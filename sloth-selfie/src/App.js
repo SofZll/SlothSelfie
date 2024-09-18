@@ -1,7 +1,6 @@
-import logo from './logo.svg';
-import iconHome from './Sloth.svg';
-import React, { useState } from 'react';
-import './App.css';
+import iconHome from './media/Sloth.svg';
+import React from 'react';
+import './css/App.css';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { Carousel } from 'react-responsive-carousel';
 import Calendar from 'react-calendar';
@@ -9,10 +8,9 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import PomodoroFunction from './Pomodoro';
 import NotesFunction from './Notes';
-import animatedHourglass from './Hourglass.gif';
+import animatedHourglass from './media/Hourglass.gif';
 
 function App() {
-  
   return (
     <Router>
       <div className="App">
@@ -20,9 +18,17 @@ function App() {
           <h1>Sloth Selfie</h1>
         <img src={iconHome} className="App-logo" alt="logo" />
           <Routes>
-            <Route path="/" 
-            element={
-              <Carousel showThumbs={false} showStatus={false} infiniteLoop={true}>
+            <Route 
+              path="/" 
+              element={
+              <Carousel 
+                showThumbs={false}
+                showStatus={false}
+                infiniteLoop={true}
+                centerMode={true}
+                centerSlidePercentage={50}
+                dynamicHeight={true}
+              >
                 <div class="carousel-slide">
                   <h2>Calendar</h2>
                   <Calendar />
