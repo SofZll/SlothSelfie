@@ -8,6 +8,7 @@ import Calendar from 'react-calendar';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import PomodoroFunction from './Pomodoro';
+import NotesFunction from './Notes';
 import animatedHourglass from './Hourglass.gif';
 
 function App() {
@@ -41,25 +42,10 @@ function App() {
                 <div class="carousel-slide">
                   <h2>Notes</h2>
                     <div className="notes-section">
-                      <input
-                        value={noteTitle}
-                        onChange={(e) => setNoteTitle(e.target.value)}
-                        placeholder="Note Title"
-                      />
-                      <textarea
-                        value={noteContent}
-                        onChange={(e) => setNoteContent(e.target.value)}
-                        placeholder="Note Content"
-                      />
-                      <button onClick={handleAddNote}>Add Note</button>
-                      <ul>
-                        {notes.map((note, index) => (
-                          <li key={index}>
-                          <h3>{note.title}</h3>
-                          <p>{note.content}</p>
-                        </li>
-                        ))}
-                      </ul>
+                    <p>Add a note here!</p><br/>
+                    <Link to="/notes">
+                      <button>Add</button>
+                    </Link>
                   </div>
                 </div>
                 <div className="carousel-slide">
@@ -81,6 +67,7 @@ function App() {
             }
             />
             <Route path="/pomodoro" element={<PomodoroFunction />} />
+            <Route path="/notes" element={<NotesFunction />} />
           </Routes>
         </header>
       </div>
