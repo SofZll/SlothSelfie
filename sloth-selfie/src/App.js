@@ -12,9 +12,6 @@ import NotesFunction from './Notes';
 import animatedHourglass from './Hourglass.gif';
 
 function App() {
-  const [notes, setNotes] = useState([]);
-  const [noteTitle, setNoteTitle] = useState('');
-  const [noteContent, setNoteContent] = useState('');
   
   return (
     <Router>
