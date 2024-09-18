@@ -1,4 +1,5 @@
 import logo from './logo.svg';
+import iconHome from './Sloth.svg';
 import React, { useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
@@ -27,6 +28,7 @@ function App() {
       <div className="App">
         <header className="App-header">
           <h1>Sloth Selfie</h1>
+        <img src={iconHome} className="App-logo" alt="logo" />
           <Routes>
             <Route path="/" 
             element={
@@ -36,40 +38,44 @@ function App() {
                   <Calendar />
                 </div>
                 <div class="carousel-slide">
-                <h2>Notes</h2>
-                  <div className="notes-section">
-                    <input
-                      value={noteTitle}
-                      onChange={(e) => setNoteTitle(e.target.value)}
-                      placeholder="Note Title"
-                    />
-                    <textarea
-                      value={noteContent}
-                      onChange={(e) => setNoteContent(e.target.value)}
-                      placeholder="Note Content"
-                    />
-                    <button onClick={handleAddNote}>Add Note</button>
-                    <ul>
-                      {notes.map((note, index) => (
-                        <li key={index}>
-                        <h3>{note.title}</h3>
-                        <p>{note.content}</p>
-                      </li>
-                      ))}
-                    </ul>
+                  <h2>Notes</h2>
+                    <div className="notes-section">
+                      <input
+                        value={noteTitle}
+                        onChange={(e) => setNoteTitle(e.target.value)}
+                        placeholder="Note Title"
+                      />
+                      <textarea
+                        value={noteContent}
+                        onChange={(e) => setNoteContent(e.target.value)}
+                        placeholder="Note Content"
+                      />
+                      <button onClick={handleAddNote}>Add Note</button>
+                      <ul>
+                        {notes.map((note, index) => (
+                          <li key={index}>
+                          <h3>{note.title}</h3>
+                          <p>{note.content}</p>
+                        </li>
+                        ))}
+                      </ul>
                   </div>
                 </div>
                 <div className="carousel-slide">
-                    {/* Preview of the Pomodoro timer */}
-                    <h2>Pomodoro</h2>
-                    <div className="pomodoro-timer">
-                      <img src={animatedHourglass} alt="Hourglass" className="hourglass"/><br/>
-                      <p>Start your study session!</p><br/>
-                      <Link to="/pomodoro">
-                        <button>Start</button>
-                      </Link>
-                    </div>
+                  {/* Preview of the Pomodoro timer */}
+                  <h2>Pomodoro</h2>
+                  <div className="pomodoro-timer">
+                    <img src={animatedHourglass} alt="Hourglass" className="hourglass"/><br/>
+                    <p>Start your study session!</p><br/>
+                    <Link to="/pomodoro">
+                      <button>Start</button>
+                    </Link>
                   </div>
+                </div>
+              <div class="carousel-slide">
+                <h2>Projects</h2>
+                <p>Content for other stuff 3</p>
+              </div>
               </Carousel>
             }
             />
