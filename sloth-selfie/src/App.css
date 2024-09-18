@@ -48,6 +48,10 @@ h1 {
   margin: 0;
 }
 
+.hourglass{
+  width: 100px !important;
+  height: 100px;
+}
 
 .carousel-slide .react-calendar {
   display: flex;
