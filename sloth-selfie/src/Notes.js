@@ -56,7 +56,7 @@ function NotesFunction() {
 
       {/* Note list */}
       <ul>
-        {notes.map((note, index) => (
+        {sortNotes(notes).map((note, index) => (
           <li key={index}>
             <h3>{note.title}</h3>
             <p>{note.content}</p>

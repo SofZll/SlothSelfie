@@ -15,16 +15,7 @@ function App() {
   const [notes, setNotes] = useState([]);
   const [noteTitle, setNoteTitle] = useState('');
   const [noteContent, setNoteContent] = useState('');
-
-  const handleAddNote = () => {
-    if (noteTitle && noteContent) {
-      setNotes([...notes, { title: noteTitle, content: noteContent }]);
-      setNoteTitle('');
-      setNoteContent('');
-    }
-  };
   
-
   return (
     <Router>
       <div className="App">
