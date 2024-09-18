@@ -134,8 +134,28 @@ h1 {
     width: 90%; /* Reducing width for smaller screen */
   }
 
+  .carousel-slide{
+    height: auto;
+  }
+
   .notes-section button {
     font-size: 14px;
     padding: 8px 16px;
+  }
+  
+  .react-calendar {
+    display: flex;
+    flex-direction: column; /* Disposizione verticale */
+    align-items: center;
+  }
+  
+  .react-calendar__month-view__days {
+    display: flex;
+    width: 100%; /* Occupa tutto lo spazio in larghezza */
+  }
+  
+  .react-calendar__tile {
+    margin-bottom: 10px; /* Spaziatura tra i giorni */
+    width: 100%; /* I giorni occupano tutta la larghezza */
   }
 }
