@@ -69,21 +69,34 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 10px;
+}
+.notes-section input, .notes-section textarea {
+  width: 300px;
+  max-width: 400px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+.notes-section input {
+  height: 40px;
 }
 
 .notes-section textarea {
-  width: 300px;
   height: 100px;
-  margin-bottom: 10px;
 }
 
 .notes-section button {
   margin-bottom: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
 }
 
 .notes-section ul {
   list-style-type: none;
   padding: 0;
+  width: 100%;
+  max-width: 400px;
 }
 
 .notes-section li {
@@ -92,4 +105,27 @@ h1 {
   margin: 5px 0;
   padding: 10px;
   border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.notes-section h3 {
+  margin: 0;
+  color: #333;
+}
+
+.notes-section p {
+  margin: 0;
+}
+
+/* Media Queries */
+@media (max-width: 600px) {
+  .notes-section input,
+  .notes-section textarea {
+    width: 90%; /* Reducing width for smaller screen */
+  }
+
+  .notes-section button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
 }

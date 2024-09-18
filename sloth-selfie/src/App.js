@@ -8,12 +8,14 @@ import 'react-calendar/dist/Calendar.css';
 
 function App() {
   const [notes, setNotes] = useState([]);
-  const [noteInput, setNoteInput] = useState('');
+  const [noteTitle, setNoteTitle] = useState('');
+  const [noteContent, setNoteContent] = useState('');
 
   const handleAddNote = () => {
-    if (noteInput) {
-      setNotes([...notes, noteInput]);
-      setNoteInput('');
+    if (noteTitle && noteContent) {
+      setNotes([...notes, { title: noteTitle, content: noteContent }]);
+      setNoteTitle('');
+      setNoteContent('');
     }
   };
 
@@ -29,15 +31,23 @@ function App() {
           <div class="carousel-slide">
           <h2>Notes</h2>
             <div className="notes-section">
+              <input
+                value={noteTitle}
+                onChange={(e) => setNoteTitle(e.target.value)}
+                placeholder="Note Title"
+              />
               <textarea
-                value={noteInput}
-                onChange={(e) => setNoteInput(e.target.value)}
-                placeholder="Add a new note"
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                placeholder="Note Content"
               />
               <button onClick={handleAddNote}>Add Note</button>
               <ul>
                 {notes.map((note, index) => (
-                  <li key={index}>{note}</li>
+                   <li key={index}>
+                   <h3>{note.title}</h3>
+                   <p>{note.content}</p>
+                 </li>
                 ))}
               </ul>
             </div>
