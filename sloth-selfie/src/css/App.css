@@ -81,7 +81,7 @@ h1 {
   font-size: 14px;
   font-weight: bold;
   color: white;
-  background-color: #15e9f1;
+  background-color: #FFD6BA;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -89,19 +89,11 @@ h1 {
 }
 
 .btn:hover {
-  background-color: #2581f1;
+  background-color: #f39252;
 }
 
 .btn:active {
-  background-color: #0051ff;
-}
-
-.btn-add{
-  background-color: #FFD6BA ;
-}
-
-.btn-add:hover{
-  background-color: #f39252;
+  background-color: #f39252;;
 }
 
 .btn-duplicate {

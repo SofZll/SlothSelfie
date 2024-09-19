@@ -51,7 +51,7 @@ function App() {
                       <div className="notes-section">
                       <p>Add a note here!</p><br/>
                       <Link to="/notes">
-                        <button>Add</button>
+                        <button className="btn">Add</button>
                       </Link>
                     </div>
                   </div>
@@ -62,7 +62,7 @@ function App() {
                       <img src={animatedHourglass} alt="Hourglass" className="hourglass"/><br/>
                       <p>Start your study session!</p><br/>
                       <Link to="/pomodoro">
-                        <button>Start</button>
+                        <button className="btn">Start</button>
                       </Link>
                     </div>
                   </div>
