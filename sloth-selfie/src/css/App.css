@@ -44,7 +44,7 @@ h1 {
 }
 
 .hourglass{
-  width: 100px !important;
+  max-width: 100px !important;
   height: 100px;
 }
 
@@ -73,6 +73,45 @@ h1 {
     height: 40%;
   }
   
+}
+
+/* buttons style */
+.btn {
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  background-color: #15e9f1;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #2581f1;
+}
+
+.btn:active {
+  background-color: #0051ff;
+}
+
+/* Style for btn "Duplicate" */
+.btn-duplicate {
+  background-color: #15e9f1;
+}
+
+.btn-duplicate:hover {
+  background-color: #2581f1;
+}
+
+/* Style for btn "Copy" */
+.btn-copy {
+  background-color: #eb5dd1;
+}
+
+.btn-copy:hover {
+  background-color: #e229c7;
 }
 
 .notes-section {
