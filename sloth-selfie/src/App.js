@@ -6,6 +6,7 @@ import { Carousel } from 'react-responsive-carousel';
 import Calendar from 'react-calendar';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
+import EventsFunction from './Events';
 import PomodoroFunction from './Pomodoro';
 import NotesFunction from './Notes';
 import animatedHourglass from './media/Hourglass.gif';
@@ -45,6 +46,12 @@ function App() {
                   <div class="carousel-slide">
                     <h2>Calendar</h2>
                     <Calendar />
+                    <Link to="/events">
+                      <button className="btn">Manage Events</button>
+                    </Link>
+                    <Link to="/activities">
+                      <button className="btn">Manage Activities</button>
+                    </Link>
                   </div>
                   <div class="carousel-slide">
                     <h2>Notes</h2>
@@ -78,6 +85,7 @@ function App() {
             />
             <Route path="/pomodoro" element={<PomodoroFunction />} />
             <Route path="/notes" element={<NotesFunction />} />
+            <Route path="/events" element={<EventsFunction />} />
           </Routes>
         </header>
       </div>
