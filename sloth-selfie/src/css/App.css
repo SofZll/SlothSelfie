@@ -96,22 +96,28 @@ h1 {
   background-color: #0051ff;
 }
 
-/* Style for btn "Duplicate" */
+.btn-add{
+  background-color: #FFD6BA ;
+}
+
+.btn-add:hover{
+  background-color: #f39252;
+}
+
 .btn-duplicate {
-  background-color: #15e9f1;
+  background-color: #BEE3DB;
 }
 
 .btn-duplicate:hover {
-  background-color: #2581f1;
+  background-color: #1de8bc;
 }
 
-/* Style for btn "Copy" */
 .btn-copy {
-  background-color: #eb5dd1;
+  background-color: #89B0AE;
 }
 
 .btn-copy:hover {
-  background-color: #e229c7;
+  background-color: #49c0ba;
 }
 
 .notes-section {

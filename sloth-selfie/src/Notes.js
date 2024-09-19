@@ -98,7 +98,7 @@ function NotesFunction() {
         onChange={(e) => setNoteContent(e.target.value)}
         placeholder="Note Content"
       />
-      <button onClick={handleAddNote}>Add Note</button>
+      <button className="btn btn-add" onClick={handleAddNote}>Add Note</button>
 
       {/* Note list, filtered and ordered */}
       <ul>
