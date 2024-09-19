@@ -7,6 +7,16 @@ function NotesFunction() {
   const [noteContent, setNoteContent] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
   const [filterDate, setFilterDate] = useState('');
+  const [clickedButton, setClickedButton] = useState(null);
+
+  const handleButtonClick = (type, index) => {
+    setClickedButton(type + index);//set the clicked btn status
+
+    // after 500ms the color comes to normal
+    setTimeout(() => {
+      setClickedButton(null);
+    }, 500);
+  };
 
   const handleAddNote = () => {
     if (noteTitle && noteContent) {
@@ -98,8 +108,14 @@ function NotesFunction() {
             <p>{note.content}</p>
             {/*If the note has a date we show it, else: "N/A" */}
             <small>{note.date ? note.date.toLocaleString() : 'N/A'}</small>
-            <button onClick={() => handleDuplicateNote(index)}>Duplicate</button>
-            <button onClick={() => handleCopyContent(note.content)}>Copy</button>
+            <div className='note-buttons'>
+            <button
+             className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
+             onClick={() =>{ handleDuplicateNote(index); handleButtonClick('duplicate', index);}}>Duplicate</button>
+            <button
+              className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
+             onClick={() =>{ handleCopyContent(note.content); handleButtonClick('copy', index)}}>Copy</button>
+             </div>
           </li>
         ))}
       </ul>

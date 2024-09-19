@@ -29,11 +29,11 @@ function App() {
                 centerSlidePercentage={50}
                 dynamicHeight={true}
               >
-                <div class="carousel-slide">
+                <div className="carousel-slide">
                   <h2>Calendar</h2>
                   <Calendar />
                 </div>
-                <div class="carousel-slide">
+                <div className="carousel-slide">
                   <h2>Notes</h2>
                     <div className="notes-section">
                     <p>Add a note here!</p><br/>
@@ -53,7 +53,7 @@ function App() {
                     </Link>
                   </div>
                 </div>
-              <div class="carousel-slide">
+              <div className="carousel-slide">
                 <h2>Projects</h2>
                 <p>Content for other stuff 3</p>
               </div>
