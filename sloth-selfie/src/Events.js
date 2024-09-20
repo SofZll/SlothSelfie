@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
 function EventsFunction() {
   const [events, setEvents] = useState([]);
@@ -18,6 +19,12 @@ function EventsFunction() {
     setDuration('');
   };
 
+   // Updates the date field when we select a date from the calendar
+   const handleDateChange = (selectedDate) => {
+    const formattedDate = selectedDate.toLocaleDateString('en-CA'); // Format as 'YYYY-MM-DD'
+    setDate(formattedDate);  
+  };
+  
   return (
     <div className= "Event">
       <h2>Add Event</h2>
@@ -62,7 +69,7 @@ function EventsFunction() {
       </ul>
 
       <h2>Calendar</h2>
-      <Calendar />
+      <Calendar  onChange={handleDateChange} />
     </div>
   );
 }
