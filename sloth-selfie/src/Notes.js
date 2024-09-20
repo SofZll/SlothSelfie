@@ -101,25 +101,13 @@ function NotesFunction() {
       />
       <button className="btn" onClick={handleAddNote}>Add Note</button>
 
-      <ul>
-        {notes.map((note, index) => (
-          <li key={index}>
-            <h3>{note.title}</h3>
-            <p>{note.content}</p>
-            <small>{note.date.toLocaleString()}</small>
-          </li>
-        ))}
-      </ul>
       {/* Note list, filtered and ordered */}
-      {/* 
       <ul>
         {filterNotesByDate(sortNotes(notes)).map((note, index) => (
           <li key={index}>
             <h3>{note.title}</h3>
             <p>{note.content}</p>
-            {/*If the note has a date we show it, else: "N/A" */}
-            {/*
-            <small>{note.date ? note.date.toLocaleString() : 'N/A'}</small>
+            <small>{note.date.toLocaleString()}</small>
             <div className='note-buttons'>
             <button
              className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
@@ -130,7 +118,7 @@ function NotesFunction() {
              </div>
           </li>
         ))}
-      </ul> */}
+      </ul>
     </div>
   );
 }
