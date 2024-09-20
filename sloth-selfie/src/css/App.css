@@ -1,6 +1,9 @@
 .App {
   text-align: center;
   overflow: hidden;
+  display: flex;
+  justify-content: start;
+  align-items: center;
 }
 
 .App-logo {
@@ -10,21 +13,31 @@
 
 .App-header {
   background-color: #FAF9F9;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: start;
   font-size: calc(10px + 2vmin);
   color: #555B6E;
+  width: 100%;
 }
 
 .App-link {
   color: #61dafb;
 }
 
+.title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  padding-top: 20px;
+  width: 300px;
+}
+
 h1 {
   margin-bottom: 20px;
+  font-size: 2rem !important;
+  color: #555B6E !important;
 }
 
 .carousel-slide {
@@ -81,7 +94,7 @@ h1 {
   font-size: 14px;
   font-weight: bold;
   color: white;
-  background-color: #FFD6BA;
+  background-color: #89B0AE;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -110,6 +123,12 @@ h1 {
 
 .btn-copy:hover {
   background-color: #49c0ba;
+}
+
+.divBtn {
+  display: flex;
+  justify-content: space-around;
+  width: 70%;
 }
 
 .notes-section {
