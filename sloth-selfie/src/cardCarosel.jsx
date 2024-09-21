@@ -4,6 +4,7 @@ import { useSpring, animated } from "react-spring";
 import Button from "./Button";
 import Calendar from 'react-calendar';
 import animatedHourglass from './media/Hourglass.gif';
+import noteImage from './media/note.png';
 import './css/App.css';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
@@ -28,6 +29,7 @@ function Card({ title, caseShow }) {
         case "2":
             content = (<div className="notes-section">
                 <p>Add a note here!</p>
+                <img src={noteImage} alt="Note illustration" className="note-image" />
                 <br />
                 </div>);
             break;
