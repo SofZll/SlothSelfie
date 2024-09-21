@@ -29,8 +29,13 @@
 
 @media (max-width: 840px) {
     .card {
-        width: 15rem;
+        width: 18rem;
         height: 350px;
     
+    }
+
+    .carousel {
+        width: 97% !important;
+
     }
 }
