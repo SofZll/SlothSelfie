@@ -68,6 +68,11 @@ p {
   margin: 0;
 }
 
+.note-image {
+  max-width: 100px !important;
+  height: 100px;
+}
+
 .hourglass{
   max-width: 100px !important;
   height: 100px;
