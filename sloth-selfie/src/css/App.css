@@ -31,12 +31,24 @@
   align-items: center;
   justify-content: space-around;
   padding-top: 20px;
-  width: 300px;
+  width: 370px;
 }
 
 h1 {
   margin-bottom: 20px;
-  font-size: 2rem !important;
+  font-size: 3rem !important;
+  color: #555B6E !important;
+}
+
+h2 {
+  margin-bottom: 20px;
+  font-size: 1.5rem !important;
+  color: #555B6E !important;
+}
+
+p {
+  margin: 0;
+  font-size: 1rem !important;
   color: #555B6E !important;
 }
 
@@ -68,6 +80,7 @@ h1 {
   width: 40%;
 }
 
+/***
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -75,18 +88,7 @@ h1 {
   to {
     transform: rotate(360deg);
   }
-}
-
-@media screen and (max-width: 768px) {
-  .App-logo {
-    width: 40%;
-  }
-
-  .carousel-slide .react-calendar {
-    height: 40%;
-  }
-  
-}
+}***/
 
 /* buttons style */
 .btn {
@@ -184,7 +186,24 @@ h1 {
 }
 
 /* Media Queries */
-@media (max-width: 600px) {
+@media (max-width: 840px) {
+  .App-logo {
+    height: 15vmin;
+    width: 18vmin !important;
+  }
+
+  h1 {
+    font-size: 2.5rem !important;
+  }
+
+  .title {
+    justify-content: center;
+  }
+
+  h2 {
+    font-size: 1.2rem !important;
+  }
+
   .notes-section input,
   .notes-section textarea {
     width: 90%; /* Reducing width for smaller screen */
@@ -213,5 +232,23 @@ h1 {
   .react-calendar__tile {
     margin-bottom: 10px; /* Spaziatura tra i giorni */
     width: 100%; /* I giorni occupano tutta la larghezza */
+  }
+
+  .App-header {
+    width: 600px;
+    justify-items: center;
+  }
+
+  .App-logo {
+    width: 40%;
+  }
+
+  .carousel-slide .react-calendar {
+    height: 40%;
+  }
+
+  .carousel_structure{
+    height: 100%;
+    width: 100%;
   }
 }
