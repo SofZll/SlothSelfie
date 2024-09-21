@@ -9,7 +9,6 @@ import Login from './Login';
 import Card from "./cardCarosel";
 import Carousel from "./CarouselHome";
 import { v4 as uuidv4 } from "uuid";
-import { useMediaQuery } from 'react-responsive';
 
 function App() {
 /*
@@ -72,7 +71,7 @@ function App() {
             <Route path="/"  /*path="/home"*/
               element={ 
               /*isAuthenticated ? (*/ 
-                (<Carousel
+              (<Carousel
                   cards={cards}
                   className="carousel_structure"
                   height="70vh"

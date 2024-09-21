@@ -209,10 +209,6 @@ p {
     width: 90%; /* Reducing width for smaller screen */
   }
 
-  .carousel-slide{
-    height: auto;
-  }
-
   .notes-section button {
     font-size: 14px;
     padding: 8px 16px;
@@ -232,11 +228,6 @@ p {
   .react-calendar__tile {
     margin-bottom: 10px; /* Spaziatura tra i giorni */
     width: 100%; /* I giorni occupano tutta la larghezza */
-  }
-
-  .App-header {
-    width: 600px;
-    justify-items: center;
   }
 
   .App-logo {
