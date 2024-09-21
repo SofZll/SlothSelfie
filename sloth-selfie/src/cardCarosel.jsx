@@ -73,7 +73,7 @@ function Card({ title, caseShow }) {
             );
             break;
         case "4":
-            btn_card = <Button text="Demo" />;
+            btn_card = <button className="btn">Start</button>;
             break;
     }
 
