@@ -13,13 +13,12 @@ import animatedHourglass from './media/Hourglass.gif';
 import Login from './Login';
 
 function App() {
-/*
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogin = (status) => {
     setIsAuthenticated(status);
   };
-*/
+
   return (
     <Router>
       <div className="App">
@@ -27,9 +26,8 @@ function App() {
           <h1>Sloth Selfie</h1>
         <img src={iconHome} className="App-logo" alt="logo" />
         <Routes>
-            {/* <Route path="/login" element={<Login onLogin={handleLogin} />} /> */}
-            {/* Commenta il controllo di autenticazione */}
-            {/* <Route
+            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route
               path="/"
               element={
                 isAuthenticated ? (
@@ -38,10 +36,10 @@ function App() {
                   <Navigate to="/login" />
                 )
               }
-            /> */}
-            <Route path="/"  /*path="/home"*/
+            />
+            <Route path="/home"
               element={ 
-              /*isAuthenticated ? (*/ 
+                isAuthenticated ? (
                 <Carousel showThumbs={false} showStatus={false} infiniteLoop={true}>
                   <div class="carousel-slide">
                     <h2>Calendar</h2>
@@ -78,9 +76,9 @@ function App() {
                   <p>Content for other stuff 3</p>
                 </div>
                 </Carousel>
-              /*) : (
+              ) : (
                 <Navigate to="/login" />
-              )*/
+              )
               }
             />
             <Route path="/pomodoro" element={<PomodoroFunction />} />
