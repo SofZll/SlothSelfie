@@ -133,6 +133,27 @@ p {
   width: 70%;
 }
 
+/* Events */
+.events-section {
+  padding: 20px;
+}
+
+.events-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.event-card {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 10px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Notes*/
 .notes-section {
   display: flex;
   flex-direction: column;
@@ -160,29 +181,13 @@ p {
   font-size: 16px;
 }
 
-.notes-section ul {
-  list-style-type: none;
-  padding: 0;
-  width: 100%;
-  max-width: 400px;
-}
-
-.notes-section li {
-  background: #f1f1f1;
-  color: #000;
-  margin: 5px 0;
-  padding: 10px;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.notes-section h3 {
-  margin: 0;
-  color: #333;
-}
-
-.notes-section p {
-  margin: 0;
+.note-card {
+  background-color: #f9f9f9; 
+  border: 1px solid #ddd; 
+  border-radius: 8px; 
+  padding: 15px;
+  margin: 10px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
 }
 
 /* Media Queries */
