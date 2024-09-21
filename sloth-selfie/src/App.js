@@ -9,7 +9,7 @@ import Login from './Login';
 import Card from "./cardCarosel";
 import Carousel from "./CarouselHome";
 import { v4 as uuidv4 } from "uuid";
-import { useMediaQuery } from 'react-responsive';
+//import { useMediaQuery } from 'react-responsive';
 
 function App() {
 /*

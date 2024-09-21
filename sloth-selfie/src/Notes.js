@@ -102,23 +102,24 @@ function NotesFunction() {
       <button className="btn" onClick={handleAddNote}>Add Note</button>
 
       {/* Note list, filtered and ordered */}
-      <ul>
+      <h2>Your Notes</h2>
+      <div className="notes-container">
         {filterNotesByDate(sortNotes(notes)).map((note, index) => (
-          <li key={index}>
+          <div key={index} className="note-card">
             <h3>{note.title}</h3>
             <p>{note.content}</p>
             <small>{note.date.toLocaleString()}</small>
             <div className='note-buttons'>
-            <button
-             className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
-             onClick={() =>{ handleDuplicateNote(index); handleButtonClick('duplicate', index);}}>Duplicate</button>
-            <button
-              className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
-             onClick={() =>{ handleCopyContent(note.content); handleButtonClick('copy', index)}}>Copy</button>
-             </div>
-          </li>
+              <button
+                className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
+                onClick={() => { handleDuplicateNote(index); setClickedButton('duplicate' + index); }}>Duplicate</button>
+              <button
+                className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
+                onClick={() => { handleCopyContent(note.content); setClickedButton('copy' + index); }}>Copy</button>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

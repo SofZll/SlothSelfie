@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import './css/App.css';
 
 function EventsFunction() {
   const [events, setEvents] = useState([]);
@@ -60,13 +61,15 @@ function EventsFunction() {
       </form>
 
       <h2>Your Events</h2>
-      <ul>
+      <div className="events-container">
         {events.map((event, index) => (
-          <li key={index}>
-            <strong>{event.title}</strong> on {event.date} at {event.time}, Duration: {event.duration} hours
-          </li>
+          <div key={index} className="event-card">
+            <h3>{event.title}</h3>
+            <p>{event.date} at {event.time}</p>
+            <p>Duration: {event.duration} hours</p>
+          </div>
         ))}
-      </ul>
+      </div>
 
       <h2>Calendar</h2>
       <Calendar  onChange={handleDateChange} />
