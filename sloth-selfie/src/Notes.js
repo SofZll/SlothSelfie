@@ -101,36 +101,25 @@ function NotesFunction() {
       />
       <button className="btn" onClick={handleAddNote}>Add Note</button>
 
-      <ul>
-        {notes.map((note, index) => (
-          <li key={index}>
+      {/* Note list, filtered and ordered */}
+      <h2>Your Notes</h2>
+      <div className="notes-container">
+        {filterNotesByDate(sortNotes(notes)).map((note, index) => (
+          <div key={index} className="note-card">
             <h3>{note.title}</h3>
             <p>{note.content}</p>
             <small>{note.date.toLocaleString()}</small>
-          </li>
-        ))}
-      </ul>
-      {/* Note list, filtered and ordered */}
-      {/* 
-      <ul>
-        {filterNotesByDate(sortNotes(notes)).map((note, index) => (
-          <li key={index}>
-            <h3>{note.title}</h3>
-            <p>{note.content}</p>
-            {/*If the note has a date we show it, else: "N/A" */}
-            {/*
-            <small>{note.date ? note.date.toLocaleString() : 'N/A'}</small>
             <div className='note-buttons'>
-            <button
-             className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
-             onClick={() =>{ handleDuplicateNote(index); handleButtonClick('duplicate', index);}}>Duplicate</button>
-            <button
-              className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
-             onClick={() =>{ handleCopyContent(note.content); handleButtonClick('copy', index)}}>Copy</button>
-             </div>
-          </li>
+              <button
+                className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
+                onClick={() => { handleDuplicateNote(index); setClickedButton('duplicate' + index); }}>Duplicate</button>
+              <button
+                className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
+                onClick={() => { handleCopyContent(note.content); setClickedButton('copy' + index); }}>Copy</button>
+            </div>
+          </div>
         ))}
-      </ul> */}
+      </div>
     </div>
   );
 }
