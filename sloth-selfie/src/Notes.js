@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import './css/App.css';
 
+{/*TODO: cancellare e modificare note, data creazione e ultima modifica, preview con N almeno 200 per nota esistente*/}
+
 function NotesFunction() {
   const [notes, setNotes] = useState([]);
   const [noteTitle, setNoteTitle] = useState('');
+  const [noteCategory, setNoteCategory] = useState('');
   const [noteContent, setNoteContent] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
   const [filterDate, setFilterDate] = useState('');
@@ -19,10 +22,11 @@ function NotesFunction() {
   };
 
   const handleAddNote = () => {
-  if (noteTitle && noteContent) {
-    const newNote = { title: noteTitle, content: noteContent, date: new Date() };
+  if (noteTitle && noteCategory && noteContent) {
+    const newNote = { title: noteTitle, category: noteCategory, content: noteContent, date: new Date() };
     setNotes([...notes, newNote]);
     setNoteTitle('');
+    setNoteCategory('');
     setNoteContent('');
   }
 };
@@ -94,6 +98,11 @@ function NotesFunction() {
         onChange={(e) => setNoteTitle(e.target.value)}
         placeholder="Note Title"
       />
+      <input
+        value = {noteCategory}
+        onChange={(e)=> setNoteCategory(e.target.value)}
+        placeholder='Note Category'
+      />
       <textarea
         value={noteContent}
         onChange={(e) => setNoteContent(e.target.value)}
@@ -107,6 +116,7 @@ function NotesFunction() {
         {filterNotesByDate(sortNotes(notes)).map((note, index) => (
           <div key={index} className="note-card">
             <h3>{note.title}</h3>
+            <small>{note.category}</small>
             <p>{note.content}</p>
             <small>{note.date.toLocaleString()}</small>
             <div className='note-buttons'>
