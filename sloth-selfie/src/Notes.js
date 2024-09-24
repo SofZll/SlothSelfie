@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import './css/App.css';
+import NoteCard from './NoteCard';
 
-{/*TODO: cancellare e modificare note, data creazione e ultima modifica, preview con N almeno 200 per nota esistente*/}
+{/*TODO: cancellare e modificare note, data creazione e ultima modifica*/}
 
 function NotesFunction() {
   const [notes, setNotes] = useState([]);
@@ -12,14 +13,6 @@ function NotesFunction() {
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton, setClickedButton] = useState(null);
 
-  const handleButtonClick = (type, index) => {
-    setClickedButton(type + index);//set the clicked btn status
-
-    // after 500ms the color comes to normal
-    setTimeout(() => {
-      setClickedButton(null);
-    }, 500);
-  };
 
   const handleAddNote = () => {
   if (noteTitle && noteCategory && noteContent) {
@@ -114,20 +107,14 @@ function NotesFunction() {
       <h2>Your Notes</h2>
       <div className="notes-container">
         {filterNotesByDate(sortNotes(notes)).map((note, index) => (
-          <div key={index} className="note-card">
-            <h3>{note.title}</h3>
-            <small>{note.category}</small>
-            <p>{note.content}</p>
-            <small>{note.date.toLocaleString()}</small>
-            <div className='note-buttons'>
-              <button
-                className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
-                onClick={() => { handleDuplicateNote(index); setClickedButton('duplicate' + index); }}>Duplicate</button>
-              <button
-                className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
-                onClick={() => { handleCopyContent(note.content); setClickedButton('copy' + index); }}>Copy</button>
-            </div>
-          </div>
+          <NoteCard
+            key={index}
+            note={note}
+            index={index}
+            onDuplicate={handleDuplicateNote}
+            onCopy={handleCopyContent}
+            clickedButton={clickedButton}
+          />
         ))}
       </div>
     </div>
