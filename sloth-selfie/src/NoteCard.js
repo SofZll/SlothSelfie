@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './css/App.css';
 
-function NoteCard({ note, onDuplicate, onCopy, index, clickedButton }) {
+function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedButton }) {
 
     const [isExpanded, setIsExpanded] = useState(false);  // State to manage the note content expansion
   
@@ -19,6 +19,19 @@ function NoteCard({ note, onDuplicate, onCopy, index, clickedButton }) {
       </p>
       <small>{note.date.toLocaleString()}</small>
       <div className="note-buttons">
+      <button
+        className={`btn btn-edit ${clickedButton === 'edit' + index ? 'active' : ''}`}
+          onClick={() => onEdit(index)}
+        >
+        Edit
+        </button>
+        <button
+          className={`btn btn-delete ${clickedButton === 'delete' + index ? 'active' : ''}`}
+          onClick={() => onDelete(index)}
+          >
+          Delete
+          </button>
+
         <button
           className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
           onClick={() => onDuplicate(index)}
@@ -26,7 +39,7 @@ function NoteCard({ note, onDuplicate, onCopy, index, clickedButton }) {
           Duplicate
         </button>
         <button
-          className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
+          className={`btn ${clickedButton === 'copy' + index ? 'active' : ''}`}
           onClick={() => onCopy(note.content)}
         >
           Copy
