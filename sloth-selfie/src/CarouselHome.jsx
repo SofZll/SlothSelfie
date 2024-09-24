@@ -5,6 +5,8 @@ import iconCalendar from './media/calendar.svg';
 import iconNotes from './media/notes.svg';
 import iconTomato from './media/tomato.svg';
 import iconProjects from './media/projects.svg'; 
+import iconArrowLeft from './media/arrowLeft.svg';
+import iconArrowRight from './media/arrowRight.svg';
 
 export default function CarroussSel(props) {
   const table = props.cards.map((element, index) => {
@@ -39,10 +41,10 @@ export default function CarroussSel(props) {
     >
       <div className="divBtn">
         <button onClick={handlePrev} className="btn">
-          ⬅️
+          <img src={iconArrowLeft} alt="icon" className="iconArrow"/>
         </button>
         <button onClick={handleNext} className="btn">
-          ➡️
+          <img src={iconArrowRight} alt="icon" className="iconArrow"/>
         </button>
       </div>
       <Carousel

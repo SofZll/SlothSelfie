@@ -203,6 +203,10 @@ p {
   height: 30px;
 }
 
+.iconArrow {
+  height: 20px;
+}
+
 /* Media Queries */
 @media (max-width: 840px) {
   .App-logo {
