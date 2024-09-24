@@ -116,20 +116,24 @@ p {
   background-color: #f39252;;
 }
 
-.btn-duplicate {
+.btn2 {
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
   background-color: #BEE3DB;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.btn-duplicate:hover {
-  background-color: #1de8bc;
+.btn2:hover {
+  background-color: #FFD6BA;
 }
 
-.btn-copy {
-  background-color: #89B0AE;
-}
-
-.btn-copy:hover {
-  background-color: #49c0ba;
+.btn2:active {
+  background-color: #FFD6BA;
 }
 
 .divBtn {
