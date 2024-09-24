@@ -1,42 +1,18 @@
+global.rootDir = __dirname ;
+global.startDate = null; 
+
+const mongoose = require('mongoose');
 const express = require('express');
-const cors = require('cors');
 const template = require('./scripts/tpl');
 const mymongo = require('./scripts/mongo');
-/*
-const connectDB = require('./config/db');
-const userRoutes = require('./routes/userRoutes');
+const User = require('./models/userModel')
 const path = require('path');
-
-require('dotenv').config();
-
 const app = express();
-const dbURI="mongodb://site232453:ahB4ha7j@mongo_site232453/db?authSource=admin&writeConcern=majority"
-const port=8000
 
-console.log('MONGO_URI:', dbURI); // Aggiungi questo log
-console.log('PORT:', port); // Aggiungi questo log
-
-
-
-connectDB();
-
-// Middleware per gestire le API
 app.use(express.json());
+const cors = require('cors');
+app.use(cors());
 
-app.use('/api', userRoutes);
-
-// Static files from frontend
-app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-});
-*/
-
-// Express config & routes
-
-let app = express()
-app.use('/js' , express.static('public/js'))
 
 // MONGODB
 const mongoCredentials = {
@@ -45,17 +21,65 @@ const mongoCredentials = {
     site: "mongo_site232453"
 };
 
+mongoose.connect(`mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/?authSource=admin&writeConcern=majority`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('Connected to MongoDB');
+}).catch(err => {
+    console.error('Failed to connect to MongoDB', err);
+});
+
+app.post('/register', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = new User({ username, password }); // Store password as plain text
+        await user.save();
+        res.status(201).send('User registered successfully');
+    } catch (error) {
+        console.error('User registration failed:', error);
+        res.status(500).send('User registration failed');
+    }
+});
+
+app.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username });
+        if (!user || user.password !== password) {
+            return res.status(400).send('Invalid username or password');
+        }
+        res.status(200).send('Login successful');
+    } catch (error) {
+        console.error('User login failed:', error);
+        res.status(500).send('User login failed');
+    }
+});
+
 app.get('/db/create', async function (req, res) {
-    res.send(await mymongo.create(mongoCredentials))
+    try {
+        res.send(await mymongo.create(mongoCredentials))
+    } catch (error) {
+        console.error("creation db failed: ", error);
+    }
 });
 
 app.get('/db/search', async function (req, res) {
     res.send(await mymongo.search(req.query, mongoCredentials))
 });
 
+// Static files from frontend
+const frontendPath = path.join(global.rootDir, 'frontend/build');
+app.use(express.static(frontendPath));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+
 // Node server
 
-app.listen(port, function() { 
+app.listen(8000, function() { 
 	global.startDate = new Date() ; 
 	console.log(`App listening on port 8000 started ${global.startDate.toLocaleString()}` )
 })
