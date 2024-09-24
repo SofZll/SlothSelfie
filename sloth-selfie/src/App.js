@@ -1,33 +1,98 @@
-import logo from './logo.svg';
-import './App.css';
-import React from 'react';
-import { Carousel } from 'react-responsive-carousel';
-import Calendar from 'react-calendar';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import 'react-calendar/dist/Calendar.css';
+import iconHome from './media/Sloth.svg';
+import React, {useState} from 'react';
+import './css/App.css';
+import { BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
+import EventsFunction from './Events';
+import PomodoroFunction from './Pomodoro';
+import NotesFunction from './Notes';
+import Login from './Login';
+import Card from "./cardCarosel";
+import Carousel from "./CarouselHome";
+import { v4 as uuidv4 } from "uuid";
 
 function App() {
+  /*
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleLogin = (status) => {
+    setIsAuthenticated(status);
+  };
+
+*/
+  let cards = [
+    {
+      key: uuidv4(),
+      content: (
+        <Card title="Calendar" caseShow="1"/>
+      )
+    },
+    {
+      key: uuidv4(),
+      content: (
+        <Card title="Notes" caseShow="2"/>
+      )
+    },
+    {
+      key: uuidv4(),
+      content: (
+        <Card title="Pomodoro" caseShow="3"/>
+      )
+    },
+    {
+      key: uuidv4(),
+      content: (
+        <Card title="Projects" caseShow="4"/>
+      )
+    }
+  ];
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Sloth Selfie</h1>
-        <Carousel showThumbs={false} showStatus={false} infiniteLoop={true}>
-          <div class="carousel-slide">
-            <h2>Calendar</h2>
-            <Calendar />
+    <Router>
+      <div className="App">
+        <header className="App-header">
+          <div className="title">
+            <h1>Sloth Selfie</h1>
+            <img src={iconHome} className="App-logo" alt="logo" />
           </div>
-          <div class="carousel-slide">
-            <h2>Other Stuff 1</h2>
-            <p>Content for other stuff 1</p>
-          </div>
-          <div class="carousel-slide">
-            <h2>Other Stuff 2</h2>
-            <p>Content for other stuff 2</p>
-          </div>
-        </Carousel>
-      </header>
-    </div>
-  );
+          
+        <Routes>
+            {/*<Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route
+              path="/"
+              element={
+                isAuthenticated ? (
+                  <Navigate to="/home" />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            /> */}
+            <Route path="/" /*path="home"*/
+              element={ 
+              /*isAuthenticated ? (*/ 
+              (<Carousel
+                  cards={cards}
+                  className="carousel_structure"
+                  height="70vh"
+                  width="60vw"
+                  margin="0"
+                  offset={2}
+                  showArrows={false}
+                />)
+              /*) : (
+                <Navigate to="/login" />
+              ) */
+              }
+            />
+            <Route path="/pomodoro" element={<PomodoroFunction />} />
+            <Route path="/notes" element={<NotesFunction />} />
+            <Route path="/events" element={<EventsFunction />} />
+          </Routes>
+        </header>
+      </div>
+    </Router>
+  ); 
 }
 
 export default App;
