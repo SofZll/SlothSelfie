@@ -1,30 +1,38 @@
 import React, {useState} from 'react';
+import {Link} from 'react-router-dom';
 import './css/Login.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-function Login() {
+function Form({formType}) {
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle login logic here
-        console.log('Username:', username);
-        console.log('Password:', password);
+        if (formType === 'login') {
+            // Handle login logic here
+            console.log('Login - Username:', username);
+            console.log('Login - Password:', password);
+        } else if (formType === 'register') {
+            // Handle registration logic here
+            console.log('Register - Username:', username);
+            console.log('Register - Email:', email);
+            console.log('Register - Password:', password);
+        }
     };
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
-    
+
     return (
         <div className="login-container">
             <div className="login-box">
-                {/* Titolo -*/}
-                <h1>Welcome to Sloth Selfie!</h1>
-                <form id="login-form" onSubmit={handleSubmit}>
+                <h1 className="login-title">{formType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
+                <form id={`login-form`} onSubmit={handleSubmit}>
                     <div className="form-group">
                         <input
                             type="text"
@@ -35,6 +43,18 @@ function Login() {
                             required
                         />
                     </div>
+                    {formType === 'register' && (
+                        <div className="form-group">
+                            <input
+                                type="email"
+                                id="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                    )}
                     <div className="form-group password-group">
                         <input
                             type={showPassword ? 'text' : 'password'}
@@ -48,12 +68,20 @@ function Login() {
                             <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                         </span>
                     </div>
-                    <button type="submit" className="login-button">LOGIN</button>
-                    <p class="register">Don't have an account? <a href="#">Register!</a></p>
+                    <button type="submit" className="login-button">
+                        {formType === 'login' ? 'LOGIN' : 'REGISTER'}
+                    </button>
+                    <p className="register">
+                        {formType === 'login' ? (
+                            <>Don't have an account? <Link to="/register" className="register-link">Register!</Link></>
+                        ) : (
+                            <>Already have an account? <Link to="/login" className="register-link">Login!</Link></>
+                        )}
+                    </p>
                 </form>
             </div>
         </div>
     );
 }
 
-export default Login;
+export default Form;
