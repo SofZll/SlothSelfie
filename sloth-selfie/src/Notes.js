@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './css/App.css';
 import NoteCard from './NoteCard';
 
-{/*TODO: modificare note, data creazione e ultima modifica*/}
+{/*TODO: metti a posto i filtri*/}
 
 function NotesFunction() {
   const [notes, setNotes] = useState([]);
@@ -17,7 +17,13 @@ function NotesFunction() {
 
   const handleAddNote = () => {
   if (noteTitle && noteCategory && noteContent) {
-    const newNote = { title: noteTitle, category: noteCategory, content: noteContent, date: new Date() };
+    const newNote = { 
+      title: noteTitle, 
+      category: noteCategory, 
+      content: noteContent, 
+      createDate: new Date(),
+      updateDate: new Date()
+    };
     setNotes([...notes, newNote]);
     setNoteTitle('');
     setNoteCategory('');
@@ -48,7 +54,7 @@ const handleSaveEdit = (index) => {
     title: noteTitle,
     category: noteCategory,
     content: noteContent,
-    dateModified: new Date() // updates the modify date
+    updateDate: new Date() // updates the modify date
   };
 
   const updatedNotes = [...notes];
@@ -132,15 +138,13 @@ const handleSaveEdit = (index) => {
         placeholder="Note Content"
       />
       <button className="btn" onClick={handleAddNote}>Add Note</button>
-
-      {isEditing !== null ? (
+      {/* Editing scenario*/}
+      {isEditing !== null && (
         <button className="btn" onClick={() => handleSaveEdit(isEditing)}>Save Note</button>
-      ) : (
-        <button className="btn" onClick={handleAddNote}>Add Note</button>
       )}
 
       {/* Note list, filtered and ordered */}
-      <h2>Your Notes</h2>
+      <h2>Your Notes:</h2>
       <div className="notes-container">
         {filterNotesByDate(sortNotes(notes)).map((note, index) => (
           <NoteCard
