@@ -121,15 +121,7 @@ p {
 }
 
 .btn-duplicate:hover {
-  background-color: #1de8bc;
-}
-
-.btn-copy {
-  background-color: #89B0AE;
-}
-
-.btn-copy:hover {
-  background-color: #49c0ba;
+  background-color: #FFD6BA;
 }
 
 .divBtn {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './css/App.css';
 import NoteCard from './NoteCard';
 
-{/*TODO: cancellare e modificare note, data creazione e ultima modifica*/}
+{/*TODO: modificare note, data creazione e ultima modifica*/}
 
 function NotesFunction() {
   const [notes, setNotes] = useState([]);
@@ -11,7 +11,8 @@ function NotesFunction() {
   const [noteContent, setNoteContent] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
   const [filterDate, setFilterDate] = useState('');
-  const [clickedButton, setClickedButton] = useState(null);
+  const [clickedButton] = useState(null);
+  const [isEditing, setIsEditing] = useState(null);
 
 
   const handleAddNote = () => {
@@ -29,6 +30,35 @@ function NotesFunction() {
     const duplicatedNote = { ...noteToDuplicate, date: new Date() }; // Duplicate with a new date
     setNotes([...notes, duplicatedNote]);
   };
+
+  const handleDeleteNote = (index) => {
+    setNotes(notes.filter((_, i) => i !== index));
+};
+
+const handleEditNote = (index) => {
+  setIsEditing(index);
+  setNoteTitle(notes[index].title);
+  setNoteCategory(notes[index].category);
+  setNoteContent(notes[index].content);
+};
+
+const handleSaveEdit = (index) => {
+  const updatedNote = {
+    ...notes[index],
+    title: noteTitle,
+    category: noteCategory,
+    content: noteContent,
+    dateModified: new Date() // updates the modify date
+  };
+
+  const updatedNotes = [...notes];
+  updatedNotes[index] = updatedNote;
+  setNotes(updatedNotes);
+  setIsEditing(null); // exit from edit mode
+  setNoteTitle('');
+  setNoteCategory('');
+  setNoteContent('');
+};
 
   const sortNotes = (notes) => {
     switch (sortCriterion) {
@@ -103,6 +133,12 @@ function NotesFunction() {
       />
       <button className="btn" onClick={handleAddNote}>Add Note</button>
 
+      {isEditing !== null ? (
+        <button className="btn" onClick={() => handleSaveEdit(isEditing)}>Save Note</button>
+      ) : (
+        <button className="btn" onClick={handleAddNote}>Add Note</button>
+      )}
+
       {/* Note list, filtered and ordered */}
       <h2>Your Notes</h2>
       <div className="notes-container">
@@ -113,6 +149,8 @@ function NotesFunction() {
             index={index}
             onDuplicate={handleDuplicateNote}
             onCopy={handleCopyContent}
+            onDelete={handleDeleteNote}
+            onEdit={handleEditNote}
             clickedButton={clickedButton}
           />
         ))}
