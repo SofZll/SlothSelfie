@@ -12,6 +12,7 @@ import {Link} from 'react-router-dom';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
+    let playTomato = false;
 
     const props3 = useSpring({
     transform: show ? "scale(1.03)" : "scale(1)",
@@ -19,6 +20,24 @@ function Card({ title, caseShow }) {
       ? "0 20px 25px rgb(0 0 0 / 25%)"
       : "0 2px 10px rgb(0 0 0 / 8%)"
     });
+
+    const tomatoTime = () => {
+        const tomatoButton = document.getElementById('tomatoPlay');
+        
+        if (!tomatoButton) {
+            console.error('Elemento con ID tomatoPlay non trovato');
+            return;
+        }
+    
+        if (playTomato) {
+            tomatoButton.innerHTML = "Play";
+            playTomato = false;
+        } else {
+            tomatoButton.innerHTML = "Stop";
+            playTomato = true;
+        }
+    }
+    
 
     let content;
     let btn_card;
@@ -68,6 +87,7 @@ function Card({ title, caseShow }) {
         case "3":
             btn_card = (
                 <div className="divBtn">
+                    <button id='tomatoPlay' className="btn" onClick={tomatoTime}>Play</button>
                     <Link to="/pomodoro">
                         <button className="btn">Start</button>
                     </Link>
