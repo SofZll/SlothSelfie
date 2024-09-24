@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './css/App.css';
 
 function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedButton }) {
 
@@ -17,10 +16,11 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
        <p onClick={toggleExpand} style={{ cursor: 'pointer' }}>
         {isExpanded ? note.content : note.content.substring(0, 200) + (note.content.length > 200 ? '...' : '')}
       </p>
-      <small>{note.date.toLocaleString()}</small>
+      <small>Created: {new Date(note.createDate).toLocaleString()}</small>
+      <small>Last Modified: {new Date(note.updateDate).toLocaleString()}</small>
       <div className="note-buttons">
       <button
-        className={`btn btn-edit ${clickedButton === 'edit' + index ? 'active' : ''}`}
+        className={`btn2 btn-edit ${clickedButton === 'edit' + index ? 'active' : ''}`}
           onClick={() => onEdit(index)}
         >
         Edit
@@ -33,13 +33,13 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
           </button>
 
         <button
-          className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
+          className={`btn2 btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
           onClick={() => onDuplicate(index)}
         >
           Duplicate
         </button>
         <button
-          className={`btn ${clickedButton === 'copy' + index ? 'active' : ''}`}
+          className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
           onClick={() => onCopy(note.content)}
         >
           Copy
