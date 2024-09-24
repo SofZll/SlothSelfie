@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import './css/App.css';
+import NoteCard from './NoteCard';
 
-{/*TODO: cancellare e modificare note, data creazione e ultima modifica, preview con N almeno 200 per nota esistente*/}
+{/*TODO: metti a posto i filtri*/}
 
 function NotesFunction() {
   const [notes, setNotes] = useState([]);
@@ -10,20 +11,19 @@ function NotesFunction() {
   const [noteContent, setNoteContent] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
   const [filterDate, setFilterDate] = useState('');
-  const [clickedButton, setClickedButton] = useState(null);
+  const [clickedButton] = useState(null);
+  const [isEditing, setIsEditing] = useState(null);
 
-  const handleButtonClick = (type, index) => {
-    setClickedButton(type + index);//set the clicked btn status
-
-    // after 500ms the color comes to normal
-    setTimeout(() => {
-      setClickedButton(null);
-    }, 500);
-  };
 
   const handleAddNote = () => {
   if (noteTitle && noteCategory && noteContent) {
-    const newNote = { title: noteTitle, category: noteCategory, content: noteContent, date: new Date() };
+    const newNote = { 
+      title: noteTitle, 
+      category: noteCategory, 
+      content: noteContent, 
+      createDate: new Date(),
+      updateDate: new Date()
+    };
     setNotes([...notes, newNote]);
     setNoteTitle('');
     setNoteCategory('');
@@ -37,6 +37,35 @@ function NotesFunction() {
     setNotes([...notes, duplicatedNote]);
   };
 
+  const handleDeleteNote = (index) => {
+    setNotes(notes.filter((_, i) => i !== index));
+};
+
+const handleEditNote = (index) => {
+  setIsEditing(index);
+  setNoteTitle(notes[index].title);
+  setNoteCategory(notes[index].category);
+  setNoteContent(notes[index].content);
+};
+
+const handleSaveEdit = (index) => {
+  const updatedNote = {
+    ...notes[index],
+    title: noteTitle,
+    category: noteCategory,
+    content: noteContent,
+    updateDate: new Date() // updates the modify date
+  };
+
+  const updatedNotes = [...notes];
+  updatedNotes[index] = updatedNote;
+  setNotes(updatedNotes);
+  setIsEditing(null); // exit from edit mode
+  setNoteTitle('');
+  setNoteCategory('');
+  setNoteContent('');
+};
+
   const sortNotes = (notes) => {
     switch (sortCriterion) {
       case 'alphabetical':
@@ -44,9 +73,9 @@ function NotesFunction() {
       case 'length':
         return [...notes].sort((a, b) => b.content.length - a.content.length);
       case 'most_recent':
-        return [...notes].sort((a, b) => b.date - a.date);
+        return [...notes].sort((a, b) => b.updateDate - a.updateDate);
       case 'least_recent':
-        return [...notes].sort((a, b) => a.date - b.date);
+        return [...notes].sort((a, b) => a.updateDate - b.updateDate);
 
       default:
         return notes;
@@ -56,7 +85,7 @@ function NotesFunction() {
   const filterNotesByDate = (notes) => {
     if (!filterDate) return notes;
     return notes.filter((note) =>
-      note.date.toISOString().split('T')[0] === filterDate //If a date is selected it will filter the notes by that date
+      note.createDate.toISOString().split('T')[0] === filterDate //If a date is selected it will filter the notes by that date
     );
   };
 
@@ -109,25 +138,25 @@ function NotesFunction() {
         placeholder="Note Content"
       />
       <button className="btn" onClick={handleAddNote}>Add Note</button>
+      {/* Editing scenario*/}
+      {isEditing !== null && (
+        <button className="btn" onClick={() => handleSaveEdit(isEditing)}>Save Note</button>
+      )}
 
       {/* Note list, filtered and ordered */}
-      <h2>Your Notes</h2>
+      <h2>Your Notes:</h2>
       <div className="notes-container">
         {filterNotesByDate(sortNotes(notes)).map((note, index) => (
-          <div key={index} className="note-card">
-            <h3>{note.title}</h3>
-            <small>{note.category}</small>
-            <p>{note.content}</p>
-            <small>{note.date.toLocaleString()}</small>
-            <div className='note-buttons'>
-              <button
-                className={`btn btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
-                onClick={() => { handleDuplicateNote(index); setClickedButton('duplicate' + index); }}>Duplicate</button>
-              <button
-                className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
-                onClick={() => { handleCopyContent(note.content); setClickedButton('copy' + index); }}>Copy</button>
-            </div>
-          </div>
+          <NoteCard
+            key={index}
+            note={note}
+            index={index}
+            onDuplicate={handleDuplicateNote}
+            onCopy={handleCopyContent}
+            onDelete={handleDeleteNote}
+            onEdit={handleEditNote}
+            clickedButton={clickedButton}
+          />
         ))}
       </div>
     </div>
