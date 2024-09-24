@@ -73,9 +73,9 @@ const handleSaveEdit = (index) => {
       case 'length':
         return [...notes].sort((a, b) => b.content.length - a.content.length);
       case 'most_recent':
-        return [...notes].sort((a, b) => b.date - a.date);
+        return [...notes].sort((a, b) => b.updateDate - a.updateDate);
       case 'least_recent':
-        return [...notes].sort((a, b) => a.date - b.date);
+        return [...notes].sort((a, b) => a.updateDate - b.updateDate);
 
       default:
         return notes;
@@ -85,7 +85,7 @@ const handleSaveEdit = (index) => {
   const filterNotesByDate = (notes) => {
     if (!filterDate) return notes;
     return notes.filter((note) =>
-      note.date.toISOString().split('T')[0] === filterDate //If a date is selected it will filter the notes by that date
+      note.createDate.toISOString().split('T')[0] === filterDate //If a date is selected it will filter the notes by that date
     );
   };
 
