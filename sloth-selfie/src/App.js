@@ -55,41 +55,40 @@ function App() {
             <h1>Sloth Selfie</h1>
             <img src={iconHome} className="App-logo" alt="logo" />
           </div>
-          
-        <Routes>
-            {/*<Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route
-              path="/"
-              element={
-                isAuthenticated ? (
-                  <Navigate to="/home" />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            /> */}
-            <Route path="/" /*path="home"*/
-              element={ 
-              /*isAuthenticated ? (*/ 
-              (<Carousel
-                  cards={cards}
-                  className="carousel_structure"
-                  height="70vh"
-                  width="60vw"
-                  margin="0"
-                  offset={2}
-                  showArrows={false}
-                />)
-              /*) : (
-                <Navigate to="/login" />
-              ) */
-              }
-            />
-            <Route path="/pomodoro" element={<PomodoroFunction />} />
-            <Route path="/notes" element={<NotesFunction />} />
-            <Route path="/events" element={<EventsFunction />} />
-          </Routes>
         </header>
+        <Routes>
+          {/*<Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/home" />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          /> */}
+          <Route path="/" /*path="home"*/
+            element={ 
+            /*isAuthenticated ? (*/ 
+            (<Carousel
+                cards={cards}
+                className="carousel_structure"
+                height="70vh"
+                width="60vw"
+                margin="0"
+                offset={2}
+                showArrows={false}
+              />)
+            /*) : (
+              <Navigate to="/login" />
+            ) */
+            }
+          />
+          <Route path="/pomodoro" element={<PomodoroFunction />} />
+          <Route path="/notes" element={<NotesFunction />} />
+          <Route path="/events" element={<EventsFunction />} />
+        </Routes>
       </div>
     </Router>
   ); 

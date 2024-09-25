@@ -1,6 +1,7 @@
 .App {
   text-align: center;
   display: flex;
+  flex-direction: column;
   justify-content:start !important;
   align-items: center;
   margin-top: 0 !important;
@@ -13,12 +14,12 @@
 }
 
 .App-header {
-  background-color: #FAF9F9;
+  background-color: #555B6E;
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #555B6E;
-  height: 100%;
+  color: #FFD6BA;
+  height: 15%;
 }
 
 .App-link {
@@ -37,7 +38,7 @@
 h1 {
   margin-bottom: 20px;
   font-size: 3rem;
-  color: #555B6E;
+  color: #FAF9F9;
 }
 
 h2 {
@@ -121,7 +122,7 @@ p {
   font-size: 14px;
   font-weight: bold;
   color: white;
-  background-color: #BEE3DB;
+  background-color: #f39252;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -232,6 +233,16 @@ p {
   height: 20px;
 }
 
+/* light background */ 
+.light-background {
+  background-color: #FAF9F9;
+  transition: background-color 0s ease;
+}
+
+.dark-h1{
+  color: #555B6E;
+}
+
 /* Media Queries */
 @media (max-width: 840px) {
   .App-logo {
@@ -289,4 +300,20 @@ p {
     height: 100%;
     width: 100%;
   }
+}
+
+/* Zoom animation */
+@keyframes zoom {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.zoom-in {
+  animation: zoom 0.3s forwards;
 }
