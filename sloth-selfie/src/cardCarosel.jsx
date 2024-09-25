@@ -8,12 +8,23 @@ import noteImage from './media/note.png';
 import './css/App.css';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import previewPomodoro from './previewPomodoro';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
     let playTomato = false;
+    const navigate = useNavigate();
+
+    // animation page
+    const handleLinkClick = (path) => (event) => {
+        event.preventDefault();
+        document.body.classList.add('zoom-in');
+        setTimeout(() => {
+            navigate(path);
+            document.body.classList.remove('zoom-in');
+        }, 300);
+    };
 
     const props3 = useSpring({
     transform: show ? "scale(1.03)" : "scale(1)",
@@ -69,18 +80,18 @@ function Card({ title, caseShow }) {
             btn_card = btn_card = (
                 <div className="divBtn">
                     <Link to="/events">
-                        <button className="btn">Manage Events</button>
+                        <button className="btn2">Manage Events</button>
                     </Link>
                     <Link to="/activities">
-                        <button className="btn">Manage Activities</button>
+                        <button className="btn2">Manage Activities</button>
                     </Link>
                 </div>);
             break;
         case "2":
             btn_card = (
                 <div className="divBtn">
-                    <Link to="/notes">
-                        <button className="btn">Add</button>
+                    <Link to="/notes" onClick={handleLinkClick('/notes')}>
+                        <button className="btn2">Add</button>
                     </Link>
                 </div>
             );
@@ -88,15 +99,15 @@ function Card({ title, caseShow }) {
         case "3":
             btn_card = (
                 <div className="divBtn">
-                    <button id='tomatoPlay' className="btn" onClick={tomatoTime}>Play</button>
+                    <button id='tomatoPlay' className="btn2" onClick={tomatoTime}>Play</button>
                     <Link to="/pomodoro">
-                        <button className="btn">Start</button>
+                        <button className="btn2">Start</button>
                     </Link>
                 </div>
             );
             break;
         case "4":
-            btn_card = <button className="btn">Start</button>;
+            btn_card = <button className="btn2">Start</button>;
             break;
     }
 

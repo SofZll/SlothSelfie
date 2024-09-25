@@ -7,7 +7,7 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
     const toggleExpand = () => {
       setIsExpanded(!isExpanded);
     };
-
+  
   return (
     <div className="note-card">
       <h3>{note.title}</h3>
