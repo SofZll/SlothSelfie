@@ -10,6 +10,7 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import {Link, useNavigate} from 'react-router-dom';
 import previewPomodoro from './previewPomodoro';
+import { initialEvents } from './Events';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
@@ -33,6 +34,17 @@ function Card({ title, caseShow }) {
       : "0 2px 10px rgb(0 0 0 / 8%)"
     });
 
+     const hasEventOnDate = (date) => {
+        return initialEvents.some(event => event.date === date.toLocaleDateString('en-CA'));
+    };
+
+  // Personalizing the tile content
+    const tileContent = ({ date, view }) => {
+        if (view === 'month' && hasEventOnDate(date)) {
+            return <span className="event-indicator" style={{ backgroundColor: 'red', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
+        }
+    };
+
     const tomatoTime = () => {
         const tomatoButton = document.getElementById('tomatoPlay');
         
@@ -55,7 +67,8 @@ function Card({ title, caseShow }) {
     let btn_card;
     switch (caseShow) {
         case "1":
-            content = <Calendar />;
+            content = <Calendar 
+                        tileContent={tileContent} />;
             break;
         case "2":
             content = (<div className="notes-section">
