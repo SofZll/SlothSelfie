@@ -35,23 +35,6 @@ function EventsFunction() {
     setDuration('');
   };
 
-   // Updates the date field when we select a date from the calendar
-   const handleDateChange = (selectedDate) => {
-    const formattedDate = selectedDate.toLocaleDateString('en-CA'); // Format as 'YYYY-MM-DD'
-    setDate(formattedDate);  
-  };
-
-  const handleFilterDateChange = (selectedDate) => {
-    setFilterDate(selectedDate); // updates the filter date
-    setShowFilterCalendar(false); //hide the calendar after selecting a date
-  };
-
-   const toggleFilterCalendar = () => {
-    setShowFilterCalendar(!showFilterCalendar); // hides/shows the calendar
-  };
-
-  const eventsForSelectedDate = events.filter(event => event.date === filterDate.toLocaleDateString('en-CA'));
-
   useEffect(() => {
     //setting the date to the current date as a filter at the start
     const today = new Date();
