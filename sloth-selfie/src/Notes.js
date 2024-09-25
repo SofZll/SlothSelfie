@@ -142,7 +142,7 @@ const handleSaveEdit = (index) => {
       {isEditing !== null && (
         <button className="btn" onClick={() => handleSaveEdit(isEditing)}>Save Note</button>
       )}
-
+      <br/>
       {/* Note list, filtered and ordered */}
       <h2>Your Notes:</h2>
       <div className="notes-container">
