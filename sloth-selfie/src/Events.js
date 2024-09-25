@@ -7,16 +7,19 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const localizer = momentLocalizer(moment);
 
+const initialEvents = [
+  // Puoi aggiungere alcuni eventi di esempio qui 
+  // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
+  { title: 'Coffee with John', date: '2024-09-26', time: '16:00', duration: 1 },
+];
 
 function EventsFunction() {
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState(initialEvents);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [duration, setDuration] = useState('');
-  const [showCalendar] = useState(false);
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
-  const [showFilterCalendar, setShowFilterCalendar] = useState(false);
 
     // Convert events to the format required by React Big Calendar
     const mappedEvents = events.map((event) => ({
@@ -87,5 +90,8 @@ function EventsFunction() {
     </div>
   );
 }
+
+// Export the function and the events list
+export { initialEvents };
 
 export default EventsFunction;
