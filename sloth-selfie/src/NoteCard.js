@@ -11,14 +11,14 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
   return (
     <div className="note-card">
       <h3>{note.title}</h3>
-      <small>{note.category}</small>
+      <small>{note.category}</small><br/><br/>
        {/* Note content: if expanded show all the note text*/}
-       <p onClick={toggleExpand} style={{ cursor: 'pointer' }}>
+      <p onClick={toggleExpand} style={{ cursor: 'pointer' }}>
         {isExpanded ? note.content : note.content.substring(0, 200) + (note.content.length > 200 ? '...' : '')}
-      </p>
-      <small>Created: {new Date(note.createDate).toLocaleString()}</small>
-      <small>Last Modified: {new Date(note.updateDate).toLocaleString()}</small>
-      <div className="note-buttons">
+      </p><br/>
+      <small>Created: {new Date(note.createDate).toLocaleString()}</small><br/>
+      <small>Last Modified: {new Date(note.updateDate).toLocaleString()}</small><br/>
+      <div className="notes-buttons">
       <button
         className={`btn2 btn-edit ${clickedButton === 'edit' + index ? 'active' : ''}`}
           onClick={() => onEdit(index)}
