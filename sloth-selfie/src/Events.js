@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Calendar from 'react-calendar';
+import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const localizer = momentLocalizer(moment);
+
 
 function EventsFunction() {
   const [events, setEvents] = useState([]);
@@ -12,6 +17,13 @@ function EventsFunction() {
   const [showCalendar] = useState(false);
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
   const [showFilterCalendar, setShowFilterCalendar] = useState(false);
+
+    // Convert events to the format required by React Big Calendar
+    const mappedEvents = events.map((event) => ({
+      title: event.title,
+      start: new Date(`${event.date}T${event.time}`), // Combine date and time
+      end: new Date(new Date(`${event.date}T${event.time}`).getTime() + event.duration * 60 * 60 * 1000), // Add duration in hours
+    }));
 
   const handleAddEvent = (e) => {
     e.preventDefault();
@@ -63,9 +75,6 @@ function EventsFunction() {
           onChange={(e) => setDate(e.target.value)} 
           required 
         />
-         {showCalendar && (
-          <Calendar onChange={handleDateChange} />
-        )}
         <input 
           type="time" 
           value={time} 
@@ -83,31 +92,15 @@ function EventsFunction() {
         <button className='btn' type="submit">Add Event</button>
       </form>
 
-      <h2>Your Events for {filterDate.toLocaleDateString('en-CA')}:</h2>
-      <div className="events-container">
-        {eventsForSelectedDate.length > 0 ? (
-          eventsForSelectedDate.map((event, index) => (
-            <div key={index} className="event-card">
-              <h3>{event.title}</h3>
-              <p>{event.date} at {event.time}</p>
-              <p>Duration: {event.duration} hours</p>
-            </div>
-          ))
-        ) : (
-          <p>No events for this day.</p>
-        )}
-      </div>
-      <h2>Filter by Date:</h2>
-      <input
-        type="text"
-        placeholder="Select Date to Filter"
-        value={filterDate.toLocaleDateString('en-CA')}
-        onClick={toggleFilterCalendar} // show calendar when clicked
-        readOnly
+       {/* React Big Calendar to display events */}
+       <h2>Your Calendar</h2>
+      <BigCalendar
+        localizer={localizer}
+        events={mappedEvents}
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: 500 }}
       />
-      {showFilterCalendar && (
-        <Calendar onChange={handleFilterDateChange} />
-      )}
     </div>
   );
 }
