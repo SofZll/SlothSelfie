@@ -92,10 +92,10 @@ function Card({ title, caseShow }) {
         case "1":
             btn_card = btn_card = (
                 <div className="divBtn">
-                    <Link to="/events">
+                    <Link to="/events" onClick={handleLinkClick('/events')}>
                         <button className="btn2">Manage Events</button>
                     </Link>
-                    <Link to="/activities">
+                    <Link to="/activities" onClick={handleLinkClick('/activities')}>
                         <button className="btn2">Manage Activities</button>
                     </Link>
                 </div>);
@@ -113,7 +113,7 @@ function Card({ title, caseShow }) {
             btn_card = (
                 <div className="divBtn">
                     <button id='tomatoPlay' className="btn2" onClick={tomatoTime}>Play</button>
-                    <Link to="/pomodoro">
+                    <Link to="/pomodoro" onClick={handleLinkClick('/pomodoro')}>
                         <button className="btn2">Start</button>
                     </Link>
                 </div>

@@ -21,12 +21,29 @@ function EventsFunction() {
   const [duration, setDuration] = useState('');
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
 
-    // Convert events to the format required by React Big Calendar
-    const mappedEvents = events.map((event) => ({
-      title: event.title,
-      start: new Date(`${event.date}T${event.time}`), // Combine date and time
-      end: new Date(new Date(`${event.date}T${event.time}`).getTime() + event.duration * 60 * 60 * 1000), // Add duration in hours
-    }));
+  // change style page onload document
+  useEffect(() => {
+    const header = document.querySelector('.App-header');
+    const h1 = document.querySelector('h1');
+    if (header) header.classList.add('light-background');
+    else console.error('Header not found');
+    if (h1) h1.classList.add('dark-h1');
+
+    document.body.classList.add('light-background');
+
+    return () => {
+      if (header) header.classList.remove('light-background');
+      if (h1) h1.classList.remove('dark-h1');
+      document.body.classList.remove('light-background');
+    };
+  }, []);
+
+  // Convert events to the format required by React Big Calendar
+  const mappedEvents = events.map((event) => ({
+    title: event.title,
+    start: new Date(`${event.date}T${event.time}`), // Combine date and time
+    end: new Date(new Date(`${event.date}T${event.time}`).getTime() + event.duration * 60 * 60 * 1000), // Add duration in hours
+  }));
 
   const handleAddEvent = (e) => {
     e.preventDefault();
