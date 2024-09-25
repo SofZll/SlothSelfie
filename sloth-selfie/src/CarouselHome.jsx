@@ -40,21 +40,6 @@ export default function CarroussSel(props) {
       style={{ width: props.width, height: props.height, margin: props.margin }}
     >
       <div className="divBtn">
-        <button onClick={handlePrev} className="btn">
-          <img src={iconArrowLeft} alt="icon" className="iconArrow"/>
-        </button>
-        <button onClick={handleNext} className="btn">
-          <img src={iconArrowRight} alt="icon" className="iconArrow"/>
-        </button>
-      </div>
-      <Carousel
-        slides={cards}
-        goToSlide={goToSlide}
-        offsetRadius={offsetRadius}
-        showNavigation={showArrows}
-        animationConfig={config.gentle}
-      />
-      <div className="divBtn">
           <button onClick={() => handleGoToSlide(0)} className="btn">
             <img src={iconCalendar} alt="icon" className="icon"/>
           </button>
@@ -67,6 +52,21 @@ export default function CarroussSel(props) {
           <button onClick={() => handleGoToSlide(3)} className="btn">
             <img src={iconProjects} alt="icon" className="icon"/>
           </button>
+      </div>
+      <Carousel
+        slides={cards}
+        goToSlide={goToSlide}
+        offsetRadius={offsetRadius}
+        showNavigation={showArrows}
+        animationConfig={config.gentle}
+      />
+      <div className="divBtn">
+        <button onClick={handlePrev} className="btn">
+          <img src={iconArrowLeft} alt="icon" className="iconArrow"/>
+        </button>
+        <button onClick={handleNext} className="btn">
+          <img src={iconArrowRight} alt="icon" className="iconArrow"/>
+        </button>
       </div>
         
     </div>

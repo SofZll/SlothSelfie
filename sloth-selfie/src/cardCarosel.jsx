@@ -9,6 +9,7 @@ import './css/App.css';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import {Link} from 'react-router-dom';
+import previewPomodoro from './previewPomodoro';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
