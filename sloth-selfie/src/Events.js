@@ -10,7 +10,7 @@ const localizer = momentLocalizer(moment);
 const initialEvents = [
   // Puoi aggiungere alcuni eventi di esempio qui 
   // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
-  { title: 'Coffee with John', date: '2024-09-26', time: '16:00', duration: 1 },
+  { title: 'Coffee with John', date: '2024-09-30', time: '16:00', duration: 1 },
 ];
 
 function EventsFunction() {
@@ -18,7 +18,12 @@ function EventsFunction() {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [duration, setDuration] = useState('');
+  const [duration, setDuration] = useState('');//hours
+  const [allDay, setAllDay] = useState(false);//days
+  const [repeatFrequency, setRepeatFrequency] = useState('none'); // Freqence of repetition
+  const [repeatCount, setRepeatCount] = useState(null); // Number of repetitions
+  const [repeatEndDate, setRepeatEndDate] = useState(''); // Date of the last repetition
+  const [location, setLocation] = useState(''); // Location of the event
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
 
   // change style page onload document
@@ -47,13 +52,52 @@ function EventsFunction() {
 
   const handleAddEvent = (e) => {
     e.preventDefault();
-    const newEvent = { title, date, time, duration };
+    const newEvent = { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, location };
+
+    // If we have a repeat frequency, generate repeated events
+    if (repeatFrequency !== 'none') {
+      const repeatedEvents = generateRepeatedEvents(newEvent);
+      setEvents([...events, ...repeatedEvents]);
+    } else {
+      setEvents([...events, newEvent]);
+    }
+
+    // Reset input fields
     setEvents([...events, newEvent]);
-    setTitle('');   // Reset input fields
+    setTitle('');
     setDate('');
     setTime('');
     setDuration('');
+    setAllDay(false);
+    setRepeatFrequency('none');
+    setRepeatEndDate('');
+    setLocation('');
   };
+
+    // Function to generate repeated events
+    const generateRepeatedEvents = (event) => {
+      const repeatedEvents = [];
+      let currentDate = new Date(event.date);
+      const endDate = new Date(event.repeatEndDate);
+  
+      while (currentDate <= endDate) {
+        repeatedEvents.push({ ...event, date: currentDate.toISOString().split('T')[0] });
+      
+        // Incrementa la data basata sulla frequenza
+        if (event.repeatFrequency === 'daily') {
+            currentDate.setDate(currentDate.getDate() + 1);
+        } else if (event.repeatFrequency === 'weekly') {
+          currentDate.setDate(currentDate.getDate() + 7);
+        } else if (event.repeatFrequency === 'monthly') {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+        } else if (event.repeatFrequency === 'yearly') {
+          currentDate.setFullYear(currentDate.getFullYear() + 1);
+        }
+      }
+  
+      return repeatedEvents;
+    };
+  
 
   useEffect(() => {
     //setting the date to the current date as a filter at the start
@@ -92,6 +136,30 @@ function EventsFunction() {
           min="1" //no negative numbers
           required 
         />
+        <label>
+          <input type="checkbox"
+          checked={allDay} 
+          onChange={(e) => setAllDay(e.target.checked)} /> 
+          All day
+        </label>
+        <select value={repeatFrequency} onChange={(e) => setRepeatFrequency(e.target.value)}>
+          <option value="none">No repetition</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+          {repeatFrequency !== 'none' && (
+          <div>
+            <label>Repeat until:</label>
+            <input type="date" value={repeatEndDate} onChange={(e) => setRepeatEndDate(e.target.value)} />
+          </div>
+          )}
+
+        <input type="text"
+          placeholder="Location (physical or virtual)"
+          value={location} onChange={(e) => setLocation(e.target.value)}
+        />
         <button className='btn' type="submit">Add Event</button>
       </form>
 
@@ -102,6 +170,7 @@ function EventsFunction() {
         events={mappedEvents}
         startAccessor="start"
         endAccessor="end"
+        titleAccessor="title"
         style={{ height: 500 }}
       />
     </div>
