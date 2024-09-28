@@ -43,24 +43,19 @@ function EventsFunction() {
       document.body.classList.remove('light-background');
     };
   }, []);
-
-  /*MI VIENE DA PIANGERE*/
   
   // Convert events to the format required by React Big Calendar
-  const mappedEvents = events.flatMap((event) => {
-    // Se l'evento è ripetuto, generare gli eventi ripetuti
-    if (event.repeatFrequency !== 'none' && event.repeatEndDate) {
-      return generateRepeatedEvents(event);
-    }
+  const mappedEvents = events.map(event => {
+    const startDate = new Date(`${event.date}T${event.time}`);
+    const endDate = new Date(startDate.getTime() + event.duration * 60 * 60 * 1000);
     
-    // Altrimenti, mappa l'evento singolo
-    const start = new Date(`${event.date}T${event.time}`);
-    const end = new Date(start.getTime() + event.duration * 60 * 60 * 1000);
-    return [{
+    return {
       title: event.title,
-      start: start,
-      end: end,
-    }];
+      start: startDate,
+      end: endDate,
+      allDay: event.allDay,
+      location: event.location,
+    };
   });
 
     //test
@@ -71,7 +66,6 @@ function EventsFunction() {
       });
 
     }, [mappedEvents]);
-   /*STO ANCORA PIANGENDO */
 
   const handleAddEvent = (e) => {
     e.preventDefault();
@@ -81,8 +75,10 @@ function EventsFunction() {
     if (repeatFrequency !== 'none' && repeatEndDate) {
       const repeatedEvents = generateRepeatedEvents(newEvent);
       setEvents([...events, ...repeatedEvents]);
+      console.log("Current Events:", [...events, ...repeatedEvents]);
     } else {
       setEvents([...events, newEvent]);
+      console.log("Current Events:", [...events, newEvent]);
     }
 
     // Reset input fields
@@ -141,6 +137,42 @@ function EventsFunction() {
     const today = new Date();
     setFilterDate(today);
   }, []);
+
+  const normalizeEvents = (events) => {
+    return events.map((event) => {
+      let startDate, endDate;
+
+    // Gestione di eventi ripetuti
+    if (event.start && event.end) {
+      startDate = new Date(event.start);
+      endDate = new Date(event.end);
+    } else {
+      startDate = new Date(`${event.date}T${event.time}`);
+      const durationInMilliseconds = Number(event.duration) * 60 * 60 * 1000; // Assicurati che sia un numero
+      endDate = new Date(startDate.getTime() + durationInMilliseconds);
+    }
+
+    // Controllo di validità delle date
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      console.error(`Invalid date for event: ${JSON.stringify(event)}`);
+      return {
+        title: event.title,
+        start: new Date(), // O un valore di fallback
+        end: new Date(),
+        allDay: event.allDay,
+        location: event.location,
+      };
+    }
+  
+      return {
+        title: event.title,
+        start: startDate,
+        end: endDate,
+        allDay: event.allDay,
+        location: event.location,
+      };
+    });
+  };
 
   return (
     <div className= "Event">
@@ -204,7 +236,7 @@ function EventsFunction() {
        <h2>Your Calendar</h2>
       <BigCalendar
         localizer={localizer}
-        events={mappedEvents}
+        events={normalizeEvents(events)}
         //events={events}
         startAccessor="start"
         endAccessor="end"
