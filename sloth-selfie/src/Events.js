@@ -10,7 +10,7 @@ const localizer = momentLocalizer(moment);
 const initialEvents = [
   // Puoi aggiungere alcuni eventi di esempio qui 
   // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
-  { title: 'Coffee with John', date: '2024-09-30', time: '16:00', duration: 1 },
+  { title: 'Coffee with John',date: '2024-09-30',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
 ];
 
 function EventsFunction() {
@@ -19,6 +19,7 @@ function EventsFunction() {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [duration, setDuration] = useState('');//hours
+  //
   const [allDay, setAllDay] = useState(false);//days
   const [repeatFrequency, setRepeatFrequency] = useState('none'); // Freqence of repetition
   const [repeatCount, setRepeatCount] = useState(null); // Number of repetitions
@@ -43,19 +44,41 @@ function EventsFunction() {
     };
   }, []);
 
+  /*MI VIENE DA PIANGERE*/
+  
   // Convert events to the format required by React Big Calendar
-  const mappedEvents = events.map((event) => ({
-    title: event.title,
-    start: new Date(`${event.date}T${event.time}`), // Combine date and time
-    end: new Date(new Date(`${event.date}T${event.time}`).getTime() + event.duration * 60 * 60 * 1000), // Add duration in hours
-  }));
+  const mappedEvents = events.flatMap((event) => {
+    // Se l'evento è ripetuto, generare gli eventi ripetuti
+    if (event.repeatFrequency !== 'none' && event.repeatEndDate) {
+      return generateRepeatedEvents(event);
+    }
+    
+    // Altrimenti, mappa l'evento singolo
+    const start = new Date(`${event.date}T${event.time}`);
+    const end = new Date(start.getTime() + event.duration * 60 * 60 * 1000);
+    return [{
+      title: event.title,
+      start: start,
+      end: end,
+    }];
+  });
+
+    //test
+    useEffect(() => {
+      console.log("Mapped Events:", mappedEvents); // Aggiungi questo per vedere i dati mappati
+      mappedEvents.forEach(event => {
+        console.log(`Event: ${event.title}, Start: ${event.start}, End: ${event.end}`);
+      });
+
+    }, [mappedEvents]);
+   /*STO ANCORA PIANGENDO */
 
   const handleAddEvent = (e) => {
     e.preventDefault();
     const newEvent = { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, location };
 
     // If we have a repeat frequency, generate repeated events
-    if (repeatFrequency !== 'none') {
+    if (repeatFrequency !== 'none' && repeatEndDate) {
       const repeatedEvents = generateRepeatedEvents(newEvent);
       setEvents([...events, ...repeatedEvents]);
     } else {
@@ -63,7 +86,7 @@ function EventsFunction() {
     }
 
     // Reset input fields
-    setEvents([...events, newEvent]);
+
     setTitle('');
     setDate('');
     setTime('');
@@ -77,13 +100,27 @@ function EventsFunction() {
     // Function to generate repeated events
     const generateRepeatedEvents = (event) => {
       const repeatedEvents = [];
-      let currentDate = new Date(event.date);
+      let currentDate = new Date(`${event.date}T${event.time}`);
       const endDate = new Date(event.repeatEndDate);
-  
+
+       //setting the end of the day for the repeat end date
+      endDate.setHours(23, 59, 59, 999);
+      console.log("Repeat End Date:", endDate);
+
       while (currentDate <= endDate) {
-        repeatedEvents.push({ ...event, date: currentDate.toISOString().split('T')[0] });
+
+        // Log currentDate on each iteration
+        console.log("Current Date:", currentDate); 
+
+          repeatedEvents.push({
+          title: event.title,
+          start: new Date(currentDate), // Start date
+          end: new Date(currentDate.getTime() + event.duration * 60 * 60 * 1000), // End date
+          allDay: event.allDay,
+          location: event.location,
+        });
       
-        // Incrementa la data basata sulla frequenza
+        // Increment the date based on the repeat frequency
         if (event.repeatFrequency === 'daily') {
             currentDate.setDate(currentDate.getDate() + 1);
         } else if (event.repeatFrequency === 'weekly') {
@@ -94,7 +131,7 @@ function EventsFunction() {
           currentDate.setFullYear(currentDate.getFullYear() + 1);
         }
       }
-  
+      console.log("Generated Repeated Events:", repeatedEvents); //FINO A QUI TUTTO OK
       return repeatedEvents;
     };
   
@@ -168,6 +205,7 @@ function EventsFunction() {
       <BigCalendar
         localizer={localizer}
         events={mappedEvents}
+        //events={events}
         startAccessor="start"
         endAccessor="end"
         titleAccessor="title"
