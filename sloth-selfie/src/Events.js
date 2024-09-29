@@ -20,9 +20,10 @@ function EventsFunction() {
   const [time, setTime] = useState('');
   const [duration, setDuration] = useState('');//hours
   //
-  const [allDay, setAllDay] = useState(false);//days
+  const [allDay, setAllDay] = useState(false);//days AGGIUSTA
   const [repeatFrequency, setRepeatFrequency] = useState('none'); // Freqence of repetition
   const [repeatCount, setRepeatCount] = useState(null); // Number of repetitions
+  const [repeatMode, setRepeatMode] = useState('indefinite'); // Mode of repetition
   const [repeatEndDate, setRepeatEndDate] = useState(''); // Date of the last repetition
   const [location, setLocation] = useState(''); // Location of the event
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
@@ -72,15 +73,26 @@ function EventsFunction() {
     const newEvent = { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, location };
 
     // If we have a repeat frequency, generate repeated events
-    if (repeatFrequency !== 'none' && repeatEndDate) {
-      const repeatedEvents = generateRepeatedEvents(newEvent);
+    if (repeatFrequency !== 'none') {
+      let repeatedEvents = [];
+  
+      if (repeatMode === 'until' && repeatEndDate) {
+        // Generate events based on an end date
+        repeatedEvents = generateRepeatedEvents(newEvent, repeatEndDate);
+      } else if (repeatMode === 'ntimes' && repeatCount) {
+        // Generate events based on a number of repetitions N
+        repeatedEvents = generateRepeatedEvents(newEvent, null, repeatCount);
+      } else if (repeatMode === 'indefinite') {
+        // Indefinite repetitions, we set a maximum number of repetitions AGGIUSTA QUESTA OPZIONE
+        repeatedEvents = generateRepeatedEvents(newEvent, null, 100); // es. 100 repetitions
+      }
+  
       setEvents([...events, ...repeatedEvents]);
       console.log("Current Events:", [...events, ...repeatedEvents]);
     } else {
       setEvents([...events, newEvent]);
       console.log("Current Events:", [...events, newEvent]);
     }
-
     // Reset input fields
 
     setTitle('');
@@ -90,9 +102,10 @@ function EventsFunction() {
     setAllDay(false);
     setRepeatFrequency('none');
     setRepeatEndDate('');
+    setRepeatCount('');
     setLocation('');
   };
-
+/*
     // Function to generate repeated events
     const generateRepeatedEvents = (event) => {
       const repeatedEvents = [];
@@ -130,6 +143,47 @@ function EventsFunction() {
       console.log("Generated Repeated Events:", repeatedEvents); //FINO A QUI TUTTO OK
       return repeatedEvents;
     };
+    */
+
+    // Function to generate repeated events
+    const generateRepeatedEvents = (event, repeatEndDate = null, repeatCount = null) => {
+      const repeatedEvents = [];
+      let currentDate = new Date(`${event.date}T${event.time}`);
+      let count = 0;
+      if(repeatEndDate){
+        //setting the end of the day for the repeat end date
+        //repeatEndDate.setHours(23, 59, 59, 999); //Aggiusta, altrimenti si perde un giorno
+        console.log("Repeat End Date:", repeatEndDate);
+      }
+      while (true) {
+        if (repeatEndDate && currentDate > new Date(repeatEndDate)) break;
+        if (repeatCount && count >= repeatCount) break;
+    
+        repeatedEvents.push({
+          title: event.title,
+          start: new Date(currentDate),
+          end: new Date(currentDate.getTime() + event.duration * 60 * 60 * 1000),
+          allDay: event.allDay,
+          location: event.location,
+        });
+    
+        //  Increment the date based on the repeat frequency
+        if (event.repeatFrequency === 'daily') {
+          currentDate.setDate(currentDate.getDate() + 1);
+        } else if (event.repeatFrequency === 'weekly') {
+          currentDate.setDate(currentDate.getDate() + 7);
+        } else if (event.repeatFrequency === 'monthly') {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+        } else if (event.repeatFrequency === 'yearly') {
+          currentDate.setFullYear(currentDate.getFullYear() + 1);
+        }
+    
+        count++;
+      }
+      console.log("Generated Repeated Events:", repeatedEvents);
+      return repeatedEvents;
+    };
+    
   
 
   useEffect(() => {
@@ -220,10 +274,39 @@ function EventsFunction() {
         </select>
           {repeatFrequency !== 'none' && (
           <div>
-            <label>Repeat until:</label>
-            <input type="date" value={repeatEndDate} onChange={(e) => setRepeatEndDate(e.target.value)} />
-          </div>
+          <label>
+            Repeat Mode:
+            <select onChange={(e) => setRepeatMode(e.target.value)}>
+              <option value="indefinite">Indefinite</option>
+              <option value="ntimes">N Times</option>
+              <option value="until">Until</option>
+            </select>
+          </label>
+    
+          {repeatMode === 'ntimes' && (
+            <div>
+              <label>Number of repetitions:</label>
+              <input 
+                type="number" 
+                value={repeatCount} 
+                onChange={(e) => setRepeatCount(e.target.value)} 
+                min="1" 
+              />
+            </div>
           )}
+    
+          {repeatMode === 'until' && (
+            <div>
+              <label>Repeat until:</label>
+              <input 
+                type="date" 
+                value={repeatEndDate} 
+                onChange={(e) => setRepeatEndDate(e.target.value)} 
+              />
+            </div>
+          )}
+        </div>
+      )}
 
         <input type="text"
           placeholder="Location (physical or virtual)"
