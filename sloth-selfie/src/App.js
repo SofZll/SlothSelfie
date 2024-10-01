@@ -3,6 +3,7 @@ import React, {useState} from 'react';
 import './css/App.css';
 import { BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
 import EventsFunction from './Events';
+import ActivitiesFunction from './Activities';
 import PomodoroFunction from './Pomodoro';
 import NotesFunction from './Notes';
 import Login from './Login';
@@ -88,6 +89,7 @@ function App() {
           <Route path="/pomodoro" element={<PomodoroFunction />} />
           <Route path="/notes" element={<NotesFunction />} />
           <Route path="/events" element={<EventsFunction />} />
+          <Route path="/activities" element={<ActivitiesFunction />} />
         </Routes>
       </div>
     </Router>
