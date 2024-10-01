@@ -24,13 +24,32 @@ const EventComponent = ({ event }) => {
   );
 };
 
+/*TODO: non funzionano gli eventi allDay ripetuti e quelli allDay non ripetuti che durano più di 1 giorno*/
+
+// Function to convert all-day events to timed events 
+function convertAllDayToTimedEvent(event) {
+  if (event.allDay) {
+    const startDate = new Date(`${event.date}T00:00:00`); // set at midnight of the day
+    const endDate = new Date(startDate.getTime() + (event.duration || 1) * 24 * 60 * 60 * 1000 - 1); // set the end at the last millisec of the day
+
+    return {
+      ...event,
+      start: startDate,
+      end: endDate,
+      allDay: false, //converted in hours
+    };
+  }
+  return event;
+}
+
 function EventsFunction() {
   const [events, setEvents] = useState(initialEvents);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [duration, setDuration] = useState('');//hourss
-  const [allDay, setAllDay] = useState(false);//days AGGIUSTA
+  const [allDay, setAllDay] = useState(false);
+  const [days, setDays] = useState(1); // Number of days
   const [repeatFrequency, setRepeatFrequency] = useState('none'); // Freqence of repetition
   const [repeatCount, setRepeatCount] = useState(null); // Number of repetitions
   const [repeatMode, setRepeatMode] = useState(''); // Mode of repetition
@@ -71,7 +90,7 @@ function EventsFunction() {
 
     //test
     useEffect(() => {
-      console.log("Mapped Events:", mappedEvents); // Aggiungi questo per vedere i dati mappati
+      console.log("Mapped Events:", mappedEvents);
       mappedEvents.forEach(event => {
         console.log(`Event: ${event.title}, Start: ${event.start}, End: ${event.end}`);
       });
@@ -80,7 +99,20 @@ function EventsFunction() {
 
   const handleAddEvent = (e) => {
     e.preventDefault();
-    const newEvent = { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, location };
+    let newEvent = {
+      title,
+      date,
+      time,
+      duration,
+      allDay,
+      repeatFrequency,
+      repeatEndDate,
+      location,
+    };
+
+    if(allDay){
+      newEvent = convertAllDayToTimedEvent(newEvent);
+    }
 
     // If we have a repeat frequency, generate repeated events
     if (repeatFrequency !== 'none') {
@@ -107,6 +139,7 @@ function EventsFunction() {
     setTime('');
     setDuration('');
     setAllDay(false);
+    setDays(1);
     setRepeatFrequency('none');
     setRepeatEndDate('');
     setRepeatCount('');
@@ -164,22 +197,27 @@ function EventsFunction() {
     return events.map((event) => {
       let startDate, endDate;
 
-    // Gestione di eventi ripetuti
+    // managing repeated events
     if (event.start && event.end) {
       startDate = new Date(event.start);
       endDate = new Date(event.end);
     } else {
       startDate = new Date(`${event.date}T${event.time}`);
-      const durationInMilliseconds = Number(event.duration) * 60 * 60 * 1000; // Assicurati che sia un numero
+      const durationInMilliseconds = Number(event.duration) * 60 * 60 * 1000;
       endDate = new Date(startDate.getTime() + durationInMilliseconds);
     }
 
-    // Controllo di validità delle date
+    // Setting a default time for allDay events
+    if (event.allDay) {
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+    }
+
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       console.error(`Invalid date for event: ${JSON.stringify(event)}`);
       return {
         title: event.title,
-        start: new Date(), // O un valore di fallback
+        start: new Date(),
         end: new Date(),
         allDay: event.allDay,
         location: event.location,
@@ -213,28 +251,40 @@ function EventsFunction() {
           onChange={(e) => setDate(e.target.value)} 
           required 
         />
-        <input 
-          type="time" 
-          value={time} 
-          onChange={(e) => setTime(e.target.value)} 
-          required 
-        />
-        <input 
-          type="number" 
-          placeholder="Duration (hours)" 
-          value={duration} 
-          onChange={(e) => setDuration(e.target.value)} 
-          min="1" //no negative numbers
-          required 
-        />
-        {/* 
-        <label>
-          <input type="checkbox"
-          checked={allDay} 
-          onChange={(e) => setAllDay(e.target.checked)} /> 
-          All day
-        </label>
-        */}
+          {!allDay && (
+    <input 
+      type="time" 
+      value={time} 
+      onChange={(e) => setTime(e.target.value)} 
+      required 
+    />
+  )}
+
+  {!allDay && (
+    <input 
+      type="number" 
+      placeholder="Duration (hours)" 
+      value={duration} 
+      onChange={(e) => setDuration(e.target.value)} 
+      min="1" 
+      required 
+    />
+  )}
+
+  {allDay && (
+    <input 
+      type="number" 
+      placeholder="Number of days" 
+      value={days} 
+      onChange={(e) => setDays(e.target.value)} 
+      min="1" 
+    />
+  )}
+
+  <label>
+    <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
+    All Day
+  </label>
         <select value={repeatFrequency} onChange={(e) => setRepeatFrequency(e.target.value)}>
           <option value="none">No repetition</option>
           <option value="daily">Daily</option>
