@@ -4,7 +4,7 @@ import './css/Login.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-function Form({formType}) {
+function Form({ formType, setFormType }) {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -13,14 +13,56 @@ function Form({formType}) {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (formType === 'login') {
-            // Handle login logic here
-            console.log('Login - Username:', username);
-            console.log('Login - Password:', password);
+            if (!username || !password) {
+                alert('Please enter a username and password!');
+                return;
+            }
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Login successful:', data);
+                }
+                else {
+                    console.error('Login failed:', data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error login:', error);
+            });
+
         } else if (formType === 'register') {
-            // Handle registration logic here
-            console.log('Register - Username:', username);
-            console.log('Register - Email:', email);
-            console.log('Register - Password:', password);
+            if (!username || !email || !password) {
+                alert('Please enter a username, email, and password!');
+                return;
+            }
+
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Registration successful:', data);
+                }
+                else {
+                    console.error('Registration failed:', data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error registering:', error);
+            });
         }
     };
 
