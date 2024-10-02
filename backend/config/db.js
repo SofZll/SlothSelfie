@@ -1,7 +1,14 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
 
-const uri="mongodb://site232453:ahB4ha7j@mongo_site232453/db?authSource=admin&writeConcern=majority"
+// mongodb credentials
+const mongoCredentials = {
+    user: "site232453",
+    pwd: "au8Eevai",
+    site: "mongo_site232453"
+};
+
+const dbName = 'slothselfie';
+const uri = `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/${dbName}?authSource=admin&writeConcern=majority`;
 
 const connectDB = async () => {
     try {
