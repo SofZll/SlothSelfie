@@ -3,8 +3,6 @@ global.startDate = null;
 
 const mongoose = require('mongoose');
 const express = require('express');
-const template = require('./scripts/tpl');
-const mymongo = require('./scripts/mongo');
 const User = require('./models/userModel')
 const path = require('path');
 const app = express();
@@ -14,10 +12,10 @@ const cors = require('cors');
 app.use(cors());
 
 
-// MONGODB
+// mongodb credentials
 const mongoCredentials = {
     user: "site232453",
-    pwd: "ahB4ha7j",
+    pwd: "au8Eevai",
     site: "mongo_site232453"
 };
 
@@ -56,20 +54,8 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get('/db/create', async function (req, res) {
-    try {
-        res.send(await mymongo.create(mongoCredentials))
-    } catch (error) {
-        console.error("creation db failed: ", error);
-    }
-});
-
-app.get('/db/search', async function (req, res) {
-    res.send(await mymongo.search(req.query, mongoCredentials))
-});
-
 // Static files from frontend
-const frontendPath = path.join(global.rootDir, 'frontend/build');
+const frontendPath = path.join(global.rootDir, '..', 'frontend/build');
 app.use(express.static(frontendPath));
 
 app.get('*', (req, res) => {

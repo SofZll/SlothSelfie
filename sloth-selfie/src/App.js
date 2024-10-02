@@ -6,20 +6,20 @@ import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import PomodoroFunction from './Pomodoro';
 import NotesFunction from './Notes';
-import Login from './Login';
+import Form from './Login';
 import Card from "./cardCarosel";
 import Carousel from "./CarouselHome";
 import { v4 as uuidv4 } from "uuid";
 
 function App() {
-  /*
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [formType, setFormType] = useState('login');
 
   const handleLogin = (status) => {
+    console.log("Login status:", status);
     setIsAuthenticated(status);
   };
 
-*/
   let cards = [
     {
       key: uuidv4(),
@@ -47,6 +47,7 @@ function App() {
     }
   ];
 
+  console.log("isAuthenticated:", isAuthenticated);
 
   return (
     <Router>
@@ -58,7 +59,6 @@ function App() {
           </div>
         </header>
         <Routes>
-          {/*<Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route
             path="/"
             element={
@@ -68,11 +68,12 @@ function App() {
                 <Navigate to="/login" />
               )
             }
-          /> */}
-          <Route path="/" /*path="home"*/
+          />
+          <Route path="/login" element={<Form formType={formType} setFormType={setFormType} onLogin={handleLogin} />} />
+          <Route path="/home"
             element={ 
-            /*isAuthenticated ? (*/ 
-            (<Carousel
+            isAuthenticated ? (
+            <Carousel
                 cards={cards}
                 className="carousel_structure"
                 height="70vh"
@@ -80,10 +81,10 @@ function App() {
                 margin="0"
                 offset={2}
                 showArrows={false}
-              />)
-            /*) : (
+              />
+            ) : (
               <Navigate to="/login" />
-            ) */
+            )
             }
           />
           <Route path="/pomodoro" element={<PomodoroFunction />} />

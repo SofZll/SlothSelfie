@@ -73,9 +73,9 @@ function Form({formType}) {
                     </button>
                     <p className="register">
                         {formType === 'login' ? (
-                            <>Don't have an account? <Link to="/register" className="register-link">Register!</Link></>
+                            <>Don't have an account? <span className="register-link" onClick={() => setFormType('register')}>Register!</span></>
                         ) : (
-                            <>Already have an account? <Link to="/login" className="register-link">Login!</Link></>
+                            <>Already have an account? <span className="register-link" onClick={() => setFormType('login')}>Login!</span></>
                         )}
                     </p>
                 </form>
