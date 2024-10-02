@@ -1,14 +1,19 @@
+import { duration } from "moment";
+
 
 // Function to convert all-day events to timed events 
 export function convertAllDayToTimedEvent(event) {
     if (event.allDay) {
+        //test
+        console.log("Original Event:", event);
       const startDate = new Date(`${event.date}T00:00:00`); // set at midnight of the day
-      const endDate = new Date(startDate.getTime() + (event.duration || 1) * 24 * 60 * 60 * 1000 - 1); // set the end at the last millisec of the day
+      const endDate = new Date(startDate.getTime() + (event.duration  * 24 * 60 * 60 * 1000) - 1); // set the end at the last millisec of the day
     
       //test
         console.log("Converted Event:", {
             ...event,
             start: startDate,
+            duration: "",
             end: endDate,
             allDay: false, //converted in hours
         });
@@ -16,6 +21,7 @@ export function convertAllDayToTimedEvent(event) {
       return {
         ...event,
         start: startDate,
+        duration: "",
         end: endDate,
         allDay: false, //converted in hours
       };
