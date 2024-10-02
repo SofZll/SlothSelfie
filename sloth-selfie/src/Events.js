@@ -25,7 +25,7 @@ const EventComponent = ({ event }) => {
   );
 };
 
-/*TODO: non funzionano gli eventi allDay ripetuti e quelli allDay non ripetuti che durano più di 1 giorno*/
+/*TODO: non funzionano gli eventi allDay ripetuti*/
 
 function EventsFunction() {
   const [events, setEvents] = useState(initialEvents);
@@ -60,6 +60,7 @@ function EventsFunction() {
   }, []);
   
   // Convert events to the format required by React Big Calendar
+  /*
   const mappedEvents = events.map(event => {
     const startDate = new Date(`${event.date}T${event.time}`);
     const endDate = new Date(startDate.getTime() + event.duration * 60 * 60 * 1000);
@@ -72,8 +73,9 @@ function EventsFunction() {
       location: event.location,
     };
   });
-
+*/
     //test
+  /*
     useEffect(() => {
       console.log("Mapped Events:", mappedEvents);
       mappedEvents.forEach(event => {
@@ -81,6 +83,7 @@ function EventsFunction() {
       });
 
     }, [mappedEvents]);
+  */
 
   const handleAddEvent = (e) => {
     e.preventDefault();
@@ -88,7 +91,7 @@ function EventsFunction() {
       title,
       date,
       time,
-      duration,
+      duration: allDay ? days : duration,
       allDay,
       repeatFrequency,
       repeatEndDate,
