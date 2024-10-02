@@ -1,0 +1,112 @@
+import { duration } from "moment";
+
+
+// Function to convert all-day events to timed events 
+export function convertAllDayToTimedEvent(event) {
+    if (event.allDay) {
+        //test
+        console.log("Original Event:", event);
+      const startDate = new Date(`${event.date}T00:00:00`); // set at midnight of the day
+      const endDate = new Date(startDate.getTime() + (event.duration  * 24 * 60 * 60 * 1000) - 1); // set the end at the last millisec of the day
+    
+      //test
+        console.log("Converted Event:", {
+            ...event,
+            start: startDate,
+            duration: "",
+            end: endDate,
+            allDay: false, //converted in hours
+        });
+        
+      return {
+        ...event,
+        start: startDate,
+        duration: "",
+        end: endDate,
+        allDay: false, //converted in hours
+      };
+    }
+    return event;
+  }
+
+// Function to generate repeated events
+export function generateRepeatedEvents (event, repeatEndDate = null, repeatCount = null) {
+    const repeatedEvents = [];
+    let currentDate = new Date(`${event.date}T${event.time}`);
+    let count = 0;
+    if(repeatEndDate){
+        repeatEndDate = new Date(repeatEndDate);
+        repeatEndDate.setHours(23, 59, 59, 999);//Adjusting the end, else we lose a day
+        console.log("Repeat End Date:", repeatEndDate);
+    }
+    while (true) {
+        if (repeatEndDate && currentDate > new Date(repeatEndDate)) break;
+        if (repeatCount && count >= repeatCount) break;
+      
+        repeatedEvents.push({
+        title: event.title,
+        start: new Date(currentDate),
+        end: new Date(currentDate.getTime() + event.duration * 60 * 60 * 1000),
+        allDay: event.allDay,
+        location: event.location,
+        });
+      
+        //  Increment the date based on the repeat frequency
+        if (event.repeatFrequency === 'daily') {
+        currentDate.setDate(currentDate.getDate() + 1);
+        } else if (event.repeatFrequency === 'weekly') {
+            currentDate.setDate(currentDate.getDate() + 7);
+        } else if (event.repeatFrequency === 'monthly') {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        } else if (event.repeatFrequency === 'yearly') {
+            currentDate.setFullYear(currentDate.getFullYear() + 1);
+        }
+      
+        count++;
+    }
+    console.log("Generated Repeated Events:", repeatedEvents);
+    return repeatedEvents;
+};
+
+// Convert events to the format required by React Big Calendar
+export function normalizeEvents (events) {
+    return events.map((event) => {
+        let startDate, endDate;
+    
+    // managing repeated events
+    if (event.start && event.end) {
+        startDate = new Date(event.start);
+        endDate = new Date(event.end);
+    } else {
+        startDate = new Date(`${event.date}T${event.time}`);
+        const durationInMilliseconds = Number(event.duration) * 60 * 60 * 1000;
+        endDate = new Date(startDate.getTime() + durationInMilliseconds);
+    }
+    
+    // Setting a default time for allDay events
+    if (event.allDay) {
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+    }
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error(`Invalid date for event: ${JSON.stringify(event)}`);
+        return {
+         title: event.title,
+        start: new Date(),
+        end: new Date(),
+        allDay: event.allDay,
+        location: event.location,
+        };
+    }
+      
+        return {
+        title: event.title,
+        start: startDate,
+        end: endDate,
+        allDay: event.allDay,
+        location: event.location,
+        };
+    });
+};
+        
