@@ -29,7 +29,7 @@ export function convertAllDayToTimedEvent(event) {
     return event;
   }
 
-    // Function to generate repeated events
+// Function to generate repeated events
 export function generateRepeatedEvents (event, repeatEndDate = null, repeatCount = null) {
     const repeatedEvents = [];
     let currentDate = new Date(`${event.date}T${event.time}`);
@@ -68,7 +68,8 @@ export function generateRepeatedEvents (event, repeatEndDate = null, repeatCount
     return repeatedEvents;
 };
 
-    export function normalizeEvents (events) {
+// Convert events to the format required by React Big Calendar
+export function normalizeEvents (events) {
     return events.map((event) => {
         let startDate, endDate;
     
