@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import './css/App.css';
 import NoteCard from './NoteCard';
 
-{/*TODO: metti a posto i filtri*/}
-
 function NotesFunction() {
   const [notes, setNotes] = useState([]);
   const [noteTitle, setNoteTitle] = useState('');
