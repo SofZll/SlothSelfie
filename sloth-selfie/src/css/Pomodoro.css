@@ -1,23 +1,35 @@
 .container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: space-around;
     align-items: center;
-    height: 100vh;
-  }
-  
-  .circle {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background-color: #4caf50;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    height: auto;
+    padding-bottom: 50px;
   }
   
   .count {
     font-size: 48px;
-    color: white;
+    color: #f9f9f9;
   }
   
+  .tomatoPrew {
+    width: 200px;
+    height: 200px;
+  }
+
+  .containerRed,
+  .containerYellow {
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 70px;
+    position: relative;
+    display: flex;
+  }
+
+  .counterRed,
+  .counterYellow {
+    padding-top: 15px;
+    color: #f9f9f9 !important;
+    font-size: 3rem !important;
+    position: absolute;
+  }

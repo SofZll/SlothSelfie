@@ -9,7 +9,7 @@ import './css/App.css';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import {Link, useNavigate} from 'react-router-dom';
-import previewPomodoro from './previewPomodoro';
+import PreviewPomodoro from './previewPomodoro';
 import { initialEvents } from './Events';
 
 function Card({ title, caseShow }) {
@@ -45,82 +45,51 @@ function Card({ title, caseShow }) {
         }
     };
 
-    const tomatoTime = () => {
-        const tomatoButton = document.getElementById('tomatoPlay');
-        
-        if (!tomatoButton) {
-            console.error('Elemento con ID tomatoPlay non trovato');
-            return;
-        }
-    
-        if (playTomato) {
-            tomatoButton.innerHTML = "Play";
-            playTomato = false;
-        } else {
-            tomatoButton.innerHTML = "Stop";
-            playTomato = true;
-        }
-    }
     
 
     let content;
-    let btn_card;
     switch (caseShow) {
         case "1":
-            content = <Calendar 
-                        tileContent={tileContent} />;
+            content = (
+                <div className='inCard'>
+                    <Calendar />
+                    <div className="divBtn">
+                        <Link to="/events">
+                            <button className="btn">Manage Events</button>
+                        </Link>
+                        <Link to="/activities">
+                            <button className="btn">Manage Activities</button>
+                        </Link>
+                    </div>
+                </div>
+            );
             break;
         case "2":
-            content = (<div className="notes-section">
-                <p>Add a note here!</p>
-                <img src={noteImage} alt="Note illustration" className="note-image" />
-                <br />
-                </div>);
-            break;
-        case "3":
-            content = (<div className="pomodoro-timer">
-                <img src={animatedHourglass} alt="Hourglass" className="hourglass"/><br/>
-                <p>Start your study session!</p><br/>
-                </div>);
-            break;
-        case "4":
-            content = <p>Content for other stuff 3</p>;
-            break;
-    }
-
-    switch (caseShow) {
-        case "1":
-            btn_card = btn_card = (
-                <div className="divBtn">
-                    <Link to="/events" onClick={handleLinkClick('/events')}>
-                        <button className="btn2">Manage Events</button>
-                    </Link>
-                    <Link to="/activities" onClick={handleLinkClick('/activities')}>
-                        <button className="btn2">Manage Activities</button>
-                    </Link>
-                </div>);
-            break;
-        case "2":
-            btn_card = (
-                <div className="divBtn">
-                    <Link to="/notes" onClick={handleLinkClick('/notes')}>
-                        <button className="btn2">Add</button>
-                    </Link>
+            content = (
+                <div className='inCard'>
+                    <div className="notes-section">
+                        <p>Add a note here!</p>
+                        <img src={noteImage} alt="Note illustration" className="note-image" />
+                        <br />
+                    </div>
+                    <div className="divBtn">
+                        <Link to="/notes">
+                            <button className="btn">Add</button>
+                        </Link>
+                    </div>
                 </div>
             );
             break;
         case "3":
-            btn_card = (
-                <div className="divBtn">
-                    <button id='tomatoPlay' className="btn2" onClick={tomatoTime}>Play</button>
-                    <Link to="/pomodoro" onClick={handleLinkClick('/pomodoro')}>
-                        <button className="btn2">Start</button>
-                    </Link>
-                </div>
-            );
+            content = <PreviewPomodoro />;
             break;
         case "4":
-            btn_card = <button className="btn2">Start</button>;
+            content = (
+                <div className='inCard'>
+                    <p>Content for other stuff 3</p>
+                    <button className="btn">Start</button>
+                </div>
+            );
             break;
     }
 
@@ -133,7 +102,6 @@ function Card({ title, caseShow }) {
         >
         <h2>{title}</h2>
         {content}
-        {btn_card}
         
         </animated.div>
     );
