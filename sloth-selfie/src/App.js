@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [formType, setFormType] = useState('login');
+  const [formType, setFormType] = useState('login'); 
 
   const handleLogin = (status) => {
     console.log("Login status:", status);
@@ -69,7 +69,14 @@ function App() {
               )
             }
           />
-          <Route path="/login" element={<Form formType={formType} setFormType={setFormType} onLogin={handleLogin} />} />
+          <Route 
+            path="/login" 
+            element={<Form formType={formType} setFormType={setFormType} />}
+          />
+          <Route 
+            path="/register" 
+            element={<Form formType="register" setFormType={setFormType} />}
+          />
           <Route path="/home"
             element={ 
             isAuthenticated ? (
