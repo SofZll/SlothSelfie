@@ -52,7 +52,7 @@ function Card({ title, caseShow }) {
         case "1":
             content = (
                 <div className='inCard'>
-                    <Calendar />
+                    <Calendar  tileContent={tileContent} />
                     <div className="divBtn">
                         <Link to="/events">
                             <button className="btn">Manage Events</button>

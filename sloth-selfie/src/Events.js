@@ -25,7 +25,7 @@ const EventComponent = ({ event }) => {
   );
 };
 
-/*TODO: non funzionano gli eventi allDay ripetuti -> contrrolla e modifica la funzione dei generateRepeatedEvents per includerli*/
+/*TODO: non funzionano gli eventi allDay ripetuti -> aggiusta le date, risultano sempre 00:00:00*/
 
 function EventsFunction() {
   const [events, setEvents] = useState(initialEvents);
@@ -75,7 +75,7 @@ function EventsFunction() {
     if(allDay){
       newEvent = convertAllDayToTimedEvent(newEvent);
     }
-
+    
     // If we have a repeat frequency, generate repeated events
     if (repeatFrequency !== 'none') {
       let repeatedEvents = [];
