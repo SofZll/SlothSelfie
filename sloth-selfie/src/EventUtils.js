@@ -1,8 +1,6 @@
 // Function to convert all-day events to timed events 
 export function convertAllDayToTimedEvent(event) {
     if (event.allDay) {
-        //test
-        console.log("Original Event:", event);
 
       const startDate = new Date(`${event.date}T00:00:00`); // set at midnight of the day
       const endDate = new Date(startDate.getTime() + (event.duration  * 24 * 60 * 60 * 1000) - 1); // set the end at the last millisec of the day
@@ -12,7 +10,7 @@ export function convertAllDayToTimedEvent(event) {
             ...event,
             start: startDate,
             time: eventTime,
-            duration: (event.duration * 24).toString(),
+            duration: ((event.duration * 23)+(59 / 60)).toString(),
             end: endDate,
             allDay: false, //converted in hours
         });
@@ -21,7 +19,7 @@ export function convertAllDayToTimedEvent(event) {
         ...event,
         start: startDate,
         time: eventTime,
-        duration: (event.duration * 24).toString(),
+        duration: ((event.duration * 23)+(59 / 60)).toString(),
         end: endDate,
         allDay: false, //converted in hours
       };
@@ -33,30 +31,15 @@ export function convertAllDayToTimedEvent(event) {
 export function generateRepeatedEvents (event, repeatEndDate = null, repeatCount = null) {
     const repeatedEvents = [];
     let currentDate = new Date(`${event.date}T${event.time}`);
-    console.log("Current Date:", currentDate);
-
     let count = 0;
     if(repeatEndDate){
         repeatEndDate = new Date(repeatEndDate);
         repeatEndDate.setHours(23, 59, 59, 999);//Adjusting the end, else we lose a day
-        console.log("Repeat End Date:", repeatEndDate);
-    }
-
-    if (event.allDay) {
-        event = convertAllDayToTimedEvent(event);
-        currentDate = new Date(event.start); // set the current date to the start of the event
     }
 
     while (true) {
         if (repeatEndDate && currentDate > new Date(repeatEndDate)) break;
         if (repeatCount && count >= repeatCount) break;
-
-        //test
-        // Verifica che la data corrente sia valida prima di inserirla
-        if (isNaN(currentDate.getTime())) {
-            console.error("Invalid current date during generation:", currentDate);
-            break; // Ferma la generazione se c'è un errore
-        }
       
         repeatedEvents.push({
         title: event.title,
