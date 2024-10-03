@@ -1,19 +1,18 @@
-import { duration } from "moment";
-
-
 // Function to convert all-day events to timed events 
 export function convertAllDayToTimedEvent(event) {
     if (event.allDay) {
         //test
         console.log("Original Event:", event);
+
       const startDate = new Date(`${event.date}T00:00:00`); // set at midnight of the day
       const endDate = new Date(startDate.getTime() + (event.duration  * 24 * 60 * 60 * 1000) - 1); // set the end at the last millisec of the day
-    
+      const eventTime ="00:00"; // set at midnight of the day
       //test
         console.log("Converted Event:", {
             ...event,
             start: startDate,
-            duration: "",
+            time: eventTime,
+            duration: (event.duration * 24).toString(),
             end: endDate,
             allDay: false, //converted in hours
         });
@@ -21,7 +20,8 @@ export function convertAllDayToTimedEvent(event) {
       return {
         ...event,
         start: startDate,
-        duration: "",
+        time: eventTime,
+        duration: (event.duration * 24).toString(),
         end: endDate,
         allDay: false, //converted in hours
       };
@@ -33,20 +33,35 @@ export function convertAllDayToTimedEvent(event) {
 export function generateRepeatedEvents (event, repeatEndDate = null, repeatCount = null) {
     const repeatedEvents = [];
     let currentDate = new Date(`${event.date}T${event.time}`);
+    console.log("Current Date:", currentDate);
+
     let count = 0;
     if(repeatEndDate){
         repeatEndDate = new Date(repeatEndDate);
         repeatEndDate.setHours(23, 59, 59, 999);//Adjusting the end, else we lose a day
         console.log("Repeat End Date:", repeatEndDate);
     }
+
+    if (event.allDay) {
+        event = convertAllDayToTimedEvent(event);
+        currentDate = new Date(event.start); // set the current date to the start of the event
+    }
+
     while (true) {
         if (repeatEndDate && currentDate > new Date(repeatEndDate)) break;
         if (repeatCount && count >= repeatCount) break;
+
+        //test
+        // Verifica che la data corrente sia valida prima di inserirla
+        if (isNaN(currentDate.getTime())) {
+            console.error("Invalid current date during generation:", currentDate);
+            break; // Ferma la generazione se c'è un errore
+        }
       
         repeatedEvents.push({
         title: event.title,
         start: new Date(currentDate),
-        end: new Date(currentDate.getTime() + event.duration * 60 * 60 * 1000),
+        end: new Date(currentDate.getTime() + (event.duration ? event.duration * 60 * 60 * 1000 : 0)),
         allDay: event.allDay,
         location: event.location,
         });
@@ -61,7 +76,13 @@ export function generateRepeatedEvents (event, repeatEndDate = null, repeatCount
         } else if (event.repeatFrequency === 'yearly') {
             currentDate.setFullYear(currentDate.getFullYear() + 1);
         }
-      
+        
+        // If no repeat conditions are set, prevent an infinite loop
+        if (!repeatEndDate && !repeatCount && count >= 1000) {
+            console.warn("Maximum iterations reached. Possibly an infinite loop.");
+            break;
+        }
+
         count++;
     }
     console.log("Generated Repeated Events:", repeatedEvents);
