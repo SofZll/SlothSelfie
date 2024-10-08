@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
+import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents } from './EventUtils';
