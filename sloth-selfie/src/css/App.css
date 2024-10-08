@@ -145,89 +145,6 @@ p {
   width: 100%;
 }
 
-/* Events */
-.events-section {
-  padding: 20px;
-}
-
-.events-container {
-  display: flex;
-  flex-direction: column;
-  margin-top: 20px;
-}
-
-.event-card {
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  margin: 10px 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-
-/* Notes*/
-.notes-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-}
-.notes-section input, .notes-section textarea, .notes-section select {
-  width: 300px;
-  max-width: 400px;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  background-color: #FFF;
-  padding: 5px;
-  margin: 10px;
-  border: 1px solid #555B6E;
-}
-
-.notes-section input::placeholder,
-.notes-section textarea::placeholder{
-  color: #555B6E;
-  font-family: Arial, Helvetica, sans-serif;
-  opacity: 0.8;
-}
-
-.notes-selection option:hover{
-  background-color: #89B0AE;
-  color: white;
-}
-
-.notes-section input {
-  height: 40px;
-}
-
-.notes-section textarea {
-  height: 150px;
-  padding-top: 10px;
-  margin-bottom: 30px;
-}
-
-.notes-section button {
-  margin-bottom: 10px;
-  padding: 10px 20px;
-  font-size: 16px;
-}
-
-.note-card {
-  background-color: #f9f9f9; 
-  border: 1px solid #ddd; 
-  border-radius: 8px; 
-  padding: 15px;
-  margin: 10px 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
-}
-
-.notes-buttons{
-  margin-top: 10px;
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-}
-
 .icon {
   height: 30px;
 }
@@ -263,11 +180,6 @@ p {
 
   h2 {
     font-size: 1.2rem !important;
-  }
-
-  .notes-section input,
-  .notes-section textarea {
-    width: 90%; /* Reducing width for smaller screen */
   }
 
   .notes-section button {
