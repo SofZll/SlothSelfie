@@ -26,7 +26,6 @@ const EventComponent = ({ event }) => {
   );
 };
 
-/*TODO: non funzionano gli eventi allDay ripetuti -> aggiusta le date, risultano sempre 00:00:00*/
 
 function EventsFunction() {
   const [events, setEvents] = useState(initialEvents);
@@ -216,18 +215,20 @@ function EventsFunction() {
       </form>
 
        {/* React Big Calendar to display events */}
-       <h2>Your Calendar</h2>
-      <BigCalendar
-        localizer={localizer}
-        events={normalizeEvents(events)}
-        startAccessor="start"
-        endAccessor="end"
-        titleAccessor="title"
-        style={{ height: 500 }}
-        components={{
-          event: EventComponent
-        }}
-      />
+       <h2>Your Events:</h2>
+       <div className="calendar-container">
+        <BigCalendar
+          localizer={localizer}
+          events={normalizeEvents(events)}
+          startAccessor="start"
+          endAccessor="end"
+          titleAccessor="title"
+          style={{ height: 500 }}
+          components={{
+            event: EventComponent
+          }}
+        />
+      </div>
     </div>
   );
 }
