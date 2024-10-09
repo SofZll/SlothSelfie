@@ -5,8 +5,8 @@ import './css/App.css';
 import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents } from './EventUtils';
-import { handleEditActivity, handleDeleteActivity } from './ActivityUtils';
+import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleEditEvent, handleDeleteEvent } from './EventUtils';
+//import { handleEditActivity, handleDeleteActivity } from './ActivityUtils';
 
 //TODO: functions to Delete/Update events
 
@@ -107,7 +107,7 @@ function EventsFunction() {
       console.log("Current Events:", [...events, newEvent]);
     }
     // Reset input fields
-
+    setId('');
     setTitle('');
     setDate('');
     setTime('');
@@ -249,8 +249,15 @@ function EventsFunction() {
             <p>Start: {selectedEvent.start.toLocaleString()}</p>
             <p>End: {selectedEvent.end.toLocaleString()}</p>
             <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-            <button onClick={() => handleEditActivity(selectedEvent.id)}>Edit</button>
-            <button onClick={() => handleDeleteActivity(selectedEvent.id)}>Delete</button>
+            <button onClick={() => handleEditEvent(selectedEvent.id, events, setEvents, setSelectedEvent)}>Edit</button>
+            <button onClick={() => {
+                if (selectedEvent) {
+                    console.log("Deleting event with ID:", selectedEvent.id); // Verifica l'ID prima di chiamare la funzione
+                    handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
+                } else {
+                    console.log("No event selected for deletion.");
+                }
+            }}>Delete</button>
             <button onClick={() => setSelectedEvent(null)}>Close</button>
             </div>
           )}

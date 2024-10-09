@@ -9,18 +9,22 @@ export function normalizeActivities (activities) {
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         console.error(`Invalid date for event: ${JSON.stringify(activity)}`);
         return {
-         title: activity.title,
-        start: new Date(),
-        end: new Date(),
-        deadline: activity.deadline,
+            id: activity.id,
+            title: activity.title,
+            start: new Date(),
+            end: new Date(),
+            deadline: activity.deadline,
+            completed: activity.completed
         };
     }
       
         return {
-        title: activity.title,
-        start: startDate,
-        end: endDate,
-        deadline: activity.deadline,
+            id: activity.id,
+            title: activity.title,
+            start: startDate,
+            end: endDate,
+            deadline: activity.deadline,
+            completed: activity.completed
         };
     });
 };
@@ -63,28 +67,17 @@ export function updateOverdueActivities(activities, setActivities) {
     }
 }
 
-export function handleEditActivity(id) {
-    return;
-}
-
-export function handleDeleteActivity(id) {
-    return;
-}
-
-{/* 
-// Handle editing an activity
-export function handleEditActivity(id) {
-    // Logica per modificare l'attività
+// Handle editing an activity  <-NON VA
+export function handleEditActivity(id, activity, setActivity) {
     const activityToEdit = activity.find(activity => activity.id === id);
     if (activityToEdit) {
-      // Popola il form con i dati dell'attività per modificarla
+        setActivity(activityToEdit);
     }
   }
 
-// Handle deleting an activity
-export function handleDeleteActivity(id) {
-  const updatedActivities = activity.filter(activity => activity.id !== id);
-  setActivities(updatedActivities);
-  setSelectedActivity(null); // Chiudi il pop-up
+//Handle deleting an activity
+export function handleDeleteActivity(id, activities, setActivities, setSelectedActivity) {
+    const updatedActivities = activities.filter(activity => activity.id !== id);
+    setActivities(updatedActivities);
+    setSelectedActivity(null); // close the pop-up
 }
-*/}
