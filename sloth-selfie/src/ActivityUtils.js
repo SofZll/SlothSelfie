@@ -22,3 +22,10 @@ export function normalizeActivities (activities) {
         };
     });
 };
+
+export function handleRemoveActivity (id, activities, setActivities) {
+    if (!activities) return;
+    const updatedActivities = activities.filter(activity => activity.id !== id);
+    setActivities(updatedActivities);
+    console.log("Current activities:", updatedActivities);
+};

@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
-import { normalizeActivities } from './ActivityUtils';
+import { normalizeActivities, handleRemoveActivity } from './ActivityUtils';
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -15,7 +15,7 @@ const initialActivities = [
   ];
 
 function ActivitiesFunction(){
-    const [activities, setActivities] = useState(initialActivities);
+    const [activities, setActivities] = useState(initialActivities || []);
     const [id, setId] = useState("");
     const [title, setTitle] = useState('');
     const [deadline, setDeadline] = useState('');
@@ -93,6 +93,7 @@ function ActivitiesFunction(){
                             <div className="activity-card" key={activity.id}>
                                 <h2>{activity.title}</h2>
                                 <p>Due: {activity.deadline}</p>
+                                <button className="btn" onClick={() => handleRemoveActivity(activity.id, activities, setActivities)}>Done</button>
                             </div>
                         ))}
                     </div>
