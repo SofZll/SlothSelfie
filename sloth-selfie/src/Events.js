@@ -6,6 +6,9 @@ import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents } from './EventUtils';
+import { handleEditActivity, handleDeleteActivity } from './ActivityUtils';
+
+//TODO: functions to Delete/Update events
 
 const localizer = momentLocalizer(moment);
 
@@ -42,6 +45,7 @@ function EventsFunction() {
   const [repeatEndDate, setRepeatEndDate] = useState(''); // Date of the last repetition
   const [location, setLocation] = useState(''); // Location of the event
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   // change style page onload document
   useEffect(() => {
@@ -60,6 +64,12 @@ function EventsFunction() {
     };
   }, []);
   
+  function handleEventClick(event) {
+    console.log("Event clicked:", event); 
+    setSelectedEvent(event);
+  }
+
+
   const handleAddEvent = (e) => {
     e.preventDefault();
     let newEvent = {
@@ -224,12 +234,26 @@ function EventsFunction() {
           events={normalizeEvents(events)}
           startAccessor="start"
           endAccessor="end"
+          onSelectEvent={handleEventClick}
           titleAccessor="title"
           style={{ height: 500 }}
           components={{
             event: EventComponent
           }}
         />
+        {/* Display popup for the selected activity*/}
+        {selectedEvent && (
+            <div className="popup">
+            <h2>{selectedEvent.title}</h2>
+            <p>Location: {selectedEvent.location}</p>
+            <p>Start: {selectedEvent.start.toLocaleString()}</p>
+            <p>End: {selectedEvent.end.toLocaleString()}</p>
+            <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
+            <button onClick={() => handleEditActivity(selectedEvent.id)}>Edit</button>
+            <button onClick={() => handleDeleteActivity(selectedEvent.id)}>Delete</button>
+            <button onClick={() => setSelectedEvent(null)}>Close</button>
+            </div>
+          )}
       </div>
     </div>
   );
