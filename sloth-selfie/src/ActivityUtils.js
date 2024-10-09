@@ -23,9 +23,41 @@ export function normalizeActivities (activities) {
     });
 };
 
-export function handleRemoveActivity (id, activities, setActivities) {
-    if (!activities) return;
-    const updatedActivities = activities.filter(activity => activity.id !== id);
+/*TODO: remove the completed activities from bigcalendar*/
+// Handle removing an activity and marking it as completed
+export function handleRemoveActivity(id, activities, setActivities) {
+    const updatedActivities = activities.map(activity => {
+        if (activity.id === id) {
+            return { ...activity, completed: true };
+        }
+        return activity;
+    });
+
     setActivities(updatedActivities);
     console.log("Current activities:", updatedActivities);
-};
+}
+
+
+// Update overdue activities
+export function updateOverdueActivities(activities, setActivities) {
+    const today = new Date().toISOString().split('T')[0];
+
+    const updatedActivities = activities.map(activity => {
+        const activityDate = new Date(activity.deadline).toISOString().split('T')[0];
+        // if the activity is not completed and the deadline is in the past
+        if (activityDate < today && !activity.completed) {
+            return {
+                ...activity,
+                deadline: today,
+            };
+        }
+        return activity;
+    });
+
+    // update the state only if there are changes
+    const hasChanges = updatedActivities.some((activity, index) => activity.deadline !== activities[index].deadline);
+
+    if (hasChanges) {
+        setActivities(updatedActivities);
+    }
+}

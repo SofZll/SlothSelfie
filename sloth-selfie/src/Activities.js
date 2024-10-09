@@ -6,12 +6,12 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
-import { normalizeActivities, handleRemoveActivity } from './ActivityUtils';
+import { normalizeActivities, handleRemoveActivity, updateOverdueActivities } from './ActivityUtils';
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
-    {id: 1, title: 'Study Math', deadline: '2024-10-12' },
-    {id: 2, title: 'Write Report', deadline: '2024-10-15' }
+    {id: 1, title: 'Study Math', deadline: '2024-10-12', completed: false },
+    {id: 2, title: 'Write Report', deadline: '2024-10-15', completed: false }
   ];
 
 function ActivitiesFunction(){
@@ -19,6 +19,7 @@ function ActivitiesFunction(){
     const [id, setId] = useState("");
     const [title, setTitle] = useState('');
     const [deadline, setDeadline] = useState('');
+    const [completed, setCompleted] = useState(false);
 
     // change style page onload document
     useEffect(() => {
@@ -37,12 +38,25 @@ function ActivitiesFunction(){
         };
     }, []);
 
+    //checking for overdue activities
+    useEffect(() => {
+        const overdueActivities = activities.filter(activity => 
+            new Date(activity.deadline) < new Date() && !activity.completed
+        );
+    
+        // Update the deadline of overdue activities to today
+        if (overdueActivities.length > 0) {
+            updateOverdueActivities(activities, setActivities);
+        }
+    }, [activities]);
+
     function handleAddActivity (e) {
         e.preventDefault();
         let newActivity = {
             id: activities.length + 1,
             title: title,
-            deadline: deadline
+            deadline: deadline,
+            completed: false
         };
     
 
@@ -89,7 +103,7 @@ function ActivitiesFunction(){
                 <div className="activities-list">
                     <h2>List of your Activities:</h2>
                     <div className="activities-container">
-                        {activities.map(activity => (
+                        {activities.filter(activity => !activity.completed).map(activity => (
                             <div className="activity-card" key={activity.id}>
                                 <h2>{activity.title}</h2>
                                 <p>Due: {activity.deadline}</p>
