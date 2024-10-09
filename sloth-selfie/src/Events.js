@@ -12,7 +12,7 @@ const localizer = momentLocalizer(moment);
 const initialEvents = [
   // Puoi aggiungere alcuni eventi di esempio qui 
   // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
-  { title: 'Coffee with John',date: '2024-10-20',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
+  {id: 1, title: 'Coffee with John',date: '2024-10-20',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
 ];
 
 // Custom component to display the event
@@ -29,6 +29,7 @@ const EventComponent = ({ event }) => {
 
 function EventsFunction() {
   const [events, setEvents] = useState(initialEvents);
+  const [id, setId] = useState("");
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -62,6 +63,7 @@ function EventsFunction() {
   const handleAddEvent = (e) => {
     e.preventDefault();
     let newEvent = {
+      id: events.length + 1,
       title,
       date,
       time,
