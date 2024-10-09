@@ -113,4 +113,20 @@ export function normalizeEvents (events) {
         };
     });
 };
-        
+
+// Handle editing an event  <-NON VA
+export function handleEditEvent(id, events, setEvents) {
+    const activityToEdit = events.find(event => event.id === id);
+    //if (eventToEdit) {
+    //    setEvents(eventToEdit);
+    //}
+  };
+
+//Handle deleting an event <-NON VA, mi da id undefined
+export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
+    console.log("Deleting event with id:", id);
+    const updatedEvents = events.filter(event => event.id !== id);
+    console.log("Updated events:", updatedEvents); 
+    setEvents(updatedEvents);
+    setSelectedEvent(null); // close the pop-up
+};

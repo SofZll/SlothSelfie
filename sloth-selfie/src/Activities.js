@@ -8,7 +8,7 @@ import './css/App.css';
 import './css/Activities.css';
 import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleEditActivity, handleDeleteActivity} from './ActivityUtils';
 
-//TODO: functions to Delete/Update activities
+//TODO: functions to Update activities
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -114,8 +114,8 @@ function ActivitiesFunction(){
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {selectedActivity.deadline}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
-                        <button onClick={() => handleEditActivity(selectedActivity.id)}>Edit</button>
-                        <button onClick={() => handleDeleteActivity(selectedActivity.id)}>Delete</button>
+                        <button onClick={() => handleEditActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Edit</button>
+                        <button onClick={() => handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Delete</button>
                         <button onClick={() => setSelectedActivity(null)}>Close</button>
                         </div>
                     )}
