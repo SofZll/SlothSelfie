@@ -6,13 +6,19 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
+import { normalizeActivities } from './ActivityUtils';
+
+const initialActivities = [
+    // Puoi aggiungere alcune attività di esempio qui 
+    {id: 1, title: 'Study Math', deadline: '2024-10-12' },
+    {id: 2, title: 'Write Report', deadline: '2024-10-15' }
+  ];
 
 function ActivitiesFunction(){
-    // Dummy data for activities
-    const [activities, setActivities] = useState([
-        { id: 1, title: 'Study Math', deadline: '2024-10-12' },
-        { id: 2, title: 'Write Report', deadline: '2024-10-15' }
-    ]);
+    const [activities, setActivities] = useState(initialActivities);
+    const [id, setId] = useState("");
+    const [title, setTitle] = useState('');
+    const [deadline, setDeadline] = useState('');
 
     // change style page onload document
     useEffect(() => {
@@ -30,17 +36,50 @@ function ActivitiesFunction(){
         document.body.classList.remove('light-background');
         };
     }, []);
+
+    function handleAddActivity (e) {
+        e.preventDefault();
+        let newActivity = {
+            id: activities.length + 1,
+            title: title,
+            deadline: deadline
+        };
     
 
+        setActivities([...activities, newActivity]);
+        console.log("Current activities:", [...activities, newActivity]);
+
+         // Reset input fields
+        setTitle('');
+        setDeadline('');
+    };
+  
     return (
         <div className="activities-page">
             <h2>Activities</h2>
+            <form onSubmit={handleAddActivity}>
+            <input 
+                type="text" 
+                placeholder="Title" 
+                value={title} 
+                onChange={(e) => setTitle(e.target.value)} 
+                required 
+            />
+            <label>Deadline:</label>
+            <input 
+                type="date" 
+                value={deadline} 
+                onChange={(e) => setDeadline(e.target.value)} 
+                required 
+            />
+            <button className='btn' type="submit">Add Activity</button>
+                </form>
             <h2>Your Activities:</h2>
             <div className="activities-layout">
                 <div className="calendar-container">
                     <BigCalendar
                         localizer={momentLocalizer(moment)}
-                        events={[]}
+                        events={normalizeActivities(activities)}
                         startAccessor="start"
                         endAccessor="end"
                         titleAccessor="title"
@@ -62,5 +101,6 @@ function ActivitiesFunction(){
         </div>
     );
 }
-
+// Export the function and the Activities list
+export { initialActivities };
 export default ActivitiesFunction;

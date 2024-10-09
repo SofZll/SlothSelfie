@@ -11,6 +11,7 @@ import 'react-calendar/dist/Calendar.css';
 import {Link, useNavigate} from 'react-router-dom';
 import PreviewPomodoro from './previewPomodoro';
 import { initialEvents } from './Events';
+import { initialActivities } from './Activities';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
@@ -38,10 +39,17 @@ function Card({ title, caseShow }) {
         return initialEvents.some(event => event.date === date.toLocaleDateString('en-CA'));
     };
 
+    const hasActivityOnDate = (date) => {
+        return initialActivities.some(activity => activity.deadline === date.toLocaleDateString('en-CA'));
+    };
+
   // Personalizing the tile content
     const tileContent = ({ date, view }) => {
         if (view === 'month' && hasEventOnDate(date)) {
-            return <span className="event-indicator" style={{ backgroundColor: 'red', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
+            return <span className="event-indicator" style={{ backgroundColor: 'blue', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
+        }
+        if (view === 'month' && hasActivityOnDate(date)) {
+            return <span className="event-indicator" style={{ backgroundColor: 'magenta', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
         }
     };
 
@@ -55,10 +63,10 @@ function Card({ title, caseShow }) {
                     <Calendar  tileContent={tileContent} />
                     <div className="divBtn">
                         <Link to="/events">
-                            <button className="btn">Manage Events</button>
+                        <button className="btn" style={{ color: 'blue' }}>Manage Events</button>
                         </Link>
                         <Link to="/activities">
-                            <button className="btn">Manage Activities</button>
+                            <button className="btn" style={{ color: 'magenta' }}>Manage Activities</button>
                         </Link>
                     </div>
                 </div>
