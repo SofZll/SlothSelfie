@@ -1,6 +1,6 @@
 // Convert activities to the format required by React Big Calendar
 export function normalizeActivities (activities) {
-    return activities.map((activity) => {
+    return activities.filter(activity => !activity.completed).map((activity) => {
             let startDate, endDate;
         
             startDate = new Date(activity.deadline);
@@ -12,6 +12,7 @@ export function normalizeActivities (activities) {
          title: activity.title,
         start: new Date(),
         end: new Date(),
+        deadline: activity.deadline,
         };
     }
       
@@ -19,11 +20,11 @@ export function normalizeActivities (activities) {
         title: activity.title,
         start: startDate,
         end: endDate,
+        deadline: activity.deadline,
         };
     });
 };
 
-/*TODO: remove the completed activities from bigcalendar*/
 // Handle removing an activity and marking it as completed
 export function handleRemoveActivity(id, activities, setActivities) {
     const updatedActivities = activities.map(activity => {
@@ -61,3 +62,29 @@ export function updateOverdueActivities(activities, setActivities) {
         setActivities(updatedActivities);
     }
 }
+
+export function handleEditActivity(id) {
+    return;
+}
+
+export function handleDeleteActivity(id) {
+    return;
+}
+
+{/* 
+// Handle editing an activity
+export function handleEditActivity(id) {
+    // Logica per modificare l'attività
+    const activityToEdit = activity.find(activity => activity.id === id);
+    if (activityToEdit) {
+      // Popola il form con i dati dell'attività per modificarla
+    }
+  }
+
+// Handle deleting an activity
+export function handleDeleteActivity(id) {
+  const updatedActivities = activity.filter(activity => activity.id !== id);
+  setActivities(updatedActivities);
+  setSelectedActivity(null); // Chiudi il pop-up
+}
+*/}

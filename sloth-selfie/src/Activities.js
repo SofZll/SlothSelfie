@@ -6,7 +6,9 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
-import { normalizeActivities, handleRemoveActivity, updateOverdueActivities } from './ActivityUtils';
+import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleEditActivity, handleDeleteActivity} from './ActivityUtils';
+
+//TODO: functions to Delete/Update activities
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -20,6 +22,7 @@ function ActivitiesFunction(){
     const [title, setTitle] = useState('');
     const [deadline, setDeadline] = useState('');
     const [completed, setCompleted] = useState(false);
+    const [selectedActivity, setSelectedActivity] = useState(null);
 
     // change style page onload document
     useEffect(() => {
@@ -50,6 +53,11 @@ function ActivitiesFunction(){
         }
     }, [activities]);
 
+    function handleEventClick(event) {
+        console.log("Event clicked:", event); 
+        setSelectedActivity(event);
+      }
+    
     function handleAddActivity (e) {
         e.preventDefault();
         let newActivity = {
@@ -96,9 +104,21 @@ function ActivitiesFunction(){
                         events={normalizeActivities(activities)}
                         startAccessor="start"
                         endAccessor="end"
+                        onSelectEvent={handleEventClick}
                         titleAccessor="title"
                         style={{ height: 500 }}
                     />
+                    {/* Display popup for the selected activity*/}
+                    {selectedActivity && (
+                        <div className="popup">
+                        <h2>{selectedActivity.title}</h2>
+                        <p>Due: {selectedActivity.deadline}</p>
+                        <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
+                        <button onClick={() => handleEditActivity(selectedActivity.id)}>Edit</button>
+                        <button onClick={() => handleDeleteActivity(selectedActivity.id)}>Delete</button>
+                        <button onClick={() => setSelectedActivity(null)}>Close</button>
+                        </div>
+                    )}
                 </div>
                 <div className="activities-list">
                     <h2>List of your Activities:</h2>
