@@ -96,7 +96,8 @@ export function normalizeEvents (events) {
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         console.error(`Invalid date for event: ${JSON.stringify(event)}`);
         return {
-         title: event.title,
+        id: event.id,
+        title: event.title,
         start: new Date(),
         end: new Date(),
         allDay: event.allDay,
@@ -105,6 +106,7 @@ export function normalizeEvents (events) {
     }
       
         return {
+        id: event.id,
         title: event.title,
         start: startDate,
         end: endDate,
@@ -115,14 +117,21 @@ export function normalizeEvents (events) {
 };
 
 // Handle editing an event  <-NON VA
-export function handleEditEvent(id, events, setEvents) {
-    const activityToEdit = events.find(event => event.id === id);
-    //if (eventToEdit) {
-    //    setEvents(eventToEdit);
-    //}
-  };
+export function handleEditEvent(id, updatedEvent, events, setEvents, setSelectedEvent) {
+    console.log("list of events", events);
+    if (!Array.isArray(events)) {
+        console.error("Events is not an array:", events);
+        return; 
+    }/*
+    const updatedEvents = events.map(event =>
+        event.id === id ? { ...event, ...updatedEvent } : event
+    );
+    setEvents(updatedEvents);
+    */
+    setSelectedEvent(null); // close the popup
+}
 
-//Handle deleting an event <-NON VA, mi da id undefined
+//Handle deleting an event
 export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
     console.log("Deleting event with id:", id);
     const updatedEvents = events.filter(event => event.id !== id);

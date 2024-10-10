@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
-import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleEditActivity, handleDeleteActivity} from './ActivityUtils';
+import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleEditActivity, handleUpdateActivity, handleDeleteActivity} from './ActivityUtils';
 
 //TODO: functions to Update activities
 
@@ -75,11 +75,23 @@ function ActivitiesFunction(){
         setTitle('');
         setDeadline('');
     };
+
+    // Handle editing an activity
+    function handleEditActivity(id, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
+        const activityToEdit = activities.find(activity => activity.id === id);
+        if (activityToEdit) {
+            setId(activityToEdit.id);
+            setTitle(activityToEdit.title);
+            setDeadline(activityToEdit.deadline);
+            setCompleted(activityToEdit.completed);
+            setSelectedActivity(activityToEdit);
+        }
+    }
   
     return (
         <div className="activities-page">
             <h2>Activities</h2>
-            <form onSubmit={handleAddActivity}>
+            <form onSubmit={selectedActivity ? handleUpdateActivity : handleAddActivity}>
             <input 
                 type="text" 
                 placeholder="Title" 
@@ -94,7 +106,7 @@ function ActivitiesFunction(){
                 onChange={(e) => setDeadline(e.target.value)} 
                 required 
             />
-            <button className='btn' type="submit">Add Activity</button>
+            <button className='btn' type="submit">{selectedActivity ? 'Update Activity' : 'Add Activity'}</button>
                 </form>
             <h2>Your Activities:</h2>
             <div className="activities-layout">
@@ -117,6 +129,7 @@ function ActivitiesFunction(){
                         <button onClick={() => handleEditActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Edit</button>
                         <button onClick={() => handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Delete</button>
                         <button onClick={() => setSelectedActivity(null)}>Close</button>
+                        <button type="submit">Save Changes</button>
                         </div>
                     )}
                 </div>
