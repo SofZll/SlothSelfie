@@ -64,3 +64,8 @@
   .notes-section textarea {
     width: 90%; /* Reducing width for smaller screen */
   }
+
+  .notes-container {
+    width: 100%;
+    padding: 10px;
+}
