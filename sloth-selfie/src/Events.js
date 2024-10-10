@@ -261,8 +261,8 @@ function EventsFunction() {
             <p>Start: {selectedEvent.start.toLocaleString()}</p>
             <p>End: {selectedEvent.end.toLocaleString()}</p>
             <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-            <button onClick={() => handleEditEvent(selectedEvent.id, events, setEvents, setSelectedEvent)}>Edit</button>
-            <button onClick={() => {
+            <button className='btn' onClick={() => handleEditEvent(selectedEvent.id, events, setEvents, setSelectedEvent)}>Edit</button>
+            <button className='btn' onClick={() => {
                 if (selectedEvent) {
                     console.log("Deleting event with ID:", selectedEvent.id); // Verifing the id first
                     handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
@@ -270,8 +270,8 @@ function EventsFunction() {
                     console.log("No event selected for deletion.");
                 }
             }}>Delete</button>
-            <button onClick={() => setSelectedEvent(null)}>Close</button>
-            <button onClick={() => {
+            <button className='btn' onClick={() => setSelectedEvent(null)}>X</button>
+            <button className='btn2' onClick={() => {
                 if (selectedEvent) {
                     const updatedEvent = {
                         title,

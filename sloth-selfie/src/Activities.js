@@ -75,18 +75,6 @@ function ActivitiesFunction(){
         setTitle('');
         setDeadline('');
     };
-
-    // Handle editing an activity
-    function handleEditActivity(id, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
-        const activityToEdit = activities.find(activity => activity.id === id);
-        if (activityToEdit) {
-            setId(activityToEdit.id);
-            setTitle(activityToEdit.title);
-            setDeadline(activityToEdit.deadline);
-            setCompleted(activityToEdit.completed);
-            setSelectedActivity(activityToEdit);
-        }
-    }
   
     return (
         <div className="activities-page">
@@ -106,7 +94,7 @@ function ActivitiesFunction(){
                 onChange={(e) => setDeadline(e.target.value)} 
                 required 
             />
-            <button className='btn' type="submit">{selectedActivity ? 'Update Activity' : 'Add Activity'}</button>
+            <button className='btn' type="submit">{selectedActivity ? 'Editing Activity' : 'Add Activity'}</button>
                 </form>
             <h2>Your Activities:</h2>
             <div className="activities-layout">
@@ -126,23 +114,25 @@ function ActivitiesFunction(){
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {selectedActivity.deadline}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
-                        <button onClick={() => handleEditActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Edit</button>
-                        <button onClick={() => handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Delete</button>
-                        <button onClick={() => setSelectedActivity(null)}>Close</button>
-                        <button type="submit">Save Changes</button>
+                        <button className='btn' onClick={() => handleEditActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Edit</button>
+                        <button className='btn' onClick={() => handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Delete</button>
+                        <button className='btn' onClick={() => setSelectedActivity(null)}>X</button>
+                        <button className='btn2' type="submit">Save Changes</button>
                         </div>
                     )}
                 </div>
                 <div className="activities-list">
                     <h2>List of your Activities:</h2>
                     <div className="activities-container">
-                        {activities.filter(activity => !activity.completed).map(activity => (
-                            <div className="activity-card" key={activity.id}>
-                                <h2>{activity.title}</h2>
-                                <p>Due: {activity.deadline}</p>
-                                <button className="btn" onClick={() => handleRemoveActivity(activity.id, activities, setActivities)}>Done</button>
-                            </div>
-                        ))}
+                        <div className="scrollable-list">
+                            {activities.filter(activity => !activity.completed).sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map(activity => (
+                                <div className="activity-card" key={activity.id}>
+                                    <h2>{activity.title}</h2>
+                                    <p>Due: {activity.deadline}</p>
+                                    <button className="btn" onClick={() => handleRemoveActivity(activity.id, activities, setActivities)}>Done</button>
+                                </div>
+                            ))}
+                        </div>    
                     </div>
                 </div>
             </div>

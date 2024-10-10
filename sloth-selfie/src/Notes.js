@@ -161,18 +161,20 @@ const handleSaveEdit = (index) => {
       {/* Note list, filtered and ordered */}
       <h2>Your Notes:</h2>
       <div className="notes-container">
-        {filterNotesByDate(sortNotes(notes)).map((note, index) => (
-          <NoteCard
-            key={index}
-            note={note}
-            index={index}
-            onDuplicate={handleDuplicateNote}
-            onCopy={handleCopyContent}
-            onDelete={handleDeleteNote}
-            onEdit={handleEditNote}
-            clickedButton={clickedButton}
-          />
-        ))}
+        <div className = "scrollable-list">
+          {filterNotesByDate(sortNotes(notes)).map((note, index) => (
+            <NoteCard
+              key={index}
+              note={note}
+              index={index}
+              onDuplicate={handleDuplicateNote}
+              onCopy={handleCopyContent}
+              onDelete={handleDeleteNote}
+              onEdit={handleEditNote}
+              clickedButton={clickedButton}
+            />
+          ))}
+        </div> 
       </div>
     </div>
   );
