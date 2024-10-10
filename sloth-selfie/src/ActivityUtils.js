@@ -68,12 +68,39 @@ export function updateOverdueActivities(activities, setActivities) {
 }
 
 // Handle editing an activity  <-NON VA
-export function handleEditActivity(id, activity, setActivity) {
-    const activityToEdit = activity.find(activity => activity.id === id);
+export function handleEditActivity(id, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
+    const activityToEdit = activities.find(activity => activity.id === id);
     if (activityToEdit) {
-        setActivity(activityToEdit);
+        setId(activityToEdit.id);
+        setTitle(activityToEdit.title);
+        setDeadline(activityToEdit.deadline);
+        setCompleted(activityToEdit.completed);
+        setSelectedActivity(activityToEdit);
     }
-  }
+}
+
+export function handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
+    e.preventDefault();
+    const updatedActivities = activities.map(activity => {
+        if (activity.id === id) {
+            return {
+                ...activity,
+                title: title,
+                deadline: deadline,
+                completed: completed
+            };
+        }
+        return activity;
+    });
+    
+    setActivities(updatedActivities);
+    setSelectedActivity(null); // Close the popup
+    // Reset input fields
+    setId('');
+    setTitle('');
+    setDeadline('');
+    setCompleted(false);
+}
 
 //Handle deleting an activity
 export function handleDeleteActivity(id, activities, setActivities, setSelectedActivity) {

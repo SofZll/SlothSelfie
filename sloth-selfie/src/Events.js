@@ -6,9 +6,8 @@ import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleEditEvent, handleDeleteEvent } from './EventUtils';
-//import { handleEditActivity, handleDeleteActivity } from './ActivityUtils';
 
-//TODO: functions to Delete/Update events
+//TODO: functions to Update events
 
 const localizer = momentLocalizer(moment);
 
@@ -31,7 +30,7 @@ const EventComponent = ({ event }) => {
 
 
 function EventsFunction() {
-  const [events, setEvents] = useState(initialEvents);
+  const [events, setEvents] = useState(initialEvents || []);
   const [id, setId] = useState("");
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -67,6 +66,17 @@ function EventsFunction() {
   function handleEventClick(event) {
     console.log("Event clicked:", event); 
     setSelectedEvent(event);
+    // Pre-fill the form with the selected event
+    setId(event.id || ''); 
+    setTitle(event.title || '');
+    setDate(event.date || '');
+    setTime(event.time || '');
+    setDuration(event.duration || 1); // Default to 1 hour if undefined
+    setAllDay(event.allDay || false);
+    setDays(event.allDay ? event.duration : 1); // Use duration for all-day events, otherwise 1 day
+    setRepeatFrequency(event.repeatFrequency || 'none');
+    setRepeatEndDate(event.repeatEndDate || '');
+    setLocation(event.location || '');
   }
 
 
@@ -223,7 +233,9 @@ function EventsFunction() {
           placeholder="Location (physical or virtual)"
           value={location} onChange={(e) => setLocation(e.target.value)}
         />
-        <button className='btn' type="submit">Add Event</button>
+        <button className='btn' type="submit" disabled={selectedEvent !== null}>
+          {selectedEvent ? 'Editing Event' : 'Add Event'}
+        </button>
       </form>
 
        {/* React Big Calendar to display events */}
@@ -252,13 +264,29 @@ function EventsFunction() {
             <button onClick={() => handleEditEvent(selectedEvent.id, events, setEvents, setSelectedEvent)}>Edit</button>
             <button onClick={() => {
                 if (selectedEvent) {
-                    console.log("Deleting event with ID:", selectedEvent.id); // Verifica l'ID prima di chiamare la funzione
+                    console.log("Deleting event with ID:", selectedEvent.id); // Verifing the id first
                     handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
                 } else {
                     console.log("No event selected for deletion.");
                 }
             }}>Delete</button>
             <button onClick={() => setSelectedEvent(null)}>Close</button>
+            <button onClick={() => {
+                if (selectedEvent) {
+                    const updatedEvent = {
+                        title,
+                        date,
+                        time,
+                        duration: allDay ? days : duration,
+                        allDay,
+                        repeatFrequency,
+                        repeatEndDate,
+                        location,
+                    };
+                    handleEditEvent(selectedEvent.id, updatedEvent, events, setEvents, setSelectedEvent);
+                }
+            }}>Save Changes</button>
+
             </div>
           )}
       </div>
