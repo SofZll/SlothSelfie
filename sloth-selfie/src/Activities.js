@@ -8,7 +8,7 @@ import './css/App.css';
 import './css/Activities.css';
 import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleEditActivity, handleUpdateActivity, handleDeleteActivity} from './ActivityUtils';
 
-//TODO: functions to Update activities
+//TODO: make edit look good
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -53,6 +53,15 @@ function ActivitiesFunction(){
         }
     }, [activities]);
 
+    useEffect(() => {
+        if (selectedActivity) {
+            setId(selectedActivity.id);
+            setTitle(selectedActivity.title);
+            setDeadline(selectedActivity.deadline);
+            setCompleted(selectedActivity.completed);
+        }
+    }, [selectedActivity]);
+
     function handleEventClick(event) {
         console.log("Event clicked:", event); 
         setSelectedActivity(event);
@@ -79,7 +88,7 @@ function ActivitiesFunction(){
     return (
         <div className="activities-page">
             <h2>Activities</h2>
-            <form onSubmit={selectedActivity ? handleUpdateActivity : handleAddActivity}>
+            <form onSubmit={selectedActivity ? (e) => handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) : handleAddActivity}>
             <input 
                 type="text" 
                 placeholder="Title" 
@@ -114,7 +123,7 @@ function ActivitiesFunction(){
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {selectedActivity.deadline}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
-                        <button className='btn' onClick={() => handleEditActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Edit</button>
+                        <button className='btn' onClick={() => handleEditActivity(selectedActivity.id, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted, setSelectedActivity)}>Edit</button>
                         <button className='btn' onClick={() => handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Delete</button>
                         <button className='btn' onClick={() => setSelectedActivity(null)}>X</button>
                         <button className='btn2' type="submit">Save Changes</button>
