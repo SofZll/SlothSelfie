@@ -5,7 +5,7 @@ import './css/App.css';
 import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleEditEvent, handleDeleteEvent } from './EventUtils';
+import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleEditEvent, handleDeleteEvent, handleUpdateEvent } from './EventUtils';
 
 //TODO: functions to Update events
 
@@ -62,21 +62,31 @@ function EventsFunction() {
       document.body.classList.remove('light-background');
     };
   }, []);
+
+  useEffect(() => {
+    //setting the date to the current date as a filter at the start
+    const today = new Date();
+    setFilterDate(today);
+  }, []);
+
+  useEffect(() => {
+    if (selectedEvent) {// Pre-fill the form with the selected event
+      setId(selectedEvent.id);
+      setTitle(selectedEvent.title);
+      setDate(selectedEvent.date);
+      setTime(selectedEvent.time);
+      setDuration(selectedEvent.duration);
+      setAllDay(selectedEvent.allDay);
+      setDays(selectedEvent.allDay ? selectedEvent.duration : 1);
+      setRepeatFrequency(selectedEvent.repeatFrequency);
+      setRepeatEndDate(selectedEvent.repeatEndDate);
+      setLocation(selectedEvent.location);
+    }
+  },[selectedEvent]);
   
   function handleEventClick(event) {
     console.log("Event clicked:", event); 
     setSelectedEvent(event);
-    // Pre-fill the form with the selected event
-    setId(event.id || ''); 
-    setTitle(event.title || '');
-    setDate(event.date || '');
-    setTime(event.time || '');
-    setDuration(event.duration || 1); // Default to 1 hour if undefined
-    setAllDay(event.allDay || false);
-    setDays(event.allDay ? event.duration : 1); // Use duration for all-day events, otherwise 1 day
-    setRepeatFrequency(event.repeatFrequency || 'none');
-    setRepeatEndDate(event.repeatEndDate || '');
-    setLocation(event.location || '');
   }
 
 
@@ -130,16 +140,10 @@ function EventsFunction() {
     setLocation('');
   };
 
-  useEffect(() => {
-    //setting the date to the current date as a filter at the start
-    const today = new Date();
-    setFilterDate(today);
-  }, []);
-
   return (
     <div className= "Event">
       <h2>Add Event</h2>
-      <form onSubmit={handleAddEvent}>
+      <form onSubmit={selectedEvent ? (e) => handleUpdateEvent(e, id, selectedEvent, events, setSelectedEvent, selectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, setLocation) : handleAddEvent}>
         <input 
           type="text" 
           placeholder="Title" 
@@ -261,7 +265,7 @@ function EventsFunction() {
             <p>Start: {selectedEvent.start.toLocaleString()}</p>
             <p>End: {selectedEvent.end.toLocaleString()}</p>
             <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-            <button className='btn' onClick={() => handleEditEvent(selectedEvent.id, events, setEvents, setSelectedEvent)}>Edit</button>
+            <button className='btn' onClick={() => handleEditEvent(selectedEvent.id, events, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, setLocation)}>Edit</button>
             <button className='btn' onClick={() => {
                 if (selectedEvent) {
                     console.log("Deleting event with ID:", selectedEvent.id); // Verifing the id first

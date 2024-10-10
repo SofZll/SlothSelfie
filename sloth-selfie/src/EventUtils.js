@@ -117,18 +117,45 @@ export function normalizeEvents (events) {
 };
 
 // Handle editing an event  <-NON VA
-export function handleEditEvent(id, updatedEvent, events, setEvents, setSelectedEvent) {
-    console.log("list of events", events);
-    if (!Array.isArray(events)) {
-        console.error("Events is not an array:", events);
-        return; 
-    }/*
-    const updatedEvents = events.map(event =>
-        event.id === id ? { ...event, ...updatedEvent } : event
-    );
+export function handleEditEvent(id,  events, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, setLocation) {
+    const eventToEdit = events.find(event => event.id === id);
+    if(eventToEdit){
+        setId(eventToEdit.id);
+        setTitle(eventToEdit.title);
+        setDate(eventToEdit.date);
+        setTime(eventToEdit.time);
+        setDuration(eventToEdit.duration);
+        setAllDay(eventToEdit.allDay);
+        setDays(eventToEdit.days);
+        setRepeatFrequency(eventToEdit.repeatFrequency);
+        setRepeatEndDate(eventToEdit.repeatEndDate);
+        setRepeatCount(eventToEdit.repeatCount);
+        setLocation(eventToEdit.location);
+    }
+}
+
+export function handleUpdateEvent(e, id, event, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, setLocation) {
+    e.prevenbtDefault();
+    const updatedEvents = events.map(event => {
+        if (event.id === id) {
+            return event;
+        }
+        return e;
+    });
     setEvents(updatedEvents);
-    */
     setSelectedEvent(null); // close the popup
+    //Reset imput fields
+    setId('');
+    setTitle('');
+    setDate('');
+    setTime('');
+    setDuration('');
+    setAllDay(false);
+    setDays(1);
+    setRepeatFrequency('none');
+    setRepeatEndDate('');
+    setRepeatCount('');
+    setLocation('');
 }
 
 //Handle deleting an event

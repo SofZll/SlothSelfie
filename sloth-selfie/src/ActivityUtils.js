@@ -67,7 +67,7 @@ export function updateOverdueActivities(activities, setActivities) {
     }
 }
 
-// Handle editing an activity  <-NON VA
+// Handle editing an activity
 export function handleEditActivity(id, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
     const activityToEdit = activities.find(activity => activity.id === id);
     if (activityToEdit) {
