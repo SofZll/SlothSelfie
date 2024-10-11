@@ -46,7 +46,7 @@ export function generateRepeatedEvents (event, repeatEndDate = null, repeatCount
         start: new Date(currentDate),
         end: new Date(currentDate.getTime() + (event.duration ? event.duration * 60 * 60 * 1000 : 0)),
         allDay: event.allDay,
-        location: event.location,
+        eventLocation: event.eventLocation,
         });
       
         //  Increment the date based on the repeat frequency
@@ -101,7 +101,7 @@ export function normalizeEvents (events) {
         start: new Date(),
         end: new Date(),
         allDay: event.allDay,
-        location: event.location,
+        eventLocation: event.eventLocation,
         };
     }
       
@@ -111,15 +111,16 @@ export function normalizeEvents (events) {
         start: startDate,
         end: endDate,
         allDay: event.allDay,
-        location: event.location,
+        eventLocation: event.eventLocation,
         };
     });
 };
 
 // Handle editing an event  <-NON VA
-export function handleEditEvent(id,  events, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, setLocation) {
+export function handleEditEvent(id,  events, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setSelectedEvent) {
     const eventToEdit = events.find(event => event.id === id);
     if(eventToEdit){
+        console.log("Editing event: ", eventToEdit);
         setId(eventToEdit.id);
         setTitle(eventToEdit.title);
         setDate(eventToEdit.date);
@@ -130,17 +131,33 @@ export function handleEditEvent(id,  events, setId, setTitle, setDate, setTime, 
         setRepeatFrequency(eventToEdit.repeatFrequency);
         setRepeatEndDate(eventToEdit.repeatEndDate);
         setRepeatCount(eventToEdit.repeatCount);
-        setLocation(eventToEdit.location);
+        seteventLocation(eventToEdit.eventLocation);
+        setSelectedEvent(eventToEdit);
     }
 }
 
-export function handleUpdateEvent(e, id, event, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, setLocation) {
-    e.prevenbtDefault();
+export function handleUpdateEvent(
+    e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, 
+  ) {
+    e.preventDefault();
+
     const updatedEvents = events.map(event => {
         if (event.id === id) {
-            return event;
+            return {
+                ...event,
+                title: title,
+                date: date,
+                time: time,
+                duration: duration,
+                allDay: allDay,
+                days: days,
+                repeatFrequency: repeatFrequency,
+                repeatEndDate: repeatEndDate,
+                repeatCount: repeatCount,
+                eventLocation: eventLocation,
+            };
         }
-        return e;
+        return event;
     });
     setEvents(updatedEvents);
     setSelectedEvent(null); // close the popup
@@ -155,7 +172,7 @@ export function handleUpdateEvent(e, id, event, events, setEvents, setSelectedEv
     setRepeatFrequency('none');
     setRepeatEndDate('');
     setRepeatCount('');
-    setLocation('');
+    seteventLocation('');
 }
 
 //Handle deleting an event

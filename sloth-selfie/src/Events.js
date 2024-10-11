@@ -23,7 +23,7 @@ const EventComponent = ({ event }) => {
     <span>
       <strong>{event.title}</strong>
       <br />
-      <em>Location:{event.location}</em>
+      <em>eventLocation:{event.eventLocation}</em>
     </span>
   );
 };
@@ -42,7 +42,7 @@ function EventsFunction() {
   const [repeatCount, setRepeatCount] = useState(null); // Number of repetitions
   const [repeatMode, setRepeatMode] = useState(''); // Mode of repetition
   const [repeatEndDate, setRepeatEndDate] = useState(''); // Date of the last repetition
-  const [location, setLocation] = useState(''); // Location of the event
+  const [eventLocation, seteventLocation] = useState(''); // eventLocation of the event
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
   const [selectedEvent, setSelectedEvent] = useState(null);
 
@@ -71,16 +71,16 @@ function EventsFunction() {
 
   useEffect(() => {
     if (selectedEvent) {// Pre-fill the form with the selected event
-      setId(selectedEvent.id);
-      setTitle(selectedEvent.title);
-      setDate(selectedEvent.date);
-      setTime(selectedEvent.time);
-      setDuration(selectedEvent.duration);
-      setAllDay(selectedEvent.allDay);
-      setDays(selectedEvent.allDay ? selectedEvent.duration : 1);
-      setRepeatFrequency(selectedEvent.repeatFrequency);
-      setRepeatEndDate(selectedEvent.repeatEndDate);
-      setLocation(selectedEvent.location);
+        setId(selectedEvent.id);
+        setTitle(selectedEvent.title);
+        setDate(selectedEvent.start ? new Date(selectedEvent.start).toISOString().substring(0, 10) : ''); // Format as YYYY-MM-DD
+        setTime(selectedEvent.start ? new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''); // Format as HH:MM
+        setDuration(selectedEvent.duration || 1);
+        setAllDay(selectedEvent.allDay);
+        setDays(selectedEvent.allDay ? selectedEvent.duration : 1);
+        setRepeatFrequency(selectedEvent.repeatFrequency);
+        setRepeatEndDate(selectedEvent.repeatEndDate);
+        seteventLocation(selectedEvent.eventLocation);
     }
   },[selectedEvent]);
   
@@ -101,7 +101,7 @@ function EventsFunction() {
       allDay,
       repeatFrequency,
       repeatEndDate,
-      location,
+      eventLocation,
     };
 
     if(allDay){
@@ -137,13 +137,42 @@ function EventsFunction() {
     setRepeatFrequency('none');
     setRepeatEndDate('');
     setRepeatCount('');
-    setLocation('');
+    seteventLocation('');
   };
 
   return (
     <div className= "Event">
       <h2>Add Event</h2>
-      <form onSubmit={selectedEvent ? (e) => handleUpdateEvent(e, id, selectedEvent, events, setSelectedEvent, selectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, setLocation) : handleAddEvent}>
+      <form onSubmit={selectedEvent ? (e) => handleUpdateEvent(
+        e, 
+        id, 
+        { 
+          title, 
+          date, 
+          time, 
+          duration: allDay ? days : duration, 
+          allDay, 
+          days, 
+          repeatFrequency, 
+          repeatEndDate, 
+          repeatCount, 
+          eventLocation 
+        }, 
+        events, 
+        setEvents, 
+        setSelectedEvent, 
+        setId, 
+        setTitle, 
+        setDate, 
+        setTime, 
+        setDuration, 
+        setAllDay, 
+        setDays, 
+        setRepeatFrequency, 
+        setRepeatEndDate, 
+        setRepeatCount, 
+        seteventLocation
+      ) : handleAddEvent}>
         <input 
           type="text" 
           placeholder="Title" 
@@ -234,11 +263,11 @@ function EventsFunction() {
       )}
 
         <input type="text"
-          placeholder="Location (physical or virtual)"
-          value={location} onChange={(e) => setLocation(e.target.value)}
+          placeholder="eventLocation (physical or virtual)"
+          value={eventLocation} onChange={(e) => seteventLocation(e.target.value)}
         />
         <button className='btn' type="submit" disabled={selectedEvent !== null}>
-          {selectedEvent ? 'Editing Event' : 'Add Event'}
+          {selectedEvent ? 'Save Changes' : 'Add Event'}
         </button>
       </form>
 
@@ -260,37 +289,18 @@ function EventsFunction() {
         {/* Display popup for the selected activity*/}
         {selectedEvent && (
             <div className="popup">
+            <h2>Editing mode:</h2>
             <h2>{selectedEvent.title}</h2>
-            <p>Location: {selectedEvent.location}</p>
+            <p>Location: {selectedEvent.eventLocation}</p>
             <p>Start: {selectedEvent.start.toLocaleString()}</p>
             <p>End: {selectedEvent.end.toLocaleString()}</p>
             <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-            <button className='btn' onClick={() => handleEditEvent(selectedEvent.id, events, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, setLocation)}>Edit</button>
             <button className='btn' onClick={() => {
                 if (selectedEvent) {
-                    console.log("Deleting event with ID:", selectedEvent.id); // Verifing the id first
                     handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
-                } else {
-                    console.log("No event selected for deletion.");
                 }
             }}>Delete</button>
             <button className='btn' onClick={() => setSelectedEvent(null)}>X</button>
-            <button className='btn2' onClick={() => {
-                if (selectedEvent) {
-                    const updatedEvent = {
-                        title,
-                        date,
-                        time,
-                        duration: allDay ? days : duration,
-                        allDay,
-                        repeatFrequency,
-                        repeatEndDate,
-                        location,
-                    };
-                    handleEditEvent(selectedEvent.id, updatedEvent, events, setEvents, setSelectedEvent);
-                }
-            }}>Save Changes</button>
-
             </div>
           )}
       </div>
