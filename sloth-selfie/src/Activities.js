@@ -103,7 +103,7 @@ function ActivitiesFunction(){
                 onChange={(e) => setDeadline(e.target.value)} 
                 required 
             />
-            <button className='btn' type="submit">{selectedActivity ? 'Editing Activity' : 'Add Activity'}</button>
+            <button className='btn' type="submit">{selectedActivity ? 'Save Changes' : 'Add Activity'}</button>
                 </form>
             <h2>Your Activities:</h2>
             <div className="activities-layout">
@@ -120,13 +120,12 @@ function ActivitiesFunction(){
                     {/* Display popup for the selected activity*/}
                     {selectedActivity && (
                         <div className="popup">
+                        <h2>Editing mode:</h2>
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {selectedActivity.deadline}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
-                        <button className='btn' onClick={() => handleEditActivity(selectedActivity.id, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted, setSelectedActivity)}>Edit</button>
                         <button className='btn' onClick={() => handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Delete</button>
                         <button className='btn' onClick={() => setSelectedActivity(null)}>X</button>
-                        <button className='btn2' type="submit">Save Changes</button>
                         </div>
                     )}
                 </div>
