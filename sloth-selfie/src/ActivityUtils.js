@@ -67,18 +67,7 @@ export function updateOverdueActivities(activities, setActivities) {
     }
 }
 
-// Handle editing an activity
-export function handleEditActivity(id, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
-    const activityToEdit = activities.find(activity => activity.id === id);
-    if (activityToEdit) {
-        setId(activityToEdit.id);
-        setTitle(activityToEdit.title);
-        setDeadline(activityToEdit.deadline);
-        setCompleted(activityToEdit.completed);
-        setSelectedActivity(activityToEdit);
-    }
-}
-
+// Handle updating an activity
 export function handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
     e.preventDefault();
     const updatedActivities = activities.map(activity => {
