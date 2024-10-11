@@ -6,9 +6,8 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
-import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleEditActivity, handleUpdateActivity, handleDeleteActivity} from './ActivityUtils';
+import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity} from './ActivityUtils';
 
-//TODO: make edit look good
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 

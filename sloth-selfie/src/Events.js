@@ -5,9 +5,9 @@ import './css/App.css';
 import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleEditEvent, handleDeleteEvent, handleUpdateEvent } from './EventUtils';
+import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent } from './EventUtils';
 
-//TODO: functions to Update events
+//TODO: function to Update events
 
 const localizer = momentLocalizer(moment);
 
@@ -35,7 +35,7 @@ function EventsFunction() {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [duration, setDuration] = useState('');//hourss
+  const [duration, setDuration] = useState('');//hours
   const [allDay, setAllDay] = useState(false);
   const [days, setDays] = useState(1); // Number of days
   const [repeatFrequency, setRepeatFrequency] = useState('none'); // Freqence of repetition
@@ -71,6 +71,7 @@ function EventsFunction() {
 
   useEffect(() => {
     if (selectedEvent) {// Pre-fill the form with the selected event
+        console.log("Selected event:", selectedEvent);
         setId(selectedEvent.id);
         setTitle(selectedEvent.title);
         setDate(selectedEvent.start ? new Date(selectedEvent.start).toISOString().substring(0, 10) : ''); // Format as YYYY-MM-DD
@@ -143,21 +144,21 @@ function EventsFunction() {
   return (
     <div className= "Event">
       <h2>Add Event</h2>
-      <form onSubmit={selectedEvent ? (e) => handleUpdateEvent(
+      <form onSubmit={selectedEvent ? (e) => {
+    console.log("Submitting update for event:", selectedEvent); // Log per il debug
+    handleUpdateEvent(
         e, 
         id, 
-        { 
-          title, 
-          date, 
-          time, 
-          duration: allDay ? days : duration, 
-          allDay, 
-          days, 
-          repeatFrequency, 
-          repeatEndDate, 
-          repeatCount, 
-          eventLocation 
-        }, 
+        title, 
+        date, 
+        time, 
+        duration, 
+        allDay, 
+        days, 
+        repeatFrequency, 
+        repeatEndDate, 
+        repeatCount, 
+        eventLocation, 
         events, 
         setEvents, 
         setSelectedEvent, 
@@ -172,7 +173,8 @@ function EventsFunction() {
         setRepeatEndDate, 
         setRepeatCount, 
         seteventLocation
-      ) : handleAddEvent}>
+    );
+} : handleAddEvent}>
         <input 
           type="text" 
           placeholder="Title" 

@@ -116,31 +116,12 @@ export function normalizeEvents (events) {
     });
 };
 
-// Handle editing an event  <-NON VA
-export function handleEditEvent(id,  events, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setSelectedEvent) {
-    const eventToEdit = events.find(event => event.id === id);
-    if(eventToEdit){
-        console.log("Editing event: ", eventToEdit);
-        setId(eventToEdit.id);
-        setTitle(eventToEdit.title);
-        setDate(eventToEdit.date);
-        setTime(eventToEdit.time);
-        setDuration(eventToEdit.duration);
-        setAllDay(eventToEdit.allDay);
-        setDays(eventToEdit.days);
-        setRepeatFrequency(eventToEdit.repeatFrequency);
-        setRepeatEndDate(eventToEdit.repeatEndDate);
-        setRepeatCount(eventToEdit.repeatCount);
-        seteventLocation(eventToEdit.eventLocation);
-        setSelectedEvent(eventToEdit);
-    }
-}
-
+// Handle updating an event  <-NON VA
 export function handleUpdateEvent(
     e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, 
   ) {
     e.preventDefault();
-
+    console.log("Updating event:", id); // Check if the update function is called
     const updatedEvents = events.map(event => {
         if (event.id === id) {
             return {
@@ -159,6 +140,7 @@ export function handleUpdateEvent(
         }
         return event;
     });
+    console.log("Updated events:", events); // Check if the events are updated
     setEvents(updatedEvents);
     setSelectedEvent(null); // close the popup
     //Reset imput fields
