@@ -3,8 +3,15 @@ import './css/App.css';
 import './css/Notes.css';
 import NoteCard from './NoteCard';
 
+const initialNotes = [
+    // Puoi aggiungere alcune note di esempio qui 
+  { title: 'First Note', category: 'Work', content: 'This is a note', createDate: new Date(), updateDate: new Date() },
+  { title: 'Second Note', category: 'Study', content: 'This is another note', createDate: new Date(), updateDate: new Date() },
+  { title: 'Third Note', category: 'Personal', content: 'This is a third note', createDate: new Date(), updateDate: new Date() }
+];
+
 function NotesFunction() {
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState(initialNotes || []);
   const [noteTitle, setNoteTitle] = useState('');
   const [noteCategory, setNoteCategory] = useState('');
   const [noteContent, setNoteContent] = useState('');
@@ -135,18 +142,23 @@ const handleSaveEdit = (index) => {
           onChange={(e) => setFilterDate(e.target.value)}
         />
       </div>
-
+      <h2>Add a note here:</h2>
        {/* Form for adding a new note */}
       <input
         value={noteTitle}
         onChange={(e) => setNoteTitle(e.target.value)}
         placeholder="Note Title"
       />
-      <input
-        value = {noteCategory}
-        onChange={(e)=> setNoteCategory(e.target.value)}
-        placeholder='Note Category'
-      />
+       <select id = "category"
+        value={noteCategory}
+        onChange={(e) => setNoteCategory(e.target.value)}
+      >
+        <option value="">Category</option>
+        <option value="Work">Work</option>
+        <option value="Study">Study</option>
+        <option value="Personal">Personal</option>
+        <option value="Others">Others</option>
+      </select>
       <textarea
         value={noteContent}
         onChange={(e) => setNoteContent(e.target.value)}
@@ -180,4 +192,5 @@ const handleSaveEdit = (index) => {
   );
 }
 
+export { initialNotes };
 export default NotesFunction;
