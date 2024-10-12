@@ -29,7 +29,7 @@ export function normalizeActivities (activities) {
     });
 };
 
-// Handle removing an activity and marking it as completed
+// Handle removing an activity and marking it as completed while pressing btn "Done"
 export function handleRemoveActivity(id, activities, setActivities) {
     const updatedActivities = activities.map(activity => {
         if (activity.id === id) {

@@ -52,7 +52,7 @@ function ActivitiesFunction(){
         }
     }, [activities]);
 
-    useEffect(() => {
+    useEffect(() => {// Pre-fill the form with the selected activity
         if (selectedActivity) {
             setId(selectedActivity.id);
             setTitle(selectedActivity.title);
@@ -102,7 +102,8 @@ function ActivitiesFunction(){
                 onChange={(e) => setDeadline(e.target.value)} 
                 required 
             />
-            <button className='btn' type="submit">{selectedActivity ? 'Save Changes' : 'Add Activity'}</button>
+            <button className='btn' type="submit">
+                {selectedActivity ? 'Save Changes' : 'Add Activity'}</button>
                 </form>
             <h2>Your Activities:</h2>
             <div className="activities-layout">

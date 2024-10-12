@@ -82,6 +82,7 @@ function EventsFunction() {
         setRepeatFrequency(selectedEvent.repeatFrequency);
         setRepeatEndDate(selectedEvent.repeatEndDate);
         seteventLocation(selectedEvent.eventLocation);
+        console.log("form prefilled", selectedEvent);
     }
   },[selectedEvent]);
   
@@ -140,41 +141,19 @@ function EventsFunction() {
     setRepeatCount('');
     seteventLocation('');
   };
-
   return (
     <div className= "Event">
       <h2>Add Event</h2>
-      <form onSubmit={selectedEvent ? (e) => {
-    console.log("Submitting update for event:", selectedEvent); // Log per il debug
-    handleUpdateEvent(
-        e, 
-        id, 
-        title, 
-        date, 
-        time, 
-        duration, 
-        allDay, 
-        days, 
-        repeatFrequency, 
-        repeatEndDate, 
-        repeatCount, 
-        eventLocation, 
-        events, 
-        setEvents, 
-        setSelectedEvent, 
-        setId, 
-        setTitle, 
-        setDate, 
-        setTime, 
-        setDuration, 
-        setAllDay, 
-        setDays, 
-        setRepeatFrequency, 
-        setRepeatEndDate, 
-        setRepeatCount, 
-        seteventLocation
-    );
-} : handleAddEvent}>
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        console.log("Form submit triggered");
+        if (selectedEvent) {
+          console.log("Submitting update for event:", selectedEvent);
+          handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation);
+        } else {
+          handleAddEvent(e);
+        }
+      }}>
         <input 
           type="text" 
           placeholder="Title" 
@@ -268,7 +247,7 @@ function EventsFunction() {
           placeholder="eventLocation (physical or virtual)"
           value={eventLocation} onChange={(e) => seteventLocation(e.target.value)}
         />
-        <button className='btn' type="submit" disabled={selectedEvent !== null}>
+        <button className='btn' type="submit">
           {selectedEvent ? 'Save Changes' : 'Add Event'}
         </button>
       </form>
