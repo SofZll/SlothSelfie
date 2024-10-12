@@ -11,8 +11,8 @@ import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, han
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
-    {id: 1, title: 'Study Math', deadline: '2024-10-12', completed: false },
-    {id: 2, title: 'Write Report', deadline: '2024-10-15', completed: false }
+    {id: 1, title: 'Study Math', deadline: '2024-10-22', completed: false },
+    {id: 2, title: 'Write Report', deadline: '2024-10-25', completed: false }
   ];
 
 function ActivitiesFunction(){

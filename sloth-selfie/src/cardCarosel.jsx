@@ -12,6 +12,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import PreviewPomodoro from './previewPomodoro';
 import { initialEvents } from './Events';
 import { initialActivities } from './Activities';
+import { initialNotes } from './Notes';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
@@ -49,7 +50,7 @@ function Card({ title, caseShow }) {
             return <span className="event-indicator" style={{ backgroundColor: 'blue', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
         }
         if (view === 'month' && hasActivityOnDate(date)) {
-            return <span className="event-indicator" style={{ backgroundColor: 'magenta', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
+            return <span className="event-indicator" style={{ backgroundColor: '#f72585', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
         }
     };
 
@@ -66,7 +67,7 @@ function Card({ title, caseShow }) {
                         <button className="btn" style={{ color: 'blue' }}>Manage Events</button>
                         </Link>
                         <Link to="/activities">
-                            <button className="btn" style={{ color: 'magenta' }}>Manage Activities</button>
+                            <button className="btn" style={{ color: '#f72585' }}>Manage Activities</button>
                         </Link>
                     </div>
                 </div>
@@ -76,9 +77,29 @@ function Card({ title, caseShow }) {
             content = (
                 <div className='inCard'>
                     <div className="notes-section">
-                        <p>Add a note here!</p>
-                        <img src={noteImage} alt="Note illustration" className="note-image" />
                         <br />
+                        {/* Visualizing notes */}
+                        <h2>Your Notes:</h2>
+                        <div className="notes-container">
+                            <div className="scrollable-list">
+                            {initialNotes.length > 0 ? (
+                                initialNotes.map((note, index) => (
+                                <li key={index}>
+                                    <h2>{note.title}</h2>
+                                    <p>{note.content}</p>
+                                    <small>Category: {note.category}</small>
+                                    <br />
+                                    <small>Created on: {new Date(note.createDate).toLocaleDateString()}</small>
+                                </li>
+                                ))
+                            ) : (
+                                <p>
+                                    <h2>No notes yet!</h2>
+                                    <img src={noteImage} alt="Note illustration" className="note-image" />
+                                </p>
+                            )}
+                            </div>
+                        </div>
                     </div>
                     <div className="divBtn">
                         <Link to="/notes">
