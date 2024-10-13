@@ -7,7 +7,7 @@ const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
   { title: 'First Note', category: 'Work', content: 'This is a note', createDate: new Date(), updateDate: new Date() },
   { title: 'Second Note', category: 'Study', content: 'This is another note', createDate: new Date(), updateDate: new Date() },
-  { title: 'Third Note', category: 'Personal', content: 'This is a third note', createDate: new Date(), updateDate: new Date() }
+  { title: 'Third Note', category: 'Personal', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam imperdiet quam fringilla libero rutrum lobortis. Nam id vulputate odio. Cras molestie quis ante et vestibulum. Nullam viverra leo quis libero vulputate ultricies sit amet et lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas vestibulum ligula ac tortor faucibus, eget viverra elit faucibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum eu diam interdum, luctus velit in, vehicula erat. Aliquam dapibus mauris eget nulla faucibus, vitae commodo massa placerat. Nam luctus felis nec fermentum lobortis. Aliquam ac odio a neque suscipit mollis. Cras sit amet felis dolor. Nam consequat, nulla vitae lacinia malesuada, ipsum nibh pulvinar mi, sit amet eleifend elit velit id nulla. Cras pretium elit luctus, laoreet turpis sed, scelerisque tellus. Fusce venenatis feugiat diam, id tristique ligula pellentesque vitae.', createDate: new Date(), updateDate: new Date() }
 ];
 
 function NotesFunction() {

@@ -73,42 +73,48 @@ function Card({ title, caseShow }) {
                 </div>
             );
             break;
-        case "2":
-            content = (
-                <div className='inCard'>
-                    <div className="notes-section">
-                        <br />
-                        {/* Visualizing notes */}
-                        <h2>Your Notes:</h2>
-                        <div className="notes-container">
+            case "2":
+                content = (
+                    <div className="inCard">
+                        <div className="notes-section">
+                            <h2>Your Notes:</h2>
                             <div className="scrollable-list">
-                            {initialNotes.length > 0 ? (
-                                initialNotes.map((note, index) => (
-                                <li key={index}>
-                                    <h2>{note.title}</h2>
-                                    <p>{note.content}</p>
-                                    <small>Category: {note.category}</small>
-                                    <br />
-                                    <small>Created on: {new Date(note.createDate).toLocaleDateString()}</small>
-                                </li>
-                                ))
-                            ) : (
-                                <p>
-                                    <h2>No notes yet!</h2>
-                                    <img src={noteImage} alt="Note illustration" className="note-image" />
-                                </p>
-                            )}
+                                {initialNotes.length > 0 ? (
+                                    initialNotes.map((note, index) => (
+                                        <div key={index} className="card mb-3"style={{ maxWidth: "400px", margin: "0 auto",  wordWrap: "break-word" }}> {/* Bootstrap card */}
+                                            <div className="card-body">
+                                                <h5 className="card-title">{note.title}</h5>
+                                                <p className="card-text">
+                                                    {/* Limiting note content to 200 characters */}
+                                                    {note.content.length > 200 
+                                                        ? note.content.substring(0, 200) + "..."
+                                                        : note.content
+                                                    }
+                                                </p>
+                                                {/* Using d-flex and justify-content-between for proper alignment */}
+                                                <div className="d-flex justify-content-between mt-3">
+                                                    <small className="text-muted">Category: {note.category}</small><br />
+                                                    <small className="text-muted">Created on: {new Date(note.createDate).toLocaleDateString()}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div>
+                                        <h2>No notes yet!</h2>
+                                        <img src={noteImage} alt="Note illustration" className="note-image" />
+                                    </div>
+                                )}
                             </div>
                         </div>
+                        <div className="divBtn">
+                            <Link to="/notes">
+                                <button className="btn btn-primary">Manage Notes</button> {/* Bootstrap button */}
+                            </Link>
+                        </div>
                     </div>
-                    <div className="divBtn">
-                        <Link to="/notes">
-                            <button className="btn">Add</button>
-                        </Link>
-                    </div>
-                </div>
-            );
-            break;
+                );
+                break;
         case "3":
             content = <PreviewPomodoro />;
             break;

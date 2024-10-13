@@ -116,7 +116,7 @@ export function normalizeEvents (events) {
     });
 };
 
-// Handle updating an event  <-NON VA
+// Handle updating an event
 export function handleUpdateEvent(
     e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, 
   ) {

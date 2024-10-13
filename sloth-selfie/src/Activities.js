@@ -8,7 +8,6 @@ import './css/App.css';
 import './css/Activities.css';
 import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity} from './ActivityUtils';
 
-
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
     {id: 1, title: 'Study Math', deadline: '2024-10-22', completed: false },
