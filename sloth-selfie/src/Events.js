@@ -7,8 +7,6 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent } from './EventUtils';
 
-//TODO: function to Update events
-
 const localizer = momentLocalizer(moment);
 
 const initialEvents = [
