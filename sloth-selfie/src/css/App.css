@@ -254,3 +254,14 @@ p {
   border-radius: 5px;
   background-color: #f8f9fa;
 }
+
+/*List used for activities and notes not in the preview*/
+.scrollable-Card-list {
+  list-style-type: none;
+  max-height: 450px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+}
