@@ -173,7 +173,7 @@ const handleSaveEdit = (index) => {
       {/* Note list, filtered and ordered */}
       <h2>Your Notes:</h2>
       <div className="notes-container">
-        <div className = "scrollable-list">
+        <div className = "scrollable-Card-list">
           {filterNotesByDate(sortNotes(notes)).map((note, index) => (
             <NoteCard
               key={index}

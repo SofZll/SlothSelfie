@@ -131,7 +131,7 @@ function ActivitiesFunction(){
                 <div className="activities-list">
                     <h2>List of your Activities:</h2>
                     <div className="activities-container">
-                        <div className="scrollable-list">
+                        <div className="scrollable-Card-list">
                             {activities.filter(activity => !activity.completed).sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map(activity => (
                                 <div className="activity-card" key={activity.id}>
                                     <h2>{activity.title}</h2>
