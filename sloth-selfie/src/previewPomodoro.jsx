@@ -3,7 +3,7 @@ import "./css/App.css";
 import "./css/Pomodoro.css";
 import iconYellowTomato from './media/yellowTomato.svg';
 import iconRedTomato from './media/redTomato.svg';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 const PreviewPomodoro = () => {
@@ -11,7 +11,17 @@ const PreviewPomodoro = () => {
   const [isStudioTime, setIsStudioTime] = useState(true);
   const [playTomato, setPlayTomato] = useState(false);
   const [stringPrintTime, setStringPrintTime] = useState('30:00');
-  
+  const navigate = useNavigate();
+
+  // animation page
+  const handleLinkClick = (path) => (event) => {
+    event.preventDefault();
+    document.body.classList.add('zoom-in');
+    setTimeout(() => {
+        navigate(path);
+        document.body.classList.remove('zoom-in');
+    }, 300);
+  };
 
   useEffect(() => {
     if (playTomato) {
@@ -64,7 +74,7 @@ const PreviewPomodoro = () => {
       </div>
       <div className="divBtn">
               <button  onClick={tomatoPlay} className="btn">{playTomato ? "Stop" : "Play"}</button>
-          <Link to="/pomodoro">
+          <Link to="/pomodoro" onClick={handleLinkClick('/pomodoro')}>
               <button className="btn">Start</button>
           </Link>
       </div>
