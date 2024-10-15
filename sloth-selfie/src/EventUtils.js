@@ -117,8 +117,9 @@ export function normalizeEvents (events) {
 };
 
 //Function to reset imput fields
-export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation) {
+export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing) {
     setSelectedEvent(null); // close the popup
+    setIsEditing(false); // reset the editing state
     //Reset imput fields
     setId('');
     setTitle('');
@@ -131,11 +132,12 @@ export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, se
     setRepeatEndDate('');
     setRepeatCount('');
     seteventLocation('');
+    setIsEditing(false);
 }
 
 // Handle updating an event
 export function handleUpdateEvent(
-    e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, 
+    e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing 
   ) {
     e.preventDefault();
     console.log("Updating event:", id); // Check if the update function is called
@@ -159,19 +161,37 @@ export function handleUpdateEvent(
     });
     console.log("Updated events:", events); // Check if the events are updated
     setEvents(updatedEvents);
-    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation);
+    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing);
 }
+// CON EVENTI RIPETUTI VANNO SOLO TITLE E LOCATION
 
 
-/* CON EVENTI RIPETUTI VANNO SOLO TITLE E LOCATION
 // Handle updating an event
+/*
 export function handleUpdateEvent(
-    e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setUpdateAllFutureEvents
-  ) {
+    e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, 
+    events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, 
+    setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing
+  ){
     e.preventDefault();
     console.log("Updating event:", id); // Check if the update function is called
     const updatedEvents = events.map(event => {
-        if (event.id === id) {
+        if (event.id === id && updateAllFutureEvents) {
+            // Updates all future instances
+            return {
+                ...event,
+                title: title,
+                date: calculateNextOccurrence(date, event.repeatFrequency),
+                time: time,
+                duration: duration,
+                allDay: allDay,
+                days: days,
+                repeatFrequency: repeatFrequency,
+                repeatEndDate: repeatEndDate,
+                repeatCount: repeatCount,
+                eventLocation: eventLocation,
+            };
+        } else if (event.id == id) {
             // Updates only the current instance
             return {
                 ...event,
@@ -186,40 +206,13 @@ export function handleUpdateEvent(
                 repeatCount: repeatCount,
                 eventLocation: eventLocation,
             };
-        } else if (event.originalId === id && setUpdateAllFutureEvents) {
-            // Aggiorna tutte le istanze future
-            return {
-                ...event,
-                title: title,
-                date: calculateNextOccurrence(date, event.repeatFrequency),
-                time: time,
-                duration: duration,
-                allDay: allDay,
-                days: days,
-                repeatFrequency: repeatFrequency,
-                repeatEndDate: repeatEndDate,
-                repeatCount: repeatCount,
-                eventLocation: eventLocation,
-            };
         }
         return event;
     });
 
     console.log("Updated events:", events); // Check if the events are updated
     setEvents(updatedEvents);
-    setSelectedEvent(null); // close the popup
-    //Reset imput fields
-    setId('');
-    setTitle('');
-    setDate('');
-    setTime('');
-    setDuration('');
-    setAllDay(false);
-    setDays(1);
-    setRepeatFrequency('none');
-    setRepeatEndDate('');
-    setRepeatCount('');
-    seteventLocation('');
+    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing);
 }
 
 // Function to calculate the next occurrence of a repeated event
@@ -260,8 +253,8 @@ export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
   };
 
   // Function to confirm the deletion
-  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation) {
+  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing) {
     handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
     setShowConfirmation(false);
-    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation);
+    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing);
   };
