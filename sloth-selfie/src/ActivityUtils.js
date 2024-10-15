@@ -67,6 +67,16 @@ export function updateOverdueActivities(activities, setActivities) {
     }
 }
 
+//Function to reset imput fields
+export function handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
+    setSelectedActivity(null); // Close the popup
+    // Reset input fields
+    setId('');
+    setTitle('');
+    setDeadline('');
+    setCompleted(false);
+}
+
 // Handle updating an activity
 export function handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
     e.preventDefault();
@@ -83,12 +93,7 @@ export function handleUpdateActivity(e, id, title, deadline, completed, activiti
     });
     
     setActivities(updatedActivities);
-    setSelectedActivity(null); // Close the popup
-    // Reset input fields
-    setId('');
-    setTitle('');
-    setDeadline('');
-    setCompleted(false);
+    handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted);
 }
 
 //Handle deleting an activity
@@ -104,7 +109,8 @@ export function handleDeleteActivity(id, activities, setActivities, setSelectedA
   };
 
   // Function to confirm the deletion
-  export function handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity) {
+  export function handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
     handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity);
     setShowConfirmation(false);
+    handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted);
   };
