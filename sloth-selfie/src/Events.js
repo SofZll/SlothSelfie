@@ -5,7 +5,7 @@ import './css/App.css';
 import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent } from './EventUtils';
+import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent, handleAbortDelete,handleConfirmDelete } from './EventUtils';
 
 const localizer = momentLocalizer(moment);
 
@@ -43,6 +43,7 @@ function EventsFunction() {
   const [eventLocation, seteventLocation] = useState(''); // eventLocation of the event
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // change style page onload document
   useEffect(() => {
@@ -274,11 +275,24 @@ function EventsFunction() {
             <p>Start: {selectedEvent.start.toLocaleString()}</p>
             <p>End: {selectedEvent.end.toLocaleString()}</p>
             <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-            <button className='btn' onClick={() => {
-                if (selectedEvent) {
-                    handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
-                }
-            }}>Delete</button>
+            {/*<button className='btn' onClick={() => {
+                //if (selectedEvent) {
+                    //handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
+                //}
+            }}>Delete</button>*/}
+            <button className='btn' onClick={() =>{
+                setShowConfirmation(true);
+                console.log(setShowConfirmation);
+            }}>
+            Delete
+              </button>
+            {showConfirmation && (
+              <div className="popup">
+                <h2>Are you sure you want to delete this event?</h2>
+                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent)}>Yes</button>
+                <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+              </div>
+            )}
             <button className='btn' onClick={() => setSelectedEvent(null)}>X</button>
             </div>
           )}
