@@ -10,7 +10,7 @@ const connectDB = require('./config/db');
 const app = express();
 
 // Connect to MongoDB
-
+connectDB();
 
 app.use(bodyParser.json());
 app.use('/api', userRoutes);
