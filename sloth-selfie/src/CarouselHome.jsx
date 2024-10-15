@@ -1,6 +1,7 @@
 import Carousel from "react-spring-3d-carousel";
 import { useState, useEffect } from "react";
 import { config } from "react-spring";
+import { useSwipeable } from 'react-swipeable';
 import TimeMachine from "./TimeMachine";
 import iconCalendar from './media/calendar.svg';
 import iconNotes from './media/notes.svg';
@@ -8,8 +9,17 @@ import iconTomato from './media/tomato.svg';
 import iconProjects from './media/projects.svg'; 
 import iconArrowLeft from './media/arrowLeft.svg';
 import iconArrowRight from './media/arrowRight.svg';
+import iconTimeMachine from './media/time-machine.svg';
 
 export default function CarroussSel(props) {
+
+  const handlers = useSwipeable({
+    onSwipedLeft: () => handleNext(),
+    onSwipedRight: () => handlePrev(),
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true,
+  });
+
   const table = props.cards.map((element, index) => {
     return { ...element, onClick: () => setGoToSlide(index) };
   });
@@ -49,8 +59,8 @@ export default function CarroussSel(props) {
   }
 
   return (
-    <div className="carousel"
-      style={{ width: props.width, height: props.height, margin: props.margin }}
+    <div className="carousel" {...handlers}
+      style={{ width: props.width, height: props.height, margin: props.margin, touchAction: 'pan-y' }}
     >
       <div className="divBtn">
           <button onClick={() => handleGoToSlide(0)} className="btn">
@@ -79,7 +89,7 @@ export default function CarroussSel(props) {
         </button>
         {/* time machine */}
         <button onClick={showTimeMachine} className="btn">
-          <img src="" alt="time machine" className="icon"/>
+          <img src={iconTimeMachine} alt="icon" className="icon"/>
         </button>
         <TimeMachine isOpen={machineOpen} onClose={closeTimeMachine}/>
         <button onClick={handleNext} className="btn">
