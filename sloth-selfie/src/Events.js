@@ -5,10 +5,13 @@ import './css/App.css';
 import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent, handleAbortDelete,handleConfirmDelete, handleClosePopupE} from './EventUtils';
+import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent, handleAbortDelete, handleConfirmDelete, handleClosePopupE} from './EventUtils';
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
+
+//TODO: con le ore piene il time diventa invalid e si rompono gli eventi ripetuti
+//TODO: edit di eventi ripetuti(vanno solo title e location)
 
 const localizer = momentLocalizer(moment);
 
@@ -165,7 +168,7 @@ function EventsFunction() {
         console.log("Form submit triggered");
         if (selectedEvent) {
           console.log("Submitting update for event:", selectedEvent);
-          handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents);
+          handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing);
         } else {
           handleAddEvent(e);
         }
@@ -332,11 +335,11 @@ function EventsFunction() {
             {showConfirmation && (
               <div className="popup">
                 <h2>Are you sure you want to delete this event?</h2>
-                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation)}>Yes</button>
+                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing)}>Yes</button>
                 <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
               </div>
             )}
-            <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation)}>X</button>
+            <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing)}>X</button>
             </div>
           )}
       </div>
