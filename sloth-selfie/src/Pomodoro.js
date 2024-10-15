@@ -6,6 +6,9 @@ import { StyleContext } from './StyleContext';
 
 function PomodoroFunction() {
     const { updateStyles, updateIcon } = useContext(StyleContext);
+
+    const [choiceSelection, setChoiceSelection] = useState('0');
+
     const [textStudio, setTextStudio] = useState('30');
     const [textBreak, setTextBreak] = useState('5');
     const [textCycles, setTextCycles] = useState('5');
@@ -19,6 +22,38 @@ function PomodoroFunction() {
     const [timeBreakSuggest2, setTimeBreakSuggest2] = useState('5');
     const [numberCyclesSuggest2, setNumberCyclesSuggest2] = useState('3');
     const [timeTotalSuggest2, setTimeTotalSuggest2] = useState('175');
+
+    const handleChoiceSelection = (type) => {
+        setChoiceSelection(type);
+    };
+
+    const selectChoice = () => {
+        const selectionPomodoroSettings = document.getElementById('selection-pomodoro-settings');
+        if (choiceSelection === 1) {
+            const pomodoroTimersOptions = document.getElementById('pomodoro-timers-options');
+            if (pomodoroTimersOptions) {
+                pomodoroTimersOptions.style.display = 'block';
+            } else {
+                console.error('Element with ID "pomodoro-timers-options" not found.');
+            }
+        } else if (choiceSelection === 2) {
+            const pomodoroTotalTimeOption = document.getElementById('pomodoro-total-time-option');
+
+            if (pomodoroTotalTimeOption) {
+                pomodoroTotalTimeOption.style.display = 'block';
+
+            }
+            else {
+                console.error('Element with ID "pomodoro-total-time-option" not found.');
+            }
+        } else {
+            alert("Please select an option.");
+        }
+
+        if (selectionPomodoroSettings && (choiceSelection === 1 || choiceSelection === 2)) {
+            selectionPomodoroSettings.style.display = 'none';
+        }
+    };
 
 
     const handleInputChange = (e, type) => {
@@ -138,7 +173,13 @@ function PomodoroFunction() {
         <div>
             <div className="select-pomodoro">
                 <h2>Select a Pomodoro and <br/>start your learning session</h2>
-                <div className="pomodoro-timers-options">
+                <div id='selection-pomodoro-settings' className='selection-pomodoro-settings'>
+                    <p>Chouse the settings of your Pomodoro study session</p>
+                    <button className='settings-choice' onClick={() => handleChoiceSelection(1)} >Set the number of cycles and their duration</button>
+                    <button className='settings-choice' onClick={() => handleChoiceSelection(2)}>Set the total time of your studying session</button>
+                    <botton className='btn' onClick={selectChoice}>Select</botton>
+                </div>
+                <div id='pomodoro-timers-options' className="pomodoro-timers-options">
                     <div className="timers-option">
                         <p>Select the duration of your study and break cycles </p>
                         <div className='input-timer-div'>
@@ -183,7 +224,7 @@ function PomodoroFunction() {
                         <p>The selected total time is: {textTotal} minutes</p>
                     </div>
                 </div>
-                <div className="pomodoro-total-time-option">
+                <div id='pomodoro-total-time-option' className="pomodoro-total-time-option">
                     <div className='input-total-div'>
                         <p>Enter the total time of your studing session</p>
                         <div className='total-time-div'>
