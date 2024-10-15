@@ -1,6 +1,6 @@
 const User = require('../models/userModel');
 
-const getUsers = async (req, res) => {
+const loginUser = async (req, res) => {
     try {
         const users = await User.find();
         res.json(users);
@@ -9,18 +9,26 @@ const getUsers = async (req, res) => {
     }
 };
 
-const createUser = async (req, res) => {
-    const { username, password } = req.body;
+const registerUser = async (req, res) => {
+    const { username, email, password } = req.body;
     try {
-        const newUser = new User({ username, password });
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'User already exists' });
+        }
+
+        // Create a new user
+        const newUser = new User({ username, email, password });
         await newUser.save();
-        res.status(201).json(newUser);
+        res.status(201).json({ success: true, user: newUser });
     } catch (error) {
-        res.status(500).json({ message: 'Error creating user' });
+        console.error('Error creating user:', error);
+        res.status(500).json({ success: false, message: 'Error creating user' });
     }
 };
 
 module.exports = {
-    getUsers,
-    createUser,
+    loginUser,
+    registerUser,
 };
