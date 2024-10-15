@@ -116,6 +116,23 @@ export function normalizeEvents (events) {
     });
 };
 
+//Function to reset imput fields
+export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation) {
+    setSelectedEvent(null); // close the popup
+    //Reset imput fields
+    setId('');
+    setTitle('');
+    setDate('');
+    setTime('');
+    setDuration('');
+    setAllDay(false);
+    setDays(1);
+    setRepeatFrequency('none');
+    setRepeatEndDate('');
+    setRepeatCount('');
+    seteventLocation('');
+}
+
 // Handle updating an event
 export function handleUpdateEvent(
     e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, 
@@ -142,6 +159,54 @@ export function handleUpdateEvent(
     });
     console.log("Updated events:", events); // Check if the events are updated
     setEvents(updatedEvents);
+    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation);
+}
+
+
+/* CON EVENTI RIPETUTI VANNO SOLO TITLE E LOCATION
+// Handle updating an event
+export function handleUpdateEvent(
+    e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setUpdateAllFutureEvents
+  ) {
+    e.preventDefault();
+    console.log("Updating event:", id); // Check if the update function is called
+    const updatedEvents = events.map(event => {
+        if (event.id === id) {
+            // Updates only the current instance
+            return {
+                ...event,
+                title: title,
+                date: date,
+                time: time,
+                duration: duration,
+                allDay: allDay,
+                days: days,
+                repeatFrequency: repeatFrequency,
+                repeatEndDate: repeatEndDate,
+                repeatCount: repeatCount,
+                eventLocation: eventLocation,
+            };
+        } else if (event.originalId === id && setUpdateAllFutureEvents) {
+            // Aggiorna tutte le istanze future
+            return {
+                ...event,
+                title: title,
+                date: calculateNextOccurrence(date, event.repeatFrequency),
+                time: time,
+                duration: duration,
+                allDay: allDay,
+                days: days,
+                repeatFrequency: repeatFrequency,
+                repeatEndDate: repeatEndDate,
+                repeatCount: repeatCount,
+                eventLocation: eventLocation,
+            };
+        }
+        return event;
+    });
+
+    console.log("Updated events:", events); // Check if the events are updated
+    setEvents(updatedEvents);
     setSelectedEvent(null); // close the popup
     //Reset imput fields
     setId('');
@@ -156,6 +221,29 @@ export function handleUpdateEvent(
     setRepeatCount('');
     seteventLocation('');
 }
+
+// Function to calculate the next occurrence of a repeated event
+const calculateNextOccurrence = (date, frequency) => {
+    const nextDate = new Date(date);
+    switch (frequency) {
+        case 'daily':
+            nextDate.setDate(nextDate.getDate() + 1);
+            break;
+        case 'weekly':
+            nextDate.setDate(nextDate.getDate() + 7);
+            break;
+        case 'monthly':
+            nextDate.setMonth(nextDate.getMonth() + 1);
+            break;
+        case 'yearly':
+            nextDate.setFullYear(nextDate.getFullYear() + 1);
+            break;
+        default:
+            break;
+    }
+    return nextDate;
+};
+*/
 
 //Handle deleting an event
 export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
@@ -172,7 +260,8 @@ export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
   };
 
   // Function to confirm the deletion
-  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent) {
+  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation) {
     handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
     setShowConfirmation(false);
+    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation);
   };
