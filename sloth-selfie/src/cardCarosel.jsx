@@ -63,10 +63,10 @@ function Card({ title, caseShow }) {
                 <div className='inCard'>
                     <Calendar  tileContent={tileContent} />
                     <div className="divBtn">
-                        <Link to="/events">
+                        <Link to="/events" onClick={handleLinkClick('/events')}>
                         <button className="btn" style={{ color: 'blue' }}>Manage Events</button>
                         </Link>
-                        <Link to="/activities">
+                        <Link to="/activities" onClick={handleLinkClick('/activities')}>
                             <button className="btn" style={{ color: '#f72585' }}>Manage Activities</button>
                         </Link>
                     </div>
@@ -108,7 +108,7 @@ function Card({ title, caseShow }) {
                             </div>
                         </div>
                         <div className="divBtn">
-                            <Link to="/notes">
+                            <Link to="/notes" onClick={handleLinkClick('/notes')}>
                                 <button className="btn btn-primary">Manage Notes</button> {/* Bootstrap button */}
                             </Link>
                         </div>
