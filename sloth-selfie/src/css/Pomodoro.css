@@ -49,6 +49,7 @@
   .pomodoro {
     flex-direction: row;
     justify-content:space-around;
+    display: none;
   }
 
   .select-pomodoro {
@@ -92,4 +93,35 @@
   flex-direction: row;
   align-items: baseline;
   justify-content: space-around;
+  }
+
+  .suggested-cycles-div {
+    display: none;
+    flex-direction: column;
+    margin: 20px 0;
+  }
+
+  .pomodoro-timers-options {
+    display: none;
+  }
+
+  .suggested-cycles {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: start;
+    border-radius: 5px;
+    border: 1px solid #555B6E;
+    height: 125px;
+    margin: 10px 0;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .suggested-cycles:hover {
+    opacity: 0.8;
+  }
+  
+  .btn-tomato-start {
+    display: none;
   }
