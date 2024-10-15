@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import './css/App.css';
 import './css/Notes.css';
 import NoteCard from './NoteCard';
+import iconDark from './media/SlothDark.svg';
+import iconLight from './media/SlothLight.svg';
+import { StyleContext } from './StyleContext';
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -11,6 +14,7 @@ const initialNotes = [
 ];
 
 function NotesFunction() {
+  const { updateStyles, updateIcon } = useContext(StyleContext);
   const [notes, setNotes] = useState(initialNotes || []);
   const [noteTitle, setNoteTitle] = useState('');
   const [noteCategory, setNoteCategory] = useState('');
@@ -22,20 +26,15 @@ function NotesFunction() {
 
   // change style page onload document
   useEffect(() => {
-    const header = document.querySelector('.App-header');
-    const h1 = document.querySelector('h1');
-    if (header) header.classList.add('light-background');
-    else console.error('Header not found');
-    if (h1) h1.classList.add('dark-h1');
-
-    document.body.classList.add('light-background');
+    updateStyles(true);
+    updateIcon(iconDark);
 
     return () => {
-      if (header) header.classList.remove('light-background');
-      if (h1) h1.classList.remove('dark-h1');
-      document.body.classList.remove('light-background');
+        updateStyles(false);
+        updateIcon(iconLight);
     };
-  }, []);
+  }, [updateIcon, updateStyles]);
+
   
   const handleAddNote = () => {
   if (noteTitle && noteCategory && noteContent) {
