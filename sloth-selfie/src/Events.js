@@ -5,7 +5,7 @@ import './css/App.css';
 import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent } from './EventUtils';
+import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent, handleAbortDelete,handleConfirmDelete } from './EventUtils';
 
 const localizer = momentLocalizer(moment);
 
@@ -33,6 +33,7 @@ function EventsFunction() {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [isPreciseTime, setIsPreciseTime] = useState(false); // State for precise time input
   const [duration, setDuration] = useState('');//hours
   const [allDay, setAllDay] = useState(false);
   const [days, setDays] = useState(1); // Number of days
@@ -43,6 +44,7 @@ function EventsFunction() {
   const [eventLocation, seteventLocation] = useState(''); // eventLocation of the event
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // change style page onload document
   useEffect(() => {
@@ -78,6 +80,7 @@ function EventsFunction() {
         setAllDay(selectedEvent.allDay);
         setDays(selectedEvent.allDay ? selectedEvent.duration : 1);
         setRepeatFrequency(selectedEvent.repeatFrequency);
+        setRepeatCount(selectedEvent.repeatCount);
         setRepeatEndDate(selectedEvent.repeatEndDate);
         seteventLocation(selectedEvent.eventLocation);
         console.log("form prefilled", selectedEvent);
@@ -89,6 +92,18 @@ function EventsFunction() {
     setSelectedEvent(event);
   }
 
+  // Function to generate time options
+  const generateTimeOptions = () => {
+    const options = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minutes of [0, 15, 30, 45]) {
+          const formattedHour = hour < 10 ? `0${hour}` : hour;
+          const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+          options.push(`${formattedHour}:${formattedMinutes}`);
+      }
+  }
+    return options;
+  };
 
   const handleAddEvent = (e) => {
     e.preventDefault();
@@ -165,35 +180,56 @@ function EventsFunction() {
           onChange={(e) => setDate(e.target.value)} 
           required 
         />
-          {!allDay && (
-    <input 
-      type="time" 
-      value={time} 
-      onChange={(e) => setTime(e.target.value)} 
-      required 
-    />
-  )}
+       {!allDay && (
+          <>
+            <label>
+              <input 
+                type="checkbox" 
+                checked={isPreciseTime} 
+                onChange={(e) => setIsPreciseTime(e.target.checked)} 
+              />
+              Use Precise Time
+            </label>
 
-  {!allDay && (
-    <input 
-      type="number" 
-      placeholder="Duration (hours)" 
-      value={duration} 
-      onChange={(e) => setDuration(e.target.value)} 
-      min="1" 
-      required 
-    />
-  )}
+            {isPreciseTime ? (
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                required
+              />
+            ) : (
+              <select value={time} onChange={(e) => setTime(e.target.value)} required>
+                {generateTimeOptions().map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            )}
+          </>
+        )}
+        
+        {!allDay && (
+          <input 
+            type="number" 
+            placeholder="Duration (hours)" 
+            value={duration} 
+            onChange={(e) => setDuration(e.target.value)} 
+            min="1" 
+            required 
+          />
+        )}
 
-  {allDay && (
-    <input 
-      type="number" 
-      placeholder="Number of days" 
-      value={days} 
-      onChange={(e) => setDays(e.target.value)} 
-      min="1" 
-    />
-  )}
+        {allDay && (
+          <input 
+            type="number" 
+            placeholder="Number of days" 
+            value={days} 
+            onChange={(e) => setDays(e.target.value)} 
+            min="1" 
+          />
+        )}
 
   <label>
     <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
@@ -274,11 +310,19 @@ function EventsFunction() {
             <p>Start: {selectedEvent.start.toLocaleString()}</p>
             <p>End: {selectedEvent.end.toLocaleString()}</p>
             <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-            <button className='btn' onClick={() => {
-                if (selectedEvent) {
-                    handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
-                }
-            }}>Delete</button>
+            <button className='btn' onClick={() =>{
+                setShowConfirmation(true);
+                console.log(setShowConfirmation);
+            }}>
+            Delete
+              </button>
+            {showConfirmation && (
+              <div className="popup">
+                <h2>Are you sure you want to delete this event?</h2>
+                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent)}>Yes</button>
+                <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+              </div>
+            )}
             <button className='btn' onClick={() => setSelectedEvent(null)}>X</button>
             </div>
           )}

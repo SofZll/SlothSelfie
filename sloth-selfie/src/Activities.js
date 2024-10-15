@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
-import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity} from './ActivityUtils';
+import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity, handleAbortDelete, handleConfirmDelete} from './ActivityUtils';
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -21,6 +21,7 @@ function ActivitiesFunction(){
     const [deadline, setDeadline] = useState('');
     const [completed, setCompleted] = useState(false);
     const [selectedActivity, setSelectedActivity] = useState(null);
+    const [showConfirmation, setShowConfirmation] = useState(false);
 
     // change style page onload document
     useEffect(() => {
@@ -123,7 +124,19 @@ function ActivitiesFunction(){
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {selectedActivity.deadline}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
-                        <button className='btn' onClick={() => handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Delete</button>
+                        <button className='btn' onClick={() =>{
+                            setShowConfirmation(true);
+                            console.log(setShowConfirmation);
+                        }}>
+                        Delete
+                        </button>
+                        {showConfirmation && (
+                        <div className="popup">
+                            <h2>Are you sure you want to delete this activity?</h2>
+                            <button className='btn' onClick={() => handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity)}>Yes</button>
+                            <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+                        </div>
+                        )}
                         <button className='btn' onClick={() => setSelectedActivity(null)}>X</button>
                         </div>
                     )}
