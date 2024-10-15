@@ -97,3 +97,14 @@ export function handleDeleteActivity(id, activities, setActivities, setSelectedA
     setActivities(updatedActivities);
     setSelectedActivity(null); // close the pop-up
 }
+
+  // Function to Abort the deletion
+  export function handleAbortDelete(setShowConfirmation) {
+    setShowConfirmation(false);
+  };
+
+  // Function to confirm the deletion
+  export function handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity) {
+    handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity);
+    setShowConfirmation(false);
+  };

@@ -165,3 +165,14 @@ export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
     setEvents(updatedEvents);
     setSelectedEvent(null); // close the pop-up
 };
+
+  // Function to Abort the deletion
+ export function handleAbortDelete(setShowConfirmation) {
+    setShowConfirmation(false);
+  };
+
+  // Function to confirm the deletion
+  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent) {
+    handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
+    setShowConfirmation(false);
+  };
