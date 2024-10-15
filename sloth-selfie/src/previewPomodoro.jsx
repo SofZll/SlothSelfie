@@ -7,10 +7,10 @@ import { Link } from 'react-router-dom';
 
 
 const PreviewPomodoro = () => {
-  const [timeLeft, setTimeLeft] = useState(25*60);
+  const [timeLeft, setTimeLeft] = useState(30*60);
   const [isStudioTime, setIsStudioTime] = useState(true);
   const [playTomato, setPlayTomato] = useState(false);
-  const [stringPrintTime, setStringPrintTime] = useState('25:00');
+  const [stringPrintTime, setStringPrintTime] = useState('30:00');
   
 
   useEffect(() => {
@@ -20,7 +20,7 @@ const PreviewPomodoro = () => {
         if (isStudioTime) {
           setTimeLeft(5*60);
         } else {
-          setTimeLeft(25*60);
+          setTimeLeft(30*60);
         }
         setIsStudioTime(!isStudioTime);
       } else {
