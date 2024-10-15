@@ -5,7 +5,9 @@ import './css/App.css';
 import './css/Events.css';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent, handleAbortDelete,handleConfirmDelete } from './EventUtils';
+import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent, handleAbortDelete,handleConfirmDelete, handleClosePopupE} from './EventUtils';
+
+//TODO: edit di eventi ripetuti(vanno solo title e location)
 
 const localizer = momentLocalizer(moment);
 
@@ -45,6 +47,8 @@ function EventsFunction() {
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);//option to chose in the editing form
+  const [isEditing, setIsEditing] = useState(false);
 
   // change style page onload document
   useEffect(() => {
@@ -90,6 +94,7 @@ function EventsFunction() {
   function handleEventClick(event) {
     console.log("Event clicked:", event); 
     setSelectedEvent(event);
+    setIsEditing(true);
   }
 
   // Function to generate time options
@@ -153,6 +158,8 @@ function EventsFunction() {
     setRepeatEndDate('');
     setRepeatCount('');
     seteventLocation('');
+    setIsEditing(false);
+    setUpdateAllFutureEvents(false); 
   };
   return (
     <div className= "Event">
@@ -162,7 +169,7 @@ function EventsFunction() {
         console.log("Form submit triggered");
         if (selectedEvent) {
           console.log("Submitting update for event:", selectedEvent);
-          handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation);
+          handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents);
         } else {
           handleAddEvent(e);
         }
@@ -235,6 +242,16 @@ function EventsFunction() {
     <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
     All Day
   </label>
+
+  {isEditing && (
+    <label>
+        <input 
+            type="checkbox" 
+            onChange={(e) => setUpdateAllFutureEvents(e.target.checked)} 
+        />
+        Update all the future instances
+    </label>
+)}
         <select value={repeatFrequency} onChange={(e) => setRepeatFrequency(e.target.value)}>
           <option value="none">No repetition</option>
           <option value="daily">Daily</option>
@@ -319,11 +336,11 @@ function EventsFunction() {
             {showConfirmation && (
               <div className="popup">
                 <h2>Are you sure you want to delete this event?</h2>
-                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent)}>Yes</button>
+                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation)}>Yes</button>
                 <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
               </div>
             )}
-            <button className='btn' onClick={() => setSelectedEvent(null)}>X</button>
+            <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation)}>X</button>
             </div>
           )}
       </div>

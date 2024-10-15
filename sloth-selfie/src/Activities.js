@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
-import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity, handleAbortDelete, handleConfirmDelete} from './ActivityUtils';
+import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA} from './ActivityUtils';
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -133,11 +133,11 @@ function ActivitiesFunction(){
                         {showConfirmation && (
                         <div className="popup">
                             <h2>Are you sure you want to delete this activity?</h2>
-                            <button className='btn' onClick={() => handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity)}>Yes</button>
+                            <button className='btn' onClick={() => handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted)}>Yes</button>
                             <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
                         </div>
                         )}
-                        <button className='btn' onClick={() => setSelectedActivity(null)}>X</button>
+                        <button className='btn' onClick={() => handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted)}>X</button>
                         </div>
                     )}
                 </div>
