@@ -31,10 +31,12 @@ function PomodoroFunction() {
         const selectionPomodoroSettings = document.getElementById('selection-pomodoro-settings');
         if (choiceSelection === 1) {
             const pomodoroTimersOptions = document.getElementById('pomodoro-timers-options');
-            if (pomodoroTimersOptions) {
+            const btnStart = document.getElementById('btn-tomato-start');
+            if (pomodoroTimersOptions && btnStart) {
                 pomodoroTimersOptions.style.display = 'block';
+                btnStart.style.display = 'block';
             } else {
-                console.error('Element with ID "pomodoro-timers-options" not found.');
+                console.error('Element with ID "pomodoro-timers-options"  or "btn-tomato-start" not found.');
             }
         } else if (choiceSelection === 2) {
             const pomodoroTotalTimeOption = document.getElementById('pomodoro-total-time-option');
@@ -170,7 +172,7 @@ function PomodoroFunction() {
     }, [updateIcon, updateStyles]);
 
     return (
-        <div>
+        <div className='div-pomodoro'>
             <div className="select-pomodoro">
                 <h2>Select a Pomodoro and <br/>start your learning session</h2>
                 <div id='selection-pomodoro-settings' className='selection-pomodoro-settings'>

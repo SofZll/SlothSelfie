@@ -38,12 +38,21 @@
 
   /*** Pomodoro page ***/
 
+  .div-pomodoro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100%;
+  }
+
   .pomodoro,
   .select-pomodoro {
-  display: flex;
-  align-items: start;
-  height: 100vh;
-  width: 100vw;
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
   }
 
   .pomodoro {
@@ -135,4 +144,13 @@
   
   .btn-tomato-start {
     display: none;
+  }
+
+  @media screen and (max-width: 768px) {
+
+    .pomodoro,
+    .select-pomodoro {
+      width: 90%;
+    }
+    
   }
