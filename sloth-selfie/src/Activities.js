@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useContext} from 'react';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
@@ -7,6 +7,9 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
 import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA} from './ActivityUtils';
+import iconDark from './media/SlothDark.svg';
+import iconLight from './media/SlothLight.svg';
+import { StyleContext } from './StyleContext';
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -15,6 +18,7 @@ const initialActivities = [
   ];
 
 function ActivitiesFunction(){
+    const { updateStyles, updateIcon } = useContext(StyleContext);
     const [activities, setActivities] = useState(initialActivities || []);
     const [id, setId] = useState("");
     const [title, setTitle] = useState('');
@@ -25,20 +29,14 @@ function ActivitiesFunction(){
 
     // change style page onload document
     useEffect(() => {
-        const header = document.querySelector('.App-header');
-        const h1 = document.querySelector('h1');
-        if (header) header.classList.add('light-background');
-        else console.error('Header not found');
-        if (h1) h1.classList.add('dark-h1');
-
-        document.body.classList.add('light-background');
+        updateStyles(true);
+        updateIcon(iconDark);
 
         return () => {
-        if (header) header.classList.remove('light-background');
-        if (h1) h1.classList.remove('dark-h1');
-        document.body.classList.remove('light-background');
+            updateStyles(false);
+            updateIcon(iconLight);
         };
-    }, []);
+    }, [updateIcon, updateStyles]);
 
     //checking for overdue activities
     useEffect(() => {
