@@ -124,7 +124,6 @@ function ActivitiesFunction(){
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {selectedActivity.deadline}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
-                        {/*<button className='btn' onClick={() => handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity)}>Delete</button>*/}
                         <button className='btn' onClick={() =>{
                             setShowConfirmation(true);
                             console.log(setShowConfirmation);
