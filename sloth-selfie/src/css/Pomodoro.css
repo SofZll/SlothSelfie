@@ -101,24 +101,35 @@
     margin: 20px 0;
   }
 
-  .pomodoro-timers-options {
+  .pomodoro-timers-options,
+  .pomodoro-total-time-option {
     display: none;
   }
 
-  .suggested-cycles {
+  .suggested-cycles,
+  .settings-choice {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    align-items: start;
     border-radius: 5px;
     border: 1px solid #555B6E;
-    height: 125px;
     margin: 10px 0;
     width: 100%;
     padding: 10px;
   }
 
-  .suggested-cycles:hover {
+  .suggested-cycles {
+    align-items: start;
+    height: 125px;
+  }
+
+  .settings-choice {
+    align-items: center;
+    height: 75px;
+  }
+
+  .suggested-cycles:hover,
+  .settings-choice:hover {
     opacity: 0.8;
   }
   
