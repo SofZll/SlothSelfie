@@ -1,4 +1,5 @@
 import Carousel from "react-spring-3d-carousel";
+import './css/App.css';
 import { useState, useEffect } from "react";
 import { config } from "react-spring";
 import { useSwipeable } from 'react-swipeable';
@@ -82,6 +83,7 @@ export default function CarroussSel(props) {
         offsetRadius={offsetRadius}
         showNavigation={showArrows}
         animationConfig={config.gentle}
+        height={props.height}
       />
       <div className="divBtn">
         <button onClick={handlePrev} className="btn">
