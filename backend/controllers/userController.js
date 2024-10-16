@@ -2,14 +2,18 @@ const User = require('../models/userModel');
 
 // TODO: implement a hashing function to store passwords securely
 
+// Function to log in a user
 const loginUser = async (req, res) => {
     const { username, password } = req.body;
     try {
+
+        // Check if the user exists
         const user = await User.findOne({ username});
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
+        // Compare the stored password with the input password
         console.log(`Stored password: ${user.password}`);
         if (password !== user.password) {
             return res.status(400).json({ success: false, message: 'Invalid password' });
@@ -22,6 +26,7 @@ const loginUser = async (req, res) => {
     }
 };
 
+// Function to register a new user
 const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
     try {
@@ -34,6 +39,7 @@ const registerUser = async (req, res) => {
         // Create a new user
         const newUser = new User({ username, email, password });
         await newUser.save();
+        
         res.status(201).json({ success: true, user: newUser });
     } catch (error) {
         console.error('Error creating user:', error);

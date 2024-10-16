@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// mongodb credentials
+// Mongodb credentials
 const mongoCredentials = {
     user: "site232453",
     pwd: "au8Eevai",
