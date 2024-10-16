@@ -1,14 +1,15 @@
 import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './css/Login.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-function Form({ formType, setFormType }) {
+function Form({ formType, setFormType, handleLogin}) {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -29,6 +30,8 @@ function Form({ formType, setFormType }) {
             .then(data => {
                 if (data.success) {
                     console.log('Login successful:', data);
+                    handleLogin(true);
+                    navigate('/home');
                 }
                 else {
                     console.error('Login failed:', data.message);

@@ -71,11 +71,11 @@ function App() {
           />
           <Route 
             path="/login" 
-            element={<Form formType={formType} setFormType={setFormType} />}
+            element={<Form formType={formType} setFormType={setFormType} handleLogin={handleLogin}/>}
           />
           <Route 
             path="/register" 
-            element={<Form formType="register" setFormType={setFormType} />}
+            element={<Form formType="register" setFormType={setFormType}/>}
           />
           <Route path="/home"
             element={ 
