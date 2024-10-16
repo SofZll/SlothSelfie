@@ -10,7 +10,6 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 
-//TODO: con le ore piene il time diventa invalid e si rompono gli eventi ripetuti
 //TODO: edit di eventi ripetuti(vanno solo title e location)
 
 const localizer = momentLocalizer(moment);
@@ -39,14 +38,14 @@ function EventsFunction() {
   const [id, setId] = useState("");
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [time, setTime] = useState('00:00');
   const [isPreciseTime, setIsPreciseTime] = useState(false); // State for precise time input
   const [duration, setDuration] = useState('');//hours
   const [allDay, setAllDay] = useState(false);
   const [days, setDays] = useState(1); // Number of days
   const [repeatFrequency, setRepeatFrequency] = useState('none'); // Freqence of repetition
   const [repeatCount, setRepeatCount] = useState(null); // Number of repetitions
-  const [repeatMode, setRepeatMode] = useState(''); // Mode of repetition
+  const [repeatMode, setRepeatMode] = useState('ntimes'); // Mode of repetition
   const [repeatEndDate, setRepeatEndDate] = useState(''); // Date of the last repetition
   const [eventLocation, seteventLocation] = useState(''); // eventLocation of the event
   const [filterDate, setFilterDate] = useState(new Date()); // default day: today
@@ -251,7 +250,15 @@ function EventsFunction() {
         Update all the future instances
     </label>
 )}
-        <select value={repeatFrequency} onChange={(e) => setRepeatFrequency(e.target.value)}>
+        <select 
+          value={repeatFrequency} 
+          onChange={(e) => {
+            setRepeatFrequency(e.target.value);
+            if (e.target.value === 'none') {
+              setRepeatMode('ntimes'); // Reset at default value
+            }
+          }}
+        >
           <option value="none">No repetition</option>
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
@@ -275,6 +282,7 @@ function EventsFunction() {
                 type="number" 
                 value={repeatCount} 
                 onChange={(e) => setRepeatCount(e.target.value)} 
+                defaultValue={1}
                 min="1" 
               />
             </div>
