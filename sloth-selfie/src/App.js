@@ -10,9 +10,28 @@ import Card from "./cardCarosel";
 import Carousel from "./CarouselHome";
 import { v4 as uuidv4 } from "uuid";
 import { StyleContext, StyleProvider } from './StyleContext';
+import Menu from './Menu';
 
 function App() {
+  const username = 'user';
   /*
+  const [username, setUsername] = useState('example');
+  
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const response = await fetch('api/username');
+        const data = await response.json();
+        setUsername(data.username);
+      } catch (error) {
+        console.error('Error fetching username:', error);
+      }
+    };
+
+    fetchUsername();
+  }, []);
+
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogin = (status) => {
@@ -54,8 +73,11 @@ function App() {
       <Router>
         <div className="App">
           <header className="App-header">
-            <div className="title">
-              <h1>Sloth Selfie</h1>
+            <div className="header-content">
+              <Menu username={username}/>
+              <div className="title">
+                <h1>Sloth Selfie</h1>
+              </div>
               <StyleContext.Consumer>
                 {({ icon }) => <img src={icon} className="App-logo" alt="logo" />}
               </StyleContext.Consumer>
