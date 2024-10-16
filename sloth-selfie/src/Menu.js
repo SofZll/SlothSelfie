@@ -3,7 +3,7 @@ import { slide as Hamburger } from 'react-burger-menu';
 import { Link } from 'react-router-dom';
 import './css/Menu.css';
 
-const Menu = () => {
+const Menu = ({username}) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const handleStateChange = (state) => {
@@ -16,6 +16,9 @@ const Menu = () => {
 
     return (
         <Hamburger isOpen={isOpen} onStateChange={handleStateChange}>
+            <div className="navbar-message">
+                Welcome back, {username}!
+            </div>
             <Link to="/profile" onClick={closeMenu}>Profile</Link>
             <Link to="/" onClick={closeMenu}>Home</Link>
             <Link to="/events" onClick={closeMenu}>Events</Link>
