@@ -152,5 +152,32 @@
     .select-pomodoro {
       width: 90%;
     }
+
     
+  }
+
+  @media screen and (max-height: 768px) {
+    .containerRed,
+    .containerYellow {
+      margin-bottom: 10px;
+    }
+
+    .tomatoPrew {
+      width: 180px;
+      height: 180px;
+    }
+
+    .count {
+      font-size: 36px;
+    }
+
+    .container {
+      height: 85%;
+      margin: 0;
+      justify-content: space-evenly;
+    }
+
+    .container p {
+      margin-bottom: 0;
+    }
   }
