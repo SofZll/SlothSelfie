@@ -1,6 +1,7 @@
 import './css/CarouselHome.css';
 import React, { useState } from "react";
 import { useSpring, animated } from "react-spring";
+import { marked } from 'marked';
 import Button from "./Button";
 import Calendar from 'react-calendar';
 import animatedHourglass from './media/Hourglass.gif';
@@ -85,11 +86,14 @@ function Card({ title, caseShow }) {
                                             <div className="card-body">
                                                 <h5 className="card-title">{note.title}</h5>
                                                 <p className="card-text">
-                                                    {/* Limiting note content to 200 characters */}
-                                                    {note.content.length > 200 
-                                                        ? note.content.substring(0, 200) + "..."
-                                                        : note.content
-                                                    }
+                                                    {/* Limiting note content to 200 characters, showing markdown */}
+                                                    <div
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: note.content.length > 200 
+                                                                ? marked(note.content.substring(0, 200) + "...")
+                                                                : marked(note.content)
+                                                        }}
+                                                    />
                                                 </p>
                                                 {/* Using d-flex and justify-content-between for proper alignment */}
                                                 <div className="d-flex justify-content-between mt-3">
