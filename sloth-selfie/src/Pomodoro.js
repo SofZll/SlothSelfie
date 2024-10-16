@@ -32,18 +32,26 @@ function PomodoroFunction() {
         if (choiceSelection === 1) {
             const pomodoroTimersOptions = document.getElementById('pomodoro-timers-options');
             const btnStart = document.getElementById('btn-tomato-start');
-            if (pomodoroTimersOptions && btnStart) {
+            const btnQS = document.getElementById('btn-tomato-QS');
+            const btnBack = document.getElementById('btn-back');
+
+            if (pomodoroTimersOptions && btnStart && btnQS && btnBack) {
                 pomodoroTimersOptions.style.display = 'block';
                 btnStart.style.display = 'block';
+                btnQS.style.display = 'none';
+                btnBack.style.display = 'block';
             } else {
-                console.error('Element with ID "pomodoro-timers-options"  or "btn-tomato-start" not found.');
+                console.error('Element with ID "pomodoro-timers-options", "btnQS", "btnBack"  or "btn-tomato-start" not found.');
             }
         } else if (choiceSelection === 2) {
             const pomodoroTotalTimeOption = document.getElementById('pomodoro-total-time-option');
+            const btnQS = document.getElementById('btn-tomato-QS');
 
-            if (pomodoroTotalTimeOption) {
+
+            if (pomodoroTotalTimeOption && btnQS) {
                 pomodoroTotalTimeOption.style.display = 'block';
-
+                btnQS.style.display = 'none';
+                
             }
             else {
                 console.error('Element with ID "pomodoro-total-time-option" not found.');
@@ -57,6 +65,28 @@ function PomodoroFunction() {
         }
     };
 
+    const backSelection = () => {
+        const selectionPomodoroSettings = document.getElementById('selection-pomodoro-settings');
+        const pomodoroTimersOptions = document.getElementById('pomodoro-timers-options');
+        const pomodoroTotalTimeOption = document.getElementById('pomodoro-total-time-option');
+        const btnStart = document.getElementById('btn-tomato-start');
+        const btnQS = document.getElementById('btn-tomato-QS');
+        const btnBack = document.getElementById('btn-back');
+        const suggestedCyclesDiv = document.getElementById('suggested-cycles-div');
+
+        if (selectionPomodoroSettings && pomodoroTimersOptions && pomodoroTotalTimeOption && btnStart && btnQS && btnBack && suggestedCyclesDiv) {
+            selectionPomodoroSettings.style.display = 'block';
+            pomodoroTimersOptions.style.display = 'none';
+            pomodoroTotalTimeOption.style.display = 'none';
+            btnStart.style.display = 'none';
+            btnQS.style.display = 'block';
+            btnBack.style.display = 'none';
+            suggestedCyclesDiv.style.display = 'none';
+        } else {
+            console.error('Element with ID "selection-pomodoro-settings", "pomodoro-timers-options", "pomodoro-total-time-option", "btnQS", "btnBack" or "btn-tomato-start" not found.');
+        }
+    };
+            
 
     const handleInputChange = (e, type) => {
         switch (type) {
@@ -80,9 +110,11 @@ function PomodoroFunction() {
     const handleCSS = () => {
         const suggestedCyclesDiv = document.getElementById('suggested-cycles-div');
         const btnTomatoStart = document.getElementById('btn-tomato-start');
+        const btnQS = document.getElementById('btn-tomato-QS');
+        const btnBack = document.getElementById('btn-back');
+        const btnBackTotalTimeOne = document.getElementById('btn-back-total-time-one');
 
-        console.log(suggestedCyclesDiv, btnTomatoStart); // Check if elements are null
-
+        console.log(suggestedCyclesDiv, btnTomatoStart);
         if (suggestedCyclesDiv) {
             suggestedCyclesDiv.style.display = 'flex';
         } else {
@@ -93,6 +125,14 @@ function PomodoroFunction() {
             btnTomatoStart.style.display = 'block';
         } else {
             console.error('Element with ID "btn-tomato-start" not found.');
+        }
+
+        if (btnQS && btnBack && btnBackTotalTimeOne) {
+            btnQS.style.display = 'none';
+            btnBack.style.display = 'block';
+            btnBackTotalTimeOne.style.display = 'none';
+        } else {
+            console.error('Element with ID "btn-tomato-QS", "btn-back" or "btn-back-total-time-one" not found.');
         }
     };
 
@@ -179,7 +219,10 @@ function PomodoroFunction() {
                     <p>Chouse the settings of your Pomodoro study session</p>
                     <button className='settings-choice' onClick={() => handleChoiceSelection(1)} >Set the number of cycles and their duration</button>
                     <button className='settings-choice' onClick={() => handleChoiceSelection(2)}>Set the total time of your studying session</button>
-                    <botton className='btn' onClick={selectChoice}>Select</botton>
+                    <div className='divBtn'>
+                        <button className='btn btn-tomato'>Back</button>
+                        <botton className='btn btn-tomato' onClick={selectChoice}>Select</botton>
+                    </div>
                 </div>
                 <div id='pomodoro-timers-options' className="pomodoro-timers-options">
                     <div className="timers-option">
@@ -240,9 +283,10 @@ function PomodoroFunction() {
                             />
                             <p>minuts</p>
                         </div>
-                        
-                        <button className='btn' onClick={getCycles}>calculate cycles</button>
-
+                        <div className='divBtn'>
+                            <button id='btn-back-total-time-one' className='btn btn-tomato' onClick={backSelection}>Back</button>
+                            <button className='btn btn-tomato' onClick={getCycles}>Calculate cycles</button>
+                        </div>
                         <div id='suggested-cycles-div' className='suggested-cycles-div'>
                             <p>Select one of the suggested Pomodoro</p>
                             <button className='suggested-cycles'>
@@ -260,7 +304,11 @@ function PomodoroFunction() {
                         </div>
                     </div>
                 </div>
-                <button id='btn-tomato-start' className='btn btn-tomato-start'>Let's get started</button>
+                <div className='divBtn'>
+                    <button id='btn-back' className='btn btn-tomato btn-back' onClick={backSelection}>Back</button>
+                    <button id='btn-tomato-start' className='btn btn-tomato btn-tomato-start'>Let's get started</button>
+                    <botton id='btn-tomato-QS' className='btn btn-tomato'>Quick Start</botton>
+                </div>
             </div>
 
 

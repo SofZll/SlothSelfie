@@ -146,6 +146,14 @@
     display: none;
   }
 
+  .btn-tomato {
+    width: 150px;
+  }
+
+  .btn-back {
+    display: none;
+  }
+
   @media screen and (max-width: 768px) {
 
     .pomodoro,
@@ -153,7 +161,6 @@
       width: 90%;
     }
 
-    
   }
 
   @media screen and (max-height: 768px) {
