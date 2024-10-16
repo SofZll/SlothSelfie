@@ -10,7 +10,6 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 
-//TODO: con le ore piene il time diventa invalid e si rompono gli eventi ripetuti
 //TODO: edit di eventi ripetuti(vanno solo title e location)
 
 const localizer = momentLocalizer(moment);

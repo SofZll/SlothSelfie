@@ -132,42 +132,9 @@ export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, se
     setRepeatEndDate('');
     setRepeatCount('');
     seteventLocation('');
-    setIsEditing(false);
 }
 
-// Handle updating an event
-export function handleUpdateEvent(
-    e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing 
-  ) {
-    e.preventDefault();
-    console.log("Updating event:", id); // Check if the update function is called
-    const updatedEvents = events.map(event => {
-        if (event.id === id) {
-            return {
-                ...event,
-                title: title,
-                date: date,
-                time: time,
-                duration: duration,
-                allDay: allDay,
-                days: days,
-                repeatFrequency: repeatFrequency,
-                repeatEndDate: repeatEndDate,
-                repeatCount: repeatCount,
-                eventLocation: eventLocation,
-            };
-        }
-        return event;
-    });
-    console.log("Updated events:", events); // Check if the events are updated
-    setEvents(updatedEvents);
-    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing);
-}
-// CON EVENTI RIPETUTI VANNO SOLO TITLE E LOCATION
-
-
-// Handle updating an event
-/*
+// Handle updating an event -> // CON EVENTI RIPETUTI MODIFICA SOLO TITLE E LOCATION E NON LI CONSIDERA SINGOLI
 export function handleUpdateEvent(
     e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, 
     events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, 
@@ -176,11 +143,13 @@ export function handleUpdateEvent(
     e.preventDefault();
     console.log("Updating event:", id); // Check if the update function is called
     const updatedEvents = events.map(event => {
-        if (event.id === id && updateAllFutureEvents) {
-            // Updates all future instances
-            return {
+        if (event.id === id) {
+            // check if we need to update all future events
+            if (updateAllFutureEvents && event.repeatFrequency) {
+              return {
                 ...event,
                 title: title,
+                // here we calculate the next occurrence of the event
                 date: calculateNextOccurrence(date, event.repeatFrequency),
                 time: time,
                 duration: duration,
@@ -190,10 +159,10 @@ export function handleUpdateEvent(
                 repeatEndDate: repeatEndDate,
                 repeatCount: repeatCount,
                 eventLocation: eventLocation,
-            };
-        } else if (event.id == id) {
-            // Updates only the current instance
-            return {
+              };
+            } else {
+              // update the current event only
+              return {
                 ...event,
                 title: title,
                 date: date,
@@ -205,9 +174,10 @@ export function handleUpdateEvent(
                 repeatEndDate: repeatEndDate,
                 repeatCount: repeatCount,
                 eventLocation: eventLocation,
-            };
-        }
-        return event;
+              };
+            }
+          }
+          return event;
     });
 
     console.log("Updated events:", events); // Check if the events are updated
@@ -236,7 +206,7 @@ const calculateNextOccurrence = (date, frequency) => {
     }
     return nextDate;
 };
-*/
+
 
 //Handle deleting an event
 export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
