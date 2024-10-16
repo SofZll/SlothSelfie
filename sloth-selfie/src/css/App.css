@@ -68,6 +68,7 @@
 }
 
 h1 {
+  white-space: nowrap;
   margin-bottom: 20px;
   font-size: 3rem;
   color: #FAF9F9;
@@ -197,6 +198,10 @@ p {
   color: #555B6E;
 }
 
+.dark-burger{
+  color: #555B6E;
+}
+
 /* time machine */
 
 .time-machine {
@@ -252,7 +257,7 @@ p {
   .header-content{
     position: relative;
     width: 100%;
-    padding-left: 55px;
+    padding-left: 5rem;
   }
 
   .App-header {
