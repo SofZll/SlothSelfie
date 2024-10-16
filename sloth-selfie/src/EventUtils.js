@@ -42,6 +42,7 @@ export function generateRepeatedEvents (event, repeatEndDate = null, repeatCount
         if (repeatCount && count >= repeatCount) break;
       
         repeatedEvents.push({
+        id: event.id + count,
         title: event.title,
         start: new Date(currentDate),
         end: new Date(currentDate.getTime() + (event.duration ? event.duration * 60 * 60 * 1000 : 0)),
@@ -134,7 +135,7 @@ export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, se
     seteventLocation('');
 }
 
-// Handle updating an event -> // CON EVENTI RIPETUTI MODIFICA SOLO TITLE E LOCATION E NON LI CONSIDERA SINGOLI
+// Handle updating an event -> // CON EVENTI RIPETUTI MODIFICA SOLO TITLE E LOCATION
 export function handleUpdateEvent(
     e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, 
     events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, 
@@ -148,6 +149,7 @@ export function handleUpdateEvent(
             if (updateAllFutureEvents && event.repeatFrequency) {
               return {
                 ...event,
+                id: event.id,
                 title: title,
                 // here we calculate the next occurrence of the event
                 date: calculateNextOccurrence(date, event.repeatFrequency),
@@ -164,6 +166,7 @@ export function handleUpdateEvent(
               // update the current event only
               return {
                 ...event,
+                id: event.id,
                 title: title,
                 date: date,
                 time: time,
