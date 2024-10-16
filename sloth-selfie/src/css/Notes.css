@@ -4,6 +4,8 @@
     flex-direction: column;
     align-items: center;
     padding: 10px;
+    height: 100%;
+    width: 95%;
   }
   .notes-section input, .notes-section textarea, .notes-section select {
     width: 300px;

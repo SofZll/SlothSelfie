@@ -1,4 +1,9 @@
 /* Events */
+.Event {
+  height: 100%;
+  width: 95%;
+}
+
 .events-section {
     padding: 20px;
   }

@@ -62,40 +62,40 @@ function App() {
             </div>
           </header>
           <div className="App-body">
-          <Routes>
-            {/*<Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route
-              path="/"
-              element={
-                isAuthenticated ? (
-                  <Navigate to="/home" />
-                ) : (
+            <Routes>
+              {/*<Route path="/login" element={<Login onLogin={handleLogin} />} />
+              <Route
+                path="/"
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/home" />
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              /> */}
+              <Route path="/" /*path="home"*/
+                element={ 
+                /*isAuthenticated ? (*/ 
+                (<Carousel
+                    cards={cards}
+                    className="carousel_structure"
+                    height="85vh"
+                    width="60vw"
+                    margin="0"
+                    offset={2}
+                    showArrows={false}
+                  />)
+                /*) : (
                   <Navigate to="/login" />
-                )
-              }
-            /> */}
-            <Route path="/" /*path="home"*/
-              element={ 
-              /*isAuthenticated ? (*/ 
-              (<Carousel
-                  cards={cards}
-                  className="carousel_structure"
-                  height="85vh"
-                  width="60vw"
-                  margin="0"
-                  offset={2}
-                  showArrows={false}
-                />)
-              /*) : (
-                <Navigate to="/login" />
-              ) */
-              }
-            />
-            <Route path="/pomodoro" element={<PomodoroFunction />} />
-            <Route path="/notes" element={<NotesFunction />} />
-            <Route path="/events" element={<EventsFunction />} />
-            <Route path="/activities" element={<ActivitiesFunction />} />
-          </Routes>
+                ) */
+                }
+              />
+              <Route path="/pomodoro" element={<PomodoroFunction />} />
+              <Route path="/notes" element={<NotesFunction />} />
+              <Route path="/events" element={<EventsFunction />} />
+              <Route path="/activities" element={<ActivitiesFunction />} />
+            </Routes>
           </div>
         </div>
       </Router>
