@@ -10,6 +10,7 @@ import Card from "./cardCarosel";
 import Carousel from "./CarouselHome";
 import { v4 as uuidv4 } from "uuid";
 import { StyleContext, StyleProvider } from './StyleContext';
+import Menu from './Menu';
 
 function App() {
   /*
@@ -54,8 +55,11 @@ function App() {
       <Router>
         <div className="App">
           <header className="App-header">
-            <div className="title">
-              <h1>Sloth Selfie</h1>
+            <div className="header-content">
+              <Menu />
+              <div className="title">
+                <h1>Sloth Selfie</h1>
+              </div>
               <StyleContext.Consumer>
                 {({ icon }) => <img src={icon} className="App-logo" alt="logo" />}
               </StyleContext.Consumer>
