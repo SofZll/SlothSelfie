@@ -61,6 +61,7 @@ function App() {
               </StyleContext.Consumer>
             </div>
           </header>
+          <div className="App-body">
           <Routes>
             {/*<Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route
@@ -79,7 +80,7 @@ function App() {
               (<Carousel
                   cards={cards}
                   className="carousel_structure"
-                  height="70vh"
+                  height="85vh"
                   width="60vw"
                   margin="0"
                   offset={2}
@@ -95,6 +96,7 @@ function App() {
             <Route path="/events" element={<EventsFunction />} />
             <Route path="/activities" element={<ActivitiesFunction />} />
           </Routes>
+          </div>
         </div>
       </Router>
     </StyleProvider>
