@@ -169,6 +169,7 @@ p {
   display: flex;
   justify-content: space-around;
   width: 100%;
+  height: fit-content;
 }
 
 .icon {
