@@ -191,7 +191,7 @@ const filterNotesByDate = (notes) => {
       <button className="btn" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
       {/* Editing scenario*/}
       {isEditing !== null && (
-        <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent)}>Save Note</button>
+        <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers)}>Save Note</button>
       )}
       <br/>
       {/* Note list, filtered and ordered */}
@@ -199,7 +199,6 @@ const filterNotesByDate = (notes) => {
       <div className="notes-container">
         <div className = "scrollable-Card-list">
           {/* Filter the accessible notes from the users and the orders */}
-          {/*{filterNotesByDate(sortNotes(notes)).map((note, index) => ( */}
           {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)))).map((note, index) => (
             <NoteCard
               key={index}
@@ -208,7 +207,7 @@ const filterNotesByDate = (notes) => {
               onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
               onCopy={() => handleCopyContent(note.content)}
               onDelete={() => handleDeleteNote(index, notes, setNotes)}
-              onEdit={() => handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing)}
+              onEdit={() => handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing, setNoteAuthor, setNoteAccess, setAllowedUsers)}
             />
           ))}
         </div> 
