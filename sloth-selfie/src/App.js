@@ -11,6 +11,7 @@ import Carousel from "./CarouselHome";
 import { v4 as uuidv4 } from "uuid";
 import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
+import ProfileFunction from './Profile';
 
 function App() {
   const username = 'user';
@@ -69,8 +70,8 @@ function App() {
 
 
   return (
+    <Router>
       <StyleProvider>
-      <Router>
         <div className="App">
           <header className="App-header">
             <div className="header-content">
@@ -113,6 +114,7 @@ function App() {
                 ) */
                 }
               />
+              <Route path="/profile" element={<ProfileFunction />} />
               <Route path="/pomodoro" element={<PomodoroFunction />} />
               <Route path="/notes" element={<NotesFunction />} />
               <Route path="/events" element={<EventsFunction />} />
@@ -120,8 +122,8 @@ function App() {
             </Routes>
           </div>
         </div>
-      </Router>
-    </StyleProvider>
+      </StyleProvider>
+    </Router>
   ); 
 }
 
