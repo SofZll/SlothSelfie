@@ -67,6 +67,7 @@
   .select-pomodoro {
     flex-direction: column;
     align-items: center;
+    padding-bottom: 27%;
   }
 
   .song-container,
