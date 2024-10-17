@@ -36,21 +36,46 @@
     height: 94%;
     }
 
-@media (max-width: 840px) {
+@media screen and (max-width: 400px) {
     .card {
-        width: 19rem;
-        height: 80%;
+        width: 19rem  !important;
+        }
+
+    .carousel {
+        width: 90vw !important;
+        flex-direction: column-reverse;
+        justify-content: start;
+        }
+
+    .divBtn4icon {
+            display: none;
+        }
+    
+}
+
+@media screen and (max-width: 500px) and (min-width: 401px) {
+    .card {
+        width: 21rem  !important;
         padding: 0 1rem;
     }
 
     .carousel {
-        width: 97% !important;
+        width: 90vw !important;
+        flex-direction: column-reverse;
+        justify-content: start;
+    }
 
+    .divBtn4icon {
+        display: none;
     }
 }
 
-@media (max-height: 768px) {
+@media (max-height: 932px) {
     .card {
         height: 95%;
+    }
+
+    .carousel {
+        height: 75vh !important;
     }
 }

@@ -262,6 +262,7 @@ p {
   .App-header {
     margin: 5px;
     justify-content: center;
+    height: 9%;
   }
 
   .App-logo {
@@ -271,6 +272,7 @@ p {
 
   h1 {
     font-size: 2.5rem;
+    margin-bottom: 5px;
   }
 
   .title {
@@ -313,6 +315,14 @@ p {
   .carousel_structure{
     height: 100%;
     width: 100%;
+  }
+
+  .App-body {
+    justify-content: start;
+  }
+
+  .btn {
+    padding: 8px 12px;
   }
 }
 

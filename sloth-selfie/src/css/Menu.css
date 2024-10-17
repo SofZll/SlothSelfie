@@ -86,22 +86,40 @@
 }
 
 .navbar-message:hover {
-    color: #FAF9F9;
+    color: #F9F9F9;
     background-color: transparent;
 }
 
-@media (max-width: 840px) {
+.mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.mobile-nav a {
+    margin: 0 10px;
+    text-decoration: none;
+    color: #333;
+}
+
+@media (max-width: 500px) {
     .bm-burger-button {
         left: 30px;
         top: 30px;
         width: 33px;
         height: 26px;
+        display: none;
     }
     
     .bm-menu {
-        width: 100%;
-        background-color: rgba(37, 3A, 47, 0.7);
-        opacity: 0.9;
+        display: none;
     }
 
     .bm-menu-wrap {
@@ -116,4 +134,19 @@
         font-size: 26px;
     }
 
+    .mobile-nav {
+        display: flex;
+        justify-content: space-around;
+    }
+
+}
+
+@media (min-width: 769px) {
+    .mobile-nav {
+        display: none;
+    }
+
+    .bm-menu {
+        display: block;
+    }
 }

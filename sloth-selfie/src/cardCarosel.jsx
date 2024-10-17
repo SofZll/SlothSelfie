@@ -2,9 +2,7 @@ import './css/CarouselHome.css';
 import React, { useState } from "react";
 import { useSpring, animated } from "react-spring";
 import { marked } from 'marked';
-import Button from "./Button";
 import Calendar from 'react-calendar';
-import animatedHourglass from './media/Hourglass.gif';
 import noteImage from './media/note.png';
 import './css/App.css';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -17,7 +15,6 @@ import { initialNotes } from './Notes';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
-    let playTomato = false;
     const navigate = useNavigate();
 
     // animation page
