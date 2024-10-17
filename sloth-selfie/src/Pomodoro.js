@@ -3,6 +3,7 @@ import { useState } from 'react';
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
+import PomodoroTimer from './PomodoroTimer';
 
 function PomodoroFunction() {
     const { updateStyles, updateIcon } = useContext(StyleContext);
@@ -22,6 +23,17 @@ function PomodoroFunction() {
     const [timeBreakSuggest2, setTimeBreakSuggest2] = useState('5');
     const [numberCyclesSuggest2, setNumberCyclesSuggest2] = useState('3');
     const [timeTotalSuggest2, setTimeTotalSuggest2] = useState('175');
+
+    const startPomodoro = () => {
+        const pomodoro = document.getElementById('pomodoro');
+        if (pomodoro) {
+            pomodoro.style.display = 'flex';
+            pomodoro.innerHTML = '';
+            pomodoro.appendChild(PomodoroTimer());
+        } else {
+            console.error('Element with ID "pomodoro" not found.');
+        }
+    };
 
     const handleChoiceSelection = (type) => {
         setChoiceSelection(type);
@@ -63,6 +75,25 @@ function PomodoroFunction() {
         if (selectionPomodoroSettings && (choiceSelection === 1 || choiceSelection === 2)) {
             selectionPomodoroSettings.style.display = 'none';
         }
+    };
+
+    const selectionSuggestedPomodoro = (type) => {
+        if (type === 1) {
+            setTextStudio(timeStudySuggest1);
+            setTextBreak(timeBreakSuggest1);
+            setTextCycles(numberCyclesSuggest1);
+            setTextTotal(timeTotalSuggest1);
+        }
+        else if (type === 2) {
+            setTextStudio(timeStudySuggest2);
+            setTextBreak(timeBreakSuggest2);
+            setTextCycles(numberCyclesSuggest2);
+            setTextTotal(timeTotalSuggest2);
+        }
+    };
+
+    const backPage = () => {
+        window.location.href = '/';
     };
 
     const backSelection = () => {
@@ -220,7 +251,7 @@ function PomodoroFunction() {
                     <button className='settings-choice' onClick={() => handleChoiceSelection(1)} >Set the number of cycles and their duration</button>
                     <button className='settings-choice' onClick={() => handleChoiceSelection(2)}>Set the total time of your studying session</button>
                     <div className='divBtn'>
-                        <button className='btn btn-tomato'>Back</button>
+                        <button className='btn btn-tomato' onClick={backPage}>Back</button>
                         <botton className='btn btn-tomato' onClick={selectChoice}>Select</botton>
                     </div>
                 </div>
@@ -289,13 +320,13 @@ function PomodoroFunction() {
                         </div>
                         <div id='suggested-cycles-div' className='suggested-cycles-div'>
                             <p>Select one of the suggested Pomodoro</p>
-                            <button className='suggested-cycles'>
+                            <button className='suggested-cycles' onClick={()=>selectionSuggestedPomodoro(1)}>
                                 <p>Study time: {timeStudySuggest1} minutes</p>
                                 <p>Break time: {timeBreakSuggest1} minutes</p>
                                 <p>Cycles number: {numberCyclesSuggest1}</p>
                                 <p>Total time: {timeTotalSuggest1} minutes</p>
                             </button>
-                            <button className='suggested-cycles'>
+                            <button className='suggested-cycles' onClick={()=>selectionSuggestedPomodoro(2)}>
                                 <p>Study time: {timeStudySuggest2} minutes</p>
                                 <p>Break time: {timeBreakSuggest2} minutes</p>
                                 <p>Cycles number: {numberCyclesSuggest2}</p>
@@ -306,20 +337,14 @@ function PomodoroFunction() {
                 </div>
                 <div className='divBtn'>
                     <button id='btn-back' className='btn btn-tomato btn-back' onClick={backSelection}>Back</button>
-                    <button id='btn-tomato-start' className='btn btn-tomato btn-tomato-start'>Let's get started</button>
-                    <botton id='btn-tomato-QS' className='btn btn-tomato'>Quick Start</botton>
+                    <button id='btn-tomato-start' className='btn btn-tomato btn-tomato-start' onClick={startPomodoro}>Let's get started</button>
+                    <botton id='btn-tomato-QS' className='btn btn-tomato' onClick={startPomodoro}>Quick Start</botton>
                 </div>
             </div>
 
 
-            <div className="pomodoro">
-                <div className="song-container">
-
-                </div>
-                <div className="pomodoro-container">
-                </div>
-                <div className="stats-container">
-                </div>
+            <div id='pomodoro' className="pomodoro">
+                
             </div>
         </div>
     );
