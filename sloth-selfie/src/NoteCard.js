@@ -10,7 +10,7 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
     };
 
     marked.setOptions({
-      breaks: true,  // Se desideri che le nuove linee vengano rispettate
+      breaks: true,
     });
 
     // Convert the note content to HTML
@@ -25,7 +25,15 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
     <div className="note-card">
       <h3>{note.title}</h3>
       <small>{note.category}</small><br/><br/>
-       {/* Note content: if expanded show all the note text*/}
+      <small>Author: {note.author}</small><br/>
+      <small>
+        Access: {note.access?.type === 'public' 
+          ? 'Public' 
+          : note.access?.type === 'private' 
+          ? 'Private' 
+          : `Shared with: ${note.access?.allowedUsers.join(', ')}`}
+    </small>
+    {/* Note content: if expanded show all the note text*/}
        <div
           onClick={toggleExpand}
           style={{ cursor: 'pointer' }}
