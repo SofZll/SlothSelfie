@@ -36,6 +36,7 @@ function EventsFunction() {
   const { updateStyles, updateIcon } = useContext(StyleContext);
   const [events, setEvents] = useState(initialEvents || []);
   const [id, setId] = useState("");
+  const [originalId, setOriginalId] = useState("");
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('00:00');
@@ -75,6 +76,7 @@ function EventsFunction() {
     if (selectedEvent) {// Pre-fill the form with the selected event
         console.log("Selected event:", selectedEvent);
         setId(selectedEvent.id);
+        setOriginalId(selectedEvent.id);
         setTitle(selectedEvent.title);
         setDate(selectedEvent.start ? new Date(selectedEvent.start).toISOString().substring(0, 10) : ''); // Format as YYYY-MM-DD
         setTime(selectedEvent.start ? new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''); // Format as HH:MM
@@ -112,6 +114,7 @@ function EventsFunction() {
     e.preventDefault();
     let newEvent = {
       id: events.length + 1,
+      originalId: events.length + 1,
       title,
       date,
       time,
@@ -146,9 +149,10 @@ function EventsFunction() {
     }
     // Reset input fields
     setId('');
+    setOriginalId('');
     setTitle('');
     setDate('');
-    setTime('');
+    setTime('00:00');
     setDuration('');
     setAllDay(false);
     setDays(1);
@@ -167,7 +171,7 @@ function EventsFunction() {
         console.log("Form submit triggered");
         if (selectedEvent) {
           console.log("Submitting update for event:", selectedEvent);
-          handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing);
+          handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing, originalId, setOriginalId);
         } else {
           handleAddEvent(e);
         }
@@ -343,11 +347,11 @@ function EventsFunction() {
             {showConfirmation && (
               <div className="popup">
                 <h2>Are you sure you want to delete this event?</h2>
-                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing)}>Yes</button>
+                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>Yes</button>
                 <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
               </div>
             )}
-            <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing)}>X</button>
+            <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>X</button>
             </div>
           )}
       </div>
