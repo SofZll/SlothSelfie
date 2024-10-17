@@ -18,6 +18,7 @@
 .bm-cross-button {
     height: 50px !important;
     width: 50px !important;
+    z-index: 1000;
 }
 
 .bm-cross {
@@ -26,6 +27,7 @@
     background: #BDC3C7;
     height: 25px !important;
     width: 4px !important;
+    z-index: 1000;
 }
 
 .bm-menu {
@@ -102,6 +104,7 @@
         width: 100%;
         background-color: rgba(37, 3A, 47, 0.7);
         opacity: 0.9;
+        z-index: 1000;
     }
 
     .bm-menu-wrap {

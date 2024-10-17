@@ -262,22 +262,15 @@ p {
 /* Media Queries */
 @media (max-width: 840px) {
 
-  .App{
-    margin-top: 15% !important;
-  }
-  
   .header-content{
-    position: fixed;
+    position: relative;
     width: 100%;
     padding-left: 5rem;
-    top: 1%;
   }
 
   .App-header {
     margin: 5px;
     justify-content: center;
-    position: fixed;
-    top: 1%;
   }
 
   .App-logo {
@@ -286,7 +279,7 @@ p {
   }
 
   h1 {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
   }
 
   .title {

@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import iconHomeLight from './media/SlothLight.svg';
+import iconHomeDark from './media/SlothDark.svg';
+import { update } from 'react-spring';
 
 export const StyleContext = createContext();
 
@@ -36,8 +38,10 @@ export const StyleProvider = ({ children }) => {
     useEffect(() => {
         if ((location.pathname === '/notes') || (location.pathname === '/profile') || (location.pathname === '/activities') || (location.pathname === '/events') || (location.pathname === '/pomodoro') || (location.pathname === '/projects')) {
             updateStyles(true);
+            updateIcon(iconHomeDark);
         } else {
             updateStyles(false);
+            updateIcon(iconHomeLight);
         }
     }, [location]);
 
