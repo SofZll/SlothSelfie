@@ -43,6 +43,7 @@ export function generateRepeatedEvents (event, repeatEndDate = null, repeatCount
       
         repeatedEvents.push({
         id: event.id + count,
+        originalId: event.id,
         title: event.title,
         start: new Date(currentDate),
         end: new Date(currentDate.getTime() + (event.duration ? event.duration * 60 * 60 * 1000 : 0)),
@@ -118,14 +119,15 @@ export function normalizeEvents (events) {
 };
 
 //Function to reset imput fields
-export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing) {
+export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId) {
     setSelectedEvent(null); // close the popup
     setIsEditing(false); // reset the editing state
     //Reset imput fields
     setId('');
+    setOriginalId('');
     setTitle('');
     setDate('');
-    setTime('');
+    setTime('00:00');
     setDuration('');
     setAllDay(false);
     setDays(1);
@@ -139,34 +141,15 @@ export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, se
 export function handleUpdateEvent(
     e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, 
     events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, 
-    setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing
+    setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing, originalId, setOriginalId
   ){
     e.preventDefault();
     console.log("Updating event:", id); // Check if the update function is called
     const updatedEvents = events.map(event => {
-        if (event.id === id) {
-            // check if we need to update all future events
-            if (updateAllFutureEvents && event.repeatFrequency) {
-              return {
+        if (event.id === id && !updateAllFutureEvents) {//we update only the current event
+            // Update only the current instance
+            return {
                 ...event,
-                id: event.id,
-                title: title,
-                // here we calculate the next occurrence of the event
-                date: calculateNextOccurrence(date, event.repeatFrequency),
-                time: time,
-                duration: duration,
-                allDay: allDay,
-                days: days,
-                repeatFrequency: repeatFrequency,
-                repeatEndDate: repeatEndDate,
-                repeatCount: repeatCount,
-                eventLocation: eventLocation,
-              };
-            } else {
-              // update the current event only
-              return {
-                ...event,
-                id: event.id,
                 title: title,
                 date: date,
                 time: time,
@@ -177,15 +160,28 @@ export function handleUpdateEvent(
                 repeatEndDate: repeatEndDate,
                 repeatCount: repeatCount,
                 eventLocation: eventLocation,
-              };
-            }
-          }
-          return event;
+            };
+        } else if (event.originalId === event.originalId && updateAllFutureEvents) {//we update all the events with the same originalId
+            return {
+                ...event,
+                title: title,
+                eventLocation: eventLocation,
+                time: time,
+                duration: duration,
+                allDay: allDay,
+                days: days,
+                repeatFrequency: repeatFrequency,
+                repeatEndDate: repeatEndDate,
+                repeatCount: repeatCount,
+                date: calculateNextOccurrence(event.date, event.repeatFrequency), // Calculate next occurrence for future events
+            };
+        }
+        return event; // Return unchanged events
     });
 
     console.log("Updated events:", events); // Check if the events are updated
     setEvents(updatedEvents);
-    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing);
+    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId);
 }
 
 // Function to calculate the next occurrence of a repeated event
@@ -226,8 +222,8 @@ export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
   };
 
   // Function to confirm the deletion
-  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing) {
+  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId) {
     handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
     setShowConfirmation(false);
-    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing);
+    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId);
   };
