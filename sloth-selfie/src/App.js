@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
 import ProfileFunction from './Profile';
+import { use } from 'marked';
 
 function App() {
   const username = 'user';
@@ -54,6 +55,10 @@ function App() {
     }
   };
 
+  const isMobile = () => {
+    return window.matchMedia('(max-width: 768px)').matches; // Soglia di 768px per modalità cellulare
+  };
+
   let cards = [
     {
       key: uuidv4(),
@@ -82,17 +87,19 @@ function App() {
   ];
 
   useEffect(() => {
-    // Chiediamo all'utente di entrare in fullscreen
-    window.addEventListener('click', openFullscreen);
-    
-    // Cleanup dell'event listener quando il componente viene smontato
-    return () => {
-      window.removeEventListener('click', openFullscreen);
+    if (isMobile()) {
+      // Chiediamo all'utente di entrare in fullscreen
+      window.addEventListener('click', openFullscreen);
+      
+      // Cleanup dell'event listener quando il componente viene smontato
+      return () => {
+        window.removeEventListener('click', openFullscreen);
+      }
     };
   }, [])
 
   return (
-    <Router onLoad={openFullscreen}>
+    <Router>
       <StyleProvider>
         <div className="App">
           <header className="App-header">
