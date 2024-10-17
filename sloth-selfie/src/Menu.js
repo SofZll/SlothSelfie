@@ -15,18 +15,32 @@ const Menu = ({username}) => {
     };
 
     return (
-        <Hamburger isOpen={isOpen} onStateChange={handleStateChange}>
+        <>
+            <Hamburger isOpen={isOpen} onStateChange={handleStateChange}>
+                <div className="navbar-message">
+                    Welcome back, {username}!
+                </div>
+                <Link to="/profile" onClick={closeMenu}>Profile</Link>
+                <Link to="/" onClick={closeMenu}>Home</Link>
+                <Link to="/events" onClick={closeMenu}>Events</Link>
+                <Link to="/activities" onClick={closeMenu}>Activities</Link>
+                <Link to="/notes" onClick={closeMenu}>Notes</Link>
+                <Link to="/pomodoro" onClick={closeMenu}>Pomodoro</Link>
+                {/*<Link to="/projects">Projects</Link>*/}
+            </Hamburger>
+
+        <nav className="mobile-nav">
             <div className="navbar-message">
                 Welcome back, {username}!
             </div>
-            <Link to="/profile" onClick={closeMenu}>Profile</Link>
-            <Link to="/" onClick={closeMenu}>Home</Link>
-            <Link to="/events" onClick={closeMenu}>Events</Link>
-            <Link to="/activities" onClick={closeMenu}>Activities</Link>
-            <Link to="/notes" onClick={closeMenu}>Notes</Link>
-            <Link to="/pomodoro" onClick={closeMenu}>Pomodoro</Link>
-            {/*<Link to="/projects">Projects</Link>*/}
-        </Hamburger>
+            <Link to="/profile">Profile</Link>
+            <Link to="/">Home</Link>
+            <Link to="/events">Events</Link>
+            <Link to="/activities">Activities</Link>
+            <Link to="/notes">Notes</Link>
+            <Link to="/pomodoro">Pomodoro</Link>
+        </nav>
+    </>
     );
 };
 

@@ -4,8 +4,6 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import PomodoroTimer from './PomodoroTimer';
-import ReactDOM from 'react-dom';
-import { Route } from 'react-router-dom';
 
 function PomodoroFunction() {
     const { updateStyles, updateIcon } = useContext(StyleContext);
@@ -292,7 +290,7 @@ function PomodoroFunction() {
                                     onChange={(e) => handleInputChange(e,1)}
                                     style={{ width: '65%', padding: '5px', marginTop: '5px' }}
                                 />
-                                <p>minuts</p>
+                                <p>minutes</p>
                             </div>
                             <div className='input-break-div'>
                                 <label htmlFor="inputText">Break:</label>
@@ -303,7 +301,7 @@ function PomodoroFunction() {
                                     onChange={(e) => handleInputChange(e,2)}
                                     style={{ width: '65%', padding: '5px', marginTop: '5px' }}
                                 />
-                                <p>minuts</p>
+                                <p>minutes</p>
                             </div>
                         </div>
                         <div className='input-cycles-div'>
@@ -336,7 +334,7 @@ function PomodoroFunction() {
                                 onChange={(e) => handleInputChange(e,3)}
                                 style={{ width: '65%', padding: '5px', marginTop: '5px' }}
                             />
-                            <p>minuts</p>
+                            <p>minutes</p>
                         </div>
                         <div className='divBtn'>
                             <button id='btn-back-total-time-one' className='btn btn-tomato' onClick={backSelection}>Back</button>

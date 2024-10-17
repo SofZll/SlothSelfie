@@ -63,7 +63,7 @@ export default function CarroussSel(props) {
     <div className="carousel" {...handlers}
       style={{ width: props.width, height: props.height, margin: props.margin, touchAction: 'pan-y' }}
     >
-      <div className="divBtn">
+      <div className="divBtn divBtn4icon">
           <button onClick={() => handleGoToSlide(0)} className="btn">
             <img src={iconCalendar} alt="icon" className="icon"/>
           </button>
