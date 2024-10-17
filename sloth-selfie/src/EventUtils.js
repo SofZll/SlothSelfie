@@ -146,7 +146,7 @@ export function handleUpdateEvent(
     e.preventDefault();
     console.log("Updating event:", id); // Check if the update function is called
     const updatedEvents = events.map(event => {
-        if (event.id === id) {
+        if (event.id === id && !updateAllFutureEvents) {//we update only the current event
             // Update only the current instance
             return {
                 ...event,
@@ -161,9 +161,7 @@ export function handleUpdateEvent(
                 repeatCount: repeatCount,
                 eventLocation: eventLocation,
             };
-        } else if (event.originalId === originalId && updateAllFutureEvents) { //questo fa update di 1 solo evento ripetuto
-        //} else if (event.originalId === event.originalId && updateAllFutureEvents) { //questo fa update di tutti gli eventi ripetuti
-            // Update future instances if they match the same originalId
+        } else if (event.originalId === event.originalId && updateAllFutureEvents) {//we update all the events with the same originalId
             return {
                 ...event,
                 title: title,
