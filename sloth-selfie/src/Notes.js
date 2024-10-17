@@ -8,9 +8,6 @@ import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
 import { canUserAccess, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 
-const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
-//const accessibleNotes = notes.filter(note => canUserAccess(note, currentUser));
-
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
     {
@@ -18,16 +15,28 @@ const initialNotes = [
       category: 'Work',
       content: 'This is a note',
       author: 'Bob',
-      accessList: 'public', // or 'private' or specific people ['Alice', 'Bob']
+      access: { 
+        type: 'public', 
+        allowedUsers: [] 
+      },
       createDate: new Date(),
       updateDate: new Date(),
     },
   { title: 'Second Note', category: 'Study', content: 'This is another note', author: 'Bob',
-    accessList: 'private',createDate: new Date(), updateDate: new Date() },
+    access: { 
+      type: 'private', 
+      allowedUsers: [] 
+    },createDate: new Date(), updateDate: new Date() },
   { title: 'Third Note', category: 'Personal', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam imperdiet quam fringilla libero rutrum lobortis. Nam id vulputate odio. Cras molestie quis ante et vestibulum. Nullam viverra leo quis libero vulputate ultricies sit amet et lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas vestibulum ligula ac tortor faucibus, eget viverra elit faucibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum eu diam interdum, luctus velit in, vehicula erat. Aliquam dapibus mauris eget nulla faucibus, vitae commodo massa placerat. Nam luctus felis nec fermentum lobortis. Aliquam ac odio a neque suscipit mollis. Cras sit amet felis dolor. Nam consequat, nulla vitae lacinia malesuada, ipsum nibh pulvinar mi, sit amet eleifend elit velit id nulla. Cras pretium elit luctus, laoreet turpis sed, scelerisque tellus. Fusce venenatis feugiat diam, id tristique ligula pellentesque vitae.',
-    author: 'Alice A.', accessList: 'public',createDate: new Date(), updateDate: new Date() },
+    author: 'Alice A.', access: { 
+      type: 'public', //if private Bob can't see it
+      allowedUsers: [] 
+    },createDate: new Date(), updateDate: new Date() },
   { title: 'Fourth Note', category: 'Others', content: "# This is a markdown note\n\nHere is some **bold** text, and here is a list:\n\n- Item 1\n- Item 2\n- Item 3\n\nYou can also add [links](https://example.com) and other markdown syntax.",
-    author: 'Someone', accessList: 'Alice, Bob', createDate: new Date(), updateDate: new Date() },
+    author: 'Someone', access: { 
+      type: 'restricted', 
+      allowedUsers: ['Alice', 'Bob'] 
+    }, createDate: new Date(), updateDate: new Date() },
 ];
 
 function NotesFunction() {
@@ -43,6 +52,10 @@ function NotesFunction() {
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
+
+
+  const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
+  const accessibleNotes = notes.filter(note => canUserAccess(note, currentUser));
 
   // change style page onload document
   useEffect(() => {
@@ -62,7 +75,7 @@ function NotesFunction() {
       title: noteTitle, 
       category: noteCategory, 
       content: noteContent, 
-      author: noteAuthor,
+      author: currentUser,
       access: { 
         type: noteAccess, 
         allowedUsers: noteAccess === 'restricted' ? allowedUsers : [] // Add allowed users if restricted
@@ -149,9 +162,13 @@ const filterNotesByDate = (notes) => {
       </select>
       {noteAccess === 'restricted' && (
       <div>
+        {/* We include the current user*/}
+        {currentUser && !allowedUsers.includes(currentUser) && 
+          setAllowedUsers(prevUsers => [...prevUsers, currentUser])
+        }
         <input 
           type="text" 
-          placeholder="Allowed User" 
+          placeholder="type and press Enter" 
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               const newUser = e.target.value.trim();
@@ -181,7 +198,9 @@ const filterNotesByDate = (notes) => {
       <h2>Your Notes:</h2>
       <div className="notes-container">
         <div className = "scrollable-Card-list">
-          {filterNotesByDate(sortNotes(notes)).map((note, index) => (
+          {/* Filter the accessible notes from the users and the orders */}
+          {/*{filterNotesByDate(sortNotes(notes)).map((note, index) => ( */}
+          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)))).map((note, index) => (
             <NoteCard
               key={index}
               note={note}

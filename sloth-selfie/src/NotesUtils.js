@@ -1,4 +1,7 @@
 export function canUserAccess(note, currentUser) {
+    if (!note.access) {
+        return false; // if no access is defined, the note is private
+    }
     if (note.access.type === 'public') {
       return true;  // open to everyone
     }
@@ -6,8 +9,12 @@ export function canUserAccess(note, currentUser) {
       return note.author === currentUser;  //only the author can access
     }
     if (note.access.type === 'restricted') {
-      return note.allowedUsers.includes(currentUser);  //only the allowed users can access
+        //Verify if allowedUsers is an array and if it contains the current user
+        console.log('Allowed Users:', note.access.allowedUsers);
+        return Array.isArray(note.access.allowedUsers) && 
+               note.access.allowedUsers.includes(currentUser);
     }
+
     return false;
   }
 
@@ -21,6 +28,7 @@ export function handleDeleteNote(index, notes, setNotes) {
     setNotes(notes.filter((_, i) => i !== index));
 };
 
+//TODO: adjust for limited access
 export function handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing) {
   setIsEditing(index);
   setNoteTitle(notes[index].title);
