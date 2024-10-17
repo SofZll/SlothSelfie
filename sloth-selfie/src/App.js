@@ -41,6 +41,19 @@ function App() {
 
   */
 
+  const openFullscreen = () => {
+    const elem = document.documentElement; // L'intero documento sarà a schermo intero
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.mozRequestFullScreen) { // Firefox
+      elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari e Opera
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { // IE/Edge
+      elem.msRequestFullscreen();
+    }
+  };
+
   let cards = [
     {
       key: uuidv4(),
@@ -68,9 +81,18 @@ function App() {
     }
   ];
 
+  useEffect(() => {
+    // Chiediamo all'utente di entrare in fullscreen
+    window.addEventListener('click', openFullscreen);
+    
+    // Cleanup dell'event listener quando il componente viene smontato
+    return () => {
+      window.removeEventListener('click', openFullscreen);
+    };
+  }, [])
 
   return (
-    <Router>
+    <Router onLoad={openFullscreen}>
       <StyleProvider>
         <div className="App">
           <header className="App-header">
