@@ -7,6 +7,8 @@ const router = express.Router();
 // User endpoints
 router.post('/login', loginUser);
 router.post('/register', registerUser);
+router.post('/logout', logoutUser);
+router.get('/user/image/:userId', getUserImage);
 
 // Time machine endpoint
 router.get('/fetchState', fetchState);
