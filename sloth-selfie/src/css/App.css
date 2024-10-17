@@ -1,9 +1,19 @@
+.body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .root {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .carousel {
@@ -72,12 +82,14 @@ h1 {
   margin-bottom: 20px;
   font-size: 3rem;
   color: #FAF9F9;
+  font-weight: bold;
 }
 
 h2 {
   margin-bottom: 20px;
   font-size: 1.5rem !important;
   color: #555B6E !important;
+  font-weight: bold;
 }
 
 p {
@@ -198,10 +210,6 @@ p {
   color: #555B6E;
 }
 
-.dark-burger{
-  color: #555B6E;
-}
-
 /* time machine */
 
 .time-machine {
@@ -257,6 +265,7 @@ p {
   .header-content{
     position: relative;
     width: 100%;
+    padding-left: 5rem;
   }
 
   .App-header {
@@ -375,4 +384,48 @@ p {
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #f8f9fa;
+}
+
+/*List used for notes in the preview*/
+.card {
+  max-width: 400px;
+  margin: 0 auto;
+  word-wrap: break-word;
+}
+
+.card-body {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.card-text {
+  max-height: 100px;
+  overflow-y: auto; 
+  white-space: normal;
+}
+
+.card-text img {
+  max-width: 100%;
+  height: auto;
+}
+
+.scrollable-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/*hides scrollbar on Webkit (Chrome, Safari) */
+.scrollable-list::-webkit-scrollbar {
+  display: none;
+}
+
+/*hides scrollbar on Firefox */
+.scrollable-list {
+  scrollbar-width: none;
+}
+
+/*hides scrollbar on Internet Explorer e Edge */
+.scrollable-list {
+  -ms-overflow-style: none;
 }

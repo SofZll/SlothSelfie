@@ -79,9 +79,17 @@ function Card({ title, caseShow }) {
                             <div className="scrollable-list">
                                 {initialNotes.length > 0 ? (
                                     initialNotes.map((note, index) => (
-                                        <div key={index} className="card mb-3"style={{ maxWidth: "400px", margin: "0 auto",  wordWrap: "break-word" }}> {/* Bootstrap card */}
+                                        <div key={index} className="card mb-3"> {/* Bootstrap card */}
                                             <div className="card-body">
                                                 <h5 className="card-title">{note.title}</h5>
+                                                <small>Author: {note.author}</small><br />
+                                                <small>
+                                                    Access: {note.access.type === 'public' 
+                                                        ? 'Public' 
+                                                        : note.access.type === 'private' 
+                                                        ? 'Private' 
+                                                        : `Shared with: ${note.access.allowedUsers.join(', ')}`}
+                                                </small>
                                                 <p className="card-text">
                                                     {/* Limiting note content to 200 characters, showing markdown */}
                                                     <div

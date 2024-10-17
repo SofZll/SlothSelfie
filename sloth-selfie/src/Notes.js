@@ -28,7 +28,7 @@ const initialNotes = [
       allowedUsers: [] 
     },createDate: new Date(), updateDate: new Date() },
   { title: 'Third Note', category: 'Personal', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam imperdiet quam fringilla libero rutrum lobortis. Nam id vulputate odio. Cras molestie quis ante et vestibulum. Nullam viverra leo quis libero vulputate ultricies sit amet et lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas vestibulum ligula ac tortor faucibus, eget viverra elit faucibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum eu diam interdum, luctus velit in, vehicula erat. Aliquam dapibus mauris eget nulla faucibus, vitae commodo massa placerat. Nam luctus felis nec fermentum lobortis. Aliquam ac odio a neque suscipit mollis. Cras sit amet felis dolor. Nam consequat, nulla vitae lacinia malesuada, ipsum nibh pulvinar mi, sit amet eleifend elit velit id nulla. Cras pretium elit luctus, laoreet turpis sed, scelerisque tellus. Fusce venenatis feugiat diam, id tristique ligula pellentesque vitae.',
-    author: 'Alice A.', access: { 
+    author: 'Alice', access: { 
       type: 'public', //if private Bob can't see it
       allowedUsers: [] 
     },createDate: new Date(), updateDate: new Date() },
@@ -39,13 +39,15 @@ const initialNotes = [
     }, createDate: new Date(), updateDate: new Date() },
 ];
 
+const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
+
 function NotesFunction() {
   const { updateStyles, updateIcon } = useContext(StyleContext);
   const [notes, setNotes] = useState(initialNotes || []);
   const [noteTitle, setNoteTitle] = useState('');
   const [noteCategory, setNoteCategory] = useState('');
   const [noteContent, setNoteContent] = useState('');
-  const [noteAuthor, setNoteAuthor] = useState('');
+  const [noteAuthor, setNoteAuthor] = useState(currentUser);
   const [noteAccess, setNoteAccess] = useState('public');
   const [allowedUsers, setAllowedUsers] = useState([]);
   const [sortCriterion, setSortCriterion] = useState('');
@@ -53,9 +55,6 @@ function NotesFunction() {
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
 
-
-  const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
-  const accessibleNotes = notes.filter(note => canUserAccess(note, currentUser));
 
   // change style page onload document
   useEffect(() => {
@@ -134,7 +133,7 @@ const filterNotesByDate = (notes) => {
       <input
         value={noteAuthor}
         onChange={(e) => setNoteAuthor(e.target.value)}
-        placeholder="Author Name"
+        placeholder="Author Name: enter username"
       />
        <select id = "category"
         value={noteCategory}
