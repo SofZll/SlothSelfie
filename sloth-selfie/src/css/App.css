@@ -382,3 +382,47 @@ p {
   border-radius: 5px;
   background-color: #f8f9fa;
 }
+
+/*List used for notes in the preview*/
+.card {
+  max-width: 400px;
+  margin: 0 auto;
+  word-wrap: break-word;
+}
+
+.card-body {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.card-text {
+  max-height: 100px;
+  overflow-y: auto; 
+  white-space: normal;
+}
+
+.card-text img {
+  max-width: 100%;
+  height: auto;
+}
+
+.scrollable-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/*hides scrollbar on Webkit (Chrome, Safari) */
+.scrollable-list::-webkit-scrollbar {
+  display: none;
+}
+
+/*hides scrollbar on Firefox */
+.scrollable-list {
+  scrollbar-width: none;
+}
+
+/*hides scrollbar on Internet Explorer e Edge */
+.scrollable-list {
+  -ms-overflow-style: none;
+}
