@@ -1,4 +1,9 @@
+import { a } from "react-spring";
+
 export function canUserAccess(note, currentUser) {
+    if (!note.access) {
+        return false; // if no access is defined, the note is private
+    }
     if (note.access.type === 'public') {
       return true;  // open to everyone
     }
@@ -6,8 +11,12 @@ export function canUserAccess(note, currentUser) {
       return note.author === currentUser;  //only the author can access
     }
     if (note.access.type === 'restricted') {
-      return note.allowedUsers.includes(currentUser);  //only the allowed users can access
+        //Verify if allowedUsers is an array and if it contains the current user
+        console.log('Allowed Users:', note.access.allowedUsers);
+        return Array.isArray(note.access.allowedUsers) && 
+               note.access.allowedUsers.includes(currentUser);
     }
+
     return false;
   }
 
@@ -21,17 +30,25 @@ export function handleDeleteNote(index, notes, setNotes) {
     setNotes(notes.filter((_, i) => i !== index));
 };
 
-export function handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing) {
+export function handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing, setNoteAuthor, setNoteAccess, setAllowedUsers) {
   setIsEditing(index);
   setNoteTitle(notes[index].title);
   setNoteCategory(notes[index].category);
   setNoteContent(notes[index].content);
+  setNoteAuthor(notes[index].author);
+  setNoteAccess(notes[index].access.type);
+  setAllowedUsers(notes[index].access.allowedUsers);
 };
 
-export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent) {
+export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers) {
   const updatedNote = {
     ...notes[index],
     title: noteTitle,
+    author: noteAuthor,
+    access: { 
+      type: noteAccess, 
+      allowedUsers: noteAccess === 'restricted' ? allowedUsers : [] // Add allowed users if restricted
+    },
     category: noteCategory,
     content: noteContent,
     updateDate: new Date() // updates the modify date
@@ -44,6 +61,9 @@ export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, 
   setNoteTitle('');
   setNoteCategory('');
   setNoteContent('');
+  setNoteAuthor('');
+  setNoteAccess('public');
+  setAllowedUsers([]);
 };
 
 export function sortNotes(notes, sortCriterion) {
