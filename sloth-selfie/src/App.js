@@ -122,6 +122,9 @@ function App() {
             </Routes>
           </div>
         </div>
+        <div class="landscape-warning">
+          Coglion* ruota il telefono &#129324;
+        </div>
       </StyleProvider>
     </Router>
   ); 

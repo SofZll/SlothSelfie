@@ -334,6 +334,32 @@ p {
   }
 }
 
+/* Nascondi il contenuto quando in modalità landscape */
+@media screen and (orientation: landscape) AND (max-height: 840px) {
+  .App {
+    display: none;
+  }
+
+  .landscape-warning {
+    display: block;
+    text-align: center;
+    padding: 20px;
+    font-size: 3rem;
+    color: red;
+  }
+}
+
+/* Mostra il contenuto quando in modalità portrait */
+@media screen and (orientation: portrait) AND (max-height: 840px){
+  .App {
+    display: flex;
+  }
+
+  .landscape-warning {
+    display: none;
+  }
+}
+
 /* Zoom animation */
 @keyframes zoom {
   from {
