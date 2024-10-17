@@ -2,6 +2,7 @@ global.rootDir = __dirname ;
 global.startDate = null; 
 
 const express = require('express');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/userRoutes');
 const path = require('path');
@@ -13,6 +14,14 @@ const app = express();
 connectDB();
 
 app.use(bodyParser.json());
+
+/*
+app.use(session({
+    secret:
+    resave: false;
+    saveUninitialized: true;
+}))
+*/
 app.use('/api', userRoutes);
 
 // Static files from frontend
