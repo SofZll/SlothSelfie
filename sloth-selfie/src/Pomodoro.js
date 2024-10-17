@@ -4,6 +4,8 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import PomodoroTimer from './PomodoroTimer';
+import ReactDOM from 'react-dom';
+import { Route } from 'react-router-dom';
 
 function PomodoroFunction() {
     const { updateStyles, updateIcon } = useContext(StyleContext);
@@ -24,14 +26,27 @@ function PomodoroFunction() {
     const [numberCyclesSuggest2, setNumberCyclesSuggest2] = useState('3');
     const [timeTotalSuggest2, setTimeTotalSuggest2] = useState('175');
 
-    const startPomodoro = () => {
+    const startPomodoro = (defaultStart) => {
+        if (!defaultStart) {
+            if (textStudio === '' || textBreak === '' || textCycles === '' || textTotal === ''
+                || isNaN(textStudio) || isNaN(textBreak) || isNaN(textCycles) || isNaN(textTotal)) {
+                alert("Please enter valid Pomodoro settings.");
+                return;
+            }
+
+            if (parseInt(textTotal) !== (parseInt(textStudio) + parseInt(textBreak)) * parseInt(textCycles)) {
+                alert("The total time doesn't match the study and break time and the number of cycles.");
+                return;
+            }
+        }
+
         const pomodoro = document.getElementById('pomodoro');
-        if (pomodoro) {
+        const selectionPomodoro = document.getElementById('select-pomodoro');
+        if (pomodoro && selectionPomodoro) {
             pomodoro.style.display = 'flex';
-            pomodoro.innerHTML = '';
-            pomodoro.appendChild(PomodoroTimer());
+            selectionPomodoro.style.display = 'none';
         } else {
-            console.error('Element with ID "pomodoro" not found.');
+            console.error('Element with ID "pomodoro" or "select-pomodoro" not found.');
         }
     };
 
@@ -116,6 +131,12 @@ function PomodoroFunction() {
         } else {
             console.error('Element with ID "selection-pomodoro-settings", "pomodoro-timers-options", "pomodoro-total-time-option", "btnQS", "btnBack" or "btn-tomato-start" not found.');
         }
+
+        setTextBreak(5);
+        setTextCycles(5);
+        setTextStudio(30);
+        setTextTotal(175);
+        setChoiceSelection('0');
     };
             
 
@@ -229,6 +250,9 @@ function PomodoroFunction() {
 
         handleCSS();
 
+        setTextBreak('');
+        setTextCycles('');
+        setTextStudio('');
     }
 
     // change style page onload document
@@ -244,7 +268,7 @@ function PomodoroFunction() {
 
     return (
         <div className='div-pomodoro'>
-            <div className="select-pomodoro">
+            <div id="select-pomodoro" className="select-pomodoro">
                 <h2>Select a Pomodoro and <br/>start your learning session</h2>
                 <div id='selection-pomodoro-settings' className='selection-pomodoro-settings'>
                     <p>Chouse the settings of your Pomodoro study session</p>
@@ -337,14 +361,18 @@ function PomodoroFunction() {
                 </div>
                 <div className='divBtn'>
                     <button id='btn-back' className='btn btn-tomato btn-back' onClick={backSelection}>Back</button>
-                    <button id='btn-tomato-start' className='btn btn-tomato btn-tomato-start' onClick={startPomodoro}>Let's get started</button>
-                    <botton id='btn-tomato-QS' className='btn btn-tomato' onClick={startPomodoro}>Quick Start</botton>
+                    <button id='btn-tomato-start' className='btn btn-tomato btn-tomato-start' onClick={()=>startPomodoro(false)}>Let's get started</button>
+                    <botton id='btn-tomato-QS' className='btn btn-tomato' onClick={()=>startPomodoro(true)}>Quick Start</botton>
                 </div>
             </div>
 
-
             <div id='pomodoro' className="pomodoro">
-                
+                <PomodoroTimer
+                    timeStudio={textStudio}
+                    timeBreak={textBreak}
+                    numberCycles={textCycles}
+                    timeTotal={textTotal}
+                />
             </div>
         </div>
     );
