@@ -117,16 +117,24 @@ function App() {
           </header>
           <div className="App-body">
             <Routes>
-              {/*<Route path="/login" element={<Login onLogin={handleLogin} />} />
-              <Route
-                path="/"
-                element={
-                  isAuthenticated ? (
-                    <Navigate to="/home" />
-                  ) : (
-                    <Navigate to="/login" />
-                  )
-                }
+              {/*<Route
+                  path="/"
+                  element={
+                    isAuthenticated ? (
+                      <Navigate to="/home" />
+                    ) : (
+                      <Navigate to="/login" />
+                    )
+                  }
+                />
+                <Route 
+                  path="/login" 
+                  element={<Form formType={formType} setFormType={setFormType} handleLogin={handleLogin}/>}
+                />
+                <Route 
+                  path="/register" 
+                  element={<Form formType="register" setFormType={setFormType}/>}
+                />
               /> */}
               <Route path="/" /*path="home"*/
                 element={ 
