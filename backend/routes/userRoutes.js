@@ -1,9 +1,16 @@
 const express = require('express');
-const { getUsers, createUser } = require('../controllers/userController');
+const {loginUser, registerUser } = require('../controllers/userController');
+const {fetchState} = require('../controllers/timeMachineController');
 
 const router = express.Router();
 
-router.get('/users', getUsers);
-router.post('/users', createUser);
+// User endpoints
+router.post('/login', loginUser);
+router.post('/register', registerUser);
+router.post('/logout', logoutUser);
+router.get('/user/image/:userId', getUserImage);
+
+// Time machine endpoint
+router.get('/fetchState', fetchState);
 
 module.exports = router;

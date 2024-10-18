@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { marked } from 'marked';
 
 function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedButton }) {
 
@@ -8,17 +9,44 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
       setIsExpanded(!isExpanded);
     };
 
+    marked.setOptions({
+      breaks: true,
+    });
+
+    // Convert the note content to HTML
+    function getMarkdownContent (content) {
+      return marked(content);
+    };
+
+    console.log('Note content:', note.content);
+    console.log('Note content (HTML):', getMarkdownContent(note.content));
+    
   return (
     <div className="note-card">
       <h3>{note.title}</h3>
-      <small>{note.category}</small>
-       {/* Note content: if expanded show all the note text*/}
-       <p onClick={toggleExpand} style={{ cursor: 'pointer' }}>
-        {isExpanded ? note.content : note.content.substring(0, 200) + (note.content.length > 200 ? '...' : '')}
-      </p>
-      <small>Created: {new Date(note.createDate).toLocaleString()}</small>
-      <small>Last Modified: {new Date(note.updateDate).toLocaleString()}</small>
-      <div className="note-buttons">
+      <small>{note.category}</small><br/><br/>
+      <small>Author: {note.author}</small><br/>
+      <small>
+        Access: {note.access?.type === 'public' 
+          ? 'Public' 
+          : note.access?.type === 'private' 
+          ? 'Private' 
+          : `Shared with: ${note.access?.allowedUsers.join(', ')}`}
+    </small>
+    {/* Note content: if expanded show all the note text*/}
+       <div
+          onClick={toggleExpand}
+          style={{ cursor: 'pointer' }}
+          dangerouslySetInnerHTML={{
+            __html: isExpanded
+              ? marked(note.content)
+              : marked(note.content.substring(0, 200) + (note.content.length > 200 ? '...' : '')),
+          }}
+        />
+      <br/>
+      <small>Created: {new Date(note.createDate).toLocaleString()}</small><br/>
+      <small>Last Modified: {new Date(note.updateDate).toLocaleString()}</small><br/>
+      <div className="notes-buttons">
       <button
         className={`btn2 btn-edit ${clickedButton === 'edit' + index ? 'active' : ''}`}
           onClick={() => onEdit(index)}

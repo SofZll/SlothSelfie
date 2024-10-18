@@ -3,10 +3,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
-    background-color: #FFD6BA;
+    background-color: #FAF9F9;
     width: 30rem;
-    height: 540px;
-    padding: 0 2rem 0 2rem;
+    height: 95%;
+    padding: 0 2rem;
     border-radius: 10px;
     }
 
@@ -27,15 +27,55 @@
     align-items: center;
     }
 
-@media (max-width: 840px) {
+.inCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    height: 94%;
+    }
+
+@media screen and (max-width: 400px) {
     .card {
-        width: 18rem;
-        height: 350px;
+        width: 19rem  !important;
+        }
+
+    .carousel {
+        width: 90vw !important;
+        flex-direction: column-reverse;
+        justify-content: start;
+        }
+
+    .divBtn4icon {
+            display: none;
+        }
     
+}
+
+@media screen and (max-width: 500px) and (min-width: 401px) {
+    .card {
+        width: 21rem  !important;
+        padding: 0 1rem;
     }
 
     .carousel {
-        width: 97% !important;
+        width: 90vw !important;
+        flex-direction: column-reverse;
+        justify-content: start;
+    }
 
+    .divBtn4icon {
+        display: none;
+    }
+}
+
+@media (max-height: 932px) {
+    .card {
+        height: 95%;
+    }
+
+    .carousel {
+        height: 75vh !important;
     }
 }
