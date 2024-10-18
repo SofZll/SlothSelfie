@@ -1,30 +1,83 @@
 import React, {useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 import './css/Login.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-function Login() {
+function Form({ formType, setFormType, handleLogin}) {
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle login logic here
-        console.log('Username:', username);
-        console.log('Password:', password);
+        if (formType === 'login') {
+            if (!username || !password) {
+                alert('Please enter a username and password!');
+                return;
+            }
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Login successful:', data);
+                    handleLogin(true);
+                    navigate('/home');
+                }
+                else {
+                    console.error('Login failed:', data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error login:', error);
+            });
+
+        } else if (formType === 'register') {
+            if (!username || !email || !password) {
+                alert('Please enter a username, email, and password!');
+                return;
+            }
+
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Registration successful:', data);
+                }
+                else {
+                    console.error('Registration failed:', data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error registering:', error);
+            });
+        }
     };
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
-    
+
     return (
         <div className="login-container">
             <div className="login-box">
-                {/* Titolo -*/}
-                <h1>Welcome to Sloth Selfie!</h1>
-                <form id="login-form" onSubmit={handleSubmit}>
+                <h1 className="login-title">{formType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
+                <form id={`login-form`} onSubmit={handleSubmit}>
                     <div className="form-group">
                         <input
                             type="text"
@@ -35,6 +88,18 @@ function Login() {
                             required
                         />
                     </div>
+                    {formType === 'register' && (
+                        <div className="form-group">
+                            <input
+                                type="email"
+                                id="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                    )}
                     <div className="form-group password-group">
                         <input
                             type={showPassword ? 'text' : 'password'}
@@ -48,12 +113,20 @@ function Login() {
                             <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                         </span>
                     </div>
-                    <button type="submit" className="login-button">LOGIN</button>
-                    <p class="register">Don't have an account? <a href="#">Register!</a></p>
+                    <button type="submit" className="login-button">
+                        {formType === 'login' ? 'LOGIN' : 'REGISTER'}
+                    </button>
+                    <p className="register">
+                        {formType === 'login' ? (
+                            <>Don't have an account? <span className="register-link" onClick={() => setFormType('register')}>Register!</span></>
+                        ) : (
+                            <>Already have an account? <span className="register-link" onClick={() => setFormType('login')}>Login!</span></>
+                        )}
+                    </p>
                 </form>
             </div>
         </div>
     );
 }
 
-export default Login;
+export default Form;

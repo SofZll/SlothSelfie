@@ -1,0 +1,194 @@
+  /*** Preview Home ***/
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    height: auto;
+    padding-bottom: 50px;
+  }
+
+  .count {
+    font-size: 48px;
+    color: #f9f9f9;
+  }
+
+  .tomatoPrew {
+    width: 200px;
+    height: 200px;
+  }
+
+  .containerRed,
+  .containerYellow {
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 70px;
+    position: relative;
+    display: flex;
+  }
+
+  .counterRed,
+  .counterYellow {
+    padding-top: 15px;
+    color: #f9f9f9 !important;
+    font-size: 3rem !important;
+    position: absolute;
+  }
+
+  /*** Pomodoro page ***/
+
+  .div-pomodoro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    height: 100vh;
+    width: 100%;
+  }
+
+  .pomodoro {
+    display: none;
+    align-items: start;
+    justify-content: center;
+    width: 98vw;
+    height: 100%;
+  }
+
+  .pomodoro-timer {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    justify-content: space-around;
+    width: 98%;
+    height: 98%;
+  }
+
+  .select-pomodoro {
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 27%;
+  }
+
+  .song-container,
+  .pomodoro-container,
+  .stats-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 70%;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 5px;
+  }
+
+  .song-container,
+  .stats-container {
+  justify-content: center;
+  width: 25%;
+  }
+
+  .pomodoro-container {
+  justify-content: space-around;
+  width: 50%;
+  }
+
+  .input-cycles-div,
+  .input-timer-div {
+    margin: 20px;
+  }
+
+  .input-studio-div,
+  .input-break-div,
+  .total-time-div,
+  .total-cycles-div {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-around;
+  }
+
+  .suggested-cycles-div {
+    display: none;
+    flex-direction: column;
+    margin: 20px 0;
+  }
+
+  .pomodoro-timers-options,
+  .pomodoro-total-time-option {
+    display: none;
+  }
+
+  .suggested-cycles,
+  .settings-choice {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    border-radius: 5px;
+    border: 1px solid #555B6E;
+    margin: 10px 0;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .suggested-cycles {
+    align-items: start;
+    height: 125px;
+  }
+
+  .settings-choice {
+    align-items: center;
+    height: 75px;
+  }
+
+  .suggested-cycles:hover,
+  .settings-choice:hover {
+    opacity: 0.8;
+  }
+  
+  .btn-tomato-start {
+    display: none;
+  }
+
+  .btn-tomato {
+    width: 150px;
+  }
+
+  .btn-back {
+    display: none;
+  }
+
+  @media screen and (max-width: 768px) {
+
+    .pomodoro,
+    .select-pomodoro {
+      width: 90%;
+    }
+
+  }
+
+  @media screen and (max-height: 768px) {
+    .containerRed,
+    .containerYellow {
+      margin-bottom: 10px;
+    }
+
+    .tomatoPrew {
+      width: 180px;
+      height: 180px;
+    }
+
+    .count {
+      font-size: 36px;
+    }
+
+    .container {
+      height: 85%;
+      margin: 0;
+      justify-content: space-evenly;
+    }
+
+    .container p {
+      margin-bottom: 0;
+    }
+  }

@@ -6,18 +6,18 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #FAF9F9;
+    background-color: #555B6E;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
 }
 
-h1 {
+h1.login-title {
     font-size: 24px;
     font-weight: bold;
+    margin-bottom: 20px;
     color: #333;
-    margin-bottom: 10px;
 }
 
 .login-container {
@@ -44,7 +44,7 @@ h1 {
 
 .form-group {
     position: relative;
-    margin-bottom: 15px;
+    margin-bottom: 25px;
 }
 
 /*
@@ -102,17 +102,23 @@ h1 {
     font-size: 14px;
 }
 
-.register a {
+.register-link {
     color: #89B0AE;
     text-decoration: none;
 }
 
-.register a:hover {
+.register-link:hover {
     text-decoration: underline;
 }
 
 @media screen and (max-width: 768px) {
+    h1.login-title {
+        margin-bottom: 10px;
+    }
 
-    
+    .form-group {
+        position: relative;
+        margin-bottom: 15px;
+    }
     
 }
