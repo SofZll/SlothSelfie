@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { marked } from 'marked';
 
+export function toggleTaskCompletion(taskIndex, note) {
+  const updatedTasks = note.tasks.map((task, i) => 
+    i === taskIndex ? { ...task, completed: !task.completed } : task
+  );
+  // Funzione per aggiornare le note qui, se necessario //TODO DA FINIRE
+};
+
 function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedButton }) {
 
     const [isExpanded, setIsExpanded] = useState(false);  // State to manage the note content expansion
@@ -20,6 +27,9 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
 
     console.log('Note content:', note.content);
     console.log('Note content (HTML):', getMarkdownContent(note.content));
+
+    console.log('Rendering NoteCard:', note);
+    console.log('Tasks:', note.tasks);
     
   return (
     <div className="note-card">
@@ -33,17 +43,33 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
           ? 'Private' 
           : `Shared with: ${note.access?.allowedUsers.join(', ')}`}
     </small>
-    {/* Note content: if expanded show all the note text*/}
-       <div
-          onClick={toggleExpand}
-          style={{ cursor: 'pointer' }}
-          dangerouslySetInnerHTML={{
-            __html: isExpanded
-              ? marked(note.content)
-              : marked(note.content.substring(0, 200) + (note.content.length > 200 ? '...' : '')),
-          }}
-        />
-      <br/>
+    {/* Shows the todo list if it is one */}
+    {note.isTodo ? (
+      <ul>
+        {note.tasks.map((task, taskIndex) => (
+          <li key={taskIndex}>
+            <input 
+              type="checkbox" 
+              checked={task.completed} 
+              onChange={() => toggleTaskCompletion(taskIndex, note)} 
+            />
+            {task.completed ? <s>{task.text}</s> : task.text}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      // Else shows the note content
+      /* Note content: if expanded show all the note text*/
+      <div
+        onClick={toggleExpand}
+        style={{ cursor: 'pointer' }}
+        dangerouslySetInnerHTML={{
+          __html: isExpanded
+            ? marked(note.content)
+            : marked(note.content.substring(0, 200) + (note.content.length > 200 ? '...' : '')),
+        }}
+      />
+    )}
       <small>Created: {new Date(note.createDate).toLocaleString()}</small><br/>
       <small>Last Modified: {new Date(note.updateDate).toLocaleString()}</small><br/>
       <div className="notes-buttons">
