@@ -81,7 +81,7 @@ function NotesFunction() {
         alert("Add content to your note!");
         return;
     }
-  if (noteTitle && noteCategory && noteContent && noteAuthor && noteAccess && isTodo) {
+  if (noteTitle && noteCategory && (noteContent || isTodo) && noteAuthor && noteAccess) {
     const newNote = { 
       title: noteTitle, 
       category: noteCategory, 
