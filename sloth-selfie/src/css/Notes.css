@@ -29,12 +29,19 @@
   width: 100%;
   overflow-y: auto; 
   white-space: normal;
+  padding: 5px 0;
 }
 
-.card-text h1 {
+.card-text div {
+  width: 100%;
+}
+
+.card-text div h1 {
   font-size: 1.5rem;
-  word-wrap: break-word;
+  width: 100%;
+  overflow-wrap: break-word;
   color: #555B6E;
+  white-space: normal;
 }
 
 .card-text ul {
@@ -57,16 +64,18 @@
     align-items: center;
     padding: 10px;
     width: 95%;
+    height: 90%;
+    justify-content: space-around;
     box-sizing: border-box;
   }
-  .notes-section input, .notes-section textarea, .notes-section select {
+  .notes-section input, .notes-sectiontextarea, .notes-section select {
     width: 300px;
     max-width: 400px;
     margin-bottom: 10px;
     border-radius: 4px;
     background-color: #FFF;
     padding: 5px;
-    margin: 10px;
+    margin: 10px 10%;
     border: 1px solid #555B6E;
   }
   
@@ -94,8 +103,8 @@
   
   .notes-section button {
     margin-bottom: 10px;
-    font-size: 14px;
-    padding: 8px 16px;
+    padding: 10px 20px;
+    font-size: 16px;
   }
   
   .note-card {
@@ -116,7 +125,7 @@
 
   .notes-section input,
   .notes-section textarea {
-    width: 90%; /* Reducing width for smaller screen */
+    width: 80%; /* Reducing width for smaller screen */
   }
 
   .notes-container {
@@ -133,7 +142,7 @@
 
 @media screen and (min-width: 600px){
   .notes-section button {
-    padding: 10px 20px;
-    font-size: 16px;
+    font-size: 14px;
+    padding: 8px 16px;
   }
 }

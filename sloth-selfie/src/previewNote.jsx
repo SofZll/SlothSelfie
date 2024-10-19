@@ -33,7 +33,7 @@ function PreviewNote() {
     return (
         <div className="inCard">
             <div className="notes-section">
-                <h2>Your Notes:</h2>
+                <p>Your Notes:</p>
                 <div className="scrollable-list">
                     {initialNotes.length > 0 ? (
                         initialNotes.map((note, index) => (
@@ -96,11 +96,11 @@ function PreviewNote() {
                         </div>
                     )}
                 </div>
-            </div>
-            <div className="divBtn">
-                <Link to="/notes" onClick={handleLinkClick('/notes')}>
-                    <button className="btn btn-primary">Manage Notes</button> {/* Bootstrap button */}
-                </Link>
+                <div className="divBtn">
+                    <Link to="/notes" onClick={handleLinkClick('/notes')}>
+                        <button className="btn btn-primary">Manage Notes</button> {/* Bootstrap button */}
+                    </Link>
+                </div>
             </div>
         </div>
     );
