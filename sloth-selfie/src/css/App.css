@@ -1,9 +1,13 @@
-.body {
+/*** Style Background ***/
+
+body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
   width: 100%;
-  box-sizing: border-box;
+  height: 100vh;
+  background-color: #555B6E;
+  font-family: Arial, sans-serif;
+  color: #555B6E;
 }
 
 .root {
@@ -11,108 +15,68 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.carousel {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
   height: 100%;
   width: 100%;
 }
 
 .App {
-  position: relative;
   text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content:space-around !important;
+  justify-content:space-around;
   align-items: center;
-  margin-top: 0 !important;
-  height: 100vh;
+  height: 100%;
+  width: 100%;
+}
+
+/*** Style Header ***/
+
+.App-header {
+  display: flex;
+  align-items: center;
+  height: 10%;
+  margin: 5px;
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+h1 {
+  white-space: nowrap;
+  font-size: 10vmin;
+  color: #FAF9F9;
+  font-weight: bold;
 }
 
 .App-logo {
-  height: 10vmin;
-  pointer-events: none;
+  height: 15vmin;
 }
 
-.App-header {
-  background-color: #555B6E;
-  display: flex;
-  align-items: center;
-  color: #FFD6BA;
-  height: 10%;
-}
+/*** Style Body ***/
 
 .App-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
   height: 90%;
   width: 100%;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-.header-content{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.title {
-  padding-top: 10px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-around;
-  margin-right: 20px;
-}
-
-h1 {
-  white-space: nowrap;
-  margin-bottom: 20px;
-  font-size: 3rem;
-  color: #FAF9F9;
-  font-weight: bold;
-}
-
 h2 {
   margin-bottom: 20px;
-  font-size: 1.5rem !important;
-  color: #555B6E !important;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
 p {
-  margin: 0;
   font-size: 1rem;
-  color: #555B6E !important;
 }
 
-.carousel-slide {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: auto;
-}
-
-.carousel .slide h2 {
-  margin-bottom: 10px;
-}
-
-.carousel .slide p {
-  margin: 0;
-}
+/*** Style Note ***/
 
 .note-image {
   max-width: 100px !important;
@@ -124,33 +88,24 @@ p {
   height: 100px;
 }
 
-.carousel-slide .react-calendar {
+/* Style Buttons */
+
+.divBtn {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40%;
+  justify-content: space-around;
+  width: 100%;
+  height: fit-content;
+  margin: 10px 0;
 }
 
-/***
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}***/
-
-/* buttons style */
-.btn {
-  padding: 10px 15px;
+.btn,
+.btn2 {
+  padding: 6px 10px;
   font-size: 14px;
   font-weight: bold;
   color: white;
-  background-color: #89B0AE;
   border: none;
   border-radius: 5px;
-  cursor: pointer;
   transition: background-color 0.3s ease;
   margin: 5px;
 }
@@ -163,17 +118,12 @@ p {
   background-color: #f39252;
 }
 
+.btn {
+  background-color: #89B0AE;
+}
+
 .btn2 {
-  padding: 10px 15px;
-  font-size: 14px;
-  font-weight: bold;
-  color: white;
   background-color: #f39252;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin: 5px;
 }
 
 .btn2:hover {
@@ -184,23 +134,47 @@ p {
   background-color: #FFD6BA;
 }
 
-.divBtn {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  height: fit-content;
-}
-
 .icon {
-  height: 30px;
+  height: 10vmin;
+  max-height: 30px;
+  width: 10vmin;
+  max-width: 30px;
 }
 
-.iconArrow,
-.iconTime {
-  height: 20px;
+/*** Style tmp Calendar ***/
+
+@media (max-width: 360px) {
+  .react-calendar {
+    height: 40vh;
+  }
+
+  .react-calendar__viewContainer {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .react-calendar * {
+    font-size: 3vw;
+    height: 5vh;
+  }
+
+  .react-calendar__navigation {
+    height: 2vh!important;
+  }
+  
+  .react-calendar__viewContainer *{
+    height: 4vh
+  }
+  
+  .react-calendar__tile {
+    padding:0 !important;
+  }
 }
 
 /* light background */ 
+
 .light-background {
   background-color: #FAF9F9;
   transition: background-color 0s ease;
@@ -257,81 +231,6 @@ p {
 
 .time-input{
   margin: 15px;
-}
-
-/* Media Queries */
-@media (max-width: 840px) {
-
-  .header-content{
-    position: relative;
-    width: 100%;
-  }
-
-  .App-header {
-    margin: 5px;
-    justify-content: center;
-    height: 9%;
-  }
-
-  .App-logo {
-    height: 15vmin;
-    width: 18vmin !important;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 5px;
-  }
-
-  .title {
-    justify-content: center;
-  }
-
-  h2 {
-    font-size: 1.2rem !important;
-  }
-
-  .notes-section button {
-    font-size: 14px;
-    padding: 8px 16px;
-  }
-  
-  .react-calendar {
-    display: flex;
-    flex-direction: column; /* Disposizione verticale */
-    align-items: center;
-  }
-  
-  .react-calendar__month-view__days {
-    display: flex;
-    width: 100%; /* Occupa tutto lo spazio in larghezza */
-  }
-  
-  .react-calendar__tile {
-    margin-bottom: 10px; /* Spaziatura tra i giorni */
-    width: 100%; /* I giorni occupano tutta la larghezza */
-  }
-
-  .App-logo {
-    width: 40%;
-  }
-
-  .carousel-slide .react-calendar {
-    height: 40%;
-  }
-
-  .carousel_structure{
-    height: 100%;
-    width: 100%;
-  }
-
-  .App-body {
-    justify-content: start;
-  }
-
-  .btn {
-    padding: 8px 12px;
-  }
 }
 
 /* Nascondi il contenuto quando in modalità landscape */
@@ -413,11 +312,6 @@ p {
 }
 
 /*List used for notes in the preview*/
-.card {
-  max-width: 400px;
-  margin: 0 auto;
-  word-wrap: break-word;
-}
 
 .card-body {
   white-space: normal;
@@ -455,3 +349,42 @@ p {
 .scrollable-list {
   -ms-overflow-style: none;
 }
+
+@media screen and (min-width: 600px){
+  .title h1 {
+    font-size: 7vmin;
+    padding-right: 1vmin;
+  }
+  
+  .App-logo {
+    height: 11vmin;
+  }
+
+  .App-body {
+    justify-content: center;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .btn {
+    padding: 10px 15px;
+  }
+}
+
+@media screen and (min-width: 601px) and (max-width: 1036px){
+  h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/***
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}***/

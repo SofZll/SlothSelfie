@@ -59,7 +59,7 @@ function Card({ title, caseShow }) {
         case "1":
             content = (
                 <div className='inCard'>
-                    <Calendar  tileContent={tileContent} />
+                    <Calendar  tileContent={tileContent}/>
                     <div className="divBtn">
                         <Link to="/events" onClick={handleLinkClick('/events')}>
                         <button className="btn" style={{ color: 'blue' }}>Manage Events</button>

@@ -1,5 +1,5 @@
 import Carousel from "react-spring-3d-carousel";
-import './css/App.css';
+import './css/CarouselHome.css';
 import { useState, useEffect } from "react";
 import { config } from "react-spring";
 import { useSwipeable } from 'react-swipeable';
@@ -60,8 +60,8 @@ export default function CarroussSel(props) {
   }
 
   return (
-    <div className="carousel" {...handlers}
-      style={{ width: props.width, height: props.height, margin: props.margin, touchAction: 'pan-y' }}
+    <div className="carousel-div" {...handlers}
+      style={{ touchAction: 'pan-y' }}
     >
       <div className="divBtn divBtn4icon">
           <button onClick={() => handleGoToSlide(0)} className="btn">
@@ -83,11 +83,10 @@ export default function CarroussSel(props) {
         offsetRadius={offsetRadius}
         showNavigation={showArrows}
         animationConfig={config.gentle}
-        height={props.height}
       />
       <div className="divBtn">
         <button onClick={handlePrev} className="btn">
-          <img src={iconArrowLeft} alt="icon" className="iconArrow"/>
+          <img src={iconArrowLeft} alt="icon" className="icon"/>
         </button>
         {/* time machine */}
         <button onClick={showTimeMachine} className="btn">
@@ -95,7 +94,7 @@ export default function CarroussSel(props) {
         </button>
         <TimeMachine isOpen={machineOpen} onClose={closeTimeMachine}/>
         <button onClick={handleNext} className="btn">
-          <img src={iconArrowRight} alt="icon" className="iconArrow"/>
+          <img src={iconArrowRight} alt="icon" className="icon"/>
         </button>
       </div>
         

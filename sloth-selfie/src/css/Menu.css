@@ -114,7 +114,7 @@
     border: #555B6E 1px solid;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
     .bm-burger-button {
         left: 30px;
         top: 30px;
