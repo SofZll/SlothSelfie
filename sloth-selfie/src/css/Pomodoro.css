@@ -178,7 +178,7 @@
     }
   }
 
-  @media (max-width: 360px) {
+  @media (max-height: 700px) {
     .container p {
       display: none;
     }

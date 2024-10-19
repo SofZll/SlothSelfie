@@ -131,9 +131,9 @@ p {
 
 /*** Style tmp Calendar ***/
 
-@media (max-width: 360px) or (max-height: 640px) {
+@media (max-height: 700px) {
   .react-calendar {
-    height: 40vh;
+    height: 44vh;
   }
 
   .react-calendar__viewContainer {
@@ -144,16 +144,17 @@ p {
   }
   
   .react-calendar * {
-    font-size: 3vw;
-    height: 5vh;
+    font-size: 2vw;
+    height: 5.2vh;
   }
 
   .react-calendar__navigation {
-    height: 2vh!important;
+    height: 3vh!important;
+    margin-bottom: 2px !important;
   }
   
   .react-calendar__viewContainer *{
-    height: 4vh
+    height: 5.7vh
   }
   
   .react-calendar__tile {
@@ -238,16 +239,6 @@ p {
   }
 }***/
 
-/* Mostra il contenuto quando in modalità portrait */
-@media screen and (orientation: portrait) AND (max-height: 840px){
-  .App {
-    display: flex;
-  }
-
-  .landscape-warning {
-    display: none;
-  }
-}
 
 /* Zoom animation */
 @keyframes zoom {
@@ -343,6 +334,27 @@ p {
 @media screen and (min-width: 601px) and (max-width: 1036px){
   h2 {
     font-size: 1.4rem;
+  }
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+  .App-header {
+    display: none;
+  }
+
+  .App-body {
+    width: 90%;
+    height: 100%;
+    align-self: end;
+  }
+  
+  .icon {
+    height: 7vmin;
+    width: 7vmin;
+  }
+
+  .divBtn {
+    margin: 5px 0;
   }
 }
 

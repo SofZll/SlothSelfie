@@ -69,3 +69,23 @@
         width: 80%;
     }
 }
+
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .App-body {
+        justify-content: end;
+    }
+
+    .carousel-div {
+        height: 95%;
+        flex-direction: column;
+    }
+
+    .divBtn4icon {
+        display: none;
+    }
+
+    .card {
+        height: 98%;
+    }
+}
