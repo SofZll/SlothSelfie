@@ -8,7 +8,7 @@ import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
 import { canUserAccess, addTask, removeTask, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 
-//TODO: AGGIUSTA LISTE E CONTENT
+//TODO: AGGIUSTA EDIT DI TODO (spunte cliccabili)
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -263,7 +263,7 @@ const filterNotesByDate = (notes) => {
       <button className="btn" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
       {/* Editing scenario*/}
       {isEditing !== null && (
-        <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers)}>Save Note</button>
+        <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers, tasks, setTasks)}>Save Note</button>
       )}
       <br/>
       {/* Note list, filtered and ordered */}
@@ -279,7 +279,7 @@ const filterNotesByDate = (notes) => {
               onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
               onCopy={() => handleCopyContent(note.content)}
               onDelete={() => handleDeleteNote(index, notes, setNotes)}
-              onEdit={() => handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing, setNoteAuthor, setNoteAccess, setAllowedUsers)}
+              onEdit={() => handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing, setNoteAuthor, setNoteAccess, setAllowedUsers, setIsTodo, setTasks)}
             />
           ))}
         </div> 
