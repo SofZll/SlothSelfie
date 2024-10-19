@@ -156,7 +156,7 @@
     }
 }
 
-@media screen and (max-width: 932px) and (orientation: landscape) {
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
     .mobile-nav {
         display: flex;
         height: 100%;

@@ -183,3 +183,13 @@
       display: none;
     }
   }
+
+  @media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .div-pomodoro {
+      margin-top: 10px;
+    }
+
+    .div-pomodoro h2 {
+      font-size: 1.5rem;
+    }
+}
