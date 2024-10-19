@@ -57,10 +57,6 @@ function App() {
     }
   };
 
-  const isMobile = () => {
-    return window.matchMedia('(max-width: 768px)').matches; // Soglia di 768px per modalità cellulare
-  };
-
   let cards = [
     {
       key: uuidv4(),
@@ -88,32 +84,19 @@ function App() {
     }
   ];
 
-  useEffect(() => {
-    if (isMobile()) {
-      // Chiediamo all'utente di entrare in fullscreen
-      window.addEventListener('click', openFullscreen);
-      
-      // Cleanup dell'event listener quando il componente viene smontato
-      return () => {
-        window.removeEventListener('click', openFullscreen);
-      }
-    };
-  }, [])
 
   return (
     <Router>
       <StyleProvider>
         <div className="App">
+          <Menu username={username}/>
           <header className="App-header">
-            <div className="header-content">
-              <Menu username={username}/>
               <div className="title">
                 <h1>Sloth Selfie</h1>
               </div>
               <StyleContext.Consumer>
                 {({ icon }) => <img src={icon} className="App-logo" alt="logo" />}
               </StyleContext.Consumer>
-            </div>
           </header>
           <div className="App-body">
             <Routes>
@@ -141,10 +124,6 @@ function App() {
                 /*isAuthenticated ? (*/ 
                 (<Carousel
                     cards={cards}
-                    className="carousel_structure"
-                    height="85vh"
-                    width="60vw"
-                    margin="0"
                     offset={2}
                     showArrows={false}
                   />)
