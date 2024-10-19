@@ -6,7 +6,9 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
-import { canUserAccess, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
+import { canUserAccess, addTask, removeTask, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
+
+//TODO: AGGIUSTA LISTE E CONTENT
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -50,6 +52,8 @@ function NotesFunction() {
   const [noteAuthor, setNoteAuthor] = useState(currentUser);
   const [noteAccess, setNoteAccess] = useState('public');
   const [allowedUsers, setAllowedUsers] = useState([]);
+  const [isTodo, setIsTodo] = useState(false);
+  const [tasks, setTasks] = useState([]);
   const [sortCriterion, setSortCriterion] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
@@ -69,16 +73,26 @@ function NotesFunction() {
 
   
   const handleAddNote = () => {
-  if (noteTitle && noteCategory && noteContent && noteAuthor && noteAccess) {
+    console.log("isTodo:", isTodo);
+    console.log("noteContent:", noteContent);
+    console.log("tasks:", tasks);
+
+    if (!isTodo && noteContent.trim() === "") {
+        alert("Add content to your note!");
+        return;
+    }
+  if (noteTitle && noteCategory && (noteContent || isTodo) && noteAuthor && noteAccess) {
     const newNote = { 
       title: noteTitle, 
       category: noteCategory, 
-      content: noteContent, 
+      content: isTodo ? "" : noteContent.trim(), // If isTodo, content is empty 
       author: currentUser,
       access: { 
         type: noteAccess, 
         allowedUsers: noteAccess === 'restricted' ? allowedUsers : [] // Add allowed users if restricted
       },
+      isTodo: isTodo, // Add tasks if isToDo
+      tasks: isTodo ? tasks.map(task => ({ ...task, completed: task.completed || false })) : [],
       createDate: new Date(),
       updateDate: new Date()
     };
@@ -88,6 +102,8 @@ function NotesFunction() {
     setNoteContent('');
     setNoteAuthor('');
     setNoteAccess('public');
+    setIsTodo(false);
+    setTasks([]);
   }
 };
 
@@ -151,6 +167,37 @@ const filterNotesByDate = (notes) => {
         onChange={(e) => setNoteContent(e.target.value)}
         placeholder="Note Content"
       />
+       <label>
+       <input
+         type="checkbox"
+         checked={isTodo}
+         onChange={() => setIsTodo(!isTodo)}
+       />
+       Is this a to-do list?
+     </label>
+
+     {/* Input per aggiungere task se isTodo è true */}
+     {isTodo && (
+       <div>
+         <input
+           type="text"
+           placeholder="Add task and press Enter"
+           onKeyDown={(e) => {
+             if (e.key === 'Enter') {
+               addTask(e.target.value, tasks, setTasks);
+               e.target.value = ''; // Clear input after adding task
+             }
+           }}
+         />
+         <ul>
+           {tasks.map((task, index) => (
+             <li key={index}>
+               {task.text} <button className='btn' onClick={() => removeTask(index, tasks, setTasks)}>Remove</button>
+             </li>
+           ))}
+         </ul>
+       </div>
+     )}
       </div>
        {/* Dropdown for acces list */}
        <select value={noteAccess} onChange={(e) => setNoteAccess(e.target.value)}>

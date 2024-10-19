@@ -20,6 +20,21 @@ export function canUserAccess(note, currentUser) {
     return false;
   }
 
+export function addTask(taskText, tasks, setTasks) {
+  if (!Array.isArray(tasks)) {
+    tasks = [];
+  }
+  const newTask = {
+    text: taskText,
+    completed: false // every new task is not completed
+  };
+  setTasks([...tasks, newTask]);
+};
+
+export function removeTask(taskIndex, tasks, setTasks) {
+  setTasks(tasks.filter((task, i) => i !== taskIndex));
+};
+
 export function handleDuplicateNote (index, notes, setNotes) {
     const noteToDuplicate = notes[index];
     const duplicatedNote = { ...noteToDuplicate, date: new Date() }; // Duplicate with a new date
