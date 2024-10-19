@@ -90,16 +90,39 @@ function Card({ title, caseShow }) {
                                                         ? 'Private' 
                                                         : `Shared with: ${note.access.allowedUsers.join(', ')}`}
                                                 </small>
-                                                <p className="card-text">
-                                                    {/* Limiting note content to 200 characters, showing markdown */}
-                                                    <div
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: note.content.length > 200 
-                                                                ? marked(note.content.substring(0, 200) + "...")
-                                                                : marked(note.content)
-                                                        }}
-                                                    />
-                                                </p>
+                                                {/* Render note content or todo list */}
+                                                {note.isTodo ? (
+                                                    <p className="card-text">
+                                                    <ul>
+                                                    {/* Render the tasks if the note contains a todo list */}
+                                                    {note.tasks && note.tasks.length > 0 ? (
+                                                        note.tasks.map((task, taskIndex) => (
+                                                        <li key={taskIndex}>
+                                                            <input
+                                                            type="checkbox"
+                                                            checked={task.completed}
+                                                            readOnly
+                                                            />
+                                                            {task.text}
+                                                        </li>
+                                                        ))
+                                                    ) : (
+                                                        <p>No tasks available</p>
+                                                    )}
+                                                    </ul>
+                                                    </p>
+                                                ) : (
+                                                    <p className="card-text">
+                                                        {/* Limiting note content to 200 characters, showing markdown */}
+                                                        <div
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: note.content.length > 200 
+                                                                    ? marked(note.content.substring(0, 200) + "...")
+                                                                    : marked(note.content)
+                                                            }}
+                                                        />
+                                                    </p>
+                                                )}
                                                 {/* Using d-flex and justify-content-between for proper alignment */}
                                                 <div className="d-flex justify-content-between mt-3">
                                                     <small className="text-muted">Category: {note.category}</small><br />

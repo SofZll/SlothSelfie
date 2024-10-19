@@ -22,7 +22,8 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
 
     // Convert the note content to HTML
     function getMarkdownContent (content) {
-      return marked(content);
+      if (content && content.trim()) 
+        return marked(content);
     };
 
     console.log('Note content:', note.content);
