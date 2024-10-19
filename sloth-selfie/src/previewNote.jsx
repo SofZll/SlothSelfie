@@ -26,6 +26,8 @@ function PreviewNote() {
             document.body.classList.remove('zoom-in');
         }, 300);
     };
+
+    
     
 
     return (
