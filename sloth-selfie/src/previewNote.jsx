@@ -59,7 +59,7 @@ function PreviewNote() {
                                                 checked={task.completed}
                                                 readOnly
                                                 />
-                                                {task.text}
+                                                {task.completed ? <s>{task.text}</s> : task.text}
                                             </li>
                                             ))
                                         ) : (

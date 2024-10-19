@@ -45,7 +45,7 @@ export function handleDeleteNote(index, notes, setNotes) {
     setNotes(notes.filter((_, i) => i !== index));
 };
 
-export function handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing, setNoteAuthor, setNoteAccess, setAllowedUsers) {
+export function handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing, setNoteAuthor, setNoteAccess, setAllowedUsers, setIsToDo, setNoteTasks) {
   setIsEditing(index);
   setNoteTitle(notes[index].title);
   setNoteCategory(notes[index].category);
@@ -53,9 +53,11 @@ export function handleEditNote(index, notes, setNoteTitle, setNoteCategory, setN
   setNoteAuthor(notes[index].author);
   setNoteAccess(notes[index].access.type);
   setAllowedUsers(notes[index].access.allowedUsers);
+  setIsToDo(notes[index].isTodo);
+  setNoteTasks(notes[index].tasks);
 };
 
-export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers) {
+export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers, tasks, setTasks) {
   const updatedNote = {
     ...notes[index],
     title: noteTitle,
@@ -66,6 +68,7 @@ export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, 
     },
     category: noteCategory,
     content: noteContent,
+    tasks: tasks,
     updateDate: new Date() // updates the modify date
   };
 
@@ -76,6 +79,7 @@ export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, 
   setNoteTitle('');
   setNoteCategory('');
   setNoteContent('');
+  setTasks([]);
   setNoteAuthor('');
   setNoteAccess('public');
   setAllowedUsers([]);
