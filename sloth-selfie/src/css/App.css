@@ -144,7 +144,7 @@ p {
   }
   
   .react-calendar * {
-    font-size: 2vw;
+    font-size: 1.5vw;
     height: 5.2vh;
   }
 
@@ -347,10 +347,18 @@ p {
     height: 100%;
     align-self: end;
   }
+
+  h2 {
+    font-size: 1rem;
+  }
   
   .icon {
-    height: 7vmin;
-    width: 7vmin;
+    height: 5vmin;
+    width: 5vmin;
+  }
+
+  .btn {
+    font-size: 4vmin;
   }
 
   .divBtn {
