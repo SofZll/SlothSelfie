@@ -103,7 +103,7 @@ function Card({ title, caseShow }) {
                                                             checked={task.completed}
                                                             readOnly
                                                             />
-                                                            {task.text}
+                                                            {task.completed ? <s>{task.text}</s> : task.text}
                                                         </li>
                                                         ))
                                                     ) : (

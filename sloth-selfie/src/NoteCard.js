@@ -5,7 +5,7 @@ export function toggleTaskCompletion(taskIndex, note) {
   const updatedTasks = note.tasks.map((task, i) => 
     i === taskIndex ? { ...task, completed: !task.completed } : task
   );
-  // Funzione per aggiornare le note qui, se necessario //TODO DA FINIRE
+  return { ...note, tasks: updatedTasks };
 };
 
 function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedButton }) {
