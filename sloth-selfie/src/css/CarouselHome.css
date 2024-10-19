@@ -45,7 +45,7 @@
     }
 }
 
-@media screen and (min-width: 600px){
+@media screen and (min-width: 700px){
     .carousel-div {
         flex-direction: column;
         justify-content: space-around;

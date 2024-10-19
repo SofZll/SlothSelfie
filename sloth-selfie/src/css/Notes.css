@@ -1,4 +1,40 @@
 /* Notes*/
+.card-note{
+  width: 100%;
+}
+
+
+/*** Style Note ***/
+
+.note-image {
+  max-width: 100px !important;
+  height: 100px;
+}
+
+.hourglass{
+  max-width: 100px !important;
+  height: 100px;
+}
+
+/*List used for notes in the preview*/
+
+.card-body {
+  white-space: normal;
+  word-wrap: break-word;
+  box-shadow: #555B6E 0px 0px 7px;
+}
+
+.card-text {
+  max-height: 100px;
+  overflow-y: auto; 
+  white-space: normal;
+}
+
+.card-text img {
+  max-width: 100%;
+  height: auto;
+}
+
 .notes-section {
     display: flex;
     flex-direction: column;
