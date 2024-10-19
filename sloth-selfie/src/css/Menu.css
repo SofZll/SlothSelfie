@@ -96,6 +96,7 @@
     width: 100%;
     height: 10%;
     align-items: center;
+    flex-direction: row;
     bottom: 0;
     left: 0;
     right: 0;
@@ -152,5 +153,18 @@
 
     .bm-menu {
         display: block;
+    }
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) {
+    .mobile-nav {
+        display: flex;
+        height: 100%;
+        width: 10%;
+        flex-direction: column;
+    }
+
+    .bm-menu {
+        display: none;
     }
 }

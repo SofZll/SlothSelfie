@@ -11,6 +11,7 @@ import iconProjects from './media/projects.svg';
 import iconArrowLeft from './media/arrowLeft.svg';
 import iconArrowRight from './media/arrowRight.svg';
 import iconTimeMachine from './media/time-machine.svg';
+import iconSetting from './media/setting.svg';
 
 export default function CarroussSel(props) {
 
