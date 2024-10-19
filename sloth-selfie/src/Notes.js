@@ -19,8 +19,9 @@ const initialNotes = [
       author: 'Bob',
       access: { 
         type: 'public', 
-        allowedUsers: [] 
+        allowedUsers: []
       },
+      isTodo: false, tasks: [],
       createDate: new Date(),
       updateDate: new Date(),
     },
@@ -28,17 +29,41 @@ const initialNotes = [
     access: { 
       type: 'private', 
       allowedUsers: [] 
-    },createDate: new Date(), updateDate: new Date() },
+    },
+    isTodo: false, tasks: [],
+    createDate: new Date(), updateDate: new Date() },
   { title: 'Third Note', category: 'Personal', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam imperdiet quam fringilla libero rutrum lobortis. Nam id vulputate odio. Cras molestie quis ante et vestibulum. Nullam viverra leo quis libero vulputate ultricies sit amet et lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas vestibulum ligula ac tortor faucibus, eget viverra elit faucibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum eu diam interdum, luctus velit in, vehicula erat. Aliquam dapibus mauris eget nulla faucibus, vitae commodo massa placerat. Nam luctus felis nec fermentum lobortis. Aliquam ac odio a neque suscipit mollis. Cras sit amet felis dolor. Nam consequat, nulla vitae lacinia malesuada, ipsum nibh pulvinar mi, sit amet eleifend elit velit id nulla. Cras pretium elit luctus, laoreet turpis sed, scelerisque tellus. Fusce venenatis feugiat diam, id tristique ligula pellentesque vitae.',
     author: 'Alice', access: { 
       type: 'public', //if private Bob can't see it
       allowedUsers: [] 
-    },createDate: new Date(), updateDate: new Date() },
+    },
+    isTodo: false, tasks: [],
+    createDate: new Date(), updateDate: new Date() },
   { title: 'Fourth Note', category: 'Others', content: "# This is a markdown note\n\nHere is some **bold** text, and here is a list:\n\n- Item 1\n- Item 2\n- Item 3\n\nYou can also add [links](https://example.com) and other markdown syntax.",
     author: 'Someone', access: { 
       type: 'restricted', 
       allowedUsers: ['Alice', 'Bob'] 
-    }, createDate: new Date(), updateDate: new Date() },
+    },
+    isTodo: false, tasks: [],
+    createDate: new Date(), updateDate: new Date() },
+    {
+      title: 'Fifth Note',
+      category: 'Work',
+      content: '',
+      author: 'Bob',
+      access: { 
+        type: 'public', 
+        allowedUsers: []
+      },
+      isTodo: true, tasks: [
+        { text: "Task 1", completed: false },
+        { text: "Task 2", completed: true },
+        { text: "Task 3", completed: false },
+      ],
+      createDate: new Date(),
+      updateDate: new Date(),
+    },
+
 ];
 
 const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
@@ -161,6 +186,7 @@ const filterNotesByDate = (notes) => {
         <option value="Personal">Personal</option>
         <option value="Others">Others</option>
       </select>
+      <h2>Choose one: free Note content or Todo list?</h2>
       <div className="note-content">
       <textarea
         value={noteContent}
