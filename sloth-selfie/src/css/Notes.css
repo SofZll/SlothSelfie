@@ -26,8 +26,24 @@
 
 .card-text {
   max-height: 100px;
+  width: 100%;
   overflow-y: auto; 
   white-space: normal;
+}
+
+.card-text h1 {
+  font-size: 1.5rem;
+  word-wrap: break-word;
+  color: #555B6E;
+}
+
+.card-text ul {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  list-style-type: none;
+  width: 100%;
+
 }
 
 .card-text img {
