@@ -151,6 +151,7 @@
   display: flex;
   justify-content: space-around;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 
@@ -218,10 +219,12 @@
   font-size: 1.5rem;
   color: #555B6E;
   margin: 10px 0;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .note-card {
-  padding: 15px;
+  padding: 2vmin;
   margin: 10px 0;
   width: 90%;
   align-items: center;
@@ -235,12 +238,54 @@
   margin: 5px 0;
 }
 
-  
-
 .note-content {
-    justify-content: space-between;
-    align-items: center;
-    width: 90%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  width: 90%;
+  margin-bottom: 10px;
+}
+
+.div-input-content,
+.div-input-todo {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 50%;
+  height: 100%;
+}
+
+.div-input-content *,
+.div-input-todo * {
+  width: 95%;
+}
+
+.checkbox {
+  margin: 0 5px;
+  width: auto;
+}
+
+.div-input-content textarea {
+  height: 100%;
+  padding: 5px;
+}
+
+.div-input-todo ul {
+  list-style-position: inside;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  margin-top: 10px;
+  padding: 5px;
+}
+
+.div-input-todo div {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
 }
 
 @media screen and (min-width: 769px){
@@ -258,6 +303,34 @@
     width: 50%;
     height: 100%;
     margin-top: 20px;
+  }
+
+  .notes-section button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+  .notes-div {
+    flex-direction: row;
+    height: 100%;
+  }
+
+  .notes-container {
+    height: 60vh;
+  }
+
+  .my-notes-div,
+  .note-add {
+    width: 50%;
+    height: 100%;
+    margin-top: 30px;
+    overflow-y: scroll;
+  }
+
+  .note-add {
+    padding-right: 1.5vmin;
   }
 
   .notes-section button {
