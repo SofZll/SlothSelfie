@@ -1,5 +1,5 @@
 import Carousel from "react-spring-3d-carousel";
-import './css/App.css';
+import './css/CarouselHome.css';
 import { useState, useEffect } from "react";
 import { config } from "react-spring";
 import { useSwipeable } from 'react-swipeable';
@@ -9,6 +9,8 @@ import iconTomato from './media/tomato.svg';
 import iconProjects from './media/projects.svg'; 
 import iconArrowLeft from './media/arrowLeft.svg';
 import iconArrowRight from './media/arrowRight.svg';
+import iconTimeMachine from './media/time-machine.svg';
+import iconSetting from './media/setting.svg';
 
 export default function CarroussSel(props) {
 
@@ -46,8 +48,8 @@ export default function CarroussSel(props) {
   };
 
   return (
-    <div className="carousel" {...handlers}
-      style={{ width: props.width, height: props.height, margin: props.margin, touchAction: 'pan-y' }}
+    <div className="carousel-div" {...handlers}
+      style={{ touchAction: 'pan-y' }}
     >
       <div className="divBtn divBtn4icon">
           <button onClick={() => handleGoToSlide(0)} className="btn">
@@ -69,14 +71,13 @@ export default function CarroussSel(props) {
         offsetRadius={offsetRadius}
         showNavigation={showArrows}
         animationConfig={config.gentle}
-        height={props.height}
       />
       <div className="divBtn">
         <button onClick={handlePrev} className="btn">
-          <img src={iconArrowLeft} alt="icon" className="iconArrow"/>
+          <img src={iconArrowLeft} alt="icon" className="icon"/>
         </button>
         <button onClick={handleNext} className="btn">
-          <img src={iconArrowRight} alt="icon" className="iconArrow"/>
+          <img src={iconArrowRight} alt="icon" className="icon"/>
         </button>
       </div>
         
