@@ -3,7 +3,6 @@ import './css/CarouselHome.css';
 import { useState, useEffect } from "react";
 import { config } from "react-spring";
 import { useSwipeable } from 'react-swipeable';
-import TimeMachine from "./TimeMachine";
 import iconCalendar from './media/calendar.svg';
 import iconNotes from './media/notes.svg';
 import iconTomato from './media/tomato.svg';
@@ -31,9 +30,6 @@ export default function CarroussSel(props) {
   const [goToSlide, setGoToSlide] = useState(null);
   const [cards] = useState(table);
 
-  // State for time machine
-  const [machineOpen, setMachineOpen] = useState(false);
-
   useEffect(() => {
     setOffsetRadius(props.offset);
     setShowArrows(props.showArrows);
@@ -50,15 +46,6 @@ export default function CarroussSel(props) {
   const handleGoToSlide = (index) => {
     setGoToSlide(index);
   };
-
-  // functions to show and close the time machine
-  const showTimeMachine = () => {
-    setMachineOpen(true);
-  };
-
-  const closeTimeMachine = () => {
-    setMachineOpen(false);
-  }
 
   return (
     <div className="carousel-div" {...handlers}
@@ -89,11 +76,9 @@ export default function CarroussSel(props) {
         <button onClick={handlePrev} className="btn">
           <img src={iconArrowLeft} alt="icon" className="icon"/>
         </button>
-        {/* time machine */}
-        <button onClick={showTimeMachine} className="btn">
+        <button /*onClick={}*/ className="btn">
           <img src={iconSetting} alt="icon" className="icon"/>
         </button>
-        <TimeMachine isOpen={machineOpen} onClose={closeTimeMachine}/>
         <button onClick={handleNext} className="btn">
           <img src={iconArrowRight} alt="icon" className="icon"/>
         </button>
