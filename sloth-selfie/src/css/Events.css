@@ -1,33 +1,103 @@
 /* Events */
 .Event {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   height: 100%;
+  width: 100%;
+}
+
+.container-events-add,
+.div-calendar-container,
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.container-events-add {
+  padding: 20px 0 11vh 0;
+}
+
+.container-events-add form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.calendar-container {
   width: 95%;
 }
 
-.events-section {
-    padding: 20px;
+.time-filter {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  width: 80%;
+}
+
+input {
+  padding: 5px;
+  margin: 5px;
+}
+
+@media screen and (min-width: 700px){
+  .Event {
+    flex-direction: row;
+    align-items: start;
   }
-  
-  .events-container {
-    display: flex;
-    flex-direction: column;
-    margin-top: 20px;
+
+  .div-calendar-container,
+  .container-events-add {
+    padding: 20px 0 0 0;
+    width: 50%;
+    height: 100%;
+  }
+
+  .time-filter {
+    width: 60%;
+  }
+
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+  .Event {
+    flex-direction: row;
+    align-items: start;
+  }
+
+  .div-calendar-container,
+  .container-events-add {
+    padding: 20px 0 0 0;
+    width: 50%;
+    height: 100%;
+  }
+
+  .div-calendar-container {
+    width: 95%;
   }
 
   .calendar-container {
-    width: 100%;
-    max-width: 700px;
-    height: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 20px;
-}
+    width: 95%;
+  }
 
-/* For smaller screens */
-@media (max-width: 700px) {
-  .calendar-container {
-      width: 90%; 
-      height: auto;
-      margin: 0 auto;
+  .container-events-add {
+    overflow-y: scroll;
+  }
+
+  .time-filter {
+    width: 60%;
+  }
+
+  input {
+    width: 50%;
+  }
+
+  label {
+    margin: 0;
   }
 }
+
