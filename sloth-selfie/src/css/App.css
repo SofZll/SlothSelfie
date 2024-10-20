@@ -270,43 +270,11 @@ p {
   z-index: 1000;
 }
 
-.scrollable-list {
-  list-style-type: none;
-  width: 100%;
-  height: 90%;
-  max-height: 250px;
-  overflow-y: auto;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f8f9fa;
-}
 
-/*List used for activities and notes not in the preview*/
-.-Card-list {
-  list-style-type: none;
-  max-height: 450px;
-  overflow-y: auto;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f8f9fa;
-}
 
-/*hides scrollbar on Webkit (Chrome, Safari) */
-.scrollable-list::-webkit-scrollbar {
-  display: none;
-}
 
-/*hides scrollbar on Firefox */
-.scrollable-list {
-  scrollbar-width: none;
-}
 
-/*hides scrollbar on Internet Explorer e Edge */
-.scrollable-list {
-  -ms-overflow-style: none;
-}
+
 
 @media screen and (min-width: 700px){
   .title h1 {

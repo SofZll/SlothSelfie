@@ -140,136 +140,37 @@ const filterNotesByDate = (notes) => {
 };
 
   return (
-    <div className="notes-section">
-      <h2>Notes</h2>
-       {/* Filtering note bar */}
-      <div className="filter-bar">
-        <label htmlFor="filter">Filter Notes: </label>
-        <select id="filter" value={sortCriterion} onChange={(e) => setSortCriterion(e.target.value)}>
-          <option value="">Select...</option>
-          <option value="alphabetical">Alphabetical Order</option>
-          <option value="length">By Length</option>
-          <option value="most_recent">Most Recent</option>
-          <option value="least_recent">Least Recent</option>
-        </select>
-      </div>
+    <div className="notes-div">
 
-      {/* Input field to sort by data */}
-      <div className="date-filter">
-        <label htmlFor="date">Filter by Date: </label>
-        <input
-          type="date"
-          id="date"
-          value={filterDate}
-          onChange={(e) => setFilterDate(e.target.value)}
-        />
-      </div>
-      <h2>Add a note here:</h2>
-       {/* Form for adding a new note */}
-      <input
-        value={noteTitle}
-        onChange={(e) => setNoteTitle(e.target.value)}
-        placeholder="Note Title"
-      />
-      <input
-        value={noteAuthor}
-        onChange={(e) => setNoteAuthor(e.target.value)}
-        placeholder="Author Name: enter username"
-      />
-       <select id = "category"
-        value={noteCategory}
-        onChange={(e) => setNoteCategory(e.target.value)}
-      >
-        <option value="">Category</option>
-        <option value="Work">Work</option>
-        <option value="Study">Study</option>
-        <option value="Personal">Personal</option>
-        <option value="Others">Others</option>
-      </select>
-      <h2>Choose one: free Note content or Todo list?</h2>
-      <div className="note-content">
-      <textarea
-        value={noteContent}
-        onChange={(e) => setNoteContent(e.target.value)}
-        placeholder="Note Content"
-      />
-       <label>
-       <input
-         type="checkbox"
-         checked={isTodo}
-         onChange={() => setIsTodo(!isTodo)}
-       />
-       Is this a to-do list?
-     </label>
+      {/* Filtering note bar */}
+      <div className="my-notes-div">
+        <h2>Your Notes:</h2>
+        <div className='selection-div'>
+          <div className="filter-bar">
+            <label htmlFor="filter">Filter Notes: </label>
+            <select id="filter" value={sortCriterion} onChange={(e) => setSortCriterion(e.target.value)}>
+              <option value="">Select...</option>
+              <option value="alphabetical">Alphabetical Order</option>
+              <option value="length">By Length</option>
+              <option value="most_recent">Most Recent</option>
+              <option value="least_recent">Least Recent</option>
+            </select>
+          </div>
 
-     {/* Input per aggiungere task se isTodo è true */}
-     {isTodo && (
-       <div>
-         <input
-           type="text"
-           placeholder="Add task and press Enter"
-           onKeyDown={(e) => {
-             if (e.key === 'Enter') {
-               addTask(e.target.value, tasks, setTasks);
-               e.target.value = ''; // Clear input after adding task
-             }
-           }}
-         />
-         <ul>
-           {tasks.map((task, index) => (
-             <li key={index}>
-               {task.text} <button className='btn' onClick={() => removeTask(index, tasks, setTasks)}>Remove</button>
-             </li>
-           ))}
-         </ul>
-       </div>
-     )}
-      </div>
-       {/* Dropdown for acces list */}
-       <select value={noteAccess} onChange={(e) => setNoteAccess(e.target.value)}>
-        <option value="">Access List</option>
-        <option value="public">Public</option>
-        <option value="private">Private</option>
-        <option value="restricted">Specific People</option>
-      </select>
-      {noteAccess === 'restricted' && (
-      <div>
-        {/* We include the current user*/}
-        {currentUser && !allowedUsers.includes(currentUser) && 
-          setAllowedUsers(prevUsers => [...prevUsers, currentUser])
-        }
-        <input 
-          type="text" 
-          placeholder="type and press Enter" 
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              const newUser = e.target.value.trim();
-              if (newUser && !allowedUsers.includes(newUser)) {
-                setAllowedUsers([...allowedUsers, newUser]);
-                e.target.value = ''; // Clear input field
-              }
-            }
-          }} 
-        />
-        <ul>
-          {allowedUsers.map((user, index) => (
-            <li key={index}>
-              {user} <button className = "btn" onClick={() => setAllowedUsers(allowedUsers.filter(u => u !== user))}>Remove</button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-      <button className="btn" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
-      {/* Editing scenario*/}
-      {isEditing !== null && (
-        <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers, tasks, setTasks)}>Save Note</button>
-      )}
-      <br/>
-      {/* Note list, filtered and ordered */}
-      <h2>Your Notes:</h2>
-      <div className="notes-container">
-        <div className = "scrollable-Card-list">
+          {/* Input field to sort by data */}
+          <div className="date-filter">
+            <label htmlFor="date">Filter by Date: </label>
+            <input
+              type="date"
+              id="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Note list, filtered and ordered */}
+        <div className="notes-container">
           {/* Filter the accessible notes from the users and the orders */}
           {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)))).map((note, index) => (
             <NoteCard
@@ -283,6 +184,124 @@ const filterNotesByDate = (notes) => {
             />
           ))}
         </div> 
+      </div>
+
+      <div className="note-add">
+        <h2>Add a note here:</h2>
+          {/* Form for adding a new note */}
+        <div className='div-input'>
+          <div className='div-input-title'>
+            <label htmlFor='noteTutle'>Note Title: </label>
+            <input
+              value={noteTitle}
+              onChange={(e) => setNoteTitle(e.target.value)}
+              placeholder="Enter title"
+            />
+          </div>
+          <div className='div-input-author'>
+            <label htmlFor='Author'>Author name: </label>
+            <input
+              value={noteAuthor}
+              onChange={(e) => setNoteAuthor(e.target.value)}
+              placeholder="Enter username"
+            />
+          </div>
+          <div className='div-input-category'>
+            <label htmlFor='category'>Note category: </label>
+            <select id = "category"
+              value={noteCategory}
+              onChange={(e) => setNoteCategory(e.target.value)}
+            >
+              <option value="">Category</option>
+              <option value="Work">Work</option>
+              <option value="Study">Study</option>
+              <option value="Personal">Personal</option>
+              <option value="Others">Others</option>
+            </select>
+          </div>
+        </div>
+
+        <div className='div-content'>
+          <h2>Choose one: free Note content or Todo list?</h2>
+          <div className="note-content">
+            <textarea
+              value={noteContent}
+              onChange={(e) => setNoteContent(e.target.value)}
+              placeholder="Note Content"
+            />
+            <label>
+              <input
+                type="checkbox"
+                checked={isTodo}
+                onChange={() => setIsTodo(!isTodo)}
+              />
+              Is this a to-do list?
+            </label>
+
+            {/* Input per aggiungere task se isTodo è true */}
+            {isTodo && (
+              <div>
+                <input
+                  type="text"
+                  placeholder="Add task and press Enter"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      addTask(e.target.value, tasks, setTasks);
+                      e.target.value = ''; // Clear input after adding task
+                    }
+                  }}
+                />
+                <ul>
+                  {tasks.map((task, index) => (
+                    <li key={index}>
+                      {task.text} <button className='btn' onClick={() => removeTask(index, tasks, setTasks)}>Remove</button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            </div>
+              {/* Dropdown for acces list */}
+              <select value={noteAccess} onChange={(e) => setNoteAccess(e.target.value)}>
+                <option value="">Access List</option>
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+                <option value="restricted">Specific People</option>
+              </select>
+              {noteAccess === 'restricted' && (
+            <div>
+              {/* We include the current user*/}
+              {currentUser && !allowedUsers.includes(currentUser) && 
+                setAllowedUsers(prevUsers => [...prevUsers, currentUser])
+              }
+              <input 
+                type="text" 
+                placeholder="type and press Enter" 
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const newUser = e.target.value.trim();
+                    if (newUser && !allowedUsers.includes(newUser)) {
+                      setAllowedUsers([...allowedUsers, newUser]);
+                      e.target.value = ''; // Clear input field
+                    }
+                  }
+                }} 
+              />
+              <ul>
+                {allowedUsers.map((user, index) => (
+                  <li key={index}>
+                    {user} <button className = "btn" onClick={() => setAllowedUsers(allowedUsers.filter(u => u !== user))}>Remove</button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <button className="btn" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
+            {/* Editing scenario*/}
+            {isEditing !== null && (
+          <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers, tasks, setTasks)}>Save Note</button>
+          )}
+        </div>
       </div>
     </div>
   );
