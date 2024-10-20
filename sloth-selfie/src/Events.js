@@ -165,195 +165,221 @@ function EventsFunction() {
   };
   return (
     <div className= "Event">
-      <h2>Add Event</h2>
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        console.log("Form submit triggered");
-        if (selectedEvent) {
-          console.log("Submitting update for event:", selectedEvent);
-          handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing, originalId, setOriginalId);
-        } else {
-          handleAddEvent(e);
-        }
-      }}>
-        <input 
-          type="text" 
-          placeholder="Title" 
-          value={title} 
-          onChange={(e) => setTitle(e.target.value)} 
-          required 
-        />
-        <input 
-          type="date" 
-          value={date} 
-          onChange={(e) => setDate(e.target.value)} 
-          required 
-        />
-       {!allDay && (
-          <>
-            <label>
-              <input 
-                type="checkbox" 
-                checked={isPreciseTime} 
-                onChange={(e) => setIsPreciseTime(e.target.checked)} 
-              />
-              Use Precise Time
-            </label>
-
-            {isPreciseTime ? (
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                required
-              />
-            ) : (
-              <select value={time} onChange={(e) => setTime(e.target.value)} required>
-                {generateTimeOptions().map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            )}
-          </>
-        )}
-        
-        {!allDay && (
-          <input 
-            type="number" 
-            placeholder="Duration (hours)" 
-            value={duration} 
-            onChange={(e) => setDuration(e.target.value)} 
-            min="1" 
-            required 
+      <div className="div-calendar-container">
+        {/* React Big Calendar to display events */}
+        <h2>Your Events:</h2>
+        <div className="calendar-container">
+          <BigCalendar
+            localizer={localizer}
+            events={normalizeEvents(events)}
+            startAccessor="start"
+            endAccessor="end"
+            onSelectEvent={handleEventClick}
+            titleAccessor="title"
+            style={{ height: "60vh" }}
+            components={{
+              event: EventComponent
+            }}
           />
-        )}
-
-        {allDay && (
-          <input 
-            type="number" 
-            placeholder="Number of days" 
-            value={days} 
-            onChange={(e) => setDays(e.target.value)} 
-            min="1" 
-          />
-        )}
-
-  <label>
-    <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
-    All Day
-  </label>
-
-  {isEditing && (
-    <label>
-        <input 
-            type="checkbox" 
-            onChange={(e) => setUpdateAllFutureEvents(e.target.checked)} 
-        />
-        Update all the future instances
-    </label>
-)}
-        <select 
-          value={repeatFrequency} 
-          onChange={(e) => {
-            setRepeatFrequency(e.target.value);
-            if (e.target.value === 'none') {
-              setRepeatMode('ntimes'); // Reset at default value
-            }
-          }}
-        >
-          <option value="none">No repetition</option>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
-          {repeatFrequency !== 'none' && (
-          <div>
-          <label>
-            Repeat Mode:
-            <select onChange={(e) => setRepeatMode(e.target.value)}>
-              <option value="ntimes">N Times</option>
-              <option value="until">Until</option>
-            </select>
-          </label>
-    
-          {repeatMode === 'ntimes' && (
-            <div>
-              <label>Number of repetitions:</label>
-              <input 
-                type="number" 
-                value={repeatCount} 
-                onChange={(e) => setRepeatCount(e.target.value)} 
-                defaultValue={1}
-                min="1" 
-              />
-            </div>
-          )}
-    
-          {repeatMode === 'until' && (
-            <div>
-              <label>Repeat until:</label>
-              <input 
-                type="date" 
-                value={repeatEndDate} 
-                onChange={(e) => setRepeatEndDate(e.target.value)} 
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-        <input type="text"
-          placeholder="eventLocation (physical or virtual)"
-          value={eventLocation} onChange={(e) => seteventLocation(e.target.value)}
-        />
-        <button className='btn' type="submit">
-          {selectedEvent ? 'Save Changes' : 'Add Event'}
-        </button>
-      </form>
-
-       {/* React Big Calendar to display events */}
-       <h2>Your Events:</h2>
-       <div className="calendar-container">
-        <BigCalendar
-          localizer={localizer}
-          events={normalizeEvents(events)}
-          startAccessor="start"
-          endAccessor="end"
-          onSelectEvent={handleEventClick}
-          titleAccessor="title"
-          style={{ height: 500 }}
-          components={{
-            event: EventComponent
-          }}
-        />
-        {/* Display popup for the selected activity*/}
-        {selectedEvent && (
-            <div className="popup">
-            <h2>Editing mode:</h2>
-            <h2>{selectedEvent.title}</h2>
-            <p>Location: {selectedEvent.eventLocation}</p>
-            <p>Start: {selectedEvent.start.toLocaleString()}</p>
-            <p>End: {selectedEvent.end.toLocaleString()}</p>
-            <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-            <button className='btn' onClick={() =>{
-                setShowConfirmation(true);
-                console.log(setShowConfirmation);
-            }}>
-            Delete
-              </button>
-            {showConfirmation && (
+          {/* Display popup for the selected activity*/}
+          {selectedEvent && (
               <div className="popup">
-                <h2>Are you sure you want to delete this event?</h2>
-                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>Yes</button>
-                <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+              <h2>Editing mode:</h2>
+              <h2>{selectedEvent.title}</h2>
+              <p>Location: {selectedEvent.eventLocation}</p>
+              <p>Start: {selectedEvent.start.toLocaleString()}</p>
+              <p>End: {selectedEvent.end.toLocaleString()}</p>
+              <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
+              <div>
+                <button className='btn' onClick={() =>{
+                    setShowConfirmation(true);
+                    console.log(setShowConfirmation);
+                }}>
+                  Delete
+                </button>
+                <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>X</button>
+              </div>
+              {showConfirmation && (
+                <div className="popup-delete">
+                  <h2>Are you sure you want to delete this event?</h2>
+                  <div>
+                    <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>Yes</button>
+                    <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+                  </div>
+                </div>
+              )}
               </div>
             )}
-            <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>X</button>
+        </div>
+      </div>
+
+      <div className="container-events-add">
+        <h2>Add Event</h2>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          console.log("Form submit triggered");
+          if (selectedEvent) {
+            console.log("Submitting update for event:", selectedEvent);
+            handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing, originalId, setOriginalId);
+          } else {
+            handleAddEvent(e);
+          }
+        }}>
+          <label>Event Title:
+            <input 
+              type="text" 
+              placeholder="Add Title" 
+              value={title} 
+              onChange={(e) => setTitle(e.target.value)} 
+              required 
+            />
+          </label>
+          <br/>
+
+          <label>Event Date:
+            <input 
+              type="date" 
+              value={date} 
+              onChange={(e) => setDate(e.target.value)} 
+              required 
+            />
+          </label>
+          <br/>
+
+          <label>
+            <input className='checkbox' type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
+            All Day
+          </label>
+          <br/>
+          
+          
+          {!allDay ? (
+            <>
+              <div className='time-filter'>
+                <label>
+                  <input 
+                    className='checkbox'
+                    type="checkbox" 
+                    checked={isPreciseTime} 
+                    onChange={(e) => setIsPreciseTime(e.target.checked)} 
+                  />
+                  Use Precise Time
+                </label>
+
+                {isPreciseTime ? (
+                  <input
+                    type="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    required
+                  />
+                ) : (
+                  <select value={time} onChange={(e) => setTime(e.target.value)} required>
+                    {generateTimeOptions().map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              <label>
+                Duration:
+                <input 
+                  type="number" 
+                  placeholder="hours" 
+                  value={duration} 
+                  onChange={(e) => setDuration(e.target.value)} 
+                  min="1" 
+                  required 
+                />
+              </label>
+            </>
+          ) : (
+            <label>
+              Number of days:
+              <input 
+                type="number" 
+                placeholder="Number of days" 
+                value={days} 
+                onChange={(e) => setDays(e.target.value)} 
+                min="1" 
+              />
+            </label>
+          )}
+          <br/>
+
+          {isEditing && (
+            <label>
+                <input 
+                    className='checkbox'
+                    type="checkbox" 
+                    onChange={(e) => setUpdateAllFutureEvents(e.target.checked)} 
+                />
+                Update all the future instances
+                <br/>
+            </label>
+          )}
+
+          <select 
+            value={repeatFrequency} 
+            onChange={(e) => {
+              setRepeatFrequency(e.target.value);
+              if (e.target.value === 'none') {
+                setRepeatMode('ntimes'); // Reset at default value
+              }
+            }}
+          >
+            <option value="none">No repetition</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+
+          <br/>
+          {repeatFrequency !== 'none' && (
+            <div>
+              <label>
+                Repeat Mode:
+                <select onChange={(e) => setRepeatMode(e.target.value)}>
+                  <option value="ntimes">N Times</option>
+                  <option value="until">Until</option>
+                </select>
+              </label>
+              <br/>
+      
+              {(repeatMode === 'ntimes') ? (
+                <label>Number of repetitions:
+                  <input 
+                    type="number" 
+                    value={repeatCount} 
+                    onChange={(e) => setRepeatCount(e.target.value)} 
+                    defaultValue={1}
+                    min="1" 
+                  />
+                </label>
+              ) : (
+                <label>Repeat until:
+                  <input 
+                    type="date" 
+                    value={repeatEndDate} 
+                    onChange={(e) => setRepeatEndDate(e.target.value)} 
+                  />
+                </label>
+              )}
             </div>
           )}
+          <label>Event Location:
+            <input type="text"
+              placeholder="physical or virtual"
+              value={eventLocation} onChange={(e) => seteventLocation(e.target.value)}
+            />
+          </label>
+          <button className='btn' type="submit">
+            {selectedEvent ? 'Save Changes' : 'Add Event'}
+          </button>
+        </form>
       </div>
     </div>
   );

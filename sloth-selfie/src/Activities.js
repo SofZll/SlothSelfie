@@ -84,27 +84,8 @@ function ActivitiesFunction(){
   
     return (
         <div className="activities-page">
-            <h2>Activities</h2>
-            <form onSubmit={selectedActivity ? (e) => handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) : handleAddActivity}>
-            <input 
-                type="text" 
-                placeholder="Title" 
-                value={title} 
-                onChange={(e) => setTitle(e.target.value)} 
-                required 
-            />
-            <label>Deadline:</label>
-            <input 
-                type="date" 
-                value={deadline} 
-                onChange={(e) => setDeadline(e.target.value)} 
-                required 
-            />
-            <button className='btn' type="submit">
-                {selectedActivity ? 'Save Changes' : 'Add Activity'}</button>
-                </form>
-            <h2>Your Activities:</h2>
-            <div className="activities-layout">
+            <div className="div-calendar-container">
+                <h2>Your Activities:</h2>
                 <div className="calendar-container">
                     <BigCalendar
                         localizer={momentLocalizer(moment)}
@@ -113,7 +94,7 @@ function ActivitiesFunction(){
                         endAccessor="end"
                         onSelectEvent={handleEventClick}
                         titleAccessor="title"
-                        style={{ height: 500 }}
+                        style={{ height: "60vh" }}
                     />
                     {/* Display popup for the selected activity*/}
                     {selectedActivity && (
@@ -122,23 +103,52 @@ function ActivitiesFunction(){
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {selectedActivity.deadline}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
-                        <button className='btn' onClick={() =>{
-                            setShowConfirmation(true);
-                            console.log(setShowConfirmation);
-                        }}>
-                        Delete
-                        </button>
-                        {showConfirmation && (
-                        <div className="popup">
-                            <h2>Are you sure you want to delete this activity?</h2>
-                            <button className='btn' onClick={() => handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted)}>Yes</button>
-                            <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+                        <div>
+                            <button className='btn' onClick={() =>{
+                                setShowConfirmation(true);
+                                console.log(setShowConfirmation);
+                            }}>
+                                Delete
+                            </button>
+                            <button className='btn' onClick={() => handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted)}>X</button>
                         </div>
+                        {showConfirmation && (
+                            <div className="popup-delete">
+                                <h2>Are you sure you want to delete this activity?</h2>
+                                <div>
+                                    <button className='btn' onClick={() => handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted)}>Yes</button>
+                                    <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+                                </div>
+                            </div>
                         )}
-                        <button className='btn' onClick={() => handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted)}>X</button>
                         </div>
                     )}
                 </div>
+            </div>
+            <div className="container-activity-add">
+                <h2>Activities</h2>
+                <form onSubmit={selectedActivity ? (e) => handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) : handleAddActivity}>
+                    <label>Activity:
+                        <input 
+                            type="text" 
+                            placeholder="Title" 
+                            value={title} 
+                            onChange={(e) => setTitle(e.target.value)} 
+                            required 
+                        />
+                    </label>
+                    <label>Deadline:
+                        <input 
+                            type="date" 
+                            value={deadline} 
+                            onChange={(e) => setDeadline(e.target.value)} 
+                            required 
+                        />
+                    </label>
+                    <button className='btn' type="submit">
+                        {selectedActivity ? 'Save Changes' : 'Add Activity'}
+                    </button>
+                </form>
                 <div className="activities-list">
                     <h2>List of your Activities:</h2>
                     <div className="activities-container">
@@ -153,7 +163,7 @@ function ActivitiesFunction(){
                         </div>    
                     </div>
                 </div>
-            </div>
+            </div> 
         </div>
     );
 }
