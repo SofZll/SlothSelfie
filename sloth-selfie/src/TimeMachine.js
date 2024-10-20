@@ -1,9 +1,18 @@
-import React, { useState } from "react";
-import "./css/App.css";
+import React, { useEffect, useState } from "react";
+import './css/TimeMachine.css';
 
 const TimeMachine = ({isOpen, onClose}) => {
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');
+
+    useEffect(() => {
+        const now = new Date();
+        const currentDate = now.toISOString().split('T')[0];
+        const currentTime = now.toTimeString().split(' ')[0].slice(0, 5)
+
+        setInputDate(currentDate);
+        setInputTime(currentTime);
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -24,6 +33,7 @@ const TimeMachine = ({isOpen, onClose}) => {
             <div className="time-machine-content">
             <span className="close" onClick={onClose}>&times;</span>
                 <h2>Hi "user"! <br/> Do you wish to go back in time?</h2>
+                <p>The time is set to the operating system's default. Change it using the form below.</p>
                 <form onSubmit={handleSubmit}>
                     <label htmlFor="date">Enter a date:</label>
                     <input
@@ -33,7 +43,7 @@ const TimeMachine = ({isOpen, onClose}) => {
                         value={inputDate}
                         onChange={(e) => setInputDate(e.target.value)}
                         required
-                    />
+                    /><br/>
                     <label htmlFor="time">Enter a time:</label>
                     <input
                         className="time-input"
