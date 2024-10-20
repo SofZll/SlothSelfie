@@ -190,20 +190,24 @@ function EventsFunction() {
               <p>Start: {selectedEvent.start.toLocaleString()}</p>
               <p>End: {selectedEvent.end.toLocaleString()}</p>
               <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-              <button className='btn' onClick={() =>{
-                  setShowConfirmation(true);
-                  console.log(setShowConfirmation);
-              }}>
-              Delete
+              <div>
+                <button className='btn' onClick={() =>{
+                    setShowConfirmation(true);
+                    console.log(setShowConfirmation);
+                }}>
+                  Delete
                 </button>
+                <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>X</button>
+              </div>
               {showConfirmation && (
-                <div className="popup">
+                <div className="popup-delete">
                   <h2>Are you sure you want to delete this event?</h2>
-                  <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>Yes</button>
-                  <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+                  <div>
+                    <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>Yes</button>
+                    <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+                  </div>
                 </div>
               )}
-              <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>X</button>
               </div>
             )}
         </div>

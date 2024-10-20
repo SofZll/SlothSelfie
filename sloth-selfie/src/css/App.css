@@ -240,11 +240,13 @@ p {
   animation: zoom 0.3s forwards;
 }
 
-.popup {
+.popup,
+.popup-delete {
+  display: flex;
+  flex-direction: column;
   position: fixed;
-  width: 250px;
-  height: 270px;
-  top: 70%;
+  max-width: 250px;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 20px;
@@ -252,6 +254,21 @@ p {
   border: 1px solid #ccc;
   border-radius: 5px;
   z-index: 1000;
+}
+
+.popup {
+  width: 80%;
+}
+
+.popup-delete {
+  width: 100%;
+  justify-content: center;
+}
+
+.popup h2,
+.popup p {
+  font-size: 1rem;
+  margin-bottom: 2%;
 }
 
 
