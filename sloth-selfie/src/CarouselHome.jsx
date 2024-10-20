@@ -91,7 +91,7 @@ export default function CarroussSel(props) {
         </button>
         {/* time machine */}
         <button onClick={showTimeMachine} className="btn">
-          <img src={iconTimeMachine} alt="icon" className="icon"/>
+          <img src={iconSetting} alt="icon" className="icon"/>
         </button>
         <TimeMachine isOpen={machineOpen} onClose={closeTimeMachine}/>
         <button onClick={handleNext} className="btn">

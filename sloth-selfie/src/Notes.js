@@ -224,16 +224,20 @@ const filterNotesByDate = (notes) => {
         <div className='div-content'>
           <h2>Choose one: free Note content or Todo list?</h2>
           <div className="note-content">
+            <div className='div-input-content'>
             <textarea
               value={noteContent}
               onChange={(e) => setNoteContent(e.target.value)}
               placeholder="Note Content"
             />
+            </div>
+            <div className='div-input-todo'>
             <label>
               <input
                 type="checkbox"
                 checked={isTodo}
                 onChange={() => setIsTodo(!isTodo)}
+                className='checkbox'
               />
               Is this a to-do list?
             </label>
@@ -251,6 +255,7 @@ const filterNotesByDate = (notes) => {
                     }
                   }}
                 />
+                {tasks.length > 0 && (
                 <ul>
                   {tasks.map((task, index) => (
                     <li key={index}>
@@ -258,9 +263,12 @@ const filterNotesByDate = (notes) => {
                     </li>
                   ))}
                 </ul>
+                )}
               </div>
             )}
             </div>
+
+          </div>
               {/* Dropdown for acces list */}
               <select value={noteAccess} onChange={(e) => setNoteAccess(e.target.value)}>
                 <option value="">Access List</option>
