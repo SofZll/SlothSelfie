@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 function Form({ formType, setFormType, handleLogin}) {
+    const [name, setName] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -52,7 +53,7 @@ function Form({ formType, setFormType, handleLogin}) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ name, username, email, password })
             })
             .then(response => response.json())
             .then(data => {
@@ -78,6 +79,18 @@ function Form({ formType, setFormType, handleLogin}) {
             <div className="login-box">
                 <h1 className="login-title">{formType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
                 <form id={`login-form`} onSubmit={handleSubmit}>
+                    {formType === 'register' && (
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                id="name"
+                                placeholder="Name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </div>
+                    )}
                     <div className="form-group">
                         <input
                             type="text"
