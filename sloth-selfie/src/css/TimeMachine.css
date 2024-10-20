@@ -44,3 +44,11 @@
 .time-input{
     margin: 15px;
 }
+
+.current-time {
+    display: flex;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: bold;
+    gap: 1rem;
+}
