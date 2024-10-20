@@ -223,6 +223,21 @@ p {
   }
 }***/
 
+/*hides scrollbar on Webkit (Chrome, Safari) */
+.scrollable-list::-webkit-scrollbar {
+  display: none;
+}
+
+/*hides scrollbar on Firefox */
+.scrollable-list {
+  scrollbar-width: none;
+}
+
+/*hides scrollbar on Internet Explorer e Edge */
+.scrollable-list {
+  -ms-overflow-style: none;
+}
+
 
 /* Zoom animation */
 @keyframes zoom {
@@ -246,6 +261,7 @@ p {
   flex-direction: column;
   position: fixed;
   max-width: 250px;
+  height: auto;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -258,6 +274,7 @@ p {
 
 .popup {
   width: 80%;
+  justify-content: space-around;
 }
 
 .popup-delete {
@@ -297,6 +314,12 @@ p {
   
   .btn {
     padding: 10px 15px;
+  }
+
+  .popup,
+  .popup-delete {
+    height: 280px;
+    top: 50%;
   }
 }
 

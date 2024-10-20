@@ -46,21 +46,6 @@
   background-color: #f8f9fa;
 }
 
-/*hides scrollbar on Webkit (Chrome, Safari) */
-.scrollable-list::-webkit-scrollbar {
-  display: none;
-}
-
-/*hides scrollbar on Firefox */
-.scrollable-list {
-  scrollbar-width: none;
-}
-
-/*hides scrollbar on Internet Explorer e Edge */
-.scrollable-list {
-  -ms-overflow-style: none;
-}
-
 .card-note{
   width: 100%;
 }
