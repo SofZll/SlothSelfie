@@ -1,0 +1,46 @@
+.time-machine {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.time-machine-content {
+    background-color: #FAF9F9;
+    padding: 50px 20px 50px 20px;
+    border: 1px solid #555B6E;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #555B6E;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #FFF;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.time-input{
+    margin: 15px;
+}
