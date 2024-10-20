@@ -35,7 +35,7 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
   return (
     <div className="note-card">
       <h3>{note.title}</h3>
-      <small>{note.category}</small><br/><br/>
+      <small>{note.category}</small><br/>
       <small>Author: {note.author}</small><br/>
       <small>
         Access: {note.access?.type === 'public' 

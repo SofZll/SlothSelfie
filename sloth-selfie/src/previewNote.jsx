@@ -39,7 +39,7 @@ function PreviewNote() {
                         initialNotes.map((note, index) => (
                             <div key={index} className="card-note mb-3"> {/* Bootstrap card */}
                                 <div className="card-body">
-                                    <h5 className="card-title">{note.title}</h5>
+                                    <h5>{note.title}</h5>
                                     <small>Author: {note.author}</small><br />
                                     <small>
                                         Access: {note.access.type === 'public' 
@@ -90,7 +90,7 @@ function PreviewNote() {
                             </div>
                         ))
                     ) : (
-                        <div>
+                        <div className="div-postit">
                             <h2>No notes yet!</h2>
                             <img src={noteImage} alt="Note illustration" className="note-image" />
                         </div>
