@@ -76,6 +76,9 @@ export default function CarroussSel(props) {
         <button onClick={handlePrev} className="btn">
           <img src={iconArrowLeft} alt="icon" className="icon"/>
         </button>
+        <button /*onClick={}*/ className="btn">
+          <img src={iconSetting} alt="icon" className="icon"/>
+        </button>
         <button onClick={handleNext} className="btn">
           <img src={iconArrowRight} alt="icon" className="icon"/>
         </button>
