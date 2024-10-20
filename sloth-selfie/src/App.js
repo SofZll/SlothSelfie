@@ -13,8 +13,17 @@ import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
 import ProfileFunction from './Profile';
 import { use } from 'marked';
+import TimeMachine from './TimeMachine';
+import iconTimeMachine from './media/time-machine.svg';
+import { update } from 'react-spring';
 
 function App() {
+  const [machineOpen, setMachineOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
+
   const username = 'user';
   /*
   const [username, setUsername] = useState('example');
@@ -33,6 +42,9 @@ function App() {
     fetchUsername();
   }, []);
 
+
+  
+  
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formType, setFormType] = useState('login'); 
@@ -41,7 +53,6 @@ function App() {
     console.log("Login status:", status);
     setIsAuthenticated(status);
   };
-
   */
 
   const openFullscreen = () => {
@@ -57,33 +68,104 @@ function App() {
     }
   };
 
+  const isMobile = () => {
+    return window.matchMedia('(max-width:500px)').matches; // Soglia di 500px per modalità cellulare
+  };
+
   let cards = [
     {
       key: uuidv4(),
       content: (
-        <Card title="Calendar" caseShow="1"/>
+        <Card title="Calendar" caseShow="1" />
       )
     },
     {
       key: uuidv4(),
       content: (
-        <Card title="Notes" caseShow="2"/>
+        <Card title="Notes" caseShow="2" />
       )
     },
     {
       key: uuidv4(),
       content: (
-        <Card title="Pomodoro" caseShow="3"/>
+        <Card title="Pomodoro" caseShow="3" />
       )
     },
     {
       key: uuidv4(),
       content: (
-        <Card title="Projects" caseShow="4"/>
+        <Card title="Projects" caseShow="4" />
       )
     }
   ];
 
+  // Function to update position based on screen size
+  const updatePosition = () => {
+    if (isMobile()) {
+      const initialX = window.innerWidth * 0.8;
+      const initialY = window.innerHeight * 0.8;
+      setPosition({ x: initialX, y: initialY });
+    } else {
+      setPosition({ x: window.innerWidth * 0.9, y: window.innerHeight * 0.03 });
+    }
+  };
+
+  useEffect(() => {
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isMobile()) {
+      // Chiediamo all'utente di entrare in fullscreen
+      window.addEventListener('click', openFullscreen);
+
+      // Cleanup dell'event listener quando il componente viene smontato
+      return () => {
+        window.removeEventListener('click', openFullscreen);
+      }
+    }
+  }, []);
+
+  // functions to show and close the time machine
+  const toggleTimeMachine = () => {
+    setMachineOpen(prevState => !prevState);
+  };
+
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    setStartPosition({ x: touch.clientX, y: touch.clientY });
+    setIsDragging(false);
+  };
+
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0];
+    
+    // Calculate delta for better performance
+    const deltaX = touch.clientX - startPosition.x;
+    const deltaY = touch.clientY - startPosition.y;
+
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+      setIsDragging(true);
+
+      setPosition(prevPos => ({
+        x: prevPos.x + deltaX,
+        y: prevPos.y + deltaY,
+      }));
+
+      setStartPosition({ x: touch.clientX, y: touch.clientY });
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!isDragging) {
+      toggleTimeMachine();
+    }
+  };
 
   return (
     <Router>
@@ -138,15 +220,31 @@ function App() {
               <Route path="/events" element={<EventsFunction />} />
               <Route path="/activities" element={<ActivitiesFunction />} />
             </Routes>
+            {/* time machine */}
+            <div
+              className="div-time-machine"
+              style={{
+                left: `${position.x}px` ,
+                top: `${position.y}px` ,
+              }}
+            >
+              <button
+                className="btn-time-machine"
+                onTouchStart={isMobile() ? handleTouchStart : null} // Enable touch events on mobile
+                onTouchMove={isMobile() ? handleTouchMove : null}
+                onTouchEnd={isMobile() ? handleTouchEnd : null}
+                onClick={!isMobile() ? toggleTimeMachine : null} // Enable click on desktop
+                style={{ touchAction: 'none' }} // Prevent default touch action for mobile
+              >
+                <img src={iconTimeMachine} alt="icon" className="icon" />
+              </button>
+            </div>
+            <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
           </div>
         </div>
-        {/*
-        <div class="landscape-warning">
-          Coglion* ruota il telefono &#129324;
-        </div>*/}
       </StyleProvider>
     </Router>
-  ); 
+  );
 }
 
 export default App;

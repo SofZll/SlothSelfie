@@ -176,51 +176,35 @@ p {
 
 /* time machine */
 
-.time-machine {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.div-time-machine {
   position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
 }
 
-.time-machine-content {
-  background-color: #FAF9F9;
-  padding: 50px 20px 50px 20px;
-  border: 1px solid #555B6E;
-  width: 80%;
-  max-width: 400px;
-  border-radius: 10px;
-  text-align: center;
+.btn-time-machine {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: #F39252;
+  border: 2px solid #555B6E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: move;
 }
 
-.close {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  color: #555B6E;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
+.btn-time-machine:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
 }
 
-.close:hover,
-.close:focus {
-  color: #FFF;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.time-input{
-  margin: 15px;
+.icon-time-machine {
+  height: 40px;
 }
 
 /* Nascondi il contenuto quando in modalità landscape */

@@ -21,6 +21,7 @@
     "react-burger-menu": "^3.0.9",
     "react-calendar": "^5.0.0",
     "react-dom": "^18.3.1",
+    "react-draggable": "^4.4.6",
     "react-responsive": "^10.0.0",
     "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^6.26.2",
