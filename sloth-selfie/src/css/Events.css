@@ -24,7 +24,7 @@
 }
 
 /* For smaller screens */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .calendar-container {
       width: 90%; 
       height: auto;
