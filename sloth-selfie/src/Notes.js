@@ -240,7 +240,7 @@ const filterNotesByDate = (notes) => {
               Is this a to-do list?
             </label>
 
-            {/* Input per aggiungere task se isTodo è true */}
+            {/* Input for adding tasks if todo */}
             {isTodo && (
               <div>
                 <input
@@ -256,7 +256,7 @@ const filterNotesByDate = (notes) => {
                 {tasks.length > 0 && (
                 <ul>
                   {tasks.map((task, index) => (
-                    <li key={index}>
+                    <li key={index} className="task-item">
                     <input
                       type="checkbox"
                       checked={task.completed}
@@ -283,7 +283,7 @@ const filterNotesByDate = (notes) => {
                 <option value="restricted">Specific People</option>
               </select>
               {noteAccess === 'restricted' && (
-            <div>
+            <div className='div-input-accesslist'>
               {/* We include the current user*/}
               {currentUser && !allowedUsers.includes(currentUser) && 
                 setAllowedUsers(prevUsers => [...prevUsers, currentUser])
