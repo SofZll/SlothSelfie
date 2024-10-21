@@ -76,7 +76,7 @@ function NotesFunction() {
   const [noteAccess, setNoteAccess] = useState('public');
   const [allowedUsers, setAllowedUsers] = useState([]);
   const [isTodo, setIsTodo] = useState(false);
-  const [tasks, setTasks] = useState([]);//every task has text and completed properties
+  const [tasks, setTasks] = useState([]);//every task has text, completed and expire date properties
   const [sortCriterion, setSortCriterion] = useState('most_recent');
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
@@ -115,7 +115,7 @@ function NotesFunction() {
         allowedUsers: noteAccess === 'restricted' ? allowedUsers : [] // Add allowed users if restricted
       },
       isTodo: isTodo, // Add tasks if isToDo
-      tasks: isTodo ? tasks.map(task => ({ ...task, completed: task.completed || false })) : [],
+      tasks: isTodo ? tasks.map(task => ({ ...task, completed: task.completed|| false })) : [],
       createDate: new Date(),
       updateDate: new Date()
     };
@@ -290,7 +290,7 @@ const filterNotesByDate = (notes) => {
               }
               <input 
                 type="text" 
-                placeholder="type and press Enter" 
+                placeholder="type user and press Enter" 
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     const newUser = e.target.value.trim();
