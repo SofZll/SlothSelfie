@@ -35,6 +35,14 @@ export function removeTask(taskIndex, tasks, setTasks) {
   setTasks(tasks.filter((task, i) => i !== taskIndex));
 };
 
+//marks a task as completed
+export function toggleTaskCompletion(taskIndex, tasks, setTasks) {
+  const updatedTasks = tasks.map((task, i) =>
+    i === taskIndex ? { ...task, completed: !task.completed } : task
+  );
+  setTasks(updatedTasks);
+};
+
 export function handleDuplicateNote (index, notes, setNotes) {
     const noteToDuplicate = notes[index];
     const duplicatedNote = { ...noteToDuplicate, date: new Date() }; // Duplicate with a new date

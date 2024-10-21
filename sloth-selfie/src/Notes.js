@@ -6,9 +6,7 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
-import { canUserAccess, addTask, removeTask, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
-
-//TODO: AGGIUSTA EDIT DI TODO (spunte cliccabili)
+import { canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -78,7 +76,7 @@ function NotesFunction() {
   const [noteAccess, setNoteAccess] = useState('public');
   const [allowedUsers, setAllowedUsers] = useState([]);
   const [isTodo, setIsTodo] = useState(false);
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([]);//every task has text and completed properties
   const [sortCriterion, setSortCriterion] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
@@ -259,7 +257,15 @@ const filterNotesByDate = (notes) => {
                 <ul>
                   {tasks.map((task, index) => (
                     <li key={index}>
-                      {task.text} <button className='btn' onClick={() => removeTask(index, tasks, setTasks)}>Remove</button>
+                    <input
+                      type="checkbox"
+                      checked={task.completed}
+                      onChange={() => toggleTaskCompletion(index, tasks, setTasks)}
+                    />
+                    <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
+                      {task.text}
+                    </span>
+                    <button className='btn' onClick={() => removeTask(index, tasks, setTasks)}>Remove</button>
                     </li>
                   ))}
                 </ul>
