@@ -54,9 +54,9 @@ const initialNotes = [
         allowedUsers: []
       },
       isTodo: true, tasks: [
-        { text: "Task 1", completed: false },
-        { text: "Task 2", completed: true },
-        { text: "Task 3", completed: false },
+        { text: "Task 1", completed: false, deadline: null },
+        { text: "Task 2", completed: true, deadline: null },
+        { text: "Task 3", completed: false, deadline: '2024-11-25' },
       ],
       createDate: new Date(),
       updateDate: new Date(),
@@ -76,7 +76,8 @@ function NotesFunction() {
   const [noteAccess, setNoteAccess] = useState('public');
   const [allowedUsers, setAllowedUsers] = useState([]);
   const [isTodo, setIsTodo] = useState(false);
-  const [tasks, setTasks] = useState([]);//every task has text, completed and expire date properties
+  const [tasks, setTasks] = useState([]);//every task has these properties: text, completed and deadline(optional)
+  const [taskDeadline, setTaskDeadline] = useState(null);
   const [sortCriterion, setSortCriterion] = useState('most_recent');
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
@@ -114,7 +115,7 @@ function NotesFunction() {
       alert("Add at least one task to your to-do list!");
     return;
   }
-  
+
   if (noteTitle && noteCategory && (noteContent || isTodo) && noteAuthor && noteAccess) {
     const newNote = { 
       title: noteTitle, 
@@ -126,7 +127,12 @@ function NotesFunction() {
         allowedUsers: noteAccess === 'restricted' ? allowedUsers : [] // Add allowed users if restricted
       },
       isTodo: isTodo, // Add tasks if isToDo
-      tasks: isTodo ? tasks.map(task => ({ ...task, completed: task.completed|| false })) : [],
+      tasks: isTodo 
+      ? tasks.map(task => ({ 
+        ...task, 
+        completed: task.completed|| false,
+        deadline: taskDeadline || null
+      })) : [],
       createDate: new Date(),
       updateDate: new Date()
     };
@@ -259,10 +265,17 @@ const filterNotesByDate = (notes) => {
                   placeholder="Add task and press Enter"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      addTask(e.target.value, tasks, setTasks);
+                      addTask(e.target.value, tasks, setTasks, taskDeadline);
                       e.target.value = ''; // Clear input after adding task
+                      setTaskDeadline('');  // Reset deadline
                     }
                   }}
+                />
+                <label>Task Deadline (Optional):</label>
+                <input
+                  type="date" 
+                  value={taskDeadline}
+                  onChange={(e) => setTaskDeadline(e.target.value)}
                 />
                 {tasks.length > 0 && (
                 <ul>
@@ -276,6 +289,12 @@ const filterNotesByDate = (notes) => {
                     <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
                       {task.text}
                     </span>
+                    {task.deadline && (
+                      <span className="task-deadline">
+                        {/* Converti la deadline in un formato leggibile */}
+                        &nbsp; Deadline: {new Date(task.deadline).toLocaleDateString()}
+                      </span>
+                    )}
                     <button className='btn' onClick={() => removeTask(index, tasks, setTasks)}>Remove</button>
                     </li>
                   ))}

@@ -47,6 +47,11 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
               checked={task.completed} 
             />
             {task.completed ? <s>{task.text}</s> : task.text}
+            {task.deadline ? (
+              <small>
+                &nbsp; Deadline: {new Date(task.deadline).toLocaleDateString()}
+              </small>
+            ) : null}
           </li>
         ))}
       </ul>
