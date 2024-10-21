@@ -290,7 +290,7 @@ const filterNotesByDate = (notes) => {
               }
               <input 
                 type="text" 
-                placeholder="type user and press Enter" 
+                placeholder="type username and press Enter" 
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     const newUser = e.target.value.trim();
@@ -299,7 +299,7 @@ const filterNotesByDate = (notes) => {
                       e.target.value = ''; // Clear input field
                     }
                   }
-                }} 
+                }}
               />
               <ul>
                 {allowedUsers.map((user, index) => (
