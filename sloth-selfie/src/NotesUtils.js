@@ -1,5 +1,4 @@
 import { a } from "react-spring";
-import {handleAddActivity} from './ActivityUtils';
 
 export function canUserAccess(note, currentUser) {
     if (!note.access) {
@@ -31,10 +30,6 @@ export function addTask(taskText, tasks, setTasks, taskDeadline) {
     deadline: taskDeadline //if specified we create an activity
   };
   setTasks([...tasks, newTask]);
-
-  if(taskDeadline !== null) {
-    //handleAddActivity(taskText, taskDeadline, task.completed);
-  }
 };
 
 export function removeTask(taskIndex, tasks, setTasks) {

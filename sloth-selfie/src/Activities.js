@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
-import { normalizeActivities, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA} from './ActivityUtils';
+import { normalizeActivities, handleAddActivity, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA} from './ActivityUtils';
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
@@ -63,24 +63,6 @@ function ActivitiesFunction(){
         console.log("Event clicked:", event); 
         setSelectedActivity(event);
       }
-    
-    function handleAddActivity (e) {
-        e.preventDefault();
-        let newActivity = {
-            id: activities.length + 1,
-            title: title,
-            deadline: deadline,
-            completed: false
-        };
-    
-
-        setActivities([...activities, newActivity]);
-        console.log("Current activities:", [...activities, newActivity]);
-
-         // Reset input fields
-        setTitle('');
-        setDeadline('');
-    };
   
     return (
         <div className="activities-page">
@@ -127,7 +109,9 @@ function ActivitiesFunction(){
             </div>
             <div className="container-activity-add">
                 <h2>Activities</h2>
-                <form onSubmit={selectedActivity ? (e) => handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) : handleAddActivity}>
+                <form onSubmit={selectedActivity 
+                    ? (e) => handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) 
+                    :(e) => handleAddActivity(e, title, deadline, activities, setActivities, setTitle, setDeadline)}>
                     <label>Activity:
                         <input 
                             type="text" 
