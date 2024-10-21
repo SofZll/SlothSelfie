@@ -76,8 +76,8 @@ function NotesFunction() {
   const [noteAccess, setNoteAccess] = useState('public');
   const [allowedUsers, setAllowedUsers] = useState([]);
   const [isTodo, setIsTodo] = useState(false);
-  const [tasks, setTasks] = useState([]);//every task has text and completed properties
-  const [sortCriterion, setSortCriterion] = useState('');
+  const [tasks, setTasks] = useState([]);//every task has text, completed and expire date properties
+  const [sortCriterion, setSortCriterion] = useState('most_recent');
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
@@ -100,10 +100,21 @@ function NotesFunction() {
     console.log("noteContent:", noteContent);
     console.log("tasks:", tasks);
 
+    if (!noteTitle || !noteAuthor || !noteCategory) {
+      alert('Please fill out all required fields: Title, Author, and Category.');
+      return;
+    }
+
     if (!isTodo && noteContent.trim() === "") {
         alert("Add content to your note!");
         return;
     }
+
+    if (isTodo && tasks.length === 0) {
+      alert("Add at least one task to your to-do list!");
+    return;
+  }
+  
   if (noteTitle && noteCategory && (noteContent || isTodo) && noteAuthor && noteAccess) {
     const newNote = { 
       title: noteTitle, 
@@ -115,7 +126,7 @@ function NotesFunction() {
         allowedUsers: noteAccess === 'restricted' ? allowedUsers : [] // Add allowed users if restricted
       },
       isTodo: isTodo, // Add tasks if isToDo
-      tasks: isTodo ? tasks.map(task => ({ ...task, completed: task.completed || false })) : [],
+      tasks: isTodo ? tasks.map(task => ({ ...task, completed: task.completed|| false })) : [],
       createDate: new Date(),
       updateDate: new Date()
     };
@@ -170,7 +181,7 @@ const filterNotesByDate = (notes) => {
         {/* Note list, filtered and ordered */}
         <div className="notes-container">
           {/* Filter the accessible notes from the users and the orders */}
-          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)))).map((note, index) => (
+          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)), sortCriterion)).map((note, index) => (
             <NoteCard
               key={index}
               note={note}
@@ -240,7 +251,7 @@ const filterNotesByDate = (notes) => {
               Is this a to-do list?
             </label>
 
-            {/* Input per aggiungere task se isTodo è true */}
+            {/* Input for adding tasks if todo */}
             {isTodo && (
               <div>
                 <input
@@ -256,7 +267,7 @@ const filterNotesByDate = (notes) => {
                 {tasks.length > 0 && (
                 <ul>
                   {tasks.map((task, index) => (
-                    <li key={index}>
+                    <li key={index} className="task-item">
                     <input
                       type="checkbox"
                       checked={task.completed}
@@ -283,14 +294,14 @@ const filterNotesByDate = (notes) => {
                 <option value="restricted">Specific People</option>
               </select>
               {noteAccess === 'restricted' && (
-            <div>
+            <div className='div-input-accesslist'>
               {/* We include the current user*/}
               {currentUser && !allowedUsers.includes(currentUser) && 
                 setAllowedUsers(prevUsers => [...prevUsers, currentUser])
               }
               <input 
                 type="text" 
-                placeholder="type and press Enter" 
+                placeholder="type username and press Enter" 
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     const newUser = e.target.value.trim();
@@ -299,7 +310,7 @@ const filterNotesByDate = (notes) => {
                       e.target.value = ''; // Clear input field
                     }
                   }
-                }} 
+                }}
               />
               <ul>
                 {allowedUsers.map((user, index) => (
