@@ -77,7 +77,7 @@ function NotesFunction() {
   const [allowedUsers, setAllowedUsers] = useState([]);
   const [isTodo, setIsTodo] = useState(false);
   const [tasks, setTasks] = useState([]);//every task has text and completed properties
-  const [sortCriterion, setSortCriterion] = useState('');
+  const [sortCriterion, setSortCriterion] = useState('most_recent');
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
@@ -170,7 +170,7 @@ const filterNotesByDate = (notes) => {
         {/* Note list, filtered and ordered */}
         <div className="notes-container">
           {/* Filter the accessible notes from the users and the orders */}
-          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)))).map((note, index) => (
+          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)), sortCriterion)).map((note, index) => (
             <NoteCard
               key={index}
               note={note}
