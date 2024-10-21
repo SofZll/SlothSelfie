@@ -100,10 +100,21 @@ function NotesFunction() {
     console.log("noteContent:", noteContent);
     console.log("tasks:", tasks);
 
+    if (!noteTitle || !noteAuthor || !noteCategory) {
+      alert('Please fill out all required fields: Title, Author, and Category.');
+      return;
+    }
+
     if (!isTodo && noteContent.trim() === "") {
         alert("Add content to your note!");
         return;
     }
+
+    if (isTodo && tasks.length === 0) {
+      alert("Add at least one task to your to-do list!");
+    return;
+  }
+  
   if (noteTitle && noteCategory && (noteContent || isTodo) && noteAuthor && noteAccess) {
     const newNote = { 
       title: noteTitle, 
