@@ -27,7 +27,7 @@ function Profile({ username }) {
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
-                const response = await fetch('api/profile?username=' + username);
+                const response = await fetch(`/api/user/profile/${username}`);
                 const data = await response.json();
                 setProfileData(data);
             } catch (error) {
@@ -41,14 +41,6 @@ function Profile({ username }) {
     const handleImageClick = () => {
         document.getElementById('file-input').click();
     }
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setProfileData(prevData => ({
-            ...prevData,
-            [name]: value
-        }));
-    };
 
     const editImage = async (e) => {
         const file = e.target.files[0];
@@ -67,7 +59,7 @@ function Profile({ username }) {
             formData.append('email', profileData.username);
 
             try {
-                const response = await fetch('api/edit-image', {
+                const response = await fetch('api/user/edit-image', {
                     method: 'POST',
                     body: formData
                 });
@@ -85,7 +77,7 @@ function Profile({ username }) {
         }
     }
 
-    const editProfile = (e) => {
+    const editProfile = () => {
         setIsEditing(true);
     } 
     
@@ -93,13 +85,37 @@ function Profile({ username }) {
         setIsEditing(false);
     };
 
-    const saveChanges = () => {
+    const saveChanges = async (e) => {
+        const newProfileData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            birthday: document.getElementById('birthday').value,
+            phoneNumber: document.getElementById('phoneNumber').value,
+            gender: document.getElementById('gender').value,
+        };
 
+        try {
+            const response = await fetch('api/user/edit-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newProfileData)
+            });
+
+            if (response.ok) {
+                setIsEditing(false);
+            } else {
+                console.error('Error editing profile:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error editing profile:', error);
+        }
     }
 
     const logout = async () => {
         try {
-            const response = await fetch('api/logout', {
+            const response = await fetch('api/user/logout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -134,7 +150,7 @@ function Profile({ username }) {
                     <form className="profile-form">
                         <div className="form-group profile-form-group">
                             <label htmlFor="name">Name:</label>
-                            <input type="text" id="name" name="name" value={profileData.name} onChange={handleChange} />
+                            <input type="text" id="name" name="name" value={profileData.name}/>
                         </div>
                         <div className="form-group profile-form-group">
                             <label htmlFor="username">Username:</label>
@@ -142,19 +158,19 @@ function Profile({ username }) {
                         </div>
                         <div className="form-group profile-form-group">
                             <label htmlFor="email">Email:</label>
-                            <input type="email" id="email" name="email" value={profileData.email} onChange={handleChange} />
+                            <input type="email" id="email" name="email" value={profileData.email}/>
                         </div>
                         <div className="form-group profile-form-group">
                             <label htmlFor="birthday">Birthday:</label>
-                            <input type="date" id="birthday" name="birthday" value={profileData.birthday} onChange={handleChange} />
+                            <input type="date" id="birthday" name="birthday" value={profileData.birthday}/>
                         </div>
                         <div className="form-group profile-form-group">
                             <label htmlFor="phoneNumber">Phone number:</label>
-                            <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber} onChange={handleChange} />
+                            <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber}/>
                         </div>
                         <div className="form-group profile-form-group">
                             <label htmlFor="gender">Gender:</label>
-                            <select id="gender" name="gender" value={profileData.gender} onChange={handleChange}>
+                            <select id="gender" name="gender" value={profileData.gender}>
                                 <option value="">Select Gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
