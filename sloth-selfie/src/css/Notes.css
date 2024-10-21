@@ -163,6 +163,12 @@
   margin: 10px 0;
 }
 
+.task-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
 .filter-bar,
 .date-filter,
 .div-input-title,
@@ -233,7 +239,8 @@
 }
 
 .div-input-content,
-.div-input-todo {
+.div-input-todo,
+.div-input-accesslist{
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -242,7 +249,8 @@
 }
 
 .div-input-content *,
-.div-input-todo * {
+.div-input-todo *,
+.div-input-accesslist *{
   width: 95%;
 }
 
@@ -256,7 +264,8 @@
   padding: 5px;
 }
 
-.div-input-todo ul {
+.div-input-todo ul,
+.div-input-accesslist ul {
   list-style-position: inside;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -265,7 +274,8 @@
   padding: 5px;
 }
 
-.div-input-todo div {
+.div-input-todo div,
+.div-input-accesslist div {
   display: flex;
   align-items: center;
   flex-direction: column;
