@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 
 // TODO: implement a hashing function to store passwords securely
+// TODO: implement the possibility to change the password
 
 // Function to log in a user
 const loginUser = async (req, res) => {
@@ -67,20 +68,60 @@ const logoutUser = async (req, res) => {
     }
 };
 
-// Function to get the profile image
-const getUserImage = async (req, res) => {
+// Function to edit the user's profile image
+const editImage = async (req, res) => {
     try {
-        // Fetch the user and check if the image exists
-        const user = await User.findById(req.params.userId);
-        if (!user || !user.image || !user.image.data) {
-            return res.status(404).json({ success: false, message: 'Image not found' });
+        const user = await User.findById(req.session.userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        
+        user.image.data = req.file.buffer;
+        user.image.contentType = req.file.mimetype;
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'Image uploaded successfully' });
+    } catch (error) {
+        console.error('Error editing image:', error);
+        res.status(500).json({ success: false, message: 'Error editing image' });
+    }
+};
+
+// Function to edit the user's profile
+const editProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        res.set('Content-Type', user.image.contentType);
-        res.send(user.image.data);
+        const { name, email, birthday, phoneNumber, gender } = req.body;
+        user.name = name;
+        user.email = email;
+        user.birthday = birthday;
+        user.phoneNumber = phoneNumber;
+        user.gender = gender;
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'Profile updated successfully' });
     } catch (error) {
-        console.error('Error fetching user image:', error);
-        res.status(500).json({ success: false, message: 'Error fetching user image' });
+        console.error('Error editing profile:', error);
+        res.status(500).json({ success: false, message: 'Error editing profile' });
+    }
+};
+
+// Function to get the profile info
+const getUserProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        res.status(200).json({ success: true, user });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ success: false, message: 'Error fetching user profile' });
     }
 };
 
@@ -89,5 +130,7 @@ module.exports = {
     loginUser,
     registerUser,
     logoutUser,
-    getUserImage
+    getUserProfile,
+    editImage,
+    editProfile,
 };

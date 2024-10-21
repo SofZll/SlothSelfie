@@ -20,7 +20,7 @@ function Form({ formType, setFormType, handleLogin}) {
                 return;
             }
 
-            fetch('/api/login', {
+            fetch('/api/user/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ function Form({ formType, setFormType, handleLogin}) {
                 return;
             }
 
-            fetch('/api/register', {
+            fetch('/api/user/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
