@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { marked } from 'marked';
 
-export function toggleTaskCompletion(taskIndex, note) {
-  const updatedTasks = note.tasks.map((task, i) => 
-    i === taskIndex ? { ...task, completed: !task.completed } : task
-  );
-  return { ...note, tasks: updatedTasks };
-};
-
 function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedButton }) {
 
     const [isExpanded, setIsExpanded] = useState(false);  // State to manage the note content expansion
@@ -52,7 +45,6 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
             <input 
               type="checkbox" 
               checked={task.completed} 
-              onChange={() => toggleTaskCompletion(taskIndex, note)} 
             />
             {task.completed ? <s>{task.text}</s> : task.text}
           </li>
