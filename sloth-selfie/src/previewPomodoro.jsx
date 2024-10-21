@@ -11,6 +11,7 @@ const PreviewPomodoro = () => {
   const [isStudioTime, setIsStudioTime] = useState(true);
   const [playTomato, setPlayTomato] = useState(false);
   const [stringPrintTime, setStringPrintTime] = useState('30:00');
+  const [cicles, setCicles] = useState(5);
   const navigate = useNavigate();
 
   // animation page
@@ -24,15 +25,22 @@ const PreviewPomodoro = () => {
   };
 
   useEffect(() => {
-    if (playTomato) {
+    if (playTomato && cicles > 0) {
       if (timeLeft === 0) {
       
         if (isStudioTime) {
           setTimeLeft(5*60);
         } else {
           setTimeLeft(30*60);
+          setCicles(cicles - 1);
+        }
+        if (cicles === 0) {
+          setTimeLeft(0);
+          setPlayTomato(false);
         }
         setIsStudioTime(!isStudioTime);
+        setStringPrintTime(stringTime(timeLeft));
+
       } else {
         const timer = setTimeout(() => {
           setTimeLeft(timeLeft - 1);
@@ -56,6 +64,11 @@ const PreviewPomodoro = () => {
   }
 
   const tomatoPlay = () => {
+    if (cicles === 0) {
+      setTimeLeft(30*60);
+      setCicles(5);
+      setStringPrintTime(stringTime(timeLeft));
+    }
     setPlayTomato(prevPlayTomato => !prevPlayTomato);
   }
 
@@ -72,12 +85,12 @@ const PreviewPomodoro = () => {
           {stringPrintTime}
         </h2>
       </div>
-      <div className="divBtn">
-              <button  onClick={tomatoPlay} className="btn">{playTomato ? "Stop" : "Play"}</button>
+        <div className="divBtn">
+            <button  onClick={tomatoPlay} className="btn">{playTomato ? (cicles === 0 ? "Reset" : "Stop") : "Play"}</button>
           <Link to="/pomodoro" onClick={handleLinkClick('/pomodoro')}>
-              <button className="btn">Start</button>
+            <button className="btn">Start</button>
           </Link>
-      </div>
+        </div>
     </div>
   );
 };
