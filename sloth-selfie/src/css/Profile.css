@@ -11,7 +11,7 @@
     border-radius: 50%;
     border: 1px solid #555B6E;
     overflow: hidden;
-    margin: 25px;
+    margin: auto;
 }
 
 .profile-image img{
@@ -19,4 +19,15 @@
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+}
+
+.profile-info{
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.profile-info p{
+    margin: 0;
 }
