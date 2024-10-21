@@ -21,13 +21,61 @@
     border-radius: 50%;
 }
 
+.profile-container{
+    /*background-color: #b0d3d1;*/
+    border: 1px solid #555B6E;
+    padding: 10px;
+    border-radius: 10px;
+    width:80%;
+}
+
 .profile-info{
     margin-top: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin: 30px 20px 20px 20px;
 }
 
 .profile-info p{
+    text-align: left;
     margin: 0;
+}
+
+.profile-form{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    
+}
+
+.profile-form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.profile-form-group label{
+    width: 80px;
+    text-align: left;
+}
+
+.profile-form-group input,
+.profile-form-group select,
+.profile-form-group span {
+    flex: 1;
+    padding: 8px;
+    box-sizing: border-box;
+    width: 200px;
+    margin: 0;
+}
+
+@media screen and (min-width: 700px){
+    .profile-container{
+        width: 400px;
+    }
+    
+    .profile-info p{
+        padding-left: 40px;
+    }
 }

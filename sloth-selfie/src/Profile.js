@@ -1,8 +1,28 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import "./css/Profile.css";
 
 function Profile({ username }) {
-    const [profileData, setProfileData] = useState({name: '', username: '', email: '', birthday: '', phoneNumber: '', gender:'', profile_image: ''});
+    const [isEditing, setIsEditing] = useState(false);
+    const [profileData, setProfileData] = useState({
+        name: 'Giorgio', 
+        username: 'GG', 
+        email: 'giorgio787@example.com', 
+        birthday: '22/07/1998', 
+        phoneNumber: '', 
+        gender:'Male', 
+        profile_image: ''
+    });
+    /*
+    const [profileData, setProfileData] = useState({
+        name: '', 
+        username: '', 
+        email: '', 
+        birthday: '', 
+        phoneNumber: '', 
+        gender:'', 
+        profile_image: ''
+    });
+    */
 
     useEffect(() => {
         const fetchProfileData = async () => {
@@ -22,9 +42,59 @@ function Profile({ username }) {
         document.getElementById('file-input').click();
     }
 
-    const editImage = (e) => {
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setProfileData(prevData => ({
+            ...prevData,
+            [name]: value
+        }));
+    };
+
+    const editImage = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfileData(prevData => ({
+                    ...prevData,
+                    profile_image_url: reader.result
+                }));
+            };
+            reader.readAsDataURL(file);
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('email', profileData.username);
+
+            try {
+                const response = await fetch('api/edit-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Image uploaded successfully:', data);
+                } else {
+                    console.error('Error uploading image:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error uploading image:', error);
+            }
+            
+        }
     }
+
     const editProfile = (e) => {
+        setIsEditing(true);
+    } 
+    
+    const cancelEdit = () => {
+        setIsEditing(false);
+    };
+
+    const saveChanges = () => {
+
     }
 
     const logout = async () => {
@@ -49,22 +119,71 @@ function Profile({ username }) {
         <div className="profile-container">
             <h2 className="profile-title">Profile</h2>
             <div className="profile-image">
+                {/*
                 {profileData.profile_image_url && (
-                    <img src={profileData.profile_image_url} alt="image" onClick={handleImageClick}/>
+                    <img src={profileData.profile_image_url} alt="profile-img" onClick={handleImageClick}/>
                 )}
+                
+                */}
+                <img src='./media/user.svg' alt="profile-img" onClick={handleImageClick}/>
                 <input type="file" id="file-input" style={{display: 'none'}} onChange={editImage}/>
             </div>
+            {/*<button className="btn" onClick={handleImageClick}>Change Photo</button>*/}
             <div className="profile-info">
-                <p>Name: {profileData.name} </p>
-                <p>Username: {profileData.username} </p>
-                <p>Email: {profileData.email}</p>
-                <p>Birthday: {profileData.birthday}</p>
-                <p>Phone number: {profileData.phoneNumber}</p>
-                <p>Gender: {profileData.gender} </p>
-            </div>
-            <h2 className="profile-title">Pomodoro stats</h2>
-            <button className="btn" onClick={editProfile}>Edit profile</button>
-            <button className="btn" onClick={logout}>Log out</button>
+                {isEditing ? (
+                    <form className="profile-form">
+                        <div className="form-group profile-form-group">
+                            <label htmlFor="name">Name:</label>
+                            <input type="text" id="name" name="name" value={profileData.name} onChange={handleChange} />
+                        </div>
+                        <div className="form-group profile-form-group">
+                            <label htmlFor="username">Username:</label>
+                            <span>{profileData.username}</span>
+                        </div>
+                        <div className="form-group profile-form-group">
+                            <label htmlFor="email">Email:</label>
+                            <input type="email" id="email" name="email" value={profileData.email} onChange={handleChange} />
+                        </div>
+                        <div className="form-group profile-form-group">
+                            <label htmlFor="birthday">Birthday:</label>
+                            <input type="date" id="birthday" name="birthday" value={profileData.birthday} onChange={handleChange} />
+                        </div>
+                        <div className="form-group profile-form-group">
+                            <label htmlFor="phoneNumber">Phone number:</label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber} onChange={handleChange} />
+                        </div>
+                        <div className="form-group profile-form-group">
+                            <label htmlFor="gender">Gender:</label>
+                            <select id="gender" name="gender" value={profileData.gender} onChange={handleChange}>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </form>
+                ):(
+                    <>
+                        <p>Name: {profileData.name} </p>
+                        <p>Username: {profileData.username} </p>
+                        <p>Email: {profileData.email}</p>
+                        <p>Birthday: {profileData.birthday}</p>
+                        <p>Phone number: {profileData.phoneNumber}</p>
+                        <p>Gender: {profileData.gender} </p>
+                    </>
+                )}
+            </div><br/>
+            {isEditing ? (
+                <>
+                    <button className="btn" onClick={saveChanges}>Save changes</button>
+                    <button className="btn" onClick={cancelEdit}>Cancel</button>
+                </>
+            ):(
+                <>
+                    <button className="btn" onClick={editProfile}>Edit profile</button>
+                    <button className="btn" onClick={logout}>Log out</button>
+                </>
+            )}
         </div>
     );
 }
