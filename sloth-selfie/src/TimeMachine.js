@@ -4,23 +4,67 @@ import './css/TimeMachine.css';
 const TimeMachine = ({isOpen, onClose}) => {
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');
-
+    const [currentDate, setCurrentDate] = useState('');
+    const [currentTime, setCurrentTime] = useState('');
+    
     useEffect(() => {
+        // Message for future me: comment once the server is running
         const now = new Date();
-        const currentDate = now.toISOString().split('T')[0];
-        const currentTime = now.toTimeString().split(' ')[0].slice(0, 5)
+        const date = now.toISOString().split('T')[0];
+        const time = now.toTimeString().split(' ')[0].slice(0, 5);
+        setCurrentDate(date);
+        setCurrentTime(time);
 
-        setInputDate(currentDate);
-        setInputTime(currentTime);
+        // The server returns the current time if there is no time set
+        // Fetch selected time from server
+        fetch('/api/selected-time')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Time is set on:', data);
+                setCurrentDate(data.date);
+                setCurrentTime(data.time);
+            })
+            .catch(error => {
+                console.error("Error fetching selected time: ", error);
+            }); 
     }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (inputTime && inputDate) {
-          alert(`You have chosen to go back to: ${inputDate} ${inputTime}`);
-          onClose();
-        } else {
-          alert("No time entered. Please try again.");
+        const buttonClicked = e.nativeEvent.submitter.value;
+        if (buttonClicked === 'reset-time') {
+            if (inputTime && inputDate) {
+                fetch('/api/set-time',{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({inputTime, inputDate})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(`You have chosen to go back to: ${inputDate} ${inputTime}`);
+                    console.log('Time set:', data);
+                })
+                .catch(error => {
+                    console.error("Error setting time: ", error);
+                });
+                onClose();
+            } else {
+                alert("No time entered. Please try again.");
+            }
+        }
+        else if (buttonClicked === 'reset-time') {
+            fetch('/api/reset-time')
+            .then(response => response.json())
+            .then(data => {
+                alert('Time has been reset!');
+                console.log('Time reset:', data);
+            })
+            .catch(error => {
+                console.error("Error resetting time: ", error);
+            });
+            onClose();
         }
     }
 
@@ -33,7 +77,11 @@ const TimeMachine = ({isOpen, onClose}) => {
             <div className="time-machine-content">
             <span className="close" onClick={onClose}>&times;</span>
                 <h2>Hi "user"! <br/> Do you wish to go back in time?</h2>
-                <p>The time is set to the operating system's default. Change it using the form below.</p>
+                <p>Right now the time is set on: </p>
+                <p className="current-time">
+                    <span>Date: {currentDate}</span>
+                    <span>Time: {currentTime}</span>
+                </p>
                 <form onSubmit={handleSubmit}>
                     <label htmlFor="date">Enter a date:</label>
                     <input
@@ -53,7 +101,8 @@ const TimeMachine = ({isOpen, onClose}) => {
                         onChange={(e) => setInputTime(e.target.value)}
                         required
                     /><br/><br/>
-                    <button type="submit" className="btn">Go back in time!</button>
+                    <button type="submit" className="btn" value="set-time">Go back in time!</button>
+                    <button type="submit" className="btn" value="reset-time">Reset time</button>
                 </form>
             </div>
         </div>

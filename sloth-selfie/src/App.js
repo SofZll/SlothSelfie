@@ -40,11 +40,7 @@ function App() {
     };
 
     fetchUsername();
-  }, []);
-
-
-  
-  
+  }, []); 
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formType, setFormType] = useState('login'); 
@@ -68,8 +64,15 @@ function App() {
     }
   };
 
+  const isMobileLandscape = () => {
+    const isMobileWidth = window.matchMedia('(max-width: 700px)').matches; // Soglia di 500px per modalità cellulare
+    const isLandscapeHeight = window.matchMedia('(max-height: 700px').matches;
+    const isLandscapeWidth = window.matchMedia('(max-width: 1000px').matches;
+    return isMobileWidth || (isLandscapeHeight && isLandscapeWidth);
+  };
+
   const isMobile = () => {
-    return window.matchMedia('(max-width:500px)').matches; // Soglia di 500px per modalità cellulare
+    return window.matchMedia('(max-width: 700px)').matches;
   };
 
   let cards = [
@@ -99,7 +102,7 @@ function App() {
     }
   ];
 
-  // Function to update position based on screen size
+  // Functions to update time machine position based on screen size
   const updatePosition = () => {
     if (isMobile()) {
       const initialX = window.innerWidth * 0.8;
@@ -119,11 +122,24 @@ function App() {
     }
   }, []);
 
-  // functions to show and close the time machine
+  useEffect(() => {
+    if (isMobile()) {
+      // Chiediamo all'utente di entrare in fullscreen
+      window.addEventListener('click', openFullscreen);
+
+      // Cleanup dell'event listener quando il componente viene smontato
+      return () => {
+        window.removeEventListener('click', openFullscreen);
+      }
+    }
+  }, []);
+
+  // Function to show and close the time machine
   const toggleTimeMachine = () => {
     setMachineOpen(prevState => !prevState);
   };
 
+  // Touch events for time machine
   const handleTouchStart = (e) => {
     const touch = e.touches[0];
     setStartPosition({ x: touch.clientX, y: touch.clientY });
@@ -218,11 +234,11 @@ function App() {
             >
               <button
                 className="btn-time-machine"
-                onTouchStart={isMobile() ? handleTouchStart : null} // Enable touch events on mobile
-                onTouchMove={isMobile() ? handleTouchMove : null}
-                onTouchEnd={isMobile() ? handleTouchEnd : null}
-                onClick={!isMobile() ? toggleTimeMachine : null} // Enable click on desktop
-                style={{ touchAction: 'none' }} // Prevent default touch action for mobile
+                onTouchStart={isMobileLandscape() ? handleTouchStart : null}
+                onTouchMove={isMobileLandscape() ? handleTouchMove : null}
+                onTouchEnd={isMobileLandscape() ? handleTouchEnd : null}
+                onClick={!isMobileLandscape() ? toggleTimeMachine : null} // Enable click on desktop
+                style={{ touchAction: 'none' }}
               >
                 <img src={iconTimeMachine} alt="icon" className="icon" />
               </button>

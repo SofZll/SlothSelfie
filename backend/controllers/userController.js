@@ -31,7 +31,7 @@ const loginUser = async (req, res) => {
 
 // Function to register a new user
 const registerUser = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { name, username, email, password } = req.body;
     try {
         // Check if the user already exists
         const existingUser = await User.findOne({ email });
@@ -40,7 +40,7 @@ const registerUser = async (req, res) => {
         }
 
         // Create a new user
-        const newUser = new User({ username, email, password });
+        const newUser = new User({ name, username, email, password });
         await newUser.save();
         
         res.status(201).json({ success: true, user: newUser });
