@@ -240,7 +240,7 @@
 
 .div-input-content,
 .div-input-todo,
-.div-input-accesslist {
+.div-input-accesslist{
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -249,7 +249,8 @@
 }
 
 .div-input-content *,
-.div-input-todo * {
+.div-input-todo *,
+.div-input-accesslist *{
   width: 95%;
 }
 
@@ -273,7 +274,8 @@
   padding: 5px;
 }
 
-.div-input-todo div {
+.div-input-todo div,
+.div-input-accesslist div {
   display: flex;
   align-items: center;
   flex-direction: column;
