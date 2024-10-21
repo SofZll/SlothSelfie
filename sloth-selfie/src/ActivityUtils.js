@@ -29,19 +29,26 @@ export function normalizeActivities (activities) {
     });
 };
 
-/*
-// Handle adding an activity
 
-export function handleAddActivity(e, title, deadline, activities, setActivities) {
+// Handle adding an activity
+export function handleAddActivity(e, title, deadline, activities, setActivities, setTitle, setDeadline) {
     e.preventDefault();
-    let newActivity = {
-        id: activities.length + 1,
-        title: title,
-        deadline: deadline,
-        completed: false
-    };
+        let newActivity = {
+            id: activities.length + 1,
+            title: title,
+            deadline: deadline,
+            completed: false
+        };
+    
+
+        setActivities([...activities, newActivity]);
+        console.log("Current activities:", [...activities, newActivity]);
+
+         // Reset input fields
+        setTitle('');
+        setDeadline('');
 }
-*/
+
 // Handle removing an activity and marking it as completed while pressing btn "Done"
 export function handleRemoveActivity(id, activities, setActivities) {
     const updatedActivities = activities.map(activity => {

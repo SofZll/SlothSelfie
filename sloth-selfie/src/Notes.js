@@ -7,6 +7,13 @@ import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
 import { canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
+import {handleAddActivity} from './ActivityUtils';
+
+/* TODO: in add Note:
+  if(taskDeadline !== null) {
+    //handleAddActivity(taskText, taskDeadline, task.completed);
+  } */
+
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
