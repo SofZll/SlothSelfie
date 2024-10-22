@@ -148,7 +148,7 @@ export function handleClosePopupE(setSelectedEvent, setIsEditing, setEventData) 
 // Handle updating an event -> // CON EVENTI RIPETUTI MODIFICA SOLO TITLE E LOCATION
 export function handleUpdateEvent(
     e, 
-    eventData, // L'intero oggetto evento contenente { id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation }
+    eventData,
     setEventData,
     events, 
     setEvents, 

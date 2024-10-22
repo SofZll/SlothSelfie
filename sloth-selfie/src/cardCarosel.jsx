@@ -8,7 +8,7 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import PreviewPomodoro from './previewPomodoro';
 import PreviewNote from './previewNote';
-import { initialEvents } from './Events2';
+import { initialEvents } from './Events';
 import { initialActivities } from './Activities';
 
 function Card({ title, caseShow }) {
