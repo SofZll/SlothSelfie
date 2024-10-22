@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
+const defaultImage = path.join(__dirname, '../defaultImage.jpg');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -29,11 +32,24 @@ const userSchema = new mongoose.Schema({
         type: String,
     },
     image: {
-        data: Buffer,
-        contentType: String 
+        data: {
+            type: Buffer,
+            default: null,
+        },
+        contentType: {
+            type: String,
+            default: 'image/jpeg',
+        },
     }
 }, {
     timestamps: true,
+});
+
+userSchema.pre('save', function (next) {
+    if (!this.image.data) {
+        this.image.data = fs.readFileSync(defaultImage);
+    }
+    next();
 });
 
 const User = mongoose.model('User', userSchema);
