@@ -86,7 +86,8 @@ const PreviewPomodoro = () => {
         </h2>
       </div>
         <div className="divBtn">
-            <button  onClick={tomatoPlay} className="btn">{playTomato ? (cicles === 0 ? "Reset" : "Stop") : "Play"}</button>
+            <button  onClick={tomatoPlay} className="btn">{playTomato ? 
+              (cicles === 0 ? "Reset" : "Stop") : ((cicles === 5 && timeLeft === (30*60)) ? "Quick start" : "Play")}</button>
           <Link to="/pomodoro" onClick={handleLinkClick('/pomodoro')}>
             <button className="btn">Start</button>
           </Link>
