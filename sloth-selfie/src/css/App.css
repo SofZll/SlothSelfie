@@ -87,7 +87,8 @@ p {
 }
 
 .btn,
-.btn2 {
+.btn2,
+.btnMusic {
   padding: 6px 10px;
   font-size: 14px;
   font-weight: bold;
@@ -120,6 +121,10 @@ p {
 
 .btn2:active {
   background-color: #FFD6BA;
+}
+
+.btnMusic {
+  background-color: inherit;
 }
 
 .icon {
@@ -261,7 +266,7 @@ p {
   flex-direction: column;
   position: fixed;
   max-width: 250px;
-  height: auto;
+  height: 280px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -318,7 +323,6 @@ p {
 
   .popup,
   .popup-delete {
-    height: 280px;
     top: 50%;
   }
 }

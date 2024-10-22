@@ -9,6 +9,9 @@ import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, han
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
+import Select from 'react-select';
+
+
 
 //TODO: edit di eventi ripetuti(vanno solo title e location)
 
@@ -104,11 +107,13 @@ function EventsFunction() {
       for (let minutes of [0, 15, 30, 45]) {
           const formattedHour = hour < 10 ? `0${hour}` : hour;
           const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-          options.push(`${formattedHour}:${formattedMinutes}`);
+          options.push({ value: `${formattedHour}:${formattedMinutes}`, label: `${formattedHour}:${formattedMinutes}` });
       }
   }
     return options;
   };
+  
+  const options = generateTimeOptions();
 
   const handleAddEvent = (e) => {
     e.preventDefault();
@@ -274,13 +279,22 @@ function EventsFunction() {
                     required
                   />
                 ) : (
-                  <select value={time} onChange={(e) => setTime(e.target.value)} required>
-                    {generateTimeOptions().map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    value={options.find(option => option.value === time)}
+                    onChange={(selectedOption) => setTime(selectedOption.value)}
+                    options={options}
+                    isSearchable
+                    styles={{
+                      menu: (provided) => ({
+                        ...provided,
+                        maxHeight: 200,
+                      }),
+                      menuList: (provided) => ({
+                        ...provided,
+                        maxHeight: 200,
+                      }),
+                    }}
+                  />
                 )}
               </div>
               <label>
@@ -321,22 +335,33 @@ function EventsFunction() {
             </label>
           )}
 
-          <select 
-            value={repeatFrequency} 
-            onChange={(e) => {
-              setRepeatFrequency(e.target.value);
-              if (e.target.value === 'none') {
-                setRepeatMode('ntimes'); // Reset at default value
+          <Select
+            value={options.find(option => option.value === repeatFrequency)}
+            onChange={(selectedOption) => {
+              setRepeatFrequency(selectedOption.value);
+              if (selectedOption.value === 'none') {
+                setRepeatMode('ntimes');
               }
             }}
-          >
-            <option value="none">No repetition</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-
+            options= {[
+              { value: 'none', label: 'No repetition' },
+              { value: 'daily', label: 'Daily' },
+              { value: 'weekly', label: 'Weekly' },
+              { value: 'monthly', label: 'Monthly' },
+              { value: 'yearly', label: 'Yearly' },
+            ]}
+            styles={{
+              menu: (provided) => ({
+                ...provided,
+                maxHeight: 90,
+                overflowY: 'auto',
+              }),
+              menuList: (provided) => ({
+                ...provided,
+                maxHeight: 90,
+              }),
+            }}
+          />
           <br/>
           {repeatFrequency !== 'none' && (
             <div>
