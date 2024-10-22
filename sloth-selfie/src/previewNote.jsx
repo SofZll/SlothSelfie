@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { initialNotes } from './Notes';
 import noteImage from './media/note.png';
 import { marked } from 'marked';
+import './css/Notes.css';
 
 function PreviewNote() {
     const navigate = useNavigate();
