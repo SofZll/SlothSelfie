@@ -8,12 +8,7 @@ import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
 import { canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
-
-/* TODO: in add Note:
-  if(taskDeadline !== null) {
-    //handleAddActivity(taskText, taskDeadline, task.completed);
-  } */
-
+import { ActivityContext } from './ActivityContext'; 
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -89,7 +84,7 @@ function NotesFunction() {
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
-
+  const { activities, setActivities, setTitle, setDeadline } = useContext(ActivityContext);
 
   // change style page onload document
   useEffect(() => {
@@ -143,6 +138,16 @@ function NotesFunction() {
       createDate: new Date(),
       updateDate: new Date()
     };
+
+     // Add tasks as activities if they have a deadline
+     if (isTodo) {
+      tasks.forEach(task => {
+        if (task.deadline) {
+          handleAddActivity(null, task.text, task.deadline, activities, setActivities, setTitle, setDeadline);
+        }
+      });
+    }
+
     setNotes([...notes, newNote]);
     setNoteTitle('');
     setNoteCategory('');

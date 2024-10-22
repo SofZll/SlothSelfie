@@ -10,6 +10,7 @@ import { normalizeActivities, handleAddActivity, handleRemoveActivity, updateOve
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
+import { ActivityContext } from './ActivityContext'; 
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -19,13 +20,14 @@ const initialActivities = [
 
 function ActivitiesFunction(){
     const { updateStyles, updateIcon } = useContext(StyleContext);
-    const [activities, setActivities] = useState(initialActivities || []);
+    //const [activities, setActivities] = useState(initialActivities || []);
     const [id, setId] = useState("");
-    const [title, setTitle] = useState('');
-    const [deadline, setDeadline] = useState('');
+    //const [title, setTitle] = useState('');
+    //const [deadline, setDeadline] = useState('');
     const [completed, setCompleted] = useState(false);
     const [selectedActivity, setSelectedActivity] = useState(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const { activities, setActivities, title, setTitle, deadline, setDeadline } = useContext(ActivityContext);
 
     // change style page onload document
     useEffect(() => {

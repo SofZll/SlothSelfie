@@ -32,7 +32,9 @@ export function normalizeActivities (activities) {
 
 // Handle adding an activity
 export function handleAddActivity(e, title, deadline, activities, setActivities, setTitle, setDeadline) {
-    e.preventDefault();
+    if (e && e.preventDefault) {
+        e.preventDefault();
+      }
         let newActivity = {
             id: activities.length + 1,
             title: title,
