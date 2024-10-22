@@ -123,17 +123,7 @@ function App() {
     }
   }, []);
 
-  useEffect(() => {
-    if (isMobile()) {
-      // Chiediamo all'utente di entrare in fullscreen
-      window.addEventListener('click', openFullscreen);
-
-      // Cleanup dell'event listener quando il componente viene smontato
-      return () => {
-        window.removeEventListener('click', openFullscreen);
-      }
-    }
-  }, []);
+  
 
   // Function to show and close the time machine
   const toggleTimeMachine = () => {

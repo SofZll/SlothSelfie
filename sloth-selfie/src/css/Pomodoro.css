@@ -1,195 +1,230 @@
-  /*** Preview Home ***/
+/*** Preview Home ***/
 
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-bottom: 10vmin;
-    height: 90%;
-    margin: 0;
-    justify-content: space-evenly;
-  }
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 10vmin;
+  height: 90%;
+  margin: 0;
+  justify-content: space-evenly;
+}
 
-  .tomatoPrew {
-    width: 100%;
-    height: 100%;
-  }
+.tomatoPrew {
+  width: 100%;
+  height: 100%;
+}
 
+.containerRed,
+.containerYellow {
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  display: flex;
+  width: 40vmin;
+}
+
+.counterRed,
+.counterYellow {
+  padding-top: 3vmin;
+  color: #f9f9f9;
+  font-size: 12vmin;
+  position: absolute;
+}
+
+.container p {
+  margin-bottom: 0;
+}
+
+/*** Pomodoro page ***/
+
+.div-pomodoro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  height: 100%;
+  width: 100%;
+}
+
+.pomodoro {
+  display: none;
+  align-items: start;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin-bottom: 10vh;
+}
+
+.pomodoro-timer {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: start;
+  justify-content: space-around;
+  width: 98%;
+  height: 98%;
+}
+
+.select-pomodoro {
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  max-width: 500px;
+}
+
+.song-container,
+.pomodoro-container,
+.stats-container {
+display: flex;
+flex-direction: column;
+align-items: center;
+margin: 10px 0;
+border-radius: 8px;
+box-shadow: 5px;
+width: 98%;
+}
+
+
+.pomodoro-container {
+  height: 60%;
+  justify-content: space-around;
+}
+
+.song-container,
+.stats-container {
+  height: 20%;
+  justify-content: center;
+  border: 1px solid #555B6E;
+  border-radius: 5px;
+  background-color: #ccc;
+  align-self: center;
+}
+
+.input-cycles-div,
+.input-timer-div {
+  margin: 20px;
+}
+
+.input-studio-div,
+.input-break-div,
+.total-time-div,
+.total-cycles-div {
+display: flex;
+flex-direction: row;
+align-items: baseline;
+justify-content: space-around;
+}
+
+.suggested-cycles-div {
+  display: none;
+  flex-direction: column;
+  margin: 20px 0;
+}
+
+.pomodoro-timers-options,
+.pomodoro-total-time-option {
+  display: none;
+}
+
+.suggested-cycles,
+.settings-choice {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  border-radius: 5px;
+  border: 1px solid #555B6E;
+  margin: 10px 0;
+  width: 100%;
+  padding: 10px;
+}
+
+.suggested-cycles {
+  align-items: start;
+}
+
+.settings-choice {
+  align-items: center;
+  height: 75px;
+}
+
+.suggested-cycles:hover,
+.settings-choice:hover {
+  opacity: 0.8;
+}
+
+.btn-tomato-start {
+  display: none;
+}
+
+.btn-tomato {
+  width: 150px;
+}
+
+.btn-back {
+  display: none;
+}
+
+.iconYoutube {
+  height: 25vh;
+  max-height: 35px;
+}
+
+.iconSpotify {
+  height: 20vh;
+  max-height: 30px;
+}
+
+
+@media screen and (min-width: 769px){
   .containerRed,
   .containerYellow {
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    display: flex;
-    width: 40vmin;
+    width: 30vmin;
   }
 
   .counterRed,
   .counterYellow {
     padding-top: 3vmin;
-    color: #f9f9f9;
-    font-size: 12vmin;
-    position: absolute;
+    font-size: 9vmin;
   }
 
-  .container p {
-    margin-bottom: 0;
-  }
-
-  /*** Pomodoro page ***/
-
-  .div-pomodoro {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: start;
+  .container {
+    justify-content: space-around;
     height: 100%;
-    width: 100%;
-  }
-
-  .pomodoro {
-    display: none;
-    align-items: start;
-    justify-content: center;
-    width: 98%;
-    height: 100%;
+    padding-bottom: 3vmin;
   }
 
   .pomodoro-timer {
-    display: flex;
     flex-direction: row;
-    align-items: start;
-    justify-content: space-around;
-    width: 98%;
-    height: 98%;
-  }
-
-  .select-pomodoro {
-    flex-direction: column;
-    align-items: center;
-    width: 90%;
-    max-width: 500px;
-  }
-
-  .song-container,
-  .pomodoro-container,
-  .stats-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 80%;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 5px;
-  }
-
-  .song-container,
-  .stats-container {
-  justify-content: center;
-  width: 25%;
   }
 
   .pomodoro-container {
-  justify-content: space-around;
-  width: 50%;
+    width: 50%;
+    height: 80%;
+    padding: 0 20px;
+    margin: 0;
   }
 
-  .input-cycles-div,
-  .input-timer-div {
-    margin: 20px;
+  .song-container,
+  .stats-container {
+    width: 25%;
+    height: 80%;
+    padding: 0 20px;
+    margin: 0;
   }
+}
 
-  .input-studio-div,
-  .input-break-div,
-  .total-time-div,
-  .total-cycles-div {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  justify-content: space-around;
-  }
-
-  .suggested-cycles-div {
-    display: none;
-    flex-direction: column;
-    margin: 20px 0;
-  }
-
-  .pomodoro-timers-options,
-  .pomodoro-total-time-option {
+@media (max-height: 700px) {
+  .container p {
     display: none;
   }
+}
 
-  .suggested-cycles,
-  .settings-choice {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    border-radius: 5px;
-    border: 1px solid #555B6E;
-    margin: 10px 0;
-    width: 100%;
-    padding: 10px;
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+  .div-pomodoro {
+    margin-top: 10px;
   }
 
-  .suggested-cycles {
-    align-items: start;
+  .div-pomodoro h2 {
+    font-size: 1.5rem;
   }
-
-  .settings-choice {
-    align-items: center;
-    height: 75px;
-  }
-
-  .suggested-cycles:hover,
-  .settings-choice:hover {
-    opacity: 0.8;
-  }
-  
-  .btn-tomato-start {
-    display: none;
-  }
-
-  .btn-tomato {
-    width: 150px;
-  }
-
-  .btn-back {
-    display: none;
-  }
-
-
-  @media screen and (min-width: 700px){
-    .containerRed,
-    .containerYellow {
-      width: 30vmin;
-    }
-
-    .counterRed,
-    .counterYellow {
-      padding-top: 3vmin;
-      font-size: 9vmin;
-    }
-
-    .container {
-      justify-content: space-around;
-      height: 100%;
-    padding-bottom: 3vmin;
-    }
-  }
-
-  @media (max-height: 700px) {
-    .container p {
-      display: none;
-    }
-  }
-
-  @media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
-    .div-pomodoro {
-      margin-top: 10px;
-    }
-
-    .div-pomodoro h2 {
-      font-size: 1.5rem;
-    }
 }

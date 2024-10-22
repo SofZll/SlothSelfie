@@ -1,12 +1,32 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './css/Pomodoro.css';
+import iconYoutube from './media/youtube.svg';
+import iconSpotify from './media/spotify.svg';
+
 
 
 function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
+    const [platformMusic, setPlatformMusic] = useState(0);
+
+
     return (
         <div className="pomodoro-timer">
+            
             <div className="song-container">
-
+                {platformMusic === 0 ? (
+                <div className='divBtn'>
+                    <button className='btnMusic' onClick={() => setPlatformMusic(1)}>
+                        <img src={iconYoutube} alt="Youtube" className='iconYoutube'/>
+                    </button>
+                    <button className='btnMusic' onClick={() => setPlatformMusic(2)}>
+                        <img src={iconSpotify} alt="Spotify" className='iconSpotify'/>
+                    </button>
+                </div>
+                ) : (
+                    <div className='divBtn'>
+                        
+                    </div>
+                )}
             </div>
             <div className="pomodoro-container">
             </div>
