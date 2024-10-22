@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './css/App.css';
 import { BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
-import EventsFunction from './Events2';
+import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import PomodoroFunction from './Pomodoro';
 import NotesFunction from './Notes';
