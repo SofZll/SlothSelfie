@@ -10,9 +10,12 @@ import { canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplica
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext'; 
 
+//TODO: ID NON CORRISPONDENTI TRA EDIT E LISTA NOTE, MANCA ANCHE DEADLINE IN EDIT
+
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
     {
+      id: 0,
       title: 'First Note',
       category: 'Work',
       content: 'This is a note',
@@ -25,21 +28,21 @@ const initialNotes = [
       createDate: new Date(),
       updateDate: new Date(),
     },
-  { title: 'Second Note', category: 'Study', content: 'This is another note', author: 'Bob',
+  { id: 1, title: 'Second Note', category: 'Study', content: 'This is another note', author: 'Bob',
     access: { 
       type: 'private', 
       allowedUsers: [] 
     },
     isTodo: false, tasks: [],
     createDate: new Date(), updateDate: new Date() },
-  { title: 'Third Note', category: 'Personal', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam imperdiet quam fringilla libero rutrum lobortis. Nam id vulputate odio. Cras molestie quis ante et vestibulum. Nullam viverra leo quis libero vulputate ultricies sit amet et lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas vestibulum ligula ac tortor faucibus, eget viverra elit faucibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum eu diam interdum, luctus velit in, vehicula erat. Aliquam dapibus mauris eget nulla faucibus, vitae commodo massa placerat. Nam luctus felis nec fermentum lobortis. Aliquam ac odio a neque suscipit mollis. Cras sit amet felis dolor. Nam consequat, nulla vitae lacinia malesuada, ipsum nibh pulvinar mi, sit amet eleifend elit velit id nulla. Cras pretium elit luctus, laoreet turpis sed, scelerisque tellus. Fusce venenatis feugiat diam, id tristique ligula pellentesque vitae.',
+  { id: 2, title: 'Third Note', category: 'Personal', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam imperdiet quam fringilla libero rutrum lobortis. Nam id vulputate odio. Cras molestie quis ante et vestibulum. Nullam viverra leo quis libero vulputate ultricies sit amet et lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas vestibulum ligula ac tortor faucibus, eget viverra elit faucibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum eu diam interdum, luctus velit in, vehicula erat. Aliquam dapibus mauris eget nulla faucibus, vitae commodo massa placerat. Nam luctus felis nec fermentum lobortis. Aliquam ac odio a neque suscipit mollis. Cras sit amet felis dolor. Nam consequat, nulla vitae lacinia malesuada, ipsum nibh pulvinar mi, sit amet eleifend elit velit id nulla. Cras pretium elit luctus, laoreet turpis sed, scelerisque tellus. Fusce venenatis feugiat diam, id tristique ligula pellentesque vitae.',
     author: 'Alice', access: { 
       type: 'public', //if private Bob can't see it
       allowedUsers: [] 
     },
     isTodo: false, tasks: [],
     createDate: new Date(), updateDate: new Date() },
-  { title: 'Fourth Note', category: 'Others', content: "# This is a markdown note\n\nHere is some **bold** text, and here is a list:\n\n- Item 1\n- Item 2\n- Item 3\n\nYou can also add [links](https://example.com) and other markdown syntax.",
+  { id: 3, title: 'Fourth Note', category: 'Others', content: "# This is a markdown note\n\nHere is some **bold** text, and here is a list:\n\n- Item 1\n- Item 2\n- Item 3\n\nYou can also add [links](https://example.com) and other markdown syntax.",
     author: 'Someone', access: { 
       type: 'restricted', 
       allowedUsers: ['Alice', 'Bob'] 
@@ -47,6 +50,7 @@ const initialNotes = [
     isTodo: false, tasks: [],
     createDate: new Date(), updateDate: new Date() },
     {
+      id: 4,
       title: 'Fifth Note',
       category: 'Work',
       content: '',
@@ -71,6 +75,7 @@ const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
 function NotesFunction() {
   const { updateStyles, updateIcon } = useContext(StyleContext);
   const [notes, setNotes] = useState(initialNotes || []);
+  const{id, setId} = useState("");
   const [noteTitle, setNoteTitle] = useState('');
   const [noteCategory, setNoteCategory] = useState('');
   const [noteContent, setNoteContent] = useState('');
@@ -99,9 +104,9 @@ function NotesFunction() {
 
   
   const handleAddNote = () => {
-    console.log("isTodo:", isTodo);
-    console.log("noteContent:", noteContent);
-    console.log("tasks:", tasks);
+    //console.log("isTodo:", isTodo);
+    //console.log("noteContent:", noteContent);
+    //console.log("tasks:", tasks);
 
     if (!noteTitle || !noteAuthor || !noteCategory) {
       alert('Please fill out all required fields: Title, Author, and Category.');
@@ -120,6 +125,7 @@ function NotesFunction() {
 
   if (noteTitle && noteCategory && (noteContent || isTodo) && noteAuthor && noteAccess) {
     const newNote = { 
+      id: notes.length,
       title: noteTitle, 
       category: noteCategory, 
       content: isTodo ? "" : noteContent.trim(), // If isTodo, content is empty 
@@ -201,9 +207,9 @@ const filterNotesByDate = (notes) => {
           {/* Filter the accessible notes from the users and the orders */}
           {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)), sortCriterion)).map((note, index) => (
             <NoteCard
+              //key={note.id}
               key={index}
               note={note}
-              index={index}
               onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
               onCopy={() => handleCopyContent(note.content)}
               onDelete={() => handleDeleteNote(index, notes, setNotes)}
