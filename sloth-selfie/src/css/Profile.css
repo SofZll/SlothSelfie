@@ -22,7 +22,7 @@
 }
 
 .profile-container{
-    /*background-color: #b0d3d1;*/
+    background-color: #e7e7e7;
     border: 1px solid #555B6E;
     padding: 10px;
     border-radius: 10px;
@@ -30,11 +30,25 @@
 }
 
 .profile-info{
-    margin-top: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin: 30px 20px 20px 20px;
+    max-height: 0; /* Inizialmente chiuso */
+    overflow: hidden; /* Nasconde il contenuto quando è chiuso */
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out; /* Transizione veloce */
+    padding: 0 20px; /* Nessun padding quando è chiuso */
+    opacity: 0; /* Aggiunge un effetto di dissolvenza */
+    margin: 0; /* Rimuove il margine quando è chiuso */
+    color: #000;
+    background-color: #FAF9F9;
+}
+
+.profile-info.show {
+    max-height: 350px; /* Imposta un'altezza massima ragionevole per il contenuto */
+    padding: 10px 20px; /* Ripristina il padding */
+    opacity: 1; /* Ripristina l'opacità */
+    border-radius: 5px;
+    margin: 10px 0 15px 0;
 }
 
 .profile-info p{
@@ -63,11 +77,56 @@
 .profile-form-group input,
 .profile-form-group select,
 .profile-form-group span {
+    background-color: #FFF;
     flex: 1;
     padding: 8px;
     box-sizing: border-box;
     width: 200px;
     margin: 0;
+}
+
+.miniHub{
+    margin: 40px;
+    display: block;
+    width: 100%;
+}
+
+.button-info {
+    color:#555B6E;
+    background-color: #FAF9F9;
+    margin-top: 15px;
+}
+
+.button-info:hover {
+    color: #000;
+    background-color: #FAF9F9;
+}
+
+.button-hub {
+    width: 100%;
+    height: 80px;
+    font-size: 20px;
+    background-color: #89B0AE;
+    color: #FFF;
+    font-weight: bold;
+    border: 0;
+}
+
+.button-edit {
+    opacity: 0;
+    max-height: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transition: opacity 0.5s ease, max-height 0.5s ease, visibility 0s 0.5s;
+}
+
+.button-edit.show {
+    max-height: 50px;
+    opacity: 1;
+    visibility: visible;
+    transition: all 0.5s;
+    display: inline-block;
+    transition: opacity 0.5s ease, max-height 0.5s ease;
 }
 
 @media screen and (min-width: 700px){

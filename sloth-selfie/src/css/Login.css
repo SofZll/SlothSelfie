@@ -16,7 +16,7 @@ h1.login-title {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px;
+    padding-top: 100px;
 }
 
 .login-box {
@@ -35,7 +35,7 @@ h1.login-title {
 
 .form-group {
     position: relative;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 /*

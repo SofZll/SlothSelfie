@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./css/Profile.css";
 
 function Profile({ username }) {
     const [isEditing, setIsEditing] = useState(false);
+    const [showProfile, setShowProfile] = useState(false);
     const [profileData, setProfileData] = useState({
         name: 'Giorgio', 
-        username: 'GG', 
+        username: 'Kevin', 
         email: 'giorgio787@example.com', 
         birthday: '22/07/1998', 
         phoneNumber: '', 
@@ -24,6 +26,8 @@ function Profile({ username }) {
     });
     */
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
@@ -37,6 +41,10 @@ function Profile({ username }) {
 
         fetchProfileData();
     }, [username]);
+
+    const toggleShowProfile = () => {
+        setShowProfile(!showProfile);
+    };
 
     const handleImageClick = () => {
         document.getElementById('file-input').click();
@@ -131,76 +139,88 @@ function Profile({ username }) {
         }   
     }
 
+    const navigateHub = () => {
+        navigate('/hub');
+    }
+
     return (
-        <div className="profile-container">
-            <h2 className="profile-title">Profile</h2>
-            <div className="profile-image">
-                {/*
-                {profileData.profile_image_url && (
-                    <img src={profileData.profile_image_url} alt="profile-img" onClick={handleImageClick}/>
-                )}
-                
-                */}
-                <img src='./media/user.svg' alt="profile-img" onClick={handleImageClick}/>
-                <input type="file" id="file-input" style={{display: 'none'}} onChange={editImage}/>
-            </div>
-            {/*<button className="btn" onClick={handleImageClick}>Change Photo</button>*/}
-            <div className="profile-info">
+        <>
+            <div className="profile-container">
+                <h2>{profileData.username}</h2>
+                <div className="profile-image">
+                    {/*
+                    {profileData.profile_image_url && (
+                        <img src={profileData.profile_image_url} alt="profile-img" onClick={handleImageClick}/>
+                    )}
+                    
+                    */}
+                    <img src='./media/user.svg' alt="profile-img" onClick={handleImageClick}/>
+                    <input type="file" id="file-input" style={{display: 'none'}} onChange={editImage}/>
+                </div>
+                <button className="btn button-info" onClick={toggleShowProfile}>
+                    {showProfile ? "Hide": "Expands"}
+                </button>
+                {/*<button className="btn" onClick={handleImageClick}>Change Photo</button>*/}
+                <div className={`profile-info ${showProfile ? 'show' : ''}`}>
+                    {isEditing ? (
+                        <form className="profile-form">
+                            <div className="form-group profile-form-group">
+                                <label htmlFor="name">Name:</label>
+                                <input type="text" id="name" name="name" value={profileData.name}/>
+                            </div>
+                            <div className="form-group profile-form-group">
+                                <label htmlFor="username">Username:</label>
+                                <span>{profileData.username}</span>
+                            </div>
+                            <div className="form-group profile-form-group">
+                                <label htmlFor="email">Email:</label>
+                                <input type="email" id="email" name="email" value={profileData.email}/>
+                            </div>
+                            <div className="form-group profile-form-group">
+                                <label htmlFor="birthday">Birthday:</label>
+                                <input type="date" id="birthday" name="birthday" value={profileData.birthday}/>
+                            </div>
+                            <div className="form-group profile-form-group">
+                                <label htmlFor="phoneNumber">Phone number:</label>
+                                <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber}/>
+                            </div>
+                            <div className="form-group profile-form-group">
+                                <label htmlFor="gender">Gender:</label>
+                                <select id="gender" name="gender" value={profileData.gender}>
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </form>
+                    ):(
+                        <>
+                            <p>Name: {profileData.name} </p>
+                            <p>Username: {profileData.username} </p>
+                            <p>Email: {profileData.email}</p>
+                            <p>Birthday: {profileData.birthday}</p>
+                            <p>Phone number: {profileData.phoneNumber}</p>
+                            <p>Gender: {profileData.gender} </p>
+                        </>
+                    )}
+                </div>
                 {isEditing ? (
-                    <form className="profile-form">
-                        <div className="form-group profile-form-group">
-                            <label htmlFor="name">Name:</label>
-                            <input type="text" id="name" name="name" value={profileData.name}/>
-                        </div>
-                        <div className="form-group profile-form-group">
-                            <label htmlFor="username">Username:</label>
-                            <span>{profileData.username}</span>
-                        </div>
-                        <div className="form-group profile-form-group">
-                            <label htmlFor="email">Email:</label>
-                            <input type="email" id="email" name="email" value={profileData.email}/>
-                        </div>
-                        <div className="form-group profile-form-group">
-                            <label htmlFor="birthday">Birthday:</label>
-                            <input type="date" id="birthday" name="birthday" value={profileData.birthday}/>
-                        </div>
-                        <div className="form-group profile-form-group">
-                            <label htmlFor="phoneNumber">Phone number:</label>
-                            <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber}/>
-                        </div>
-                        <div className="form-group profile-form-group">
-                            <label htmlFor="gender">Gender:</label>
-                            <select id="gender" name="gender" value={profileData.gender}>
-                                <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                    </form>
+                    <>
+                        <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={saveChanges}>Save changes</button>
+                        <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={cancelEdit}>Cancel</button>
+                    </>
                 ):(
                     <>
-                        <p>Name: {profileData.name} </p>
-                        <p>Username: {profileData.username} </p>
-                        <p>Email: {profileData.email}</p>
-                        <p>Birthday: {profileData.birthday}</p>
-                        <p>Phone number: {profileData.phoneNumber}</p>
-                        <p>Gender: {profileData.gender} </p>
+                        <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={editProfile}>Edit profile</button>
+                        <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={logout}>Log out</button>
                     </>
                 )}
-            </div><br/>
-            {isEditing ? (
-                <>
-                    <button className="btn" onClick={saveChanges}>Save changes</button>
-                    <button className="btn" onClick={cancelEdit}>Cancel</button>
-                </>
-            ):(
-                <>
-                    <button className="btn" onClick={editProfile}>Edit profile</button>
-                    <button className="btn" onClick={logout}>Log out</button>
-                </>
-            )}
-        </div>
+            </div>
+            <div className="miniHub">
+                <button className="button-hub" onClick={navigateHub}>Go to hub!</button>
+            </div>
+        </>
     );
 }
 
