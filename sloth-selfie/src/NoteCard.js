@@ -19,11 +19,11 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
         return marked(content);
     };
 
-    console.log('Note content:', note.content);
-    console.log('Note content (HTML):', getMarkdownContent(note.content));
+    //console.log('Note content:', note.content);
+    //console.log('Note content (HTML):', getMarkdownContent(note.content));
 
-    console.log('Rendering NoteCard:', note);
-    console.log('Tasks:', note.tasks);
+    //console.log('Rendering NoteCard:', note);
+    //console.log('Tasks:', note.tasks);
     
   return (
     <div className="note-card">
@@ -47,6 +47,11 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
               checked={task.completed} 
             />
             {task.completed ? <s>{task.text}</s> : task.text}
+            {task.deadline ? (
+              <small>
+                &nbsp; Deadline: {new Date(task.deadline).toLocaleDateString()}
+              </small>
+            ) : null}
           </li>
         ))}
       </ul>

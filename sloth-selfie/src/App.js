@@ -17,6 +17,9 @@ import { use } from 'marked';
 import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
 import { update } from 'react-spring';
+import { ActivityProvider } from './ActivityContext';
+//import { ActivityProvider } from './ActivityContext.Oldjs';
+
 
 function App() {
   const [machineOpen, setMachineOpen] = useState(false);
@@ -120,17 +123,7 @@ function App() {
     }
   }, []);
 
-  useEffect(() => {
-    if (isMobile()) {
-      // Chiediamo all'utente di entrare in fullscreen
-      window.addEventListener('click', openFullscreen);
-
-      // Cleanup dell'event listener quando il componente viene smontato
-      return () => {
-        window.removeEventListener('click', openFullscreen);
-      }
-    }
-  }, []);
+  
 
   // Function to show and close the time machine
   const toggleTimeMachine = () => {
@@ -172,6 +165,7 @@ function App() {
   return (
     <Router>
       <StyleProvider>
+        <ActivityProvider>
         <div className="App">
           <Menu username={username}/>
           <header className="App-header">
@@ -244,6 +238,7 @@ function App() {
             <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
           </div>
         </div>
+        </ActivityProvider>
       </StyleProvider>
     </Router>
   );
