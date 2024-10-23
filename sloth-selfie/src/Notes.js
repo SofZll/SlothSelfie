@@ -6,7 +6,7 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
-import { canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
+import { handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext'; 
 
@@ -75,21 +75,35 @@ const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
 function NotesFunction() {
   const { updateStyles, updateIcon } = useContext(StyleContext);
   const [notes, setNotes] = useState(initialNotes || []);
-  const{id, setId} = useState("");
-  const [noteTitle, setNoteTitle] = useState('');
-  const [noteCategory, setNoteCategory] = useState('');
-  const [noteContent, setNoteContent] = useState('');
-  const [noteAuthor, setNoteAuthor] = useState(currentUser);
-  const [noteAccess, setNoteAccess] = useState('public');
-  const [allowedUsers, setAllowedUsers] = useState([]);
-  const [isTodo, setIsTodo] = useState(false);
-  const [tasks, setTasks] = useState([]);//every task has these properties: text, completed and deadline(optional)
-  const [taskDeadline, setTaskDeadline] = useState(null);
   const [sortCriterion, setSortCriterion] = useState('most_recent');
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
-  const { activities, setActivities, setTitle, setDeadline } = useContext(ActivityContext);
+  //const { activities, setActivities, setTitle, setDeadline } = useContext(ActivityContext);
+
+  //defining the note data structure
+  const [noteData, setNoteData] = useState({
+    id: "",
+    title: "",
+    category: "",
+    content: "",
+    noteAuthor: "",
+    noteAccess: "",
+    allowedUsers: [],
+    isTodo: false,
+    tasks: [],
+    /*
+    tasks: [
+      {
+        id: 0,  
+        text: "",  
+        completed: false,
+        deadline: null  //optional
+      }
+    ],
+    */
+    taskDeadline: '', // Deadline for the task while creating it
+  });
 
   // change style page onload document
   useEffect(() => {
@@ -108,60 +122,60 @@ function NotesFunction() {
     //console.log("noteContent:", noteContent);
     //console.log("tasks:", tasks);
 
-    if (!noteTitle || !noteAuthor || !noteCategory) {
+    if (!noteData.title || !noteData.noteAuthor || !noteData.category) {
       alert('Please fill out all required fields: Title, Author, and Category.');
       return;
     }
 
-    if (!isTodo && noteContent.trim() === "") {
+    if (!noteData.isTodo && noteData.content.trim() === "") {
         alert("Add content to your note!");
         return;
     }
 
-    if (isTodo && tasks.length === 0) {
+    if (noteData.isTodo && noteData.tasks.length === 0) {
       alert("Add at least one task to your to-do list!");
     return;
   }
 
-  if (noteTitle && noteCategory && (noteContent || isTodo) && noteAuthor && noteAccess) {
+  if (noteData.title && noteData.category && (noteData.content || noteData.isTodo) && noteData.noteAuthor && noteData.noteAccess) {
     const newNote = { 
       id: notes.length,
-      title: noteTitle, 
-      category: noteCategory, 
-      content: isTodo ? "" : noteContent.trim(), // If isTodo, content is empty 
+      title: noteData.title, 
+      category: noteData.category, 
+      content: noteData.isTodo ? "" : noteData.content.trim(), // If isTodo, content is empty 
       author: currentUser,
       access: { 
-        type: noteAccess, 
-        allowedUsers: noteAccess === 'restricted' ? allowedUsers : [] // Add allowed users if restricted
+        type: noteData.noteAccess, 
+        allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
       },
-      isTodo: isTodo, // Add tasks if isToDo
-      tasks: isTodo 
-      ? tasks.map(task => ({ 
+      isTodo: noteData.isTodo, // Add tasks if isToDo
+      tasks: noteData.isTodo 
+      ? noteData.tasks.map(task => ({ 
         ...task, 
-        completed: task.completed|| false,
-        deadline: taskDeadline || null
+        completed: task.completed || false,
+        deadline: task.deadline || null
       })) : [],
       createDate: new Date(),
       updateDate: new Date()
     };
 
      // Add tasks as activities if they have a deadline
-     if (isTodo) {
-      tasks.forEach(task => {
+     if (noteData.isTodo) {
+      noteData.tasks.forEach(task => {
         if (task.deadline) {
-          handleAddActivity(null, task.text, task.deadline, activities, setActivities, setTitle, setDeadline);
+          //handleAddActivity(null, task.text, task.deadline, activities, setActivities, setTitle, setDeadline);
         }
       });
     }
 
     setNotes([...notes, newNote]);
-    setNoteTitle('');
-    setNoteCategory('');
-    setNoteContent('');
-    setNoteAuthor('');
-    setNoteAccess('public');
-    setIsTodo(false);
-    setTasks([]);
+    handleNoteDataChange('title', '', setNoteData);
+    handleNoteDataChange('category', '', setNoteData);
+    handleNoteDataChange('content', '', setNoteData);
+    handleNoteDataChange('noteAuthor', '', setNoteData);
+    handleNoteDataChange('noteAccess', 'public', setNoteData);
+    handleNoteDataChange('isTodo', false, setNoteData);
+    handleNoteDataChange('tasks', [], setNoteData);
   }
 };
 
@@ -213,7 +227,7 @@ const filterNotesByDate = (notes) => {
               onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
               onCopy={() => handleCopyContent(note.content)}
               onDelete={() => handleDeleteNote(index, notes, setNotes)}
-              onEdit={() => handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing, setNoteAuthor, setNoteAccess, setAllowedUsers, setIsTodo, setTasks)}
+              onEdit={() => handleEditNote(index, notes, setNoteData, setIsEditing)}
             />
           ))}
         </div> 
@@ -226,24 +240,24 @@ const filterNotesByDate = (notes) => {
           <div className='div-input-title'>
             <label htmlFor='noteTutle'>Note Title: </label>
             <input
-              value={noteTitle}
-              onChange={(e) => setNoteTitle(e.target.value)}
+              value={noteData.title}
+              onChange={(e) => handleNoteDataChange('title', e.target.value, setNoteData)}
               placeholder="Enter title"
             />
           </div>
           <div className='div-input-author'>
             <label htmlFor='Author'>Author name: </label>
             <input
-              value={noteAuthor}
-              onChange={(e) => setNoteAuthor(e.target.value)}
+              value={noteData.noteAuthor}
+              onChange={(e) => handleNoteDataChange('noteAuthor', e.target.value, setNoteData)}
               placeholder="Enter username"
             />
           </div>
           <div className='div-input-category'>
             <label htmlFor='category'>Note category: </label>
             <select id = "category"
-              value={noteCategory}
-              onChange={(e) => setNoteCategory(e.target.value)}
+              value={noteData.category}
+              onChange={(e) => handleNoteDataChange('category', e.target.value, setNoteData)}
             >
               <option value="">Category</option>
               <option value="Work">Work</option>
@@ -259,8 +273,8 @@ const filterNotesByDate = (notes) => {
           <div className="note-content">
             <div className='div-input-content'>
             <textarea
-              value={noteContent}
-              onChange={(e) => setNoteContent(e.target.value)}
+              value={noteData.content}
+              onChange={(e) => handleNoteDataChange('content', e.target.value, setNoteData)}
               placeholder="Note Content"
             />
             </div>
@@ -268,73 +282,73 @@ const filterNotesByDate = (notes) => {
             <label>
               <input
                 type="checkbox"
-                checked={isTodo}
-                onChange={() => setIsTodo(!isTodo)}
+                checked={noteData.isTodo}
+                onChange={() => handleNoteDataChange('isTodo', !noteData.isTodo, setNoteData)}
                 className='checkbox'
               />
               Is this a to-do list?
             </label>
 
             {/* Input for adding tasks if todo */}
-            {isTodo && (
-              <div>
-                <input
-                  type="text"
-                  placeholder="Add task and press Enter"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      addTask(e.target.value, tasks, setTasks, taskDeadline);
-                      e.target.value = ''; // Clear input after adding task
-                      setTaskDeadline('');  // Reset deadline
-                    }
-                  }}
-                />
-                <label>Task Deadline (Optional):</label>
-                <input
-                  type="date" 
-                  value={taskDeadline}
-                  onChange={(e) => setTaskDeadline(e.target.value)}
-                />
-                {tasks.length > 0 && (
-                <ul>
-                  {tasks.map((task, index) => (
-                    <li key={index} className="task-item">
+            {noteData.isTodo && (
+            <div>
+              <input
+                type="text"
+                placeholder="Add task and press Enter"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    addTask(e.target.value, noteData, setNoteData);
+                    e.target.value = ''; // Clear input after adding task
+                    handleNoteDataChange('deadline', '', setNoteData); // Reset deadline
+                  }
+                }}
+              />
+              <label>Task Deadline (Optional):</label>
+              <input
+                type="date" 
+                value={noteData.taskDeadline || ''}  // Usa taskDeadline
+                onChange={(e) => handleNoteDataChange('taskDeadline', e.target.value, setNoteData)}
+              />
+              {noteData.tasks && noteData.tasks.length > 0 && (
+              <ul>
+                {noteData.tasks.map((task, index) => (
+                  <li key={index} className="task-item">
                     <input
                       type="checkbox"
                       checked={task.completed}
-                      onChange={() => toggleTaskCompletion(index, tasks, setTasks)}
+                      onChange={() => toggleTaskCompletion(index, noteData, setNoteData)}
                     />
                     <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
                       {task.text}
                     </span>
-                    {task.deadline && (
+                    {task.deadline && ( 
                       <span className="task-deadline">
-                        {/* Converti la deadline in un formato leggibile */}
+                        {/* Convert deadline format */}
                         &nbsp; Deadline: {new Date(task.deadline).toLocaleDateString()}
                       </span>
                     )}
-                    <button className='btn' onClick={() => removeTask(index, tasks, setTasks)}>Remove</button>
-                    </li>
-                  ))}
-                </ul>
-                )}
-              </div>
-            )}
+                    <button className='btn' onClick={() => removeTask(index, noteData, setNoteData)}>Remove</button>
+                  </li>
+                ))}
+              </ul>
+              )}
             </div>
+          )}
+        </div>
 
           </div>
               {/* Dropdown for acces list */}
-              <select value={noteAccess} onChange={(e) => setNoteAccess(e.target.value)}>
+              <select value={noteData.noteAccess} onChange={(e) => handleNoteDataChange('noteAccess', e.target.value, setNoteData)}>
                 <option value="">Access List</option>
                 <option value="public">Public</option>
                 <option value="private">Private</option>
                 <option value="restricted">Specific People</option>
               </select>
-              {noteAccess === 'restricted' && (
+              {noteData.noteAccess === 'restricted' && (
             <div className='div-input-accesslist'>
               {/* We include the current user*/}
-              {currentUser && !allowedUsers.includes(currentUser) && 
-                setAllowedUsers(prevUsers => [...prevUsers, currentUser])
+              {currentUser && Array.isArray(noteData.allowedUsers) && !noteData.allowedUsers.includes(currentUser) && 
+              handleNoteDataChange('allowedUsers', [...noteData.allowedUsers, currentUser], setNoteData)
               }
               <input 
                 type="text" 
@@ -342,17 +356,18 @@ const filterNotesByDate = (notes) => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     const newUser = e.target.value.trim();
-                    if (newUser && !allowedUsers.includes(newUser)) {
-                      setAllowedUsers([...allowedUsers, newUser]);
+                    if (newUser && !noteData.allowedUsers.includes(newUser)) {
+                      
+                      handleNoteDataChange('allowedUsers', [...noteData.allowedUsers, newUser], setNoteData)
                       e.target.value = ''; // Clear input field
                     }
                   }
                 }}
               />
               <ul>
-                {allowedUsers.map((user, index) => (
+                {noteData.allowedUsers.map((user, index) => (
                   <li key={index}>
-                    {user} <button className = "btn" onClick={() => setAllowedUsers(allowedUsers.filter(u => u !== user))}>Remove</button>
+                    {user} <button className = "btn" onClick={() => handleNoteDataChange('allowedUsers', noteData.allowedUsers.filter(u => u !== user), setNoteData)}>Remove</button>
                   </li>
                 ))}
               </ul>
@@ -361,7 +376,7 @@ const filterNotesByDate = (notes) => {
           <button className="btn" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
             {/* Editing scenario*/}
             {isEditing !== null && (
-          <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers, tasks, setTasks)}>Save Note</button>
+          <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing)}>Save Note</button>
           )}
         </div>
       </div>

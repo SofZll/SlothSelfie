@@ -1,5 +1,13 @@
 import { a } from "react-spring";
 
+// Function to handle changes in note data
+export function handleNoteDataChange (field, value, setNoteData) {
+  setNoteData((prevEventData) => ({
+      ...prevEventData,
+      [field]: value
+  }));
+  };
+
 export function canUserAccess(note, currentUser) {
     if (!note.access) {
         return false; // if no access is defined, the note is private
@@ -20,28 +28,41 @@ export function canUserAccess(note, currentUser) {
     return false;
   }
 
-export function addTask(taskText, tasks, setTasks, taskDeadline) {
-  if (!Array.isArray(tasks)) {
-    tasks = [];
-  }
-  const newTask = {
-    text: taskText,
-    completed: false, // every new task is not completed
-    deadline: taskDeadline //if specified we create an activity
-  };
-  setTasks([...tasks, newTask]);
-};
+  export function addTask(taskText, noteData, setNoteData) {
 
-export function removeTask(taskIndex, tasks, setTasks) {
-  setTasks(tasks.filter((task, i) => i !== taskIndex));
+    if (!Array.isArray(noteData.tasks)) {
+      noteData.tasks = [];
+    }
+  
+    const newTask = {
+      id: noteData.tasks.length,
+      text: taskText,
+      completed: false,  // every new task is not completed
+      deadline: noteData.taskDeadline || null //if specified we create an activity
+    };
+
+    // Aggiorna noteData con il nuovo task
+    setNoteData(prevNoteData => ({
+      ...prevNoteData,
+      tasks: [...prevNoteData.tasks, newTask],
+      taskDeadline: ''
+    }));
+  }
+
+  export function removeTask(taskIndex, noteData, setNoteData) {
+    const updatedTasks = noteData.tasks.filter((task, i) => i !== taskIndex);
+    setNoteData(prevNoteData => ({
+      ...prevNoteData,
+      tasks: updatedTasks // Aggiorna l'array di tasks
+    }));
 };
 
 //marks a task as completed
-export function toggleTaskCompletion(taskIndex, tasks, setTasks) {
-  const updatedTasks = tasks.map((task, i) =>
+export function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
+  const updatedTasks = noteData.tasks.map((task, i) =>
     i === taskIndex ? { ...task, completed: !task.completed } : task
   );
-  setTasks(updatedTasks);
+  handleNoteDataChange('tasks', updatedTasks, setNoteData);
 };
 
 export function handleDuplicateNote (index, notes, setNotes) {
@@ -54,37 +75,37 @@ export function handleDeleteNote(index, notes, setNotes) {
     setNotes(notes.filter((_, i) => i !== index));
 };
 
-export function handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing, setNoteAuthor, setNoteAccess, setAllowedUsers, setIsToDo, setNoteTasks) {
+export function handleEditNote(index, notes, setNoteData, setIsEditing,) {
   console.log('Editing note at index:', index);
   console.log('Note data:', notes[index]);
   //const index = notes.findIndex(note => note.id === id);
   if (index !== -1) {
   setIsEditing(index);
-  setNoteTitle(notes[index].title);
-  setNoteCategory(notes[index].category);
-  setNoteContent(notes[index].content);
-  setNoteAuthor(notes[index].author);
-  setNoteAccess(notes[index].access.type);
-  setAllowedUsers(notes[index].access.allowedUsers);
-  setIsToDo(notes[index].isTodo);
-  setNoteTasks(notes[index].tasks);
+  handleNoteDataChange('title', notes[index].title, setNoteData);
+  handleNoteDataChange('category', notes[index].category, setNoteData);
+  handleNoteDataChange('content', notes[index].content, setNoteData);
+  handleNoteDataChange('author', notes[index].author, setNoteData);
+  handleNoteDataChange('access', notes[index].access.type, setNoteData);
+  handleNoteDataChange('allowedUsers', notes[index].access.allowedUsers, setNoteData);
+  handleNoteDataChange('isTodo', notes[index].isTodo, setNoteData);
+  handleNoteDataChange('tasks', notes[index].tasks, setNoteData);
   }
 };
 
-export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers, tasks, setTasks) {
+export function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, setIsEditing) {
   //const index = notes.findIndex(note => note.id === id);
   if (index !== -1) {
     const updatedNote = {
       ...notes[index],
-      title: noteTitle,
-      author: noteAuthor,
+      title: noteData.title,
+      author: noteData.author,
       access: { 
-        type: noteAccess, 
-        allowedUsers: noteAccess === 'restricted' ? allowedUsers : [] // Add allowed users if restricted
+        type: noteData.access, 
+        allowedUsers: noteData.access === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
       },
-      category: noteCategory,
-      content: noteContent,
-      tasks: tasks,
+      category: noteData.category,
+      content: noteData.content,
+      tasks: noteData.tasks,
       updateDate: new Date() // updates the modify date
     };
 
@@ -92,13 +113,13 @@ export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, 
     updatedNotes[index] = updatedNote;
     setNotes(updatedNotes);
     setIsEditing(null); // exit from edit mode
-    setNoteTitle('');
-    setNoteCategory('');
-    setNoteContent('');
-    setTasks([]);
-    setNoteAuthor('');
-    setNoteAccess('public');
-    setAllowedUsers([]);
+    handleNoteDataChange('title', '', setNoteData);
+    handleNoteDataChange('category', '', setNoteData);
+    handleNoteDataChange('content', '', setNoteData);
+    handleNoteDataChange('author', '', setNoteData);
+    handleNoteDataChange('access', 'public', setNoteData);
+    handleNoteDataChange('allowedUsers', [], setNoteData);
+    handleNoteDataChange('task', [], setNoteData);
   }
 };
 
