@@ -165,7 +165,7 @@ function App() {
   return (
     <Router>
       <StyleProvider>
-        <ActivityProvider>
+        {/*<ActivityProvider> */}
         <div className="App">
           <Menu username={username}/>
           <header className="App-header">
@@ -238,7 +238,7 @@ function App() {
             <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
           </div>
         </div>
-        </ActivityProvider>
+        {/*</ActivityProvider>*/}
       </StyleProvider>
     </Router>
   );
