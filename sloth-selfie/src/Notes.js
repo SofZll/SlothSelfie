@@ -11,7 +11,7 @@ import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext'; 
 
 //TODO: ID NON CORRISPONDENTI TRA EDIT E LISTA NOTE, MANCA ANCHE DEADLINE IN EDIT
-//TODO1: non funzionano task, problemi di id, manca COLLEGAMENTO CON TASK E ACTIVITY
+//TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -81,15 +81,15 @@ function NotesFunction() {
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
   //const { activities, setActivities, setTitle, setDeadline } = useContext(ActivityContext);
-
+  
   //defining the note data structure
   const [noteData, setNoteData] = useState({
     id: "",
     title: "",
     category: "",
     content: "",
-    noteAuthor: "",
-    noteAccess: "",
+    noteAuthor: currentUser,
+    noteAccess: "public",
     allowedUsers: [],
     isTodo: false,
     tasks: [],
@@ -124,10 +124,10 @@ function NotesFunction() {
     //console.log("tasks:", tasks);
     console.log("isTodo:", noteData.isTodo);
     console.log("tasks length:", noteData.tasks.length);
-    console.log("noteData:", noteData);
+    //console.log("noteData:", noteData);
 
     if (!noteData.title || !noteData.noteAuthor || !noteData.category) {
-      alert('Please fill out all required fields: Title, Author, and Category.');
+      alert('Please fill out all required fields: Title, Author and Category');
       return;
     }
 
@@ -171,8 +171,11 @@ function NotesFunction() {
         }
       });
     }
-
-    setNotes([...notes, newNote]);
+    console.log("newNote.id:", newNote.id);
+    const updatedNote = { ...newNote, id: notes.length };
+    console.log("newNote con id aggiornato:", updatedNote);
+    setNotes([...notes, updatedNote]);
+    
     //resetting fields
     handleNoteDataChange('title', '', setNoteData);
     handleNoteDataChange('category', '', setNoteData);

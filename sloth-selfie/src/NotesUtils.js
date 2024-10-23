@@ -20,7 +20,7 @@ export function canUserAccess(note, currentUser) {
     }
     if (note.access.type === 'restricted') {
         //Verify if allowedUsers is an array and if it contains the current user
-        console.log('Allowed Users:', note.access.allowedUsers);
+        //console.log('Allowed Users:', note.access.allowedUsers);
         return Array.isArray(note.access.allowedUsers) && 
                note.access.allowedUsers.includes(currentUser);
     }
@@ -93,8 +93,6 @@ export function handleEditNote(index, notes, setNoteData, setIsEditing,) {
 };
 
 export function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, setIsEditing) {
-  //const index = notes.findIndex(note => note.id === id);
-  //if (index !== -1) { //solve the empty idex problem
     const updatedNote = {
       ...notes[index],
       title: noteData.title,
@@ -119,8 +117,8 @@ export function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, se
     handleNoteDataChange('author', '', setNoteData);
     handleNoteDataChange('access', 'public', setNoteData);
     handleNoteDataChange('allowedUsers', [], setNoteData);
-    handleNoteDataChange('task', [], setNoteData);
-  //}
+    handleNoteDataChange('isTodo', false, setNoteData);
+    handleNoteDataChange('tasks', [], setNoteData);
 };
 
 export function sortNotes(notes, sortCriterion) {
