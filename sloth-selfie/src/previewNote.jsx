@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { initialNotes } from './Notes';
 import noteImage from './media/note.png';
 import { marked } from 'marked';
+import './css/Notes.css';
 
 function PreviewNote() {
     const navigate = useNavigate();
@@ -62,6 +63,11 @@ function PreviewNote() {
                                                 readOnly
                                                 />
                                                 {task.completed ? <s>{task.text}</s> : task.text}
+                                                {task.deadline ? (
+                                                <small>
+                                                    &nbsp; Deadline: {new Date(task.deadline).toLocaleDateString()}
+                                                </small>
+                                                ) : null}
                                             </li>
                                             ))
                                         ) : (

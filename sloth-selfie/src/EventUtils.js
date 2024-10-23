@@ -1,3 +1,11 @@
+// Function to handle changes in event data
+export function handleEventDataChange (field, value, setEventData) {
+    setEventData((prevEventData) => ({
+        ...prevEventData,
+        [field]: value
+    }));
+    };
+
 // Function to convert all-day events to timed events 
 export function convertAllDayToTimedEvent(event) {
     if (event.allDay) {
@@ -119,49 +127,50 @@ export function normalizeEvents (events) {
 };
 
 //Function to reset imput fields
-export function handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId) {
+export function handleClosePopupE(setSelectedEvent, setIsEditing, setEventData) {
     setSelectedEvent(null); // close the popup
     setIsEditing(false); // reset the editing state
-    //Reset imput fields
-    setId('');
-    setOriginalId('');
-    setTitle('');
-    setDate('');
-    setTime('00:00');
-    setDuration('');
-    setAllDay(false);
-    setDays(1);
-    setRepeatFrequency('none');
-    setRepeatEndDate('');
-    setRepeatCount('');
-    seteventLocation('');
+    // Reset input fields using handleEventDataChange
+    handleEventDataChange('id', '', setEventData);
+    handleEventDataChange('originalId', '', setEventData);
+    handleEventDataChange('title', '', setEventData);
+    handleEventDataChange('date', '', setEventData);
+    handleEventDataChange('time', '00:00', setEventData);
+    handleEventDataChange('duration', '', setEventData);
+    handleEventDataChange('allDay', false, setEventData);
+    handleEventDataChange('days', 1, setEventData);
+    handleEventDataChange('repeatFrequency', 'none', setEventData);
+    handleEventDataChange('repeatEndDate', '', setEventData);
+    handleEventDataChange('repeatCount', '', setEventData);
+    handleEventDataChange('eventLocation', '', setEventData);
 }
 
 // Handle updating an event -> // CON EVENTI RIPETUTI MODIFICA SOLO TITLE E LOCATION
 export function handleUpdateEvent(
-    e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, 
-    events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, 
-    setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing, originalId, setOriginalId
-  ){
+    e, 
+    eventData,
+    setEventData,
+    events, 
+    setEvents, 
+    setSelectedEvent, 
+    updateAllFutureEvents, 
+    setIsEditing
+) {
     e.preventDefault();
+    const { id, originalId, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation } = eventData;
+
     console.log("Updating event:", id); // Check if the update function is called
+
+    // finding the event to
     const updatedEvents = events.map(event => {
-        if (event.id === id && !updateAllFutureEvents) {//we update only the current event
-            // Update only the current instance
+        if (event.id === id && !updateAllFutureEvents) {
+            // we update only the current event
             return {
                 ...event,
-                title: title,
-                date: date,
-                time: time,
-                duration: duration,
-                allDay: allDay,
-                days: days,
-                repeatFrequency: repeatFrequency,
-                repeatEndDate: repeatEndDate,
-                repeatCount: repeatCount,
-                eventLocation: eventLocation,
+                ...eventData
             };
-        } else if (event.originalId === event.originalId && updateAllFutureEvents) {//we update all the events with the same originalId
+        } else if (event.originalId === originalId && updateAllFutureEvents) {
+            //we update all future events with same originalId
             return {
                 ...event,
                 title: title,
@@ -173,16 +182,17 @@ export function handleUpdateEvent(
                 repeatFrequency: repeatFrequency,
                 repeatEndDate: repeatEndDate,
                 repeatCount: repeatCount,
-                date: calculateNextOccurrence(event.date, event.repeatFrequency), // Calculate next occurrence for future events
+                date: calculateNextOccurrence(event.date, event.repeatFrequency), // Calculate the next occurrence
             };
         }
-        return event; // Return unchanged events
+        return event;
     });
 
-    console.log("Updated events:", events); // Check if the events are updated
+    console.log("Updated events:", updatedEvents); // Check if the events are updated
     setEvents(updatedEvents);
-    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId);
+    handleClosePopupE(setSelectedEvent, setIsEditing, setEventData);
 }
+
 
 // Function to calculate the next occurrence of a repeated event
 const calculateNextOccurrence = (date, frequency) => {
@@ -222,8 +232,8 @@ export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
   };
 
   // Function to confirm the deletion
-  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId) {
+  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setIsEditing, setEventData) {
     handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
     setShowConfirmation(false);
-    handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId);
+    handleClosePopupE(setSelectedEvent, setIsEditing, setEventData);
   };
