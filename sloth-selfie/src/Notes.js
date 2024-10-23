@@ -11,6 +11,7 @@ import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext'; 
 
 //TODO: ID NON CORRISPONDENTI TRA EDIT E LISTA NOTE, MANCA ANCHE DEADLINE IN EDIT
+//TODO1: non funzionano task, problemi di id, manca COLLEGAMENTO CON TASK E ACTIVITY
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -116,11 +117,14 @@ function NotesFunction() {
     };
   }, [updateIcon, updateStyles]);
 
-  
+
   const handleAddNote = () => {
     //console.log("isTodo:", isTodo);
     //console.log("noteContent:", noteContent);
     //console.log("tasks:", tasks);
+    console.log("isTodo:", noteData.isTodo);
+    console.log("tasks length:", noteData.tasks.length);
+    console.log("noteData:", noteData);
 
     if (!noteData.title || !noteData.noteAuthor || !noteData.category) {
       alert('Please fill out all required fields: Title, Author, and Category.');
@@ -169,6 +173,7 @@ function NotesFunction() {
     }
 
     setNotes([...notes, newNote]);
+    //resetting fields
     handleNoteDataChange('title', '', setNoteData);
     handleNoteDataChange('category', '', setNoteData);
     handleNoteDataChange('content', '', setNoteData);
