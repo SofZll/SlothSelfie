@@ -94,7 +94,7 @@ export function handleEditNote(index, notes, setNoteData, setIsEditing,) {
 
 export function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, setIsEditing) {
   //const index = notes.findIndex(note => note.id === id);
-  if (index !== -1) {
+  //if (index !== -1) { //solve the empty idex problem
     const updatedNote = {
       ...notes[index],
       title: noteData.title,
@@ -120,7 +120,7 @@ export function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, se
     handleNoteDataChange('access', 'public', setNoteData);
     handleNoteDataChange('allowedUsers', [], setNoteData);
     handleNoteDataChange('task', [], setNoteData);
-  }
+  //}
 };
 
 export function sortNotes(notes, sortCriterion) {
