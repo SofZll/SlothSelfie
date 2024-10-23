@@ -217,8 +217,8 @@ function Profile({ username }) {
                     </>
                 )}
             </div>
-            <div className="miniHub">
-                <button className="button-hub" onClick={navigateHub}>Go to hub!</button>
+            <div className="mini-hub">
+                <button className="button-hub" onClick={navigateHub}>HUB</button>
             </div>
         </>
     );
