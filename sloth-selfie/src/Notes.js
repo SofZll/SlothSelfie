@@ -10,8 +10,8 @@ import { handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCom
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext'; 
 
-//TODO: ID NON CORRISPONDENTI TRA EDIT E LISTA NOTE, MANCA ANCHE DEADLINE IN EDIT
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
+//IN EDIT di note senza todo author non viene settato
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -20,7 +20,7 @@ const initialNotes = [
       title: 'First Note',
       category: 'Work',
       content: 'This is a note',
-      author: 'Bob',
+      noteAuthor: 'Bob',
       access: { 
         type: 'public', 
         allowedUsers: []
@@ -37,14 +37,14 @@ const initialNotes = [
     isTodo: false, tasks: [],
     createDate: new Date(), updateDate: new Date() },
   { id: 2, title: 'Third Note', category: 'Personal', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam imperdiet quam fringilla libero rutrum lobortis. Nam id vulputate odio. Cras molestie quis ante et vestibulum. Nullam viverra leo quis libero vulputate ultricies sit amet et lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas vestibulum ligula ac tortor faucibus, eget viverra elit faucibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum eu diam interdum, luctus velit in, vehicula erat. Aliquam dapibus mauris eget nulla faucibus, vitae commodo massa placerat. Nam luctus felis nec fermentum lobortis. Aliquam ac odio a neque suscipit mollis. Cras sit amet felis dolor. Nam consequat, nulla vitae lacinia malesuada, ipsum nibh pulvinar mi, sit amet eleifend elit velit id nulla. Cras pretium elit luctus, laoreet turpis sed, scelerisque tellus. Fusce venenatis feugiat diam, id tristique ligula pellentesque vitae.',
-    author: 'Alice', access: { 
+    noteAuthor: 'Alice', access: { 
       type: 'public', //if private Bob can't see it
       allowedUsers: [] 
     },
     isTodo: false, tasks: [],
     createDate: new Date(), updateDate: new Date() },
   { id: 3, title: 'Fourth Note', category: 'Others', content: "# This is a markdown note\n\nHere is some **bold** text, and here is a list:\n\n- Item 1\n- Item 2\n- Item 3\n\nYou can also add [links](https://example.com) and other markdown syntax.",
-    author: 'Someone', access: { 
+    noteAuthor: 'Someone', access: { 
       type: 'restricted', 
       allowedUsers: ['Alice', 'Bob'] 
     },
@@ -55,7 +55,7 @@ const initialNotes = [
       title: 'Fifth Note',
       category: 'Work',
       content: '',
-      author: 'Bob',
+      noteAuthor: 'Bob',
       access: { 
         type: 'public', 
         allowedUsers: []
@@ -103,7 +103,7 @@ function NotesFunction() {
       }
     ],
     */
-    taskDeadline: '', // Deadline for the task while creating it
+    taskDeadline: '', // Deadline for the task while creating it, it is used to set the deadline before creating the task
   });
 
   // change style page onload document
@@ -147,7 +147,7 @@ function NotesFunction() {
       title: noteData.title, 
       category: noteData.category, 
       content: noteData.isTodo ? "" : noteData.content.trim(), // If isTodo, content is empty 
-      author: currentUser,
+      noteAuthor: currentUser,
       access: { 
         type: noteData.noteAccess, 
         allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
@@ -235,7 +235,13 @@ const filterNotesByDate = (notes) => {
               onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
               onCopy={() => handleCopyContent(note.content)}
               onDelete={() => handleDeleteNote(index, notes, setNotes)}
-              onEdit={() => handleEditNote(index, notes, setNoteData, setIsEditing)}
+              onEdit={() =>{
+                //we pass the correct index using the filtered notes
+                //handleEditNote(index, notes, setNoteData, setIsEditing)
+                const filteredNotes = notes.filter(note => canUserAccess(note, currentUser));
+                const noteIndex = filteredNotes.findIndex(n => n.id === note.id);
+                handleEditNote(noteIndex, notes, setNoteData, setIsEditing);  
+              }}
             />
           ))}
         </div> 

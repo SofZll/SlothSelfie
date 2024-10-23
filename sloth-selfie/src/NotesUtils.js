@@ -84,8 +84,8 @@ export function handleEditNote(index, notes, setNoteData, setIsEditing,) {
   handleNoteDataChange('title', notes[index].title, setNoteData);
   handleNoteDataChange('category', notes[index].category, setNoteData);
   handleNoteDataChange('content', notes[index].content, setNoteData);
-  handleNoteDataChange('author', notes[index].author, setNoteData);
-  handleNoteDataChange('access', notes[index].access.type, setNoteData);
+  handleNoteDataChange('noteAuthor', notes[index].noteAuthor, setNoteData);
+  handleNoteDataChange('noteAccess', notes[index].access.type, setNoteData);
   handleNoteDataChange('allowedUsers', notes[index].access.allowedUsers, setNoteData);
   handleNoteDataChange('isTodo', notes[index].isTodo, setNoteData);
   handleNoteDataChange('tasks', notes[index].tasks, setNoteData);
@@ -96,10 +96,10 @@ export function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, se
     const updatedNote = {
       ...notes[index],
       title: noteData.title,
-      author: noteData.author,
+      author: noteData.noteAuthor,
       access: { 
-        type: noteData.access, 
-        allowedUsers: noteData.access === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
+        type: noteData.noteAccess, 
+        allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
       },
       category: noteData.category,
       content: noteData.content,
@@ -110,12 +110,13 @@ export function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, se
     const updatedNotes = [...notes];
     updatedNotes[index] = updatedNote;
     setNotes(updatedNotes);
+    console.log("Updated Notes:", updatedNotes);
     setIsEditing(null); // exit from edit mode
     handleNoteDataChange('title', '', setNoteData);
     handleNoteDataChange('category', '', setNoteData);
     handleNoteDataChange('content', '', setNoteData);
-    handleNoteDataChange('author', '', setNoteData);
-    handleNoteDataChange('access', 'public', setNoteData);
+    handleNoteDataChange('noteAuthor', '', setNoteData);
+    handleNoteDataChange('noteAccess', 'public', setNoteData);
     handleNoteDataChange('allowedUsers', [], setNoteData);
     handleNoteDataChange('isTodo', false, setNoteData);
     handleNoteDataChange('tasks', [], setNoteData);
