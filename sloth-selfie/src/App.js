@@ -17,6 +17,8 @@ import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
 import { update } from 'react-spring';
 import { ActivityProvider } from './ActivityContext';
+//import { ActivityProvider } from './ActivityContext.Oldjs';
+
 
 function App() {
   const [machineOpen, setMachineOpen] = useState(false);
@@ -165,7 +167,7 @@ function App() {
   return (
     <Router>
       <StyleProvider>
-        {/*<ActivityProvider> */}
+        <ActivityProvider>
         <div className="App">
           <Menu username={username}/>
           <header className="App-header">
@@ -238,7 +240,7 @@ function App() {
             <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
           </div>
         </div>
-        {/*</ActivityProvider>*/}
+        </ActivityProvider>
       </StyleProvider>
     </Router>
   );
