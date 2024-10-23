@@ -10,7 +10,8 @@ import { normalizeActivities, handleAddActivity, handleRemoveActivity, updateOve
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
-import { ActivityContext } from './ActivityContext'; 
+//import { ActivityContext } from './ActivityContext';
+//import { ActivityContext } from './ActivityContext.Oldjs'; 
 import { a } from 'react-spring';
 
 const initialActivities = [
@@ -24,7 +25,9 @@ function ActivitiesFunction(){
     const [activities, setActivities] = useState(initialActivities || []);
     const [selectedActivity, setSelectedActivity] = useState(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
-    //const[activityData, setActivityData] = useContext(ActivityContext);
+    //const { activities, setActivities } = useContext(ActivityContext);
+    //const[activityData, setActivityData] = useContext(ActivityContext); Old
+
 
     //define the activity data structure
     

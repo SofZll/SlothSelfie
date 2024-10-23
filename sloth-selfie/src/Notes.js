@@ -8,7 +8,8 @@ import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
 import { handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
-import { ActivityContext } from './ActivityContext'; 
+import { ActivityContext } from './ActivityContext';
+//import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
