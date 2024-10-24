@@ -11,14 +11,15 @@ import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import Select from 'react-select';
 
-//TODO: edit di eventi ripetuti(vanno solo title e location)
+//TODO: edit di eventi ripetuti(vanno solo title e location) e non vanno edit e delete di updateAllFutureInstances
+//TODO: cliccando su evento compila il form sbagliando il campo data, mette il giorno prima
 
 const localizer = momentLocalizer(moment);
 
 const initialEvents = [
   // Puoi aggiungere alcuni eventi di esempio qui 
   // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
-  {id: 1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
+  {id: 1, originalId:1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
 ];
 
 function EventsFunction() {
