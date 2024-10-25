@@ -2,6 +2,9 @@ import React, {useState} from 'react';
 import './css/Pomodoro.css';
 import iconYoutube from './media/youtube.svg';
 import iconSpotify from './media/spotify.svg';
+import SpotifySearch from './Spotify';
+import Youtube from './Youtube';
+import iconArrow from './media/leftBackArrow.svg';
 
 
 
@@ -23,9 +26,12 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     </button>
                 </div>
                 ) : (
-                    <div className='divBtn'>
-                        
-                    </div>
+                <>
+                    <button className='btnBack' onClick={() => setPlatformMusic(0)}>
+                        <img src={iconArrow} alt="Back" className='icon'/>
+                    </button>
+                    {platformMusic === 1 ? <Youtube /> : <SpotifySearch />}
+                </>
                 )}
             </div>
             <div className="pomodoro-container">
