@@ -37,6 +37,7 @@ export function normalizeActivities (activities) {
     });
 };
 
+const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
 
 // Handle adding an activity
 export function handleAddActivity(e, activityData, setActivityData, activities, setActivities) {
@@ -48,7 +49,8 @@ export function handleAddActivity(e, activityData, setActivityData, activities, 
             id: activities.length + 1,
             title: title,
             deadline: deadline,
-            completed: false
+            completed: false,
+            userId: currentUser,
         };
     
 

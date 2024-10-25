@@ -22,6 +22,8 @@ const initialEvents = [
   {id: 1, originalId:1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
 ];
 
+const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
+
 function EventsFunction() {
     const { updateStyles, updateIcon } = useContext(StyleContext);
     const [events, setEvents] = useState(initialEvents || []);
@@ -47,6 +49,7 @@ function EventsFunction() {
     repeatMode: 'ntimes', // Mode of repetition
     repeatEndDate: '', // Date of the last repetition
     eventLocation: '', // eventLocation of the event
+    userId: '', // User ID of whom creates the event
     });
 
     // change style page onload document
@@ -142,6 +145,7 @@ function EventsFunction() {
         repeatFrequency: eventData.repeatFrequency,
         repeatEndDate: eventData.repeatEndDate,
         eventLocation: eventData.eventLocation,
+        userId: currentUser,
         };
     
         if (eventData.allDay) {
