@@ -367,10 +367,13 @@ function EventsFunction() {
             <div>
               <label>
                 Repeat Mode:
-                <select onChange={(e) => setRepeatMode(e.target.value)}>
-                  <option value="ntimes">N Times</option>
-                  <option value="until">Until</option>
-                </select>
+                <Select 
+                  onChange = {[(e) => setRepeatMode(e.target.value)]}
+                  options = {[
+                    {value: 'ntimes', label: 'N Times'},
+                    {value: 'until', label: 'Until'},
+                  ]}
+                />
               </label>
               <br/>
       

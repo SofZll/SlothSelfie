@@ -70,6 +70,7 @@
   align-items: center;
   width: 90%;
   max-width: 500px;
+  padding-bottom: 11vh;
 }
 
 .song-container,
@@ -84,6 +85,10 @@ box-shadow: 5px;
 width: 98%;
 }
 
+.song-container {
+  position: relative;
+}
+
 
 .pomodoro-container {
   height: 60%;
@@ -92,12 +97,15 @@ width: 98%;
 
 .song-container,
 .stats-container {
-  height: 20%;
   justify-content: center;
   border: 1px solid #555B6E;
   border-radius: 5px;
   background-color: #ccc;
   align-self: center;
+}
+
+.stats-container {
+  height: 20%;
 }
 
 .input-cycles-div,
@@ -164,6 +172,24 @@ justify-content: space-around;
   display: none;
 }
 
+.btnSearch,
+.btnCross,
+.btnBack {
+  background-color: inherit;
+  border: none;
+  padding: 5px;
+  border-radius: 5px
+}
+
+.btnSearch:hover,
+.btnSearch:active,
+.btnCross:hover,
+.btnCross:active,
+.btnBack:hover,
+.btnBack:active {
+  background-color: #F39252;
+}
+
 .iconYoutube {
   height: 25vh;
   max-height: 35px;
@@ -174,6 +200,66 @@ justify-content: space-around;
   max-height: 30px;
 }
 
+.videoYoutube,
+.searchYoutube,
+.youtube,
+.selectSpotify {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.titleYoutubeVideo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  padding: 10px;
+}
+
+.titleYoutubeVideo button,
+.btnBack {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.youtube,
+.selectSpotify {
+  padding: 5px;
+}
+
+.videoYoutube h2,
+.searchYoutube h2,
+.selectSpotify h2 {
+  margin: 0;
+  font-size: 4vmin;
+}
+
+.videoYoutube iframe {
+  width: 90%;
+  aspect-ratio: 16/9;
+}
+
+.songSpotify {
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  justify-content: space-between;
+  padding: 10px 0;
+  width: 95%;
+  height: 172px;
+}
+
+.songSpotify iframe {
+  border-radius: 12px;
+  width: 89%;
+  height: 152px;
+}
 
 @media screen and (min-width: 769px){
   .containerRed,
