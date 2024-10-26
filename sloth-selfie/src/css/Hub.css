@@ -1,0 +1,52 @@
+.posts-list {
+    width: 100%;
+    max-width: 400px;
+}
+
+.posts-list h3 {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.posts-list h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.post {
+    width: 100%;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #555b6e;
+}
+
+.post-title,
+.post-functions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.post-functions {
+    font-size: 15px;
+}
+
+.post-functions span {
+    cursor: pointer;
+}
+
+.new-post {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    gap: 1rem;
+}
+
+.new-post textarea {
+    width: 80%;
+    
+}

@@ -6,11 +6,13 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Activities.css';
-import { normalizeActivities, handleAddActivity, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA} from './ActivityUtils';
+import { normalizeActivities, handleAddActivity, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA, handleActivityDataChange} from './ActivityUtils';
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
-import { ActivityContext } from './ActivityContext'; 
+//import { ActivityContext } from './ActivityContext';
+//import { ActivityContext } from './ActivityContext.Oldjs'; 
+import { a } from 'react-spring';
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -20,15 +22,23 @@ const initialActivities = [
 
 function ActivitiesFunction(){
     const { updateStyles, updateIcon } = useContext(StyleContext);
-    //const [activities, setActivities] = useState(initialActivities || []);
-    const [id, setId] = useState("");
-    //const [title, setTitle] = useState('');
-    //const [deadline, setDeadline] = useState('');
-    const [completed, setCompleted] = useState(false);
+    const [activities, setActivities] = useState(initialActivities || []);
     const [selectedActivity, setSelectedActivity] = useState(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
-    const { activities, setActivities, title, setTitle, deadline, setDeadline } = useContext(ActivityContext);
+    //const { activities, setActivities } = useContext(ActivityContext);
+    //const[activityData, setActivityData] = useContext(ActivityContext); Old
 
+
+    //define the activity data structure
+    
+    const [activityData, setActivityData] = useState({
+        id: "",
+        title: "",
+        deadline: "",
+        completed: false,
+        userId: '', // User ID of whom creates the event
+    });
+    
     // change style page onload document
     useEffect(() => {
         updateStyles(true);
@@ -54,10 +64,10 @@ function ActivitiesFunction(){
 
     useEffect(() => {// Pre-fill the form with the selected activity
         if (selectedActivity) {
-            setId(selectedActivity.id);
-            setTitle(selectedActivity.title);
-            setDeadline(selectedActivity.deadline);
-            setCompleted(selectedActivity.completed);
+            handleActivityDataChange('id', selectedActivity.id, setActivityData);
+            handleActivityDataChange('title', selectedActivity.title, setActivityData);
+            handleActivityDataChange('deadline', selectedActivity.deadline, setActivityData);
+            handleActivityDataChange('completed', selectedActivity.completed, setActivityData);
         }
     }, [selectedActivity]);
 
@@ -94,13 +104,13 @@ function ActivitiesFunction(){
                             }}>
                                 Delete
                             </button>
-                            <button className='btn' onClick={() => handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted)}>X</button>
+                            <button className='btn' onClick={() => handleClosePopupA(setSelectedActivity, setActivityData)}>X</button>
                         </div>
                         {showConfirmation && (
                             <div className="popup-delete">
                                 <h2>Are you sure you want to delete this activity?</h2>
                                 <div>
-                                    <button className='btn' onClick={() => handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted)}>Yes</button>
+                                    <button className='btn' onClick={() => handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setActivityData)}>Yes</button>
                                     <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
                                 </div>
                             </div>
@@ -112,22 +122,22 @@ function ActivitiesFunction(){
             <div className="container-activity-add">
                 <h2>Activities</h2>
                 <form onSubmit={selectedActivity 
-                    ? (e) => handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) 
-                    :(e) => handleAddActivity(e, title, deadline, activities, setActivities, setTitle, setDeadline)}>
+                    ? (e) => handleUpdateActivity(e, activityData, setActivityData, activities, setActivities, setSelectedActivity) 
+                    :(e) => handleAddActivity(e, activityData, setActivityData, activities, setActivities)}>
                     <label>Activity:
                         <input 
                             type="text" 
                             placeholder="Title" 
-                            value={title} 
-                            onChange={(e) => setTitle(e.target.value)} 
+                            value={activityData.title} 
+                            onChange={(e) => handleActivityDataChange("title", e.target.value, setActivityData)}
                             required 
                         />
                     </label>
                     <label>Deadline:
                         <input 
                             type="date" 
-                            value={deadline} 
-                            onChange={(e) => setDeadline(e.target.value)} 
+                            value={activityData.deadline} 
+                            onChange={(e) => handleActivityDataChange("deadline", e.target.value, setActivityData)}
                             required 
                         />
                     </label>

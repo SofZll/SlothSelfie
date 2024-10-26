@@ -1,3 +1,11 @@
+// Function to handle changes in activity data
+export function handleActivityDataChange (field, value, setActivityData) {
+    setActivityData((prevEventData) => ({
+        ...prevEventData,
+        [field]: value
+    }));
+    };
+
 // Convert activities to the format required by React Big Calendar
 export function normalizeActivities (activities) {
     return activities.filter(activity => !activity.completed).map((activity) => {
@@ -29,17 +37,20 @@ export function normalizeActivities (activities) {
     });
 };
 
+const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
 
 // Handle adding an activity
-export function handleAddActivity(e, title, deadline, activities, setActivities, setTitle, setDeadline) {
+export function handleAddActivity(e, activityData, setActivityData, activities, setActivities) {
     if (e && e.preventDefault) {
         e.preventDefault();
       }
+      const {title, deadline} = activityData;
         let newActivity = {
             id: activities.length + 1,
             title: title,
             deadline: deadline,
-            completed: false
+            completed: false,
+            userId: currentUser,
         };
     
 
@@ -47,8 +58,8 @@ export function handleAddActivity(e, title, deadline, activities, setActivities,
         console.log("Current activities:", [...activities, newActivity]);
 
          // Reset input fields
-        setTitle('');
-        setDeadline('');
+        handleActivityDataChange('title', '', setActivityData);
+        handleActivityDataChange('deadline', '', setActivityData);
 }
 
 // Handle removing an activity and marking it as completed while pressing btn "Done"
@@ -90,32 +101,32 @@ export function updateOverdueActivities(activities, setActivities) {
 }
 
 //Function to reset imput fields
-export function handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
+export function handleClosePopupA(setSelectedActivity, setActivityData) {
     setSelectedActivity(null); // Close the popup
     // Reset input fields
-    setId('');
-    setTitle('');
-    setDeadline('');
-    setCompleted(false);
+    handleActivityDataChange('id', '', setActivityData);
+    handleActivityDataChange('title', '', setActivityData);
+    handleActivityDataChange('deadline', '', setActivityData);
+    handleActivityDataChange('completed', false, setActivityData);
 }
 
 // Handle updating an activity
-export function handleUpdateActivity(e, id, title, deadline, completed, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
+export function handleUpdateActivity(e, activityData, setActivityData, activities, setActivities, setSelectedActivity) {
     e.preventDefault();
     const updatedActivities = activities.map(activity => {
-        if (activity.id === id) {
+        if (activity.id === activityData.id) {
             return {
                 ...activity,
-                title: title,
-                deadline: deadline,
-                completed: completed
+                title: activityData.title,
+                deadline: activityData.deadline,
+                completed: activityData.completed
             };
         }
         return activity;
     });
     
     setActivities(updatedActivities);
-    handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted);
+    handleClosePopupA(setSelectedActivity, setActivityData);
 }
 
 //Handle deleting an activity
@@ -131,8 +142,8 @@ export function handleDeleteActivity(id, activities, setActivities, setSelectedA
   };
 
   // Function to confirm the deletion
-  export function handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setId, setTitle, setDeadline, setCompleted) {
+  export function handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setActivityData) {
     handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity);
     setShowConfirmation(false);
-    handleClosePopupA(setSelectedActivity, setId, setTitle, setDeadline, setCompleted);
+    handleClosePopupA(setSelectedActivity, setActivityData);
   };
