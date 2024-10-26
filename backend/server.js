@@ -5,6 +5,7 @@ const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/routes');
+const noteRoutes = require('./routes/routes');
 const path = require('path');
 const connectDB = require('./config/db');
 
@@ -23,6 +24,7 @@ app.use(session({
 }))
 */
 app.use('/api', Routes);
+//app.use('/api', noteRoutes);
 
 // Static files from frontend
 const frontendPath = path.join(global.rootDir, '..', 'frontend/build');

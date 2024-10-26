@@ -12,11 +12,14 @@ import { v4 as uuidv4 } from "uuid";
 import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
 import ProfileFunction from './Profile';
+import HubFunction from './Hub';
 import { use } from 'marked';
 import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
 import { update } from 'react-spring';
 import { ActivityProvider } from './ActivityContext';
+//import { ActivityProvider } from './ActivityContext.Oldjs';
+
 
 function App() {
   const [machineOpen, setMachineOpen] = useState(false);
@@ -25,8 +28,6 @@ function App() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
 
-  const username = 'user';
-  /*
   const [username, setUsername] = useState('example');
   
   useEffect(() => {
@@ -50,7 +51,6 @@ function App() {
     console.log("Login status:", status);
     setIsAuthenticated(status);
   };
-  */
 
   const openFullscreen = () => {
     const elem = document.documentElement; // L'intero documento sarà a schermo intero
@@ -178,36 +178,35 @@ function App() {
           </header>
           <div className="App-body">
             <Routes>
-              {/*<Route
-                  path="/"
-                  element={
-                    isAuthenticated ? (
-                      <Navigate to="/home" />
-                    ) : (
-                      <Navigate to="/login" />
-                    )
-                  }
-                />
-                <Route 
-                  path="/login" 
-                  element={<Form formType={formType} setFormType={setFormType} handleLogin={handleLogin}/>}
-                />
-                <Route 
-                  path="/register" 
-                  element={<Form formType="register" setFormType={setFormType}/>}
-                />
-              /> */}
-              <Route path="/" /*path="home"*/
+              <Route
+                path="/"
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/home" />
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                }
+              />
+              <Route 
+                path="/login" 
+                element={<Form formType={formType} setFormType={setFormType} handleLogin={handleLogin}/>}
+              />
+              <Route 
+                path="/register" 
+                element={<Form formType="register" setFormType={setFormType}/>}
+              />
+              <Route path="home"
                 element={ 
-                /*isAuthenticated ? (*/ 
+                isAuthenticated ? ( 
                 (<Carousel
                     cards={cards}
                     offset={2}
                     showArrows={false}
                   />)
-                /*) : (
+                ) : (
                   <Navigate to="/login" />
-                ) */
+                )
                 }
               />
               <Route path="/profile" element={<ProfileFunction />} />
@@ -215,6 +214,7 @@ function App() {
               <Route path="/notes" element={<NotesFunction />} />
               <Route path="/events" element={<EventsFunction />} />
               <Route path="/activities" element={<ActivitiesFunction />} />
+              <Route path="/hub" element={<HubFunction />} />
             </Routes>
             {/* time machine */}
             <div
