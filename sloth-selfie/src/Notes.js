@@ -111,6 +111,8 @@ function NotesFunction() {
   const fetchNotes = async () => {
     try {
         const response = await fetch('/api/notes', {
+        //locale:
+        //const response = await fetch('http://localhost:8000/api/notes', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -123,6 +125,7 @@ function NotesFunction() {
         }
 
         const data = await response.json();
+        console.log(data);
         setNotes(data);
     } catch (error) {
         console.error('Errore if fetching di notes:', error);

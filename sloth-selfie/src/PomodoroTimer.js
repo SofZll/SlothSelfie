@@ -6,8 +6,8 @@ import SpotifySearch from './Spotify';
 import Youtube from './Youtube';
 import iconArrow from './media/leftBackArrow.svg';
 import iconPlay from './media/play.svg';
-import iconPause from './media/pause.svg';
-import iconReset from './media/reset.svg';
+//import iconPause from './media/pause.svg';
+//import iconReset from './media/reset.svg';
 import iconEdit from './media/edit.svg';
 import iconSkip from './media/skip.svg';
 
@@ -47,10 +47,10 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                         <image src={iconEdit} alt="Edit" className='icon'/>
                     </button>
                     <button className='btnMusic'>
-                        <image src={iconReset} alt="Reset" className='icon'/>
+                        {/*<image src={iconReset} alt="Reset" className='icon'/> */}
                     </button>
                     <button className='btnMusic'>
-                        {playTomato ? (<image src={iconPause} alt="Pause" className='icon'/>) : (<image src={iconPlay} alt="Play" className='icon'/>)}
+                        {/*{playTomato ? (<image src={iconPause} alt="Pause" className='icon'/>) : (<image src={iconPlay} alt="Play" className='icon'/>)} */}
                     </button>
                     <button className='btnMusic'>
                         <image src={iconSkip} alt="Skip" className='icon'/>
