@@ -44,7 +44,7 @@ function App() {
     fetchUsername();
   }, []); 
   
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [formType, setFormType] = useState('login'); 
 
   const handleLogin = (status) => {
