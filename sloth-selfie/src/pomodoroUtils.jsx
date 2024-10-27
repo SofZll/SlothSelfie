@@ -87,6 +87,25 @@ export function editDataPomodoro (cicles, studioTime, breakTime, dataPomodoro, s
     handlePodomoroTimeChange('breakTime', breakTime, setDataPomodoro);
 }
 
+export function skipTime (dataPomodoro, setDataPomodoro, setStringPrintTime) {
+    if (dataPomodoro.isStudioTime) {
+        handlePodomoroTimeChange('timeLeft', 0, setDataPomodoro);
+        setStringPrintTime(stringTime(0));
+        handlePodomoroTimeChange('isStudioTime', false, setDataPomodoro);
+    } else {
+        handlePodomoroTimeChange('timeLeft', dataPomodoro.studioTime, setDataPomodoro);
+        setStringPrintTime(stringTime(dataPomodoro.studioTime));
+        handlePodomoroTimeChange('isStudioTime', true, setDataPomodoro);
+    }
+}
+
+export function resetTime (dataPomodoro, setDataPomodoro, setStringPrintTime) {
+    handlePodomoroTimeChange('timeLeft', dataPomodoro.studioTime, setDataPomodoro);
+    setStringPrintTime(stringTime(dataPomodoro.studioTime));
+    handlePodomoroTimeChange('ciclesLeft', dataPomodoro.cicles, setDataPomodoro);
+    handlePodomoroTimeChange('isStudioTime', true, setDataPomodoro);
+}
+
 export function passingTime (dataPomodoro, setDataPomodoro, setPlayTomato, setStringPrintTime) {
     if (dataPomodoro.timeLeft > 0) {
         handlePodomoroTimeChange('timeLeft', dataPomodoro.timeLeft - 1, setDataPomodoro);
