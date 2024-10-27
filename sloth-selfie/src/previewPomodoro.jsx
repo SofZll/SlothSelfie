@@ -4,22 +4,25 @@ import "./css/Pomodoro.css";
 import iconYellowTomato from './media/yellowTomato.svg';
 import iconRedTomato from './media/redTomato.svg';
 import { Link, useNavigate } from 'react-router-dom';
-import { Howl } from 'howler';
+import { stringTime, tomatoPlay, handlePodomoroTimeChange, handleEdtiDataLeft, passingTime } from './pomodoroUtils';
+import { to } from 'react-spring';
 
 
 const PreviewPomodoro = () => {
-  const [timeLeft, setTimeLeft] = useState(30*60);
-  const [isStudioTime, setIsStudioTime] = useState(true);
-  const [playTomato, setPlayTomato] = useState(false);
-  const [stringPrintTime, setStringPrintTime] = useState('30:00');
-  const [cicles, setCicles] = useState(5);
   const navigate = useNavigate();
+  const [soundAudio, setSoundAudio] = useState('./media/meow.mp3');
 
-
-  const soundMeow = new Howl({
-    src: [require('./media/meow.mp3')],
-    volume: 1.0,
+  const [dataPomodoro, setDataPomodoro] = useState({
+    timeLeft: 5,
+    ciclesLeft: 3,
+    cicles: 3,
+    isStudioTime: true,
+    studioTime: 5,
+    breakTime: 3,
   });
+
+  const [playTomato, setPlayTomato] = useState(false);
+  const [stringPrintTime, setStringPrintTime] = useState(stringTime(dataPomodoro.timeLeft));
 
   // animation page
   const handleLinkClick = (path) => (event) => {
@@ -31,73 +34,35 @@ const PreviewPomodoro = () => {
     }, 300);
   };
 
-  useEffect(() => {
-    if (playTomato && cicles > 0) {
-      if (timeLeft === 0) {
-      
-        if (isStudioTime) {
-          setTimeLeft(5*60);
-          soundMeow.play();
-        } else {
-          setTimeLeft(30*60);
-          setCicles(cicles - 1);
-          soundMeow.play();
-        }
-        if (cicles === 0) {
-          setTimeLeft(0);
-          setPlayTomato(false);
-        }
-        setIsStudioTime(!isStudioTime);
-        setStringPrintTime(stringTime(timeLeft));
 
-      } else {
+  useEffect(() => { 
+    if (playTomato && dataPomodoro.ciclesLeft > 0) {
         const timer = setTimeout(() => {
-          setTimeLeft(timeLeft - 1);
+            passingTime(dataPomodoro, setDataPomodoro, setPlayTomato, setStringPrintTime);
         }, 1000);
 
-        setStringPrintTime(stringTime(timeLeft));
-
         return () => clearTimeout(timer);
-      };
-    } else {
-      return;
     }
-    
-  }, [timeLeft, isStudioTime, playTomato]);
-
-  const stringTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-
-    return `${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
-  }
-
-  const tomatoPlay = () => {
-    if (cicles === 0) {
-      setTimeLeft(30*60);
-      setCicles(5);
-      setStringPrintTime(stringTime(timeLeft));
-    }
-    setPlayTomato(prevPlayTomato => !prevPlayTomato);
-  }
+}, [dataPomodoro, playTomato]);
 
   return (
     <div className='container'>
       <p>Start your study session!</p><br/>
-      <div className={isStudioTime ? 'containerRed' : 'containerYellow'}>
+      <div className={dataPomodoro.isStudioTime ? 'containerRed' : 'containerYellow'}>
         <img 
-          src={isStudioTime ? iconRedTomato : iconYellowTomato} 
+          src={dataPomodoro.isStudioTime ? iconRedTomato : iconYellowTomato} 
           alt='Tomato' 
           className='tomatoPrew' 
         />
-        <h2 className={isStudioTime ? 'counterRed' : 'counterYellow'}>
+        <h2 className={dataPomodoro.isStudioTime ? 'counterRed' : 'counterYellow'}>
           {stringPrintTime}
         </h2>
       </div>
       <div className="divBtn">
-          <button  onClick={tomatoPlay} className="btn">{playTomato ? 
-            (cicles === 0 ? "Reset" : "Stop") : ((cicles === 5 && timeLeft === (30*60)) ? "Quick start" : "Play")}</button>
-        <Link to="/pomodoro" onClick={handleLinkClick('/pomodoro')}>
+          <button  onClick={() => tomatoPlay (setDataPomodoro, dataPomodoro, setPlayTomato, playTomato, setStringPrintTime)} className="btn">{playTomato ? 
+            (dataPomodoro.ciclesLeft === 0 ? "Reset" : "Stop") : ((dataPomodoro.ciclesLeft === dataPomodoro.cicles && dataPomodoro.timeLeft === dataPomodoro.studioTime) ? "Quick start" : "Play")}
+          </button>
+        <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
           <button className="btn">Start</button>
         </Link>
       </div>
