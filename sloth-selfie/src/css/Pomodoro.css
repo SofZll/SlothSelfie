@@ -93,6 +93,7 @@ width: 98%;
 .pomodoro-container {
   height: 60%;
   justify-content: space-around;
+  align-self: center;
 }
 
 .song-container,
@@ -174,7 +175,8 @@ justify-content: space-around;
 
 .btnSearch,
 .btnCross,
-.btnBack {
+.btnBack,
+.btnSettingTomato {
   background-color: inherit;
   border: none;
   padding: 5px;
@@ -186,19 +188,39 @@ justify-content: space-around;
 .btnCross:hover,
 .btnCross:active,
 .btnBack:hover,
-.btnBack:active {
+.btnBack:active,
+.btnSettingTomato:hover,
+.btnSettingTomato:active {
   background-color: #F39252;
 }
 
-.iconYoutube {
+.iconCross {
+  height: 27vh;
+  max-height: 37px;
+}
+
+.iconYoutube,
+.iconAdd {
   height: 25vh;
   max-height: 35px;
 }
 
-.iconSpotify {
+.iconSpotify,
+.iconEdit,
+.iconReset {
   height: 20vh;
   max-height: 30px;
 }
+
+
+.iconPlay,
+.iconStop,
+.iconSkip {
+  height: 16vh;
+  max-height: 26px;
+
+}
+
 
 .videoYoutube,
 .searchYoutube,

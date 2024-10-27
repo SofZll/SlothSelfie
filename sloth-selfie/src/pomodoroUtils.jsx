@@ -8,14 +8,23 @@ export function stringTime (time) {
 }
 
 export function tomatoPlay (setDataPomodoro, dataPomodoro, setPlayTomato, playTomato, setStringPrintTime) {
-    if (dataPomodoro.ciclesLeft === 0) {
+    if (dataPomodoro.cyclesLeft === 0) {
         handlePodomoroTimeChange('timeLeft', dataPomodoro.studioTime, setDataPomodoro);
         setStringPrintTime(stringTime(dataPomodoro.studioTime));
-        handlePodomoroTimeChange('ciclesLeft', dataPomodoro.cicles, setDataPomodoro);
+        handlePodomoroTimeChange('cyclesLeft', dataPomodoro.cycles, setDataPomodoro);
+        handlePodomoroTimeChange('done', false, setDataPomodoro);
+        handlePodomoroTimeChange('notStartedYet', true, setDataPomodoro);
         setPlayTomato(false);
     } else {
+        if(dataPomodoro.notStartedYet) handlePodomoroTimeChange('notStartedYet', false, setDataPomodoro)
         setPlayTomato(!playTomato);
     }
+}
+
+export function pomodoroPlay (setPlayTomato, playTomato, dataPomodoro, setDataPomodoro) {
+    if(dataPomodoro.notStartedYet) handlePodomoroTimeChange('notStartedYet', false, setDataPomodoro)
+
+    setPlayTomato(!playTomato);
 }
 
 function soundFinish() {
@@ -25,12 +34,12 @@ function soundFinish() {
   });
 }
 
-export function initDataPomodoro (setDataPomodoro, cicles, studioTime, breakTime) {
-    handlePodomoroTimeChange('cicles', cicles, setDataPomodoro);
+export function initDataPomodoro (setDataPomodoro, cycles, studioTime, breakTime) {
+    handlePodomoroTimeChange('cycles', cycles, setDataPomodoro);
     handlePodomoroTimeChange('studioTime', studioTime, setDataPomodoro);
     handlePodomoroTimeChange('breakTime', breakTime, setDataPomodoro);
     handlePodomoroTimeChange('timeLeft', studioTime, setDataPomodoro);
-    handlePodomoroTimeChange('ciclesLeft', cicles, setDataPomodoro);
+    handlePodomoroTimeChange('cyclesLeft', cycles, setDataPomodoro);
 }
 
 export function handlePodomoroTimeChange (field, value, setDataPomodoro) {
@@ -40,21 +49,21 @@ export function handlePodomoroTimeChange (field, value, setDataPomodoro) {
     }));
 }
 
-export function handleEdtiDataLeft (cicles, studioTime, breakTime, dataPomodoro, setDataPomodoro, setPlayTomato) {
-    if (cicles < dataPomodoro.cicles) {
-        const ciclesLeft = dataPomodoro.ciclesLeft - (dataPomodoro.cicles - cicles);
-        if (ciclesLeft < 0) {
-            handlePodomoroTimeChange('ciclesLeft', 0, setDataPomodoro);
+export function handleEdtiDataLeft (cycles, studioTime, breakTime, dataPomodoro, setDataPomodoro, setPlayTomato) {
+    if (cycles < dataPomodoro.cycles) {
+        const cyclesLeft = dataPomodoro.cyclesLeft - (dataPomodoro.cycles - cycles);
+        if (cyclesLeft < 0) {
+            handlePodomoroTimeChange('cyclesLeft', 0, setDataPomodoro);
             handlePodomoroTimeChange('timeLeft', 0, setDataPomodoro);
             setPlayTomato(false);
         } else {
-            handlePodomoroTimeChange('ciclesLeft', ciclesLeft, setDataPomodoro);
+            handlePodomoroTimeChange('cyclesLeft', cyclesLeft, setDataPomodoro);
         }
     } else {
-        handlePodomoroTimeChange('ciclesLeft', dataPomodoro.ciclesLeft + (cicles - dataPomodoro.cicles), setDataPomodoro);
+        handlePodomoroTimeChange('cyclesLeft', dataPomodoro.cyclesLeft + (cycles - dataPomodoro.cycles), setDataPomodoro);
     }
 
-    if (dataPomodoro.ciclesLeft !== 0) {
+    if (dataPomodoro.cyclesLeft !== 0) {
         if (dataPomodoro.isStudioTime) {
             if (studioTime < dataPomodoro.studioTime) {
                 handlePodomoroTimeChange('timeLeft', dataPomodoro.timeLeft - (dataPomodoro.studioTime - studioTime), setDataPomodoro);
@@ -79,19 +88,26 @@ export function handleEdtiDataLeft (cicles, studioTime, breakTime, dataPomodoro,
     }
 }
 
-export function editDataPomodoro (cicles, studioTime, breakTime, dataPomodoro, setDataPomodoro) {
-    handleEdtiDataLeft(cicles, studioTime, breakTime, dataPomodoro, setDataPomodoro);
+export function editDataPomodoro (cycles, studioTime, breakTime, dataPomodoro, setDataPomodoro) {
+    handleEdtiDataLeft(cycles, studioTime, breakTime, dataPomodoro, setDataPomodoro);
     
-    handlePodomoroTimeChange('cicles', cicles, setDataPomodoro);
+    handlePodomoroTimeChange('cycles', cycles, setDataPomodoro);
     handlePodomoroTimeChange('studioTime', studioTime, setDataPomodoro);
     handlePodomoroTimeChange('breakTime', breakTime, setDataPomodoro);
 }
 
 export function skipTime (dataPomodoro, setDataPomodoro, setStringPrintTime) {
     if (dataPomodoro.isStudioTime) {
-        handlePodomoroTimeChange('timeLeft', 0, setDataPomodoro);
-        setStringPrintTime(stringTime(0));
+        handlePodomoroTimeChange('timeLeft', dataPomodoro.breakTime, setDataPomodoro);
+        setStringPrintTime(stringTime(dataPomodoro.breakTime));
         handlePodomoroTimeChange('isStudioTime', false, setDataPomodoro);
+        handlePodomoroTimeChange('skippedCycles', dataPomodoro.skippedCycles + 1, setDataPomodoro);
+        handlePodomoroTimeChange('cyclesLeft', dataPomodoro.cyclesLeft - 1, setDataPomodoro);
+
+        if (dataPomodoro.cyclesLeft === 0) {
+            handlePodomoroTimeChange('done', true, setDataPomodoro);
+        }
+        
     } else {
         handlePodomoroTimeChange('timeLeft', dataPomodoro.studioTime, setDataPomodoro);
         setStringPrintTime(stringTime(dataPomodoro.studioTime));
@@ -99,11 +115,24 @@ export function skipTime (dataPomodoro, setDataPomodoro, setStringPrintTime) {
     }
 }
 
+export function addCycle (dataPomodoro, setDataPomodoro, setStringPrintTime) {
+    handlePodomoroTimeChange('addedCycles', dataPomodoro.addedCycles + 1, setDataPomodoro);
+    handlePodomoroTimeChange('cycles', dataPomodoro.cycles + 1, setDataPomodoro);
+    handlePodomoroTimeChange('cyclesLeft', dataPomodoro.cyclesLeft + 1, setDataPomodoro);
+    handlePodomoroTimeChange('timeLeft', dataPomodoro.breakTime, setDataPomodoro);
+    setStringPrintTime(stringTime(dataPomodoro.breakTime));
+    handlePodomoroTimeChange('isStudioTime', false, setDataPomodoro);
+    handlePodomoroTimeChange('done', false, setDataPomodoro);
+}
+
 export function resetTime (dataPomodoro, setDataPomodoro, setStringPrintTime) {
     handlePodomoroTimeChange('timeLeft', dataPomodoro.studioTime, setDataPomodoro);
     setStringPrintTime(stringTime(dataPomodoro.studioTime));
-    handlePodomoroTimeChange('ciclesLeft', dataPomodoro.cicles, setDataPomodoro);
-    handlePodomoroTimeChange('isStudioTime', true, setDataPomodoro);
+    handlePodomoroTimeChange('cyclesLeft', (dataPomodoro.cycles - dataPomodoro.addedCycles), setDataPomodoro);
+    handlePodomoroTimeChange('cycles', dataPomodoro.cycles - dataPomodoro.addedCycles, setDataPomodoro);
+    handlePodomoroTimeChange('done', false, setDataPomodoro);
+    handlePodomoroTimeChange('notStartedYet', true, setDataPomodoro);
+    handlePodomoroTimeChange('addedCycles', 0, setDataPomodoro);
 }
 
 export function passingTime (dataPomodoro, setDataPomodoro, setPlayTomato, setStringPrintTime) {
@@ -113,15 +142,17 @@ export function passingTime (dataPomodoro, setDataPomodoro, setPlayTomato, setSt
     } else {
         soundFinish().play();
         if (dataPomodoro.isStudioTime) {
-            if (dataPomodoro.ciclesLeft > 1) {
+            if (dataPomodoro.cyclesLeft > 1) {
                 handlePodomoroTimeChange('timeLeft', dataPomodoro.breakTime, setDataPomodoro);
                 setStringPrintTime(stringTime(dataPomodoro.breakTime));
                 handlePodomoroTimeChange('isStudioTime', false, setDataPomodoro);
             } else {
                 handlePodomoroTimeChange('timeLeft', 0, setDataPomodoro);
                 setStringPrintTime(stringTime(0));
+                handlePodomoroTimeChange('done', true, setDataPomodoro);
+                setPlayTomato(false);
             }
-            handlePodomoroTimeChange('ciclesLeft', dataPomodoro.ciclesLeft - 1, setDataPomodoro);
+            handlePodomoroTimeChange('cyclesLeft', dataPomodoro.cyclesLeft - 1, setDataPomodoro);
         } else {
             handlePodomoroTimeChange('timeLeft', dataPomodoro.studioTime, setDataPomodoro);
             setStringPrintTime(stringTime(dataPomodoro.studioTime));
