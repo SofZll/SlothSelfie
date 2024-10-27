@@ -34,6 +34,8 @@ function App() {
     const fetchUsername = async () => {
       try {
         const response = await fetch('api/username');
+        //locale:
+        //const response = await fetch('http://localhost:8000/api/username');
         const data = await response.json();
         setUsername(data.username);
       } catch (error) {
