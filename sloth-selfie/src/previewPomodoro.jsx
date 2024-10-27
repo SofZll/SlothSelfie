@@ -4,7 +4,7 @@ import "./css/Pomodoro.css";
 import iconYellowTomato from './media/yellowTomato.svg';
 import iconRedTomato from './media/redTomato.svg';
 import { Link, useNavigate } from 'react-router-dom';
-import { stringTime, tomatoPlay, handlePodomoroTimeChange, handleEdtiDataLeft, passingTime } from './pomodoroUtils';
+import { stringTime, tomatoPlay, passingTime } from './pomodoroUtils';
 import { to } from 'react-spring';
 
 
@@ -13,12 +13,14 @@ const PreviewPomodoro = () => {
   const [soundAudio, setSoundAudio] = useState('./media/meow.mp3');
 
   const [dataPomodoro, setDataPomodoro] = useState({
-    timeLeft: 5,
-    ciclesLeft: 3,
-    cicles: 3,
-    isStudioTime: true,
-    studioTime: 5,
-    breakTime: 3,
+    timeLeft: 30*60,
+        cyclesLeft: 5,
+        cycles: 5,
+        isStudioTime: true,
+        studioTime: 30*60,
+        breakTime: 5*60,
+        notStartedYet: true,
+        done: false,
   });
 
   const [playTomato, setPlayTomato] = useState(false);
@@ -36,7 +38,7 @@ const PreviewPomodoro = () => {
 
 
   useEffect(() => { 
-    if (playTomato && dataPomodoro.ciclesLeft > 0) {
+    if (playTomato && dataPomodoro.cyclesLeft > 0) {
         const timer = setTimeout(() => {
             passingTime(dataPomodoro, setDataPomodoro, setPlayTomato, setStringPrintTime);
         }, 1000);
@@ -60,7 +62,7 @@ const PreviewPomodoro = () => {
       </div>
       <div className="divBtn">
           <button  onClick={() => tomatoPlay (setDataPomodoro, dataPomodoro, setPlayTomato, playTomato, setStringPrintTime)} className="btn">{playTomato ? 
-            (dataPomodoro.ciclesLeft === 0 ? "Reset" : "Stop") : ((dataPomodoro.ciclesLeft === dataPomodoro.cicles && dataPomodoro.timeLeft === dataPomodoro.studioTime) ? "Quick start" : "Play")}
+            (dataPomodoro.done ? "Reset" : "Stop") : (dataPomodoro.notStartedYet ? "Quick start" : "Play")}
           </button>
         <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
           <button className="btn">Start</button>
