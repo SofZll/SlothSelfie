@@ -176,7 +176,8 @@ justify-content: space-around;
 .btnCross,
 .btnBack,
 .btnSettingTomato,
-.btnClose {
+.btnClose,
+.btnStats {
   background-color: inherit;
   border: none;
   padding: 5px;
@@ -190,11 +191,15 @@ justify-content: space-around;
 .btnBack:hover,
 .btnBack:active,
 .btnSettingTomato:hover,
-.btnSettingTomato:active {
+.btnSettingTomato:active,
+.btnStats:hover,
+.btnStats:active {
   background-color: #F39252;
 }
 
-.iconCross {
+.iconCross,
+.iconStats,
+.iconShare {
   height: 27vh;
   max-height: 37px;
 }
