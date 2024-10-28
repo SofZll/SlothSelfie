@@ -75,7 +75,7 @@ const TimeMachine = ({isOpen, onClose}) => {
     return (
         <div className="time-machine">
             <div className="time-machine-content">
-            <span className="close" onClick={onClose}>&times;</span>
+                <span className="close" onClick={onClose}>&times;</span>
                 <h2>Hi "user"! <br/> Do you wish to go back in time?</h2>
                 <p>Right now the time is set on: </p>
                 <p className="current-time">
