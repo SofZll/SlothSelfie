@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import iconSearch from './media/search.svg';
 import iconCrossDark from './media/crossDark.svg';
+import iconArrow from './media/leftBackArrow.svg';
 
-const Youtube = () => {
+const Youtube = ({setPlatformMusic}) => {
   const [videoSelected, setVideoSelected] = useState(false);
   const [link, setLink] = useState('');
   const [reduced, setReduced] = useState(false);
@@ -86,6 +87,9 @@ const Youtube = () => {
         </div>
         ) : (
           <div className='searchYoutube'>
+            <button className='btnBack' onClick={() => setPlatformMusic(0)}>
+              <img src={iconArrow} alt="Back" className='icon'/>
+            </button>
             <h2>Choose a video to study with</h2>
             <form onSubmit={searchTrack}>
               <input 

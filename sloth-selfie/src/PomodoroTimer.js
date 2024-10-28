@@ -4,7 +4,6 @@ import iconYoutube from './media/youtube.svg';
 import iconSpotify from './media/spotify.svg';
 import SpotifySearch from './Spotify';
 import Youtube from './Youtube';
-import iconArrow from './media/leftBackArrow.svg';
 import iconPlay from './media/play.svg';
 import iconStop from './media/stop.svg';
 import iconReset from './media/reset.svg';
@@ -14,6 +13,7 @@ import iconCrossDark from './media/crossDark.svg';
 import iconCross from './media/cross.svg';
 import iconAdd from './media/add.svg';
 import { stringTime, pomodoroPlay, passingTime, initDataPomodoro, addCycle, skipTime, resetTime, editDataPomodoro } from './pomodoroUtils';
+
 
 
 
@@ -117,13 +117,9 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                         <img src={iconSpotify} alt="Spotify" className='iconSpotify'/>
                     </button>
                 </div>
-                ) : (
-                <>
-                    <button className='btnBack' onClick={() => setPlatformMusic(0)}>
-                        <img src={iconArrow} alt="Back" className='icon'/>
-                    </button>
-                    {platformMusic === 1 ? <Youtube /> : <SpotifySearch />}
-                </>
+                ) : ( platformMusic === 1 ? 
+                    <Youtube setPlatformMusic = {setPlatformMusic}/> 
+                : <SpotifySearch setPlatformMusic = {setPlatformMusic}/>
                 )}
             </div>
             <div className="pomodoro-container">
@@ -155,7 +151,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     <button className='btnSettingTomato' onClick={() => setIsEditing(true)}>
                         <img src={iconEdit} alt="Edit" className='iconEdit'/>
                     </button>
-                    <button className='btnSettingTomato' onClick={() => resetTime (dataPomodoro, setDataPomodoro, setStringPrintTime)}>
+                    <button className='btnSettingTomato' onClick={() => resetTime (dataPomodoro, setDataPomodoro, setStringPrintTime, setPlayTomato)}>
                         <img src={iconReset} alt="Reset" className='iconReset'/>
                     </button>
 

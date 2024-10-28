@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import iconSearch from './media/search.svg';
 import iconCrossDark from './media/crossDark.svg';
+import iconArrow from './media/leftBackArrow.svg';
 
-function SpotifySearch() {
+function SpotifySearch({setPlatformMusic}) {
   const [uri, setUri] = useState('');
   const [embedUrl, setEmbedUrl] = useState('');
   const [songSelected, setSongSelected] = useState(false);
@@ -126,6 +127,9 @@ function SpotifySearch() {
         </div>
       ) : (
         <div className='selectSpotify'>
+          <button className='btnBack' onClick={() => setPlatformMusic(0)}>
+            <img src={iconArrow} alt="Back" className='icon'/>
+          </button>
           <h2>Choose a bit Music to study with</h2>
           <form onSubmit={searchTrack}>
             <input 
