@@ -13,6 +13,8 @@ const uri = `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoC
 const connectDB = async () => {
     try {
         await mongoose.connect(uri, {
+        //locale:
+        //await mongoose.connect('mongodb://localhost:27017/mydb', {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });

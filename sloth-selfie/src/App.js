@@ -34,6 +34,8 @@ function App() {
     const fetchUsername = async () => {
       try {
         const response = await fetch('api/username');
+        //locale:
+        //const response = await fetch('http://localhost:8000/api/username');
         const data = await response.json();
         setUsername(data.username);
       } catch (error) {
@@ -44,7 +46,7 @@ function App() {
     fetchUsername();
   }, []); 
   
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [formType, setFormType] = useState('login'); 
 
   const handleLogin = (status) => {

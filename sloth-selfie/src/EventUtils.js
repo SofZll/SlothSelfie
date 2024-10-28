@@ -107,6 +107,7 @@ export function normalizeEvents (events) {
         console.error(`Invalid date for event: ${JSON.stringify(event)}`);
         return {
         id: event.id,
+        originalId: event.originalId,
         title: event.title,
         start: new Date(),
         end: new Date(),
@@ -117,6 +118,7 @@ export function normalizeEvents (events) {
       
         return {
         id: event.id,
+        originalId: event.originalId,
         title: event.title,
         start: startDate,
         end: endDate,
@@ -161,7 +163,7 @@ export function handleUpdateEvent(
 
     console.log("Updating event:", id); // Check if the update function is called
 
-    // finding the event to
+    // finding the event to update
     const updatedEvents = events.map(event => {
         if (event.id === id && !updateAllFutureEvents) {
             // we update only the current event
