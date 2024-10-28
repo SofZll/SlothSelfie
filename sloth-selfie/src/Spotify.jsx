@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import iconSearch from './media/search.svg';
-import iconCross from './media/cross.svg';
+import iconCrossDark from './media/crossDark.svg';
 
 function SpotifySearch() {
   const [uri, setUri] = useState('');
@@ -121,7 +121,7 @@ function SpotifySearch() {
             loading="lazy">
           </iframe>
           <button onClick={() => exitSong()} className='btnCross'>
-            <img src={iconCross} alt="Cross" className='icon'/>
+            <img src={iconCrossDark} alt="Cross" className='icon'/>
           </button>
         </div>
       ) : (

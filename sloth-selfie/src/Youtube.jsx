@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import iconSearch from './media/search.svg';
-import iconCross from './media/cross.svg';
+import iconCrossDark from './media/crossDark.svg';
 
 const Youtube = () => {
   const [videoSelected, setVideoSelected] = useState(false);
@@ -67,7 +67,7 @@ const Youtube = () => {
           <div className='titleYoutubeVideo'>
             <h2>Your Youtube Video</h2>
             <button onClick={() => exitSong()} className='btnCross'>
-              <img src={iconCross} alt="Cross" className='icon'/>
+              <img src={iconCrossDark} alt="Cross" className='icon'/>
             </button>
           </div>
           {reduced ? (

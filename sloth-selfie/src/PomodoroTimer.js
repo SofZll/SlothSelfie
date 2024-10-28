@@ -10,14 +10,16 @@ import iconStop from './media/stop.svg';
 import iconReset from './media/reset.svg';
 import iconEdit from './media/edit.svg';
 import iconSkip from './media/skip.svg';
+import iconCrossDark from './media/crossDark.svg';
 import iconCross from './media/cross.svg';
 import iconAdd from './media/add.svg';
-import { stringTime, pomodoroPlay, handlePodomoroTimeChange, passingTime, initDataPomodoro, addCycle, skipTime, resetTime } from './pomodoroUtils';
+import { stringTime, pomodoroPlay, passingTime, initDataPomodoro, addCycle, skipTime, resetTime, editDataPomodoro } from './pomodoroUtils';
 
 
 
 function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
     const [platformMusic, setPlatformMusic] = useState(0);
+    const [isEditing, setIsEditing] = useState(false);
     const [soundAudio, setSoundAudio] = useState('./media/meow.mp3');
 
     const [dataPomodoro, setDataPomodoro] = useState({
@@ -31,14 +33,39 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
         done: false,
         addedCycles: 0,
         skippedCycles: 0,
-      });
+    });
+
+    const [editData, setEditData] = useState({
+        cycles: 5,
+        studioTime: 30*60,
+        breakTime: 5*60,
+        totalTime: (dataPomodoro.cycles*(dataPomodoro.studioTime+dataPomodoro.breakTime))/60,
+    });
 
     const [playTomato, setPlayTomato] = useState(false);
     const [stringPrintTime, setStringPrintTime] = useState(stringTime(dataPomodoro.timeLeft));
 
+    const updateEditData = (field, value) => {
+        setEditData((prevData) => ({
+            ...prevData,
+            [field]: value,
+        }));
+    };
+
+    const updateTot = () => {
+        updateEditData('totalTime', ((Number(editData.studioTime) + Number(editData.breakTime)) * Number(editData.cycles)));
+    }
+
+    useEffect(() => {
+        updateTot();
+    }, [editData.studioTime, editData.breakTime, editData.cycles]);
+
     useEffect(() => {
         initDataPomodoro (setDataPomodoro, numberCycles, timeStudio*60, timeBreak*60);
-    }, []);
+        updateEditData('cycles', numberCycles);
+        updateEditData('studioTime', timeStudio);
+        updateEditData('breakTime', timeBreak);
+    }, [numberCycles, timeStudio, timeBreak]);
 
     const backPage = () => {
         //saveData(dataPomodoro);
@@ -57,6 +84,28 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
 
     return (
         <div className="pomodoro-timer">
+
+            {isEditing && (
+                <div className="edit-popup">
+                    <button className='btnClose' onClick={() => setIsEditing(false)}>
+                        <img src={iconCross} alt="Close" className='iconCross'/>
+                    </button>
+                    <h2>Edit your Pomodoro</h2>
+                    <form onSubmit={(e) => e.preventDefault()}>
+                        <label>Study time:
+                            <input type="number" value={editData.studioTime} onChange={(e) => updateEditData('studioTime', parseInt(e.target.value))} min={0} step={1}/>
+                        </label>
+                        <label>Break time: 
+                            <input type="number" value={editData.breakTime} onChange={(e) => updateEditData('breakTime', parseInt(e.target.value))} min={0} step={1}/>
+                        </label>
+                        <label>N° Cycles: 
+                            <input type="number" value={editData.cycles} onChange={(e) => updateEditData('cycles', parseInt(e.target.value))} min={0} step={1}/>
+                        </label>
+                        <p>Time total: {isNaN(editData.totalTime) ? ("___") : (editData.totalTime)} minutes</p>
+                        <button className="btn" type="submit" onClick={() => editDataPomodoro(editData.cycles, editData.studioTime*60, editData.breakTime*60, dataPomodoro, setDataPomodoro, setIsEditing, setStringPrintTime)}>Save</button>
+                    </form>
+                </div>
+            )}
             
             <div className="song-container">
                 {platformMusic === 0 ? (
@@ -103,7 +152,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                 )}
                 
                 <div className='divBtn'>
-                    <button className='btnSettingTomato'>
+                    <button className='btnSettingTomato' onClick={() => setIsEditing(true)}>
                         <img src={iconEdit} alt="Edit" className='iconEdit'/>
                     </button>
                     <button className='btnSettingTomato' onClick={() => resetTime (dataPomodoro, setDataPomodoro, setStringPrintTime)}>
@@ -112,7 +161,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
 
                     {dataPomodoro.done ? (
                         <button className='btnSettingTomato' onClick={() => backPage()}>
-                            <img src={iconCross} alt='exit' className='iconCross'/>
+                            <img src={iconCrossDark} alt='exit' className='iconCross'/>
                         </button>
                     ) : (
                         <button className='btnSettingTomato' onClick={() => pomodoroPlay (setPlayTomato, playTomato, dataPomodoro, setDataPomodoro)}>
