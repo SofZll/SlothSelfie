@@ -129,7 +129,7 @@ export function addCycle (dataPomodoro, setDataPomodoro, setStringPrintTime) {
     handlePodomoroTimeChange('done', false, setDataPomodoro);
 }
 
-export function resetTime (dataPomodoro, setDataPomodoro, setStringPrintTime) {
+export function resetTime (dataPomodoro, setDataPomodoro, setStringPrintTime, setPlayTomato) {
     handlePodomoroTimeChange('timeLeft', dataPomodoro.studioTime, setDataPomodoro);
     setStringPrintTime(stringTime(dataPomodoro.studioTime));
     handlePodomoroTimeChange('cyclesLeft', (dataPomodoro.cycles - dataPomodoro.addedCycles), setDataPomodoro);
@@ -137,6 +137,7 @@ export function resetTime (dataPomodoro, setDataPomodoro, setStringPrintTime) {
     handlePodomoroTimeChange('done', false, setDataPomodoro);
     handlePodomoroTimeChange('notStartedYet', true, setDataPomodoro);
     handlePodomoroTimeChange('addedCycles', 0, setDataPomodoro);
+    setPlayTomato(false);
 }
 
 export function passingTime (dataPomodoro, setDataPomodoro, setPlayTomato, setStringPrintTime) {
