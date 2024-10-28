@@ -6,6 +6,7 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
+import { v4 as uuidv4 } from 'uuid'; //to create unic id
 import { handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
@@ -89,9 +90,9 @@ function NotesFunction() {
     title: "",
     category: "",
     content: "",
-    noteAuthor: currentUser,
+    noteAuthor: currentUser, //Username
     noteAccess: "public",
-    allowedUsers: [],
+    allowedUsers: [], //Usernames
     isTodo: false,
     tasks: [],
     /*
@@ -148,7 +149,7 @@ function NotesFunction() {
   }, [updateIcon, updateStyles]);
 
 
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     //console.log("isTodo:", isTodo);
     //console.log("noteContent:", noteContent);
     //console.log("tasks:", tasks);
@@ -173,7 +174,7 @@ function NotesFunction() {
 
   if (noteData.title && noteData.category && (noteData.content || noteData.isTodo) && noteData.noteAuthor && noteData.noteAccess) {
     const newNote = { 
-      id: notes.length,
+      id: uuidv4(),
       title: noteData.title, 
       category: noteData.category, 
       content: noteData.isTodo ? "" : noteData.content.trim(), // If isTodo, content is empty 
@@ -201,21 +202,42 @@ function NotesFunction() {
         }
       });
     }
-    console.log("newNote.id:", newNote.id);
-    const updatedNote = { ...newNote, id: notes.length };
-    console.log("newNote con id aggiornato:", updatedNote);
-    setNotes([...notes, updatedNote]);
-    
-    //resetting fields
-    handleNoteDataChange('title', '', setNoteData);
-    handleNoteDataChange('category', '', setNoteData);
-    handleNoteDataChange('content', '', setNoteData);
-    handleNoteDataChange('noteAuthor', '', setNoteData);
-    handleNoteDataChange('noteAccess', 'public', setNoteData);
-    handleNoteDataChange('isTodo', false, setNoteData);
-    handleNoteDataChange('tasks', [], setNoteData);
+    //adjusting id
+      console.log("newNote.id:", newNote.id);
+      const updatedNote = { ...newNote, id: uuidv4()};
+      console.log("newNote con id aggiornato:", updatedNote);
+
+    try {
+      const response = await fetch('/api/notes', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedNote)
+      });
+
+      if (!response.ok) {
+          throw new Error('Errore nella creazione della nota');
+      }
+
+      const savedNote = await response.json();
+      setNotes([...notes, savedNote]);
+      //setNotes([...notes, updatedNote]);
+
+      //resetting fields
+      handleNoteDataChange('title', '', setNoteData);
+      handleNoteDataChange('category', '', setNoteData);
+      handleNoteDataChange('content', '', setNoteData);
+      handleNoteDataChange('noteAuthor', '', setNoteData);
+      handleNoteDataChange('noteAccess', 'public', setNoteData);
+      handleNoteDataChange('isTodo', false, setNoteData);
+      handleNoteDataChange('tasks', [], setNoteData);
+    }
+    catch(error){
+      console.error('Error while adding note:', error);
+    }
   }
-};
+}
 
 const filterNotesByDate = (notes) => {
   if (!filterDate) return notes;
@@ -259,8 +281,8 @@ const filterNotesByDate = (notes) => {
           {/* Filter the accessible notes from the users and the orders */}
           {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)), sortCriterion)).map((note, index) => (
             <NoteCard
-              //key={note.id}
-              key={index}
+              //key={index}
+              key={noteData.id}
               note={note}
               onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
               onCopy={() => handleCopyContent(note.content)}
