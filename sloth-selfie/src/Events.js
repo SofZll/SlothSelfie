@@ -11,15 +11,18 @@ import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import Select from 'react-select';
 
-//TODO: edit di eventi ripetuti(vanno solo title e location)
+//TODO: edit di eventi ripetuti(vanno solo title e location) e non vanno edit e delete di updateAllFutureInstances
+//TODO: cliccando su evento compila il form sbagliando il campo data, mette il giorno prima
 
 const localizer = momentLocalizer(moment);
 
 const initialEvents = [
   // Puoi aggiungere alcuni eventi di esempio qui 
   // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
-  {id: 1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
+  {id: 1, originalId:1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
 ];
+
+const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
 
 function EventsFunction() {
     const { updateStyles, updateIcon } = useContext(StyleContext);
@@ -46,6 +49,7 @@ function EventsFunction() {
     repeatMode: 'ntimes', // Mode of repetition
     repeatEndDate: '', // Date of the last repetition
     eventLocation: '', // eventLocation of the event
+    userId: '', // User ID of whom creates the event
     });
 
     // change style page onload document
@@ -141,6 +145,7 @@ function EventsFunction() {
         repeatFrequency: eventData.repeatFrequency,
         repeatEndDate: eventData.repeatEndDate,
         eventLocation: eventData.eventLocation,
+        userId: currentUser,
         };
     
         if (eventData.allDay) {
@@ -413,12 +418,26 @@ function EventsFunction() {
             {eventData.repeatFrequency !== "none" && (
                 <div>
                 <label>Repeat Mode:
-                    <select
-                    onChange={(e) => handleEventDataChange("repeatMode", e.target.value, setEventData)}
-                    >
-                    <option value="ntimes">N Times</option>
-                    <option value="until">Until</option>
-                    </select>
+
+                    <Select
+                        value={options.find((option) => option.value === eventData.repeatMode)}
+                        onChange={(selectedOption) => handleEventDataChange("repeatMode", selectedOption.value, setEventData)}
+                        options= {[
+                        { value: 'ntimes', label: 'N Times' },
+                        { value: 'until', label: 'Until' },
+                        ]}
+                        styles={{
+                        menu: (provided) => ({
+                            ...provided,
+                            maxHeight: 90,
+                            overflowY: 'auto',
+                        }),
+                        menuList: (provided) => ({
+                            ...provided,
+                            maxHeight: 90,
+                        }),
+                        }}
+                    />
                 </label>
                 <br />
     

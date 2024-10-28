@@ -35,7 +35,8 @@ function ActivitiesFunction(){
         id: "",
         title: "",
         deadline: "",
-        completed: false
+        completed: false,
+        userId: '', // User ID of whom creates the event
     });
     
     // change style page onload document

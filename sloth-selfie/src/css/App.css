@@ -136,9 +136,10 @@ p {
 
 /*** Style tmp Calendar ***/
 
-@media (max-height: 700px) {
+@media (max-height: 700px) and (orientation: landscape) {
   .react-calendar {
     height: 44vh;
+    overflow-y: auto;
   }
 
   .react-calendar__viewContainer {
@@ -149,13 +150,18 @@ p {
   }
   
   .react-calendar * {
-    font-size: 1.5vw;
-    height: 5.2vh;
+    font-size: 2vmin !important;
+    height: 5vmin !important;
+  }
+
+  .event-indicator {
+    height: 1vmin !important;
+    width: 1vmin !important;
   }
 
   .react-calendar__navigation {
-    height: 3vh!important;
-    margin-bottom: 2px !important;
+    height: 3vmin!important;
+    margin-bottom: 1vmin !important;
   }
   
   .react-calendar__viewContainer *{

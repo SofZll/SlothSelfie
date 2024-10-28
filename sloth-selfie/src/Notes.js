@@ -107,6 +107,35 @@ function NotesFunction() {
     taskDeadline: '', // Deadline for the task while creating it, it is used to set the deadline before creating the task
   });
 
+  //Function to fetch notes from the server
+  const fetchNotes = async () => {
+    try {
+        const response = await fetch('/api/notes', {
+        //locale:
+        //const response = await fetch('http://localhost:8000/api/notes', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                //'Authorization': `Bearer ${yourAuthToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        console.log(data);
+        setNotes(data);
+    } catch (error) {
+        console.error('Errore if fetching di notes:', error);
+    }
+};
+
+  useEffect(() => {
+      fetchNotes();
+  }, []);
+
   // change style page onload document
   useEffect(() => {
     updateStyles(true);
