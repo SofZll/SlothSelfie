@@ -1,5 +1,3 @@
-const db = require('../config/db');
-
 const setTime = async (req, res) => {
     try {
         const { date, time } = req.body;

@@ -17,7 +17,7 @@ const TimeMachine = ({isOpen, onClose}) => {
 
         // The server returns the current time if there is no time set
         // Fetch selected time from server
-        fetch('/api/selected-time')
+        fetch('http://localhost:8000/api/time/selected-time')
             .then(response => response.json())
             .then(data => {
                 console.log('Time is set on:', data);
@@ -34,7 +34,7 @@ const TimeMachine = ({isOpen, onClose}) => {
         const buttonClicked = e.nativeEvent.submitter.value;
         if (buttonClicked === 'reset-time') {
             if (inputTime && inputDate) {
-                fetch('/api/set-time',{
+                fetch('http://localhost:8000/api/time/set-time',{
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ const TimeMachine = ({isOpen, onClose}) => {
             }
         }
         else if (buttonClicked === 'reset-time') {
-            fetch('/api/reset-time')
+            fetch('http://localhost:8000/api/time/reset-time')
             .then(response => response.json())
             .then(data => {
                 alert('Time has been reset!');
