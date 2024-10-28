@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
+import Select from 'react-select';
 import "./css/Hub.css";
+import iconHeartEmpty from "./media/heartEmpty.svg";
+import iconHeartFull from "./media/heartFull.svg";
 
 /*
 info per notifiche
@@ -7,11 +10,15 @@ titolo colore bianco sporco, background #555b6e
 background messaggio #e7e7e7
 */
 
-function Hub({ username }) {
+function Hub({ username="kaori"}) {
     //const [posts, setPosts] = useState([]);
     const [newPost, setNewPost] = useState('');
+    const [newComment, setNewComment] = useState('');
     const [times, setTimes] = useState([]);
-    const [showComments, setShowComments] = useState(false);
+    const [selectedPostId, setSelectedPostId] = useState(null);
+    const [sortingOption, setSortingOption] = useState('mostRecent');
+    const [sharePost, setSharePost] = useState(null);
+    const [showShare, setShowShare] = useState(false);
 
     const [posts, setPosts] = useState([
         {
@@ -28,7 +35,18 @@ function Hub({ username }) {
                     username: 'Alice',
                     content: 'Great post!',
                     date: '2024-10-22',
-                    time: '12:30'
+                    time: '12:30',
+                    likes: 3,
+                    likedBy: [],
+                },
+                {
+                    id: 2,
+                    username: 'Alice',
+                    content: 'Great post!',
+                    date: '2024-10-22',
+                    time: '12:30',
+                    likes: 3,
+                    likedBy: [],
                 }
             ]
         },
@@ -145,14 +163,27 @@ function Hub({ username }) {
     ]);
 
     useEffect(() => {
-        const sortedPosts = [...posts].sort((a, b) => {
-            const dateA = new Date(`${a.date}T${a.time}:00`);
-            const dateB = new Date(`${b.date}T${b.time}:00`);
-            return dateB - dateA;
-        });
-        setPosts(sortedPosts);
-    }, []);
+        sortPosts();
+    }, [sortingOption]);
 
+    const sortPosts = () => {
+        const sortedPosts = [...posts];
+        if (sortingOption === 'mostRecent') {
+            sortedPosts.sort((a, b) => {
+                const dateA = new Date(`${a.date}T${a.time}`);
+                const dateB = new Date(`${b.date}T${b.time}`);
+                return dateB - dateA;
+            });
+        } else if (sortingOption === 'mostLiked') {
+            sortedPosts.sort((a, b) => b.likes - a.likes);
+        }
+        setPosts(sortedPosts);
+    };
+
+    const handleSortChange = (option) => {
+        setSortingOption(option.value);
+        sortPosts();
+    };
 
     const calculateTime = (postTime, postDate) => {
         const currentTime = new Date();
@@ -186,16 +217,85 @@ function Hub({ username }) {
         }
     };
 
-    const handleLike = () => {
-        console.log('Like!');
+    const handleLike = (postId, isComment = false, commentId = null) => {
+        setPosts(posts.map(post => {
+            if (post.id === postId) {
+                if (isComment) {
+                    post.comments = post.comments.map(comment => {
+                        if (comment.id === commentId) {
+                            if (comment.likedBy.includes(username)) {
+                                comment.likes--;
+                                comment.likedBy = comment.likedBy.filter(user => user !== username);
+                            } else {
+                                comment.likes++;
+                                comment.likedBy.push(username);
+                            }
+                            // Trigger animation
+                            const heartIcon = document.querySelector(`#heart-icon-comment-${comment.id}`);
+                            heartIcon.classList.remove('animate');
+                            void heartIcon.offsetWidth;
+                            heartIcon.classList.add('animate');
+                        }
+                        return comment;
+                    });
+                } else {
+                    if (post.likedBy.includes(username)) {
+                        post.likes--;
+                        post.likedBy = post.likedBy.filter(user => user !== username);
+                    } else {
+                        post.likes++;
+                        post.likedBy.push(username);
+                    }
+                    // Trigger animation
+                    const heartIcon = document.querySelector(`#heart-icon-post-${post.id}`);
+                    heartIcon.classList.remove('animate');
+                    void heartIcon.offsetWidth;
+                    heartIcon.classList.add('animate');
+                }
+            }
+            return post;
+        }));
     };
 
-    const handleComments = () => {
-        setShowComments(!showComments);
+    const handleComments = (postId) => {
+        setSelectedPostId(selectedPostId === postId ? null : postId);
     };
 
     const handleShare = (post) => {
+        const shareOptions = [
+            { name: 'WhatsApp', url: `https://wa.me/?text=${encodeURIComponent(post.content)}` },
+            { name: 'Facebook', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(post.content)}` },
+            { name: 'X (Twitter)', url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.content)}&url=${encodeURIComponent(window.location.href)}` },
+        ];
+    
+        return (
+            <div className="share-options">
+                {shareOptions.map(option => (
+                    <button
+                        key={option.name}
+                        className="share-button"
+                        onClick={() => window.open(option.url, '_blank')}
+                    >
+                        Share on {option.name}
+                    </button>
+                ))}
+            </div>
+        );
     };
+
+    const toggleModal = (post = null) => {
+        setShowShare(!showShare);
+        setSharePost(post);
+    };
+
+    const sortingOptions = [
+        {value: 'mostRecent', label: 'Most Recent'},
+        {value: 'mostLiked', label: 'Most Liked'}
+    ];
+
+    const isLiked = (item) => {
+        return item.likedBy.includes(username);
+    }
 
     /*
     useEffect(() => {
@@ -221,38 +321,81 @@ function Hub({ username }) {
                     value={newPost}
                     onChange={(e) => setNewPost(e.target.value)}
                 />
-                <button>Post</button>
+                <button className="btn">Post</button>
             </div>
             <div className="posts-list">
-                <h2>Posts</h2>
+                <div className="sorting-options">
+                    <label htmlFor="sorting">Sort by: </label>
+                    <Select
+                        id="sorting"
+                        value={sortingOption}
+                        onChange={handleSortChange}
+                        options={sortingOptions}
+                        isSearchable={false}
+                    />
+                </div>
                 {posts.map((post) => (
-                    <div key={post.id} className="post">
-                        <div className="post-title">
-                            <h3>{post.username}</h3>
-                            <p>{calculateTime(post.time, post.date)}</p>
-                        </div>
-                        <p>{post.content}</p>
-                        <div className="post-functions">
-                            <span onClick={handleLike}>{post.likes} likes</span>
-                            <span onClick={handleComments}>{calculateComments(post.comments)}</span>
-                            <span onClick={handleShare(post)}>share</span>
-                        </div>
-                        {showComments && (
-                            <div className="post-comments">
-                                {post.comments.map((comment) => (
-                                    <div key={comment.id} className="comment">
-                                        <div className="comment-title">
-                                            <h4>{comment.username}</h4>
-                                            <p>{calculateTime(comment.time, comment.date)}</p>
-                                        </div>
-                                        <p>{comment.content}</p>
-                                    </div>
-                                ))}
+                    <>
+                        <div key={post.id} className="post">
+                            <div className="post-title">
+                                <h3>{post.username}</h3>
+                                <p>{calculateTime(post.time, post.date)}</p>
                             </div>
-                        )}
-                    </div>
+                            <p>{post.content}</p>
+                            <div className="post-functions">
+                                <span className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post.id)}>
+                                    {post.likes}
+                                    <img
+                                        id={`heart-icon-post-${post.id}`}
+                                        src={isLiked(post) ? iconHeartFull : iconHeartEmpty}
+                                        alt="like"
+                                        className="heart-icon"
+                                    />
+                                </span>
+                                <span onClick={() => handleComments(post.id)}>{calculateComments(post.comments)}</span>
+                                <span onClick={() => toggleModal(post)}>share</span>
+                            </div>
+                        </div>
+                        <div className={`post-comments ${selectedPostId === post.id ? 'show' : ''}`}>
+                            <div className="new-comment">
+                                <textarea
+                                    placeholder="comment"
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                />
+                                <button className="btn">Post</button>
+                            </div>
+                            {post.comments.map((comment) => (
+                                <div key={comment.id} className="comment">
+                                    <div className="comment-title">
+                                        <h4>{comment.username}</h4>
+                                        <p>{calculateTime(comment.time, comment.date)}</p>
+                                    </div>
+                                    <p>{comment.content}</p>
+                                    <span className={isLiked(comment) ? 'liked' : ''} onClick={() => handleLike(post.id, true, comment.id)}>
+                                        {comment.likes}
+                                        <img
+                                            id={`heart-icon-comment-${comment.id}`}
+                                            src={isLiked(comment) ? iconHeartFull : iconHeartEmpty}
+                                            alt="like"
+                                            className="heart-icon"
+                                        />
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </>
                 ))}
             </div>
+            {showShare && (
+                <div className="modal-overlay" onClick={() => toggleModal()}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <span className="close" onClick={() => toggleModal()}>&times;</span>
+                        <h3>Share this post</h3>
+                        {sharePost && handleShare(sharePost)}
+                    </div>
+                </div>
+            )}
         </>
     )
 };
