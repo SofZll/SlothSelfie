@@ -65,7 +65,7 @@ const PreviewPomodoro = () => {
             (dataPomodoro.done ? "Reset" : "Stop") : (dataPomodoro.notStartedYet ? "Quick start" : "Play")}
           </button>
         <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
-          <button className="btn">Start</button>
+          <button className="btn">Set Pomodoro</button>
         </Link>
       </div>
     </div>

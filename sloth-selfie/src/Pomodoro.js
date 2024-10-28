@@ -271,7 +271,7 @@ function PomodoroFunction() {
             <div id="select-pomodoro" className="select-pomodoro">
                 <h2>Select a Pomodoro and <br/>start your learning session</h2>
                 <div id='selection-pomodoro-settings' className='selection-pomodoro-settings'>
-                    <p>Chouse the settings of your Pomodoro study session</p>
+                    <p>Choose the settings of your Pomodoro study session</p>
                     <button className='settings-choice' onClick={() => handleChoiceSelection(1)} >Set the number of cycles and their duration</button>
                     <button className='settings-choice' onClick={() => handleChoiceSelection(2)}>Set the total time of your studying session</button>
                     <div className='divBtn'>
