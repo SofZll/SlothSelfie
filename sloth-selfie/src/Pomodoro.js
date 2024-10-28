@@ -264,6 +264,8 @@ function PomodoroFunction() {
         };
     }, [updateIcon, updateStyles]);
 
+    
+
     return (
         <div className='div-pomodoro'>
             <div id="select-pomodoro" className="select-pomodoro">

@@ -81,7 +81,6 @@ flex-direction: column;
 align-items: center;
 margin: 10px 0;
 border-radius: 8px;
-box-shadow: 5px;
 width: 98%;
 }
 
@@ -176,7 +175,8 @@ justify-content: space-around;
 .btnSearch,
 .btnCross,
 .btnBack,
-.btnSettingTomato {
+.btnSettingTomato,
+.btnClose {
   background-color: inherit;
   border: none;
   padding: 5px;
@@ -244,7 +244,8 @@ justify-content: space-around;
 }
 
 .titleYoutubeVideo button,
-.btnBack {
+.btnBack,
+.btnClose {
   position: absolute;
   right: 0;
   top: 0;
@@ -281,6 +282,41 @@ justify-content: space-around;
   border-radius: 12px;
   width: 89%;
   height: 152px;
+}
+
+.edit-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  background-color: #555B6E;
+  color: #f9f9f9;
+  border-radius: 8px;
+  position: fixed;
+  top: auto;
+  left: 10%;
+  width: 80%;
+  padding: 15px 10px;
+}
+
+.edit-popup form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+
+.edit-popup form label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 85%;
+}
+
+.edit-popup form label input {
+  width: 60%;
 }
 
 @media screen and (min-width: 769px){

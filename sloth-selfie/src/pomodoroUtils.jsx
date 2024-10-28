@@ -60,7 +60,8 @@ export function handleEdtiDataLeft (cycles, studioTime, breakTime, dataPomodoro,
             handlePodomoroTimeChange('cyclesLeft', cyclesLeft, setDataPomodoro);
         }
     } else {
-        handlePodomoroTimeChange('cyclesLeft', dataPomodoro.cyclesLeft + (cycles - dataPomodoro.cycles), setDataPomodoro);
+        handlePodomoroTimeChange('cyclesLeft', Number(dataPomodoro.cyclesLeft) + (cycles - dataPomodoro.cycles), setDataPomodoro);
+        console.log(dataPomodoro.cyclesLeft);
     }
 
     if (dataPomodoro.cyclesLeft !== 0) {
@@ -72,7 +73,7 @@ export function handleEdtiDataLeft (cycles, studioTime, breakTime, dataPomodoro,
                     handlePodomoroTimeChange('isStudioTime', false, setDataPomodoro);
                 }
             } else {
-                handlePodomoroTimeChange('timeLeft', dataPomodoro.timeLeft + (dataPomodoro.studioTime - studioTime), setDataPomodoro);
+                handlePodomoroTimeChange('timeLeft', dataPomodoro.timeLeft + (studioTime - dataPomodoro.studioTime), setDataPomodoro);
             }
         } else {
             if (breakTime < dataPomodoro.breakTime) {
@@ -82,18 +83,21 @@ export function handleEdtiDataLeft (cycles, studioTime, breakTime, dataPomodoro,
                     handlePodomoroTimeChange('isStudioTime', true, setDataPomodoro);
                 }
             } else {
-                handlePodomoroTimeChange('timeLeft', dataPomodoro.timeLeft + (dataPomodoro.breakTime - breakTime), setDataPomodoro);
+                handlePodomoroTimeChange('timeLeft', dataPomodoro.timeLeft + (breakTime - dataPomodoro.breakTime), setDataPomodoro);
             }
         }
     }
 }
 
-export function editDataPomodoro (cycles, studioTime, breakTime, dataPomodoro, setDataPomodoro) {
+export function editDataPomodoro (cycles, studioTime, breakTime, dataPomodoro, setDataPomodoro, setIsEditing, setStringPrintTime) {
     handleEdtiDataLeft(cycles, studioTime, breakTime, dataPomodoro, setDataPomodoro);
     
     handlePodomoroTimeChange('cycles', cycles, setDataPomodoro);
     handlePodomoroTimeChange('studioTime', studioTime, setDataPomodoro);
     handlePodomoroTimeChange('breakTime', breakTime, setDataPomodoro);
+
+    setStringPrintTime(stringTime(dataPomodoro.timeLeft));
+    setIsEditing(false);
 }
 
 export function skipTime (dataPomodoro, setDataPomodoro, setStringPrintTime) {
