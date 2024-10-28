@@ -163,13 +163,14 @@ function App() {
       toggleTimeMachine();
     }
   };
-
+  
   return (
     <Router>
       <StyleProvider>
         <ActivityProvider>
         <div className="App">
           <Menu username={username}/>
+          <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
           <header className="App-header">
               <div className="title">
                 <h1>Sloth Selfie</h1>
@@ -237,7 +238,6 @@ function App() {
                 <img src={iconTimeMachine} alt="icon" className="icon" />
               </button>
             </div>
-            <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
           </div>
         </div>
         </ActivityProvider>

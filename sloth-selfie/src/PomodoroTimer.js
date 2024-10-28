@@ -12,6 +12,8 @@ import iconSkip from './media/skip.svg';
 import iconCrossDark from './media/crossDark.svg';
 import iconCross from './media/cross.svg';
 import iconAdd from './media/add.svg';
+import iconStats from './media/stats.svg';
+import iconShare from './media/shareDark.svg';
 import { stringTime, pomodoroPlay, passingTime, initDataPomodoro, addCycle, skipTime, resetTime, editDataPomodoro } from './pomodoroUtils';
 
 
@@ -32,7 +34,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
         notStartedYet: true,
         done: false,
         addedCycles: 0,
-        skippedCycles: 0,
+        studioTimeTotal: 0,
     });
 
     const [editData, setEditData] = useState({
@@ -75,12 +77,16 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
     useEffect(() => { 
         if (playTomato && dataPomodoro.cyclesLeft > 0) {
             const timer = setTimeout(() => {
-                passingTime(dataPomodoro, setDataPomodoro, setPlayTomato, setStringPrintTime);
+                passingTime(dataPomodoro, setDataPomodoro, setPlayTomato);
             }, 1000);
     
             return () => clearTimeout(timer);
         }
     }, [dataPomodoro, playTomato]);
+
+    useEffect(() => {
+        setStringPrintTime(stringTime(dataPomodoro.timeLeft));
+    }, [dataPomodoro.timeLeft]);
 
     return (
         <div className="pomodoro-timer">
@@ -102,7 +108,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                             <input type="number" value={editData.cycles} onChange={(e) => updateEditData('cycles', parseInt(e.target.value))} min={0} step={1}/>
                         </label>
                         <p>Time total: {isNaN(editData.totalTime) ? ("___") : (editData.totalTime)} minutes</p>
-                        <button className="btn" type="submit" onClick={() => editDataPomodoro(editData.cycles, editData.studioTime*60, editData.breakTime*60, dataPomodoro, setDataPomodoro, setIsEditing, setStringPrintTime)}>Save</button>
+                        <button className="btn" type="submit" onClick={() => editDataPomodoro(editData.cycles, editData.studioTime*60, editData.breakTime*60, dataPomodoro, setDataPomodoro, setIsEditing)}>Save</button>
                     </form>
                 </div>
             )}
@@ -122,10 +128,11 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                 : <SpotifySearch setPlatformMusic = {setPlatformMusic}/>
                 )}
             </div>
+
             <div className="pomodoro-container">
 
                 {dataPomodoro.done ? (
-                    <p>Congratulation! <br/> You have finished your studing session</p>
+                    <p>Congratulation! <br/> You have studied for {stringTime(dataPomodoro.studioTimeTotal)} minutes</p>
                 ) : (
                     (dataPomodoro.notStartedYet ? (
                         <p>Let's start the Pomodoro session</p>
@@ -143,7 +150,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     (dataPomodoro.notStartedYet ? (
                         <p>Press play to start</p>
                     ) : (
-                        <p>Cycle {dataPomodoro.cycles-dataPomodoro.cyclesLeft} out of {dataPomodoro.cycles}</p>
+                        <p>Cycle {dataPomodoro.cycles-dataPomodoro.cyclesLeft+1} out of {dataPomodoro.cycles}</p>
                     ))
                 )}
                 
@@ -151,7 +158,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     <button className='btnSettingTomato' onClick={() => setIsEditing(true)}>
                         <img src={iconEdit} alt="Edit" className='iconEdit'/>
                     </button>
-                    <button className='btnSettingTomato' onClick={() => resetTime (dataPomodoro, setDataPomodoro, setStringPrintTime, setPlayTomato)}>
+                    <button className='btnSettingTomato' onClick={() => resetTime (dataPomodoro, setDataPomodoro, setPlayTomato)}>
                         <img src={iconReset} alt="Reset" className='iconReset'/>
                     </button>
 
@@ -166,17 +173,26 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     )}
 
                     {dataPomodoro.done ? (
-                        <button className='btnSettingTomato' onClick={() => addCycle (dataPomodoro, setDataPomodoro, setStringPrintTime)}>
+                        <button className='btnSettingTomato' onClick={() => addCycle (dataPomodoro, setDataPomodoro)}>
                             <img src={iconAdd} alt="Add" className='iconAdd'/>
                         </button>
                     ) : (
-                        <button className='btnSettingTomato' onClick={() => skipTime (dataPomodoro, setDataPomodoro, setStringPrintTime)}>
+                        <button className='btnSettingTomato' onClick={() => skipTime (dataPomodoro, setDataPomodoro, setPlayTomato)}>
                             <img src={iconSkip} alt="Skip" className='iconSkip'/>
                         </button>
                     )}
                 </div>
             </div>
+
             <div className="stats-container">
+                <div className='divBtn'>
+                    <button className='btnStats'>
+                        <img src={iconStats} alt="Stats" className='iconStats'/>
+                    </button>
+                    <button className='btnStats'>
+                        <img src={iconShare} alt="Share" className='iconShare'/>
+                    </button>
+                </div>
             </div>
         </div>
     );
