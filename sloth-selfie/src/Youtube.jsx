@@ -15,6 +15,7 @@ const Youtube = ({setPlatformMusic}) => {
     setVideoSelected(false);
     setLink('');
     setVideoTitle('');
+
   }
 
   const extractYoutubeId = (input) => {
@@ -63,13 +64,22 @@ const Youtube = ({setPlatformMusic}) => {
 
   return (
     <div className='youtube'>
+
+      {videoSelected ? (
+        <button onClick={() => exitSong()} className='btnCross'>
+          <img src={iconCrossDark} alt="Cross" className='icon'/>
+        </button>
+      ) : (
+        <button className='btnBack' onClick={() => setPlatformMusic(0)}>
+            <img src={iconArrow} alt="Back" className='icon'/>
+        </button>
+      )}
+
+
       {videoSelected ? (
         <div className='videoYoutube'>
           <div className='titleYoutubeVideo'>
             <h2>Your Youtube Video</h2>
-            <button onClick={() => exitSong()} className='btnCross'>
-              <img src={iconCrossDark} alt="Cross" className='icon'/>
-            </button>
           </div>
           {reduced ? (
             <></>
@@ -87,9 +97,7 @@ const Youtube = ({setPlatformMusic}) => {
         </div>
         ) : (
           <div className='searchYoutube'>
-            <button className='btnBack' onClick={() => setPlatformMusic(0)}>
-              <img src={iconArrow} alt="Back" className='icon'/>
-            </button>
+            
             <h2>Choose a video to study with</h2>
             <form onSubmit={searchTrack}>
               <input 
