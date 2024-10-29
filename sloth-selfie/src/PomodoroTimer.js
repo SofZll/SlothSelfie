@@ -108,7 +108,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                             <input type="number" value={editData.cycles} onChange={(e) => updateEditData('cycles', parseInt(e.target.value))} min={0} step={1}/>
                         </label>
                         <p>Time total: {isNaN(editData.totalTime) ? ("___") : (editData.totalTime)} minutes</p>
-                        <button className="btn" type="submit" onClick={() => editDataPomodoro(editData.cycles, editData.studioTime*60, editData.breakTime*60, dataPomodoro, setDataPomodoro, setIsEditing)}>Save</button>
+                        <button className="btn" type="submit" onClick={() => editDataPomodoro(editData.cycles, editData.studioTime*60, editData.breakTime*60, dataPomodoro, setDataPomodoro, setIsEditing, setPlayTomato)}>Save</button>
                     </form>
                 </div>
             )}
@@ -141,7 +141,8 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     ))
                 )}
 
-                <div className='anamation'>
+                <div className='animation'>
+
                 </div>
 
                 {dataPomodoro.done ? (

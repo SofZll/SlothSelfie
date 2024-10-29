@@ -21,6 +21,7 @@ const PreviewPomodoro = () => {
         breakTime: 5*60,
         notStartedYet: true,
         done: false,
+        studioTimeTotal: 0,
   });
 
   const [playTomato, setPlayTomato] = useState(false);
@@ -45,7 +46,11 @@ const PreviewPomodoro = () => {
 
         return () => clearTimeout(timer);
     }
-}, [dataPomodoro, playTomato]);
+  }, [dataPomodoro, playTomato]);
+
+  useEffect(() => {
+    setStringPrintTime(stringTime(dataPomodoro.timeLeft));
+  }, [dataPomodoro.timeLeft]);
 
   return (
     <div className='container'>
@@ -62,7 +67,7 @@ const PreviewPomodoro = () => {
       </div>
       <div className="divBtn">
           <button  onClick={() => tomatoPlay (setDataPomodoro, dataPomodoro, setPlayTomato, playTomato, setStringPrintTime)} className="btn">{playTomato ? 
-            (dataPomodoro.done ? "Reset" : "Stop") : (dataPomodoro.notStartedYet ? "Quick start" : "Play")}
+            (dataPomodoro.done ? "Reset timer" : "Stop timer") : (dataPomodoro.notStartedYet ? "Quick start" : "Play timer")}
           </button>
         <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
           <button className="btn">Set Pomodoro</button>
