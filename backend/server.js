@@ -39,9 +39,9 @@ app.use('/api', userRoutes);
 app.use('/api', noteRoutes);
 
 // Static files from frontend
-const frontendPath = path.join(global.rootDir, '..', 'frontend/build');
+// const frontendPath = path.join(global.rootDir, '..', 'frontend/build');
 //locale:
-//const frontendPath = path.join(global.rootDir, '..', 'sloth-selfie/build');
+const frontendPath = path.join(global.rootDir, '..', 'sloth-selfie/build');
 
 app.use(express.static(frontendPath));
 
