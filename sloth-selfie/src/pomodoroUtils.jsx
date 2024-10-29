@@ -93,7 +93,8 @@ export function handleEdtiDataLeft (cycles, studioTime, breakTime, dataPomodoro,
     }
 }
 
-export function editDataPomodoro (cycles, studioTime, breakTime, dataPomodoro, setDataPomodoro, setIsEditing) {
+export function editDataPomodoro (cycles, studioTime, breakTime, dataPomodoro, setDataPomodoro, setIsEditing, setPlayTomato) {
+    setPlayTomato(false);
     handleEdtiDataLeft(cycles, studioTime, breakTime, dataPomodoro, setDataPomodoro);
     
     handlePodomoroTimeChange('cycles', cycles, setDataPomodoro);

@@ -111,25 +111,27 @@ function SpotifySearch({setPlatformMusic}) {
 
 
   return (
-    <>
+    <div className='spotify'>
       {songSelected ? (
-        <div className='songSpotify'>
-          <iframe 
-            src={embedUrl} 
-            width="100%" height="152" frameborder="0"
-            allowFullScreen 
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-            loading="lazy">
-          </iframe>
-          <button onClick={() => exitSong()} className='btnCross'>
-            <img src={iconCrossDark} alt="Cross" className='icon'/>
-          </button>
-        </div>
+        <button onClick={() => exitSong()} className='btnCross'>
+          <img src={iconCrossDark} alt="Cross" className='iconCross'/>
+        </button>
       ) : (
-        <div className='selectSpotify'>
-          <button className='btnBack' onClick={() => setPlatformMusic(0)}>
-            <img src={iconArrow} alt="Back" className='icon'/>
-          </button>
+        <button className='btnBack' onClick={() => setPlatformMusic(0)}>
+          <img src={iconArrow} alt="Back" className='icon'/>
+        </button>
+      )}
+
+      {songSelected ? (
+        <iframe 
+          src={embedUrl} 
+          width="100%" height="152" frameborder="0"
+          allowFullScreen 
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+          loading="lazy">
+        </iframe>
+      ) : (
+        <div className='songSpotify'>
           <h2>Choose a bit Music to study with</h2>
           <form onSubmit={searchTrack}>
             <input 
@@ -146,7 +148,7 @@ function SpotifySearch({setPlatformMusic}) {
       )}
 
 
-   </>
+   </div>
   );
 }
 

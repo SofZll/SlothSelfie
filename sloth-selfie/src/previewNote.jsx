@@ -51,30 +51,30 @@ function PreviewNote() {
                                     </small>
                                     {/* Render note content or todo list */}
                                     {note.isTodo ? (
-                                        <p className="card-text">
-                                        <ul>
-                                        {/* Render the tasks if the note contains a todo list */}
-                                        {note.tasks && note.tasks.length > 0 ? (
-                                            note.tasks.map((task, taskIndex) => (
-                                            <li key={taskIndex}>
-                                                <input
-                                                type="checkbox"
-                                                checked={task.completed}
-                                                readOnly
-                                                />
-                                                {task.completed ? <s>{task.text}</s> : task.text}
-                                                {task.deadline ? (
-                                                <small>
-                                                    &nbsp; Deadline: {new Date(task.deadline).toLocaleDateString()}
-                                                </small>
-                                                ) : null}
-                                            </li>
-                                            ))
-                                        ) : (
-                                            <p>No tasks available</p>
-                                        )}
-                                        </ul>
-                                        </p>
+                                        <div className="card-text">
+                                            <ul>
+                                            {/* Render the tasks if the note contains a todo list */}
+                                            {note.tasks && note.tasks.length > 0 ? (
+                                                note.tasks.map((task, taskIndex) => (
+                                                <li key={taskIndex}>
+                                                    <input
+                                                    type="checkbox"
+                                                    checked={task.completed}
+                                                    readOnly
+                                                    />
+                                                    {task.completed ? <s>{task.text}</s> : task.text}
+                                                    {task.deadline ? (
+                                                    <small>
+                                                        &nbsp; Deadline: {new Date(task.deadline).toLocaleDateString()}
+                                                    </small>
+                                                    ) : null}
+                                                </li>
+                                                ))
+                                            ) : (
+                                                <p>No tasks available</p>
+                                            )}
+                                            </ul>
+                                        </div>
                                     ) : (
                                         <p className="card-text">
                                             {/* Limiting note content to 200 characters, showing markdown */}
