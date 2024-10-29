@@ -12,7 +12,6 @@ import { StyleContext } from './StyleContext';
 import Select from 'react-select';
 
 //TODO: edit di eventi ripetuti(vanno solo title e location) e non vanno edit e delete di updateAllFutureInstances
-//TODO: cliccando su evento compila il form sbagliando il campo data, mette il giorno prima
 
 const localizer = momentLocalizer(moment);
 
@@ -77,18 +76,22 @@ function EventsFunction() {
             handleEventDataChange('id', selectedEvent.id, setEventData);
             handleEventDataChange('originalId', selectedEvent.id ,setEventData);
             handleEventDataChange('title', selectedEvent.title ,setEventData);
-            
+
             // Set date in YYYY-MM-DD format
             handleEventDataChange(
                 'date',
-                selectedEvent.start ? new Date(selectedEvent.start).toISOString().substring(0, 10) : '',
+                selectedEvent.start
+                    ? new Date(selectedEvent.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-')
+                    : '',
                 setEventData
             );
-            
+
             // Set time in HH:MM format
             handleEventDataChange(
                 'time',
-                selectedEvent.start ? new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+                selectedEvent.start
+                    ? new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : '',
                 setEventData
             );
             

@@ -97,7 +97,9 @@ p {
 
 .btn,
 .btn2,
-.btnMusic {
+.btnMusic,
+.btnClose,
+.btnStats {
   padding: 6px 10px;
   font-size: 14px;
   font-weight: bold;
