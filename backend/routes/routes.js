@@ -20,7 +20,7 @@ router.post('/user/register', registerUser);
 router.post('/user/logout', logoutUser);
 router.post('/user/edit-image', editImage);
 router.post('/user/edit-profile', editProfile);
-router.get('/user/profile/:userId', getUserProfile);
+router.get('/user/profile/:username', getUserProfile);
 
 // Time machine endpoint
 router.post('/time/set-time', setTime);

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./css/Profile.css";
 
-function Profile({ username }) {
+function Profile({ username = "kmoon"}) {
     const [isEditing, setIsEditing] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
-    const [profileData, setProfileData] = useState({
+    /*const [profileData, setProfileData] = useState({
         name: 'Giorgio', 
         username: 'Kevin', 
         email: 'giorgio787@example.com', 
@@ -13,7 +13,7 @@ function Profile({ username }) {
         phoneNumber: '', 
         gender:'Male', 
         profile_image: ''
-    });
+    });*/
     const [notifs, setNotifs] = useState([
         {
             id: 1,
@@ -52,7 +52,6 @@ function Profile({ username }) {
         }
     ]);
     
-    /*
     const [profileData, setProfileData] = useState({
         name: '', 
         username: '', 
@@ -62,16 +61,39 @@ function Profile({ username }) {
         gender:'', 
         profile_image: ''
     });
-    */
 
     const navigate = useNavigate();
+
+    const bufferToBase64 = (buffer) => {
+        const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
+        return btoa(binary);
+    };
 
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
-                const response = await fetch(`/api/user/profile/${username}`);
+                const response = await fetch(`http://localhost:8000/api/user/profile/${username}`);
                 const data = await response.json();
-                setProfileData(data);
+                if (data.success && data.user) {
+                    // Since the image is stored a Buffer we need to convert it to base64
+                    let base64Image = '';
+                    if (data.user.image?.data?.data) {
+                        const buffer = data.user.image.data.data;
+                        base64Image = `data:${data.user.image.contentType};base64,${bufferToBase64(buffer)}`;
+                    }
+                    
+                    setProfileData({
+                        name: data.user.name || '',
+                        username: data.user.username || '',
+                        email: data.user.email || '',
+                        birthday: data.user.birthday || '',
+                        phoneNumber: data.user.phoneNumber || '',
+                        gender: data.user.gender || '',
+                        profile_image: base64Image
+                    });
+                    console.log('Profile data:', data.user);
+                    console.log(profileData.profile_image_url)
+                }
             } catch (error) {
                 console.error('Error fetching profile data:', error);
             }
@@ -105,7 +127,7 @@ function Profile({ username }) {
             formData.append('email', profileData.username);
 
             try {
-                const response = await fetch('api/user/edit-image', {
+                const response = await fetch('http://localhost:8000api/user/edit-image', {
                     method: 'POST',
                     body: formData
                 });
@@ -141,7 +163,7 @@ function Profile({ username }) {
         };
 
         try {
-            const response = await fetch('api/user/edit-profile', {
+            const response = await fetch('http://localhost:8000/api/user/edit-profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -161,7 +183,7 @@ function Profile({ username }) {
 
     const logout = async () => {
         try {
-            const response = await fetch('api/user/logout', {
+            const response = await fetch('http://localhost:8000/api/user/logout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -196,19 +218,14 @@ function Profile({ username }) {
             <div className="profile-container">
                 <h2>{profileData.username}</h2>
                 <div className="profile-image">
-                    {/*
-                    {profileData.profile_image_url && (
-                        <img src={profileData.profile_image_url} alt="profile-img" onClick={handleImageClick}/>
+                    {profileData.profile_image && (
+                        <img src={profileData.profile_image} alt="profile-img" onClick={handleImageClick}/>
                     )}
-                    
-                    */}
-                    <img src='./media/user.svg' alt="profile-img" onClick={handleImageClick}/>
                     <input type="file" id="file-input" style={{display: 'none'}} onChange={editImage}/>
                 </div>
                 <button className="btn button-info" onClick={toggleShowProfile}>
                     {showProfile ? "Hide": "Expands"}
                 </button>
-                {/*<button className="btn" onClick={handleImageClick}>Change Photo</button>*/}
                 <div className={`profile-info ${showProfile ? 'show' : ''}`}>
                     {isEditing ? (
                         <form className="profile-form">

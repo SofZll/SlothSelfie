@@ -113,7 +113,11 @@ const editProfile = async (req, res) => {
 // Function to get the profile info
 const getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.session.userId);
+        const username = req.params.username || req.query.username;
+        if (!username) {
+            return res.status(400).json({ success: false, message: 'Username not provided' });
+        }
+        const user = await User.findOne({username});
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }

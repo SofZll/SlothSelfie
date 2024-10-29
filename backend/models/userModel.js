@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
-const defaultImage = path.join(__dirname, '../defaultImage.jpg');
+const defaultImagePath = path.join(__dirname, '../defaultImage.jpg');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -45,11 +45,20 @@ const userSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-userSchema.pre('save', function (next) {
-    if (!this.image.data) {
-        this.image.data = fs.readFileSync(defaultImage);
+userSchema.pre('save', async function (next) {
+    try {
+        if (this.isNew && !this.image.data) {
+            // Only set default if new user and no image provided
+            const defaultImgData = await fs.readFile(defaultImagePath);
+            console.log("Default image data length:", defaultImgData.length);
+            this.image.data = defaultImgData;
+            this.image.contentType = 'image/jpeg';
+        }
+        next();
+    } catch (error) {
+        console.error('Error loading default image:', error);
+        next(error);
     }
-    next();
 });
 
 const User = mongoose.model('User', userSchema);
