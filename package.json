@@ -1,0 +1,25 @@
+{
+  "name": "slothselfie",
+  "version": "1.0.0",
+  "description": "Progetto di Tecnologie Web",
+  "main": "index.js",
+  "scripts": {
+    "client": "cd sloth-selfie && npm start",
+    "server": "cd backend && node server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SofZll/SlothSelfie.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SofZll/SlothSelfie/issues"
+  },
+  "homepage": "https://github.com/SofZll/SlothSelfie#readme",
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
