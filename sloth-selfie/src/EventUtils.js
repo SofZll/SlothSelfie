@@ -1,5 +1,6 @@
 // Function to handle changes in event data
 export function handleEventDataChange (field, value, setEventData) {
+    console.log(`Updating field: ${field}, Value: ${value}`);
     setEventData((prevEventData) => ({
         ...prevEventData,
         [field]: value
@@ -155,13 +156,16 @@ export function handleUpdateEvent(
     events, 
     setEvents, 
     setSelectedEvent, 
-    updateAllFutureEvents, 
+    updateAllFutureEvents,
+    setUpdateAllFutureEvents,
     setIsEditing
 ) {
     e.preventDefault();
     const { id, originalId, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation } = eventData;
 
     console.log("Updating event:", id); // Check if the update function is called
+    console.log("Updating future istances:", updateAllFutureEvents);
+    console.log("Event Data:", eventData);
 
     // finding the event to update
     const updatedEvents = events.map(event => {
@@ -173,20 +177,23 @@ export function handleUpdateEvent(
             };
         } else if (event.originalId === originalId && updateAllFutureEvents) {
             //we update all future events with same originalId
+            if (new Date(event.date) >= new Date(date)) {
             return {
                 ...event,
-                title: title,
-                eventLocation: eventLocation,
-                time: time,
-                duration: duration,
-                allDay: allDay,
-                days: days,
-                repeatFrequency: repeatFrequency,
-                repeatEndDate: repeatEndDate,
-                repeatCount: repeatCount,
-                date: calculateNextOccurrence(event.date, event.repeatFrequency), // Calculate the next occurrence
+                title,
+                eventLocation,
+                time,
+                duration,
+                allDay,
+                days,
+                repeatFrequency,
+                repeatEndDate,
+                repeatCount,
+                date: calculateNextOccurrence(event.id, event.date, repeatFrequency),// Calculate the next occurrence
             };
+            }
         }
+        setUpdateAllFutureEvents(false);
         return event;
     });
 
@@ -197,7 +204,9 @@ export function handleUpdateEvent(
 
 
 // Function to calculate the next occurrence of a repeated event
-const calculateNextOccurrence = (date, frequency) => {
+const calculateNextOccurrence = (id, date, frequency) => {
+    console.log(`Updating future instance for event with id ${id}`);
+    console.log('frequency:', frequency);
     const nextDate = new Date(date);
     switch (frequency) {
         case 'daily':
