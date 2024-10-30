@@ -6,6 +6,8 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/routes');
 const noteRoutes = require('./routes/routes');
+const activityRoutes = require('./routes/routes');
+const eventRoutes = require('./routes/routes');
 const path = require('path');
 const connectDB = require('./config/db');
 
@@ -37,6 +39,8 @@ app.use(session({
 //app.use('/api', Routes);
 app.use('/api', userRoutes);
 app.use('/api', noteRoutes);
+app.use('/api', activityRoutes);
+app.use('/api', eventRoutes);
 
 // Static files from frontend
 // const frontendPath = path.join(global.rootDir, '..', 'frontend/build');

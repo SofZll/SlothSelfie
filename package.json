@@ -21,5 +21,8 @@
   "homepage": "https://github.com/SofZll/SlothSelfie#readme",
   "devDependencies": {
     "concurrently": "^9.0.1"
+  },
+  "dependencies": {
+    "uuidv4": "^6.2.13"
   }
 }

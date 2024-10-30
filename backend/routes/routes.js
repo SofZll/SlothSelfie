@@ -2,6 +2,8 @@ const express = require('express');
 const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile } = require('../controllers/userController');
 const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
 const { createNote, getNotes, updateNote, deleteNote } = require('../controllers/noteController');
+const { createActivity, getActivities, updateActivity, deleteActivity } = require('../controllers/activityController');
+const { createEvent, getEvents, updateEvent, deleteEvent } = require('../controllers/eventController');
 
 const router = express.Router();
 
@@ -33,5 +35,18 @@ router.post('/note', createNote);
 router.get('/notes', getNotes);
 router.put('/note/:noteId', updateNote);
 router.delete('/note/:noteId', deleteNote);
+
+
+// Activity endpoints
+router.post('/activity', createActivity);
+router.get('/activities', getActivities);
+router.put('/activity/:activityId', updateActivity);
+router.delete('/activity/:activityId', deleteActivity);
+
+// Event endpoints
+router.post('/event', createEvent);
+router.get('/events', getEvents);
+router.put('/event/:eventId', updateEvent);
+router.delete('/event/:eventId', deleteEvent);
 
 module.exports = router;
