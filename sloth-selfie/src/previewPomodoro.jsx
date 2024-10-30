@@ -14,14 +14,14 @@ const PreviewPomodoro = () => {
 
   const [dataPomodoro, setDataPomodoro] = useState({
     timeLeft: 30*60,
-        cyclesLeft: 5,
-        cycles: 5,
-        isStudioTime: true,
-        studioTime: 30*60,
-        breakTime: 5*60,
-        notStartedYet: true,
-        done: false,
-        studioTimeTotal: 0,
+    cyclesLeft: 5,
+    cycles: 5,
+    isStudioTime: true,
+    studioTime: 30*60,
+    breakTime: 5*60,
+    notStartedYet: true,
+    done: false,
+    studioTimeTotal: 0,
   });
 
   const [playTomato, setPlayTomato] = useState(false);
@@ -36,7 +36,6 @@ const PreviewPomodoro = () => {
         document.body.classList.remove('zoom-in');
     }, 300);
   };
-
 
   useEffect(() => { 
     if (playTomato && dataPomodoro.cyclesLeft > 0) {
