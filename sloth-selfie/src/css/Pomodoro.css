@@ -172,7 +172,9 @@ justify-content: space-around;
 .btnBack,
 .btnSettingTomato,
 .btnClose,
-.btnStats {
+.btnStats,
+.btnSendWhatsApp,
+.btnSendTelegram {
   background-color: inherit;
   border: none;
   padding: 5px;
@@ -188,7 +190,11 @@ justify-content: space-around;
 .btnSettingTomato:hover,
 .btnSettingTomato:active,
 .btnStats:hover,
-.btnStats:active {
+.btnStats:active,
+.btnSendWhatsApp:hover,
+.btnSendWhatsApp:active,
+.btnSendTelegram:hover,
+.btnSendTelegram:active {
   background-color: #F39252;
 }
 
@@ -207,7 +213,9 @@ justify-content: space-around;
 
 .iconSpotify,
 .iconEdit,
-.iconReset {
+.iconReset,
+.iconWhatsApp,
+.iconTelegram {
   height: 20vh;
   max-height: 30px;
 }
@@ -215,7 +223,7 @@ justify-content: space-around;
 
 .iconPlay,
 .iconStop,
-.iconSkip {
+.iconSkip{
   height: 16vh;
   max-height: 26px;
 
@@ -309,7 +317,8 @@ justify-content: space-around;
   max-width: 75%;
 }
 
-.edit-popup {
+.edit-popup,
+.send-popup {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -331,6 +340,7 @@ justify-content: space-around;
   align-items: center;
   width: 100%;
   height: 40vh;
+  max-width: 500px;
   justify-content: space-around;
 }
 
@@ -350,6 +360,24 @@ justify-content: space-around;
 .animation {
   height: 27vh;
   width: 100%;
+}
+
+.divCode {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.divCode p {
+  margin-right: 10px;
+}
+
+hr {
+  background-color: #f9f9f9;
+  height: 1px;
+  width: 85%;
+  border-radius: 10px;
 }
 
 @media screen and (min-width: 769px){
@@ -411,11 +439,36 @@ justify-content: space-around;
   .animation {
     height: 37vh;
   }
+
+  .edit-popup,
+  .send-popup {
+    width: 45%;
+    left: auto;
+    top: 15vh;
+    height: 72vh;
+  }
 }
 
 @media (max-height: 700px) {
   .container p {
     display: none;
+  }
+
+  hr {
+    display: none;
+  }
+
+  .send-popup h2 {
+    font-size: 5vmin;
+  }
+
+  .send-popup * {
+    font-size: 4vmin;
+    margin: 2px;
+  }
+
+  .iconCross {
+    height: 8vmin;
   }
 }
 

@@ -14,7 +14,11 @@ import iconCross from './media/cross.svg';
 import iconAdd from './media/add.svg';
 import iconStats from './media/stats.svg';
 import iconShare from './media/shareDark.svg';
+import iconWhatsApp from './media/whatsapp.svg';
+import iconTelegram from './media/telegram.svg';
+import CopyableId from './copyableId';
 import { stringTime, pomodoroPlay, passingTime, initDataPomodoro, addCycle, skipTime, resetTime, editDataPomodoro } from './pomodoroUtils';
+//import io from 'socket.io-client';
 
 
 
@@ -23,6 +27,14 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
     const [platformMusic, setPlatformMusic] = useState(0);
     const [isEditing, setIsEditing] = useState(false);
     const [soundAudio, setSoundAudio] = useState('./media/meow.mp3');
+    const [sending, setSending] = useState(false);
+    const [isHost, setIsHost] = useState(false);
+
+    //const port = process.env.PORT || 8000;
+    //const socket = io('http://localhost:'+{port}+'/pomodoro');
+
+    const [sessionCode, setSessionCode] = useState('123456');
+    const encodedMessage = encodeURIComponent('Hi! Join my Pomodoro session with the code: '+ {sessionCode});
 
     const [dataPomodoro, setDataPomodoro] = useState({
         timeLeft: 30*60,
@@ -67,6 +79,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
         updateEditData('cycles', numberCycles);
         updateEditData('studioTime', timeStudio);
         updateEditData('breakTime', timeBreak);
+        updateEditData('totalTime', timeTotal);
     }, [numberCycles, timeStudio, timeBreak]);
 
     const backPage = () => {
@@ -88,8 +101,43 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
         setStringPrintTime(stringTime(dataPomodoro.timeLeft));
     }, [dataPomodoro.timeLeft]);
 
+    
+
     return (
         <div className="pomodoro-timer">
+
+            {sending && (
+                <div className="send-popup">
+                    <button className='btnClose' onClick={() => setSending(false)}>
+                        <img src={iconCross} alt="Close" className='iconCross'/>
+                    </button>
+                    <h2>Share your Pomodoro</h2>
+                    <p>Send the code to your friend to join your Pomodoro session</p>
+                    <div className="divCode">
+                        <p>Code: </p>
+                        <CopyableId id={sessionCode}/>
+                    </div>
+                    <div className="divBtn">
+                        <a href={`https://wa.me/?text=${encodedMessage}`} target="_blank" rel="noopener noreferrer">
+                            <img src={iconWhatsApp} alt="WhatsApp" className='iconWhatsApp'/>
+                        </a>
+                        <a href={`https://t.me/share/url?url=${encodedMessage}`} target="_blank" rel="noopener noreferrer">
+                            <img src={iconTelegram} alt="Telegram" className='iconTelegram'/>
+                        </a>
+                    </div>
+                    <button className='btn' onClick={() => setIsHost(false)}>Start session</button>
+                    <hr/>
+                    <p>Get in a Pomodoro room</p>
+                    <form onSubmit={(e) => e.preventDefault()}>
+                        <label>Code:
+                            <input type="text" value={sessionCode} onChange={(e) => setSessionCode(e.target.value)}/>
+                        </label>
+                        <br/>
+                        <button className="btn" type="submit" onClick={() => setIsHost(false)}>Join</button>
+                    </form>
+                    
+                </div>
+            )}
 
             {isEditing && (
                 <div className="edit-popup">
@@ -190,7 +238,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     <button className='btnStats'>
                         <img src={iconStats} alt="Stats" className='iconStats'/>
                     </button>
-                    <button className='btnStats'>
+                    <button className='btnStats' onClick={() => setSending(true)}>
                         <img src={iconShare} alt="Share" className='iconShare'/>
                     </button>
                 </div>
