@@ -96,58 +96,43 @@ function EventsFunction() {
         handleEventDataChange('filterDate', today, setEventData);
     }, []);
 
-    /*
-    useEffect(() => {
-    if (selectedEvent) {
-        console.log("Selected event:", selectedEvent);
-        
-        setEventData({
-            ...selectedEvent,
-            id: selectedEvent.id,
-            originalId: selectedEvent.originalId,
-            title: selectedEvent.title,
-            date: selectedEvent.start
-                ? new Date(selectedEvent.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-')
-                : '',
-            time: selectedEvent.start
-                ? new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                : '',
-            duration: selectedEvent.duration || 1,
-            allDay: selectedEvent.allDay,
-            days: selectedEvent.allDay ? selectedEvent.duration : 1,
-            repeatFrequency: selectedEvent.repeatFrequency || "none",
-            repeatCount: selectedEvent.repeatCount || 1,
-            repeatEndDate: selectedEvent.repeatEndDate || "",
-            repeatMode: selectedEvent.repeatMode || "ntimes",
-            eventLocation: selectedEvent.eventLocation,
-        });
-        
-        console.log("Form prefilled", selectedEvent);
-    }
-}, [selectedEvent]);*/
-
     useEffect(() => {
         if (selectedEvent) {
             console.log("Selected event:", selectedEvent);
+    
+            // Imposta i dati in base alla frequenza di ripetizione
+            const isRepeated = selectedEvent.repeatFrequency && selectedEvent.repeatFrequency !== "none";
+            
             setEventData({
                 ...selectedEvent,
                 id: selectedEvent.id,
                 originalId: selectedEvent.originalId,
                 title: selectedEvent.title,
-                date: selectedEvent.date,
-                time: selectedEvent.time,
-                duration: selectedEvent.duration,
+                date: !isRepeated && selectedEvent.date
+                    ? selectedEvent.date
+                    : new Date(selectedEvent.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'),
+                time: selectedEvent.time || ("00:00"),
+                duration: selectedEvent.duration || 1,
                 allDay: selectedEvent.allDay,
                 days: selectedEvent.allDay ? selectedEvent.duration : 1,
-                repeatFrequency: selectedEvent.repeatFrequency || "none",
-                repeatCount: selectedEvent.repeatCount || 1,
-                repeatEndDate: selectedEvent.repeatEndDate || "",
-                repeatMode: selectedEvent.repeatMode || "ntimes",
-                eventLocation: selectedEvent.eventLocation,
+                repeatFrequency: selectedEvent.repeatFrequency || "none", //boh continua a darmi i default qui, forse devo mettere un campo isRepeated?
+                repeatCount: selectedEvent.repeatCount || 1, //qui
+                repeatEndDate: selectedEvent.repeatEndDate || "" , //e qui
+                repeatMode: selectedEvent.repeatMode || "ntimes" ,
+                eventLocation: selectedEvent.eventLocation || "",
             });
+            
+            console.log("Form prefilled", selectedEvent);
+        }
+    }, [selectedEvent]);
+    /*
+    useEffect(() => {
+        if (selectedEvent) {
+            console.log("Selected event:", selectedEvent);
+
             // Pre-fill the form with the selected event using handleEventDataChange
             handleEventDataChange('id', selectedEvent.id, setEventData);
-            handleEventDataChange('originalId', selectedEvent.id ,setEventData);
+            handleEventDataChange('originalId', selectedEvent.originalId, setEventData);
             handleEventDataChange('title', selectedEvent.title ,setEventData);
 
             // Set date in YYYY-MM-DD format
@@ -192,7 +177,7 @@ function EventsFunction() {
             console.log("Form prefilled", selectedEvent);
             }
         }, [selectedEvent]);
-
+    */
     function handleEventClick(event) {
         console.log("Event clicked:", event);
         
