@@ -62,6 +62,33 @@ function EventsFunction() {
         };
     }, [updateIcon, updateStyles]);
 
+     // Function to fetch events from the server
+  const fetchEvents = async () => {
+    try {
+      // Request per recuperare gli eventi
+      const response = await fetch('http://localhost:8000/api/events', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setEvents(data);
+    } catch (error) {
+      console.error('Errore nel fetching degli eventi:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
     useEffect(() => {
         //setting the date to the current date as a filter at the start
         const today = new Date();
