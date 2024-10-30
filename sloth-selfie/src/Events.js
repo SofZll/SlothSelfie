@@ -12,6 +12,7 @@ import { StyleContext } from './StyleContext';
 import Select from 'react-select';
 
 //TODO: edit di eventi ripetuti(vanno solo title e location) e non vanno edit e delete di updateAllFutureInstances
+//IL PROBLEMA STA NEI 3 CAMPI <- CHE RISULTANO UNDEFINED
 
 const localizer = momentLocalizer(moment);
 
@@ -43,10 +44,10 @@ function EventsFunction() {
     duration: '', // hours
     allDay: false,
     days: 1, // Number of days
-    repeatFrequency: 'none', // Frequency of repetition
-    repeatCount: null, // Number of repetitions
+    repeatFrequency: 'none', // Frequency of repetition <-
+    repeatCount: 1, // Number of repetitions            <-
     repeatMode: 'ntimes', // Mode of repetition
-    repeatEndDate: '', // Date of the last repetition
+    repeatEndDate: '', // Date of the last repetition   <-
     eventLocation: '', // eventLocation of the event
     userId: '', // User ID of whom creates the event
     });
@@ -95,10 +96,55 @@ function EventsFunction() {
         handleEventDataChange('filterDate', today, setEventData);
     }, []);
 
-        useEffect(() => {
-            if (selectedEvent) {
+    /*
+    useEffect(() => {
+    if (selectedEvent) {
+        console.log("Selected event:", selectedEvent);
+        
+        setEventData({
+            ...selectedEvent,
+            id: selectedEvent.id,
+            originalId: selectedEvent.originalId,
+            title: selectedEvent.title,
+            date: selectedEvent.start
+                ? new Date(selectedEvent.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-')
+                : '',
+            time: selectedEvent.start
+                ? new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : '',
+            duration: selectedEvent.duration || 1,
+            allDay: selectedEvent.allDay,
+            days: selectedEvent.allDay ? selectedEvent.duration : 1,
+            repeatFrequency: selectedEvent.repeatFrequency || "none",
+            repeatCount: selectedEvent.repeatCount || 1,
+            repeatEndDate: selectedEvent.repeatEndDate || "",
+            repeatMode: selectedEvent.repeatMode || "ntimes",
+            eventLocation: selectedEvent.eventLocation,
+        });
+        
+        console.log("Form prefilled", selectedEvent);
+    }
+}, [selectedEvent]);*/
+
+    useEffect(() => {
+        if (selectedEvent) {
             console.log("Selected event:", selectedEvent);
-            
+            setEventData({
+                ...selectedEvent,
+                id: selectedEvent.id,
+                originalId: selectedEvent.originalId,
+                title: selectedEvent.title,
+                date: selectedEvent.date,
+                time: selectedEvent.time,
+                duration: selectedEvent.duration,
+                allDay: selectedEvent.allDay,
+                days: selectedEvent.allDay ? selectedEvent.duration : 1,
+                repeatFrequency: selectedEvent.repeatFrequency || "none",
+                repeatCount: selectedEvent.repeatCount || 1,
+                repeatEndDate: selectedEvent.repeatEndDate || "",
+                repeatMode: selectedEvent.repeatMode || "ntimes",
+                eventLocation: selectedEvent.eventLocation,
+            });
             // Pre-fill the form with the selected event using handleEventDataChange
             handleEventDataChange('id', selectedEvent.id, setEventData);
             handleEventDataChange('originalId', selectedEvent.id ,setEventData);
@@ -128,10 +174,20 @@ function EventsFunction() {
             // Set number of days based on whether it's an all-day event
             handleEventDataChange('days', selectedEvent.allDay ? selectedEvent.duration : 1, setEventData);
             
-            handleEventDataChange('repeatFrequency', selectedEvent.repeatFrequency, setEventData);
-            handleEventDataChange('repeatCount', selectedEvent.repeatCount, setEventData);
-            handleEventDataChange('repeatEndDate', selectedEvent.repeatEndDate, setEventData);
-            handleEventDataChange('eventLocation', selectedEvent.eventLocation, setEventData);
+            // Only assign repeat values if they exist
+            if (selectedEvent.repeatFrequency) {
+                handleEventDataChange('repeatFrequency', selectedEvent.repeatFrequency, setEventData);
+            }
+            if (selectedEvent.repeatCount) {
+                handleEventDataChange('repeatCount', selectedEvent.repeatCount, setEventData);
+            }
+            if (selectedEvent.repeatEndDate) {
+                handleEventDataChange('repeatEndDate', selectedEvent.repeatEndDate, setEventData);
+            }
+            //handleEventDataChange('repeatFrequency', selectedEvent.repeatFrequency ?? 'none', setEventData);
+            //handleEventDataChange('repeatCount', selectedEvent.repeatCount ?? 1, setEventData);
+            //handleEventDataChange('repeatEndDate', selectedEvent.repeatEndDate ?? '', setEventData);
+           handleEventDataChange('eventLocation', selectedEvent.eventLocation, setEventData);
             
             console.log("Form prefilled", selectedEvent);
             }
@@ -236,7 +292,7 @@ function EventsFunction() {
                 //event: EventComponent
                 }}
             />
-            {/* Display popup for the selected activity */}
+            {/* Display popup for the selected event */}
             {selectedEvent && (
                 <div className="popup">
                 <h2>Editing mode:</h2>
@@ -298,7 +354,7 @@ function EventsFunction() {
                 console.log("Form submit triggered");
                 if (selectedEvent) {
                 console.log("Submitting update for event:", selectedEvent);
-                handleUpdateEvent(e, eventData, setEventData, events, setEvents, setSelectedEvent, updateAllFutureEvents, setIsEditing);
+                handleUpdateEvent(e, eventData, setEventData, events, setEvents, setSelectedEvent, updateAllFutureEvents, setUpdateAllFutureEvents, setIsEditing);
                 } else {
                 handleAddEvent(e);
                 }
@@ -408,15 +464,15 @@ function EventsFunction() {
                 <input
                     className="checkbox"
                     type="checkbox"
-                    onChange={(e) =>
-                    handleEventDataChange("updateAllFutureEvents", e.target.checked, setEventData)
+                    onChange={(e) => setUpdateAllFutureEvents(e.target.checked)
                     }
                 />
                 Update all future instances
                 <br />
                 </label>
             )}
-    
+
+        <label>Frequency:
             <Select
                 value={options.find((option) => option.value === eventData.repeatFrequency)}
                 onChange={(selectedOption) => {
@@ -445,6 +501,7 @@ function EventsFunction() {
                 }}
             />
             <br />
+            </label>
             {eventData.repeatFrequency !== "none" && (
                 <div>
                 <label>Repeat Mode:
