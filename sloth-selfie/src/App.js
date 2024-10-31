@@ -27,25 +27,7 @@ function App() {
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
-
-  const [username, setUsername] = useState('example');
   
-  useEffect(() => {
-    const fetchUsername = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/user/username', {
-          credentials: 'include'
-        });
-        // const response = await fetch('api/username');
-        const data = await response.json();
-        setUsername(data.username);
-      } catch (error) {
-        console.error('Error fetching username:', error);
-      }
-    };
-
-    fetchUsername();
-  }, []); 
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formType, setFormType] = useState('login'); 
@@ -170,7 +152,7 @@ function App() {
       <StyleProvider>
         <ActivityProvider>
         <div className="App">
-          <Menu username={username}/>
+          <Menu/>
           <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
           <header className="App-header">
               <div className="title">
@@ -213,7 +195,7 @@ function App() {
                 )
                 }
               />
-              <Route path="/profile" element={<ProfileFunction  username={ username }/>} />
+              <Route path="/profile" element={<ProfileFunction />} />
               <Route path="/pomodoro" element={<PomodoroFunction />} />
               <Route path="/notes" element={<NotesFunction />} />
               <Route path="/events" element={<EventsFunction />} />

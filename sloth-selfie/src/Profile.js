@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./css/Profile.css";
+import { validateEmail, validatePhoneNumber } from "./inputValidation";
+import Swal from "sweetalert2";
 
 function Profile() {
     const [isEditing, setIsEditing] = useState(false);
@@ -151,6 +153,8 @@ function Profile() {
     };
 
     const saveChanges = async (e) => {
+        e.preventDefault();
+
         const newProfileData = {
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
@@ -158,6 +162,30 @@ function Profile() {
             phoneNumber: document.getElementById('phoneNumber').value,
             gender: document.getElementById('gender').value,
         };
+
+        if (newProfileData.email && !validateEmail(newProfileData.email)){
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid email address!',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
+            return;
+        }
+
+        if (newProfileData.phoneNumber && !validatePhoneNumber(newProfileData.phoneNumber)){
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid phone number!',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
+            return;
+        }
 
         try {
             const response = await fetch('http://localhost:8000/api/user/edit-profile', {
@@ -234,7 +262,7 @@ function Profile() {
                             </div>
                             <div className="form-group profile-form-group">
                                 <label htmlFor="username">Username:</label>
-                                <span>{profileData.username}</span>
+                                <input type="text" id="username" value={profileData.username} readOnly/>
                             </div>
                             <div className="form-group profile-form-group">
                                 <label htmlFor="email">Email:</label>
