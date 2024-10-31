@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 // TODO: implement a hashing function to store passwords securely
 // TODO: implement the possibility to change the password
 
-// Function to log in a user
+// Function to log in a user: FUNZIONA
 const loginUser = async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -24,12 +24,15 @@ const loginUser = async (req, res) => {
         console.log('Session UserId:', req.session.userId);
         req.session.username = user.username;
         console.log('Session Username:', req.session.username);
-        console.log('Full Session Object:', req.session);
-        req.session.save((err) => {
+
+        await req.session.save((err) => {
             if (err) {
                 console.error('Error saving session:', err);
             }
         });
+
+        console.log('Session ID after login:', req.sessionID); // Debugging line
+        console.log('Session after login:', req.session); // Debugging line
 
         res.status(200).json({ success: true, user });
     } catch (error) {
@@ -38,7 +41,7 @@ const loginUser = async (req, res) => {
     }
 };
 
-// Function to register a new user
+// Function to register a new user: FUNZIONA
 const registerUser = async (req, res) => {
     const { name, username, email, password } = req.body;
     try {
@@ -59,7 +62,7 @@ const registerUser = async (req, res) => {
     }
 };
 
-// Function to log out a user
+// Function to log out a user: FUNZIONA
 const logoutUser = async (req, res) => {
     try {
         // Destroy the session and clear the cookie
@@ -118,16 +121,14 @@ const editProfile = async (req, res) => {
     }
 };
 
-// Function to get the profile info
+// Function to get the profile info: FUNZIONA
 const getUserProfile = async (req, res) => {
     try {
-        console.log('Full Session Object:', req.session);
         const username = req.session.username;
-        console.log('Session UserId:', username);
         if (!username) {
             return res.status(400).json({ success: false, message: 'Username not found' });
         }
-        const user = await User.fondOne({ username});
+        const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }

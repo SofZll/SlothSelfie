@@ -33,15 +33,28 @@ console.log('Session Secret:', process.env.SESSION_SECRET);
 // Session middleware
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: true,
+    resave: false,
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     cookie: {
-        secure: false, // Set to `true` if using HTTPS
+        secure: false, 
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 // Set a max age for session persistence (24 hours here)
+        maxAge: 1000 * 60 * 60 * 24, // 24 hours
+        sameSite: 'lax',
     }
 }))
+
+app.use((req, res, next) => {
+    console.log('Session ID:', req.sessionID);
+    console.log('Session:', req.session);
+    if (!req.session.isNew) {
+        console.log('Existing session');
+    } else {
+        console.log('New session');
+    }
+    next();
+});
+
 
 //app.use('/api', Routes);
 app.use('/api', userRoutes);
