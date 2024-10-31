@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
-const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile } = require('../controllers/userController');
+const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername} = require('../controllers/userController');
 const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
 const { createNote, getNotes, updateNote, deleteNote } = require('../controllers/noteController');
 //const { createPost, getPosts } = require('../controllers/hubController');
@@ -24,6 +24,7 @@ router.post('/user/logout', logoutUser);
 router.post('/user/edit-image', upload.single('image'), editImage);
 router.post('/user/edit-profile', editProfile);
 router.get('/user/profile', getUserProfile);
+router.get('/user/username', getUsername);
 
 // Time machine endpoint
 router.post('/time/set-time', setTime);

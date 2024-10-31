@@ -89,6 +89,7 @@ body {
 .profile-form-group label{
     width: 80px;
     text-align: left;
+    font-size: 16px;
 }
 
 .profile-form-group input,
@@ -105,7 +106,7 @@ body {
     font-size: 15px;
 }
 
-.profile-form-group span {
+.profile-form-group input:read-only {
     background-color: #e7e7e7;
 }
 

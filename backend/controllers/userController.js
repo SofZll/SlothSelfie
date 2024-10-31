@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 // TODO: implement a hashing function to store passwords securely
 // TODO: implement the possibility to change the password
 
-// Function to log in a user: FUNZIONA
+// Log in a user: FUNZIONA
 const loginUser = async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -41,7 +41,7 @@ const loginUser = async (req, res) => {
     }
 };
 
-// Function to register a new user: FUNZIONA
+// Register a new user: FUNZIONA
 const registerUser = async (req, res) => {
     const { name, username, email, password } = req.body;
     try {
@@ -62,7 +62,7 @@ const registerUser = async (req, res) => {
     }
 };
 
-// Function to log out a user: FUNZIONA
+// Log out a user: FUNZIONA
 const logoutUser = async (req, res) => {
     try {
         // Destroy the session and clear the cookie
@@ -79,7 +79,7 @@ const logoutUser = async (req, res) => {
     }
 };
 
-// Function to edit the user's profile image
+// Edit the user's profile image: FUNZIONA
 const editImage = async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -99,7 +99,7 @@ const editImage = async (req, res) => {
     }
 };
 
-// Function to edit the user's profile
+// Edit the user's profile: FUNZIONA
 const editProfile = async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -122,7 +122,7 @@ const editProfile = async (req, res) => {
     }
 };
 
-// Function to get the profile info: FUNZIONA
+// Get the profile info: FUNZIONA
 const getUserProfile = async (req, res) => {
     try {
         const username = req.session.username;
@@ -140,6 +140,21 @@ const getUserProfile = async (req, res) => {
     }
 };
 
+// Get the username: FUNZIONA
+const getUsername = async (req, res) => {
+    try {
+        const username = req.session.username;
+        console.log('Username:', username);
+        if (!username) {
+            return res.status(400).json({ success: false, message: 'Username not found' });
+        }
+        res.status(200).json({ success: true, username: username });
+    } catch (error) {
+        console.error('Error fetching username:', error);
+        res.status(500).json({ success: false, message: 'Error fetching username' });
+    }
+};
+
 module.exports = {
     loginUser,
     registerUser,
@@ -147,4 +162,5 @@ module.exports = {
     getUserProfile,
     editImage,
     editProfile,
+    getUsername,
 };
