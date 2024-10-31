@@ -1,10 +1,10 @@
 // Function to handle changes in event data
 export function handleEventDataChange (field, value, setEventData) {
-    console.log(`Updating field: ${field}, Value: ${value}`);
     setEventData((prevEventData) => ({
         ...prevEventData,
         [field]: value
     }));
+    //console.log(`Updating field: ${field}, Value: ${value}`);
     };
 
 // Function to convert all-day events to timed events 
@@ -166,6 +166,7 @@ export function handleUpdateEvent(
     console.log("Updating event:", id); // Check if the update function is called
     console.log("Updating future istances:", updateAllFutureEvents);
     console.log("Event Data:", eventData);
+    console.log("Repeat Frequency before update:", repeatFrequency);
 
     // finding the event to update
     const updatedEvents = events.map(event => {
@@ -173,7 +174,16 @@ export function handleUpdateEvent(
             // we update only the current event
             return {
                 ...event,
-                ...eventData
+                title,
+                eventLocation,
+                time,
+                duration,
+                allDay,
+                days,
+                repeatFrequency,
+                repeatEndDate,
+                repeatCount,
+                date
             };
         } else if (event.originalId === originalId && updateAllFutureEvents) {
             //we update all future events with same originalId
@@ -193,12 +203,11 @@ export function handleUpdateEvent(
             };
             }
         }
-        setUpdateAllFutureEvents(false);
         return event;
     });
-
     console.log("Updated events:", updatedEvents); // Check if the events are updated
     setEvents(updatedEvents);
+    setUpdateAllFutureEvents(false);
     handleClosePopupE(setSelectedEvent, setIsEditing, setEventData);
 }
 
@@ -224,7 +233,7 @@ const calculateNextOccurrence = (id, date, frequency) => {
         default:
             break;
     }
-    return nextDate;
+    return nextDate.toISOString().split('T')[0]; // Convert to string format YYYY-MM-DD
 };
 
 
