@@ -22,6 +22,7 @@ function Form({ formType, setFormType, handleLogin}) {
 
             fetch('http://localhost:8000/api/user/login', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -50,6 +51,7 @@ function Form({ formType, setFormType, handleLogin}) {
 
             fetch('http://localhost:8000/api/user/register', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },

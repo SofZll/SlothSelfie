@@ -64,6 +64,7 @@ function Profile() {
         const fetchProfileData = async () => {
             try {
                 const response = await fetch(`http://localhost:8000/api/user/profile`, {
+                    method: 'GET',
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -158,6 +159,7 @@ function Profile() {
         try {
             const response = await fetch('http://localhost:8000/api/user/edit-profile', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -178,6 +180,7 @@ function Profile() {
         try {
             const response = await fetch('http://localhost:8000/api/user/logout', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
