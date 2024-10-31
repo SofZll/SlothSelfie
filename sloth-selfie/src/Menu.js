@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { slide as Hamburger } from 'react-burger-menu';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import './css/Menu.css';
 import iconHome from './media/home.svg';
 import iconUser from './media/user.svg';
@@ -27,7 +27,7 @@ const Menu = ({username}) => {
                     Welcome back, {username}!
                 </div>
                 <Link to="/profile" onClick={closeMenu}>Profile</Link>
-                <Link to="/" onClick={closeMenu}>Home</Link>
+                <Link to="/home" onClick={closeMenu}>Home</Link>
                 <Link to="/events" onClick={closeMenu}>Events</Link>
                 <Link to="/activities" onClick={closeMenu}>Activities</Link>
                 <Link to="/notes" onClick={closeMenu}>Notes</Link>
@@ -36,24 +36,24 @@ const Menu = ({username}) => {
             </Hamburger>
 
         <nav className="mobile-nav">
-            <Link to="/">
+            <NavLink to="/home" activeClassName="active">
                 <img src={iconHome} alt="Home" />
-            </Link>
-            <Link to="/events">
+            </NavLink>
+            <NavLink to="/events" activeClassName="active">
                 <img src={iconCalendar} alt="Events" />
-            </Link>
-            <Link to="/notes">
+            </NavLink>
+            <NavLink to="/notes" activeClassName="active">
                 <img src={iconNote} alt="Notes" />
-            </Link>
-            <Link to="/pomodoro">
+            </NavLink>
+            <NavLink to="/pomodoro" activeClassName="active">
                 <img src={iconTomato} alt="Pomodoro" />
-            </Link>
-            <Link to="/projects">
+            </NavLink>
+            <NavLink to="/projects" activeClassName="active">
                 <img src={iconProject} alt="Projects" />
-            </Link>
-            <Link to="/profile">
+            </NavLink>
+            <NavLink to="/profile" activeClassName="active">
                 <img src={iconUser} alt="Profile" />
-            </Link>
+            </NavLink>
         </nav>
     </>
     );
