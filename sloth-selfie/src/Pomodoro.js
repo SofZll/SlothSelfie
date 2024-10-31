@@ -106,7 +106,7 @@ function PomodoroFunction() {
     };
 
     const backPage = () => {
-        window.location.href = '/';
+        window.location.href = '/home';
     };
 
     const backSelection = () => {
