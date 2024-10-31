@@ -2,18 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./css/Profile.css";
 
-function Profile({ username = "kmoon"}) {
+function Profile() {
     const [isEditing, setIsEditing] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
-    /*const [profileData, setProfileData] = useState({
-        name: 'Giorgio', 
-        username: 'Kevin', 
-        email: 'giorgio787@example.com', 
-        birthday: '22/07/1998', 
-        phoneNumber: '', 
-        gender:'Male', 
-        profile_image: ''
-    });*/
     const [notifs, setNotifs] = useState([
         {
             id: 1,
@@ -72,7 +63,9 @@ function Profile({ username = "kmoon"}) {
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
-                const response = await fetch(`http://localhost:8000/api/user/profile/${username}`);
+                const response = await fetch(`http://localhost:8000/api/user/profile`, {
+                    credentials: 'include'
+                });
                 const data = await response.json();
                 if (data.success && data.user) {
                     // Since the image is stored a Buffer we need to convert it to base64
@@ -92,7 +85,7 @@ function Profile({ username = "kmoon"}) {
                         profile_image: base64Image
                     });
                     console.log('Profile data:', data.user);
-                    console.log(profileData.profile_image_url)
+                    console.log(profileData.profile_image)
                 }
             } catch (error) {
                 console.error('Error fetching profile data:', error);
@@ -100,7 +93,7 @@ function Profile({ username = "kmoon"}) {
         };
 
         fetchProfileData();
-    }, [username]);
+    }, []);
 
     const toggleShowProfile = () => {
         setShowProfile(!showProfile);
@@ -117,7 +110,7 @@ function Profile({ username = "kmoon"}) {
             reader.onloadend = () => {
                 setProfileData(prevData => ({
                     ...prevData,
-                    profile_image_url: reader.result
+                    profile_image: reader.result
                 }));
             };
             reader.readAsDataURL(file);
@@ -188,7 +181,7 @@ function Profile({ username = "kmoon"}) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({username: username})
+                body: JSON.stringify()
             });
 
             if (response.ok) {

@@ -1,7 +1,8 @@
 const express = require('express');
-const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile } = require('../controllers/userController');
+const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUserUsername} = require('../controllers/userController');
 const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
 const { createNote, getNotes, updateNote, deleteNote } = require('../controllers/noteController');
+const { createPost, getPosts } = require('../controllers/hubController');
 
 const router = express.Router();
 
@@ -20,12 +21,16 @@ router.post('/user/register', registerUser);
 router.post('/user/logout', logoutUser);
 router.post('/user/edit-image', editImage);
 router.post('/user/edit-profile', editProfile);
-router.get('/user/profile/:username', getUserProfile);
+router.get('/user/profile', getUserProfile);
 
 // Time machine endpoint
 router.post('/time/set-time', setTime);
 router.post('/time/reset-time', resetTime);
 router.get('/time/fetchState', fetchState);
+
+// Hub endpoint
+router.post('/hub/posts', createPost);
+router.get('/hub/posts', getPosts);
 
 // Note endpoints
 //router.post('/note', requireAuth, createNote); // if we want authentication

@@ -33,9 +33,8 @@ function App() {
   useEffect(() => {
     const fetchUsername = async () => {
       try {
-        const response = await fetch('api/username');
-        //locale:
-        //const response = await fetch('http://localhost:8000/api/username');
+        const response = await fetch('http://localhost:8000/api/user/username');
+        // const response = await fetch('api/username');
         const data = await response.json();
         setUsername(data.username);
       } catch (error) {
@@ -46,7 +45,7 @@ function App() {
     fetchUsername();
   }, []); 
   
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formType, setFormType] = useState('login'); 
 
   const handleLogin = (status) => {
@@ -212,7 +211,7 @@ function App() {
                 )
                 }
               />
-              <Route path="/profile" element={<ProfileFunction />} />
+              <Route path="/profile" element={<ProfileFunction  username={ username }/>} />
               <Route path="/pomodoro" element={<PomodoroFunction />} />
               <Route path="/notes" element={<NotesFunction />} />
               <Route path="/events" element={<EventsFunction />} />

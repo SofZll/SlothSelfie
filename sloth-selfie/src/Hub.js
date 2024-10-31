@@ -297,7 +297,6 @@ function Hub({ username="kaori"}) {
         return item.likedBy.includes(username);
     }
 
-    /*
     useEffect(() => {
         const fetchPosts = async () => {
             try {
@@ -311,7 +310,6 @@ function Hub({ username="kaori"}) {
 
         fetchPosts();
     }, []);
-    */
 
     return (
         <>
