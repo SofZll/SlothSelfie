@@ -11,8 +11,9 @@ import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import Select from 'react-select';
 
-//TODO: edit di eventi ripetuti(vanno solo title e location) e non vanno edit e delete di updateAllFutureInstances
+//TODO: edit di eventi ripetuti: non vanno edit e delete di updateAllFutureInstances e non aggiorna time e duration
 //IL PROBLEMA STA NEI 3 CAMPI <- CHE RISULTANO UNDEFINED
+//IL PROBLEMA STA NEL FETCH DEI CAMPI, MA TANTO POI DOVREMO PRENDERLI DAL DB E IL PROBLEMA RICOMINCIA...
 
 const localizer = momentLocalizer(moment);
 
@@ -111,73 +112,22 @@ function EventsFunction() {
                 date: !isRepeated && selectedEvent.date
                     ? selectedEvent.date
                     : new Date(selectedEvent.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'),
-                time: selectedEvent.time || ("00:00"),
+                time: selectedEvent.time || "00:00",
                 duration: selectedEvent.duration || 1,
                 allDay: selectedEvent.allDay,
                 days: selectedEvent.allDay ? selectedEvent.duration : 1,
-                repeatFrequency: selectedEvent.repeatFrequency || "none", //boh continua a darmi i default qui, forse devo mettere un campo isRepeated?
-                repeatCount: selectedEvent.repeatCount || 1, //qui
-                repeatEndDate: selectedEvent.repeatEndDate || "" , //e qui
-                repeatMode: selectedEvent.repeatMode || "ntimes" ,
+                repeatFrequency: isRepeated ? selectedEvent.repeatFrequency : "none", //boh continua a darmi i default qui, forse devo mettere un campo isRepeated?
+                repeatCount: isRepeated ? selectedEvent.repeatCount : 1, //qui
+                repeatEndDate: isRepeated ? selectedEvent.repeatEndDate : "", //e qui
+                repeatMode: isRepeated ? selectedEvent.repeatMode : "ntimes",
                 eventLocation: selectedEvent.eventLocation || "",
             });
             
             console.log("Form prefilled", selectedEvent);
         }
     }, [selectedEvent]);
-    /*
-    useEffect(() => {
-        if (selectedEvent) {
-            console.log("Selected event:", selectedEvent);
 
-            // Pre-fill the form with the selected event using handleEventDataChange
-            handleEventDataChange('id', selectedEvent.id, setEventData);
-            handleEventDataChange('originalId', selectedEvent.originalId, setEventData);
-            handleEventDataChange('title', selectedEvent.title ,setEventData);
 
-            // Set date in YYYY-MM-DD format
-            handleEventDataChange(
-                'date',
-                selectedEvent.start
-                    ? new Date(selectedEvent.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-')
-                    : '',
-                setEventData
-            );
-
-            // Set time in HH:MM format
-            handleEventDataChange(
-                'time',
-                selectedEvent.start
-                    ? new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    : '',
-                setEventData
-            );
-            
-            handleEventDataChange('duration', selectedEvent.duration || 1, setEventData);
-            handleEventDataChange('allDay', selectedEvent.allDay, setEventData);
-            
-            // Set number of days based on whether it's an all-day event
-            handleEventDataChange('days', selectedEvent.allDay ? selectedEvent.duration : 1, setEventData);
-            
-            // Only assign repeat values if they exist
-            if (selectedEvent.repeatFrequency) {
-                handleEventDataChange('repeatFrequency', selectedEvent.repeatFrequency, setEventData);
-            }
-            if (selectedEvent.repeatCount) {
-                handleEventDataChange('repeatCount', selectedEvent.repeatCount, setEventData);
-            }
-            if (selectedEvent.repeatEndDate) {
-                handleEventDataChange('repeatEndDate', selectedEvent.repeatEndDate, setEventData);
-            }
-            //handleEventDataChange('repeatFrequency', selectedEvent.repeatFrequency ?? 'none', setEventData);
-            //handleEventDataChange('repeatCount', selectedEvent.repeatCount ?? 1, setEventData);
-            //handleEventDataChange('repeatEndDate', selectedEvent.repeatEndDate ?? '', setEventData);
-           handleEventDataChange('eventLocation', selectedEvent.eventLocation, setEventData);
-            
-            console.log("Form prefilled", selectedEvent);
-            }
-        }, [selectedEvent]);
-    */
     function handleEventClick(event) {
         console.log("Event clicked:", event);
         
@@ -218,7 +168,9 @@ function EventsFunction() {
         eventLocation: eventData.eventLocation,
         userId: currentUser,
         };
-    
+        
+        console.log("New Event Data:", newEvent);
+
         if (eventData.allDay) {
         newEvent = convertAllDayToTimedEvent(newEvent);
         }
