@@ -86,9 +86,10 @@ const editImage = async (req, res) => {
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-        
-        user.image.data = req.file.buffer;
-        user.image.contentType = req.file.mimetype;
+        user.image = {
+            data: req.file.buffer,
+            contentType: req.file.mimetype
+        };
         await user.save();
 
         res.status(200).json({ success: true, message: 'Image uploaded successfully' });

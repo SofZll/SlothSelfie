@@ -33,7 +33,9 @@ function App() {
   useEffect(() => {
     const fetchUsername = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/user/username');
+        const response = await fetch('http://localhost:8000/api/user/username', {
+          credentials: 'include'
+        });
         // const response = await fetch('api/username');
         const data = await response.json();
         setUsername(data.username);

@@ -100,6 +100,13 @@ body {
     box-sizing: border-box;
     width: 200px;
     margin: 0;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 15px;
+}
+
+.profile-form-group span {
+    background-color: #e7e7e7;
 }
 
 .mini-hub{

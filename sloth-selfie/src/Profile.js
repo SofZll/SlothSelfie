@@ -75,12 +75,14 @@ function Profile() {
                         const buffer = data.user.image.data.data;
                         base64Image = `data:${data.user.image.contentType};base64,${bufferToBase64(buffer)}`;
                     }
+
+                    const formattedBirthday = data.user.birthday ? new Date(data.user.birthday).toISOString().split('T')[0] : '';
                     
                     setProfileData({
                         name: data.user.name || '',
                         username: data.user.username || '',
                         email: data.user.email || '',
-                        birthday: data.user.birthday || '',
+                        birthday: formattedBirthday,
                         phoneNumber: data.user.phoneNumber || '',
                         gender: data.user.gender || '',
                         profile_image: base64Image
@@ -121,8 +123,9 @@ function Profile() {
             formData.append('email', profileData.username);
 
             try {
-                const response = await fetch('http://localhost:8000api/user/edit-image', {
+                const response = await fetch('http://localhost:8000/api/user/edit-image', {
                     method: 'POST',
+                    credentials: 'include',
                     body: formData
                 });
 
@@ -227,7 +230,7 @@ function Profile() {
                         <form className="profile-form">
                             <div className="form-group profile-form-group">
                                 <label htmlFor="name">Name:</label>
-                                <input type="text" id="name" name="name" value={profileData.name}/>
+                                <input type="text" id="name" name="name" value={profileData.name} onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}/>
                             </div>
                             <div className="form-group profile-form-group">
                                 <label htmlFor="username">Username:</label>
@@ -235,19 +238,19 @@ function Profile() {
                             </div>
                             <div className="form-group profile-form-group">
                                 <label htmlFor="email">Email:</label>
-                                <input type="email" id="email" name="email" value={profileData.email}/>
+                                <input type="email" id="email" name="email" value={profileData.email} onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}/>
                             </div>
                             <div className="form-group profile-form-group">
                                 <label htmlFor="birthday">Birthday:</label>
-                                <input type="date" id="birthday" name="birthday" value={profileData.birthday}/>
+                                <input type="date" id="birthday" name="birthday" value={profileData.birthday} onChange={(e) => setProfileData({ ...profileData, birthday: e.target.value })}/>
                             </div>
                             <div className="form-group profile-form-group">
                                 <label htmlFor="phoneNumber">Phone number:</label>
-                                <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber}/>
+                                <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber} onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}/>
                             </div>
                             <div className="form-group profile-form-group">
                                 <label htmlFor="gender">Gender:</label>
-                                <select id="gender" name="gender" value={profileData.gender}>
+                                <select id="gender" name="gender" value={profileData.gender} onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })}>
                                     <option value="">Select Gender</option>
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
