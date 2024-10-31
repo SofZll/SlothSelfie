@@ -106,13 +106,14 @@
 }
 
 .mobile-nav img {
-    width: 30px;
-    height: 30px;
+    width: 70%;
+    max-width: 60px;
+    padding: 5px;
 }
 
-.mobile-nav link:active {
-    background-color: #F9F9F9;
-    border: #555B6E 1px solid;
+.mobile-nav .active {
+    opacity: 0.4;
+
 }
 
 @media (max-width: 700px) {

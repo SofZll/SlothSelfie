@@ -27,14 +27,19 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
     const [platformMusic, setPlatformMusic] = useState(0);
     const [isEditing, setIsEditing] = useState(false);
     const [soundAudio, setSoundAudio] = useState('./media/meow.mp3');
+    
     const [sending, setSending] = useState(false);
+    const [inShare, setInShare] = useState(false);
     const [isHost, setIsHost] = useState(false);
+    const [sessionCode, setSessionCode] = useState('123456');
+    const [guestCode, setGuestCode] = useState('');
+    const encodedMessage = encodeURIComponent('Hi! Join my Pomodoro session with the code: '+ {sessionCode});
+
 
     //const port = process.env.PORT || 8000;
     //const socket = io('http://localhost:'+{port}+'/pomodoro');
 
-    const [sessionCode, setSessionCode] = useState('123456');
-    const encodedMessage = encodeURIComponent('Hi! Join my Pomodoro session with the code: '+ {sessionCode});
+    
 
     const [dataPomodoro, setDataPomodoro] = useState({
         timeLeft: 30*60,
@@ -101,6 +106,16 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
         setStringPrintTime(stringTime(dataPomodoro.timeLeft));
     }, [dataPomodoro.timeLeft]);
 
+    const settingShare = (value) => {
+        setIsHost(value);
+        setInShare(true);
+
+    }
+
+    const exitShare = () => {
+        setInShare(false);
+        setIsHost(true);
+    }
     
 
     return (
@@ -108,33 +123,51 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
 
             {sending && (
                 <div className="send-popup">
-                    <button className='btnClose' onClick={() => setSending(false)}>
-                        <img src={iconCross} alt="Close" className='iconCross'/>
-                    </button>
-                    <h2>Share your Pomodoro</h2>
-                    <p>Send the code to your friend to join your Pomodoro session</p>
-                    <div className="divCode">
-                        <p>Code: </p>
-                        <CopyableId id={sessionCode}/>
-                    </div>
-                    <div className="divBtn">
-                        <a href={`https://wa.me/?text=${encodedMessage}`} target="_blank" rel="noopener noreferrer">
-                            <img src={iconWhatsApp} alt="WhatsApp" className='iconWhatsApp'/>
-                        </a>
-                        <a href={`https://t.me/share/url?url=${encodedMessage}`} target="_blank" rel="noopener noreferrer">
-                            <img src={iconTelegram} alt="Telegram" className='iconTelegram'/>
-                        </a>
-                    </div>
-                    <button className='btn' onClick={() => setIsHost(false)}>Start session</button>
-                    <hr/>
-                    <p>Get in a Pomodoro room</p>
-                    <form onSubmit={(e) => e.preventDefault()}>
-                        <label>Code:
-                            <input type="text" value={sessionCode} onChange={(e) => setSessionCode(e.target.value)}/>
-                        </label>
-                        <br/>
-                        <button className="btn" type="submit" onClick={() => setIsHost(false)}>Join</button>
-                    </form>
+                    {!inShare ? (
+                        <>
+                            <button className='btnClose' onClick={() => setSending(false)}>
+                                <img src={iconCross} alt="Close" className='iconCross'/>
+                            </button>
+                            <h2>Share your Pomodoro</h2>
+                            <p>Send the code to your friend to join your Pomodoro session</p>
+                            <div className="divCode">
+                                <p>Code: </p>
+                                <CopyableId id={sessionCode}/>
+                            </div>
+                            <div className="divBtn">
+                                <a href={`https://wa.me/?text=${encodedMessage}`} target="_blank" rel="noopener noreferrer">
+                                    <img src={iconWhatsApp} alt="WhatsApp" className='iconWhatsApp'/>
+                                </a>
+                                <a href={`https://t.me/share/url?url=${encodedMessage}`} target="_blank" rel="noopener noreferrer">
+                                    <img src={iconTelegram} alt="Telegram" className='iconTelegram'/>
+                                </a>
+                            </div>
+                            <button className='btn' onClick={() => settingShare(false)}>Start session</button>
+                            <hr/>
+                            <p>Get in a Pomodoro room</p>
+                            <form onSubmit={(e) => e.preventDefault()}>
+                                <label>Code:
+                                    <input type="text" value={guestCode} onChange={(e) => setGuestCode(e.target.value)} required/>
+                                </label>
+                                <br/>
+                                <button className="btn" type="submit" onClick={() => settingShare(true)}>Join</button>
+                            </form>
+                        </>
+                    ) : (
+                        <div style={{maxHeight: "600px"}}>
+                            <h2>Welcome in the room </h2>
+                            <CopyableId id={(isHost ? (guestCode) : (sessionCode))}/>
+                            <div className="divBtn">
+                                <a href={`https://wa.me/?text=${(isHost ? (guestCode) : (sessionCode))}`} target="_blank" rel="noopener noreferrer">
+                                    <img src={iconWhatsApp} alt="WhatsApp" className='iconWhatsApp'/>
+                                </a>
+                                <a href={`https://t.me/share/url?url=${(isHost ? (guestCode) : (sessionCode))}`} target="_blank" rel="noopener noreferrer">
+                                    <img src={iconTelegram} alt="Telegram" className='iconTelegram'/>
+                                </a>
+                            </div>
+                            <button className='btn' onClick={() => exitShare()}>End session</button>
+                        </div>
+                    )}
                     
                 </div>
             )}
