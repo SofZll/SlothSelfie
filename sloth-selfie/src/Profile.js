@@ -3,48 +3,11 @@ import { useNavigate } from "react-router-dom";
 import "./css/Profile.css";
 import { validateEmail, validatePhoneNumber } from "./inputValidation";
 import Swal from "sweetalert2";
+import Notifications from "./Notifications";
 
 function Profile() {
     const [isEditing, setIsEditing] = useState(false);
-    const [showProfile, setShowProfile] = useState(false);
-    const [notifs, setNotifs] = useState([
-        {
-            id: 1,
-            sender: 'John Doe',
-            message: 'You have a new follower!',
-            date: '2023-10-01',
-            read: false
-        },
-        {
-            id: 2,
-            sender: 'Jane Doe',
-            message: 'Your post received a new like!',
-            date: '2023-10-02',
-            read: true
-        },
-        {
-            id: 3,
-            sender: 'John Doe',
-            message: 'You have a new comment on your post!',
-            date: '2023-10-03',
-            read: false
-        },
-        {
-            id: 4,
-            sender: 'John Doe',
-            message: 'Your profile was viewed 10 times today!',
-            date: '2023-10-04',
-            read: true
-        },
-        {
-            id: 5,
-            sender: 'John Doe',
-            message: 'You have a new message!',
-            date: '2023-10-05',
-            read: false
-        }
-    ]);
-    
+    const [showProfile, setShowProfile] = useState(false); 
     const [profileData, setProfileData] = useState({
         name: '', 
         username: '', 
@@ -229,16 +192,6 @@ function Profile() {
     const navigateHub = () => {
         navigate('/hub');
     }
-    
-    const handleReadNotif = (notifId) => {
-        const notifElement = document.getElementById(`notif-${notifId}`);
-        notifElement.classList.add('disappearing');
-        setTimeout(() => {
-            setNotifs(notifs.map(notif => 
-                notif.id === notifId ? { ...notif, read: true } : notif
-            ));
-        }, 500);
-    }
 
     return (
         <div className="profile">
@@ -312,21 +265,7 @@ function Profile() {
             <div className="mini-hub">
                 <button className="button-hub" onClick={navigateHub}>HUB</button>
             </div>
-            <div className="notifs">
-                <h5>Notifications</h5>
-                {notifs.map((notif) => (
-                    !notif.read && (
-                        <div key={notif.id} id={`notif-${notif.id}`} className={`notif ${notif.read ? 'read' : 'unread'}`}>
-                            <div className="notif-title">
-                                <h6>{notif.sender}</h6>
-                                <p>{notif.date}</p>
-                            </div>
-                            <p>{notif.message}</p>
-                            <button className="btn notif-button" onClick={() => handleReadNotif(notif.id)}>Read</button>
-                        </div>
-                    )
-                ))}
-            </div>
+            <Notifications />
         </div>
     );
 }
