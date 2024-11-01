@@ -4,6 +4,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername} = require('../controllers/userController');
 const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
 const { createNote, getNotes, updateNote, deleteNote } = require('../controllers/noteController');
+const { createNotification, getNotifications } = require('../controllers/notificationController')
 //const { createPost, getPosts } = require('../controllers/hubController');
 
 const router = express.Router();
@@ -30,6 +31,10 @@ router.get('/user/username', getUsername);
 router.post('/time/set-time', setTime);
 router.post('/time/reset-time', resetTime);
 router.get('/time/fetchState', fetchState);
+
+// Notification endpoints
+router.post('/notification', createNotification);
+router.get('/notifications', getNotifications);
 
 // Hub endpoint
 //router.post('/hub/posts', createPost);
