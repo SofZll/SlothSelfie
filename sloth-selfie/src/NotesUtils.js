@@ -80,7 +80,9 @@ export async function handleDuplicateNote (index, notes, setNotes) {
     };
 
     try {
-        const response = await fetch('/note', {
+        //const response = await fetch('/note', {
+        //locale:
+        const response = await fetch('http://localhost:8000/api/note', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -104,7 +106,10 @@ export async function handleDeleteNote(index, notes, setNotes) {
     const noteId = notes[index].id;
 
     try {
-        const response = await fetch(`/api/notes/${noteId}`, {
+        //const response = await fetch(`/api/notes/${noteId}`, {
+          //locale:
+        const response = await fetch('http://localhost:8000/api/notes/${noteId}', {
+        
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
