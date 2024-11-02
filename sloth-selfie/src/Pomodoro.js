@@ -276,7 +276,7 @@ function PomodoroFunction() {
                     <button className='settings-choice' onClick={() => handleChoiceSelection(2)}>Set the total time of your studying session</button>
                     <div className='divBtn'>
                         <button className='btn btn-tomato' onClick={backPage}>Back</button>
-                        <botton className='btn btn-tomato' onClick={selectChoice}>Select</botton>
+                        <button className='btn btn-tomato' onClick={selectChoice}>Select</button>
                     </div>
                 </div>
                 <div id='pomodoro-timers-options' className="pomodoro-timers-options">
@@ -362,7 +362,7 @@ function PomodoroFunction() {
                 <div className='divBtn'>
                     <button id='btn-back' className='btn btn-tomato btn-back' onClick={backSelection}>Back</button>
                     <button id='btn-tomato-start' className='btn btn-tomato btn-tomato-start' onClick={()=>startPomodoro(false)}>Let's get started</button>
-                    <botton id='btn-tomato-QS' className='btn btn-tomato' onClick={()=>startPomodoro(true)}>Quick Start</botton>
+                    <button id='btn-tomato-QS' className='btn btn-tomato' onClick={()=>startPomodoro(true)}>Quick Start</button>
                 </div>
             </div>
 

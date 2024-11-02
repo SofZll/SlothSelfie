@@ -76,7 +76,7 @@ function PreviewNote() {
                                             </ul>
                                         </div>
                                     ) : (
-                                        <p className="card-text">
+                                        <div className="card-text">
                                             {/* Limiting note content to 200 characters, showing markdown */}
                                             <div
                                                 dangerouslySetInnerHTML={{
@@ -85,7 +85,7 @@ function PreviewNote() {
                                                         : marked(note.content)
                                                 }}
                                             />
-                                        </p>
+                                        </div>
                                     )}
                                     {/* Using d-flex and justify-content-between for proper alignment */}
                                     <div className="d-flex justify-content-between mt-3">
