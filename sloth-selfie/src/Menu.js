@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { slide as Hamburger } from 'react-burger-menu';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import './css/Menu.css';
 import iconHome from './media/home.svg';
 import iconUser from './media/user.svg';
@@ -11,6 +11,8 @@ import iconProject from './media/projectsDark.svg';
 
 const Menu = ({username}) => {
     const [isOpen, setIsOpen] = useState(false);
+    const location = useLocation();
+    const [isHomeActive, setIsHomeActive] = useState(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
 
     const handleStateChange = (state) => {
         setIsOpen(state.isOpen);
@@ -19,6 +21,11 @@ const Menu = ({username}) => {
     const closeMenu = () => {
         setIsOpen(false);
     };
+
+    useEffect(() => {
+        setIsHomeActive(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
+        
+    }, [location]);
 
     return (
         <>
@@ -36,7 +43,7 @@ const Menu = ({username}) => {
             </Hamburger>
 
         <nav className="mobile-nav">
-            <NavLink to="/home" activeClassName="active">
+            <NavLink to="/home"  className={(isHomeActive ? "active" : "")} >
                 <img src={iconHome} alt="Home" />
             </NavLink>
             <NavLink to="/events" activeClassName="active">

@@ -10,10 +10,23 @@ const noteRoutes = require('./routes/routes');
 const path = require('path');
 const connectDB = require('./config/db');
 require('dotenv').config();
+const socketIo = require('socket.io');
+
 
 const cors = require('cors');
 
 const app = express();
+
+const http = require('http');
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: 'http://localhost:3000', // La tua origine
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true // Permetti le credenziali (cookie)
+    }
+});
 
 //locale:
 // Configura CORS per accettare richieste dal frontend locale
@@ -43,6 +56,10 @@ app.use(session({
     }
 }))
 
+
+
+// Routes
+
 //app.use('/api', Routes);
 app.use('/api', userRoutes);
 app.use('/api', noteRoutes);
@@ -58,30 +75,35 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
 
 
 //Websocket
 
-/*
-const http = require('http');
-const server = http.createServer(app);
-const io = require('socket.io')(server);
+
+
+
 const { v4: uuidv4 } = require('uuid');
+const { disconnect } = require('process');
+
 
 let settingPomodoro = {}
 const sessionCode = uuidv4().slice(0, 6);
 
 let interval = null;
 
+
+
+const PORT = process.env.PORT || 8000;
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+
 io.on('connection', (socket) => {
     console.log('New client connected');
 
     socket.on('create session', (dataPomodoro, studing) => {
-        socket.join(sessionCode);
+        console.log('Create session');
 
         settingPomodoro[sessionCode] = {
             timer: dataPomodoro.studioTime,
@@ -89,7 +111,8 @@ io.on('connection', (socket) => {
             cyclesLeft: dataPomodoro.cycles,
             breakTime: dataPomodoro.breakTime,
             studyTime: dataPomodoro.studioTime,   
-            isStudioTime: studing,     
+            isStudioTime: studing,
+            people: 1    
         }
 
         socket.join(sessionCode);
@@ -100,9 +123,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('join session', (sessionCode) => {
+        console.log('Join session');
         if (settingPomodoro[sessionCode]) {
             socket.join(sessionCode);
             socket.emit('session joined', {success: true, sessionCode});
+            settingPomodoro[sessionCode].people++;
             io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
         } else {
             socket.emit('session joined', {success: false});
@@ -116,7 +141,7 @@ io.on('connection', (socket) => {
             cyclesLeft: dataPomodoro.cycles,
             breakTime: dataPomodoro.breakTime,
             studyTime: dataPomodoro.studioTime,   
-            isStudioTime: studing,     
+            isStudioTime: studing,  
         }
         console.log('Edit timer');
         io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
@@ -179,12 +204,23 @@ io.on('connection', (socket) => {
         io.to(sessionCode).emit('add', settingPomodoro[sessionCode]);
     });
 
-    socket.on('disconnect', (sessionCode) => {
-        clearInterval(interval);
-        interval = null;
+    socket.on('exit', (sessionCode) => {
+        settingPomodoro[sessionCode].people--;
+        console.log('Leave session');
+        if (settingPomodoro[sessionCode].people === 0) {
+            console.log('Delete session');
+            io.to(sessionCode).emit('session closed');
+        } else {
+            io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
+            socket.leave(sessionCode);
+        }
+    });
+
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected', sessionCode);
         delete settingPomodoro[sessionCode];
-        console.log('Disconnect');
+    
     });
 
 });
-*/

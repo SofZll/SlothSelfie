@@ -2,7 +2,7 @@ const express = require('express');
 const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUserUsername} = require('../controllers/userController');
 const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
 const { createNote, getNotes, updateNote, deleteNote } = require('../controllers/noteController');
-const { createPost, getPosts } = require('../controllers/hubController');
+//const { createPost, getPosts } = require('../controllers/hubController');
 
 const router = express.Router();
 
@@ -29,8 +29,8 @@ router.post('/time/reset-time', resetTime);
 router.get('/time/fetchState', fetchState);
 
 // Hub endpoint
-router.post('/hub/posts', createPost);
-router.get('/hub/posts', getPosts);
+//router.post('/hub/posts', createPost);
+//router.get('/hub/posts', getPosts);
 
 // Note endpoints
 //router.post('/note', requireAuth, createNote); // if we want authentication

@@ -18,7 +18,7 @@ import iconWhatsApp from './media/whatsapp.svg';
 import iconTelegram from './media/telegram.svg';
 import CopyableId from './copyableId';
 import { stringTime, pomodoroPlay, passingTime, initDataPomodoro, addCycle, skipTime, resetTime, editDataPomodoro } from './pomodoroUtils';
-//import io from 'socket.io-client';
+import io from 'socket.io-client';
 
 
 
@@ -31,15 +31,11 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
     const [sending, setSending] = useState(false);
     const [inShare, setInShare] = useState(false);
     const [isHost, setIsHost] = useState(false);
-    const [sessionCode, setSessionCode] = useState('123456');
-    const [guestCode, setGuestCode] = useState('');
+    const [sessionCode, setSessionCode] = useState('');
     const encodedMessage = encodeURIComponent('Hi! Join my Pomodoro session with the code: '+ {sessionCode});
 
 
-    //const port = process.env.PORT || 8000;
-    //const socket = io('http://localhost:'+{port}+'/pomodoro');
-
-    
+    const socket = io('http://localhost:8000', {autoConnect: false});
 
     const [dataPomodoro, setDataPomodoro] = useState({
         timeLeft: 30*60,
@@ -110,11 +106,59 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
         setIsHost(value);
         setInShare(true);
 
+        if (!socket.connected) {
+            socket.connect();
+            console.log('Connected');
+        }
+
+
+        socket.on('connect_error', (error) => {
+            console.log('Errore di connessione:', error.message);
+        });
+
+        if (value) {
+            console.log('Create session');
+            socket.emit('join session', sessionCode);
+            socket.once('session joined', (data) => {
+                if (data.success) {
+                    console.log('Joined session');
+                } else {
+                    console.log('Session not found');
+                    setInShare(false);
+                    socket.disconnect();
+                    socket.close();
+                    setSessionCode('');
+                    alert('Session not found');
+                }
+            });
+        } else {
+            console.log('Join session');
+            let tmp = socket.emit('create session', (dataPomodoro, playTomato));
+            console.log(tmp);
+            socket.once('session code', (code) => {
+                setSessionCode(code);
+                console.log('Session code:', sessionCode);
+            });
+
+        }
     }
 
-    const exitShare = () => {
+
+
+    const exitShare = (code) => {
         setInShare(false);
         setIsHost(true);
+
+        console.log('Exit session');
+
+
+        socket.emit('exit', sessionCode);
+
+        socket.once('session closed', () => {
+            console.log('Session closed');
+            socket.disconnect();
+        });
+        setSessionCode('');
     }
     
 
@@ -129,11 +173,24 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                                 <img src={iconCross} alt="Close" className='iconCross'/>
                             </button>
                             <h2>Share your Pomodoro</h2>
+                            <p>Create a new Pomodoro room for you and your friends</p>
+                            
+                            <button className='btn' onClick={() => settingShare(false)}>Start session</button>
+                            <hr/>
+                            <p>Get in a Pomodoro room</p>
+                            <form onSubmit={(e) => {e.preventDefault(); settingShare(true);}}>
+                                <label>Code:
+                                    <input type="text" value={sessionCode} onChange={(e) => setSessionCode(e.target.value)} required/>
+                                </label>
+                                <br/>
+                                <button className="btn" type="submit">Join</button>
+                            </form>
+                        </>
+                    ) : (
+                        <div style={{maxHeight: "700px"}}>
+                            <h2>Welcome in the room </h2>
                             <p>Send the code to your friend to join your Pomodoro session</p>
-                            <div className="divCode">
-                                <p>Code: </p>
-                                <CopyableId id={sessionCode}/>
-                            </div>
+                            <CopyableId id={sessionCode}/>
                             <div className="divBtn">
                                 <a href={`https://wa.me/?text=${encodedMessage}`} target="_blank" rel="noopener noreferrer">
                                     <img src={iconWhatsApp} alt="WhatsApp" className='iconWhatsApp'/>
@@ -142,30 +199,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                                     <img src={iconTelegram} alt="Telegram" className='iconTelegram'/>
                                 </a>
                             </div>
-                            <button className='btn' onClick={() => settingShare(false)}>Start session</button>
-                            <hr/>
-                            <p>Get in a Pomodoro room</p>
-                            <form onSubmit={(e) => e.preventDefault()}>
-                                <label>Code:
-                                    <input type="text" value={guestCode} onChange={(e) => setGuestCode(e.target.value)} required/>
-                                </label>
-                                <br/>
-                                <button className="btn" type="submit" onClick={() => settingShare(true)}>Join</button>
-                            </form>
-                        </>
-                    ) : (
-                        <div style={{maxHeight: "600px"}}>
-                            <h2>Welcome in the room </h2>
-                            <CopyableId id={(isHost ? (guestCode) : (sessionCode))}/>
-                            <div className="divBtn">
-                                <a href={`https://wa.me/?text=${(isHost ? (guestCode) : (sessionCode))}`} target="_blank" rel="noopener noreferrer">
-                                    <img src={iconWhatsApp} alt="WhatsApp" className='iconWhatsApp'/>
-                                </a>
-                                <a href={`https://t.me/share/url?url=${(isHost ? (guestCode) : (sessionCode))}`} target="_blank" rel="noopener noreferrer">
-                                    <img src={iconTelegram} alt="Telegram" className='iconTelegram'/>
-                                </a>
-                            </div>
-                            <button className='btn' onClick={() => exitShare()}>End session</button>
+                            <button className='btn' onClick={() => exitShare(sessionCode)}>End session</button>
                         </div>
                     )}
                     
