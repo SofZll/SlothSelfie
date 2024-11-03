@@ -12,7 +12,6 @@ import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 //import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
-import { a } from 'react-spring';
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 

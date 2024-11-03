@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './css/Login.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
 
 function Form({ formType, setFormType, handleLogin}) {
     const [name, setName] = useState('');
@@ -16,12 +17,20 @@ function Form({ formType, setFormType, handleLogin}) {
         e.preventDefault();
         if (formType === 'login') {
             if (!username || !password) {
-                alert('Please enter a username and password!');
+                Swal.fire({
+                    title: 'Login failed',
+                    icon: 'error',
+                    text: 'Please enter username and password',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
                 return;
             }
 
             fetch('http://localhost:8000/api/user/login', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -35,7 +44,15 @@ function Form({ formType, setFormType, handleLogin}) {
                     navigate('/home');
                 }
                 else {
-                    console.error('Login failed:', data.message);
+                    console.log('Login failed:', data.message);
+                    Swal.fire({
+                        title: 'Login failed',
+                        icon: 'error',
+                        text: data.message,
+                        customClass: {
+                            confirmButton: 'button-alert'
+                        }
+                    });
                 }
             })
             .catch((error) => {
@@ -44,12 +61,20 @@ function Form({ formType, setFormType, handleLogin}) {
 
         } else if (formType === 'register') {
             if (!username || !email || !password) {
-                alert('Please enter a username, email, and password!');
+                Swal.fire({
+                    title: 'Registration failed',
+                    icon: 'error',
+                    text: 'Please fill in all fields',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
                 return;
             }
 
             fetch('http://localhost:8000/api/user/register', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -62,6 +87,14 @@ function Form({ formType, setFormType, handleLogin}) {
                 }
                 else {
                     console.error('Registration failed:', data.message);
+                    Swal.fire({
+                        title: 'Registration failed',
+                        icon: 'error',
+                        text: data.message,
+                        customClass: {
+                            confirmButton: 'button-alert'
+                        }
+                    });
                 }
             })
             .catch((error) => {

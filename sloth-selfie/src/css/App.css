@@ -311,7 +311,11 @@ p {
   margin-bottom: 2%;
 }
 
+/* alert */
 
+.button-alert {
+  background-color: #89B0AE;
+}
 
 
 

@@ -1,48 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./css/Profile.css";
+import { validateEmail, validatePhoneNumber } from "./inputValidation";
+import Swal from "sweetalert2";
+import Notifications from "./Notifications";
 
 function Profile() {
     const [isEditing, setIsEditing] = useState(false);
-    const [showProfile, setShowProfile] = useState(false);
-    const [notifs, setNotifs] = useState([
-        {
-            id: 1,
-            sender: 'John Doe',
-            message: 'You have a new follower!',
-            date: '2023-10-01',
-            read: false
-        },
-        {
-            id: 2,
-            sender: 'Jane Doe',
-            message: 'Your post received a new like!',
-            date: '2023-10-02',
-            read: true
-        },
-        {
-            id: 3,
-            sender: 'John Doe',
-            message: 'You have a new comment on your post!',
-            date: '2023-10-03',
-            read: false
-        },
-        {
-            id: 4,
-            sender: 'John Doe',
-            message: 'Your profile was viewed 10 times today!',
-            date: '2023-10-04',
-            read: true
-        },
-        {
-            id: 5,
-            sender: 'John Doe',
-            message: 'You have a new message!',
-            date: '2023-10-05',
-            read: false
-        }
-    ]);
-    
+    const [showProfile, setShowProfile] = useState(false); 
     const [profileData, setProfileData] = useState({
         name: '', 
         username: '', 
@@ -55,6 +20,12 @@ function Profile() {
 
     const navigate = useNavigate();
 
+    const navigateHub = () => {
+        navigate('/hub');
+    }
+
+    // Since the image is stored a Buffer we need to convert it to base64
+    let base64Image = '';
     const bufferToBase64 = (buffer) => {
         const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
         return btoa(binary);
@@ -64,28 +35,31 @@ function Profile() {
         const fetchProfileData = async () => {
             try {
                 const response = await fetch(`http://localhost:8000/api/user/profile`, {
+                    method: 'GET',
                     credentials: 'include'
                 });
+
                 const data = await response.json();
+
                 if (data.success && data.user) {
-                    // Since the image is stored a Buffer we need to convert it to base64
-                    let base64Image = '';
                     if (data.user.image?.data?.data) {
                         const buffer = data.user.image.data.data;
                         base64Image = `data:${data.user.image.contentType};base64,${bufferToBase64(buffer)}`;
                     }
+
+                    const formattedBirthday = data.user.birthday ? new Date(data.user.birthday).toISOString().split('T')[0] : '';
                     
                     setProfileData({
                         name: data.user.name || '',
                         username: data.user.username || '',
                         email: data.user.email || '',
-                        birthday: data.user.birthday || '',
+                        birthday: formattedBirthday,
                         phoneNumber: data.user.phoneNumber || '',
                         gender: data.user.gender || '',
                         profile_image: base64Image
                     });
+
                     console.log('Profile data:', data.user);
-                    console.log(profileData.profile_image)
                 }
             } catch (error) {
                 console.error('Error fetching profile data:', error);
@@ -99,6 +73,7 @@ function Profile() {
         setShowProfile(!showProfile);
     };
 
+    // Image editing functions
     const handleImageClick = () => {
         document.getElementById('file-input').click();
     }
@@ -107,12 +82,14 @@ function Profile() {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
+
             reader.onloadend = () => {
                 setProfileData(prevData => ({
                     ...prevData,
                     profile_image: reader.result
                 }));
             };
+
             reader.readAsDataURL(file);
 
             const formData = new FormData();
@@ -120,8 +97,9 @@ function Profile() {
             formData.append('email', profileData.username);
 
             try {
-                const response = await fetch('http://localhost:8000api/user/edit-image', {
+                const response = await fetch('http://localhost:8000/api/user/edit-image', {
                     method: 'POST',
+                    credentials: 'include',
                     body: formData
                 });
 
@@ -138,6 +116,7 @@ function Profile() {
         }
     }
 
+    // Profile editing functions
     const editProfile = () => {
         setIsEditing(true);
     } 
@@ -147,6 +126,8 @@ function Profile() {
     };
 
     const saveChanges = async (e) => {
+        e.preventDefault();
+
         const newProfileData = {
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
@@ -155,9 +136,36 @@ function Profile() {
             gender: document.getElementById('gender').value,
         };
 
+        if (newProfileData.email && !validateEmail(newProfileData.email)){
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid email address!',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
+
+            return;
+        }
+
+        if (newProfileData.phoneNumber && !validatePhoneNumber(newProfileData.phoneNumber)){
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid phone number!',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
+
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:8000/api/user/edit-profile', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -178,6 +186,7 @@ function Profile() {
         try {
             const response = await fetch('http://localhost:8000/api/user/logout', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -191,107 +200,83 @@ function Profile() {
             console.error('Error logging out:', error);
         }   
     }
-
-    const navigateHub = () => {
-        navigate('/hub');
-    }
-    
-    const handleReadNotif = (notifId) => {
-        const notifElement = document.getElementById(`notif-${notifId}`);
-        notifElement.classList.add('disappearing');
-        setTimeout(() => {
-            setNotifs(notifs.map(notif => 
-                notif.id === notifId ? { ...notif, read: true } : notif
-            ));
-        }, 500);
-    }
-
+    //controlla dopo
     return (
         <div className="profile">
-            <div className="profile-container">
-                <h2>{profileData.username}</h2>
-                <div className="profile-image">
-                    {profileData.profile_image && (
-                        <img src={profileData.profile_image} alt="profile-img" onClick={handleImageClick}/>
-                    )}
-                    <input type="file" id="file-input" style={{display: 'none'}} onChange={editImage}/>
-                </div>
-                <button className="btn button-info" onClick={toggleShowProfile}>
-                    {showProfile ? "Hide": "Expands"}
-                </button>
-                <div className={`profile-info ${showProfile ? 'show' : ''}`}>
+            <div className="left-column">
+                <div className="profile-container">
+                    <h2>{profileData.username}</h2>
+                    <div className="profile-image">
+                        {profileData.profile_image && (
+                            <img src={profileData.profile_image} alt="profile-img" onClick={handleImageClick}/>
+                        )}
+                        <input type="file" id="file-input" style={{display: 'none'}} onChange={editImage}/>
+                    </div>
+                    <button className="btn button-info" onClick={toggleShowProfile}>
+                        {showProfile ? "Hide": "Expands"}
+                    </button>
+                    <div className={`profile-info ${showProfile ? 'show' : ''}`}>
+                        {isEditing ? (
+                            <form className="profile-form">
+                                <div className="form-group profile-form-group">
+                                    <label htmlFor="name">Name:</label>
+                                    <input type="text" id="name" name="name" value={profileData.name} onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}/>
+                                </div>
+                                <div className="form-group profile-form-group">
+                                    <label htmlFor="username">Username:</label>
+                                    <input type="text" id="username" value={profileData.username} readOnly/>
+                                </div>
+                                <div className="form-group profile-form-group">
+                                    <label htmlFor="email">Email:</label>
+                                    <input type="email" id="email" name="email" value={profileData.email} onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}/>
+                                </div>
+                                <div className="form-group profile-form-group">
+                                    <label htmlFor="birthday">Birthday:</label>
+                                    <input type="date" id="birthday" name="birthday" value={profileData.birthday} onChange={(e) => setProfileData({ ...profileData, birthday: e.target.value })}/>
+                                </div>
+                                <div className="form-group profile-form-group">
+                                    <label htmlFor="phoneNumber">Phone number:</label>
+                                    <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber} onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}/>
+                                </div>
+                                <div className="form-group profile-form-group">
+                                    <label htmlFor="gender">Gender:</label>
+                                    <select id="gender" name="gender" value={profileData.gender} onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })}>
+                                        <option value="">Select Gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </form>
+                        ):(
+                            <>
+                                <p>Name: {profileData.name} </p>
+                                <p>Username: {profileData.username} </p>
+                                <p>Email: {profileData.email}</p>
+                                <p>Birthday: {profileData.birthday}</p>
+                                <p>Phone number: {profileData.phoneNumber}</p>
+                                <p>Gender: {profileData.gender} </p>
+                            </>
+                        )}
+                    </div>
                     {isEditing ? (
-                        <form className="profile-form">
-                            <div className="form-group profile-form-group">
-                                <label htmlFor="name">Name:</label>
-                                <input type="text" id="name" name="name" value={profileData.name}/>
-                            </div>
-                            <div className="form-group profile-form-group">
-                                <label htmlFor="username">Username:</label>
-                                <span>{profileData.username}</span>
-                            </div>
-                            <div className="form-group profile-form-group">
-                                <label htmlFor="email">Email:</label>
-                                <input type="email" id="email" name="email" value={profileData.email}/>
-                            </div>
-                            <div className="form-group profile-form-group">
-                                <label htmlFor="birthday">Birthday:</label>
-                                <input type="date" id="birthday" name="birthday" value={profileData.birthday}/>
-                            </div>
-                            <div className="form-group profile-form-group">
-                                <label htmlFor="phoneNumber">Phone number:</label>
-                                <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber}/>
-                            </div>
-                            <div className="form-group profile-form-group">
-                                <label htmlFor="gender">Gender:</label>
-                                <select id="gender" name="gender" value={profileData.gender}>
-                                    <option value="">Select Gender</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                        </form>
+                        <>
+                            <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={saveChanges}>Save changes</button>
+                            <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={cancelEdit}>Cancel</button>
+                        </>
                     ):(
                         <>
-                            <p>Name: {profileData.name} </p>
-                            <p>Username: {profileData.username} </p>
-                            <p>Email: {profileData.email}</p>
-                            <p>Birthday: {profileData.birthday}</p>
-                            <p>Phone number: {profileData.phoneNumber}</p>
-                            <p>Gender: {profileData.gender} </p>
+                            <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={editProfile}>Edit profile</button>
+                            <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={logout}>Log out</button>
                         </>
                     )}
                 </div>
-                {isEditing ? (
-                    <>
-                        <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={saveChanges}>Save changes</button>
-                        <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={cancelEdit}>Cancel</button>
-                    </>
-                ):(
-                    <>
-                        <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={editProfile}>Edit profile</button>
-                        <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={logout}>Log out</button>
-                    </>
-                )}
+                <div className="mini-hub">
+                    <button className="button-hub" onClick={navigateHub}>HUB</button>
+                </div>
             </div>
-            <div className="mini-hub">
-                <button className="button-hub" onClick={navigateHub}>HUB</button>
-            </div>
-            <div className="notifs">
-                <h5>Notifications</h5>
-                {notifs.map((notif) => (
-                    !notif.read && (
-                        <div key={notif.id} id={`notif-${notif.id}`} className={`notif ${notif.read ? 'read' : 'unread'}`}>
-                            <div className="notif-title">
-                                <h6>{notif.sender}</h6>
-                                <p>{notif.date}</p>
-                            </div>
-                            <p>{notif.message}</p>
-                            <button className="btn notif-button" onClick={() => handleReadNotif(notif.id)}>Read</button>
-                        </div>
-                    )
-                ))}
+            <div className="right-column">
+               <Notifications /> 
             </div>
         </div>
     );

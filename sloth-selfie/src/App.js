@@ -13,10 +13,8 @@ import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
 import ProfileFunction from './Profile';
 import HubFunction from './Hub';
-import { use } from 'marked';
 import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
-import { update } from 'react-spring';
 import { ActivityProvider } from './ActivityContext';
 //import { ActivityProvider } from './ActivityContext.Oldjs';
 
@@ -27,23 +25,7 @@ function App() {
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
-
-  const [username, setUsername] = useState('example');
   
-  useEffect(() => {
-    const fetchUsername = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/user/username');
-        // const response = await fetch('api/username');
-        const data = await response.json();
-        setUsername(data.username);
-      } catch (error) {
-        console.error('Error fetching username:', error);
-      }
-    };
-
-    fetchUsername();
-  }, []); 
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formType, setFormType] = useState('login'); 
@@ -53,6 +35,8 @@ function App() {
     setIsAuthenticated(status);
   };
 
+  /*
+  // Function to open the app in fullscreen mode
   const openFullscreen = () => {
     const elem = document.documentElement; // L'intero documento sarà a schermo intero
     if (elem.requestFullscreen) {
@@ -65,6 +49,7 @@ function App() {
       elem.msRequestFullscreen();
     }
   };
+  */
 
   const isMobileLandscape = () => {
     const isMobileWidth = window.matchMedia('(max-width: 700px)').matches; // Soglia di 500px per modalità cellulare
@@ -168,7 +153,7 @@ function App() {
       <StyleProvider>
         <ActivityProvider>
         <div className="App">
-          <Menu username={username}/>
+          <Menu/>
           <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
           <header className="App-header">
               <div className="title">
@@ -211,7 +196,7 @@ function App() {
                 )
                 }
               />
-              <Route path="/profile" element={<ProfileFunction  username={ username }/>} />
+              <Route path="/profile" element={<ProfileFunction />} />
               <Route path="/pomodoro" element={<PomodoroFunction />} />
               <Route path="/notes" element={<NotesFunction />} />
               <Route path="/events" element={<EventsFunction />} />

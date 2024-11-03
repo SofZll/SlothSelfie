@@ -1,3 +1,14 @@
+@keyframes zoomIn {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 .time-machine {
     display: flex;
     justify-content: center;
@@ -22,6 +33,7 @@
     text-align: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     position: relative;
+    animation: zoomIn 0.3s forwards;
 }
 
 .close {

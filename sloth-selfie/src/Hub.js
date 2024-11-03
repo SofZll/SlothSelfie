@@ -14,7 +14,6 @@ function Hub({ username="kaori"}) {
     //const [posts, setPosts] = useState([]);
     const [newPost, setNewPost] = useState('');
     const [newComment, setNewComment] = useState('');
-    const [times, setTimes] = useState([]);
     const [selectedPostId, setSelectedPostId] = useState(null);
     const [sortingOption, setSortingOption] = useState('mostRecent');
     const [sharePost, setSharePost] = useState(null);
