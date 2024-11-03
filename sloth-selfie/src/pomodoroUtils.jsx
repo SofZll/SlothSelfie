@@ -166,3 +166,13 @@ export function passingTime (dataPomodoro, setDataPomodoro, setPlayTomato) {
     }
 }
 
+export function timerState (dataPomodoro, setDataPomodoro) {
+    handlePodomoroTimeChange('timeLeft', dataPomodoro.timer, setDataPomodoro);
+    handlePodomoroTimeChange('cyclesLeft', dataPomodoro.cycles, setDataPomodoro);
+    handlePodomoroTimeChange('done', dataPomodoro.done, setDataPomodoro);
+    handlePodomoroTimeChange('notStartedYet', dataPomodoro.notStartedYet, setDataPomodoro);
+    handlePodomoroTimeChange('addedCycles', dataPomodoro.addedCycles, setDataPomodoro);
+    handlePodomoroTimeChange('studioTimeTotal', dataPomodoro.studioTimeTotal, setDataPomodoro);
+    handlePodomoroTimeChange('isStudioTime', dataPomodoro.isStudioTime, setDataPomodoro);
+}
+
