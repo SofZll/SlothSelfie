@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 // TODO: implement a hashing function to store passwords securely
 // TODO: implement the possibility to change the password
 
-// Function to log in a user
+// Log in a user: FUNZIONA
 const loginUser = async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -24,12 +24,15 @@ const loginUser = async (req, res) => {
         console.log('Session UserId:', req.session.userId);
         req.session.username = user.username;
         console.log('Session Username:', req.session.username);
-        console.log('Full Session Object:', req.session);
-        req.session.save((err) => {
+
+        await req.session.save((err) => {
             if (err) {
                 console.error('Error saving session:', err);
             }
         });
+
+        console.log('Session ID after login:', req.sessionID); // Debugging line
+        console.log('Session after login:', req.session); // Debugging line
 
         res.status(200).json({ success: true, user });
     } catch (error) {
@@ -38,7 +41,7 @@ const loginUser = async (req, res) => {
     }
 };
 
-// Function to register a new user
+// Register a new user: FUNZIONA
 const registerUser = async (req, res) => {
     const { name, username, email, password } = req.body;
     try {
@@ -59,7 +62,7 @@ const registerUser = async (req, res) => {
     }
 };
 
-// Function to log out a user
+// Log out a user: FUNZIONA
 const logoutUser = async (req, res) => {
     try {
         // Destroy the session and clear the cookie
@@ -76,16 +79,17 @@ const logoutUser = async (req, res) => {
     }
 };
 
-// Function to edit the user's profile image
+// Edit the user's profile image: FUNZIONA
 const editImage = async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-        
-        user.image.data = req.file.buffer;
-        user.image.contentType = req.file.mimetype;
+        user.image = {
+            data: req.file.buffer,
+            contentType: req.file.mimetype
+        };
         await user.save();
 
         res.status(200).json({ success: true, message: 'Image uploaded successfully' });
@@ -95,7 +99,7 @@ const editImage = async (req, res) => {
     }
 };
 
-// Function to edit the user's profile
+// Edit the user's profile: FUNZIONA
 const editProfile = async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
@@ -118,16 +122,14 @@ const editProfile = async (req, res) => {
     }
 };
 
-// Function to get the profile info
+// Get the profile info: FUNZIONA
 const getUserProfile = async (req, res) => {
     try {
-        console.log('Full Session Object:', req.session);
         const username = req.session.username;
-        console.log('Session UserId:', username);
         if (!username) {
             return res.status(400).json({ success: false, message: 'Username not found' });
         }
-        const user = await User.fondOne({ username});
+        const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -138,6 +140,21 @@ const getUserProfile = async (req, res) => {
     }
 };
 
+// Get the username: FUNZIONA
+const getUsername = async (req, res) => {
+    try {
+        const username = req.session.username;
+        console.log('Username:', username);
+        if (!username) {
+            return res.status(400).json({ success: false, message: 'Username not found' });
+        }
+        res.status(200).json({ success: true, username: username });
+    } catch (error) {
+        console.error('Error fetching username:', error);
+        res.status(500).json({ success: false, message: 'Error fetching username' });
+    }
+};
+
 module.exports = {
     loginUser,
     registerUser,
@@ -145,4 +162,5 @@ module.exports = {
     getUserProfile,
     editImage,
     editProfile,
+    getUsername,
 };

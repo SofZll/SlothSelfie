@@ -83,6 +83,8 @@ function Card({ title, caseShow }) {
                 </div>
             );
             break;
+        default:
+            break;
     }
 
     return (

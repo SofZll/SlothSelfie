@@ -9,10 +9,11 @@ import iconTomato from './media/tomatoDark.svg';
 import iconNote from './media/notesDark.svg';
 import iconProject from './media/projectsDark.svg';
 
-const Menu = ({username}) => {
+const Menu = () => {
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const [isHomeActive, setIsHomeActive] = useState(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
+    const [username, setUsername] = useState('');
 
     const handleStateChange = (state) => {
         setIsOpen(state.isOpen);
@@ -21,6 +22,24 @@ const Menu = ({username}) => {
     const closeMenu = () => {
         setIsOpen(false);
     };
+  
+    useEffect(() => {
+        const fetchUsername = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/user/username', {
+            credentials: 'include'
+            });
+            // const response = await fetch('api/username');
+            const data = await response.json();
+            console.log('Username:', data.username);
+            setUsername(data.username);
+        } catch (error) {
+            console.error('Error fetching username:', error);
+        }
+        };
+
+        fetchUsername();
+    }, []); 
 
     useEffect(() => {
         setIsHomeActive(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
