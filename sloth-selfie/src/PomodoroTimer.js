@@ -17,7 +17,7 @@ import iconShare from './media/shareDark.svg';
 import iconWhatsApp from './media/whatsapp.svg';
 import iconTelegram from './media/telegram.svg';
 import CopyableId from './copyableId';
-import { stringTime, pomodoroPlay, passingTime, initDataPomodoro, addCycle, skipTime, resetTime, editDataPomodoro } from './pomodoroUtils';
+import { stringTime, pomodoroPlay, passingTime, initDataPomodoro, addCycle, skipTime, resetTime, editDataPomodoro, timerState } from './pomodoroUtils';
 import io from 'socket.io-client';
 
 
@@ -30,12 +30,11 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
     
     const [sending, setSending] = useState(false);
     const [inShare, setInShare] = useState(false);
-    const [isHost, setIsHost] = useState(false);
     const [sessionCode, setSessionCode] = useState('');
     const encodedMessage = encodeURIComponent('Hi! Join my Pomodoro session with the code: '+ {sessionCode});
 
 
-    const socket = io('http://localhost:8000', {autoConnect: false});
+    const socket = io('http://localhost:8000');
 
     const [dataPomodoro, setDataPomodoro] = useState({
         timeLeft: 30*60,
@@ -81,7 +80,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
         updateEditData('studioTime', timeStudio);
         updateEditData('breakTime', timeBreak);
         updateEditData('totalTime', timeTotal);
-    }, [numberCycles, timeStudio, timeBreak]);
+    }, [numberCycles, timeStudio, timeBreak, timeTotal]);
 
     const backPage = () => {
         //saveData(dataPomodoro);
@@ -89,77 +88,140 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
     }
 
     useEffect(() => { 
-        if (playTomato && dataPomodoro.cyclesLeft > 0) {
-            const timer = setTimeout(() => {
-                passingTime(dataPomodoro, setDataPomodoro, setPlayTomato);
-            }, 1000);
-    
-            return () => clearTimeout(timer);
+        if (!inShare) {
+            if (playTomato && dataPomodoro.cyclesLeft > 0) {
+                const timer = setTimeout(() => {
+                    passingTime(dataPomodoro, setDataPomodoro, setPlayTomato);
+                }, 1000);
+        
+                return () => clearTimeout(timer);
+            }
         }
-    }, [dataPomodoro, playTomato]);
+    }, [dataPomodoro, playTomato, inShare]);
 
     useEffect(() => {
         setStringPrintTime(stringTime(dataPomodoro.timeLeft));
     }, [dataPomodoro.timeLeft]);
 
+
+    const handleFunctionPomodoro = (value) => {
+        if (inShare) {
+            switch (value) {
+                case 1:
+                    if (playTomato) {
+                        socket.emit('stop', sessionCode);
+                        setPlayTomato(false);
+                    } else {
+                        socket.emit('start', sessionCode)
+                        setPlayTomato(true);
+                    }
+                    break;
+                case 2:
+                    socket.emit('reset', sessionCode);
+                    break;
+                case 3:
+                    socket.emit('skip', sessionCode);
+                    break;
+                case 4:
+                    socket.emit('add', sessionCode);
+                    break;
+                case 5:
+                    socket.emit('exit', sessionCode);
+                    setInShare(false);
+                    setSessionCode('');
+                    backPage();
+                    break;
+                case 6:
+                    editDataPomodoro (editData.cycles, editData.studioTime*60, editData.breakTime*60, dataPomodoro, setDataPomodoro, setIsEditing, setPlayTomato);
+                    socket.emit('edit', dataPomodoro, playTomato, sessionCode);
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            switch (value) {
+                case 1:
+                    pomodoroPlay (setPlayTomato, playTomato, dataPomodoro, setDataPomodoro);
+                    break;
+                case 2:
+                    resetTime (dataPomodoro, setDataPomodoro, setPlayTomato);
+                    break;
+                case 3:
+                    skipTime (dataPomodoro, setDataPomodoro, setPlayTomato);
+                    break;
+                case 4:
+                    addCycle (dataPomodoro, setDataPomodoro);
+                    break;
+                case 5:
+                    backPage();
+                    break;
+                case 6:
+                    editDataPomodoro (editData.cycles, editData.studioTime*60, editData.breakTime*60, dataPomodoro, setDataPomodoro, setIsEditing, setPlayTomato);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }   
+
+
+
+
+
+    
+
     const settingShare = (value) => {
-        setIsHost(value);
         setInShare(true);
 
-        if (!socket.connected) {
-            socket.connect();
-            console.log('Connected');
-        }
-
-
-        socket.on('connect_error', (error) => {
-            console.log('Errore di connessione:', error.message);
-        });
-
         if (value) {
-            console.log('Create session');
-            socket.emit('join session', sessionCode);
-            socket.once('session joined', (data) => {
-                if (data.success) {
-                    console.log('Joined session');
-                } else {
-                    console.log('Session not found');
-                    setInShare(false);
-                    socket.disconnect();
-                    socket.close();
-                    setSessionCode('');
-                    alert('Session not found');
-                }
-            });
-        } else {
             console.log('Join session');
-            let tmp = socket.emit('create session', (dataPomodoro, playTomato));
-            console.log(tmp);
-            socket.once('session code', (code) => {
-                setSessionCode(code);
-                console.log('Session code:', sessionCode);
-            });
-
+            socket.emit('join session', sessionCode);
+        } else {
+            console.log('Create session');
+            socket.emit('create session', dataPomodoro, playTomato);
         }
     }
 
-
-
-    const exitShare = (code) => {
-        setInShare(false);
-        setIsHost(true);
+    const exitShare = () => {
 
         console.log('Exit session');
 
-
         socket.emit('exit', sessionCode);
+        setInShare(false);
+        setSessionCode('');
+    }
 
-        socket.once('session closed', () => {
+    useEffect(() => {
+
+        socket.on('session joined', (data) => {
+            if (data.success) {
+                console.log('Joined session');
+            } else {
+                console.log('Session not found');
+                setInShare(false);
+                socket.disconnect();
+                setSessionCode('');
+                alert('Session not found');
+            }
+        });
+
+        socket.on('session code', (code) => {
+            setSessionCode(code);
+            console.log('Session code:', code);
+        });
+
+        socket.on('timerState', (data) => {
+            timerState(data, setDataPomodoro);
+            console.log('Timer state:', data);
+        });
+
+        socket.on('session closed', () => {
             console.log('Session closed');
             socket.disconnect();
         });
-        setSessionCode('');
-    }
+
+
+    }, [socket]);
     
 
     return (
@@ -167,11 +229,11 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
 
             {sending && (
                 <div className="send-popup">
+                    <button className='btnClose' onClick={() => setSending(false)}>
+                        <img src={iconCross} alt="Close" className='iconCross'/>
+                    </button>
                     {!inShare ? (
                         <>
-                            <button className='btnClose' onClick={() => setSending(false)}>
-                                <img src={iconCross} alt="Close" className='iconCross'/>
-                            </button>
                             <h2>Share your Pomodoro</h2>
                             <p>Create a new Pomodoro room for you and your friends</p>
                             
@@ -199,7 +261,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                                     <img src={iconTelegram} alt="Telegram" className='iconTelegram'/>
                                 </a>
                             </div>
-                            <button className='btn' onClick={() => exitShare(sessionCode)}>End session</button>
+                            <button className='btn' onClick={() => exitShare()}>End session</button>
                         </div>
                     )}
                     
@@ -223,7 +285,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                             <input type="number" value={editData.cycles} onChange={(e) => updateEditData('cycles', parseInt(e.target.value))} min={0} step={1}/>
                         </label>
                         <p>Time total: {isNaN(editData.totalTime) ? ("___") : (editData.totalTime)} minutes</p>
-                        <button className="btn" type="submit" onClick={() => editDataPomodoro(editData.cycles, editData.studioTime*60, editData.breakTime*60, dataPomodoro, setDataPomodoro, setIsEditing, setPlayTomato)}>Save</button>
+                        <button className="btn" type="submit" onClick={() => handleFunctionPomodoro(6)}>Save</button>
                     </form>
                 </div>
             )}
@@ -274,26 +336,26 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     <button className='btnSettingTomato' onClick={() => setIsEditing(true)}>
                         <img src={iconEdit} alt="Edit" className='iconEdit'/>
                     </button>
-                    <button className='btnSettingTomato' onClick={() => resetTime (dataPomodoro, setDataPomodoro, setPlayTomato)}>
+                    <button className='btnSettingTomato' onClick={() => handleFunctionPomodoro(2)}>
                         <img src={iconReset} alt="Reset" className='iconReset'/>
                     </button>
 
                     {dataPomodoro.done ? (
-                        <button className='btnSettingTomato' onClick={() => backPage()}>
+                        <button className='btnSettingTomato' onClick={() => handleFunctionPomodoro(5)}>
                             <img src={iconCrossDark} alt='exit' className='iconCross'/>
                         </button>
                     ) : (
-                        <button className='btnSettingTomato' onClick={() => pomodoroPlay (setPlayTomato, playTomato, dataPomodoro, setDataPomodoro)}>
+                        <button className='btnSettingTomato' onClick={() => handleFunctionPomodoro(1)}>
                             {playTomato ? (<img src={iconStop} alt="stop" className='iconStop'/>) : (<img src={iconPlay} alt="Play" className='iconPlay'/>)}
                         </button>
                     )}
 
                     {dataPomodoro.done ? (
-                        <button className='btnSettingTomato' onClick={() => addCycle (dataPomodoro, setDataPomodoro)}>
+                        <button className='btnSettingTomato' onClick={() => handleFunctionPomodoro(4)}>
                             <img src={iconAdd} alt="Add" className='iconAdd'/>
                         </button>
                     ) : (
-                        <button className='btnSettingTomato' onClick={() => skipTime (dataPomodoro, setDataPomodoro, setPlayTomato)}>
+                        <button className='btnSettingTomato' onClick={() => handleFunctionPomodoro(3)}>
                             <img src={iconSkip} alt="Skip" className='iconSkip'/>
                         </button>
                     )}
