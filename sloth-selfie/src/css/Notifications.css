@@ -1,15 +1,15 @@
-
 .notifs {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     padding-bottom: 100px;
+    margin: 0 auto;
 }
 
 .notifs h5{
-    margin-bottom: 20px;
+    margin: 10px 0;
     font-weight: bold;
 }
 
@@ -54,12 +54,19 @@
     margin: 0;
 }
 
+.notif-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .new-notif {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
 }
 
 .new-notif input {
@@ -78,6 +85,10 @@
     border: 1px solid #ccc;
 }
 
+.new-notif-button {
+    background-color: #244476;
+}
+
 .add-receiver {
     display: flex;
     justify-content: space-between;
@@ -90,7 +101,6 @@
     flex-wrap: wrap;
     gap: 10px;
     width: 90%;
-    margin-bottom: 1rem;
 }
 
 .receiver-tag {
@@ -109,10 +119,18 @@
 
 .text-notif {
     width: 100%;
+    margin: 1rem 0;
 }
 
 @media screen and (min-width: 700px){
     .notifs {
         padding-bottom: 0;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+    }
+
+    .notif-list {
+        max-height: 400px;
+        overflow: auto;
     }
 }

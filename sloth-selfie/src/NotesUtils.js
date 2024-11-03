@@ -1,4 +1,3 @@
-import { a } from "react-spring";
 import { v4 as uuidv4 } from 'uuid'; //to create unic id
 
 // Function to handle changes in note data
@@ -108,7 +107,7 @@ export async function handleDeleteNote(index, notes, setNotes) {
     try {
         //const response = await fetch(`/api/notes/${noteId}`, {
           //locale:
-        const response = await fetch('http://localhost:8000/api/notes/${noteId}', {
+        const response = await fetch(`http://localhost:8000/api/notes/${noteId}`, {
         
             method: 'DELETE',
             headers: {

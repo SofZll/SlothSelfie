@@ -70,22 +70,10 @@ const Notifications = () => {
     return (
         <div className="notifs">
             <h5>Notifications</h5>
-            {notifs.map((notif) => (
-                !notif.read && (
-                    <div key={notif.id} id={`notif-${notif.id}`} className={`notif ${notif.read ? 'read' : 'unread'}`}>
-                        <div className="notif-title">
-                            <h6>{notif.sender}</h6>
-                            <p>{notif.date}</p>
-                        </div>
-                        <p>{notif.message}</p>
-                        <button className="btn notif-button" onClick={() => handleReadNotif(notif.id)}>Read</button>
-                    </div>
-                )
-            ))}
             <div className="new-notif">
                 <div className="add-receiver">
                     <input type="text" placeholder="Enter receiver's username" value={receiverInput} onChange={(e) => setReceiverInput(e.target.value)}/>
-                    <button className="btn" onClick={handleAddReceiver}>Add</button>
+                    <button className="btn new-notif-button" onClick={handleAddReceiver}>Add</button>
                 </div>
                 <div className="receivers-list">
                     {receivers.map((receiver, index) => (
@@ -97,8 +85,22 @@ const Notifications = () => {
                 </div>
                 <div className="text-notif">
                     <textarea placeholder="Write here..." />
-                    <button className="btn" onClick={handleSend}>Send</button>
+                    <button className="btn new-notif-button" onClick={handleSend}>Send</button>
                 </div>
+            </div>
+            <div className="notif-list">
+                {notifs.map((notif) => (
+                    !notif.read && (
+                        <div key={notif.id} id={`notif-${notif.id}`} className={`notif ${notif.read ? 'read' : 'unread'}`}>
+                            <div className="notif-title">
+                                <h6>{notif.sender}</h6>
+                                <p>{notif.date}</p>
+                            </div>
+                            <p>{notif.message}</p>
+                            <button className="btn notif-button" onClick={() => handleReadNotif(notif.id)}>Read</button>
+                        </div>
+                    )
+                ))}
             </div>
         </div>
     );

@@ -13,10 +13,8 @@ import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
 import ProfileFunction from './Profile';
 import HubFunction from './Hub';
-import { use } from 'marked';
 import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
-import { update } from 'react-spring';
 import { ActivityProvider } from './ActivityContext';
 //import { ActivityProvider } from './ActivityContext.Oldjs';
 
@@ -37,6 +35,8 @@ function App() {
     setIsAuthenticated(status);
   };
 
+  /*
+  // Function to open the app in fullscreen mode
   const openFullscreen = () => {
     const elem = document.documentElement; // L'intero documento sarà a schermo intero
     if (elem.requestFullscreen) {
@@ -49,6 +49,7 @@ function App() {
       elem.msRequestFullscreen();
     }
   };
+  */
 
   const isMobileLandscape = () => {
     const isMobileWidth = window.matchMedia('(max-width: 700px)').matches; // Soglia di 500px per modalità cellulare

@@ -2,7 +2,6 @@ import React, { createContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import iconHomeLight from './media/SlothLight.svg';
 import iconHomeDark from './media/SlothDark.svg';
-import { update } from 'react-spring';
 
 export const StyleContext = createContext();
 

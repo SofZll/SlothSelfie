@@ -2,6 +2,18 @@ body {
     overflow: auto;
     height: 100%;
 }
+
+.left-column,
+.right-column {
+    width: 100%;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .profile {
     display: flex;
     align-items: center;
@@ -157,8 +169,23 @@ body {
 }
 
 @media screen and (min-width: 700px){
+    .profile {
+        flex-direction: row;
+    }
+
+    .left-column {
+        flex: 1;
+        padding-left: 10%;
+    }
+
+    .right-column {
+        flex: 1;
+        padding-right: 10%;
+    }
+
     .profile-container {
-        width: 400px;
+        max-width: 450px;
+        margin-bottom: 1rem;
     }
     
     .profile-info p {
@@ -166,7 +193,8 @@ body {
     }
 
     .button-hub {
-        max-width: 400px;
+        max-width: 500px;
+        width: 90%;
     }
 
     .button-hub:hover {
