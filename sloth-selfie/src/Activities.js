@@ -49,6 +49,32 @@ function ActivitiesFunction(){
         };
     }, [updateIcon, updateStyles]);
 
+ // Function to fetch activities from the server
+ const fetchActivities = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/activities', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setActivities(data);
+    } catch (error) {
+      console.error('Errore nel fetching delle attività:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchActivities();
+  }, []);
+
     //checking for overdue activities
     useEffect(() => {
         const overdueActivities = activities.filter(activity => 

@@ -4,6 +4,7 @@ export function handleEventDataChange (field, value, setEventData) {
         ...prevEventData,
         [field]: value
     }));
+    //console.log(`Updating field: ${field}, Value: ${value}`);
     };
 
 // Function to convert all-day events to timed events 
@@ -155,13 +156,17 @@ export function handleUpdateEvent(
     events, 
     setEvents, 
     setSelectedEvent, 
-    updateAllFutureEvents, 
+    updateAllFutureEvents,
+    setUpdateAllFutureEvents,
     setIsEditing
 ) {
     e.preventDefault();
     const { id, originalId, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation } = eventData;
 
     console.log("Updating event:", id); // Check if the update function is called
+    console.log("Updating future istances:", updateAllFutureEvents);
+    console.log("Event Data:", eventData);
+    console.log("Repeat Frequency before update:", repeatFrequency);
 
     // finding the event to update
     const updatedEvents = events.map(event => {
@@ -169,35 +174,48 @@ export function handleUpdateEvent(
             // we update only the current event
             return {
                 ...event,
-                ...eventData
+                title,
+                eventLocation,
+                time,
+                duration,
+                allDay,
+                days,
+                repeatFrequency,
+                repeatEndDate,
+                repeatCount,
+                date
             };
         } else if (event.originalId === originalId && updateAllFutureEvents) {
             //we update all future events with same originalId
+            if (new Date(event.date) >= new Date(date)) {
             return {
                 ...event,
-                title: title,
-                eventLocation: eventLocation,
-                time: time,
-                duration: duration,
-                allDay: allDay,
-                days: days,
-                repeatFrequency: repeatFrequency,
-                repeatEndDate: repeatEndDate,
-                repeatCount: repeatCount,
-                date: calculateNextOccurrence(event.date, event.repeatFrequency), // Calculate the next occurrence
+                title,
+                eventLocation,
+                time,
+                duration,
+                allDay,
+                days,
+                repeatFrequency,
+                repeatEndDate,
+                repeatCount,
+                date: calculateNextOccurrence(event.id, event.date, repeatFrequency),// Calculate the next occurrence
             };
+            }
         }
         return event;
     });
-
     console.log("Updated events:", updatedEvents); // Check if the events are updated
     setEvents(updatedEvents);
+    setUpdateAllFutureEvents(false);
     handleClosePopupE(setSelectedEvent, setIsEditing, setEventData);
 }
 
 
 // Function to calculate the next occurrence of a repeated event
-const calculateNextOccurrence = (date, frequency) => {
+const calculateNextOccurrence = (id, date, frequency) => {
+    console.log(`Updating future instance for event with id ${id}`);
+    console.log('frequency:', frequency);
     const nextDate = new Date(date);
     switch (frequency) {
         case 'daily':
@@ -215,7 +233,7 @@ const calculateNextOccurrence = (date, frequency) => {
         default:
             break;
     }
-    return nextDate;
+    return nextDate.toISOString().split('T')[0]; // Convert to string format YYYY-MM-DD
 };
 
 

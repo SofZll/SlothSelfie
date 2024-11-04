@@ -82,6 +82,9 @@ export async function handleDuplicateNote (index, notes, setNotes) {
         //const response = await fetch('/note', {
         //locale:
         const response = await fetch('http://localhost:8000/api/note', {
+        //const response = await fetch('/note', {
+        //locale:
+        const response = await fetch('http://localhost:8000/api/note', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
