@@ -30,6 +30,26 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formType, setFormType] = useState('login'); 
 
+  // Check if the user is authenticated
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/user/check-auth', {
+        method: 'GET',
+        credentials: 'include',
+      });
+    
+      if (response.ok) setIsAuthenticated(true);
+      else setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      setIsAuthenticated(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+  
   const handleLogin = (status) => {
     console.log("Login status:", status);
     setIsAuthenticated(status);
@@ -166,14 +186,8 @@ function App() {
           <div className="App-body">
             <Routes>
               <Route
-                path="/"
-                element={
-                  isAuthenticated ? (
-                    <Navigate to="/home" />
-                  ) : (
-                    <Navigate to="/login" />
-                  )
-                }
+                  path="/"
+                  element={<Navigate to={checkAuth ? "/home" : "/login"} />}
               />
               <Route 
                 path="/login" 

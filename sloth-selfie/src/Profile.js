@@ -276,7 +276,7 @@ function Profile() {
                 </div>
             </div>
             <div className="right-column">
-               <Notifications /> 
+               <Notifications username={ profileData.username }/> 
             </div>
         </div>
     );
