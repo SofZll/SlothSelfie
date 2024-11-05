@@ -109,10 +109,8 @@ server.listen(PORT, () => {
 
 
 io.on('connection', (socket) => {
-    console.log('New client connected');
 
     socket.on('create session', (dataPomodoro, studying) => {
-        console.log('Create session');
         sessionCode = uuidv4().slice(0, 6);
 
         settingPomodoro[sessionCode] = {
