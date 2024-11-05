@@ -19,6 +19,7 @@ import iconTelegram from './media/telegram.svg';
 import CopyableId from './copyableId';
 import { stringTime, pomodoroPlay, passingTime, initDataPomodoro, addCycle, skipTime, resetTime, editDataPomodoro, timerState } from './pomodoroUtils';
 import io from 'socket.io-client';
+import PomodoroAnimation from './PomodoroAnimation';
 
 
 
@@ -110,10 +111,8 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                 case 1:
                     if (playTomato) {
                         socket.emit('stop', sessionCode);
-                        setPlayTomato(false);
                     } else {
                         socket.emit('start', sessionCode)
-                        setPlayTomato(true);
                     }
                     break;
                 case 2:
@@ -189,6 +188,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
         socket.emit('exit', sessionCode);
         setInShare(false);
         setSessionCode('');
+        setPlayTomato(false);
     }
 
     useEffect(() => {
@@ -212,6 +212,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
 
         socket.on('timerState', (data) => {
             timerState(data, setDataPomodoro);
+            setPlayTomato(data.play);
             console.log('Timer state:', data);
         });
 
@@ -319,7 +320,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                 )}
 
                 <div className='animation'>
-
+                    <PomodoroAnimation isStudioTime={dataPomodoro.isStudioTime} timeLeft={dataPomodoro.timeLeft} totalTime={dataPomodoro.isStudioTime ? (dataPomodoro.studioTime) : (dataPomodoro.breakTime)}/>
                 </div>
 
                 {dataPomodoro.done ? (
