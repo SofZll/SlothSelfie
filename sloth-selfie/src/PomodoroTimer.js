@@ -35,7 +35,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
     const encodedMessage = encodeURIComponent('Hi! Join my Pomodoro session with the code: '+ {sessionCode});
 
 
-    const socket = io('http://localhost:8000');
+    const socket = io('http://localhost:8000', {autoConnect: false});
 
     const [dataPomodoro, setDataPomodoro] = useState({
         timeLeft: 30*60,
@@ -107,6 +107,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
 
     const handleFunctionPomodoro = (value) => {
         if (inShare) {
+            socket.connect();
             switch (value) {
                 case 1:
                     if (playTomato) {
@@ -137,6 +138,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                 default:
                     break;
             }
+
         } else {
             switch (value) {
                 case 1:
@@ -161,16 +163,28 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     break;
             }
         }
-    }   
+    }
 
 
 
 
+
+    useEffect(() => {
+        if (inShare) {
+            socket.connect();
+        }
+
+        return () => {
+            socket.disconnect();
+        }
+
+    }, [inShare]);
 
     
 
     const settingShare = (value) => {
         setInShare(true);
+        socket.connect();
 
         if (value) {
             console.log('Join session');
@@ -184,6 +198,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
     const exitShare = () => {
 
         console.log('Exit session');
+        socket.connect();
 
         socket.emit('exit', sessionCode);
         setInShare(false);
@@ -191,36 +206,41 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
         setPlayTomato(false);
     }
 
+
     useEffect(() => {
 
-        socket.on('session joined', (data) => {
-            if (data.success) {
-                console.log('Joined session');
-            } else {
-                console.log('Session not found');
-                setInShare(false);
-                socket.disconnect();
-                setSessionCode('');
-                alert('Session not found');
-            }
-        });
+        const handleConnection = () => {
 
-        socket.on('session code', (code) => {
-            setSessionCode(code);
-            console.log('Session code:', code);
-        });
+            socket.on('session joined', (data) => {
+                if (data.success) {
+                    console.log('Joined session');
+                } else {
+                    console.log('Session not found');
+                    setInShare(false);
+                    socket.disconnect();
+                    setSessionCode('');
+                    alert('Session not found');
+                }
+            });
 
-        socket.on('timerState', (data) => {
-            timerState(data, setDataPomodoro);
-            setPlayTomato(data.play);
-            console.log('Timer state:', data);
-        });
+            socket.on('session code', (code) => {
+                setSessionCode(code);
+                console.log('Session code:', code);
+            });
 
-        socket.on('session closed', () => {
-            console.log('Session closed');
-            socket.disconnect();
-        });
+            socket.on('timerState', (data) => {
+                timerState(data, setDataPomodoro);
+                setPlayTomato(data.play);
+                console.log('Timer state:', data);
+            });
 
+            socket.on('session closed', () => {
+                console.log('Session closed');
+                socket.close();
+            });
+        };
+
+        socket.on('connect', handleConnection);
 
     }, [socket]);
     
