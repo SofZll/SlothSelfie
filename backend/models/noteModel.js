@@ -1,14 +1,32 @@
 const mongoose = require('mongoose');
 
 const noteSchema = new mongoose.Schema({
-    id: {type: Number},
-    title: { type: String, required: true },
-    category: { type: String },
+    id: {
+        type: Number,
+        required: true,
+    },
+    title: {
+         type: String,
+        required: true,
+ },
+    category: { type: String,
+        required: true,
+     },
     content: { type: String },
-    noteAuthor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    noteAccess: { type: String, default: 'private' },
-    allowedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    isTodo: { type: Boolean, default: false },
+    noteAuthor: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'User',
+        required: true,
+        },
+    noteAccess: {
+        type: String, default: 'private'
+    },
+    allowedUsers: [{
+        type: mongoose.Schema.Types.ObjectId, ref: 'User' 
+    }],
+    isTodo: {
+        type: Boolean,
+         default: false,
+        },
     tasks: [
         {
             id: { type: Number },
@@ -17,7 +35,10 @@ const noteSchema = new mongoose.Schema({
             deadline: { type: Date, default: null },
         }
     ],
-    taskDeadline: { type: Date, default: null }
+    taskDeadline: {
+        type: Date,
+        default: null
+    }
 }, { timestamps: true });
 
 const Note = mongoose.model('Note', noteSchema);

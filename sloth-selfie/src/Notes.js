@@ -111,9 +111,9 @@ function NotesFunction() {
   //Function to fetch notes from the server
   const fetchNotes = async () => {
     try {
-        const response = await fetch('/api/notes', {
+        //const response = await fetch('/api/notes', {
         //locale:
-        //const response = await fetch('http://localhost:8000/api/notes', {
+        const response = await fetch('http://localhost:8000/api/notes', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -208,7 +208,9 @@ function NotesFunction() {
       console.log("newNote con id aggiornato:", updatedNote);
 
     try {
-      const response = await fetch('/api/notes', {
+      //const response = await fetch('/api/notes', {
+       //locale:
+       const response = await fetch('http://localhost:8000/api/notes', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
