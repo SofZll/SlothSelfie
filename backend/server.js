@@ -112,7 +112,7 @@ io.on('connection', (socket) => {
         sessionCode = uuidv4().slice(0, 6);
 
         settingPomodoro[sessionCode] = {
-            timer: dataPomodoro.studioTime,
+            timer: dataPomodoro.timeLeft,
             cycles: dataPomodoro.cycles,
             cyclesLeft: dataPomodoro.cyclesLeft,
             breakTime: dataPomodoro.breakTime,
@@ -155,22 +155,24 @@ io.on('connection', (socket) => {
     });
 
     const passingTime = (sessionCode) => {
-        if (settingPomodoro[sessionCode].timer > 0) {
-            settingPomodoro[sessionCode].timer--;
-            settingPomodoro[sessionCode].studioTimeTotal++;
-        } else {
-            if (settingPomodoro[sessionCode].isStudioTime) {
-                if (settingPomodoro[sessionCode].cyclesLeft > 1) {
-                    settingPomodoro[sessionCode].timer = settingPomodoro[sessionCode].breakTime;
-                    settingPomodoro[sessionCode].isStudioTime = false;
-                } else {
-                    settingPomodoro[sessionCode].timer = 0;
-                    settingPomodoro[sessionCode].done = true;
-                }
+        if (interval) {
+            if (settingPomodoro[sessionCode].timer > 0) {
+                settingPomodoro[sessionCode].timer--;
+                settingPomodoro[sessionCode].studioTimeTotal++;
             } else {
-                settingPomodoro[sessionCode].timer = settingPomodoro[sessionCode].studyTime;
-                settingPomodoro[sessionCode].isStudioTime = true;
-                settingPomodoro[sessionCode].cyclesLeft--;
+                if (settingPomodoro[sessionCode].isStudioTime) {
+                    if (settingPomodoro[sessionCode].cyclesLeft > 1) {
+                        settingPomodoro[sessionCode].timer = settingPomodoro[sessionCode].breakTime;
+                        settingPomodoro[sessionCode].isStudioTime = false;
+                    } else {
+                        settingPomodoro[sessionCode].timer = 0;
+                        settingPomodoro[sessionCode].done = true;
+                    }
+                } else {
+                    settingPomodoro[sessionCode].timer = settingPomodoro[sessionCode].studyTime;
+                    settingPomodoro[sessionCode].isStudioTime = true;
+                    settingPomodoro[sessionCode].cyclesLeft--;
+                }
             }
         }
     }
@@ -238,6 +240,9 @@ io.on('connection', (socket) => {
         settingPomodoro[sessionCode].people--;
         console.log('Leave session');
         if (settingPomodoro[sessionCode].people === 0) {
+            clearInterval(interval);
+            delete interval;
+            interval = null;
             delete settingPomodoro[sessionCode];
             console.log('Delete session');
             socket.emit('session closed');
