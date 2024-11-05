@@ -66,6 +66,7 @@ const Notifications = ({ username }) => {
 
     const handleSend = () => {
         const message = document.querySelector('.text-notif textarea').value;
+        
         if (receivers.length && message) {
             const date = new Date();
             const sender = username;
@@ -78,6 +79,7 @@ const Notifications = ({ username }) => {
             };
             setNotifs([newNotif, ...notifs]);
         }
+
         else if (!receivers.length) {
             Swal.fire({
                 title: 'Error',
@@ -88,6 +90,7 @@ const Notifications = ({ username }) => {
                 }
             });
         }
+
         else if (!message) {
             Swal.fire({
                 title: 'Error',
