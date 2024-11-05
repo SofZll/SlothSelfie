@@ -1,5 +1,5 @@
 // eventController.js
-const Event = require('./eventModel');
+const Event = require('../models/eventModel');
 
 // Creating an event
 const createEvent = async (req, res) => {
