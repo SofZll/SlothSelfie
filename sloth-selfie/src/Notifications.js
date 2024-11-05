@@ -1,43 +1,44 @@
 import React, { useState } from 'react';
 import './css/Notifications.css';
+import Swal from 'sweetalert2'
 
-const Notifications = () => {
+const Notifications = ({ username }) => {
     const [receiverInput, setReceiverInput] = useState('');
     const [receivers, setReceivers] = useState([]);
     const [notifs, setNotifs] = useState([
         {
-            id: 1,
             sender: 'John Doe',
+            receivers: [],
             message: 'You have a new follower!',
-            date: '2023-10-01',
+            dateTime: '2023-10-01T14:30:00Z',
             read: false
         },
         {
-            id: 2,
             sender: 'Jane Doe',
+            receivers: [],
             message: 'Your post received a new like!',
-            date: '2023-10-02',
+            dateTime: '2023-10-02T09:15:00Z', // Aggiunto orario
             read: true
         },
         {
-            id: 3,
             sender: 'John Doe',
+            receivers: [],
             message: 'You have a new comment on your post!',
-            date: '2023-10-03',
+            dateTime: '2023-10-03T16:45:00Z', // Modificato in dateTime e aggiunto orario
             read: false
         },
         {
-            id: 4,
             sender: 'John Doe',
+            receivers: [],
             message: 'Your profile was viewed 10 times today!',
-            date: '2023-10-04',
+            dateTime: '2023-10-04T11:20:00Z', // Modificato in dateTime e aggiunto orario
             read: true
         },
         {
-            id: 5,
             sender: 'John Doe',
+            receivers: [],
             message: 'You have a new message!',
-            date: '2023-10-05',
+            dateTime: '2023-10-05T08:55:00Z', // Modificato in dateTime e aggiunto orario
             read: false
         }
     ]);
@@ -64,7 +65,39 @@ const Notifications = () => {
     }
 
     const handleSend = () => {
-        // Send notification
+        const message = document.querySelector('.text-notif textarea').value;
+        if (receivers.length && message) {
+            const date = new Date();
+            const sender = username;
+            const newNotif = {
+                sender,
+                receivers,
+                message,
+                date,
+                read: false
+            };
+            setNotifs([newNotif, ...notifs]);
+        }
+        else if (!receivers.length) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter at least one receiver!',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
+        }
+        else if (!message) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a message!',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
+        }
     };
 
     return (

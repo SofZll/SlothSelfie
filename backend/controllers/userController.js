@@ -9,7 +9,7 @@ const loginUser = async (req, res) => {
     try {
 
         // Check if the user exists
-        const user = await User.findOne({ username});
+        const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -46,7 +46,7 @@ const registerUser = async (req, res) => {
     const { name, username, email, password } = req.body;
     try {
         // Check if the user already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ ussername }); 
         if (existingUser) {
             return res.status(400).json({ success: false, message: 'User already exists' });
         }
@@ -125,11 +125,11 @@ const editProfile = async (req, res) => {
 // Get the profile info: FUNZIONA
 const getUserProfile = async (req, res) => {
     try {
-        const username = req.session.username;
-        if (!username) {
-            return res.status(400).json({ success: false, message: 'Username not found' });
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'UserId not found' });
         }
-        const user = await User.findOne({ username });
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -155,6 +155,19 @@ const getUsername = async (req, res) => {
     }
 };
 
+// Check if the user is logged in
+const checkAuth = async (req, res) => {
+    try {
+        if (req.session.userId) {
+            return res.status(200).json({ success: true, message: 'User is logged in' });
+        }
+        res.status(401).json({ success: false, message: 'User is not logged in' });
+    } catch (error) {
+        console.error('Error checking authentication:', error);
+        res.status(500).json({ success: false, message: 'Error checking authentication' });
+    }
+}
+
 module.exports = {
     loginUser,
     registerUser,
@@ -163,4 +176,5 @@ module.exports = {
     editImage,
     editProfile,
     getUsername,
+    checkAuth,
 };

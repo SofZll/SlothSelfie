@@ -1,5 +1,5 @@
 // eventController.js
-const Activity = require('./activityModel');
+const Activity = require('../models/activityModel');
 
 // Creating an activity
 const createActivity = async (req, res) => {
