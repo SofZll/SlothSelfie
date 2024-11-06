@@ -14,7 +14,7 @@ const noteSchema = new mongoose.Schema({
         required: true,
         },
     noteAccess: {
-        type: String, default: 'private'
+        type: String, default: 'public'
     },
     allowedUsers: [{
         type: String,
