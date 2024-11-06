@@ -157,6 +157,10 @@ function NotesFunction() {
       fetchNotes();
   }, []);
 
+  useEffect(() => {
+    console.log("Lista aggiornata di note:", notes);
+  }, [notes]);
+
   // change style page onload document
   useEffect(() => {
     updateStyles(true);
@@ -228,9 +232,9 @@ function NotesFunction() {
       console.log("newNote con id aggiornato:", updatedNote);
 
     try {
-      //const response = await fetch('/api/notes', {
+      //const response = await fetch('/api/note', {
        //locale:
-       const response = await fetch('http://localhost:8000/api/notes', {
+       const response = await fetch('http://localhost:8000/api/note', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
@@ -243,6 +247,7 @@ function NotesFunction() {
       }
 
       const savedNote = await response.json();
+      console.log("Nota salvata dal backend:", savedNote);
       setNotes([...notes, savedNote]);
       //setNotes([...notes, updatedNote]);
 
@@ -267,6 +272,8 @@ const filterNotesByDate = (notes) => {
     note.createDate.toISOString().split('T')[0] === filterDate //If a date is selected it will filter the notes by that date
   );
 };
+
+console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, noteData.noteAuthor)), sortCriterion)));
 
   return (
     <div className="notes-div">
@@ -301,10 +308,11 @@ const filterNotesByDate = (notes) => {
         {/* Note list, filtered and ordered */}
         <div className="notes-container">
           {/* Filter the accessible notes from the users and the orders */}
+          {/*{filterNotesByDate(sortNotes(notes, sortCriterion)).map((note, index) => ( */}
           {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, noteData.noteAuthor)), sortCriterion)).map((note, index) => (
             <NoteCard
               //key={index}
-              key={noteData.id}
+              key={note.id}
               note={note}
               onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
               onCopy={() => handleCopyContent(note.content)}

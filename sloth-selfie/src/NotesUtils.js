@@ -8,7 +8,10 @@ export function handleNoteDataChange (field, value, setNoteData) {
   }));
   };
 
+  //problemi con user, risulta undefined e il filtro non fa passare nulla
 export function canUserAccess(note, currentUser) {
+    console.log('Checking access for note:', note);
+    console.log('Current user:', currentUser);
     if (!note.access) {
         return false; // if no access is defined, the note is private
     }
@@ -16,7 +19,7 @@ export function canUserAccess(note, currentUser) {
       return true;  // open to everyone
     }
     if (note.access.type === 'private') {
-      return note.author === currentUser;  //only the author can access
+      return note.noteAuthor === currentUser;  //only the author can access
     }
     if (note.access.type === 'restricted') {
         //Verify if allowedUsers is an array and if it contains the current user
