@@ -22,7 +22,7 @@ const initialNotes = [
       title: 'First Note',
       category: 'Work',
       content: 'This is a note',
-      noteAuthor: 'Bob',
+      noteAuthor: 'tiziocaio200',
       access: { 
         type: 'public', 
         allowedUsers: []
@@ -31,7 +31,7 @@ const initialNotes = [
       createDate: new Date(),
       updateDate: new Date(),
     },
-  { id: 1, title: 'Second Note', category: 'Study', content: 'This is another note', author: 'Bob',
+  { id: 1, title: 'Second Note', category: 'Study', content: 'This is another note', author: 'tiziocaio200',
     access: { 
       type: 'private', 
       allowedUsers: [] 
@@ -48,7 +48,7 @@ const initialNotes = [
   { id: 3, title: 'Fourth Note', category: 'Others', content: "# This is a markdown note\n\nHere is some **bold** text, and here is a list:\n\n- Item 1\n- Item 2\n- Item 3\n\nYou can also add [links](https://example.com) and other markdown syntax.",
     noteAuthor: 'Someone', access: { 
       type: 'restricted', 
-      allowedUsers: ['Alice', 'Bob'] 
+      allowedUsers: ['Alice', 'tiziocaio200'] 
     },
     isTodo: false, tasks: [],
     createDate: new Date(), updateDate: new Date() },
@@ -57,7 +57,7 @@ const initialNotes = [
       title: 'Fifth Note',
       category: 'Work',
       content: '',
-      noteAuthor: 'Bob',
+      noteAuthor: 'tiziocaio200',
       access: { 
         type: 'public', 
         allowedUsers: []
@@ -72,8 +72,6 @@ const initialNotes = [
     },
 
 ];
-
-const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
 
 function NotesFunction() {
   const { updateStyles, updateIcon } = useContext(StyleContext);
@@ -90,7 +88,7 @@ function NotesFunction() {
     title: "",
     category: "",
     content: "",
-    noteAuthor: currentUser, //Username
+    noteAuthor: "", //Username
     noteAccess: "public",
     allowedUsers: [], //Usernames
     isTodo: false,
@@ -107,6 +105,23 @@ function NotesFunction() {
     */
     taskDeadline: '', // Deadline for the task while creating it, it is used to set the deadline before creating the task
   });
+
+  // Get the username of the authenticated user
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/user/username', {
+        credentials: 'include'
+        });const data = await response.json();
+        console.log('Username:', data.username);
+        setNoteData({ ...noteData, noteAuthor: data.username });
+    } catch (error) {
+        console.error('Error fetching username:', error);
+    }
+    };
+
+    fetchUsername();
+}, []); 
 
   //Function to fetch notes from the server
   const fetchNotes = async () => {
@@ -127,7 +142,12 @@ function NotesFunction() {
 
         const data = await response.json();
         console.log(data);
-        setNotes(data);
+        // Verifica che 'data.notes' sia effettivamente un array
+        if (Array.isArray(data.notes)) {
+            setNotes(data.notes);
+        } else {
+            console.error('La risposta non contiene un array di note:', data);
+        }
     } catch (error) {
         console.error('Errore if fetching di notes:', error);
     }
@@ -178,7 +198,7 @@ function NotesFunction() {
       title: noteData.title, 
       category: noteData.category, 
       content: noteData.isTodo ? "" : noteData.content.trim(), // If isTodo, content is empty 
-      noteAuthor: currentUser,
+      noteAuthor: noteData.noteAuthor,
       access: { 
         type: noteData.noteAccess, 
         allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
@@ -281,7 +301,7 @@ const filterNotesByDate = (notes) => {
         {/* Note list, filtered and ordered */}
         <div className="notes-container">
           {/* Filter the accessible notes from the users and the orders */}
-          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)), sortCriterion)).map((note, index) => (
+          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, noteData.noteAuthor)), sortCriterion)).map((note, index) => (
             <NoteCard
               //key={index}
               key={noteData.id}
@@ -292,7 +312,7 @@ const filterNotesByDate = (notes) => {
               onEdit={() =>{
                 //we pass the correct index using the filtered notes
                 //handleEditNote(index, notes, setNoteData, setIsEditing)
-                const filteredNotes = notes.filter(note => canUserAccess(note, currentUser));
+                const filteredNotes = notes.filter(note => canUserAccess(note, noteData.noteAuthor));
                 const noteIndex = filteredNotes.findIndex(n => n.id === note.id);
                 handleEditNote(noteIndex, notes, setNoteData, setIsEditing);  
               }}
@@ -415,8 +435,8 @@ const filterNotesByDate = (notes) => {
               {noteData.noteAccess === 'restricted' && (
             <div className='div-input-accesslist'>
               {/* We include the current user*/}
-              {currentUser && Array.isArray(noteData.allowedUsers) && !noteData.allowedUsers.includes(currentUser) && 
-              handleNoteDataChange('allowedUsers', [...noteData.allowedUsers, currentUser], setNoteData)
+              {noteData.noteAuthor && Array.isArray(noteData.allowedUsers) && !noteData.allowedUsers.includes(noteData.noteAuthor) && 
+              handleNoteDataChange('allowedUsers', [...noteData.allowedUsers, noteData.noteAuthor], setNoteData)
               }
               <input 
                 type="text" 
