@@ -2,10 +2,9 @@ const Note = require('../models/noteModel');
 
 // Create a new note
 const createNote = async (req, res) => {
-    const { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline } = req.body;
-    const noteAuthor = req.session.userId; // The user who created the note
+    const {title, category, content, noteAccess, noteAuthor, allowedUsers, isTodo, tasks, taskDeadline } = req.body;
     try {
-        const note = new Note({ title, category, content, noteAuthor, noteAccess, allowedUsers, isTodo, tasks, taskDeadline });
+        const note = new Note({title, category, content, noteAuthor, noteAccess, allowedUsers, isTodo, tasks, taskDeadline });
         await note.save();
         res.status(201).json({ success: true, note });
     } catch (error) {
