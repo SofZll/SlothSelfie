@@ -12,6 +12,9 @@ import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
+//TODO: ora che ho connesso db è tutto rotto e da aggiustare :(
+//TODO:in canUserAccess: problemi con user, risulta undefined e il filtro non fa passare nulla, ci sono problemi con allowedusers, risulta vuoto e setta accesso a public
+//Notecard renderiza ma dati non passati
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
 
@@ -31,7 +34,7 @@ const initialNotes = [
       createDate: new Date(),
       updateDate: new Date(),
     },
-  { id: 1, title: 'Second Note', category: 'Study', content: 'This is another note', author: 'tiziocaio200',
+  { id: 1, title: 'Second Note', category: 'Study', content: 'This is another note', noteAuthor: 'tiziocaio200',
     access: { 
       type: 'private', 
       allowedUsers: [] 
@@ -80,6 +83,7 @@ function NotesFunction() {
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
+  const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
   //const { activities, setActivities, setTitle, setDeadline } = useContext(ActivityContext);
   
   //defining the note data structure
@@ -115,6 +119,7 @@ function NotesFunction() {
         });const data = await response.json();
         console.log('Username:', data.username);
         setNoteData({ ...noteData, noteAuthor: data.username });
+        setUsername(data.username);
     } catch (error) {
         console.error('Error fetching username:', error);
     }
@@ -122,7 +127,7 @@ function NotesFunction() {
 
     fetchUsername();
 }, []); 
-
+       
   //Function to fetch notes from the server
   const fetchNotes = async () => {
     try {
@@ -142,7 +147,6 @@ function NotesFunction() {
 
         const data = await response.json();
         console.log(data);
-        // Verifica che 'data.notes' sia effettivamente un array
         if (Array.isArray(data.notes)) {
             setNotes(data.notes);
         } else {
@@ -157,9 +161,15 @@ function NotesFunction() {
       fetchNotes();
   }, []);
 
-  useEffect(() => {
-    console.log("Lista aggiornata di note:", notes);
-  }, [notes]);
+useEffect(() => {
+  console.log('Notes after fetch', notes);
+}, [notes]);
+
+useEffect(() => {
+  if (noteData.noteAuthor) {
+    console.log('NoteData updated with author:', noteData.noteAuthor);
+  }
+}, [noteData.noteAuthor]);
 
   // change style page onload document
   useEffect(() => {
@@ -203,10 +213,8 @@ function NotesFunction() {
       category: noteData.category, 
       content: noteData.isTodo ? "" : noteData.content.trim(), // If isTodo, content is empty 
       noteAuthor: noteData.noteAuthor,
-      access: { 
-        type: noteData.noteAccess, 
-        allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
-      },
+      noteAccess: noteData.noteAccess, 
+      allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [], // Add allowed users if restricted
       isTodo: noteData.isTodo, // Add tasks if isToDo
       tasks: noteData.isTodo 
       ? noteData.tasks.map(task => ({ 
@@ -273,8 +281,8 @@ const filterNotesByDate = (notes) => {
   );
 };
 
-console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, noteData.noteAuthor)), sortCriterion)));
-
+console.log("Filtered and Sorted Notes with user filter:", filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, username)), sortCriterion)));
+console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes, sortCriterion)));
   return (
     <div className="notes-div">
 
@@ -309,6 +317,7 @@ console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes.filt
         <div className="notes-container">
           {/* Filter the accessible notes from the users and the orders */}
           {/*{filterNotesByDate(sortNotes(notes, sortCriterion)).map((note, index) => ( */}
+          {/* 
           {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, noteData.noteAuthor)), sortCriterion)).map((note, index) => (
             <NoteCard
               //key={index}
@@ -326,6 +335,39 @@ console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes.filt
               }}
             />
           ))}
+          */}
+          {/* Filter the accessible notes from the users and the orders */}
+          {filterNotesByDate(
+                sortNotes(
+                    notes
+                        .map(response => response.note)
+                        .filter(note => note && note.noteAccess)
+                        .filter(note => {
+                          console.log("Checking access for note:", note);
+                          console.log("Current user before checking access:", username);
+                          return canUserAccess(note, username);
+                        }),
+                    sortCriterion
+                )
+            ).map((note, index) => {
+              console.log("Rendering NoteCard per nota:", note);
+              return (
+                  <NoteCard
+                      key={note.id || index}
+                      note={note}
+                      onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
+                      onCopy={() => handleCopyContent(note.content)}
+                      onDelete={() => handleDeleteNote(index, notes, setNotes)}
+                      onEdit={() => {
+                          const filteredNotes = notes
+                              .map(response => response.note)
+                              .filter(note => canUserAccess(note, note.noteAuthor));
+                          const noteIndex = filteredNotes.findIndex(n => n.id === note.id);
+                          handleEditNote(noteIndex, notes, setNoteData, setIsEditing);
+                      }}
+                  />
+              );
+          })}
         </div> 
       </div>
 
