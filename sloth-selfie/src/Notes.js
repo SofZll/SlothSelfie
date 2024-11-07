@@ -12,6 +12,9 @@ import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
+//TODO: ora che ho connesso db è tutto rotto e da aggiustare :(
+//TODO:in canUserAccess: problemi con user, risulta undefined e il filtro non fa passare nulla, ci sono problemi con allowedusers, risulta vuoto e setta accesso a public
+//Notecard renderiza ma dati non passati
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
 
@@ -22,7 +25,7 @@ const initialNotes = [
       title: 'First Note',
       category: 'Work',
       content: 'This is a note',
-      noteAuthor: 'Bob',
+      noteAuthor: 'tiziocaio200',
       access: { 
         type: 'public', 
         allowedUsers: []
@@ -31,7 +34,7 @@ const initialNotes = [
       createDate: new Date(),
       updateDate: new Date(),
     },
-  { id: 1, title: 'Second Note', category: 'Study', content: 'This is another note', author: 'Bob',
+  { id: 1, title: 'Second Note', category: 'Study', content: 'This is another note', noteAuthor: 'tiziocaio200',
     access: { 
       type: 'private', 
       allowedUsers: [] 
@@ -48,7 +51,7 @@ const initialNotes = [
   { id: 3, title: 'Fourth Note', category: 'Others', content: "# This is a markdown note\n\nHere is some **bold** text, and here is a list:\n\n- Item 1\n- Item 2\n- Item 3\n\nYou can also add [links](https://example.com) and other markdown syntax.",
     noteAuthor: 'Someone', access: { 
       type: 'restricted', 
-      allowedUsers: ['Alice', 'Bob'] 
+      allowedUsers: ['Alice', 'tiziocaio200'] 
     },
     isTodo: false, tasks: [],
     createDate: new Date(), updateDate: new Date() },
@@ -57,7 +60,7 @@ const initialNotes = [
       title: 'Fifth Note',
       category: 'Work',
       content: '',
-      noteAuthor: 'Bob',
+      noteAuthor: 'tiziocaio200',
       access: { 
         type: 'public', 
         allowedUsers: []
@@ -73,8 +76,6 @@ const initialNotes = [
 
 ];
 
-const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
-
 function NotesFunction() {
   const { updateStyles, updateIcon } = useContext(StyleContext);
   const [notes, setNotes] = useState(initialNotes || []);
@@ -82,6 +83,7 @@ function NotesFunction() {
   const [filterDate, setFilterDate] = useState('');
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
+  const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
   //const { activities, setActivities, setTitle, setDeadline } = useContext(ActivityContext);
   
   //defining the note data structure
@@ -90,7 +92,7 @@ function NotesFunction() {
     title: "",
     category: "",
     content: "",
-    noteAuthor: currentUser, //Username
+    noteAuthor: "", //Username
     noteAccess: "public",
     allowedUsers: [], //Usernames
     isTodo: false,
@@ -108,6 +110,24 @@ function NotesFunction() {
     taskDeadline: '', // Deadline for the task while creating it, it is used to set the deadline before creating the task
   });
 
+  // Get the username of the authenticated user
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/user/username', {
+        credentials: 'include'
+        });const data = await response.json();
+        console.log('Username:', data.username);
+        setNoteData({ ...noteData, noteAuthor: data.username });
+        setUsername(data.username);
+    } catch (error) {
+        console.error('Error fetching username:', error);
+    }
+    };
+
+    fetchUsername();
+}, []); 
+       
   //Function to fetch notes from the server
   const fetchNotes = async () => {
     try {
@@ -127,7 +147,11 @@ function NotesFunction() {
 
         const data = await response.json();
         console.log(data);
-        setNotes(data);
+        if (Array.isArray(data.notes)) {
+            setNotes(data.notes);
+        } else {
+            console.error('La risposta non contiene un array di note:', data);
+        }
     } catch (error) {
         console.error('Errore if fetching di notes:', error);
     }
@@ -136,6 +160,16 @@ function NotesFunction() {
   useEffect(() => {
       fetchNotes();
   }, []);
+
+useEffect(() => {
+  console.log('Notes after fetch', notes);
+}, [notes]);
+
+useEffect(() => {
+  if (noteData.noteAuthor) {
+    console.log('NoteData updated with author:', noteData.noteAuthor);
+  }
+}, [noteData.noteAuthor]);
 
   // change style page onload document
   useEffect(() => {
@@ -178,11 +212,9 @@ function NotesFunction() {
       title: noteData.title, 
       category: noteData.category, 
       content: noteData.isTodo ? "" : noteData.content.trim(), // If isTodo, content is empty 
-      noteAuthor: currentUser,
-      access: { 
-        type: noteData.noteAccess, 
-        allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
-      },
+      noteAuthor: noteData.noteAuthor,
+      noteAccess: noteData.noteAccess, 
+      allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [], // Add allowed users if restricted
       isTodo: noteData.isTodo, // Add tasks if isToDo
       tasks: noteData.isTodo 
       ? noteData.tasks.map(task => ({ 
@@ -208,9 +240,9 @@ function NotesFunction() {
       console.log("newNote con id aggiornato:", updatedNote);
 
     try {
-      //const response = await fetch('/api/notes', {
+      //const response = await fetch('/api/note', {
        //locale:
-       const response = await fetch('http://localhost:8000/api/notes', {
+       const response = await fetch('http://localhost:8000/api/note', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
@@ -223,6 +255,7 @@ function NotesFunction() {
       }
 
       const savedNote = await response.json();
+      console.log("Nota salvata dal backend:", savedNote);
       setNotes([...notes, savedNote]);
       //setNotes([...notes, updatedNote]);
 
@@ -248,6 +281,8 @@ const filterNotesByDate = (notes) => {
   );
 };
 
+console.log("Filtered and Sorted Notes with user filter:", filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, username)), sortCriterion)));
+console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes, sortCriterion)));
   return (
     <div className="notes-div">
 
@@ -281,10 +316,12 @@ const filterNotesByDate = (notes) => {
         {/* Note list, filtered and ordered */}
         <div className="notes-container">
           {/* Filter the accessible notes from the users and the orders */}
-          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, currentUser)), sortCriterion)).map((note, index) => (
+          {/*{filterNotesByDate(sortNotes(notes, sortCriterion)).map((note, index) => ( */}
+          {/* 
+          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, noteData.noteAuthor)), sortCriterion)).map((note, index) => (
             <NoteCard
               //key={index}
-              key={noteData.id}
+              key={note.id}
               note={note}
               onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
               onCopy={() => handleCopyContent(note.content)}
@@ -292,12 +329,45 @@ const filterNotesByDate = (notes) => {
               onEdit={() =>{
                 //we pass the correct index using the filtered notes
                 //handleEditNote(index, notes, setNoteData, setIsEditing)
-                const filteredNotes = notes.filter(note => canUserAccess(note, currentUser));
+                const filteredNotes = notes.filter(note => canUserAccess(note, noteData.noteAuthor));
                 const noteIndex = filteredNotes.findIndex(n => n.id === note.id);
                 handleEditNote(noteIndex, notes, setNoteData, setIsEditing);  
               }}
             />
           ))}
+          */}
+          {/* Filter the accessible notes from the users and the orders */}
+          {filterNotesByDate(
+                sortNotes(
+                    notes
+                        .map(response => response.note)
+                        .filter(note => note && note.noteAccess)
+                        .filter(note => {
+                          console.log("Checking access for note:", note);
+                          console.log("Current user before checking access:", username);
+                          return canUserAccess(note, username);
+                        }),
+                    sortCriterion
+                )
+            ).map((note, index) => {
+              console.log("Rendering NoteCard per nota:", note);
+              return (
+                  <NoteCard
+                      key={note.id || index}
+                      note={note}
+                      onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
+                      onCopy={() => handleCopyContent(note.content)}
+                      onDelete={() => handleDeleteNote(index, notes, setNotes)}
+                      onEdit={() => {
+                          const filteredNotes = notes
+                              .map(response => response.note)
+                              .filter(note => canUserAccess(note, note.noteAuthor));
+                          const noteIndex = filteredNotes.findIndex(n => n.id === note.id);
+                          handleEditNote(noteIndex, notes, setNoteData, setIsEditing);
+                      }}
+                  />
+              );
+          })}
         </div> 
       </div>
 
@@ -415,8 +485,8 @@ const filterNotesByDate = (notes) => {
               {noteData.noteAccess === 'restricted' && (
             <div className='div-input-accesslist'>
               {/* We include the current user*/}
-              {currentUser && Array.isArray(noteData.allowedUsers) && !noteData.allowedUsers.includes(currentUser) && 
-              handleNoteDataChange('allowedUsers', [...noteData.allowedUsers, currentUser], setNoteData)
+              {noteData.noteAuthor && Array.isArray(noteData.allowedUsers) && !noteData.allowedUsers.includes(noteData.noteAuthor) && 
+              handleNoteDataChange('allowedUsers', [...noteData.allowedUsers, noteData.noteAuthor], setNoteData)
               }
               <input 
                 type="text" 
