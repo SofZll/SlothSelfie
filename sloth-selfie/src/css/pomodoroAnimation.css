@@ -1,6 +1,184 @@
-.pomodoro-animation {
+:root {
+    --animation-duration-pencil: 10s;
+    --animation-duration-line: 8s;
+    --animation-delay-go: 2s;
+    --animation-delay-back: 1s;
+    --animation-running: running;
+}
+
+.pomodoro-animation{
     display: flex;
     justify-content: center;
-    width: 100%;
+    align-items: center;
+    width: 60%;
     height: 100%;
 }
+
+.pomodoro-animation *{
+    box-sizing:border-box;
+}
+
+.pomodoro-animation > div{
+    height:70%;
+    box-sizing:border-box;
+    position:relative;
+}
+  
+div > .pencil{
+    background:#555B6E;
+    width:25px;
+    height:100%;
+    max-height: 200px;
+    border:none;
+    border-radius:5px;
+    position:relative;
+}
+
+div > .study-pencil{
+
+    transform:rotate(30deg) translate(20vw,-21px);
+    animation: animaLapisStudy var(--animation-duration-pencil) linear forwards;
+    transform-origin:bottom;
+    animation-play-state: var(--animation-running);
+}
+
+div > .break-pencil{
+    transform:rotate(-30deg) translate(-20vw,21px);
+    animation: animaLapisBreak var(--animation-duration-pencil) linear backwards;
+    transform-origin:bottom;
+    animation-play-state: var(--animation-running);
+}
+  
+div > .pencil:before{
+    content:"";
+    width:25px;
+    height:25px;
+    background: none;
+    position:absolute;
+    left: 0;
+    bottom: 0;
+    transform:translatey(100%);
+    border:12px solid;
+    border-top: 20px solid;
+    border-color:#555B6E transparent transparent transparent;
+    z-index:1;
+}
+
+div > .pencil:after{
+    content: "";
+    background: #5f9ea0;
+    width:4px;
+    height: 15px;
+    position:absolute;
+    left: 0;
+    bottom:0;
+    transform:translate(10.8px,20px);
+    border-radius: 30px;
+}
+  
+.conteudo{
+    width:100%;
+    position:absolute;
+    bottom:0;
+    left: 0;
+    background: #5f9ea0;
+}
+
+.conteudoStudy{
+    height:90%;
+    animation: conteudoStudy var(--animation-duration-line) linear forwards;
+    animation-delay: var(--animation-delay-go);
+    animation-play-state: var(--animation-running);
+}
+
+.conteudoBreak{
+    height:0%;
+    animation: conteudoBreak var(--animation-duration-line) linear backwards;
+    animation-delay: var(--animation-delay-back);
+    animation-play-state: var(--animation-running);
+}
+  
+.lapisContent{
+    content:"";
+    width:100%;
+    height:90%;
+    left: 0;
+    bottom: 0;
+    position:absolute;
+    background:#ccc;
+}
+  
+.line{
+    height:3px;
+    background:#5f9ea0;
+    position:absolute;
+    left: -200px;
+    border-radius:20px;
+}
+
+.lineStudy{
+    width:0px;
+    animation: lineStudy var(--animation-duration-line) linear forwards;
+    animation-delay: var(--animation-delay-go);
+    animation-play-state: var(--animation-running);
+}
+
+.lineBreak{
+    width: 190px;
+    animation: lineBreak var(--animation-duration-line) linear backwards;
+    animation-delay: var(--animation-delay-back);
+    animation-play-state: var(--animation-running);
+}
+  
+  
+@keyframes lineStudy{
+    
+    0%{width:0px}
+    100%{width:190px}
+}
+
+@keyframes lineBreak{
+    
+    0%{width:190px}
+    100%{width:0px}
+}
+
+  
+@keyframes animaLapisStudy{
+    0%{transform:translatex(0px) rotate(220deg) translatey(200px)}
+    10%{transform:translatex(0px) rotate(40deg) translatey(-18px)}
+    10%{transform:translatex(0px) rotate(40deg) translatey(-18px)}
+    20%{transform:translatex(-220px) translatey(-18px)}
+    20%{transform:translatex(-220px) rotate(-10deg) translatey(-18px)}
+    100%{transform:translatex(-24px)  rotate(40deg) translatey(-18px)}
+}
+
+@keyframes animaLapisBreak{
+    0%{transform:translatex(-24px)  rotate(40deg) translatey(-18px)}
+    5%{transform:translatex(-24px)  rotate(40deg) translatey(-40px)}
+    10%{transform:translatex(0px)  rotate(220deg) translatey(130px)}
+    10%{transform:translatex(-24px) rotate(220deg) translatey(130px)}
+    90%{transform:translatex(-220px)  rotate(220deg) translatey(205px)}
+    90%{transform:translatex(-220px)  rotate(220deg) translatey(0px)}
+    100%{transform:translatex(0px)  rotate(40deg) translatey(-18px)}
+}
+
+
+  
+@keyframes conteudoStudy{
+    0%{height:90%}
+    100%{height:0%}
+}
+
+@keyframes conteudoBreak{
+    0%{height:0%}
+    100%{height:90%}
+}
+
+@media screen and (min-width: 769px){
+    .pomodoro-animation{
+        width: 80%;
+    }
+    
+}
+
