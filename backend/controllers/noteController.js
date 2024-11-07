@@ -4,7 +4,18 @@ const Note = require('../models/noteModel');
 const createNote = async (req, res) => {
     const {title, category, content, noteAccess, noteAuthor, allowedUsers, isTodo, tasks, taskDeadline } = req.body;
     try {
-        const note = new Note({title, category, content, noteAuthor, noteAccess, allowedUsers, isTodo, tasks, taskDeadline });
+        const note = new Note({
+            title,
+            category,
+            content,
+            noteAuthor,
+            noteAccess,
+            allowedUsers: noteAccess === 'restricted' ? allowedUsers : [],
+            isTodo,
+            tasks,
+            createDate: new Date(),
+            updateDate: new Date(),
+        });
         await note.save();
         res.status(201).json({ success: true, note });
     } catch (error) {
@@ -26,11 +37,11 @@ const getNotes = async (req, res) => {
 
 // Update a note
 const updateNote = async (req, res) => {
-    const { noteId } = req.params;
+    const { id } = req.params;
     const { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline } = req.body;
     try {
         const note = await Note.findByIdAndUpdate(
-            { _id: noteId, noteAuthor: req.session.userId }, // Verify that the note belongs to the user
+            { _id: id, noteAuthor: req.session.userId }, // Verify that the note belongs to the user
             { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline },
             { new: true }
         );

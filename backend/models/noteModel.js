@@ -34,6 +34,14 @@ const noteSchema = new mongoose.Schema({
     taskDeadline: {
         type: Date,
         default: null
+    },
+    createDate:{
+        type: Date,
+        default: Date.now
+    },
+    updateDate:{
+        type: Date,
+        default: Date.now
     }
 }, { timestamps: true });
 
