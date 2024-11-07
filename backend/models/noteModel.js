@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const noteSchema = new mongoose.Schema({
-    id: {
-        type: Number,
-        required: true,
-    },
     title: {
          type: String,
         required: true,
@@ -14,14 +10,14 @@ const noteSchema = new mongoose.Schema({
      },
     content: { type: String },
     noteAuthor: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'User',
+        type: String,
         required: true,
         },
     noteAccess: {
-        type: String, default: 'private'
+        type: String, default: 'public'
     },
     allowedUsers: [{
-        type: mongoose.Schema.Types.ObjectId, ref: 'User' 
+        type: String,
     }],
     isTodo: {
         type: Boolean,

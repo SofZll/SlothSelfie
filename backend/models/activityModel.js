@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const activitySchema = new mongoose.Schema({
-    id: {
-        type: Number,
-        required: true
-    },
     title: {
         type: String,
         required: true
@@ -18,8 +14,7 @@ const activitySchema = new mongoose.Schema({
         default: false
     },
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        type: String,
         required: true
     }
 }, { timestamps: true });

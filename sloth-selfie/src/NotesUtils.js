@@ -9,20 +9,22 @@ export function handleNoteDataChange (field, value, setNoteData) {
   };
 
 export function canUserAccess(note, currentUser) {
-    if (!note.access) {
+    console.log('Checking access for note:', note);
+    console.log('Current user:', currentUser);
+    if (!note.noteAccess) {
         return false; // if no access is defined, the note is private
     }
-    if (note.access.type === 'public') {
+    if (note.noteAccess === 'public') {
       return true;  // open to everyone
     }
-    if (note.access.type === 'private') {
-      return note.author === currentUser;  //only the author can access
+    if (note.noteAccess === 'private') {
+      return note.noteAuthor === currentUser;  //only the author can access
     }
-    if (note.access.type === 'restricted') {
+    if (note.noteAccess === 'restricted') {
         //Verify if allowedUsers is an array and if it contains the current user
         //console.log('Allowed Users:', note.access.allowedUsers);
-        return Array.isArray(note.access.allowedUsers) && 
-               note.access.allowedUsers.includes(currentUser);
+        return Array.isArray(note.noteAccess.allowedUsers) && 
+               note.noteAccess.allowedUsers.includes(currentUser);
     }
 
     return false;
