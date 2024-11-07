@@ -157,7 +157,7 @@ export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteDa
       updateDate: new Date() // updates the modify date
     };
     try {
-      const response = await fetch(`/note/${updatedNote.id}`, {
+      const response = await fetch(`/note/${updatedNote._id}`, {
           method: 'PUT',
           headers: {
               'Content-Type': 'application/json'
