@@ -358,8 +358,10 @@ justify-content: space-around;
 }
 
 .animation {
+  display: flex;
   height: 27vh;
   width: 100%;
+  justify-content: end;
 }
 
 .divCode {

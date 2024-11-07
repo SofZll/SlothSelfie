@@ -59,6 +59,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
 
     const [playTomato, setPlayTomato] = useState(false);
     const [stringPrintTime, setStringPrintTime] = useState(stringTime(dataPomodoro.timeLeft));
+    const [hadSkipped, setHadSkipped] = useState(false);
 
     const updateEditData = (field, value) => {
         setEditData((prevData) => ({
@@ -121,6 +122,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     break;
                 case 3:
                     socket.emit('skip', sessionCode);
+                    setHadSkipped(true);
                     break;
                 case 4:
                     socket.emit('add', sessionCode);
@@ -149,6 +151,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     break;
                 case 3:
                     skipTime (dataPomodoro, setDataPomodoro, setPlayTomato);
+                    setHadSkipped(true);
                     break;
                 case 4:
                     addCycle (dataPomodoro, setDataPomodoro);
@@ -340,7 +343,13 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                 )}
 
                 <div className='animation'>
-                    <PomodoroAnimation isStudioTime={dataPomodoro.isStudioTime} timeLeft={dataPomodoro.timeLeft} totalTime={dataPomodoro.isStudioTime ? (dataPomodoro.studioTime) : (dataPomodoro.breakTime)}/>
+                    <PomodoroAnimation 
+                    isStudioTime={dataPomodoro.isStudioTime} 
+                    studioTime={dataPomodoro.studioTime} 
+                    breakTime={dataPomodoro.breakTime} 
+                    isPlaying={playTomato}
+                    skip={hadSkipped}
+                    setSkip={setHadSkipped}/>
                 </div>
 
                 {dataPomodoro.done ? (
