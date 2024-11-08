@@ -10,7 +10,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 60%;
+    width: 100%;
     height: 100%;
 }
 
@@ -19,40 +19,38 @@
 }
 
 .pomodoro-animation > div{
+    width: 90%;
     height:70%;
     box-sizing:border-box;
     position:relative;
 }
   
 div > .pencil{
+    bottom: 0;
+    left: 50%;
     background:#555B6E;
     width:25px;
-    height:100%;
-    max-height: 200px;
+    height:15vh;
     border:none;
     border-radius:5px;
-    position:relative;
+    position:absolute;
 }
 
 div > .study-pencil{
-
-    transform:rotate(30deg) translate(20vw,-21px);
     animation: animaLapisStudy var(--animation-duration-pencil) linear forwards;
-    transform-origin:bottom;
+    transform-origin:center;
     animation-play-state: var(--animation-running);
 }
 
 div > .break-pencil{
-    transform:rotate(-30deg) translate(-20vw,21px);
     animation: animaLapisBreak var(--animation-duration-pencil) linear backwards;
-    transform-origin:bottom;
+    transform-origin:center;
     animation-play-state: var(--animation-running);
 }
   
 div > .pencil:before{
     content:"";
     width:25px;
-    height:25px;
     background: none;
     position:absolute;
     left: 0;
@@ -79,13 +77,13 @@ div > .pencil:after{
 .conteudo{
     width:100%;
     position:absolute;
-    bottom:0;
-    left: 0;
     background: #5f9ea0;
 }
 
 .conteudoStudy{
     height:90%;
+    bottom:0;
+    left: 0;
     animation: conteudoStudy var(--animation-duration-line) linear forwards;
     animation-delay: var(--animation-delay-go);
     animation-play-state: var(--animation-running);
@@ -93,7 +91,9 @@ div > .pencil:after{
 
 .conteudoBreak{
     height:0%;
-    animation: conteudoBreak var(--animation-duration-line) linear backwards;
+    left: 0;
+    top: 10%;
+    animation: conteudoBreak var(--animation-duration-line) linear forwards;
     animation-delay: var(--animation-delay-back);
     animation-play-state: var(--animation-running);
 }
@@ -109,23 +109,24 @@ div > .pencil:after{
 }
   
 .line{
+    display: flex;
     height:3px;
     background:#5f9ea0;
-    position:absolute;
-    left: -200px;
     border-radius:20px;
+    position: absolute;
+    bottom: 0;
 }
 
 .lineStudy{
-    width:0px;
+    width:0%;
     animation: lineStudy var(--animation-duration-line) linear forwards;
     animation-delay: var(--animation-delay-go);
     animation-play-state: var(--animation-running);
 }
 
 .lineBreak{
-    width: 190px;
-    animation: lineBreak var(--animation-duration-line) linear backwards;
+    width: 50%;
+    animation: lineBreak var(--animation-duration-line) linear forwards;
     animation-delay: var(--animation-delay-back);
     animation-play-state: var(--animation-running);
 }
@@ -133,34 +134,71 @@ div > .pencil:after{
   
 @keyframes lineStudy{
     
-    0%{width:0px}
-    100%{width:190px}
+    0%{width:0%}
+    100%{width:50%}
 }
 
 @keyframes lineBreak{
     
-    0%{width:190px}
-    100%{width:0px}
+    0%{width:50%}
+    100%{width:0%}
 }
 
+@media screen and (max-width: 769px){
+    div > .study-pencil{
+        transform:rotate(20deg) translate(-3vw,-30px);
+    }
+    
+    div > .break-pencil{
+        transform:rotate(20deg) translate(-3vw,-30px);
+    }
+
+    @keyframes animaLapisStudy{
+        0%{transform:translatex(-3vw) rotate(20deg) translatey(-30px)}
+        10%{transform:translatex(-20vw) rotate(40deg) translatey(-2.5vh)}
+        20%{transform:translatex(-46vw) rotate(0deg) translatey(-2.5vh)}
+        90%{transform:translatex(4vw)  rotate(40deg) translatey(-1vh)}
+        100%{transform:translatex(5vw) rotate(30deg) translatey(-1.5vh)}
+    }
+    
+    @keyframes animaLapisBreak{
+        0%{transform:translatex(5vw)  rotate(30deg) translatey(-1.5vh)}
+        5%{transform:rotate(30deg) translateY(-30%)}
+        8%{transform:translateX(60%) rotate(220deg) translateY(0%)}
+        10%{transform:translateX(6vw) rotate(220deg) translateY(-1vh)}
+        90%{transform:translateX(-37vw) rotate(220deg) translateY(-1vh)}
+        100%{transform:translatex(-3vw) rotate(20deg) translatey(-30px)}
+    }
+    
+}
   
-@keyframes animaLapisStudy{
-    0%{transform:translatex(0px) rotate(220deg) translatey(200px)}
-    10%{transform:translatex(0px) rotate(40deg) translatey(-18px)}
-    10%{transform:translatex(0px) rotate(40deg) translatey(-18px)}
-    20%{transform:translatex(-220px) translatey(-18px)}
-    20%{transform:translatex(-220px) rotate(-10deg) translatey(-18px)}
-    100%{transform:translatex(-24px)  rotate(40deg) translatey(-18px)}
-}
 
-@keyframes animaLapisBreak{
-    0%{transform:translatex(-24px)  rotate(40deg) translatey(-18px)}
-    5%{transform:translatex(-24px)  rotate(40deg) translatey(-40px)}
-    10%{transform:translatex(0px)  rotate(220deg) translatey(130px)}
-    10%{transform:translatex(-24px) rotate(220deg) translatey(130px)}
-    90%{transform:translatex(-220px)  rotate(220deg) translatey(205px)}
-    90%{transform:translatex(-220px)  rotate(220deg) translatey(0px)}
-    100%{transform:translatex(0px)  rotate(40deg) translatey(-18px)}
+
+@media screen and (min-width: 769px){
+    div > .study-pencil{
+        transform:rotate(20deg) translate(-30px,-3vw);
+    }
+    
+    div > .break-pencil{
+        transform:rotate(20deg) translate(-30px,-3vw);
+    }
+
+    @keyframes animaLapisStudy{
+        0%{transform:translatex(-3vw) rotate(20deg) translatey(-30px)}
+        10%{transform:translatex(-10vw) rotate(40deg) translatey(-2.5vh)}
+        20%{transform:translatex(-21.5vw) rotate(0deg) translatey(-2.5vh)}
+        90%{transform:translatex(0vw)  rotate(40deg) translatey(-0.5vh)}
+        100%{transform:translatex(1.5vw) rotate(30deg) translatey(-1.5vh)}
+    }
+    
+    @keyframes animaLapisBreak{
+        0%{transform:translatex(1.5vw)  rotate(30deg) translatey(-1.5vh)}
+        5%{transform:translateX(2vw) rotate(30deg) translateY(-30%)}
+        8%{transform:translateX(2vw) rotate(220deg) translateY(0%)}
+        10%{transform:translateX(2vw) rotate(220deg) translateY(-1vh)}
+        90%{transform:translateX(-19vw) rotate(220deg) translateY(-1vh)}
+        100%{transform:translatex(-3vw) rotate(20deg) translatey(-30px)}
+    }
 }
 
 
@@ -173,12 +211,5 @@ div > .pencil:after{
 @keyframes conteudoBreak{
     0%{height:0%}
     100%{height:90%}
-}
-
-@media screen and (min-width: 769px){
-    .pomodoro-animation{
-        width: 80%;
-    }
-    
 }
 
