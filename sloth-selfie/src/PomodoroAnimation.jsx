@@ -9,6 +9,11 @@ function PomodoroAnimation(data) {
     const [delayBack, setDelayBack] = useState('0s')
     const [play, setPlay] = useState(false);
     const [isStudioTime, setIsStudioTime] = useState(true);
+    const [animationKey, setAnimationKey] = useState(0);
+
+  const restartAnimation = () => {
+    setAnimationKey(prevKey => prevKey + 1);
+  };
 
     useEffect(() => {
         if (data.isStudioTime) {
@@ -25,16 +30,20 @@ function PomodoroAnimation(data) {
         setPlay(data.isPlaying);
         setIsStudioTime(data.isStudioTime);
 
+        if (data.reset) {
+            restartAnimation();
+            data.setReset(false);
+        }
+
     } , [data]);
 
 
     useEffect(() => {
         document.documentElement.style.setProperty('--animation-duration-pencil', penciltime);
-        console.log('penciltime', penciltime);
         document.documentElement.style.setProperty('--animation-duration-line', linetime);
-        console.log('linetime', linetime);
         document.documentElement.style.setProperty('--animation-delay-go', delayGo);
         document.documentElement.style.setProperty('--animation-delay-back', delayBack);
+
     } , [penciltime, linetime, delayGo, delayBack]);
 
 
@@ -53,7 +62,7 @@ function PomodoroAnimation(data) {
     return (
         <div className="pomodoro-animation">
             <div>
-                <div className={isStudioTime ? 'pencil study-pencil' : 'pencil break-pencil'}>
+                <div key={animationKey} className={isStudioTime ? 'pencil study-pencil' : 'pencil break-pencil'}>
                     <span class="lapisContent"></span>
                     
                     <span
