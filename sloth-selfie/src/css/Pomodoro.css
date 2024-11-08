@@ -479,4 +479,12 @@ hr {
   .div-pomodoro h2 {
     font-size: 1.5rem;
   }
+
+  .edit-popup,
+  .send-popup {
+    width: 40%;
+    left: auto;
+    top: 15vh;
+    height: 80vh;
+  }
 }
