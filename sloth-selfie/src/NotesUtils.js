@@ -23,8 +23,8 @@ export function canUserAccess(note, currentUser) {
     if (note.noteAccess === 'restricted') {
         //Verify if allowedUsers is an array and if it contains the current user
         //console.log('Allowed Users:', note.access.allowedUsers);
-        return Array.isArray(note.noteAccess.allowedUsers) && 
-               note.noteAccess.allowedUsers.includes(currentUser);
+        return Array.isArray(note.allowedUsers) && 
+               note.allowedUsers.includes(currentUser);
     }
 
     return false;
@@ -74,21 +74,22 @@ export async function handleDuplicateNote (index, notes, setNotes) {
     const noteToDuplicate = notes[index];
     
     // Crea una nuova nota duplicata con la data attuale
+    /*
     const duplicatedNote = { 
         ...noteToDuplicate, 
         date: new Date(),
         id: uuidv4()
-    };
+    };*/
 
     try {
         //const response = await fetch('/note', {
         //locale:
-         const response = await fetch('http://localhost:8000/api/note', {
+         const response = await fetch('http://localhost:8000/api/note/duplicate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(duplicatedNote)
+            body: JSON.stringify({noteId: noteToDuplicate.id})
         });
 
         if (!response.ok) {
@@ -127,6 +128,7 @@ export async function handleDeleteNote(index, notes, setNotes) {
 
 export function handleEditNote(index, notes, setNoteData, setIsEditing,) {
   console.log('Editing note at index:', index);
+  setIsEditing(index);
   console.log('Note data:', notes[index]);
   //const index = notes.findIndex(note => note.id === id);
   if (index !== -1) {
@@ -135,8 +137,8 @@ export function handleEditNote(index, notes, setNoteData, setIsEditing,) {
   handleNoteDataChange('category', notes[index].category, setNoteData);
   handleNoteDataChange('content', notes[index].content, setNoteData);
   handleNoteDataChange('noteAuthor', notes[index].noteAuthor, setNoteData);
-  handleNoteDataChange('noteAccess', notes[index].access.type, setNoteData);
-  handleNoteDataChange('allowedUsers', notes[index].access.allowedUsers, setNoteData);
+  handleNoteDataChange('noteAccess', notes[index].noteAccess, setNoteData);
+  handleNoteDataChange('allowedUsers', notes[index].allowedUsers, setNoteData);
   handleNoteDataChange('isTodo', notes[index].isTodo, setNoteData);
   handleNoteDataChange('tasks', notes[index].tasks, setNoteData);
   }
@@ -147,10 +149,8 @@ export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteDa
       ...notes[index],
       title: noteData.title,
       author: noteData.noteAuthor,
-      access: { 
-        type: noteData.noteAccess, 
-        allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
-      },
+      noteAccess: noteData.noteAccess, 
+      allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [], // Add allowed users if restricted
       category: noteData.category,
       content: noteData.content,
       tasks: noteData.tasks,

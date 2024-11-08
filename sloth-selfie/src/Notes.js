@@ -13,8 +13,7 @@ import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 //TODO: ora che ho connesso db è tutto rotto e da aggiustare :(
-//TODO:in canUserAccess: problemi con user, risulta undefined e il filtro non fa passare nulla, ci sono problemi con allowedusers,
-//Notecard renderiza ma dati non passati, abbiamo problemi di id back-front e con lista utenti autorizzati
+//aggiusta edit e delete e duplicate e i filtri
 //filtri di data e ordinamento non funzionano
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato

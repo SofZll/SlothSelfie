@@ -3,7 +3,7 @@ const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, checkAuth} = require('../controllers/userController');
 const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
-const { createNote, getNotes, updateNote, deleteNote } = require('../controllers/noteController');
+const { createNote, getNotes, updateNote, deleteNote, duplicateNote } = require('../controllers/noteController');
 const { createNotification, getNotifications } = require('../controllers/notificationController')
 //const { createPost, getPosts } = require('../controllers/hubController');
 const { createActivity, getActivities, updateActivity, deleteActivity } = require('../controllers/activityController');
@@ -49,6 +49,7 @@ router.post('/note', createNote);
 router.get('/notes', getNotes);
 router.put('/note/:noteId', updateNote);
 router.delete('/note/:noteId', deleteNote);
+router.duplicate('/note/duplicate', duplicateNote);
 
 
 // Activity endpoints

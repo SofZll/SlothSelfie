@@ -70,9 +70,36 @@ const deleteNote = async (req, res) => {
     }
 };
 
+// Duplicate a note
+const duplicateNote = async (req, res) => {
+    const { noteId } = req.body;
+    try {
+        // find the note to duplicate
+        const existingNote = await Note.findById(noteId);
+        if (!existingNote) {
+            return res.status(404).json({ success: false, message: 'Note not found' });
+        }
+
+        // creates the duplicated note
+        const duplicatedNote = new Note({
+            ...existingNote.toObject(),
+            _id: undefined,  // Rremoves the _id field, mongo will create a new one
+            createDate: new Date(),
+            updateDate: new Date(),
+        });
+
+        await duplicatedNote.save();
+        res.status(201).json({ success: true, note: duplicatedNote });
+    } catch (error) {
+        console.error('Error duplicating note:', error);
+        res.status(500).json({ success: false, message: 'Error duplicating note' });
+    }
+};
+
 module.exports = {
     createNote,
     getNotes,
     updateNote,
     deleteNote,
+    duplicateNote,
 };
