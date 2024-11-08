@@ -29,13 +29,13 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
     <div className="note-card">
       <h3>{note.title}</h3>
       <small>{note.category}</small><br/>
-      <small>Author: {note.author}</small><br/>
+      <small>Author: {note.noteAuthor}</small><br/>
       <small>
-        Access: {note.access?.type === 'public' 
+        Access: {note.noteAccess === 'public' 
           ? 'Public' 
-          : note.access?.type === 'private' 
+          : note.noteAccess === 'private' 
           ? 'Private' 
-          : `Shared with: ${note.access?.allowedUsers.join(', ')}`}
+          : `Shared with: ${note.allowedUsers.join(', ')}`}
     </small>
     {/* Shows the todo list if it is one */}
     {note.isTodo ? (
