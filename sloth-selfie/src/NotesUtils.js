@@ -23,8 +23,8 @@ export function canUserAccess(note, currentUser) {
     if (note.noteAccess === 'restricted') {
         //Verify if allowedUsers is an array and if it contains the current user
         //console.log('Allowed Users:', note.access.allowedUsers);
-        return Array.isArray(note.noteAccess.allowedUsers) && 
-               note.noteAccess.allowedUsers.includes(currentUser);
+        return Array.isArray(note.allowedUsers) && 
+               note.allowedUsers.includes(currentUser);
     }
 
     return false;
@@ -135,8 +135,8 @@ export function handleEditNote(index, notes, setNoteData, setIsEditing,) {
   handleNoteDataChange('category', notes[index].category, setNoteData);
   handleNoteDataChange('content', notes[index].content, setNoteData);
   handleNoteDataChange('noteAuthor', notes[index].noteAuthor, setNoteData);
-  handleNoteDataChange('noteAccess', notes[index].access.type, setNoteData);
-  handleNoteDataChange('allowedUsers', notes[index].access.allowedUsers, setNoteData);
+  handleNoteDataChange('noteAccess', notes[index].noteAccess, setNoteData);
+  handleNoteDataChange('allowedUsers', notes[index].allowedUsers, setNoteData);
   handleNoteDataChange('isTodo', notes[index].isTodo, setNoteData);
   handleNoteDataChange('tasks', notes[index].tasks, setNoteData);
   }
@@ -147,10 +147,8 @@ export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteDa
       ...notes[index],
       title: noteData.title,
       author: noteData.noteAuthor,
-      access: { 
-        type: noteData.noteAccess, 
-        allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [] // Add allowed users if restricted
-      },
+      noteAccess: noteData.noteAccess, 
+      allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [], // Add allowed users if restricted
       category: noteData.category,
       content: noteData.content,
       tasks: noteData.tasks,
