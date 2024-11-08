@@ -13,8 +13,9 @@ import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 //TODO: ora che ho connesso db è tutto rotto e da aggiustare :(
-//TODO:in canUserAccess: problemi con user, risulta undefined e il filtro non fa passare nulla, ci sono problemi con allowedusers, risulta vuoto e setta accesso a public
-//Notecard renderiza ma dati non passati
+//TODO:in canUserAccess: problemi con user, risulta undefined e il filtro non fa passare nulla, ci sono problemi con allowedusers,
+//Notecard renderiza ma dati non passati, abbiamo problemi di id back-front e con lista utenti autorizzati
+//filtri di data e ordinamento non funzionano
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
 
@@ -88,7 +89,6 @@ function NotesFunction() {
   
   //defining the note data structure
   const [noteData, setNoteData] = useState({
-    id: "",
     title: "",
     category: "",
     content: "",
@@ -108,6 +108,8 @@ function NotesFunction() {
     ],
     */
     taskDeadline: '', // Deadline for the task while creating it, it is used to set the deadline before creating the task
+    createDate: new Date(), //used in Notecard
+    updateDate: new Date(), //used in Notecard
   });
 
   // Get the username of the authenticated user
@@ -208,7 +210,6 @@ useEffect(() => {
 
   if (noteData.title && noteData.category && (noteData.content || noteData.isTodo) && noteData.noteAuthor && noteData.noteAccess) {
     const newNote = { 
-      id: uuidv4(),
       title: noteData.title, 
       category: noteData.category, 
       content: noteData.isTodo ? "" : noteData.content.trim(), // If isTodo, content is empty 
@@ -223,7 +224,7 @@ useEffect(() => {
         deadline: task.deadline || null
       })) : [],
       createDate: new Date(),
-      updateDate: new Date()
+      updateDate: new Date(),
     };
 
      // Add tasks as activities if they have a deadline
@@ -235,9 +236,9 @@ useEffect(() => {
       });
     }
     //adjusting id
-      console.log("newNote.id:", newNote.id);
-      const updatedNote = { ...newNote, id: uuidv4()};
-      console.log("newNote con id aggiornato:", updatedNote);
+      //console.log("newNote.id:", newNote.id);
+      //const updatedNote = { ...newNote, id: uuidv4()};
+     // console.log("newNote con id aggiornato:", updatedNote);
 
     try {
       //const response = await fetch('/api/note', {
@@ -247,17 +248,18 @@ useEffect(() => {
           headers: {
               'Content-Type': 'application/json',
           },
-          body: JSON.stringify(updatedNote)
+          body: JSON.stringify(newNote)
       });
 
       if (!response.ok) {
           throw new Error('Errore nella creazione della nota');
       }
 
+      // Get the saved note from the backend
       const savedNote = await response.json();
+
       console.log("Nota salvata dal backend:", savedNote);
       setNotes([...notes, savedNote]);
-      //setNotes([...notes, updatedNote]);
 
       //resetting fields
       handleNoteDataChange('title', '', setNoteData);
