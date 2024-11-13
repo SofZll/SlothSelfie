@@ -189,20 +189,24 @@ export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteDa
 };
 
 export function sortNotes(notes, sortCriterion) {
+  return [...notes].sort((a, b) => {
+    const aDate = a.updateDate instanceof Date ? a.updateDate : new Date(a.updateDate);
+    const bDate = b.updateDate instanceof Date ? b.updateDate : new Date(b.updateDate);
+    
     switch (sortCriterion) {
       case 'alphabetical':
-        return [...notes].sort((a, b) => a.title.localeCompare(b.title));
+        return a.title.localeCompare(b.title);
       case 'length':
-        return [...notes].sort((a, b) => b.content.length - a.content.length);
+        return b.content.length - a.content.length;
       case 'most_recent':
-        return [...notes].sort((a, b) => b.updateDate - a.updateDate);
+        return bDate - aDate;
       case 'least_recent':
-        return [...notes].sort((a, b) => a.updateDate - b.updateDate);
-
+        return aDate - bDate;
       default:
-        return notes;
+        return 0;
     }
-  };
+  });
+}
 
   export function handleCopyContent(content) {
     navigator.clipboard.writeText(content).then(() => {
