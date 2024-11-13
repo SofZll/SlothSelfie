@@ -13,8 +13,7 @@ import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 //TODO: ora che ho connesso db è tutto rotto e da aggiustare :(
-//TODO:in canUserAccess: problemi con user, risulta undefined e il filtro non fa passare nulla, ci sono problemi con allowedusers,
-//aggiusta edit e delete e duplicate e i filtri
+//aggiusta edit e delete e duplicate e i filtri filter notes
 //Notecard renderiza ma dati non passati, abbiamo problemi di id back-front e con lista utenti autorizzati
 //filtri di data e ordinamento non funzionano
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
@@ -86,6 +85,7 @@ function NotesFunction() {
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
   const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
+  const [filteredNotes, setFilteredNotes] = useState([]);
   //const { activities, setActivities, setTitle, setDeadline } = useContext(ActivityContext);
   
   //defining the note data structure
@@ -174,6 +174,12 @@ useEffect(() => {
   }
 }, [noteData.noteAuthor]);
 
+//filters and sorts notes every time the filter/sort criteria change
+useEffect(() => {
+  const filteredAndSorted = filterNotesByDate(sortNotes(notes, sortCriterion));
+  setFilteredNotes(filteredAndSorted);
+}, [notes, filterDate, sortCriterion, username]);
+
   // change style page onload document
   useEffect(() => {
     updateStyles(true);
@@ -187,9 +193,6 @@ useEffect(() => {
 
 
   const handleAddNote = async () => {
-    //console.log("isTodo:", isTodo);
-    //console.log("noteContent:", noteContent);
-    //console.log("tasks:", tasks);
     console.log("isTodo:", noteData.isTodo);
     console.log("tasks length:", noteData.tasks.length);
     //console.log("noteData:", noteData);
@@ -224,8 +227,8 @@ useEffect(() => {
         completed: task.completed || false,
         deadline: task.deadline || null
       })) : [],
-      createDate: new Date(),
-      updateDate: new Date(),
+      createDate: noteData.createDate ? new Date(noteData.createDate) : new Date(),
+      updateDate: noteData.updateDate ? new Date(noteData.updateDate) : new Date(),
     };
 
      // Add tasks as activities if they have a deadline
@@ -236,11 +239,6 @@ useEffect(() => {
         }
       });
     }
-    //adjusting id
-      //console.log("newNote.id:", newNote.id);
-      //const updatedNote = { ...newNote, id: uuidv4()};
-     // console.log("newNote con id aggiornato:", updatedNote);
-
     try {
       //const response = await fetch('/api/note', {
        //locale:
@@ -277,11 +275,15 @@ useEffect(() => {
   }
 }
 
+////If a date is selected it will filter the notes by that date
 const filterNotesByDate = (notes) => {
   if (!filterDate) return notes;
-  return notes.filter((note) =>
-    note.createDate.toISOString().split('T')[0] === filterDate //If a date is selected it will filter the notes by that date
-  );
+
+  return notes.filter((note) => {
+    if (!note.createDate) return false;
+    const noteDate = note.createDate instanceof Date ? note.createDate : new Date(note.createDate);
+    return noteDate.toISOString().split('T')[0] === filterDate;
+  });
 };
 
 console.log("Filtered and Sorted Notes with user filter:", filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, username)), sortCriterion)));

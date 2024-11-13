@@ -104,7 +104,11 @@ export async function handleDuplicateNote (index, notes, setNotes) {
 
 export async function handleDeleteNote(index, notes, setNotes) {
     //setNotes(notes.filter((_, i) => i !== index));
-    const noteId = notes[index].id;
+    console.log("Nota da eliminare:", notes[index]);
+    const noteId = notes[index]._id;
+
+    if (!noteId) 
+      console.error("ID della nota non trovato");
 
     try {
         const response = await fetch(`/api/notes/${noteId}`, {
