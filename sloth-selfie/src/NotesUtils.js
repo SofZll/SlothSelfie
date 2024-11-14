@@ -2,8 +2,8 @@ import { v4 as uuidv4 } from 'uuid'; //to create unic id
 
 // Function to handle changes in note data
 export function handleNoteDataChange (field, value, setNoteData) {
-  setNoteData((prevEventData) => ({
-      ...prevEventData,
+  setNoteData((prevData) => ({
+      ...prevData,
       [field]: value
   }));
   };
@@ -103,15 +103,15 @@ export async function handleDuplicateNote (index, notes, setNotes) {
   };
 
 export async function handleDeleteNote(index, notes, setNotes) {
-    //setNotes(notes.filter((_, i) => i !== index));
     console.log("Nota da eliminare:", notes[index]);
-    const noteId = notes[index]._id;
+    const noteDataObject = notes[index];
+    const noteId = noteDataObject && noteDataObject.note ? noteDataObject.note._id : null;
 
     if (!noteId) 
       console.error("ID della nota non trovato");
 
     try {
-        const response = await fetch(`/api/notes/${noteId}`, {
+        const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -129,28 +129,26 @@ export async function handleDeleteNote(index, notes, setNotes) {
     }
 };
 
-export function handleEditNote(index, notes, setNoteData, setIsEditing,) {
-  console.log('Editing note at index:', index);
-  console.log('Note data:', notes[index]);
-  //const index = notes.findIndex(note => note.id === id);
-  if (index !== -1) {
-  setIsEditing(index);
-  handleNoteDataChange('title', notes[index].title, setNoteData);
-  handleNoteDataChange('category', notes[index].category, setNoteData);
-  handleNoteDataChange('content', notes[index].content, setNoteData);
-  handleNoteDataChange('noteAuthor', notes[index].noteAuthor, setNoteData);
-  handleNoteDataChange('noteAccess', notes[index].noteAccess, setNoteData);
-  handleNoteDataChange('allowedUsers', notes[index].allowedUsers, setNoteData);
-  handleNoteDataChange('isTodo', notes[index].isTodo, setNoteData);
-  handleNoteDataChange('tasks', notes[index].tasks, setNoteData);
-  }
-};
+export function handleEditNote(noteIndex, notes, setNoteData, setIsEditing) {
+  const noteToEdit = notes[noteIndex].note;
+  console.log("Editing note at index:", noteIndex);
+  console.log("Note data:", noteToEdit);
+  
+  setNoteData({
+      ...noteToEdit,
+      tasks: noteToEdit.tasks || [], // we prevent errors if undefined
+      allowedUsers: noteToEdit.allowedUsers || [] // we prevent errors if undefined
+  });
+  
+  setIsEditing(noteIndex);
+}
 
 export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, setIsEditing) {
+    console.log("ID della nota durante il salvataggio:", noteData._id);
     const updatedNote = {
       ...notes[index],
       title: noteData.title,
-      author: noteData.noteAuthor,
+      noteAuthor: noteData.noteAuthor,
       noteAccess: noteData.noteAccess, 
       allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [], // Add allowed users if restricted
       category: noteData.category,
@@ -159,7 +157,7 @@ export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteDa
       updateDate: new Date() // updates the modify date
     };
     try {
-      const response = await fetch(`/note/${updatedNote._id}`, {
+      const response = await fetch(`http://localhost:8000/api/note/${noteData._id}`, {
           method: 'PUT',
           headers: {
               'Content-Type': 'application/json'
@@ -175,14 +173,7 @@ export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteDa
       setNotes(updatedNotes);
       console.log("Updated Notes:", updatedNotes);
       setIsEditing(null); // exit from edit mode
-      handleNoteDataChange('title', '', setNoteData);
-      handleNoteDataChange('category', '', setNoteData);
-      handleNoteDataChange('content', '', setNoteData);
-      handleNoteDataChange('noteAuthor', '', setNoteData);
-      handleNoteDataChange('noteAccess', 'public', setNoteData);
-      handleNoteDataChange('allowedUsers', [], setNoteData);
-      handleNoteDataChange('isTodo', false, setNoteData);
-      handleNoteDataChange('tasks', [], setNoteData);
+      setNoteData({}); // clear note data
     } catch (error) {
       console.error("Errore nell'aggiornamento della nota:", error);
   }

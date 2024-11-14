@@ -13,7 +13,7 @@ import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 //TODO: ora che ho connesso db è tutto rotto e da aggiustare :(
-//aggiusta edit e delete e duplicate
+//aggiusta save-edit e duplicate -> err 404 o 500
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
 
@@ -166,11 +166,17 @@ useEffect(() => {
   console.log('Notes after fetch', notes);
 }, [notes]);
 
+/*
 useEffect(() => {
   if (noteData.noteAuthor) {
     console.log('NoteData updated with author:', noteData.noteAuthor);
   }
 }, [noteData.noteAuthor]);
+*/
+
+useEffect(() => {
+  console.log("noteData has been updated:", noteData);
+}, [noteData]);
 
 //filters and sorts notes every time the filter/sort criteria change
 useEffect(() => {
@@ -319,27 +325,6 @@ const filterNotesByDate = (notes) => {
         {/* Note list, filtered and ordered */}
         <div className="notes-container">
           {/* Filter the accessible notes from the users and the orders */}
-          {/*{filterNotesByDate(sortNotes(notes, sortCriterion)).map((note, index) => ( */}
-          {/* 
-          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, noteData.noteAuthor)), sortCriterion)).map((note, index) => (
-            <NoteCard
-              //key={index}
-              key={note.id}
-              note={note}
-              onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
-              onCopy={() => handleCopyContent(note.content)}
-              onDelete={() => handleDeleteNote(index, notes, setNotes)}
-              onEdit={() =>{
-                //we pass the correct index using the filtered notes
-                //handleEditNote(index, notes, setNoteData, setIsEditing)
-                const filteredNotes = notes.filter(note => canUserAccess(note, noteData.noteAuthor));
-                const noteIndex = filteredNotes.findIndex(n => n.id === note.id);
-                handleEditNote(noteIndex, notes, setNoteData, setIsEditing);  
-              }}
-            />
-          ))}
-          */}
-          {/* Filter the accessible notes from the users and the orders */}
           {filterNotesByDate(
                 sortNotes(
                     notes
@@ -353,7 +338,7 @@ const filterNotesByDate = (notes) => {
                     sortCriterion
                 )
             ).map((note, index) => {
-              console.log("Rendering NoteCard per nota:", note);
+              //console.log("Rendering NoteCard per nota:", note);
               return (
                   <NoteCard
                       key={note.id || index}
