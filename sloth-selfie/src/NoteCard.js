@@ -22,7 +22,7 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
     //console.log('Note content:', note.content);
     //console.log('Note content (HTML):', getMarkdownContent(note.content));
 
-    console.log('Rendering NoteCard:', note);
+    //console.log('Rendering NoteCard:', note);
     //console.log('Tasks:', note.tasks);
     
   return (
