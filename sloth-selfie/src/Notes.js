@@ -13,7 +13,7 @@ import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 //TODO: ora che ho connesso db è tutto rotto e da aggiustare :(
-//aggiusta edit e delete e duplicate e i filtri length e alphabetical
+//aggiusta edit e delete e duplicate
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
 
@@ -191,8 +191,8 @@ useEffect(() => {
 
 
   const handleAddNote = async () => {
-    console.log("isTodo:", noteData.isTodo);
-    console.log("tasks length:", noteData.tasks.length);
+    //console.log("isTodo:", noteData.isTodo);
+    //console.log("tasks length:", noteData.tasks.length);
     //console.log("noteData:", noteData);
 
     if (!noteData.title || !noteData.noteAuthor || !noteData.category) {
@@ -284,8 +284,8 @@ const filterNotesByDate = (notes) => {
   });
 };
 
-console.log("Filtered and Sorted Notes with user filter:", filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, username)), sortCriterion)));
-console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes, sortCriterion)));
+//console.log("Filtered and Sorted Notes with user filter:", filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, username)), sortCriterion)));
+//console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes, sortCriterion)));
   return (
     <div className="notes-div">
 

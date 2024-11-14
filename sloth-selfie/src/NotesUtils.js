@@ -195,9 +195,13 @@ export function sortNotes(notes, sortCriterion) {
     
     switch (sortCriterion) {
       case 'alphabetical':
-        return a.title.localeCompare(b.title);
+        const aTitle = a.title || '';
+        const bTitle = b.title || '';
+        return aTitle.localeCompare(bTitle);
       case 'length':
-        return b.content.length - a.content.length;
+        const aContentLength = a.content ? a.content.length : 0;
+        const bContentLength = b.content ? b.content.length : 0;
+        return bContentLength - aContentLength;
       case 'most_recent':
         return bDate - aDate;
       case 'least_recent':
