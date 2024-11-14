@@ -12,8 +12,7 @@ import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
-//TODO: ora che ho connesso db è tutto rotto e da aggiustare :(
-//aggiusta save-edit e duplicate -> err 404 o 500
+//TODO: aggiusta save-edit err 500
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
 

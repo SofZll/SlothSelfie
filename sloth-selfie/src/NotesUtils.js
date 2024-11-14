@@ -68,17 +68,14 @@ export function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
 };
 
 export async function handleDuplicateNote (index, notes, setNotes) {
-    //const noteToDuplicate = notes[index];
-    //const duplicatedNote = { ...noteToDuplicate, date: new Date() }; // Duplicate with a new date
-    //setNotes([...notes, duplicatedNote]);
     const noteToDuplicate = notes[index];
-    
-    // Crea una nuova nota duplicata con la data attuale
+    const noteToDuplicateNoId = { ...noteToDuplicate.note, _id: null };
+    // creates a new note, the backend will assign a new id
     const duplicatedNote = { 
-        ...noteToDuplicate, 
-        date: new Date(),
-        id: uuidv4()
-    };
+      ...noteToDuplicateNoId, 
+      createDate: new Date().toISOString(),
+      updateDate: new Date().toISOString(),
+  };
 
     try {
         //const response = await fetch('/note', {
@@ -95,6 +92,7 @@ export async function handleDuplicateNote (index, notes, setNotes) {
             throw new Error("Error while duplicating note");
         }
         const savedNote = await response.json();
+        console.log("Saved duplicated note:", savedNote);
 
         setNotes([...notes, savedNote]);
     } catch (error) {
@@ -129,7 +127,7 @@ export async function handleDeleteNote(index, notes, setNotes) {
     }
 };
 
-export function handleEditNote(noteIndex, notes, setNoteData, setIsEditing) {
+export async function handleEditNote(noteIndex, notes, setNoteData, setIsEditing) {
   const noteToEdit = notes[noteIndex].note;
   console.log("Editing note at index:", noteIndex);
   console.log("Note data:", noteToEdit);
