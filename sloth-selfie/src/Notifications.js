@@ -1,56 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import './css/Notifications.css';
 import Swal from 'sweetalert2'
+import { calculateTime } from './globalFunctions';
 
 const Notifications = ({ username }) => {
     const [receiverInput, setReceiverInput] = useState('');
     const [receivers, setReceivers] = useState([]);
-    const [notifs, setNotifs] = useState([
-        {
-            sender: 'John Doe',
-            receivers: [],
-            message: 'You have a new follower!',
-            dateTime: '2023-10-01T14:30:00Z',
-            read: false
-        },
-        {
-            sender: 'Jane Doe',
-            receivers: [],
-            message: 'Your post received a new like!',
-            dateTime: '2023-10-02T09:15:00Z', // Aggiunto orario
-            read: true
-        },
-        {
-            sender: 'John Doe',
-            receivers: [],
-            message: 'You have a new comment on your post!',
-            dateTime: '2023-10-03T16:45:00Z', // Modificato in dateTime e aggiunto orario
-            read: false
-        },
-        {
-            sender: 'John Doe',
-            receivers: [],
-            message: 'Your profile was viewed 10 times today!',
-            dateTime: '2023-10-04T11:20:00Z', // Modificato in dateTime e aggiunto orario
-            read: true
-        },
-        {
-            sender: 'John Doe',
-            receivers: [],
-            message: 'You have a new message!',
-            dateTime: '2023-10-05T08:55:00Z', // Modificato in dateTime e aggiunto orario
-            read: false
-        }
-    ]);
+    const [notifs, setNotifs] = useState([]);
 
-    const handleReadNotif = (notifId) => {
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/notification/get-notifications', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Fetched notifications:', data.notifications); // Debugging log
+                setNotifs(data.notifications);
+            } else {
+                console.log('Error fetching notifications');
+            }
+        } catch (error) {
+            console.error('Error fetching notifications');
+        }
+    };
+
+    const handleReadNotif = async (notifId) => {
         const notifElement = document.getElementById(`notif-${notifId}`);
         notifElement.classList.add('disappearing');
-        setTimeout(() => {
-            setNotifs(notifs.map(notif => 
-                notif.id === notifId ? { ...notif, read: true } : notif
-            ));
-        }, 500);
+
+        try {
+            const response = await fetch(`http://localhost:8000/api/notification/read-notif/${notifId}`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                setTimeout(() => {
+                    setNotifs(notifs.map(notif => {
+                        if (notif._id === notifId) {
+                            const receiverIndex = notif.receivers.findIndex(r => r.username === username);
+                            notif.read[receiverIndex] = true;
+                        }
+                        return notif;
+                 }));
+                }, 500);
+            } else {
+                console.log('Error reading notification');
+            }
+        } catch (error) {
+            console.error('Error reading notification');
+        }
     };
 
     const handleAddReceiver = () => {
@@ -64,22 +76,54 @@ const Notifications = ({ username }) => {
         setReceivers(receivers.filter((_, i) => i !== index));
     }
 
-    const handleSend = () => {
+    const handleSend = async () => {
         const message = document.querySelector('.text-notif textarea').value;
         
         if (receivers.length && message) {
-            const date = new Date();
-            const sender = username;
+            const date = new Date().toISOString().split('T')[0];
+            const time = new Date().toISOString().split('T')[1].split('.')[0];
             const newNotif = {
-                sender,
                 receivers,
                 message,
                 date,
+                time,
                 read: false
             };
+            
+            const response = await fetch('http://localhost:8000/api/notification/new-notif', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newNotif)
+            });
+            
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Notification sent!',
+                    icon: 'success',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
+
+                fetchNotifications();
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error sending notification!',
+                    icon: 'error',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
+                return;
+            }
+
             setNotifs([newNotif, ...notifs]);
         }
-
         else if (!receivers.length) {
             Swal.fire({
                 title: 'Error',
@@ -90,7 +134,6 @@ const Notifications = ({ username }) => {
                 }
             });
         }
-
         else if (!message) {
             Swal.fire({
                 title: 'Error',
@@ -125,18 +168,19 @@ const Notifications = ({ username }) => {
                 </div>
             </div>
             <div className="notif-list">
-                {notifs.map((notif) => (
-                    !notif.read && (
-                        <div key={notif.id} id={`notif-${notif.id}`} className={`notif ${notif.read ? 'read' : 'unread'}`}>
+                {notifs.map((notif) => {
+                    const receiverIndex = notif.receivers.findIndex(r => r.username === username);
+                    return !notif.read[receiverIndex] && (
+                        <div key={notif._id} id={`notif-${notif._id}`} className={`notif ${notif.read[receiverIndex] ? 'read' : 'unread'}`}>
                             <div className="notif-title">
-                                <h6>{notif.sender}</h6>
-                                <p>{notif.date}</p>
+                                <h6>{notif.sender.username}</h6>
+                                <p>{calculateTime(notif.time, notif.date)}</p>
                             </div>
                             <p>{notif.message}</p>
-                            <button className="btn notif-button" onClick={() => handleReadNotif(notif.id)}>Read</button>
+                            <button className="btn notif-button" onClick={() => handleReadNotif(notif._id)}>Read</button>
                         </div>
-                    )
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
