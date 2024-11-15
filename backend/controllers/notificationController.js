@@ -1,7 +1,7 @@
 const Notification = require('../models/notificationModel');
 const User = require('../models/userModel');
 
-// Create a new notification
+// Create a new notification: FUNZIONA
 const createNotification = async (req, res) => {
     const {receivers, message, date, time} = req.body;
 
@@ -41,7 +41,7 @@ const createNotification = async (req, res) => {
     }
 }
 
-// Get all notifications
+// Get all notifications: FUNZIONA
 const getNotifications = async (req, res) => {
     try {
         const user = await User.findOne({ username: req.session.username });
@@ -58,7 +58,7 @@ const getNotifications = async (req, res) => {
     }
 }
 
-// Mark a notification as read
+// Mark a notification as read: FUNZIONA
 const markNotificationAsRead = async (req, res) => {
     try {
         const { notifId } = req.params;

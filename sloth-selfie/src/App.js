@@ -20,12 +20,13 @@ import { ActivityProvider } from './ActivityContext';
 
 
 function App() {
+  const [loading, setLoading] = useState(true);
+
   const [machineOpen, setMachineOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
-  
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formType, setFormType] = useState('login'); 
@@ -43,7 +44,10 @@ function App() {
     } catch (error) {
       console.error('Error checking authentication:', error);
       setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
     }
+    console.log("isAuthenticated: ", isAuthenticated);
   };
 
   useEffect(() => {
@@ -172,72 +176,79 @@ function App() {
     <Router>
       <StyleProvider>
         <ActivityProvider>
-        <div className="App">
-          <Menu/>
-          <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
-          <header className="App-header">
-              <div className="title">
-                <h1>Sloth Selfie</h1>
-              </div>
-              <StyleContext.Consumer>
-                {({ icon }) => <img src={icon} className="App-logo" alt="logo" />}
-              </StyleContext.Consumer>
-          </header>
-          <div className="App-body">
-            <Routes>
-              <Route
-                  path="/"
-                  element={<Navigate to={checkAuth ? "/home" : "/login"} />}
-              />
-              <Route 
-                path="/login" 
-                element={<Form formType={formType} setFormType={setFormType} handleLogin={handleLogin}/>}
-              />
-              <Route 
-                path="/register" 
-                element={<Form formType="register" setFormType={setFormType}/>}
-              />
-              <Route path="home"
-                element={ 
-                isAuthenticated ? ( 
-                (<Carousel
-                    cards={cards}
-                    offset={2}
-                    showArrows={false}
-                  />)
-                ) : (
-                  <Navigate to="/login" />
-                )
-                }
-              />
-              <Route path="/profile" element={<ProfileFunction />} />
-              <Route path="/pomodoro" element={<PomodoroFunction />} />
-              <Route path="/notes" element={<NotesFunction />} />
-              <Route path="/events" element={<EventsFunction />} />
-              <Route path="/activities" element={<ActivitiesFunction />} />
-              <Route path="/hub" element={<HubFunction />} />
-            </Routes>
-            {/* time machine */}
-            <div
-              className="div-time-machine"
-              style={{
-                left: `${position.x}px` ,
-                top: `${position.y}px` ,
-              }}
-            >
-              <button
-                className="btn-time-machine"
-                onTouchStart={isMobileLandscape() ? handleTouchStart : null}
-                onTouchMove={isMobileLandscape() ? handleTouchMove : null}
-                onTouchEnd={isMobileLandscape() ? handleTouchEnd : null}
-                onClick={!isMobileLandscape() ? toggleTimeMachine : null} // Enable click on desktop
-                style={{ touchAction: 'none' }}
+          { loading ? (
+            <div className="loading-page">
+              <div className="spinner"></div>
+              <p>Loading, please wait...</p>
+            </div>
+          ) : (
+          <div className="App">
+            <Menu/>
+            <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
+            <header className="App-header">
+                <div className="title">
+                  <h1>Sloth Selfie</h1>
+                </div>
+                <StyleContext.Consumer>
+                  {({ icon }) => <img src={icon} className="App-logo" alt="logo" />}
+                </StyleContext.Consumer>
+            </header>
+            <div className="App-body">
+              <Routes>
+                <Route
+                    path="/"
+                    element={<Navigate to={checkAuth ? "/home" : "/login"} />}
+                />
+                <Route 
+                  path="/login" 
+                  element={<Form formType={formType} setFormType={setFormType} handleLogin={handleLogin}/>}
+                />
+                <Route 
+                  path="/register" 
+                  element={<Form formType="register" setFormType={setFormType}/>}
+                />
+                <Route path="home"
+                  element={ 
+                  isAuthenticated ? ( 
+                  (<Carousel
+                      cards={cards}
+                      offset={2}
+                      showArrows={false}
+                    />)
+                  ) : (
+                    <Navigate to="/login" />
+                  )
+                  }
+                />
+                <Route path="/profile" element={<ProfileFunction />} />
+                <Route path="/pomodoro" element={<PomodoroFunction />} />
+                <Route path="/notes" element={<NotesFunction />} />
+                <Route path="/events" element={<EventsFunction />} />
+                <Route path="/activities" element={<ActivitiesFunction />} />
+                <Route path="/hub" element={<HubFunction />} />
+              </Routes>
+              {/* time machine */}
+              <div
+                className="div-time-machine"
+                style={{
+                  left: `${position.x}px` ,
+                  top: `${position.y}px` ,
+                }}
               >
-                <img src={iconTimeMachine} alt="icon" className="icon" />
-              </button>
+                <button
+                  className="btn-time-machine"
+                  onTouchStart={isMobileLandscape() ? handleTouchStart : null}
+                  onTouchMove={isMobileLandscape() ? handleTouchMove : null}
+                  onTouchEnd={isMobileLandscape() ? handleTouchEnd : null}
+                  onClick={!isMobileLandscape() ? toggleTimeMachine : null} // Enable click on desktop
+                  style={{ touchAction: 'none' }}
+                >
+                  <img src={iconTimeMachine} alt="icon" className="icon" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
         </ActivityProvider>
       </StyleProvider>
     </Router>
