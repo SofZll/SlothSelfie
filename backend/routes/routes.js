@@ -4,7 +4,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, checkAuth} = require('../controllers/userController');
 const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
 const { createNote, getNotes, updateNote, deleteNote } = require('../controllers/noteController');
-const { createNotification, getNotifications } = require('../controllers/notificationController')
+const { createNotification, getNotifications, markNotificationAsRead} = require('../controllers/notificationController')
 //const { createPost, getPosts } = require('../controllers/hubController');
 const { createActivity, getActivities, updateActivity, deleteActivity } = require('../controllers/activityController');
 const { createEvent, getEvents, updateEvent, deleteEvent } = require('../controllers/eventController');
@@ -36,8 +36,9 @@ router.post('/time/reset-time', resetTime);
 router.get('/time/fetchState', fetchState);
 
 // Notification endpoints
-router.post('/notification', createNotification);
-router.get('/notifications', getNotifications);
+router.post('/notification/new-notif', createNotification);
+router.get('/notification/get-notifications', getNotifications);
+router.put('/notification/read-notif/:notifId', markNotificationAsRead);
 
 // Hub endpoint
 //router.post('/hub/posts', createPost);

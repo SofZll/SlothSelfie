@@ -11,11 +11,15 @@ const notificationSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    message: {
+        type: String,
+        required: true,
+    },
     date: {
         type: Date,
         required: true,
     },
-    text: {
+    time: {
         type: String,
         required: true,
     },
@@ -28,3 +32,5 @@ const notificationSchema = new mongoose.Schema({
 });
 
 const Notification = mongoose.model('Notification', notificationSchema);
+
+module.exports = Notification;
