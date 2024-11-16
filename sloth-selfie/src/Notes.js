@@ -6,13 +6,12 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
-import { v4 as uuidv4 } from 'uuid'; //to create unic id
 import { handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
-//TODO: aggiusta save-edit err 404
+//TODO: aggiusta save-edit err 404 da backend, problemi con req.session.userId
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
 

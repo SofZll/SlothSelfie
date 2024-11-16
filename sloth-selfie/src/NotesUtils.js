@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'; //to create unic id
-
 // Function to handle changes in note data
 export function handleNoteDataChange (field, value, setNoteData) {
   setNoteData((prevData) => ({
@@ -154,10 +152,21 @@ export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
   setIsEditing(noteId);
 }
 
-export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, setIsEditing) {
-    console.log("ID della nota durante il salvataggio:", noteData._id);
+export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing) {
+    console.log("ID della nota durante il salvataggio:", noteId);
+
+    const noteToUpdate = notes.find(note => note.note._id === noteId);
+    console.log("note._id:", noteToUpdate.note._id);
+
+    if (!noteToUpdate) {
+        console.error("Nota non trovata");
+        return;
+    }
+
+    console.log("Nota da aggiornare:", noteToUpdate);
+
     const updatedNote = {
-      ...notes[index],
+      ...noteToUpdate.note,
       title: noteData.title,
       noteAuthor: noteData.noteAuthor,
       noteAccess: noteData.noteAccess, 
@@ -168,7 +177,7 @@ export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteDa
       updateDate: new Date() // updates the modify date
     };
     try {
-      const response = await fetch(`http://localhost:8000/api/note/${noteData._id}`, {
+      const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
           method: 'PUT',
           headers: {
               'Content-Type': 'application/json'
@@ -180,8 +189,10 @@ export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteDa
       if (!response.ok) {
           throw new Error("Error while updating note");
       }
-      const updatedNotes = [...notes];
-      updatedNotes[index] = updatedNote;
+
+      const updatedNotes = notes.map(note =>
+        note.note._id === noteId ? { note: updatedNote } : note
+      );
       setNotes(updatedNotes);
       console.log("Updated Notes:", updatedNotes);
       setIsEditing(null); // exit from edit mode
