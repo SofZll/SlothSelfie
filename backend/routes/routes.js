@@ -45,7 +45,6 @@ router.put('/notification/read-notif/:notifId', markNotificationAsRead);
 //router.get('/hub/posts', getPosts);
 
 // Note endpoints
-//router.post('/note', requireAuth, createNote); // if we want authentication
 router.post('/note', createNote);
 router.get('/notes', getNotes);
 router.put('/note/:noteId', updateNote);
