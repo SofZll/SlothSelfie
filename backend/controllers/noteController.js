@@ -37,14 +37,22 @@ const getNotes = async (req, res) => {
 
 // Update a note
 const updateNote = async (req, res) => {
-    const { id } = req.params;
+    const { noteId } = req.params;
+    console.log('ID della nota:', noteId);
+    console.log('ID dell\'utente:', req.session.userId);
     const { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline } = req.body;
     try {
-        const note = await Note.findByIdAndUpdate(
-            { _id: id, noteAuthor: req.session.userId }, // Verify that the note belongs to the user
+        //const note = await Note.findByIdAndUpdate(
+        //    noteId,
+        //    { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline, updateDate: new Date() },
+        //    { new: true }
+        //);
+        const note = await Note.findOneAndUpdate(
+            { _id: noteId, noteAuthor: req.session.userId }, // Verify that the note belongs to the user
             { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline },
             { new: true }
         );
+
         if (!note) {
             return res.status(404).json({ success: false, message: 'Note not found' });
         }
