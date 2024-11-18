@@ -6,13 +6,12 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
-import { v4 as uuidv4 } from 'uuid'; //to create unic id
 import { handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
-//TODO: aggiusta save-edit err 500
+//TODO: aggiusta save-edit err 404 da backend, problemi con req.session.userId
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
 
@@ -165,13 +164,6 @@ useEffect(() => {
   console.log('Notes after fetch', notes);
 }, [notes]);
 
-/*
-useEffect(() => {
-  if (noteData.noteAuthor) {
-    console.log('NoteData updated with author:', noteData.noteAuthor);
-  }
-}, [noteData.noteAuthor]);
-*/
 
 useEffect(() => {
   console.log("noteData has been updated:", noteData);
@@ -196,9 +188,6 @@ useEffect(() => {
 
 
   const handleAddNote = async () => {
-    //console.log("isTodo:", noteData.isTodo);
-    //console.log("tasks length:", noteData.tasks.length);
-    //console.log("noteData:", noteData);
 
     if (!noteData.title || !noteData.noteAuthor || !noteData.category) {
       alert('Please fill out all required fields: Title, Author and Category');
@@ -289,8 +278,6 @@ const filterNotesByDate = (notes) => {
   });
 };
 
-//console.log("Filtered and Sorted Notes with user filter:", filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, username)), sortCriterion)));
-//console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes, sortCriterion)));
   return (
     <div className="notes-div">
 
@@ -336,21 +323,27 @@ const filterNotesByDate = (notes) => {
                         }),
                     sortCriterion
                 )
-            ).map((note, index) => {
-              //console.log("Rendering NoteCard per nota:", note);
+            ).map((note) => {
               return (
                   <NoteCard
-                      key={note.id || index}
+                      key={note._id}
                       note={note}
-                      onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
+                      onDuplicate={() => handleDuplicateNote(note._id, notes, setNotes)}
                       onCopy={() => handleCopyContent(note.content)}
-                      onDelete={() => handleDeleteNote(index, notes, setNotes)}
+                      onDelete={() => handleDeleteNote(note._id, notes, setNotes)}
                       onEdit={() => {
-                          const filteredNotes = notes
-                              .map(response => response.note)
-                              .filter(note => canUserAccess(note, note.noteAuthor));
-                          const noteIndex = filteredNotes.findIndex(n => n.id === note.id);
-                          handleEditNote(noteIndex, notes, setNoteData, setIsEditing);
+                        // find the note to edit by id
+                        const noteToEdit = notes
+                          .map(response =>
+                             response.note)
+                          .find(n => n._id === note._id && canUserAccess(n, n.noteAuthor));
+                        
+                        if (noteToEdit) {
+                          handleEditNote(noteToEdit._id, notes, setNoteData, setIsEditing);
+                        }
+                        else {
+                        console.error("Note not found or access denied", note);
+                      }
                       }}
                   />
               );
