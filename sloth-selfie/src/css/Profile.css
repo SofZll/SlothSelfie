@@ -168,6 +168,10 @@ body {
     transition: opacity 0.5s ease, max-height 0.5s ease;
 }
 
+.loading-page {
+    color: #555B6E;
+}
+
 @media screen and (min-width: 700px){
     .profile {
         flex-direction: row;

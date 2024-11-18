@@ -2,6 +2,7 @@ import React, { useState, useEffect} from 'react';
 import './css/Notifications.css';
 import Swal from 'sweetalert2'
 import { calculateTime } from './globalFunctions';
+import socket from './socket';
 
 const Notifications = ({ username }) => {
     const [receiverInput, setReceiverInput] = useState('');
@@ -10,6 +11,27 @@ const Notifications = ({ username }) => {
 
     useEffect(() => {
         fetchNotifications();
+
+        socket.on('notification', (newNotif) => {
+            console.log('New notification received:', newNotif);
+
+            Swal.fire({
+                title: 'New Notification',
+                text: `${newNotif.sender.username}: ${newNotif.message}`,
+                icon: 'info',
+                customClass: {
+                    confirmButton: 'button-alert'
+                },
+                timer: 5000, // Auto-close after 5 seconds
+                timerProgressBar: true,
+                toast: true, // Show as a toast popup
+                position: 'top-end' // Position on top-right
+            });
+        });
+
+        return () => {
+            socket.off('notification');
+        };
     }, []);
 
     const fetchNotifications = async () => {
@@ -87,7 +109,7 @@ const Notifications = ({ username }) => {
                 message,
                 date,
                 time,
-                read: false
+                read: receivers.map(() => false),
             };
             
             const response = await fetch('http://localhost:8000/api/notification/new-notif', {
@@ -109,6 +131,9 @@ const Notifications = ({ username }) => {
                     }
                 });
 
+                socket.emit('send-notification', newNotif);
+                setReceivers([]);
+                document.querySelector('.text-notif textarea').value = '';
                 fetchNotifications();
             } else {
                 Swal.fire({
@@ -121,10 +146,7 @@ const Notifications = ({ username }) => {
                 });
                 return;
             }
-
-            setNotifs([newNotif, ...notifs]);
-        }
-        else if (!receivers.length) {
+        } else if (!receivers.length) {
             Swal.fire({
                 title: 'Error',
                 text: 'Please enter at least one receiver!',
@@ -133,8 +155,7 @@ const Notifications = ({ username }) => {
                     confirmButton: 'button-alert'
                 }
             });
-        }
-        else if (!message) {
+        } else if (!message) {
             Swal.fire({
                 title: 'Error',
                 text: 'Please enter a message!',

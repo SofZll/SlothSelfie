@@ -33,6 +33,8 @@ const createNotification = async (req, res) => {
         });
 
         console.log(notification);
+        //io.emit('check');
+        //io.emit('send-notification', notification);
         await notification.save();
         res.status(201).json({ success: true, notification });
     } catch (error) {
