@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'; //to create unic id
-
 // Function to handle changes in note data
 export function handleNoteDataChange (field, value, setNoteData) {
   setNoteData((prevData) => ({
@@ -67,9 +65,18 @@ export function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
   handleNoteDataChange('tasks', updatedTasks, setNoteData);
 };
 
-export async function handleDuplicateNote (index, notes, setNotes) {
-    const noteToDuplicate = notes[index];
-    const noteToDuplicateNoId = { ...noteToDuplicate.note, _id: null };
+export async function handleDuplicateNote (noteId, notes, setNotes) {
+
+    const noteToDuplicate = notes
+        .map(response => response.note)
+        .find(note => note._id === noteId);
+
+    if (!noteToDuplicate) {
+        console.error("Nota non trovata per l'ID:", noteId);
+        return;
+    }
+
+    const noteToDuplicateNoId = { ...noteToDuplicate, _id: null };
     // creates a new note, the backend will assign a new id
     const duplicatedNote = { 
       ...noteToDuplicateNoId, 
@@ -100,11 +107,7 @@ export async function handleDuplicateNote (index, notes, setNotes) {
     }
   };
 
-export async function handleDeleteNote(index, notes, setNotes) {
-    console.log("Nota da eliminare:", notes[index]);
-    const noteDataObject = notes[index];
-    const noteId = noteDataObject && noteDataObject.note ? noteDataObject.note._id : null;
-
+export async function handleDeleteNote(noteId, notes, setNotes) {
     if (!noteId) 
       console.error("ID della nota non trovato");
 
@@ -121,16 +124,24 @@ export async function handleDeleteNote(index, notes, setNotes) {
         }
 
         //updating frontend
-        setNotes(notes.filter((_, i) => i !== index));
+        setNotes(notes.filter(note => note.note._id !== noteId));
     } catch (error) {
         console.error('Errore durante l\'eliminazione della nota:', error);
     }
 };
 
-export async function handleEditNote(noteIndex, notes, setNoteData, setIsEditing) {
-  const noteToEdit = notes[noteIndex].note;
-  console.log("Editing note at index:", noteIndex);
-  console.log("Note data:", noteToEdit);
+export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
+  const noteToEdit = notes
+        .map(response => response.note)
+        .find(note => note._id === noteId);
+
+    if (!noteToEdit) {
+        console.error("Nota non trovata per l'ID:", noteId);
+        return;
+    }
+
+    console.log("Editing note with ID:", noteId);
+    console.log("Note data:", noteToEdit);
   
   setNoteData({
       ...noteToEdit,
@@ -138,13 +149,24 @@ export async function handleEditNote(noteIndex, notes, setNoteData, setIsEditing
       allowedUsers: noteToEdit.allowedUsers || [] // we prevent errors if undefined
   });
   
-  setIsEditing(noteIndex);
+  setIsEditing(noteId);
 }
 
-export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteData, setIsEditing) {
-    console.log("ID della nota durante il salvataggio:", noteData._id);
+export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing) {
+    console.log("ID della nota durante il salvataggio:", noteId);
+
+    const noteToUpdate = notes.find(note => note.note._id === noteId);
+    console.log("note._id:", noteToUpdate.note._id);
+
+    if (!noteToUpdate) {
+        console.error("Nota non trovata");
+        return;
+    }
+
+    console.log("Nota da aggiornare:", noteToUpdate);
+
     const updatedNote = {
-      ...notes[index],
+      ...noteToUpdate.note,
       title: noteData.title,
       noteAuthor: noteData.noteAuthor,
       noteAccess: noteData.noteAccess, 
@@ -155,19 +177,22 @@ export async function handleSaveEdit(index, notes, setNotes, noteData, setNoteDa
       updateDate: new Date() // updates the modify date
     };
     try {
-      const response = await fetch(`http://localhost:8000/api/note/${noteData._id}`, {
+      const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
           method: 'PUT',
           headers: {
               'Content-Type': 'application/json'
           },
-          body: JSON.stringify(updatedNote)
+          body: JSON.stringify(updatedNote),
+          credentials: 'include'
       });
 
       if (!response.ok) {
           throw new Error("Error while updating note");
       }
-      const updatedNotes = [...notes];
-      updatedNotes[index] = updatedNote;
+
+      const updatedNotes = notes.map(note =>
+        note.note._id === noteId ? { note: updatedNote } : note
+      );
       setNotes(updatedNotes);
       console.log("Updated Notes:", updatedNotes);
       setIsEditing(null); // exit from edit mode
