@@ -196,7 +196,13 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
       setNotes(updatedNotes);
       console.log("Updated Notes:", updatedNotes);
       setIsEditing(null); // exit from edit mode
-      setNoteData({}); // clear note data
+      //resetting fields
+      handleNoteDataChange('title', '', setNoteData);
+      handleNoteDataChange('category', '', setNoteData);
+      handleNoteDataChange('content', '', setNoteData);
+      handleNoteDataChange('noteAccess', 'public', setNoteData);
+      handleNoteDataChange('isTodo', false, setNoteData);
+      handleNoteDataChange('tasks', [], setNoteData);
     } catch (error) {
       console.error("Errore nell'aggiornamento della nota:", error);
   }
