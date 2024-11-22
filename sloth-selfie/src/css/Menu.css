@@ -81,15 +81,6 @@
     background: rgba(0, 0, 0, 0.3);
 }
 
-.navbar-message {
-    font-size: 27px;
-}
-
-.navbar-message:hover {
-    color: #F9F9F9;
-    background-color: transparent;
-}
-
 .mobile-nav {
     display: none;
     position: fixed;
@@ -114,6 +105,74 @@
 .mobile-nav .active {
     opacity: 0.4;
 
+}
+
+.img-wrap {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.menu-profile {
+    display: flex !important;
+    position: fixed;
+    flex-direction: column;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    width: 228px;
+}
+
+.bm-item.menu-profile:hover {
+    background-color: transparent;
+}
+
+.menu-profile-link {
+    display: flex !important;
+    position: relative;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 228px;
+}
+
+.menu-profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #FAF9F9;
+}
+
+.menu-profile-info a:hover {
+    text-decoration: none;
+}
+
+.menu-profile-username {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.menu-profile-small {
+    font-size: 18px;
+    font-weight: 400;
+    color: #c9c9c9;
+}
+
+.menu-profile-small:hover {
+    color: #F9FAFA !important;
+    font-size: 19px;
+    text-decoration: underline;
+    text-decoration-color: #FAF9F9;
 }
 
 @media (max-width: 700px) {

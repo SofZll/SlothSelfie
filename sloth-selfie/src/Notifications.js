@@ -4,25 +4,27 @@ import Swal from 'sweetalert2'
 import { calculateTime } from './globalFunctions';
 import socket from './socket';
 
-const Notifications = ({ username }) => {
+const NotificationFunction = () => {
+    const [username, setUsername] = useState('');
     const [receiverInput, setReceiverInput] = useState('');
     const [receivers, setReceivers] = useState([]);
     const [notifs, setNotifs] = useState([]);
 
     useEffect(() => {
         fetchNotifications();
+        fetchUsername();
 
         socket.on('notification', (newNotif) => {
             console.log('New notification received:', newNotif);
 
             Swal.fire({
-                title: 'New Notification',
-                text: `${newNotif.sender.username}: ${newNotif.message}`,
+                title: `${newNotif.sender.username}`,
+                text: `${newNotif.message}`,
                 icon: 'info',
                 customClass: {
                     confirmButton: 'button-alert'
                 },
-                timer: 5000, // Auto-close after 5 seconds
+                timer: 5000,
                 timerProgressBar: true,
                 toast: true, // Show as a toast popup
                 position: 'top-end' // Position on top-right
@@ -33,6 +35,26 @@ const Notifications = ({ username }) => {
             socket.off('notification');
         };
     }, []);
+
+    const fetchUsername = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/user/username', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Fetched username:', data.username);
+                setUsername(data.username);
+            }
+        } catch (error) {
+            console.error('Error fetching username');
+        }
+    };
 
     const fetchNotifications = async () => {
         try {
@@ -207,4 +229,4 @@ const Notifications = ({ username }) => {
     );
 }
 
-export default Notifications;
+export default NotificationFunction;

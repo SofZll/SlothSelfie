@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import "./css/Profile.css";
 import { validateEmail, validatePhoneNumber } from "./inputValidation";
 import Swal from "sweetalert2";
-import Notifications from "./Notifications";
+import NotificationFunction from "./Notifications";
 
 function Profile() {
     const [loading, setLoading] = useState(true);
-
+    const [isDesktop, setIsDesktop] = useState(window.innerWidth > 700);
     const [isEditing, setIsEditing] = useState(false);
     const [showProfile, setShowProfile] = useState(false); 
     const [profileData, setProfileData] = useState({
@@ -71,6 +71,16 @@ function Profile() {
         };
 
         fetchProfileData();
+
+        const handleResize = () => {
+            setIsDesktop(window.innerWidth > 700);
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        }
     }, []);
 
     const toggleShowProfile = () => {
@@ -286,9 +296,11 @@ function Profile() {
                             <button className="button-hub" onClick={navigateHub}>HUB</button>
                         </div>
                     </div>
-                    <div className="right-column">
-                    <Notifications username={ profileData.username }/> 
-                    </div>
+                    {!isDesktop && (
+                        <div className="right-column">
+                            <NotificationFunction /> 
+                        </div>
+                    )}
                 </div>
             )}
         </>

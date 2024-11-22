@@ -5,6 +5,7 @@ import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import PomodoroFunction from './Pomodoro';
 import NotesFunction from './Notes';
+import NotificationFunction from './Notifications';
 import Form from './Login';
 import Card from "./cardCarosel";
 import Carousel from "./CarouselHome";
@@ -227,6 +228,7 @@ function App() {
                     }
                   />
                   <Route path="/profile" element={<ProfileFunction setLoading={setLoading}/>} />
+                  <Route path="/notifications" element={<NotificationFunction />} />
                   <Route path="/pomodoro" element={<PomodoroFunction />} />
                   <Route path="/notes" element={<NotesFunction />} />
                   <Route path="/events" element={<EventsFunction />} />
