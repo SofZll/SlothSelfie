@@ -256,7 +256,6 @@ useEffect(() => {
       handleNoteDataChange('title', '', setNoteData);
       handleNoteDataChange('category', '', setNoteData);
       handleNoteDataChange('content', '', setNoteData);
-      handleNoteDataChange('noteAuthor', '', setNoteData);
       handleNoteDataChange('noteAccess', 'public', setNoteData);
       handleNoteDataChange('isTodo', false, setNoteData);
       handleNoteDataChange('tasks', [], setNoteData);
