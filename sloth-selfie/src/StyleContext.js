@@ -34,8 +34,8 @@ export const StyleProvider = ({ children }) => {
         }
     };
 
-    useEffect(() => {
-        if ((location.pathname === '/notes') || (location.pathname === '/profile') || (location.pathname === '/activities') || (location.pathname === '/events') || (location.pathname === '/pomodoro') || (location.pathname === '/projects') || (location.pathname === '/hub')) {
+    useEffect(() => { 
+        if ((location.pathname === '/notifications') || (location.pathname === '/notes') || (location.pathname === '/profile') || (location.pathname === '/activities') || (location.pathname === '/events') || (location.pathname === '/pomodoro') || (location.pathname === '/projects') || (location.pathname === '/hub')) {
             updateStyles(true);
             updateIcon(iconHomeDark);
         } else {
