@@ -5,6 +5,7 @@ import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import PomodoroFunction from './Pomodoro';
 import NotesFunction from './Notes';
+import Settings from './previewSetUp';
 import NotificationFunction from './Notifications';
 import Form from './Login';
 import Card from "./cardCarosel";
@@ -30,7 +31,9 @@ function App() {
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [formType, setFormType] = useState('login'); 
+  const [formType, setFormType] = useState('login');
+
+  const [inSettings, setInSettings] = useState(false);
 
   // Check if the user is authenticated
   const checkAuth = async () => {
@@ -217,11 +220,19 @@ function App() {
                   <Route path="home"
                     element={ 
                     isAuthenticated ? ( 
-                    (<Carousel
-                        cards={cards}
-                        offset={2}
-                        showArrows={false}
-                      />)
+                      inSettings ? (
+                        <Settings
+                          setUp={inSettings}
+                          setSetUp={setInSettings}
+                        />
+                      ) : (
+                        <Carousel
+                            cards={cards}
+                            offset={2}
+                            showArrows={false}
+                            setUp={inSettings}
+                            setSetUp={setInSettings}
+                        />)
                     ) : (
                       <Navigate to="/login" />
                     )
