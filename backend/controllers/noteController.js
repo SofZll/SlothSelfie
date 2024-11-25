@@ -1,4 +1,5 @@
 const Note = require('../models/noteModel');
+const User = require('../models/userModel');
 
 // Create a new note
 const createNote = async (req, res) => {
@@ -37,18 +38,31 @@ const getNotes = async (req, res) => {
 
 // Update a note
 const updateNote = async (req, res) => {
-    const { id } = req.params;
+    const { noteId } = req.params;
     const { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline } = req.body;
-    try {
-        const note = await Note.findByIdAndUpdate(
-            { _id: id, noteAuthor: req.session.userId }, // Verify that the note belongs to the user
+
+    try{
+    const note = await Note.findById(noteId);
+    if (!note) {
+    return res.status(404).json({ success: false, message: 'Note not found' });
+    }
+    //we find the current user and check if it is the author of the note
+    const currentUser = await User.findById(req.session.userId);
+    if (!currentUser) {
+        return res.status(401).json({ success: false, message: 'User not found' });
+    }
+    if (note.noteAuthor.toString() !== currentUser.username) {
+        return res.status(403).json({ success: false, message: 'You are not authorized to edit this note' });
+    }
+
+    // Update the note
+    const updatedNote = await Note.findByIdAndUpdate(
+            noteId,
             { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline },
             { new: true }
         );
-        if (!note) {
-            return res.status(404).json({ success: false, message: 'Note not found' });
-        }
-        res.status(200).json({ success: true, note });
+
+        res.status(200).json({ success: true, note: updatedNote });
     } catch (error) {
         console.error('Error updating note:', error);
         res.status(500).json({ success: false, message: 'Error updating note' });

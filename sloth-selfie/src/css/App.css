@@ -196,8 +196,7 @@ p {
   color: #555B6E;
 }
 
-/* time 
-  TimeMachinemachine */
+/* time machine */
 
 .div-time-machine {
   position: fixed;
@@ -228,6 +227,39 @@ p {
 
 .icon-time-machine {
   height: 40px;
+}
+
+/* loading page */
+
+.loading-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #FFF;
+  font-family: Arial, sans-serif;
+}
+
+.loading-page p {
+  font-size: 18px;
+  margin: 0;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Nascondi il contenuto quando in modalità landscape */

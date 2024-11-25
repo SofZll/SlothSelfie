@@ -6,17 +6,12 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
-import { v4 as uuidv4 } from 'uuid'; //to create unic id
 import { handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
-//TODO: ora che ho connesso db è tutto rotto e da aggiustare :(
-//TODO:in canUserAccess: problemi con user, risulta undefined e il filtro non fa passare nulla, ci sono problemi con allowedusers,
-//aggiusta edit e delete e duplicate e i filtri
-//Notecard renderiza ma dati non passati, abbiamo problemi di id back-front e con lista utenti autorizzati
-//filtri di data e ordinamento non funzionano
+//TODO: aggiusta save-edit err 404 da backend, problemi con req.session.userId
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 //IN EDIT di note senza todo author non viene settato
 
@@ -86,6 +81,7 @@ function NotesFunction() {
   const [clickedButton] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
   const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
+  const [filteredNotes, setFilteredNotes] = useState([]);
   //const { activities, setActivities, setTitle, setDeadline } = useContext(ActivityContext);
   
   //defining the note data structure
@@ -168,11 +164,16 @@ useEffect(() => {
   console.log('Notes after fetch', notes);
 }, [notes]);
 
+
 useEffect(() => {
-  if (noteData.noteAuthor) {
-    console.log('NoteData updated with author:', noteData.noteAuthor);
-  }
-}, [noteData.noteAuthor]);
+  console.log("noteData has been updated:", noteData);
+}, [noteData]);
+
+//filters and sorts notes every time the filter/sort criteria change
+useEffect(() => {
+  const filteredAndSorted = filterNotesByDate(sortNotes(notes, sortCriterion));
+  setFilteredNotes(filteredAndSorted);
+}, [notes, filterDate, sortCriterion, username]);
 
   // change style page onload document
   useEffect(() => {
@@ -187,12 +188,6 @@ useEffect(() => {
 
 
   const handleAddNote = async () => {
-    //console.log("isTodo:", isTodo);
-    //console.log("noteContent:", noteContent);
-    //console.log("tasks:", tasks);
-    console.log("isTodo:", noteData.isTodo);
-    console.log("tasks length:", noteData.tasks.length);
-    //console.log("noteData:", noteData);
 
     if (!noteData.title || !noteData.noteAuthor || !noteData.category) {
       alert('Please fill out all required fields: Title, Author and Category');
@@ -224,8 +219,8 @@ useEffect(() => {
         completed: task.completed || false,
         deadline: task.deadline || null
       })) : [],
-      createDate: new Date(),
-      updateDate: new Date(),
+      createDate: noteData.createDate ? new Date(noteData.createDate) : new Date(),
+      updateDate: noteData.updateDate ? new Date(noteData.updateDate) : new Date(),
     };
 
      // Add tasks as activities if they have a deadline
@@ -236,11 +231,6 @@ useEffect(() => {
         }
       });
     }
-    //adjusting id
-      //console.log("newNote.id:", newNote.id);
-      //const updatedNote = { ...newNote, id: uuidv4()};
-     // console.log("newNote con id aggiornato:", updatedNote);
-
     try {
       //const response = await fetch('/api/note', {
        //locale:
@@ -266,7 +256,6 @@ useEffect(() => {
       handleNoteDataChange('title', '', setNoteData);
       handleNoteDataChange('category', '', setNoteData);
       handleNoteDataChange('content', '', setNoteData);
-      handleNoteDataChange('noteAuthor', '', setNoteData);
       handleNoteDataChange('noteAccess', 'public', setNoteData);
       handleNoteDataChange('isTodo', false, setNoteData);
       handleNoteDataChange('tasks', [], setNoteData);
@@ -277,15 +266,17 @@ useEffect(() => {
   }
 }
 
+////If a date is selected it will filter the notes by that date
 const filterNotesByDate = (notes) => {
   if (!filterDate) return notes;
-  return notes.filter((note) =>
-    note.createDate.toISOString().split('T')[0] === filterDate //If a date is selected it will filter the notes by that date
-  );
+
+  return notes.filter((note) => {
+    if (!note.createDate) return false;
+    const noteDate = note.createDate instanceof Date ? note.createDate : new Date(note.createDate);
+    return noteDate.toISOString().split('T')[0] === filterDate;
+  });
 };
 
-console.log("Filtered and Sorted Notes with user filter:", filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, username)), sortCriterion)));
-console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes, sortCriterion)));
   return (
     <div className="notes-div">
 
@@ -319,27 +310,6 @@ console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes, sor
         {/* Note list, filtered and ordered */}
         <div className="notes-container">
           {/* Filter the accessible notes from the users and the orders */}
-          {/*{filterNotesByDate(sortNotes(notes, sortCriterion)).map((note, index) => ( */}
-          {/* 
-          {filterNotesByDate(sortNotes(notes.filter(note => canUserAccess(note, noteData.noteAuthor)), sortCriterion)).map((note, index) => (
-            <NoteCard
-              //key={index}
-              key={note.id}
-              note={note}
-              onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
-              onCopy={() => handleCopyContent(note.content)}
-              onDelete={() => handleDeleteNote(index, notes, setNotes)}
-              onEdit={() =>{
-                //we pass the correct index using the filtered notes
-                //handleEditNote(index, notes, setNoteData, setIsEditing)
-                const filteredNotes = notes.filter(note => canUserAccess(note, noteData.noteAuthor));
-                const noteIndex = filteredNotes.findIndex(n => n.id === note.id);
-                handleEditNote(noteIndex, notes, setNoteData, setIsEditing);  
-              }}
-            />
-          ))}
-          */}
-          {/* Filter the accessible notes from the users and the orders */}
           {filterNotesByDate(
                 sortNotes(
                     notes
@@ -352,21 +322,27 @@ console.log("Filtered and Sorted Notes:", filterNotesByDate(sortNotes(notes, sor
                         }),
                     sortCriterion
                 )
-            ).map((note, index) => {
-              console.log("Rendering NoteCard per nota:", note);
+            ).map((note) => {
               return (
                   <NoteCard
-                      key={note.id || index}
+                      key={note._id}
                       note={note}
-                      onDuplicate={() => handleDuplicateNote(index, notes, setNotes)}
+                      onDuplicate={() => handleDuplicateNote(note._id, notes, setNotes)}
                       onCopy={() => handleCopyContent(note.content)}
-                      onDelete={() => handleDeleteNote(index, notes, setNotes)}
+                      onDelete={() => handleDeleteNote(note._id, notes, setNotes)}
                       onEdit={() => {
-                          const filteredNotes = notes
-                              .map(response => response.note)
-                              .filter(note => canUserAccess(note, note.noteAuthor));
-                          const noteIndex = filteredNotes.findIndex(n => n.id === note.id);
-                          handleEditNote(noteIndex, notes, setNoteData, setIsEditing);
+                        // find the note to edit by id
+                        const noteToEdit = notes
+                          .map(response =>
+                             response.note)
+                          .find(n => n._id === note._id && canUserAccess(n, n.noteAuthor));
+                        
+                        if (noteToEdit) {
+                          handleEditNote(noteToEdit._id, notes, setNoteData, setIsEditing);
+                        }
+                        else {
+                        console.error("Note not found or access denied", note);
+                      }
                       }}
                   />
               );
