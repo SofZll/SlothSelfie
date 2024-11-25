@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import iconSearch from './media/search.svg';
 import iconCrossDark from './media/crossDark.svg';
 import iconArrow from './media/leftBackArrow.svg';
+import Swal from 'sweetalert2';
 
 function SpotifySearch({setPlatformMusic}) {
   const [uri, setUri] = useState('');
@@ -100,10 +101,24 @@ function SpotifySearch({setPlatformMusic}) {
         setSongSelected(true);
       }
       else {
-        alert('Invalid URL 1');
+        Swal.fire({
+          title: 'Invalid URL',
+          icon: 'error',
+          text: 'Please enter a valid Spotify URL',
+          customClass: {
+            confirmButton: 'button-alert'
+          }
+        });
       }
     } else {
-      alert('Invalid URL 2');
+      Swal.fire({
+        title: 'Invalid URL',
+        icon: 'error',
+        text: 'Please enter a valid Spotify URL',
+        customClass: {
+          confirmButton: 'button-alert'
+        }
+      });
     }
 
   };
