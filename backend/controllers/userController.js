@@ -46,7 +46,7 @@ const registerUser = async (req, res) => {
     const { name, username, email, password } = req.body;
     try {
         // Check if the user already exists
-        const existingUser = await User.findOne({ ussername }); 
+        const existingUser = await User.findOne({ username }); 
         if (existingUser) {
             return res.status(400).json({ success: false, message: 'User already exists' });
         }

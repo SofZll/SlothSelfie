@@ -9,6 +9,7 @@ const userRoutes = require('./routes/routes');
 const noteRoutes = require('./routes/routes');
 const activityRoutes = require('./routes/routes');
 const eventRoutes = require('./routes/routes');
+const notificationRoutes = require('./routes/routes');
 const path = require('path');
 const connectDB = require('./config/db');
 require('dotenv').config();
@@ -45,8 +46,9 @@ connectDB();
 app.use(bodyParser.json());
 
 console.log('Session Secret:', process.env.SESSION_SECRET);
+
 // Session middleware
-app.use(session({
+const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -57,7 +59,9 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         sameSite: 'lax',
     }
-}))
+});
+
+app.use(sessionMiddleware);
 
 app.use((req, res, next) => {
     console.log('Session ID:', req.sessionID);
@@ -67,6 +71,7 @@ app.use((req, res, next) => {
     } else {
         console.log('New session');
     }
+    req.io = io;
     next();
 });
 
@@ -76,6 +81,7 @@ app.use('/api', userRoutes);
 app.use('/api', noteRoutes);
 app.use('/api', activityRoutes);
 app.use('/api', eventRoutes);
+app.use('/api', notificationRoutes);
 
 // Static files from frontend
 // const frontendPath = path.join(global.rootDir, '..', 'frontend/build');
@@ -107,6 +113,11 @@ server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
+const userSocketMap = {};
+
+io.use((socket, next) => {
+    sessionMiddleware(socket.request, {}, next);
+});
 
 io.on('connection', (socket) => {
 
@@ -277,4 +288,42 @@ io.on('connection', (socket) => {
         io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
     });
 
+    // notification stuff
+
+    socket.on('authenticated', (isAuthenticated) => {
+        if (isAuthenticated) {
+            const session = socket.request.session;
+            console.log('Session data:', session); // Add logging to check the session data
+            if (session && session.username) {
+                const username = session.username;
+                userSocketMap[username] = socket.id;
+                console.log(`User authenticated: ${username} -> ${socket.id}`);
+            } else {
+                console.log('Username not found in session');
+            }
+        } else {
+            console.log('User not authenticated');
+        }
+    });
+
+    socket.on('check', () => {
+        console.log('Checking socket');
+    })
+
+    socket.on('send-notification', (notif) => {
+        console.log('Received notification');
+        const { receivers, message } = notif;
+        const sender = socket.request.session.username;
+        console.log('Sender:', sender);
+
+        receivers.forEach((receiver) => {
+            const receiverSocketId = userSocketMap[receiver];
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit('notification', {
+                    sender: { username: sender },
+                    message
+                });
+            }
+        });
+    });
 });

@@ -3,6 +3,7 @@ import Select from 'react-select';
 import "./css/Hub.css";
 import iconHeartEmpty from "./media/heartEmpty.svg";
 import iconHeartFull from "./media/heartFull.svg";
+import { calculateTime } from "./globalFunctions";
 
 /*
 info per notifiche
@@ -182,28 +183,6 @@ function Hub({ username="kaori"}) {
     const handleSortChange = (option) => {
         setSortingOption(option.value);
         sortPosts();
-    };
-
-    const calculateTime = (postTime, postDate) => {
-        const currentTime = new Date();
-        const [hours, minutes] = postTime.split(':');
-        const tmp = new Date(postDate);
-        tmp.setHours(hours);
-        tmp.setMinutes(minutes);
-        tmp.setSeconds(0);
-
-        const diff = currentTime - tmp;
-        const minutesDiff = Math.floor(diff / 60000);
-        const hoursDiff = Math.floor(minutesDiff / 60);
-        const daysDiff = Math.floor(hoursDiff / 24);
-
-        if (daysDiff > 0) {
-            return `${daysDiff} days ago`;
-        } else if (hoursDiff > 0) {
-            return `${hoursDiff} hours ago`;
-        } else {
-            return `${minutesDiff} minutes ago`;
-        }
     };
 
     const calculateComments = (comments) => {
