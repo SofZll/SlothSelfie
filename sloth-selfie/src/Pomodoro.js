@@ -4,6 +4,7 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import PomodoroTimer from './PomodoroTimer';
+import Swal from 'sweetalert2';
 
 function PomodoroFunction() {
     const { updateStyles, updateIcon } = useContext(StyleContext);
@@ -28,12 +29,26 @@ function PomodoroFunction() {
         if (!defaultStart) {
             if (textStudio === '' || textBreak === '' || textCycles === '' || textTotal === ''
                 || isNaN(textStudio) || isNaN(textBreak) || isNaN(textCycles) || isNaN(textTotal)) {
-                alert("Please enter valid Pomodoro settings.");
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Please enter valid numbers for the study, break, cycles and total time.',
+                    icon: 'error',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
                 return;
             }
 
             if (parseInt(textTotal) !== (parseInt(textStudio) + parseInt(textBreak)) * parseInt(textCycles)) {
-                alert("The total time doesn't match the study and break time and the number of cycles.");
+                Swal.fire({
+                    title: 'Error',
+                    text: 'The total time does not match the study, break and cycles time.',
+                    icon: 'error',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
                 return;
             }
         }
@@ -82,7 +97,14 @@ function PomodoroFunction() {
                 console.error('Element with ID "pomodoro-total-time-option" not found.');
             }
         } else {
-            alert("Please select an option.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please select a valid option.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
         }
 
         if (selectionPomodoroSettings && (choiceSelection === 1 || choiceSelection === 2)) {
@@ -192,17 +214,38 @@ function PomodoroFunction() {
         let cycles = parseInt(textCycles);
 
         if (isNaN(study) || study <= 0) {
-            alert("Please enter a valid positive number for study time.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for study time.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
 
         if (isNaN(breakTime) || breakTime <= 0) {
-            alert("Please enter a valid positive number for break time.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for break time.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
 
         if (isNaN(cycles) || cycles <= 0) {
-            alert("Please enter a valid positive number for cycles.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for cycles.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
 
@@ -216,14 +259,28 @@ function PomodoroFunction() {
         let study2 = parseInt(timeStudySuggest2);
 
         if (isNaN(time) || time <= 0) {
-            alert("Please enter a valid positive number for total time.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for total time.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
 
         let cycles1 = Math.floor(time / 30);
 
         if (cycles1 <= 0) {
-            alert("Please enter a bigger value for total time.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for total time.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
         else if (time - cycles1*study1 < cycles1*2) {
