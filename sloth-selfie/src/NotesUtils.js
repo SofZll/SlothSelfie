@@ -1,3 +1,6 @@
+
+import Swal from 'sweetalert2';
+
 // Function to handle changes in note data
 export function handleNoteDataChange (field, value, setNoteData) {
   setNoteData((prevData) => ({
@@ -234,6 +237,13 @@ export function sortNotes(notes, sortCriterion) {
 
   export function handleCopyContent(content) {
     navigator.clipboard.writeText(content).then(() => {
-      alert('Content copied to clipboard!');
+      Swal.fire({
+        title: 'Content copied',
+        icon: 'success',
+        text: 'The note content has been copied to the clipboard',
+        customClass: {
+          confirmButton: 'button-alert'
+        }
+      });
     });
   };

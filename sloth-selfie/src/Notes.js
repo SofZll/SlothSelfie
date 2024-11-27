@@ -9,11 +9,10 @@ import { a } from 'react-spring';
 import { handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
+import Swal from 'sweetalert2';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
-//TODO: aggiusta save-edit err 404 da backend, problemi con req.session.userId
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
-//IN EDIT di note senza todo author non viene settato
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -190,17 +189,38 @@ useEffect(() => {
   const handleAddNote = async () => {
 
     if (!noteData.title || !noteData.noteAuthor || !noteData.category) {
-      alert('Please fill out all required fields: Title, Author and Category');
+      Swal.fire({
+        title: 'Add Note failed',
+        icon: 'error',
+        text: 'Please fill in all fields',
+        customClass: {
+          confirmButton: 'button-alert'
+        }
+      });
       return;
     }
 
     if (!noteData.isTodo && noteData.content.trim() === "") {
-        alert("Add content to your note!");
+        Swal.fire({
+          title: 'Add Note failed',
+          icon: 'error',
+          text: 'Please add content to your note',
+          customClass: {
+            confirmButton: 'button-alert'
+          }
+        });
         return;
     }
 
     if (noteData.isTodo && noteData.tasks.length === 0) {
-      alert("Add at least one task to your to-do list!");
+      Swal.fire({
+        title: 'Add Note failed',
+        icon: 'error',
+        text: 'Please add at least one task to your to-do list',
+        customClass: {
+          confirmButton: 'button-alert'
+        }
+      });
     return;
   }
 

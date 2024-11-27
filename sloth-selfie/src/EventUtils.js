@@ -114,17 +114,19 @@ export function normalizeEvents (events) {
         end: new Date(),
         allDay: event.allDay,
         eventLocation: event.eventLocation,
-        };
+        type: 'event'
+    };
     }
       
         return {
-        id: event.id,
-        originalId: event.originalId,
-        title: event.title,
-        start: startDate,
-        end: endDate,
-        allDay: event.allDay,
-        eventLocation: event.eventLocation,
+            id: event.id,
+            originalId: event.originalId,
+            title: event.title,
+            start: startDate,
+            end: endDate,
+            allDay: event.allDay,
+            eventLocation: event.eventLocation,
+            type: 'event'
         };
     });
 };
@@ -247,12 +249,12 @@ export function handleDeleteEvent(id, events, setEvents, setSelectedEvent) {
 };
 
   // Function to Abort the deletion
- export function handleAbortDelete(setShowConfirmation) {
+ export function handleAbortDeleteEvent(setShowConfirmation) {
     setShowConfirmation(false);
   };
 
   // Function to confirm the deletion
-  export function handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setIsEditing, setEventData) {
+  export function handleConfirmDeleteEvent(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setIsEditing, setEventData) {
     handleDeleteEvent(selectedEvent.id, events, setEvents, setSelectedEvent);
     setShowConfirmation(false);
     handleClosePopupE(setSelectedEvent, setIsEditing, setEventData);

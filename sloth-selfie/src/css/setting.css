@@ -1,0 +1,71 @@
+
+.card-settings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: #FAF9F9;
+    height: 65vh;
+    padding: 0 0.5rem;
+    border-radius: 10px;
+    width: 80vmin;
+    word-wrap: break-word;
+    position: relative;
+    margin-top: 5vh;
+}
+
+.card-settings > nav {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+}
+
+.btn-cross,
+.btn-settings {
+    display: flex;
+    background-color: inherit;
+    border: none;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+.btn-cross {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.btn-cross:hover,
+.btn-cross:active,
+.btn-settings:hover,
+.btn-settings:active,
+.active-btn {
+    opacity: 0.5;
+}
+
+.icon-cross,
+.icon-settings {
+  height: 27vh;
+  max-height: 37px;
+}
+
+@media screen and (min-width: 700px){
+
+    .card-settings {
+        height: 70%;
+        padding: 0 1rem;
+        width: 30rem;
+        margin-top: 0;
+    }
+}
+
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .card-settings {
+        height: 70%;
+    }
+}

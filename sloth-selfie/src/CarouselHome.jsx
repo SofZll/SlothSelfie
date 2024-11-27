@@ -46,6 +46,10 @@ export default function CarroussSel(props) {
     setGoToSlide(index);
   };
 
+  const handleSetUp = () => {
+    props.setSetUp(!props.setUp);
+  };
+
   return (
     <div className="carousel-div" {...handlers}
       style={{ touchAction: 'pan-y' }}
@@ -75,7 +79,7 @@ export default function CarroussSel(props) {
         <button onClick={handlePrev} className="btn">
           <img src={iconArrowLeft} alt="icon" className="icon"/>
         </button>
-        <button /*onClick={}*/ className="btn">
+        <button onClick={handleSetUp} className="btn">
           <img src={iconSetting} alt="icon" className="icon"/>
         </button>
         <button onClick={handleNext} className="btn">
