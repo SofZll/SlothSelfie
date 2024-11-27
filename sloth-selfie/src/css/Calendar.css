@@ -1,0 +1,165 @@
+
+.calendar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+
+.div-calendar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Events */
+.container-events-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.container-events-add {
+    padding: 20px 0 11vh 0;
+}
+
+.container-events-add form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+input {
+    padding: 5px;
+    margin: 5px;
+}
+
+/* Activities */
+.container-activity-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 99%;
+    padding: 20px 0 11vh 0;
+}
+
+.activities-list {
+    flex: 1;
+    padding-top: 20px;
+    margin: 0;
+    width: 100%;
+}
+  
+.scrollable-Card-list {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 90%;
+    height: 30vh;
+    overflow-y: auto;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.container-activity-add form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.activities-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+  
+.activity-card {
+    padding: 2vmin;
+    margin: 10px 0;
+    width: 90%;
+    align-items: center;
+    white-space: normal;
+    box-shadow: #555B6E 0px 0px 7px;
+    word-wrap: break-word;
+}
+
+/* For larger screens */
+@media screen and (min-width: 700px){
+    .calendar {
+        flex-direction: row;
+        align-items: start;
+    }
+  
+    .div-calendar-container,
+    .container-events-add {
+        padding: 20px 0 0 0;
+        width: 50%;
+        height: 100%;
+    }
+
+    .activity-card {
+        width: 100%; /* Make cards take up full width on smaller screens*/
+    }
+      
+    .container-activity-add {
+        padding: 20px 0 0 0;
+        width: 50%;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .scrollable-Card-list {
+        height: 40vh;
+    }
+
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .calendar {
+        flex-direction: row;
+        align-items: start;
+    }
+  
+    .div-calendar-container {
+        padding: 20px 0 0 0;
+        height: 100%;
+        width: 95%;
+    }
+
+    .container-events-add {
+        padding: 20px 0 0 0;
+        width: 50%;
+        height: 100%;
+        overflow-y: scroll;
+    }
+
+    input {
+        width: 50%;
+    }
+
+    label {
+        margin: 0;
+    }
+
+    .activity-card {
+        width: 100%; /* Make cards take up full width on smaller screens*/
+    }
+      
+    .container-activity-add {
+        padding: 20px 0 0 0;
+        width: 50%;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .scrollable-Card-list {
+        height: 40vh;
+    }
+}

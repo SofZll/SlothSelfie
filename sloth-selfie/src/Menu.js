@@ -75,8 +75,7 @@ const Menu = () => {
         <>
             <Hamburger isOpen={isOpen} onStateChange={handleStateChange}>
                 <Link to="/home" onClick={closeMenu}>Home</Link>
-                <Link to="/events" onClick={closeMenu}>Events</Link>
-                <Link to="/activities" onClick={closeMenu}>Activities</Link>
+                <Link to="/Calendar" onClick={closeMenu}>Calendar</Link>
                 <Link to="/notes" onClick={closeMenu}>Notes</Link>
                 <Link to="/pomodoro" onClick={closeMenu}>Pomodoro</Link>
                 <Link to="/notifications" onClick={closeMenu}>Notifications</Link>
@@ -101,8 +100,8 @@ const Menu = () => {
                 <NavLink to="/home"  className={(isHomeActive ? "active" : "")} >
                     <img src={iconHome} alt="Home" />
                 </NavLink>
-                <NavLink to="/events" activeClassName="active">
-                    <img src={iconCalendar} alt="Events" />
+                <NavLink to="/Calendar" activeClassName="active">
+                    <img src={iconCalendar} alt="Calendar" />
                 </NavLink>
                 <NavLink to="/notes" activeClassName="active">
                     <img src={iconNote} alt="Notes" />

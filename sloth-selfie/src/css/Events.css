@@ -1,14 +1,6 @@
 /* Events */
-.Event {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-  width: 100%;
-}
 
 .container-events-add,
-.div-calendar-container,
 .date-filter {
   display: flex;
   flex-direction: column;
