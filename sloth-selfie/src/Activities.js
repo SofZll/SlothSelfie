@@ -1,193 +1,75 @@
-import React, { useState, useEffect , useContext} from 'react';
-import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
+import React, { useEffect } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import './css/App.css';
-import './css/Activities.css';
-import { normalizeActivities, handleAddActivity, handleRemoveActivity, updateOverdueActivities, handleUpdateActivity, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA, handleActivityDataChange} from './ActivityUtils';
-import iconDark from './media/SlothDark.svg';
-import iconLight from './media/SlothLight.svg';
-import { StyleContext } from './StyleContext';
+import './css/Calendar.css';
+import { handleAddActivity, handleRemoveActivity, handleUpdateActivity, handleActivityDataChange} from './ActivityUtils';
+
 //import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
-const initialActivities = [
-    // Puoi aggiungere alcune attività di esempio qui 
-    {id: 1, title: 'Study Math', deadline: '2024-10-22', completed: false },
-    {id: 2, title: 'Write Report', deadline: '2024-10-25', completed: false }
-  ];
 
-function ActivitiesFunction(){
-    const { updateStyles, updateIcon } = useContext(StyleContext);
-    const [activities, setActivities] = useState(initialActivities || []);
-    const [selectedActivity, setSelectedActivity] = useState(null);
-    const [showConfirmation, setShowConfirmation] = useState(false);
+
+function ActivitiesFunction(props){
     //const { activities, setActivities } = useContext(ActivityContext);
     //const[activityData, setActivityData] = useContext(ActivityContext); Old
 
 
-    //define the activity data structure
-    
-    const [activityData, setActivityData] = useState({
-        id: "",
-        title: "",
-        deadline: "",
-        completed: false,
-        userId: '', // User ID of whom creates the event
-    });
-    
-    // change style page onload document
+    // Pre-fill the form with the selected activity
     useEffect(() => {
-        updateStyles(true);
-        updateIcon(iconDark);
-
-        return () => {
-            updateStyles(false);
-            updateIcon(iconLight);
-        };
-    }, [updateIcon, updateStyles]);
-
- // Function to fetch activities from the server
- const fetchActivities = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/activities', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-      console.log(data);
-      setActivities(data);
-    } catch (error) {
-      console.error('Errore nel fetching delle attività:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchActivities();
-  }, []);
-
-    //checking for overdue activities
-    useEffect(() => {
-        const overdueActivities = activities.filter(activity => 
-            new Date(activity.deadline) < new Date() && !activity.completed
-        );
-    
-        // Update the deadline of overdue activities to today
-        if (overdueActivities.length > 0) {
-            updateOverdueActivities(activities, setActivities);
+        if (props.selectedActivity) {
+            handleActivityDataChange('id', props.selectedActivity.id, props.setActivityData);
+            handleActivityDataChange('title', props.selectedActivity.title, props.setActivityData);
+            handleActivityDataChange('deadline', props.selectedActivity.deadline, props.setActivityData);
+            handleActivityDataChange('completed', props.selectedActivity.completed, props.setActivityData);
         }
-    }, [activities]);
+    }, [props.selectedActivity]);
 
-    useEffect(() => {// Pre-fill the form with the selected activity
-        if (selectedActivity) {
-            handleActivityDataChange('id', selectedActivity.id, setActivityData);
-            handleActivityDataChange('title', selectedActivity.title, setActivityData);
-            handleActivityDataChange('deadline', selectedActivity.deadline, setActivityData);
-            handleActivityDataChange('completed', selectedActivity.completed, setActivityData);
-        }
-    }, [selectedActivity]);
-
-    function handleEventClick(event) {
-        console.log("Event clicked:", event); 
-        setSelectedActivity(event);
-      }
   
     return (
-        <div className="activities-page">
-            <div className="div-calendar-container">
-                <h2>Your Activities:</h2>
-                <div className="calendar-container">
-                    <BigCalendar
-                        localizer={momentLocalizer(moment)}
-                        events={normalizeActivities(activities)}
-                        startAccessor="start"
-                        endAccessor="end"
-                        onSelectEvent={handleEventClick}
-                        titleAccessor="title"
-                        style={{ height: "60vh" }}
+        <div className="container-activity-add">
+            <h2>Activities</h2>
+            <form onSubmit={props.selectedActivity 
+                ? (e) => handleUpdateActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setSelectedActivity)
+                :(e) => handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities)}>
+                <label>Activity:
+                    <input 
+                        type="text" 
+                        placeholder="Title" 
+                        value={props.activityData.title} 
+                        onChange={(e) => handleActivityDataChange("title", e.target.value, props.setActivityData)}
+                        required 
                     />
-                    {/* Display popup for the selected activity*/}
-                    {selectedActivity && (
-                        <div className="popup">
-                        <h2>Editing mode:</h2>
-                        <h2>{selectedActivity.title}</h2>
-                        <p>Due: {selectedActivity.deadline}</p>
-                        <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
-                        <div>
-                            <button className='btn' onClick={() =>{
-                                setShowConfirmation(true);
-                                console.log(setShowConfirmation);
-                            }}>
-                                Delete
-                            </button>
-                            <button className='btn' onClick={() => handleClosePopupA(setSelectedActivity, setActivityData)}>X</button>
-                        </div>
-                        {showConfirmation && (
-                            <div className="popup-delete">
-                                <h2>Are you sure you want to delete this activity?</h2>
-                                <div>
-                                    <button className='btn' onClick={() => handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setActivityData)}>Yes</button>
-                                    <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
-                                </div>
+                </label>
+                <label>Deadline:
+                    <input 
+                        type="date" 
+                        value={props.activityData.deadline} 
+                        onChange={(e) => handleActivityDataChange("deadline", e.target.value, props.setActivityData)}
+                        required 
+                    />
+                </label>
+                <button className='btn' type="submit">
+                    {props.selectedActivity ? 'Save Changes' : 'Add Activity'}
+                </button>
+            </form>
+
+            <div className="activities-list">
+                <h2>List of your Activities:</h2>
+                <div className="activities-container">
+                    <div className="scrollable-Card-list">
+                        {props.activities.filter(activity => !activity.completed).sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map(activity => (
+                            <div className="activity-card" key={activity.id}>
+                                <h2>{activity.title}</h2>
+                                <p>Due: {activity.deadline}</p>
+                                <button className="btn" onClick={() => handleRemoveActivity(activity.id, props.activities, props.setActivities)}>
+                                    Done
+                                </button>
                             </div>
-                        )}
-                        </div>
-                    )}
+                        ))}
+                    </div>    
                 </div>
             </div>
-            <div className="container-activity-add">
-                <h2>Activities</h2>
-                <form onSubmit={selectedActivity 
-                    ? (e) => handleUpdateActivity(e, activityData, setActivityData, activities, setActivities, setSelectedActivity) 
-                    :(e) => handleAddActivity(e, activityData, setActivityData, activities, setActivities)}>
-                    <label>Activity:
-                        <input 
-                            type="text" 
-                            placeholder="Title" 
-                            value={activityData.title} 
-                            onChange={(e) => handleActivityDataChange("title", e.target.value, setActivityData)}
-                            required 
-                        />
-                    </label>
-                    <label>Deadline:
-                        <input 
-                            type="date" 
-                            value={activityData.deadline} 
-                            onChange={(e) => handleActivityDataChange("deadline", e.target.value, setActivityData)}
-                            required 
-                        />
-                    </label>
-                    <button className='btn' type="submit">
-                        {selectedActivity ? 'Save Changes' : 'Add Activity'}
-                    </button>
-                </form>
-                <div className="activities-list">
-                    <h2>List of your Activities:</h2>
-                    <div className="activities-container">
-                        <div className="scrollable-Card-list">
-                            {activities.filter(activity => !activity.completed).sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map(activity => (
-                                <div className="activity-card" key={activity.id}>
-                                    <h2>{activity.title}</h2>
-                                    <p>Due: {activity.deadline}</p>
-                                    <button className="btn" onClick={() => handleRemoveActivity(activity.id, activities, setActivities)}>Done</button>
-                                </div>
-                            ))}
-                        </div>    
-                    </div>
-                </div>
-            </div> 
         </div>
     );
 }
-// Export the function and the Activities list
-export { initialActivities };
 export default ActivitiesFunction;
