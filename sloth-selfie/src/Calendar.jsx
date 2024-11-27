@@ -12,6 +12,7 @@ import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
+import iconBack from './media/leftBackArrow.svg';
 
 //TODO: edit di eventi ripetuti: non vanno edit e delete di updateAllFutureInstances e non aggiorna time e duration
 //IL PROBLEMA STA NEI 3 CAMPI <- CHE RISULTANO UNDEFINED
@@ -150,6 +151,10 @@ function Calendar() {
     const handleSelection = (event) => {
         setSelectingView(false);
         setInEvent(event);
+    };
+
+    const handleBack = () => {
+        setSelectingView(true);
     };
 
     const handleEventClick = (event) => {
@@ -347,38 +352,43 @@ function Calendar() {
                     </div>
                 </div>
             ) : (
-                inEvent ? (
-                    <EventsFunction
-                        events={events}
-                        setEvents={setEvents}
-                        eventData={eventData}
-                        setEventData={setEventData}
+                <div className='activity-event-container'>
+                    <button className='btn' onClick={() => handleBack()}>
+                        <img src={iconBack} alt="back" className="icon" />
+                    </button>
+                    {inEvent ? (
+                        <EventsFunction
+                            events={events}
+                            setEvents={setEvents}
+                            eventData={eventData}
+                            setEventData={setEventData}
 
-                        isEditing={isEditing}
-                        setIsEditing={setIsEditing}
+                            isEditing={isEditing}
+                            setIsEditing={setIsEditing}
 
-                        selectedEvent={selectedEvent}
-                        setSelectedEvent={setSelectedEvent}
-                        updateAllFutureEvents={updateAllFutureEvents}
-                        setUpdateAllFutureEvents={setUpdateAllFutureEvents}
-                        handleAddEvent={handleAddEvent}
-                    />
-                ) : (
-                    <ActivitiesFunction
-                        activityData={activityData}
-                        setActivityData={setActivityData}
+                            selectedEvent={selectedEvent}
+                            setSelectedEvent={setSelectedEvent}
+                            updateAllFutureEvents={updateAllFutureEvents}
+                            setUpdateAllFutureEvents={setUpdateAllFutureEvents}
+                            handleAddEvent={handleAddEvent}
+                        />
+                    ) : (
+                        <ActivitiesFunction
+                            activityData={activityData}
+                            setActivityData={setActivityData}
 
-                        activities={activities}
-                        setActivities={setActivities}
+                            activities={activities}
+                            setActivities={setActivities}
 
-                        isEditing={isEditing}
-                        setIsEditing={setIsEditing}
+                            isEditing={isEditing}
+                            setIsEditing={setIsEditing}
 
-                        selectedActivity={selectedActivity}
-                        setSelectedActivity={setSelectedActivity}
+                            selectedActivity={selectedActivity}
+                            setSelectedActivity={setSelectedActivity}
 
-                    />
-                )
+                        />
+                    )}
+                </div>
             )}
         </div>
     );

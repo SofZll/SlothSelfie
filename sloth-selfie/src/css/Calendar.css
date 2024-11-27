@@ -7,12 +7,40 @@
     width: 100%;
 }
 
-
 .div-calendar-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
+}
+
+.selecting-view {
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+}
+
+.activity-event-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.activity-event-container > .btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: inherit;
+}
+
+.activity-event-container > .btn:active,
+.activity-event-container > .btn:hover {
+    background-color: #f39252;
 }
 
 /* Events */
@@ -97,20 +125,26 @@ input {
         align-items: start;
     }
   
-    .div-calendar-container,
-    .container-events-add {
+    .div-calendar-container{
         padding: 20px 0 0 0;
-        width: 50%;
+        width: 60%;
         height: 100%;
+    }
+
+    .selecting-view {
+        width: 40%;
+        margin: 0;
+        padding-top: 50px;
     }
 
     .activity-card {
         width: 100%; /* Make cards take up full width on smaller screens*/
     }
       
-    .container-activity-add {
+    .container-activity-add,
+    .container-events-add  {
         padding: 20px 0 0 0;
-        width: 50%;
+        width: 40%;
         height: 100%;
         overflow-y: auto;
     }
@@ -119,25 +153,29 @@ input {
         height: 40vh;
     }
 
+
 }
 
 @media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
     .calendar {
         flex-direction: row;
         align-items: start;
+        width: 98%;
     }
   
     .div-calendar-container {
         padding: 20px 0 0 0;
         height: 100%;
-        width: 95%;
+        width: 50%;
+        justify-content: center;
     }
 
+    .container-activity-add,
     .container-events-add {
         padding: 20px 0 0 0;
         width: 50%;
         height: 100%;
-        overflow-y: scroll;
+        overflow-y: auto;
     }
 
     input {
@@ -152,13 +190,6 @@ input {
         width: 100%; /* Make cards take up full width on smaller screens*/
     }
       
-    .container-activity-add {
-        padding: 20px 0 0 0;
-        width: 50%;
-        height: 100%;
-        overflow-y: auto;
-    }
-
     .scrollable-Card-list {
         height: 40vh;
     }
