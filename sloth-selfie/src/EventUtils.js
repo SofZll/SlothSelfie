@@ -114,17 +114,19 @@ export function normalizeEvents (events) {
         end: new Date(),
         allDay: event.allDay,
         eventLocation: event.eventLocation,
-        };
+        type: 'event'
+    };
     }
       
         return {
-        id: event.id,
-        originalId: event.originalId,
-        title: event.title,
-        start: startDate,
-        end: endDate,
-        allDay: event.allDay,
-        eventLocation: event.eventLocation,
+            id: event.id,
+            originalId: event.originalId,
+            title: event.title,
+            start: startDate,
+            end: endDate,
+            allDay: event.allDay,
+            eventLocation: event.eventLocation,
+            type: 'event'
         };
     });
 };

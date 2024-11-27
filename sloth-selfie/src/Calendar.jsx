@@ -69,6 +69,7 @@ function Calendar() {
         repeatEndDate: '', // Date of the last repetition   <-
         eventLocation: '', // eventLocation of the event
         userId: '', // User ID of whom creates the event
+        type: 'event',
     });
 
     //Define the activity data structure
@@ -78,6 +79,7 @@ function Calendar() {
         deadline: "",
         completed: false,
         userId: '', // User ID of whom creates the event
+        type: 'activity',
     });
 
     useEffect(() => {
@@ -272,13 +274,33 @@ function Calendar() {
         const updatedEvent = { ...event, start, end };
         const updatedEvents = events.map((e) => (e.id === event.id ? updatedEvent : e));
         setEvents(updatedEvents);
-    }
+    };
 
-    const onActivityDrop = ({ activity, start, end }) => {
-        const updatedActivity = { ...activity, start, end };
-        const updatedActivities = activities.map((a) => (a.id === activity.id ? activity : a));
+    const onActivityDrop = ({ event, start, end }) => {
+        const updatedActivity = { ...event, start, end };
+        const updatedActivities = activities.map((a) => (a.id === event.id ? updatedActivity : a));
         setActivities(updatedActivities);
-    }
+    };
+    
+
+    const onItemDrop = ({event, start, end}) => {
+        if (event.type === 'event') {
+            onEventDrop({event: event, start, end});
+        } else if (event.type === 'activity') {
+            console.log("Activity dropped:", event);
+            onActivityDrop({activity: event, start, end});
+        }
+    };
+
+    //Call handelEventClick or handleActivityClick
+    const onItemSelect = (item) => {
+        if (item.type === 'event') {
+            handleEventClick(item.event);
+        } else if (item.type === 'activity') {
+            handleActivityClick(item.activity);
+        }
+    };
+
 
 
     return (
@@ -289,11 +311,10 @@ function Calendar() {
                     events={[...normalizeActivities(activities), ...normalizeEvents(events)]}
                     startAccessor="start"
                     endAccessor="end"
-                    onSelectEvent={inEvent ? handleEventClick : handleActivityClick}
+                    onSelectEvent={onItemSelect}
                     titleAccessor="title"
                     style={{ height: "60vh" }}
-                    onEventDrop={onEventDrop}
-                    onActivityDrop={onActivityDrop}
+                    onEventDrop={onItemDrop}
                     resizable
                 />
 

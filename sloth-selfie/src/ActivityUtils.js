@@ -9,22 +9,23 @@ export function handleActivityDataChange (field, value, setActivityData) {
 // Convert activities to the format required by React Big Calendar
 export function normalizeActivities (activities) {
     return activities.filter(activity => !activity.completed).map((activity) => {
-            let startDate, endDate;
-        
-            startDate = new Date(activity.deadline);
-            endDate = new Date(activity.deadline);
+        let startDate, endDate;
     
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        console.error(`Invalid date for event: ${JSON.stringify(activity)}`);
-        return {
-            id: activity.id,
-            title: activity.title,
-            start: new Date(),
-            end: new Date(),
-            deadline: activity.deadline,
-            completed: activity.completed
-        };
-    }
+        startDate = new Date(activity.deadline);
+        endDate = new Date(activity.deadline);
+    
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            console.error(`Invalid date for event: ${JSON.stringify(activity)}`);
+            return {
+                id: activity.id,
+                title: activity.title,
+                start: new Date(),
+                end: new Date(),
+                deadline: new Date(),
+                completed: activity.completed,
+                type: 'activity'
+            };
+        }
       
         return {
             id: activity.id,
@@ -32,7 +33,8 @@ export function normalizeActivities (activities) {
             start: startDate,
             end: endDate,
             deadline: activity.deadline,
-            completed: activity.completed
+            completed: activity.completed,
+            type: 'activity'
         };
     });
 };
