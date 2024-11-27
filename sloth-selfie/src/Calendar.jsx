@@ -1,5 +1,6 @@
 import React, { useState, useEffect , useContext} from 'react';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
@@ -19,6 +20,8 @@ import iconBack from './media/leftBackArrow.svg';
 //IL PROBLEMA STA NEL FETCH DEI CAMPI, MA TANTO POI DOVREMO PRENDERLI DAL DB E IL PROBLEMA RICOMINCIA...
 
 const localizer = momentLocalizer(moment);
+
+const DnDCalendar = withDragAndDrop(BigCalendar);
 
 const initialEvents = [
   // Puoi aggiungere alcuni eventi di esempio qui 
@@ -265,18 +268,33 @@ function Calendar() {
         setUpdateAllFutureEvents(false); 
     };
 
+    const onEventDrop = ({ event, start, end }) => {
+        const updatedEvent = { ...event, start, end };
+        const updatedEvents = events.map((e) => (e.id === event.id ? updatedEvent : e));
+        setEvents(updatedEvents);
+    }
+
+    const onActivityDrop = ({ activity, start, end }) => {
+        const updatedActivity = { ...activity, start, end };
+        const updatedActivities = activities.map((a) => (a.id === activity.id ? activity : a));
+        setActivities(updatedActivities);
+    }
+
 
     return (
         <div className="calendar">
             <div className="div-calendar-container">
-                <BigCalendar
-                    localizer={momentLocalizer(moment)}
+                <DnDCalendar
+                    localizer={localizer}
                     events={[...normalizeActivities(activities), ...normalizeEvents(events)]}
                     startAccessor="start"
                     endAccessor="end"
                     onSelectEvent={inEvent ? handleEventClick : handleActivityClick}
                     titleAccessor="title"
                     style={{ height: "60vh" }}
+                    onEventDrop={onEventDrop}
+                    onActivityDrop={onActivityDrop}
+                    resizable
                 />
 
                 {selectedEvent && (
