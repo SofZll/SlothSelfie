@@ -50,7 +50,7 @@ function Calendar() {
     const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
-    const [username, setUsername] = useState("");//username of the authenticated user
+    const [currUsername, setCurrUsername] = useState("");//username of the authenticated user
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
@@ -99,8 +99,8 @@ function Calendar() {
         const response = await fetch('http://localhost:8000/api/user/username', {
         credentials: 'include'
         });const data = await response.json();
-        console.log('Username:', data.username);
-        setUsername(data.username);
+        console.log('Username:', data.currUsername);
+        setCurrUsername(data.currUsername);
     } catch (error) {
         console.error('Error fetching username:', error);
     }
