@@ -1,4 +1,4 @@
-// Function to handle changes in activity data
+ // Function to handle changes in activity data
 export function handleActivityDataChange (field, value, setActivityData) {
     setActivityData((prevEventData) => ({
         ...prevEventData,
@@ -9,23 +9,23 @@ export function handleActivityDataChange (field, value, setActivityData) {
 // Convert activities to the format required by React Big Calendar
 export function normalizeActivities (activities) {
     return activities.filter(activity => !activity.completed).map((activity) => {
-        let startDate, endDate;
+            let startDate, endDate;
+        
+            startDate = new Date(activity.deadline);
+            endDate = new Date(activity.deadline);
     
-        startDate = new Date(activity.deadline);
-        endDate = new Date(activity.deadline);
-    
-        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-            console.error(`Invalid date for event: ${JSON.stringify(activity)}`);
-            return {
-                id: activity.id,
-                title: activity.title,
-                start: new Date(),
-                end: new Date(),
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error(`Invalid date for event: ${JSON.stringify(activity)}`);
+        return {
+            id: activity.id,
+            title: activity.title,
+            start: new Date(),
+            end: new Date(),
                 deadline: new Date(),
                 completed: activity.completed,
                 type: 'activity'
-            };
-        }
+        };
+    }
       
         return {
             id: activity.id,
@@ -39,29 +39,51 @@ export function normalizeActivities (activities) {
     });
 };
 
-const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
-
 // Handle adding an activity
-export function handleAddActivity(e, activityData, setActivityData, activities, setActivities) {
+
+export async function handleAddActivity(e, activityData, setActivityData, activities, setActivities, username) {
     if (e && e.preventDefault) {
         e.preventDefault();
       }
+      console.log("Adding activity:", activityData);
       const {title, deadline} = activityData;
         let newActivity = {
             id: activities.length + 1,
             title: title,
             deadline: deadline,
             completed: false,
-            userId: currentUser,
+            userId: username, // Here we should use the authenticated user
         };
-    
+        
+        try {
+            //const response = await fetch('/api/activities', {
+            //locale:
+            const response = await fetch('http://localhost:8000/api/activity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newActivity)   
+        });
+
+    if (!response.ok) {
+        throw new Error('Errore nella creazione della attività');
+    }
+
+    // Get the saved note from the backend
+    const savedActivity = await response.json();
+
+    console.log("Attività salvata dal backend:", savedActivity);
+
 
         setActivities([...activities, newActivity]);
         console.log("Current activities:", [...activities, newActivity]);
 
-         // Reset input fields
+        // Reset input fields
         handleActivityDataChange('title', '', setActivityData);
         handleActivityDataChange('deadline', '', setActivityData);
+    } catch (error) {console.error('Error while adding activity:', error);
+    }
 }
 
 // Handle removing an activity and marking it as completed while pressing btn "Done"

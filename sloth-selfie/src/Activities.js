@@ -11,8 +11,8 @@ import { ActivityContext } from './ActivityContext';
 
 
 function ActivitiesFunction(props){
-    const { activities, setActivities, username: currUsername } = useContext(ActivityContext);
-    console.log(currUsername);
+    const { activities, setActivities, username } = useContext(ActivityContext);
+    console.log(username);
     //const { activities, setActivities } = useContext(ActivityContext);
     //const[activityData, setActivityData] = useContext(ActivityContext); Old
 
@@ -33,7 +33,7 @@ function ActivitiesFunction(props){
             <h2>Activities</h2>
             <form onSubmit={props.selectedActivity 
                 ? (e) => handleUpdateActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setSelectedActivity)
-                :(e) => handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.currUsername)}>
+                :(e) => handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.username)}>
                 <label>Activity:
                     <input 
                         type="text" 
