@@ -33,7 +33,7 @@ function ActivitiesFunction(props){
             <h2>Activities</h2>
             <form onSubmit={props.selectedActivity 
                 ? (e) => handleUpdateActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setSelectedActivity)
-                :(e) => handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.username)}>
+                :(e) => handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, username)}>
                 <label>Activity:
                     <input 
                         type="text" 
