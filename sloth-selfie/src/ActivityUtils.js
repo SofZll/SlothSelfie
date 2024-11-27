@@ -56,6 +56,9 @@ export async function handleAddActivity(e, activityData, setActivityData, activi
         };
         
         try {
+            if (!username) {
+                console.error("Username non definito");
+            }
             //const response = await fetch('/api/activities', {
             //locale:
             const response = await fetch('http://localhost:8000/api/activity', {
