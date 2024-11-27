@@ -11,15 +11,7 @@ const { createEvent, getEvents, updateEvent, deleteEvent } = require('../control
 
 const router = express.Router();
 
-/*if we want authentication
-// Middleware for checking if the user is authenticated
-const requireAuth = (req, res, next) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ success: false, message: 'Unauthorized' });
-    }
-    next();
-};
-*/
+
 // User endpoints
 router.post('/user/login', loginUser);
 router.post('/user/register', registerUser);
