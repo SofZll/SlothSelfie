@@ -12,9 +12,7 @@ import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
-//TODO: aggiusta save-edit err 404 da backend, problemi con req.session.userId
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
-//IN EDIT di note senza todo author non viene settato
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
