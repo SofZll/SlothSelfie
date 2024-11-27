@@ -448,7 +448,87 @@ hr {
   }
 }
 
-@media (max-height: 700px) {
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+  .div-pomodoro {
+    margin-top: 10px;
+  }
+
+  .div-pomodoro h2 {
+    font-size: 1.5rem;
+  }
+
+  .containerRed,
+  .containerYellow {
+    width: 30vmin;
+  }
+
+  .counterRed,
+  .counterYellow {
+    padding-top: 3vmin;
+    font-size: 9vmin;
+  }
+
+  .container {
+    justify-content: space-around;
+    padding-bottom: 3vmin;
+  }
+
+  .pomodoro-timer {
+    flex-direction: row;
+    height: 100vh;
+  }
+
+  .pomodoro-container {
+    width: 50%;
+    height: 95%;
+    padding: 0 20px;
+    margin: 0;
+  }
+
+  .song-container,
+  .stats-container {
+    width: 25%;
+    height: 90%;
+    padding: 5px;
+    margin: 0;
+  }
+
+  .song-container h2 {
+    font-size: 1.2rem;
+  }
+
+  .youtube {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+  }
+
+  .spotify iframe{
+    width: 90%;
+    height: 95%;
+  }
+
+  .iconCross {
+    height: 5vmin;
+  }
+
+  .edit-popup,
+  .send-popup {
+    width: 40%;
+    left: auto;
+    top: 5vh;
+    height: 90vh;
+  }
+
+
+  .animation {
+    height: 50vh;
+  }
+}
+
+
+@media screen and (max-height: 700px) and (orientation: portrait) {
   .container p {
     display: none;
   }
@@ -468,23 +548,5 @@ hr {
 
   .iconCross {
     height: 8vmin;
-  }
-}
-
-@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
-  .div-pomodoro {
-    margin-top: 10px;
-  }
-
-  .div-pomodoro h2 {
-    font-size: 1.5rem;
-  }
-
-  .edit-popup,
-  .send-popup {
-    width: 40%;
-    left: auto;
-    top: 15vh;
-    height: 80vh;
   }
 }

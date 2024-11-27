@@ -8,8 +8,7 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import PreviewPomodoro from './previewPomodoro';
 import PreviewNote from './previewNote';
-import { initialEvents } from './Events';
-import { initialActivities } from './Activities';
+import { initialEvents, initialActivities } from './Calendar';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
@@ -59,11 +58,8 @@ function Card({ title, caseShow }) {
                 <div className='inCard'>
                     <Calendar  tileContent={tileContent}/>
                     <div className="divBtn">
-                        <Link to="/events" onClick={handleLinkClick('/events')}>
-                        <button className="btn" style={{ color: 'blue' }}>Manage Events</button>
-                        </Link>
-                        <Link to="/activities" onClick={handleLinkClick('/activities')}>
-                            <button className="btn" style={{ color: '#f72585' }}>Manage Activities</button>
+                        <Link to="/Calendar" onClick={handleLinkClick('/Calendar')}>
+                            <button className="btn" >Manage Calendar</button>
                         </Link>
                     </div>
                 </div>

@@ -20,6 +20,7 @@ import CopyableId from './copyableId';
 import { stringTime, pomodoroPlay, passingTime, initDataPomodoro, addCycle, skipTime, resetTime, editDataPomodoro, timerState } from './pomodoroUtils';
 import io from 'socket.io-client';
 import PomodoroAnimation from './PomodoroAnimation';
+import Swal from 'sweetalert2';
 
 
 
@@ -222,7 +223,14 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                     setInShare(false);
                     socket.disconnect();
                     setSessionCode('');
-                    alert('Session not found');
+                    Swal.fire({
+                        title: 'Session not found',
+                        icon: 'error',
+                        text: 'Please check the code',
+                        customClass: {
+                            confirmButton: 'button-alert'
+                        }
+                    });
                 }
             });
 

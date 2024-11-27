@@ -3,6 +3,7 @@ import axios from 'axios';
 import iconSearch from './media/search.svg';
 import iconCrossDark from './media/crossDark.svg';
 import iconArrow from './media/leftBackArrow.svg';
+import Swal from 'sweetalert2';
 
 const Youtube = ({setPlatformMusic}) => {
   const [videoSelected, setVideoSelected] = useState(false);
@@ -52,11 +53,25 @@ const Youtube = ({setPlatformMusic}) => {
         /*setVideoTitle(response.data.items[0].snippet.title);*/
       }
       else {
-        alert('Invalid URL 1');
+        Swal.fire({
+          title: 'Invalid URL',
+          text: 'Please enter a valid Youtube URL',
+          icon: 'error',
+          customClass: {
+            confirmButton: 'button-alert'
+          }
+        });
       }
     }
     else {
-      alert('Invalid URL 2');
+      Swal.fire({
+        title: 'Invalid URL',
+        text: 'Please enter a valid Youtube URL',
+        icon: 'error',
+        customClass: {
+          confirmButton: 'button-alert'
+        }
+      });
     }
   }
 
