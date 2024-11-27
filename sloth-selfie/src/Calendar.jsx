@@ -29,7 +29,6 @@ const initialEvents = [
   {id: 1, originalId:1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
 ];
 
-const currentUser = 'Bob'; // Qui potrebbe esserci l'utente autenticato
 
 const initialActivities = [
     // Puoi aggiungere alcune attività di esempio qui 
@@ -51,6 +50,7 @@ function Calendar() {
     const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [username, setUsername] = useState("");//username of the authenticated user
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
@@ -91,6 +91,24 @@ function Calendar() {
             updateIcon(iconLight);
         };
     }, [updateIcon, updateStyles]);
+
+    // Get the username of the authenticated user
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/user/username', {
+        credentials: 'include'
+        });const data = await response.json();
+        console.log('Username:', data.username);
+        setUsername(data.username);
+    } catch (error) {
+        console.error('Error fetching username:', error);
+    }
+    };
+
+    fetchUsername();
+}, []); 
+       
 
     // Function to fetch events from the server
     const fetchEvents = async () => {
@@ -231,7 +249,7 @@ function Calendar() {
             repeatFrequency: eventData.repeatFrequency,
             repeatEndDate: eventData.repeatEndDate,
             eventLocation: eventData.eventLocation,
-            userId: currentUser,
+            userId: eventData.userId,
         };
 
         if (eventData.allDay) {
