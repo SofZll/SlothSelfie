@@ -112,7 +112,7 @@
     height: 70px;
     border-radius: 50%;
     overflow: hidden;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
 }
 
 .img-wrap img {

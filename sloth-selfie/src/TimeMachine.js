@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import './css/TimeMachine.css';
+import Swal from "sweetalert2";
 
 const TimeMachine = ({isOpen, onClose}) => {
     const [inputTime, setInputTime] = useState('');
@@ -29,42 +30,44 @@ const TimeMachine = ({isOpen, onClose}) => {
             }); 
     }, []);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        let combinedDateTime = '';
         const buttonClicked = e.nativeEvent.submitter.value;
-        if (buttonClicked === 'reset-time') {
-            if (inputTime && inputDate) {
-                fetch('http://localhost:8000/api/time/set-time',{
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({inputTime, inputDate})
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(`You have chosen to go back to: ${inputDate} ${inputTime}`);
-                    console.log('Time set:', data);
-                })
-                .catch(error => {
-                    console.error("Error setting time: ", error);
-                });
-                onClose();
-            } else {
-                alert("No time entered. Please try again.");
-            }
-        }
-        else if (buttonClicked === 'reset-time') {
-            fetch('http://localhost:8000/api/time/reset-time')
-            .then(response => response.json())
-            .then(data => {
-                alert('Time has been reset!');
-                console.log('Time reset:', data);
-            })
-            .catch(error => {
-                console.error("Error resetting time: ", error);
+        if (buttonClicked === 'set-time' && !inputTime && !inputDate) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please enter a date and time',
             });
+
+            return;
+        } else if (buttonClicked === 'set-time' && inputTime && inputDate) {
+            combinedDateTime = `${inputDate}T${inputTime}:00.000Z`;
+        } else if (buttonClicked === 'reset-time') {
+            const now = new Date();
+            combinedDateTime = now.toISOString();
+        }
+
+        try {
+            const response = await fetch('http://localhost:8000/api/time/fetch-state',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ combinedDateTime })   
+            })
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('State fetched:', data);
+            } else {
+                console.error('Error fetching state');
+            }
+
             onClose();
+        } catch (error) {
+            console.error('Error setting time:', error);
         }
     }
 
@@ -76,7 +79,7 @@ const TimeMachine = ({isOpen, onClose}) => {
         <div className="time-machine">
             <div className="time-machine-content">
                 <span className="close" onClick={onClose}>&times;</span>
-                <h2>Hi! &#128527;<br/> Do you wish to go back in time?</h2>
+                <h2>Hi! &#128527;<br/> Do you wish to travel in time?</h2>
                 <p>Right now the time is set on: </p>
                 <p className="current-time">
                     <span>Date: {currentDate}</span>
