@@ -1,15 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
 import { handleAddActivity, handleRemoveActivity, handleUpdateActivity, handleActivityDataChange} from './ActivityUtils';
 
+import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 
 
 function ActivitiesFunction(props){
+    const { activities, setActivities, username } = useContext(ActivityContext);
+    console.log(username);
     //const { activities, setActivities } = useContext(ActivityContext);
     //const[activityData, setActivityData] = useContext(ActivityContext); Old
 
@@ -30,7 +33,7 @@ function ActivitiesFunction(props){
             <h2>Activities</h2>
             <form onSubmit={props.selectedActivity 
                 ? (e) => handleUpdateActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setSelectedActivity)
-                :(e) => handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities)}>
+                :(e) => handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, username)}>
                 <label>Activity:
                     <input 
                         type="text" 
