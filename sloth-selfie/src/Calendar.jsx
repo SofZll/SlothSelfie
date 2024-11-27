@@ -294,10 +294,10 @@ function Calendar() {
         setEvents(updatedEvents);
     };
 
-    const onActivityDrop = ({ event, start, end }) => {
-        const updatedActivity = { ...event, start, end };
-        const updatedActivities = activities.map((a) => (a.id === event.id ? updatedActivity : a));
-        setActivities(updatedActivities);
+    const onActivityDrop = ({ activity, start, end }) => {
+        const updatedActivity = { ...activity, start, end };
+        const updatedActivities = activities.map((a) => (a.id === activity.id ? updatedActivity : a));
+        setActivities(normalizeActivities(updatedActivities));
     };
     
 
@@ -313,9 +313,9 @@ function Calendar() {
     //Call handelEventClick or handleActivityClick
     const onItemSelect = (item) => {
         if (item.type === 'event') {
-            handleEventClick(item.event);
+            handleEventClick(item);
         } else if (item.type === 'activity') {
-            handleActivityClick(item.activity);
+            handleActivityClick(item);
         }
     };
 
