@@ -101,6 +101,7 @@ function Calendar() {
         });const data = await response.json();
         console.log('Username:', data.username);
         setUsername(data.username);
+        console.log('Username:', username);
     } catch (error) {
         console.error('Error fetching username:', error);
     }
