@@ -31,9 +31,7 @@ router.get('/user/username', getUsername);
 router.get('/user/check-auth', checkAuth);
 
 // Time machine endpoint
-router.post('/time/set-time', setTime);
-router.post('/time/reset-time', resetTime);
-router.get('/time/fetchState', fetchState);
+router.get('/time/fetch-state', fetchState);
 
 // Notification endpoints
 router.post('/notification/new-notif', createNotification);

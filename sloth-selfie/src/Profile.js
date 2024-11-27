@@ -224,82 +224,78 @@ function Profile() {
                 </div>
             ) : (
                 <div className="profile">
-                    <div className="left-column">
-                        <div className="profile-container">
-                            <h2>{profileData.username}</h2>
-                            <div className="profile-image">
-                                {profileData.profile_image && (
-                                    <img src={profileData.profile_image} alt="profile-img" onClick={handleImageClick}/>
-                                )}
-                                <input type="file" id="file-input" style={{display: 'none'}} onChange={editImage}/>
-                            </div>
-                            <button className="btn button-info" onClick={toggleShowProfile}>
-                                {showProfile ? "Hide": "Expands"}
-                            </button>
-                            <div className={`profile-info ${showProfile ? 'show' : ''}`}>
-                                {isEditing ? (
-                                    <form className="profile-form">
-                                        <div className="form-group profile-form-group">
-                                            <label htmlFor="name">Name:</label>
-                                            <input type="text" id="name" name="name" value={profileData.name} onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}/>
-                                        </div>
-                                        <div className="form-group profile-form-group">
-                                            <label htmlFor="username">Username:</label>
-                                            <input type="text" id="username" value={profileData.username} readOnly/>
-                                        </div>
-                                        <div className="form-group profile-form-group">
-                                            <label htmlFor="email">Email:</label>
-                                            <input type="email" id="email" name="email" value={profileData.email} onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}/>
-                                        </div>
-                                        <div className="form-group profile-form-group">
-                                            <label htmlFor="birthday">Birthday:</label>
-                                            <input type="date" id="birthday" name="birthday" value={profileData.birthday} onChange={(e) => setProfileData({ ...profileData, birthday: e.target.value })}/>
-                                        </div>
-                                        <div className="form-group profile-form-group">
-                                            <label htmlFor="phoneNumber">Phone number:</label>
-                                            <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber} onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}/>
-                                        </div>
-                                        <div className="form-group profile-form-group">
-                                            <label htmlFor="gender">Gender:</label>
-                                            <select id="gender" name="gender" value={profileData.gender} onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })}>
-                                                <option value="">Select Gender</option>
-                                                <option value="male">Male</option>
-                                                <option value="female">Female</option>
-                                                <option value="other">Other</option>
-                                            </select>
-                                        </div>
-                                    </form>
-                                ):(
-                                    <>
-                                        <p>Name: {profileData.name} </p>
-                                        <p>Username: {profileData.username} </p>
-                                        <p>Email: {profileData.email}</p>
-                                        <p>Birthday: {profileData.birthday}</p>
-                                        <p>Phone number: {profileData.phoneNumber}</p>
-                                        <p>Gender: {profileData.gender} </p>
-                                    </>
-                                )}
-                            </div>
+                    <div className="profile-container">
+                        <h2>{profileData.username}</h2>
+                        <div className="profile-image">
+                            {profileData.profile_image && (
+                                <img src={profileData.profile_image} alt="profile-img" onClick={handleImageClick}/>
+                            )}
+                            <input type="file" id="file-input" style={{display: 'none'}} onChange={editImage}/>
+                        </div>
+                        <button className="btn button-info" onClick={toggleShowProfile}>
+                            {showProfile ? "Hide": "Expands"}
+                        </button>
+                        <div className={`profile-info ${showProfile ? 'show' : ''}`}>
                             {isEditing ? (
-                                <>
-                                    <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={saveChanges}>Save changes</button>
-                                    <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={cancelEdit}>Cancel</button>
-                                </>
+                                <form className="profile-form">
+                                    <div className="form-group profile-form-group">
+                                        <label htmlFor="name">Name:</label>
+                                        <input type="text" id="name" name="name" value={profileData.name} onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}/>
+                                    </div>
+                                    <div className="form-group profile-form-group">
+                                        <label htmlFor="username">Username:</label>
+                                        <input type="text" id="username" value={profileData.username} readOnly/>
+                                    </div>
+                                    <div className="form-group profile-form-group">
+                                        <label htmlFor="email">Email:</label>
+                                        <input type="email" id="email" name="email" value={profileData.email} onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}/>
+                                    </div>
+                                    <div className="form-group profile-form-group">
+                                        <label htmlFor="birthday">Birthday:</label>
+                                        <input type="date" id="birthday" name="birthday" value={profileData.birthday} onChange={(e) => setProfileData({ ...profileData, birthday: e.target.value })}/>
+                                    </div>
+                                    <div className="form-group profile-form-group">
+                                        <label htmlFor="phoneNumber">Phone number:</label>
+                                        <input type="tel" id="phoneNumber" name="phoneNumber" value={profileData.phoneNumber} onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}/>
+                                    </div>
+                                    <div className="form-group profile-form-group">
+                                        <label htmlFor="gender">Gender:</label>
+                                        <select id="gender" name="gender" value={profileData.gender} onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })}>
+                                            <option value="">Select Gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </form>
                             ):(
                                 <>
-                                    <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={editProfile}>Edit profile</button>
-                                    <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={logout}>Log out</button>
+                                    <p>Name: {profileData.name} </p>
+                                    <p>Username: {profileData.username} </p>
+                                    <p>Email: {profileData.email}</p>
+                                    <p>Birthday: {profileData.birthday}</p>
+                                    <p>Phone number: {profileData.phoneNumber}</p>
+                                    <p>Gender: {profileData.gender} </p>
                                 </>
                             )}
                         </div>
-                        <div className="mini-hub">
-                            <button className="button-hub" onClick={navigateHub}>HUB</button>
-                        </div>
+                        {isEditing ? (
+                            <>
+                                <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={saveChanges}>Save changes</button>
+                                <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={cancelEdit}>Cancel</button>
+                            </>
+                        ):(
+                            <>
+                                <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={editProfile}>Edit profile</button>
+                                <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={logout}>Log out</button>
+                            </>
+                        )}
+                    </div>
+                    <div className="mini-hub">
+                        <button className="button-hub" onClick={navigateHub}>HUB</button>
                     </div>
                     {!isDesktop && (
-                        <div className="right-column">
-                            <NotificationFunction /> 
-                        </div>
+                        <NotificationFunction /> 
                     )}
                 </div>
             )}
