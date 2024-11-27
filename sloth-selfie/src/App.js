@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './css/App.css';
 import { BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
-import EventsFunction from './Events';
-import ActivitiesFunction from './Activities';
+import Calendar from './Calendar';
 import PomodoroFunction from './Pomodoro';
 import NotesFunction from './Notes';
 import Settings from './previewSetUp';
@@ -242,8 +241,7 @@ function App() {
                   <Route path="/notifications" element={<NotificationFunction />} />
                   <Route path="/pomodoro" element={<PomodoroFunction />} />
                   <Route path="/notes" element={<NotesFunction />} />
-                  <Route path="/events" element={<EventsFunction />} />
-                  <Route path="/activities" element={<ActivitiesFunction />} />
+                  <Route path="/Calendar" element={<Calendar />} />
                   <Route path="/hub" element={<HubFunction />} />
                 </Routes>
                 {/* time machine */}

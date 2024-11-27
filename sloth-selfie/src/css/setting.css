@@ -1,13 +1,4 @@
 
-.settings {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  width: 100%;
-}
-
 .card-settings {
     display: flex;
     flex-direction: column;
@@ -20,27 +11,44 @@
     width: 80vmin;
     word-wrap: break-word;
     position: relative;
-
+    margin-top: 5vh;
 }
 
-.btn-cross {
+.card-settings > nav {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+}
+
+.btn-cross,
+.btn-settings {
     display: flex;
     background-color: inherit;
     border: none;
     padding: 5px;
     margin: 5px;
     border-radius: 5px;
+}
+
+.btn-cross {
     position: absolute;
     top: 0;
     right: 0;
 }
 
 .btn-cross:hover,
-.btn-cross:active {
-    background-color: #f39252;
+.btn-cross:active,
+.btn-settings:hover,
+.btn-settings:active,
+.active-btn {
+    opacity: 0.5;
 }
 
-.icon-cross {
+.icon-cross,
+.icon-settings {
   height: 27vh;
   max-height: 37px;
 }
@@ -51,6 +59,7 @@
         height: 70%;
         padding: 0 1rem;
         width: 30rem;
+        margin-top: 0;
     }
 }
 
