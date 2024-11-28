@@ -1,6 +1,34 @@
 
 import Swal from 'sweetalert2';
 
+//Function to fetch notes from the server
+export async function fetchNotes(setNotes) {
+  try {
+      //const response = await fetch('/api/notes', {
+      //locale:
+      const response = await fetch('http://localhost:8000/api/notes', {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
+
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log(data);
+      if (Array.isArray(data.notes)) {
+          setNotes(data.notes);
+      } else {
+          console.error('La risposta non contiene un array di note:', data);
+      }
+  } catch (error) {
+      console.error('Errore if fetching di notes:', error);
+  }
+};
+
 // Function to handle changes in note data
 export function handleNoteDataChange (field, value, setNoteData) {
   setNoteData((prevData) => ({
@@ -10,8 +38,7 @@ export function handleNoteDataChange (field, value, setNoteData) {
   };
 
 export function canUserAccess(note, currentUser) {
-    console.log('Checking access for note:', note);
-    console.log('Current user:', currentUser);
+  
     if (!note.noteAccess) {
         return false; // if no access is defined, the note is private
     }
@@ -23,7 +50,6 @@ export function canUserAccess(note, currentUser) {
     }
     if (note.noteAccess === 'restricted') {
         //Verify if allowedUsers is an array and if it contains the current user
-        //console.log('Allowed Users:', note.access.allowedUsers);
         return Array.isArray(note.allowedUsers) && 
                note.allowedUsers.includes(currentUser);
     }
@@ -56,7 +82,7 @@ export function canUserAccess(note, currentUser) {
     const updatedTasks = noteData.tasks.filter((task, i) => i !== taskIndex);
     setNoteData(prevNoteData => ({
       ...prevNoteData,
-      tasks: updatedTasks // Aggiorna l'array di tasks
+      tasks: updatedTasks
     }));
 };
 
@@ -104,6 +130,7 @@ export async function handleDuplicateNote (noteId, notes, setNotes) {
         console.log("Saved duplicated note:", savedNote);
 
         setNotes([...notes, savedNote]);
+        fetchNotes(setNotes);
     } catch (error) {
         console.error("Errore durante la duplicazione della nota:", error);
     }
@@ -127,6 +154,7 @@ export async function handleDeleteNote(noteId, notes, setNotes) {
 
         //updating frontend
         setNotes(notes.filter(note => note._id !== noteId));
+        fetchNotes(setNotes);
     } catch (error) {
         console.error('Errore durante l\'eliminazione della nota:', error);
     }
@@ -195,6 +223,7 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
         note._id === noteId ? { note: updatedNote } : note
       );
       setNotes(updatedNotes);
+      fetchNotes(setNotes);
       console.log("Updated Notes:", updatedNotes);
       setIsEditing(null); // exit from edit mode
       //resetting fields
