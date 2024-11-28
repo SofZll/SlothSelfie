@@ -15,7 +15,7 @@ const createActivity = async (req, res) => {
 // fetch all activities
 const getActivities = async (req, res) => {
     try {
-        const activities = await Activity.find({ userId: req.session.userId }); // filtering activities by user
+        const activities = await Activity.find({ username: req.session.username }); // filtering activities by user
         res.status(200).json(activities);
     } catch (error) {
         console.error('Error fetching activities:', error);

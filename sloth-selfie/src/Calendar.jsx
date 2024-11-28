@@ -236,12 +236,16 @@ function Calendar() {
         }
     }, [selectedEvent]);
 
-    const handleAddEvent = (e) => {
-        e.preventDefault();
+    async function handleAddEvent(e, eventData, setEventData, events, setEvents, isEditing, setIsEditing, selectedEvent, setSelectedEvent, updateAllFutureEvents, setUpdateAllFutureEvents) {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+          }
+        console.log("Adding event:", eventData);
 
+        const { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, userId } = eventData;
         let newEvent = {
-            id: events.length + 1,
-            originalId: events.length + 1,
+            //originalId: events.length + 1, //problems here
+            //originalId: eventData._id,
             title: eventData.title,
             date: eventData.date,
             time: eventData.time,
@@ -252,7 +256,7 @@ function Calendar() {
             eventLocation: eventData.eventLocation,
             userId: eventData.userId,
         };
-
+        try{
         if (eventData.allDay) {
             newEvent = convertAllDayToTimedEvent(newEvent);
         }
@@ -266,11 +270,36 @@ function Calendar() {
             } else if (eventData.repeatMode === 'ntimes' && eventData.repeatCount) {
                 repeatedEvents = generateRepeatedEvents(newEvent, null, eventData.repeatCount);
             }
-            setEvents([...events, ...repeatedEvents]);
-        } else {
-            setEvents([...events, newEvent]);
+
+        //    setEvents([...events, ...repeatedEvents]);
+        //} else {
+        //    setEvents([...events, newEvent]);
+        //}
+
+           // Include all repeated events for the API call
+           newEvent.repeatedEvents = repeatedEvents;
         }
 
+        // Send event data to the backend
+        const response = await fetch('http://localhost:8000/api/event', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newEvent),
+        });
+
+        if (!response.ok) {
+            throw new Error('Errore nella creazione dell\'evento');
+        }
+
+        // Parse the response
+        const savedEvent = await response.json();
+        console.log("Evento salvato dal backend:", savedEvent);
+
+        // Update state with the new event
+        setEvents([...events, savedEvent]);
+    
         // Reset input fields
         handleEventDataChange('id', '', setEventData);
         handleEventDataChange('originalId', '', setEventData);
@@ -287,6 +316,8 @@ function Calendar() {
     
         setIsEditing(false);
         setUpdateAllFutureEvents(false); 
+
+    } catch (error) {console.error('Error while adding event:', error);}
     };
 
     const onEventDrop = ({ event, start, end }) => {
