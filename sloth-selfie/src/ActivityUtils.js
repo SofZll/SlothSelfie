@@ -48,7 +48,6 @@ export async function handleAddActivity(e, activityData, setActivityData, activi
       console.log("Adding activity:", activityData);
       const {title, deadline} = activityData;
         let newActivity = {
-            id: activities.length + 1,
             title: title,
             deadline: deadline,
             completed: false,
@@ -90,16 +89,38 @@ export async function handleAddActivity(e, activityData, setActivityData, activi
 }
 
 // Handle removing an activity and marking it as completed while pressing btn "Done"
-export function handleRemoveActivity(id, activities, setActivities) {
-    const updatedActivities = activities.map(activity => {
-        if (activity.id === id) {
-            return { ...activity, completed: true };
-        }
-        return activity;
-    });
+export async function handleRemoveActivity(activityId, activities, setActivities) {
+    if (!activityId) {
+        console.error("ID dell'attività non trovato");
+    }
 
-    setActivities(updatedActivities);
-    console.log("Current activities:", updatedActivities);
+    try{
+        //const response = await fetch(`/api/activities/${activityId}`, {
+        //locale:
+        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Errore nella cancellazione della attività');
+        }
+
+        // Update the frontend
+        const updatedActivities = activities.map(activity => {
+            if (activity._id === activityId) {
+                return { ...activity, completed: true };
+            }
+            return activity;
+        });
+
+        setActivities(updatedActivities);
+        console.log("Current activities:", updatedActivities);
+}catch (error) {
+    console.error('Error while removing activity:', error);
+}
 }
 
 
@@ -141,7 +162,7 @@ export function handleClosePopupA(setSelectedActivity, setActivityData) {
 export function handleUpdateActivity(e, activityData, setActivityData, activities, setActivities, setSelectedActivity) {
     e.preventDefault();
     const updatedActivities = activities.map(activity => {
-        if (activity.id === activityData.id) {
+        if (activity._id === activityData.id) {
             return {
                 ...activity,
                 title: activityData.title,
@@ -157,10 +178,29 @@ export function handleUpdateActivity(e, activityData, setActivityData, activitie
 }
 
 //Handle deleting an activity
-export function handleDeleteActivity(id, activities, setActivities, setSelectedActivity) {
-    const updatedActivities = activities.filter(activity => activity.id !== id);
-    setActivities(updatedActivities);
-    setSelectedActivity(null); // close the pop-up
+export async function handleDeleteActivity(activityId, activities, setActivities, setSelectedActivity) {
+    try{
+        //const response = await fetch(`/api/activities/${id}`, {
+        //locale:
+        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Errore nella cancellazione della attività');
+        }
+
+        // Update the frontend
+        const updatedActivities = activities.filter(activity => activity._id !== activityId);
+        setActivities(updatedActivities);
+        setSelectedActivity(null); // close the pop-up
+    }
+    catch (error) {
+        console.error('Error while deleting activity:', error);
+    }
 }
 
   // Function to Abort the deletion
@@ -170,7 +210,7 @@ export function handleDeleteActivity(id, activities, setActivities, setSelectedA
 
   // Function to confirm the deletion
   export function handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setActivityData) {
-    handleDeleteActivity(selectedActivity.id, activities, setActivities, setSelectedActivity);
+    handleDeleteActivity(selectedActivity._id, activities, setActivities, setSelectedActivity);
     setShowConfirmation(false);
     handleClosePopupA(setSelectedActivity, setActivityData);
   };
