@@ -17,18 +17,18 @@ export function normalizeActivities (activities) {
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         console.error(`Invalid date for event: ${JSON.stringify(activity)}`);
         return {
-            id: activity.id,
+            _id: activity._id,
             title: activity.title,
             start: new Date(),
             end: new Date(),
-                deadline: new Date(),
-                completed: activity.completed,
-                type: 'activity'
+            deadline: new Date(),
+            completed: activity.completed,
+            type: 'activity'
         };
     }
       
         return {
-            id: activity.id,
+            _id: activity._id,
             title: activity.title,
             start: startDate,
             end: endDate,
