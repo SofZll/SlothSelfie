@@ -8,7 +8,7 @@ import './css/Calendar.css';
 import moment from 'moment';
 import { StyleContext } from './StyleContext';
 import { handleEventDataChange, convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleAbortDeleteEvent, handleConfirmDeleteEvent, handleClosePopupE} from './EventUtils';
-import { normalizeActivities, updateOverdueActivities, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA} from './ActivityUtils';
+import { normalizeActivities, updateOverdueActivities, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA, handleActivityDataChange} from './ActivityUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import iconDark from './media/SlothDark.svg';
@@ -54,8 +54,7 @@ function Calendar() {
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
-        id: "",
-        originalId: "",
+        originalId: "", //DA RIVEDERE
         title: '',
         date: '',
         time: '00:00',
@@ -74,7 +73,6 @@ function Calendar() {
 
     //Define the activity data structure
     const [activityData, setActivityData] = useState({
-        id: "",
         title: "",
         deadline: "",
         completed: false,
@@ -190,10 +188,15 @@ function Calendar() {
 
     const handleActivityClick = (activity) => {
         console.log("Activity clicked:", activity);
+        console.log("Activity _id", activity._id);
         setSelectedActivity(activity);
         setIsEditing(true);
         handleSelection(false);
     };
+
+    useEffect(() => {
+        console.log('Current activities:', activities);
+    }, [activities]);
 
     //setting the date to the current date as a filter at the start
     useEffect(() => {
@@ -207,7 +210,6 @@ function Calendar() {
         console.log("repedetion", selectedEvent.repeatFrequency);
 
         setEventData({
-            id: selectedEvent.id,
             originalId: selectedEvent.originalId,
             title: selectedEvent.title,
             date: !isRepeated && selectedEvent.date
@@ -301,7 +303,6 @@ function Calendar() {
         setEvents([...events, savedEvent]);
     
         // Reset input fields
-        handleEventDataChange('id', '', setEventData);
         handleEventDataChange('originalId', '', setEventData);
         handleEventDataChange('title', '', setEventData);
         handleEventDataChange('date', '', setEventData);
@@ -344,11 +345,14 @@ function Calendar() {
 
     //Call handelEventClick or handleActivityClick
     const onItemSelect = (item) => {
-        if (item.type === 'event') {
-            handleEventClick(item);
-        } else if (item.type === 'activity') {
-            handleActivityClick(item);
-        }
+        if (!item._id) 
+            console.log('Missing ID for the selected item', item);
+
+            if (item.type === 'event') {
+                handleEventClick(item);
+            } else if (item.type === 'activity') {
+                handleActivityClick(item);
+            }
     };
 
 
