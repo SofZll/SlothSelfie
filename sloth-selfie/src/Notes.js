@@ -135,7 +135,6 @@ function NotesFunction() {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                //'Authorization': `Bearer ${yourAuthToken}`,
             },
         });
 
@@ -333,7 +332,6 @@ const filterNotesByDate = (notes) => {
           {filterNotesByDate(
                 sortNotes(
                     notes
-                        .map(response => response.note)
                         .filter(note => note && note.noteAccess)
                         .filter(note => {
                           console.log("Checking access for note:", note);
