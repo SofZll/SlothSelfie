@@ -71,7 +71,6 @@ export function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
 export async function handleDuplicateNote (noteId, notes, setNotes) {
 
     const noteToDuplicate = notes
-        .map(response => response.note)
         .find(note => note._id === noteId);
 
     if (!noteToDuplicate) {
@@ -127,7 +126,7 @@ export async function handleDeleteNote(noteId, notes, setNotes) {
         }
 
         //updating frontend
-        setNotes(notes.filter(note => note.note._id !== noteId));
+        setNotes(notes.filter(note => note._id !== noteId));
     } catch (error) {
         console.error('Errore durante l\'eliminazione della nota:', error);
     }
@@ -135,7 +134,6 @@ export async function handleDeleteNote(noteId, notes, setNotes) {
 
 export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
   const noteToEdit = notes
-        .map(response => response.note)
         .find(note => note._id === noteId);
 
     if (!noteToEdit) {
@@ -158,8 +156,8 @@ export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
 export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing) {
     console.log("ID della nota durante il salvataggio:", noteId);
 
-    const noteToUpdate = notes.find(note => note.note._id === noteId);
-    console.log("note._id:", noteToUpdate.note._id);
+    const noteToUpdate = notes.find(note => note._id === noteId);
+    console.log("note._id:", noteToUpdate._id);
 
     if (!noteToUpdate) {
         console.error("Nota non trovata");
@@ -194,7 +192,7 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
       }
 
       const updatedNotes = notes.map(note =>
-        note.note._id === noteId ? { note: updatedNote } : note
+        note._id === noteId ? { note: updatedNote } : note
       );
       setNotes(updatedNotes);
       console.log("Updated Notes:", updatedNotes);

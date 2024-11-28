@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 //import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
+//render di add e edit non si aggiorna, devo fare refresh della pagina
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -351,8 +352,6 @@ const filterNotesByDate = (notes) => {
                       onEdit={() => {
                         // find the note to edit by id
                         const noteToEdit = notes
-                          .map(response =>
-                             response.note)
                           .find(n => n._id === note._id && canUserAccess(n, n.noteAuthor));
                         
                         if (noteToEdit) {
