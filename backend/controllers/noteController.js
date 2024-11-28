@@ -28,7 +28,7 @@ const createNote = async (req, res) => {
 // Fetch all notes
 const getNotes = async (req, res) => {
     try {
-        const notes = await Note.find({ noteAuthor: req.session.userId });
+        const notes = await Note.find({ noteAuthor: req.session.username });
         res.status(200).json({ success: true, notes });
     } catch (error) {
         console.error('Error fetching notes:', error);
