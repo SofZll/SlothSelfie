@@ -5,17 +5,11 @@ import './css/Calendar.css';
 import { handleAddActivity, handleRemoveActivity, handleUpdateActivity, handleActivityDataChange} from './ActivityUtils';
 
 import { ActivityContext } from './ActivityContext';
-//import { ActivityContext } from './ActivityContext';
-//import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 
 
 function ActivitiesFunction(props){
     const { activities, setActivities, username } = useContext(ActivityContext);
-    console.log(username);
-    //const { activities, setActivities } = useContext(ActivityContext);
-    //const[activityData, setActivityData] = useContext(ActivityContext); Old
-
 
     // Pre-fill the form with the selected activity
     useEffect(() => {

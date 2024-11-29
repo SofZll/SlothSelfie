@@ -17,7 +17,6 @@ import HubFunction from './Hub';
 import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
 import { ActivityProvider } from './ActivityContext';
-//import { ActivityProvider } from './ActivityContext.Oldjs';
 import socket from './socket';
 
 function App() {
