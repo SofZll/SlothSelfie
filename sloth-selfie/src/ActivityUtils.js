@@ -88,7 +88,7 @@ export async function handleAddActivity(e, activityData, setActivityData, activi
     }
 }
 
-// Handle removing an activity and marking it as completed while pressing btn "Done" ->err 500 se non ricarico la pagina a mano
+// Handle removing an activity and marking it as completed while pressing btn "Done"
 export async function handleRemoveActivity(activityId, activities, setActivities) {
     if (!activityId) {
         console.error("ID dell'attività non trovato");
@@ -123,7 +123,7 @@ export async function handleRemoveActivity(activityId, activities, setActivities
 }
 }
 
-// Update overdue activities ->err 500 se non ricarico la pagina a mano
+// Update overdue activities
 export async function updateOverdueActivities(activities, setActivities) {
     const today = new Date().toISOString().split('T')[0];
 
@@ -180,16 +180,17 @@ export function handleClosePopupA(setSelectedActivity, setActivityData) {
     handleActivityDataChange('completed', false, setActivityData);
 }
 
-// Handle updating an activity ->err 500 se non ricarico la pagina a mano
-export async function handleUpdateActivity(e, activityData, setActivityData, activities, setActivities, setSelectedActivity) {
+// Handle updating an activity
+export async function handleUpdateActivity(e, activityData, setActivityData, activities, setActivities, setSelectedActivity, selectedActivity) {
     e.preventDefault();
     try {
         // sends data to db
-        const response = await fetch(`http://localhost:8000/api/activity/${activityData._id}`, {
+        const response = await fetch(`http://localhost:8000/api/activity/${selectedActivity._id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include', 
             body: JSON.stringify({
                 title: activityData.title,
                 deadline: activityData.deadline,
@@ -205,7 +206,7 @@ export async function handleUpdateActivity(e, activityData, setActivityData, act
 
         // update the frontend
         const updatedActivities = activities.map((activity) =>
-            activity._id === activityData.id ? updatedActivity : activity
+            activity._id === selectedActivity._id ? updatedActivity : activity
         );
 
         setActivities(updatedActivities);
@@ -218,7 +219,7 @@ export async function handleUpdateActivity(e, activityData, setActivityData, act
     }
 }
 
-//Handle deleting an activity ->err 500 se non ricarico la pagina a mano
+//Handle deleting an activity
 export async function handleDeleteActivity(activityId, activities, setActivities, setSelectedActivity) {
     try{
         //const response = await fetch(`/api/activities/${id}`, {

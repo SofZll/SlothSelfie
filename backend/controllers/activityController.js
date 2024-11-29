@@ -35,6 +35,8 @@ const updateActivity = async (req, res) => {
         }
         //we find the current user and check if it is his activity
         const currentUser = await User.findById(req.session.userId);
+        console.log('Current user:', currentUser);
+        console.log('Activity user:', activity.userId);
         if (!currentUser) {
             return res.status(401).json({ message: "User not found" });
         }
