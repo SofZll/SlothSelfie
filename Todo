@@ -30,6 +30,9 @@ TODO:
     // Notifications
     - Notifications for events and activities - if the user accepts the event or activity is added to the calendar
     - Notifications for communicating the acceptance of events and activities
+
+    // Other
+    - Aggiungere i loading anche per il calendario e le note
 FIX:
     - Time machine ON events and activities popup
 
