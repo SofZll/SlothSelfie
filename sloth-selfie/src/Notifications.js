@@ -78,6 +78,7 @@ const NotificationFunction = () => {
         }
     };
 
+    //TODO: Merge the two functions into one
     const handleReadNotif = async (notifId) => {
         const notifElement = document.getElementById(`notif-${notifId}`);
         notifElement.classList.add('disappearing');
@@ -108,6 +109,34 @@ const NotificationFunction = () => {
             console.error('Error reading notification');
         }
     };
+
+    const handleStatusNotif = async (notifId, status) => {
+        const notifElement = document.getElementById(`notif-${notifId}`);
+        notifElement.classList.add('disappearing');
+
+        try {
+            const response = await fetch(`http://localhost:8000/api/notification/status-notif/${notifId}`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status })
+            });
+
+            if (response.ok) {
+                setTimeout(() => {
+                    setNotifs(notifs.filter(notif => notif._id !== notifId));
+                }, 500);
+            } else {
+                console.log('Error updating notification status');
+            }
+        } catch (error) {
+            console.error('Error updating notification status');
+        }
+    };
+
+
 
     const handleAddReceiver = () => {
         if (receiverInput) {
@@ -210,6 +239,8 @@ const NotificationFunction = () => {
                     <button className="btn new-notif-button" onClick={handleSend}>Send</button>
                 </div>
             </div>
+            {/* TODO: Add a button to mark all notifications as read*/}
+            {/* TODO: Change colors if the notification is related to an event or an activity */}
             <div className="notif-list">
                 {notifs.map((notif) => {
                     const receiverIndex = notif.receivers.findIndex(r => r.username === username);
@@ -220,7 +251,26 @@ const NotificationFunction = () => {
                                 <p>{calculateTime(notif.time, notif.date)}</p>
                             </div>
                             <p>{notif.message}</p>
-                            <button className="btn notif-button" onClick={() => handleReadNotif(notif._id)}>Read</button>
+                            {notif.activity && (
+                                <>
+                                    <p>Activity: {notif.activity.title}</p>
+                                    <p>Deadline: {notif.activity.deadline}</p>
+                                </>
+                            )}
+                            {notif.event && (
+                                <>
+                                    <p>Event: {notif.event.title}</p>
+                                    <p>Date: {notif.event.date}</p>
+                                </>
+                            )}
+                            {!(notif.event || notif.activity) ? (
+                                <button className="btn notif-button" onClick={() => handleReadNotif(notif._id)}>Read</button>
+                            ):(
+                                <>
+                                    <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'accepted')}>Accept</button>
+                                    <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'declined')}>Decline</button>
+                                </>
+                            )}
                         </div>
                     );
                 })}
