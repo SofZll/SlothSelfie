@@ -218,7 +218,7 @@ function Profile() {
     return (
         <>
             { loading ? (
-                <div className="loading-page white">
+                <div className="loading-page loading-page-dark">
                     <div className="spinner"></div>
                     <p>Loading, please wait...</p>
                 </div>

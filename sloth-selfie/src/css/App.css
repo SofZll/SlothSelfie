@@ -241,8 +241,15 @@ p {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  color: #FFF;
   font-family: Arial, sans-serif;
+}
+
+.loading-page-light {
+  color: #FFF;
+}
+
+.loading-page-dark {
+  color: #555B6E;
 }
 
 .loading-page p {
