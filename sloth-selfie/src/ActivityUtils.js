@@ -78,7 +78,7 @@ export async function handleAddActivity(e, activityData, setActivityData, activi
     console.log("Attività salvata dal backend:", savedActivity);
 
 
-        setActivities([...activities, newActivity]);
+        setActivities([...activities, savedActivity]);
         console.log("Current activities:", [...activities, newActivity]);
 
         // Reset input fields
