@@ -101,7 +101,6 @@ function Calendar() {
         });const data = await response.json();
         console.log('Username:', data.username);
         setUsername(data.username);
-        console.log('Username:', username);
     } catch (error) {
         console.error('Error fetching username:', error);
     }
@@ -289,27 +288,48 @@ function Calendar() {
         setUpdateAllFutureEvents(false); 
     };
 
-    const onEventDrop = ({ event, start, end }) => {
-        const updatedEvent = { ...event, start, end };
-        const updatedEvents = events.map((e) => (e.id === event.id ? updatedEvent : e));
+    
+    const handleDropEvent = (event, start, end) => {
+        console.log("Event dropped:", event, start, end);
+        const updatedEvents = events.map(e => {
+            if (e.id === event.id) {
+                return {
+                    ...e,
+                    start,
+                    end,
+                };
+            }
+            return e;
+        });
         setEvents(updatedEvents);
     };
 
-    const onActivityDrop = ({ activity, start, end }) => {
-        const updatedActivity = { ...activity, start, end };
-        const updatedActivities = activities.map((a) => (a.id === activity.id ? updatedActivity : a));
-        setActivities(normalizeActivities(updatedActivities));
+    const handleDropActivity = (activity, deadline) => {
+        console.log("Activity dropped:", activity, deadline);
+        const updatedActivities = activities.map(a => {
+            if (a.id === activity.id) {
+                return {
+                    ...a,
+                    deadline,
+                    start: deadline,
+                    end: deadline,
+                };
+            }
+            return a;
+        });
+        setActivities(updatedActivities);
     };
-    
 
-    const onItemDrop = ({event, start, end}) => {
+    const onEventDrop = ({event, start, end}) => {
+        console.log("Event dropped:", event, start, end);
         if (event.type === 'event') {
-            onEventDrop({event: event, start, end});
+            handleDropEvent(event, start, end);
         } else if (event.type === 'activity') {
-            console.log("Activity dropped:", event);
-            onActivityDrop({activity: event, start, end});
+            handleDropActivity( event, start);
         }
     };
+
+
 
     //Call handelEventClick or handleActivityClick
     const onItemSelect = (item) => {
@@ -333,7 +353,7 @@ function Calendar() {
                     onSelectEvent={onItemSelect}
                     titleAccessor="title"
                     style={{ height: "60vh" }}
-                    onEventDrop={onItemDrop}
+                    onEventDrop={onEventDrop}
                     resizable
                 />
 
