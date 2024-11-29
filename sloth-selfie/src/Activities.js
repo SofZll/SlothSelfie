@@ -7,7 +7,6 @@ import { handleAddActivity, handleRemoveActivity, handleUpdateActivity, handleAc
 import { ActivityContext } from './ActivityContext';
 
 
-
 function ActivitiesFunction(props){
     const { activities, setActivities, username } = useContext(ActivityContext);
 

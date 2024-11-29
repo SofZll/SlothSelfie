@@ -1,5 +1,6 @@
 
 import Swal from 'sweetalert2';
+import { handleAddActivity } from './ActivityUtils';
 
 //Function to fetch notes from the server
 export async function fetchNotes(setNotes) {
@@ -181,7 +182,7 @@ export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
   setIsEditing(noteId);
 }
 
-export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, setActivities) {
+export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
     console.log("ID della nota durante il salvataggio:", noteId);
 
     const noteToUpdate = notes.find(note => note._id === noteId);
@@ -196,19 +197,31 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
 
     // Before updating the note, check if there are tasks with deadlines to add as activities
     if (noteData.isTodo) {
+      console.log("Adding tasks as activities...");
+      
       noteData.tasks.forEach(task => {
           if (task.deadline) {
-              const activityData = {
-                  title: task.text,
-                  deadline: task.deadline,
-              };
-              setActivities(prevActivities => [
-                ...prevActivities,
-                activityData
-            ]);
-        }
-    });
-}
+              // Verify if the activity already exists
+              const activityExists = activities.some(activity => activity.title === task.text && activity.deadline === task.deadline);
+
+              if (!activityExists) {
+                  const activityData = {
+                      title: task.text,
+                      deadline: task.deadline,
+                  };
+
+                  // Add the activity
+                  setActivities(prevActivities => [
+                      ...prevActivities,
+                      activityData
+                  ]);
+                  handleAddActivity(null, activityData, setActivities, noteData.noteAuthor);// TODO DA AGGIUSTARE
+              } else {
+                  console.log(`Activity for task "${task.text}" already exists.`);
+              }
+          }
+      });
+  }
     const updatedNote = {
       ...noteToUpdate.note,
       title: noteData.title,

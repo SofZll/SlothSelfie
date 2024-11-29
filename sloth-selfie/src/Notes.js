@@ -215,15 +215,17 @@ useEffect(() => {
 
      // Add tasks as activities if they have a deadline
      if (noteData.isTodo) {
+      console.log("Adding tasks as activities...");
       noteData.tasks.forEach(task => {
         if (task.deadline) {
           //we create an activity
           const activityData = {
-            title: task.title,
+            title: task.text,
             deadline: task.deadline,
           };
           handleAddActivity(null, activityData, setActivityData, activities, setActivities, username);
-        }
+        }else {
+          console.log("Task without deadline:", task);}
       });
     }
     try {
@@ -485,7 +487,7 @@ const filterNotesByDate = (notes) => {
           <button className="btn" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
             {/* Editing scenario*/}
             {isEditing !== null && (
-          <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, setActivities)}>Save Note</button>
+          <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities)}>Save Note</button>
           )}
         </div>
       </div>
