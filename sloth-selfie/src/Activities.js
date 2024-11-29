@@ -30,7 +30,7 @@ function ActivitiesFunction(props){
     const handleSubmitSave = (e) => {
         e.preventDefault();
         if (props.selectedActivity) {
-            handleUpdateActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setSelectedActivity, props.setIsEditing);
+            handleUpdateActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setSelectedActivity,props.selectedActivity, props.setIsEditing);
         } else {
             handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, username);
         }

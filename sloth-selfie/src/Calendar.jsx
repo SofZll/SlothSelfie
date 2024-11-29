@@ -430,7 +430,7 @@ function Calendar() {
                     <div className="popup">
                         <h2>Editing mode:</h2>
                         <h2>{selectedActivity.title}</h2>
-                        <p>Due: {selectedActivity.deadline}</p>
+                        <p>Due: {new Date(selectedActivity.deadline).toLocaleDateString()}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
 
                         <div>
