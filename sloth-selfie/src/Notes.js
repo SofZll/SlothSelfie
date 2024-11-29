@@ -6,7 +6,7 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
-import { handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
+import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';
@@ -125,38 +125,9 @@ function NotesFunction() {
 
     fetchUsername();
 }, []); 
-       
-  //Function to fetch notes from the server
-  const fetchNotes = async () => {
-    try {
-        //const response = await fetch('/api/notes', {
-        //locale:
-        const response = await fetch('http://localhost:8000/api/notes', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                //'Authorization': `Bearer ${yourAuthToken}`,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
-        console.log(data);
-        if (Array.isArray(data.notes)) {
-            setNotes(data.notes);
-        } else {
-            console.error('La risposta non contiene un array di note:', data);
-        }
-    } catch (error) {
-        console.error('Errore if fetching di notes:', error);
-    }
-};
 
   useEffect(() => {
-      fetchNotes();
+      fetchNotes(setNotes);
   }, []);
 
 useEffect(() => {
@@ -271,6 +242,8 @@ useEffect(() => {
 
       console.log("Nota salvata dal backend:", savedNote);
       setNotes([...notes, savedNote]);
+      fetchNotes(setNotes);
+      console.log("Notes after adding:", notes);
 
       //resetting fields
       handleNoteDataChange('title', '', setNoteData);
@@ -333,11 +306,8 @@ const filterNotesByDate = (notes) => {
           {filterNotesByDate(
                 sortNotes(
                     notes
-                        .map(response => response.note)
                         .filter(note => note && note.noteAccess)
                         .filter(note => {
-                          console.log("Checking access for note:", note);
-                          console.log("Current user before checking access:", username);
                           return canUserAccess(note, username);
                         }),
                     sortCriterion
@@ -353,8 +323,6 @@ const filterNotesByDate = (notes) => {
                       onEdit={() => {
                         // find the note to edit by id
                         const noteToEdit = notes
-                          .map(response =>
-                             response.note)
                           .find(n => n._id === note._id && canUserAccess(n, n.noteAuthor));
                         
                         if (noteToEdit) {

@@ -15,7 +15,7 @@ const createEvent = async (req, res) => {
 // fetch all events
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find({ userId: req.session.userId }); // filtering events by user
+    const events = await Event.find({ username: req.session.username }); // filtering events by user
     res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error fetching events' });

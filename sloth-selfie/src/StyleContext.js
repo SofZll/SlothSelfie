@@ -17,6 +17,7 @@ export const StyleProvider = ({ children }) => {
         const header = document.querySelector('.App-header');
         const h1 = document.querySelector('h1');
         const burgers = document.querySelectorAll('.bm-burger-bars');
+        const loadingPage = document.querySelector('.loading-page');
         if (isLight) {
             if (header) header.classList.add('light-background');
             if (h1) h1.classList.add('dark-h1');
@@ -24,6 +25,7 @@ export const StyleProvider = ({ children }) => {
                 burger.style.backgroundColor = '#555B6E';
             });
             document.body.classList.add('light-background');
+            if (loadingPage) loadingPage.classList.add('loading-page-dark');
         } else {
             if (header) header.classList.remove('light-background');
             if (h1) h1.classList.remove('dark-h1');
@@ -31,6 +33,7 @@ export const StyleProvider = ({ children }) => {
                 burger.style.backgroundColor = '#FAF9F9';
             });
             document.body.classList.remove('light-background');
+            if (loadingPage) loadingPage.classList.remove('loading-page-dark');
         }
     };
 

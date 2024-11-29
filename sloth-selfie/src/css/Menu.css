@@ -75,6 +75,7 @@
 .bm-item:hover {
     color: white;
     background-color: #555B6E;
+    text-decoration: none;
 }
 
 .bm-overlay {
@@ -130,6 +131,8 @@
     align-items: center;
     justify-content: center;
     width: 228px;
+    border-top: #F9FAFA 1.5px solid;
+    border-radius: 0;
 }
 
 .bm-item.menu-profile:hover {

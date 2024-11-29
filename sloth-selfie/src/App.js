@@ -186,7 +186,7 @@ function App() {
       <StyleProvider>
         <ActivityProvider>
           { loading ? (
-            <div className="loading-page">
+            <div className="loading-page loading-page-light">
               <div className="spinner"></div>
               <p>Loading, please wait...</p>
             </div>
