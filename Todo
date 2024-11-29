@@ -1,0 +1,36 @@
+TODO:
+    // Projects
+    - Projects
+
+    // Time machine
+    - Back time machine
+    - Add forward time machine
+    - Change of time without reload
+    - Notifications of current day
+
+    // Calendar
+    - Connect events and notifications
+    - Add shared events - AGGIUNGERE ARRAY USERID PER EVENTI E ATTIVITÀ
+    - Accept or reject events trough notifications
+    - User time settings
+    - Configure icalendar, google calendar, mail and apple calendar
+    - Resources as users
+    - Manager user
+    - Notifications with urgent levels
+    - Shared Activities
+    - Gli eventi e le attività devono essere efficaci e possono essere modificati insieme
+
+    // Notes
+    - If an item has a deadline, it should automatically be added to the calendar
+
+    // Pomodoro
+    - Linking pomodoro to calendar - cicles not done should be added to the next day
+    - Add pomodoro notification
+
+    // Notifications
+    - Notifications for events and activities - if the user accepts the event or activity is added to the calendar
+    - Notifications for communicating the acceptance of events and activities
+FIX:
+    - Time machine ON events and activities popup
+
+DONE:

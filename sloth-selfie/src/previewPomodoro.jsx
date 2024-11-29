@@ -65,11 +65,11 @@ const PreviewPomodoro = () => {
         </h2>
       </div>
       <div className="divBtn">
-          <button  onClick={() => tomatoPlay (setDataPomodoro, dataPomodoro, setPlayTomato, playTomato, setStringPrintTime)} className="btn">{playTomato ? 
+          <button  onClick={() => tomatoPlay (setDataPomodoro, dataPomodoro, setPlayTomato, playTomato, setStringPrintTime)} className="btn btn-preview">{playTomato ? 
             (dataPomodoro.done ? "Reset timer" : "Stop timer") : (dataPomodoro.notStartedYet ? "Quick start" : "Play timer")}
           </button>
         <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
-          <button className="btn">Set Pomodoro</button>
+          <button className="btn btn-preview">Set Pomodoro</button>
         </Link>
       </div>
     </div>

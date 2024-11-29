@@ -25,8 +25,30 @@ const notificationSchema = new mongoose.Schema({
     },
     read: {
         type: [Boolean],
-        required: true,
-    }
+        required: false,
+    },
+    activity: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Activity',
+        required: false,
+    },
+    event: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Event',
+        required: false,
+    },
+    responses: [{
+        receiver: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        status: {
+            type: String,
+            enum: ['Accepted', 'Declined', 'Pending'],
+            default: 'Pending',
+        }
+    }]
 }, {
     timestamps: true,
 });

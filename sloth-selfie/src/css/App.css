@@ -138,6 +138,10 @@ p {
   background-color: inherit;
 }
 
+.btn-preview {
+  background-color: #244476;
+}
+
 .icon {
   height: 10vmin;
   max-height: 30px;

@@ -30,11 +30,10 @@ const createNotification = async (req, res) => {
             date,
             time,
             read: receivers.map(() => false),
+            responses: [], // array of responses
         });
 
         console.log(notification);
-        //io.emit('check');
-        //io.emit('send-notification', notification);
         await notification.save();
         res.status(201).json({ success: true, notification });
     } catch (error) {
@@ -88,8 +87,37 @@ const markNotificationAsRead = async (req, res) => {
     }
 }
 
+const markNotificationStatus = async (req, res) => {
+    try {
+        const { notifId } = req.params;
+        const { status } = req.body;
+        const username = req.session.username;
+
+        const notification = await Notification.findById(notifId);
+        if (!notification) {
+            return res.status(404).json({ success: false, message: 'Notification not found' });
+        }
+
+        const receiver = await User.findOne({ username });
+        const receiverIndex = notification.responses.findIndex(r => r.receiver.equals(receiver._id));
+
+        if (receiverIndex !== -1) {
+            return res.status(400).json({ success: false, message: 'Response has already been submitted' });
+        }
+
+        notification.responses.push({ receiver: receiver._id, status });
+        await notification.save();
+
+        res.status(200).json({ success: true, message: 'Notification status marked' });
+    } catch (error) {
+        console.error('Error marking notification status:', error);
+        res.status(500).json({ success: false, message: 'Error marking notification status' });
+    }
+};
+
 module.exports = {
     createNotification,
     getNotifications,
     markNotificationAsRead,
+    markNotificationStatus,
 };

@@ -59,7 +59,7 @@ function Card({ title, caseShow }) {
                     <Calendar  tileContent={tileContent}/>
                     <div className="divBtn">
                         <Link to="/Calendar" onClick={handleLinkClick('/Calendar')}>
-                            <button className="btn" >Manage Calendar</button>
+                            <button className="btn btn-preview" >Manage Calendar</button>
                         </Link>
                     </div>
                 </div>
@@ -75,7 +75,7 @@ function Card({ title, caseShow }) {
             content = (
                 <div className='inCard'>
                     <p>Content for other stuff 3</p>
-                    <button className="btn">Start</button>
+                    <button className="btn btn-preview">Start</button>
                 </div>
             );
             break;
