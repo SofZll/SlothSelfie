@@ -10,7 +10,6 @@ import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, t
 import {handleAddActivity} from './ActivityUtils';
 import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';
-//import { ActivityContext } from './ActivityContext.Oldjs'; 
 
 //TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 
@@ -81,7 +80,7 @@ function NotesFunction() {
   const [isEditing, setIsEditing] = useState(null);
   const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
   const [filteredNotes, setFilteredNotes] = useState([]);
-  //const { activities, setActivities, setTitle, setDeadline } = useContext(ActivityContext);
+  const { activities, setActivities, setActivityData} = useContext(ActivityContext);
   
   //defining the note data structure
   const [noteData, setNoteData] = useState({
@@ -218,7 +217,12 @@ useEffect(() => {
      if (noteData.isTodo) {
       noteData.tasks.forEach(task => {
         if (task.deadline) {
-          //handleAddActivity(null, task.text, task.deadline, activities, setActivities, setTitle, setDeadline);
+          //we create an activity
+          const activityData = {
+            title: task.title,
+            deadline: task.deadline,
+          };
+          handleAddActivity(null, activityData, setActivityData, activities, setActivities, username);
         }
       });
     }
@@ -481,7 +485,7 @@ const filterNotesByDate = (notes) => {
           <button className="btn" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
             {/* Editing scenario*/}
             {isEditing !== null && (
-          <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing)}>Save Note</button>
+          <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, setActivities)}>Save Note</button>
           )}
         </div>
       </div>

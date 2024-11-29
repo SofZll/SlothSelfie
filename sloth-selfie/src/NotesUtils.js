@@ -181,7 +181,7 @@ export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
   setIsEditing(noteId);
 }
 
-export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing) {
+export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, setActivities) {
     console.log("ID della nota durante il salvataggio:", noteId);
 
     const noteToUpdate = notes.find(note => note._id === noteId);
@@ -194,6 +194,21 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
 
     console.log("Nota da aggiornare:", noteToUpdate);
 
+    // Before updating the note, check if there are tasks with deadlines to add as activities
+    if (noteData.isTodo) {
+      noteData.tasks.forEach(task => {
+          if (task.deadline) {
+              const activityData = {
+                  title: task.text,
+                  deadline: task.deadline,
+              };
+              setActivities(prevActivities => [
+                ...prevActivities,
+                activityData
+            ]);
+        }
+    });
+}
     const updatedNote = {
       ...noteToUpdate.note,
       title: noteData.title,
