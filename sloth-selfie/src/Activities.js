@@ -27,13 +27,20 @@ function ActivitiesFunction(props){
         }
     }, [props.selectedActivity]);
 
+    const handleSubmitSave = (e) => {
+        e.preventDefault();
+        if (props.selectedActivity) {
+            handleUpdateActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setSelectedActivity, props.setIsEditing);
+        } else {
+            handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, username);
+        }
+    }
+
   
     return (
         <div className="container-activity-add">
             <h2>Activities</h2>
-            <form onSubmit={props.selectedActivity 
-                ? (e) => handleUpdateActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setSelectedActivity)
-                :(e) => handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, username)}>
+            <form onSubmit={(e) => handleSubmitSave(e)}>
                 <label>Activity:
                     <input 
                         type="text" 
