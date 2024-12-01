@@ -68,7 +68,7 @@ function Calendar() {
         repeatEndDate: '', // Date of the last repetition   <-
         eventLocation: '', // eventLocation of the event
         userId: '', // User ID of whom creates the event
-        type: 'event',
+        type: 'events',
     });
 
     //Define the activity data structure

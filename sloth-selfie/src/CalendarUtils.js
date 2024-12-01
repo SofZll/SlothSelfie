@@ -1,3 +1,6 @@
+import { all } from "axios";
+import { a } from "react-spring";
+import Swal from "sweetalert2";
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
@@ -14,7 +17,7 @@ const setStartEnd = (data) => {
         startDate = new Date(data.deadline);
         endDate = new Date(data.deadline);
         
-    } else {
+    } else if (data.type === "events") {
         if (data.start && data.end) {
             startDate = new Date(data.start);
             endDate = new Date(data.end);
@@ -68,13 +71,15 @@ export function normalizeData (data, type) {
 };
 
 //Function to save data in front and clen the form
-export function resetInputFiels(type, setIsEditing, setData) {
+export function resetInputFiels(type, setData) {
     
     
     if (type === "activity") {
+        handleDataChange('id', '', setData);
         handleDataChange('title', '', setData);
         handleDataChange('deadline', '', setData);
-    } else {
+        handleDataChange('completed', false, setData);
+    } else if (type === "events") {
         handleDataChange('id', '', setData);
         handleDataChange('originalId', '', setData);
         handleDataChange('title', '', setData);
@@ -88,54 +93,91 @@ export function resetInputFiels(type, setIsEditing, setData) {
         handleDataChange('repeatCount', '', setData);
         handleDataChange('eventLocation', '', setData);
     }
+}
 
-    setIsEditing(false);
+//Function to handle set of new data
+export async function handleAddData(data, username) {
+    if (data.type === "activity") {
+        const {title, deadline} = data;
+        newData = {
+            title: title,
+            deadline: deadline,
+            completed: false,
+            userId: username,
+            type: "activity",
+        };
+    } else if (data.type === "events") {
+        const {title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation} = data;
+        newData = {
+            title: title,
+            date: date,
+            time: time,
+            duration: allDay ? days : duration,
+            allDay: allDay,
+            days: days,
+            repeatFrequency: repeatFrequency,
+            repeatEndDate: repeatEndDate,
+            repeatCount: repeatCount,
+            eventLocation: eventLocation,
+            userId: username,
+            type: "events",
+        };
+    }
+
+    return newData;
 }
 
 
-//Function to Connect to the database
-export async function connectToDB (type, data, setData, setIsEditing) {
+
+// Handle adding an event or activity
+export async function handleAddData(e, data, setData, datas, setDatas, username) {
+    if (e && e.preventDefault) {
+        e.preventDefault();
+    }
+
+    console.log("Adding data:", data);
+    
+    const newData = await handleAddData(data, username);
+
     try {
+        if (!username) {
+            console.error("Username not defined");
+        }
+
+        if (type === "events") {
+            handleExtraSettings(data);
+        }
+
+
         const response = await fetch(`http://localhost:8000/api/${type}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(newData),
         });
 
         if (!response.ok) {
-            console.error(`Error adding ${type}:`, response);
+            throw new Error(`Error adding ${type}: ${response.status}`);
         }
 
-        // Get the saved note from the backend
+        // Get the saved data from the backend
         const savedData = await response.json();
+
         if (savedData) {
             console.log(`Added ${type}:`, savedData);
 
-            resetInputFiels(type, setIsEditing, setData);
-
-            //TODO: Add an alert to confirm the data was saved
+            resetInputFiels(type, setData);
+            setDatas([...datas, savedData]);
         }
-        
-    
     } catch (error) {
         console.error(`Error adding ${type}:`, error);
     }
 }
 
-// Handle dding an activity
-export async function handleAddData(type, data, setData, setIsEditing) {
-    
-    if (!data.username) {
-        console.error("Username not defined");
-    }
-
-    connectToDB(type, data, setData, setIsEditing);   
-}
 
 //Handle fetching data from the database
-export async function fetchData (type) {
+export async function fetchData (type, setData) {
     try {
         const response = await fetch(`http://localhost:8000/api/${type}`, {
             method: "GET",
@@ -145,19 +187,17 @@ export async function fetchData (type) {
         });
 
         if (!response.ok) {
-            console.error(`Error fetching ${type}:`, response);
-            return;
+            throw new Error(`Error fetching ${type}: ${response.status}`);
         }
 
         const data = await response.json();
         if (data) {
             console.log(`Fetched ${type}:`, data);
-            return data;
+            setData(data);
         }
         
     } catch (error) {
         console.error(`Error fetching ${type}:`, error);
-        return;
     }
 }
 
@@ -187,6 +227,237 @@ export async function fetchDataById (type, id) {
         return;
     }
 }
+
+
+// Handle removing an activity and marking it as completed while pressing btn "Done"
+export async function handleRemoveActivity(activityId, activities, setActivities) {
+    if (!activityId) {
+        console.error("ID dell'attività non trovato");
+    }
+
+    try{
+        //const response = await fetch(`/api/activities/${activityId}`, {
+        //locale:
+        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Errore nella cancellazione Done della attività');
+        }
+
+        // Update the frontend
+        const updatedActivities = activities.map(activity => {
+            if (activity._id === activityId) {
+                return { ...activity, completed: true };
+            }
+            return activity;
+        });
+
+        setActivities(updatedActivities);
+        console.log("Current activities:", updatedActivities);
+    }catch (error) {
+        console.error('Error while removing activity:', error);
+    }
+}
+
+// Find and update overdue activities
+export async function updateOverdueActivities(activities, setActivities) {
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    const updatedActivities = await Promise.all(
+        activities.map(async (activity) => {
+            const activityDate = new Date(activity.deadline).toISOString().split('T')[0];
+            
+            if (activityDate < currentDate && !activity.completed) {
+                try {
+                    const response = await fetch(`http://localhost:8000/api/activity/${activity._id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ ...activity, deadline: currentDate }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error updating overdue activity: ${response.status}`);
+                    }
+
+                    const updatedActivity = await response.json();
+                    if (updatedActivity) {
+                        return updatedActivity;
+                    }
+                } catch (error) {
+                    console.error('Error updating overdue activity:', error);
+                    return activity;
+                }
+            }
+            return activity;
+        })
+    );
+
+    //If there are updated activities, update frontend
+    const hasUpdated = updatedActivities.some(
+        (activity, index) => activity.deadline !== activities[index].deadline
+    );
+
+    if (hasUpdated) {
+        setActivities(updatedActivities);
+    }
+}
+
+//Handle close popup
+export function handleClosePopup(type, setSelectedData, setIsEditing, setData) {
+    setSelectedData(null);
+
+    if (type === "events") {
+        setIsEditing(false);
+    }
+
+    resetInputFiels(type, setData);
+}
+
+//Function to handle the update of an event or activity
+export async function handleUpdateData(e, data, setData, datas, setDatas, setSelectedData, selectedData, setIsEditing) {
+    if (e && e.preventDefault) {
+        e.preventDefault();
+    }
+
+    try {
+        const response = await fetch(`http://localhost:8000/api/${data.type}/${selectedData._id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(
+                data.type === "activity" ? {
+                    title: data.title,
+                    deadline: data.deadline,
+                    completed: data.completed,
+                } : {
+                    title: data.title,
+                    date: data.date,
+                    time: data.time,
+                    duration: data.allDay ? data.days : data.duration,
+                    allDay: data.allDay,
+                    repeatFrequency: data.repeatFrequency,
+                    repeatEndDate: data.repeatEndDate,
+                    repeatCount: data.repeatCount,
+                    eventLocation: data.eventLocation,
+                }
+            ),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error updating ${data.type}: ${response.status}`);
+        }
+
+        const updatedData = await response.json();
+
+        const updatedDatas = datas.map((data) =>
+            data._id === selectedData._id ? updatedData : data
+        );
+
+        setDatas(updatedDatas);
+        handleClosePopup(data.type, setSelectedData, setIsEditing, setData);
+    
+    } catch (error) {
+        console.error(`Error updating ${data.type}:`, error);
+        Swal.fire({
+            title: "Update failed",
+            icon: "error",
+            text: `Error updating ${data.type}`,
+            customClass: {
+                confirmButton: "button-alert",
+            },
+        });
+    }
+}
+
+
+//Function to handle the deletion of an event or activity
+export async function handleDeleteData(type, id, datas, setDatas, setSelectedData) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/${type}/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error deleting ${type}: ${response.status}`);
+        }
+
+        // Get the saved note from the backend
+        const deletedData = await response.json();
+        if (deletedData) {
+            console.log(`Deleted ${type}:`, deletedData);
+
+            const updatedDatas = datas.filter((data) => data._id !== id);
+            setDatas(updatedDatas);
+            setSelectedData(null);
+        }
+    } catch (error) {
+        console.error(`Error deleting ${type}:`, error);
+    }
+}
+
+// Function to Abort the deletion
+export function handleAbortDelete(setShowConfirmation) {
+    setShowConfirmation(false);
+}
+
+// Function to confirm the deletion of an event or activity
+export function handleConfirmDelete(type, selectedData, setShowConfirmation, handleDeleteData, datas, setDatas, setSelectedData, setIsEditing, setData) {
+    handleDeleteData(selectedData._id, datas, setDatas, setSelectedData);
+    setShowConfirmation(false);
+    handleClosePopup(type, setSelectedData, setIsEditing, setData);
+}
+
+
+
+
+
+
+
+
+
+
+        
+
+
+//Function to handle the deletion of a repeted events by the original id
+export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/${type}/original/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            console.error(`Error deleting ${type}:`, response);
+        }
+
+        // Get the saved note from the backend
+        const deletedData = await response.json();
+        if (deletedData) {
+            console.log(`Deleted ${type}:`, deletedData);
+
+            resetInputFiels(type, setIsEditing, setData);
+        }
+    } catch (error) {
+        console.error(`Error deleting ${type}:`, error);
+    }
+
+}
+
 
 // Function to generate repeated events con handleAddData
 export function generateRepeatedEvents (eventData, repeatEndDate = null, repeatCount = null, setEventData, setIsEditing) {
@@ -229,118 +500,5 @@ export function generateRepeatedEvents (eventData, repeatEndDate = null, repeatC
     }
 
 };
-
-
-//Function to handle the update of an event or activity
-export async function handleUpdateData(type, data, setData, setIsEditing, setSelectedData) {
-    try {
-        const response = await fetch(`http://localhost:8000/api/${type}/${data.id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-            console.error(`Error updating ${type}:`, response);
-        }
-
-        // Get the saved note from the backend
-        const updatedData = await response.json();
-        if (updatedData) {
-            console.log(`Updated ${type}:`, updatedData);
-
-            resetInputFiels(type, setIsEditing, setData);
-            setSelectedData(null);
-        }
-    } catch (error) {
-        console.error(`Error updating ${type}:`, error);
-    }
-}
-
-//Function to handle the deletion of an event or activity
-export async function handleDeleteData(type, id, setData, setIsEditing) {
-    try {
-        const response = await fetch(`http://localhost:8000/api/${type}/${id}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        if (!response.ok) {
-            console.error(`Error deleting ${type}:`, response);
-        }
-
-        // Get the saved note from the backend
-        const deletedData = await response.json();
-        if (deletedData) {
-            console.log(`Deleted ${type}:`, deletedData);
-
-            resetInputFiels(type, setIsEditing, setData);
-
-        }
-    } catch (error) {
-        console.error(`Error deleting ${type}:`, error);
-    }
-}
-
-//Function to handle the deletion of a repeted events by the original id
-export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing) {
-    try {
-        const response = await fetch(`http://localhost:8000/api/${type}/original/${id}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        if (!response.ok) {
-            console.error(`Error deleting ${type}:`, response);
-        }
-
-        // Get the saved note from the backend
-        const deletedData = await response.json();
-        if (deletedData) {
-            console.log(`Deleted ${type}:`, deletedData);
-
-            resetInputFiels(type, setIsEditing, setData);
-        }
-    } catch (error) {
-        console.error(`Error deleting ${type}:`, error);
-    }
-
-}
-
-// Find and update overdue activities
-export async function updateOverdueActivities(activities, setActivities) {
-    const currentDate = new Date();
-    const overdueActivities = activities.filter((activity) => new Date(activity.deadline) < currentDate && !activity.completed);
-    if (overdueActivities.length > 0) {
-        console.log("Overdue activities:", overdueActivities);
-        overdueActivities.forEach((activity) => {
-            activity.completed = true;
-            handleUpdateData("activities", activity, setActivities);
-        });
-
-        setActivities(fetchData("activities"));
-    }
-}
-
-// Function to Abort the deletion
-export function handleAbortDelete(setShowConfirmation) {
-    setShowConfirmation(false);
-}
-
-
-
-
-
-
-
-        
-
-
 
 
