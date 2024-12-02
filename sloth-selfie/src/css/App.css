@@ -382,7 +382,8 @@ p {
     font-size: 1.5rem;
   }
   
-  .btn {
+  .btn,
+  .btn2 {
     padding: 10px 15px;
   }
 
