@@ -2,7 +2,7 @@ import React from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleEventDataChange, handleUpdateEvent } from './EventUtils';
+import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents } from './CalendarUtils';
 import Select from 'react-select';
 
 
@@ -28,16 +28,20 @@ function EventsFunction(props) {
         console.log("Form submit triggered");
         if (props.selectedEvent) {
             console.log("Submitting update for event:", props.selectedEvent);
-            handleUpdateEvent(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setSelectedEvent, props.updateAllFutureEvents, props.setUpdateAllFutureEvents, props.setIsEditing);
+            handleUpdateData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.selectedEvent, props.setSelectedEvent, props.setIsEditing);
         } else {
-            props.handleAddEvent(e);
+            if (props.eventData.repeatFrequency !== "none") {
+                generateRepeatedEvents(props.eventData, props.events, props.setEvents, props.username);
+            } else {
+                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.username);
+            }
         }
     }
 
     const handleFrequencyChange = (selectedOption) => {
-        handleEventDataChange("repeatFrequency", selectedOption.value, props.setEventData);
+        handleDataChange("repeatFrequency", selectedOption.value, props.setEventData);
         if (selectedOption.value === "none") {
-            handleEventDataChange("repeatMode", "ntimes", props.setEventData);
+            handleDataChange("repeatMode", "ntimes", props.setEventData);
         }
     }
 
@@ -52,7 +56,7 @@ function EventsFunction(props) {
                     type="text"
                     placeholder="Add Title"
                     value={props.eventData.title}
-                    onChange={(e) => handleEventDataChange("title", e.target.value, props.setEventData)}
+                    onChange={(e) => handleDataChange("title", e.target.value, props.setEventData)}
                     required
                 />
             </label>
@@ -62,7 +66,7 @@ function EventsFunction(props) {
                 <input
                     type="date"
                     value={props.eventData.date}
-                    onChange={(e) => handleEventDataChange("date", e.target.value, props.setEventData)}
+                    onChange={(e) => handleDataChange("date", e.target.value, props.setEventData)}
                     required
                 />
             </label>
@@ -73,7 +77,7 @@ function EventsFunction(props) {
                     className="checkbox"
                     type="checkbox"
                     checked={props.eventData.allDay}
-                    onChange={(e) => handleEventDataChange("allDay", e.target.checked, props.setEventData)}
+                    onChange={(e) => handleDataChange("allDay", e.target.checked, props.setEventData)}
                 />
                 All Day
             </label>
@@ -87,7 +91,7 @@ function EventsFunction(props) {
                             className="checkbox"
                             type="checkbox"
                             checked={props.eventData.isPreciseTime}
-                            onChange={(e) => handleEventDataChange("isPreciseTime", e.target.checked, props.setEventData)}
+                            onChange={(e) => handleDataChange("isPreciseTime", e.target.checked, props.setEventData)}
                         />
                         Use Precise Time
                     </label>
@@ -96,13 +100,13 @@ function EventsFunction(props) {
                         <input
                             type="time"
                             value={props.eventData.time}
-                            onChange={(e) => handleEventDataChange("time", e.target.value, props.setEventData)}
+                            onChange={(e) => handleDataChange("time", e.target.value, props.setEventData)}
                             required
                         />
                     ) : (
                         <Select
                             value={options.find((option) => option.value === props.eventData.time)}
-                            onChange={(selectedOption) => handleEventDataChange("time", selectedOption.value, props.setEventData)}
+                            onChange={(selectedOption) => handleDataChange("time", selectedOption.value, props.setEventData)}
                             options={options}
                             isSearchable
                             styles={{
@@ -124,7 +128,7 @@ function EventsFunction(props) {
                         type="number"
                         placeholder="hours"
                         value={props.eventData.duration}
-                        onChange={(e) => handleEventDataChange("duration", e.target.value, props.setEventData)}
+                        onChange={(e) => handleDataChange("duration", e.target.value, props.setEventData)}
                         min="1"
                         required
                     />
@@ -136,7 +140,7 @@ function EventsFunction(props) {
                         type="number"
                         placeholder="Number of days"
                         value={props.eventData.days}
-                        onChange={(e) => handleEventDataChange("days", e.target.value, props.setEventData)}
+                        onChange={(e) => handleDataChange("days", e.target.value, props.setEventData)}
                         min="1"
                     />
                 </label>
@@ -187,7 +191,7 @@ function EventsFunction(props) {
                     <label>Repeat Mode:
                         <Select
                             value={options.find((option) => option.value === props.eventData.repeatMode)}
-                            onChange={(selectedOption) => handleEventDataChange("repeatMode", selectedOption.value, props.setEventData)}
+                            onChange={(selectedOption) => handleDataChange("repeatMode", selectedOption.value, props.setEventData)}
                             options= {[
                                 { value: 'ntimes', label: 'N Times' },
                                 { value: 'until', label: 'Until' },
@@ -212,7 +216,7 @@ function EventsFunction(props) {
                             <input
                                 type="number"
                                 value={props.eventData.repeatCount}
-                                onChange={(e) => handleEventDataChange("repeatCount", e.target.value, props.setEventData)}
+                                onChange={(e) => handleDataChange("repeatCount", e.target.value, props.setEventData)}
                                 defaultValue={1}
                                 min="1"
                             />
@@ -222,7 +226,7 @@ function EventsFunction(props) {
                             <input
                                 type="date"
                                 value={props.eventData.repeatEndDate}
-                                onChange={(e) => handleEventDataChange("repeatEndDate", e.target.value, props.setEventData)}
+                                onChange={(e) => handleDataChange("repeatEndDate", e.target.value, props.setEventData)}
                             />
                         </label>
                     )}
@@ -233,7 +237,7 @@ function EventsFunction(props) {
                     type="text"
                     placeholder="physical or virtual"
                     value={props.eventData.eventLocation}
-                    onChange={(e) => handleEventDataChange("eventLocation", e.target.value, props.setEventData)}
+                    onChange={(e) => handleDataChange("eventLocation", e.target.value, props.setEventData)}
                 />
             </label>
             {/* Field for notification 
