@@ -31,6 +31,11 @@ const setStartEnd = (data, type) => {
             // Set the start at 08:00 and end midnight
             startDate.setHours(8, 0, 0, 0);
             endDate.setHours(23, 59, 59, 999);
+            if (data.days > 1) {
+                endDate.setDate(startDate.getDate() + data.days - 1);
+            }
+
+            
         }
     }
 
@@ -100,7 +105,7 @@ export async function newData2Add(data, username) {
     console.log(username);
     
     if (data.type === "activity") {
-        const {title, deadline} = data;
+        const { deadline, title } = data;
         const newData = {
             title: title,
             deadline: deadline,
@@ -111,44 +116,21 @@ export async function newData2Add(data, username) {
 
         return newData;
     } else if (data.type === "event") {
-        const {title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation} = data;
+        const { originalId, title, date, time, duration, allDay, repeatFrequency, repeatEndDate, repeatCount, eventLocation } = data;
         const newData = {
+            originalId: originalId,
             title: title,
             date: date,
             time: time,
-            duration: allDay ? days : duration,
+            duration: allDay ? data.days : duration,
             allDay: allDay,
-            days: days,
             repeatFrequency: repeatFrequency,
             repeatEndDate: repeatEndDate,
-            repeatCount: repeatCount,
             eventLocation: eventLocation,
             userId: username,
-            type: "event",
         };
 
         return newData;
-    }
-}
-
-
-//Function to handle extra settings for events
-export function handleExtraSettings(data) {
-    if (data.repeatFrequency === "none") {
-        data.repeatEndDate = "";
-        data.repeatCount = "";
-    } else if (data.repeatFrequency === "daily") {
-        data.repeatEndDate = "";
-        data.repeatCount = "";
-    } else if (data.repeatFrequency === "weekly") {
-        data.repeatEndDate = "";
-        data.repeatCount = "";
-    } else if (data.repeatFrequency === "monthly") {
-        data.repeatEndDate = "";
-        data.repeatCount = "";
-    } else if (data.repeatFrequency === "yearly") {
-        data.repeatEndDate = "";
-        data.repeatCount = "";
     }
 }
 
@@ -166,14 +148,11 @@ export async function handleAddData(e, data, setData, datas, setDatas, username)
     console.log("Adding data:", data);
     
     const newData = await newData2Add(data, username);
+    console.log("New data:", newData);
 
     try {
         if (!username) {
             console.error("Username not defined");
-        }
-
-        if (data.type === "event") {
-            handleExtraSettings(data);
         }
 
 
@@ -558,46 +537,74 @@ export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing)
 
 }
 
+//Function to handle the calculation of the last date of a repeated event
+export function calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequency) {
+    let lastDate;
+
+    if (repeatMode === "end") {
+        lastDate = repeatEndDate;
+    } else if (repeatMode === "count") {
+        const currentDate = new Date();
+        if (repeatFrequency === "daily") {
+            currentDate.setDate(currentDate.getDate() + repeatCount);
+        } else if (repeatFrequency === "weekly") {
+            currentDate.setDate(currentDate.getDate() + repeatCount * 7);
+        } else if (repeatFrequency === "monthly") {
+            currentDate.setMonth(currentDate.getMonth() + repeatCount);
+        } else if (repeatFrequency === "yearly") {
+            currentDate.setFullYear(currentDate.getFullYear() + repeatCount);
+        }
+        lastDate = currentDate.toISOString().split('T')[0];
+
+    }
+
+    return lastDate;
+}
+
 
 // Function to generate repeated events con handleAddData
-export function generateRepeatedEvents (eventData, repeatEndDate = null, repeatCount = null, setEventData, setIsEditing) {
-    
-    let currentDate = new Date(`${eventData.date}T${eventData.time}`);
-    let count = 0;
-    if(repeatEndDate){
-        repeatEndDate = new Date(repeatEndDate);
-        repeatEndDate.setHours(23, 59, 59, 999);//Adjusting the end, else we lose a day
+export function generateRepeatedEvents (e, eventData, setEventData, events, setEvents, username) {
+    if (e && e.preventDefault) {
+        e.preventDefault();
     }
 
-    while (true) {
-        if (repeatEndDate && currentDate > new Date(repeatEndDate)) break;
-        if (repeatCount && count >= repeatCount) break;
-      
-        const data = {
+    const { date, repeatFrequency, repeatMode, repeatEndDate, repeatCount } = eventData;
+
+    const newEvents = [];
+    let currentDate = new Date(date);
+    const lastDate = new Date(calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequency));
+
+
+
+    while (currentDate <= lastDate) {
+        const newEvent = {
             ...eventData,
-            id: eventData.id + count,
-            originalId: eventData.id,
-            start: new Date(currentDate),
-            end: new Date(currentDate.getTime() + (eventData.duration ? eventData.duration * 60 * 60 * 1000 : 0)),
+            date: currentDate.toISOString().split('T')[0],
         };
 
-        handleAddData("events", data, setEventData, setIsEditing);
+        newEvents.push(newEvent);
 
-        count++;
-
-        if (eventData.repeatFrequency === "daily") {
-            currentDate.setDate(currentDate.getDate() + 1);
-        } else if (eventData.repeatFrequency === "weekly") {
-            currentDate.setDate(currentDate.getDate() + 7);
-        } else if (eventData.repeatFrequency === "monthly") {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-        } else if (eventData.repeatFrequency === "yearly") {
-            currentDate.setFullYear(currentDate.getFullYear() + 1);
-        } else {
-            break;
+        switch (repeatFrequency) {
+            case "daily":
+                currentDate.setDate(currentDate.getDate() + 1);
+                break;
+            case "weekly":
+                currentDate.setDate(currentDate.getDate() + 7);
+                break;
+            case "monthly":
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                break;
+            case "yearly":
+                currentDate.setFullYear(currentDate.getFullYear() + 1);
+                break;
+            default:
+                break;
         }
-
     }
+
+    newEvents.forEach(async (event) => {
+        handleAddData(null, event, setEventData, events, setEvents, username);
+    });
 
 };
 
