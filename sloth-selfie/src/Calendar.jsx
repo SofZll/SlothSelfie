@@ -8,7 +8,7 @@ import './css/Calendar.css';
 import moment from 'moment';
 import { StyleContext } from './StyleContext';
 import { handleEventDataChange, convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleAbortDeleteEvent, handleConfirmDeleteEvent, handleClosePopupE} from './EventUtils';
-import { normalizeActivities, updateOverdueActivities, handleDeleteActivity, handleAbortDelete, handleConfirmDelete, handleClosePopupA, handleActivityDataChange} from './ActivityUtils';
+import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop } from './CalendarUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import iconDark from './media/SlothDark.svg';
@@ -68,7 +68,7 @@ function Calendar() {
         repeatEndDate: '', // Date of the last repetition   <-
         eventLocation: '', // eventLocation of the event
         userId: '', // User ID of whom creates the event
-        type: 'events',
+        type: 'event',
     });
 
     //Define the activity data structure
@@ -154,7 +154,7 @@ function Calendar() {
 
     useEffect(() => {
         fetchEvents();
-        fetchActivities();
+        fetchData('activities', setActivities);
     }, []);
 
     //checking for overdue activities
@@ -176,21 +176,6 @@ function Calendar() {
 
     const handleBack = () => {
         setSelectingView(true);
-    };
-
-    const handleEventClick = (event) => {
-        console.log("Event clicked:", event);
-        setSelectedEvent(event);
-        setIsEditing(true);
-        handleSelection(true);
-    };
-
-    const handleActivityClick = (activity) => {
-        console.log("Activity clicked:", activity);
-        console.log("Activity _id", activity._id);
-        setSelectedActivity(activity);
-        setIsEditing(true);
-        handleSelection(false);
     };
 
     useEffect(() => {
@@ -352,12 +337,13 @@ function Calendar() {
         setActivities(updatedActivities);
     };
 
-    const onEventDrop = ({event, start, end}) => {
+    const onEventDrop = ({event, start}) => {
+        const end = new Date(start);
         console.log("Event dropped:", event, start, end);
         if (event.type === 'event') {
-            handleDropEvent(event, start, end);
+            handleUpdateDataOnDrop(event, start, events, setEvents);
         } else if (event.type === 'activity') {
-            handleDropActivity( event, start);
+            handleUpdateDataOnDrop(event, start, activities, setActivities);
         }
     };
 
@@ -365,24 +351,27 @@ function Calendar() {
 
     //Call handelEventClick or handleActivityClick
     const onItemSelect = (item) => {
-        if (!item._id) 
+        if (!item._id){
             console.log('Missing ID for the selected item', item);
+            return;
+        }
 
-            if (item.type === 'event') {
-                handleEventClick(item);
-            } else if (item.type === 'activity') {
-                handleActivityClick(item);
-            }
+        if (item.type === 'event') {
+            handleFillForm(item, setSelectedEvent, setIsEditing, handleSelection);
+        } else if (item.type === 'activity') {
+            handleFillForm(item, setSelectedActivity, setIsEditing, handleSelection);
+        }
+        
     };
 
 
-
+    
     return (
         <div className="calendar">
             <div className="div-calendar-container">
                 <DnDCalendar
                     localizer={localizer}
-                    events={[...normalizeActivities(activities), ...normalizeEvents(events)]}
+                    events={[...normalizeData(activities, 'activity'), ...normalizeEvents(events)]}
                     startAccessor="start"
                     endAccessor="end"
                     onSelectEvent={onItemSelect}
@@ -437,7 +426,7 @@ function Calendar() {
                             <button className='btn' onClick={() => setShowConfirmation(true)}>
                                 Delete
                             </button>
-                            <button className='btn' onClick={() => handleClosePopupA(setSelectedActivity, setActivityData)}>
+                            <button className='btn' onClick={() => handleClosePopup('activity', setSelectedActivity, setIsEditing, setActivityData) }>
                                 X
                             </button>
                         </div>
@@ -446,7 +435,7 @@ function Calendar() {
                             <div className="popup-delete">
                                 <h2>Are you sure you want to delete this activity?</h2>
                                 <div>
-                                    <button className='btn' onClick={() => handleConfirmDelete(selectedActivity, setShowConfirmation, handleDeleteActivity, activities, setActivities, setSelectedActivity, setActivityData)}>Yes</button>
+                                    <button className='btn' onClick={() => handleConfirmDelete('activity', selectedActivity, setShowConfirmation, activities, setActivities, setSelectedActivity, setIsEditing, setActivityData)}>Yes</button>
                                     <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
                                 </div>
                             </div>

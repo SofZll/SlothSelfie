@@ -2,30 +2,38 @@ import React, { useEffect, useContext } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleAddActivity, handleRemoveActivity, handleUpdateActivity, handleActivityDataChange} from './ActivityUtils';
+import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData } from './CalendarUtils';
+import {  handleUpdateActivity} from './ActivityUtils';
 
 import { ActivityContext } from './ActivityContext';
+//import { ActivityContext } from './ActivityContext';
+//import { ActivityContext } from './ActivityContext.Oldjs'; 
+
 
 
 function ActivitiesFunction(props){
     const { activities, setActivities, username } = useContext(ActivityContext);
+    console.log(username);
+    //const { activities, setActivities } = useContext(ActivityContext);
+    //const[activityData, setActivityData] = useContext(ActivityContext); Old
+
 
     // Pre-fill the form with the selected activity
     useEffect(() => {
         if (props.selectedActivity) {
-            handleActivityDataChange('id', props.selectedActivity.id, props.setActivityData);
-            handleActivityDataChange('title', props.selectedActivity.title, props.setActivityData);
-            handleActivityDataChange('deadline', props.selectedActivity.deadline, props.setActivityData);
-            handleActivityDataChange('completed', props.selectedActivity.completed, props.setActivityData);
+            handleDataChange('id', props.selectedActivity.id, props.setActivityData);
+            handleDataChange('title', props.selectedActivity.title, props.setActivityData);
+            handleDataChange('deadline', props.selectedActivity.deadline, props.setActivityData);
+            handleDataChange('completed', props.selectedActivity.completed, props.setActivityData);
         }
     }, [props.selectedActivity]);
 
     const handleSubmitSave = (e) => {
         e.preventDefault();
         if (props.selectedActivity) {
-            handleUpdateActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setSelectedActivity,props.selectedActivity, props.setIsEditing);
+            handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing);
         } else {
-            handleAddActivity(e, props.activityData, props.setActivityData, props.activities, props.setActivities, username);
+            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, username);
         }
     }
 
@@ -39,7 +47,7 @@ function ActivitiesFunction(props){
                         type="text" 
                         placeholder="Title" 
                         value={props.activityData.title} 
-                        onChange={(e) => handleActivityDataChange("title", e.target.value, props.setActivityData)}
+                        onChange={(e) => handleDataChange("title", e.target.value, props.setActivityData)}
                         required 
                     />
                 </label>
@@ -47,7 +55,7 @@ function ActivitiesFunction(props){
                     <input 
                         type="date" 
                         value={props.activityData.deadline} 
-                        onChange={(e) => handleActivityDataChange("deadline", e.target.value, props.setActivityData)}
+                        onChange={(e) => handleDataChange("deadline", e.target.value, props.setActivityData)}
                         required 
                     />
                 </label>
@@ -63,7 +71,7 @@ function ActivitiesFunction(props){
                         {props.activities.filter(activity => !activity.completed).sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map(activity => (
                             <div className="activity-card" key={activity._id}>
                                 <h2>{activity.title}</h2>
-                                <p>Due: {new Date(activity.deadline).toLocaleDateString()}</p>
+                                <p>Due: {activity.deadline}</p>
                                 <button className="btn" onClick={() => handleRemoveActivity(activity._id, props.activities, props.setActivities)}>
                                     Done
                                 </button>
