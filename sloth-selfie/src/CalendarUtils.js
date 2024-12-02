@@ -1,5 +1,4 @@
-import { all } from "axios";
-import { a } from "react-spring";
+
 import Swal from "sweetalert2";
 
 //Functoin to handle change the current Event or Activity data
@@ -10,14 +9,15 @@ export function handleDataChange(field, value, setData) {
     }));
 }
 
-const setStartEnd = (data) => {
+const setStartEnd = (data, type) => {
     let startDate, endDate;
 
-    if (data.type === "activity") {
-        startDate = new Date(data.deadline);
+    if (type === "activity") {
         endDate = new Date(data.deadline);
+        endDate.setHours(23, 59, 59, 999);
+        startDate = new Date(endDate.getTime() - 60 * 60 * 1000);
         
-    } else if (data.type === "events") {
+    } else if (type === "event") {
         if (data.start && data.end) {
             startDate = new Date(data.start);
             endDate = new Date(data.end);
@@ -39,16 +39,16 @@ const setStartEnd = (data) => {
 
 
 // Convert Data to the format required by React Big Calendar
-export function normalizeData (data, type) {
-    return data.map((data) => {
+export function normalizeData (datas, type) {
+    return (type === "activity" ? datas.filter(data => !data.completed) : datas).map((data) => {
 
-        let { startDate, endDate } = setStartEnd(data);
+        const { startDate, endDate } = setStartEnd(data, type);
 
 
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
             console.error(`Invalid date for event: ${JSON.stringify(data)}`);
             return {
-                id: data.id,
+                _id: data._id,
                 title: data.title,
                 start: new Date(),
                 end: new Date(),
@@ -59,7 +59,7 @@ export function normalizeData (data, type) {
         }
         
         return {
-            id: data.id,
+            _id: data._id,
             title: data.title,
             start: startDate,
             end: endDate,
@@ -79,7 +79,7 @@ export function resetInputFiels(type, setData) {
         handleDataChange('title', '', setData);
         handleDataChange('deadline', '', setData);
         handleDataChange('completed', false, setData);
-    } else if (type === "events") {
+    } else if (type === "event") {
         handleDataChange('id', '', setData);
         handleDataChange('originalId', '', setData);
         handleDataChange('title', '', setData);
@@ -96,19 +96,23 @@ export function resetInputFiels(type, setData) {
 }
 
 //Function to handle set of new data
-export async function handleAddData(data, username) {
+export async function newData2Add(data, username) {
+    console.log(username);
+    
     if (data.type === "activity") {
         const {title, deadline} = data;
-        newData = {
+        const newData = {
             title: title,
             deadline: deadline,
             completed: false,
             userId: username,
             type: "activity",
         };
-    } else if (data.type === "events") {
+
+        return newData;
+    } else if (data.type === "event") {
         const {title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation} = data;
-        newData = {
+        const newData = {
             title: title,
             date: date,
             time: time,
@@ -120,13 +124,33 @@ export async function handleAddData(data, username) {
             repeatCount: repeatCount,
             eventLocation: eventLocation,
             userId: username,
-            type: "events",
+            type: "event",
         };
-    }
 
-    return newData;
+        return newData;
+    }
 }
 
+
+//Function to handle extra settings for events
+export function handleExtraSettings(data) {
+    if (data.repeatFrequency === "none") {
+        data.repeatEndDate = "";
+        data.repeatCount = "";
+    } else if (data.repeatFrequency === "daily") {
+        data.repeatEndDate = "";
+        data.repeatCount = "";
+    } else if (data.repeatFrequency === "weekly") {
+        data.repeatEndDate = "";
+        data.repeatCount = "";
+    } else if (data.repeatFrequency === "monthly") {
+        data.repeatEndDate = "";
+        data.repeatCount = "";
+    } else if (data.repeatFrequency === "yearly") {
+        data.repeatEndDate = "";
+        data.repeatCount = "";
+    }
+}
 
 
 // Handle adding an event or activity
@@ -135,21 +159,25 @@ export async function handleAddData(e, data, setData, datas, setDatas, username)
         e.preventDefault();
     }
 
+    console.log("type:", data.type);
+
+    console.log(username);
+
     console.log("Adding data:", data);
     
-    const newData = await handleAddData(data, username);
+    const newData = await newData2Add(data, username);
 
     try {
         if (!username) {
             console.error("Username not defined");
         }
 
-        if (type === "events") {
+        if (data.type === "event") {
             handleExtraSettings(data);
         }
 
 
-        const response = await fetch(`http://localhost:8000/api/${type}`, {
+        const response = await fetch(`http://localhost:8000/api/${data.type}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -158,20 +186,20 @@ export async function handleAddData(e, data, setData, datas, setDatas, username)
         });
 
         if (!response.ok) {
-            throw new Error(`Error adding ${type}: ${response.status}`);
+            throw new Error(`Error adding ${data.type}: ${response.status}`);
         }
 
         // Get the saved data from the backend
         const savedData = await response.json();
 
         if (savedData) {
-            console.log(`Added ${type}:`, savedData);
+            console.log(`Added ${data.type}:`, savedData);
 
-            resetInputFiels(type, setData);
+            resetInputFiels(data.type, setData);
             setDatas([...datas, savedData]);
         }
     } catch (error) {
-        console.error(`Error adding ${type}:`, error);
+        console.error(`Error adding ${data.type}:`, error);
     }
 }
 
@@ -179,7 +207,7 @@ export async function handleAddData(e, data, setData, datas, setDatas, username)
 //Handle fetching data from the database
 export async function fetchData (type, setData) {
     try {
-        const response = await fetch(`http://localhost:8000/api/${type}`, {
+        const response = await fetch(`http://localhost:8000/api/${(type)}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -274,7 +302,7 @@ export async function updateOverdueActivities(activities, setActivities) {
             
             if (activityDate < currentDate && !activity.completed) {
                 try {
-                    const response = await fetch(`http://localhost:8000/api/activity/${activity._id}`, {
+                    const response = await fetch(`/api/activity/${activity._id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -313,7 +341,7 @@ export async function updateOverdueActivities(activities, setActivities) {
 export function handleClosePopup(type, setSelectedData, setIsEditing, setData) {
     setSelectedData(null);
 
-    if (type === "events") {
+    if (type === "event") {
         setIsEditing(false);
     }
 
@@ -321,7 +349,7 @@ export function handleClosePopup(type, setSelectedData, setIsEditing, setData) {
 }
 
 //Function to handle the update of an event or activity
-export async function handleUpdateData(e, data, setData, datas, setDatas, setSelectedData, selectedData, setIsEditing) {
+export async function handleUpdateData(e, data, setData, datas, setDatas, selectedData, setSelectedData, setIsEditing) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -378,7 +406,6 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, setSel
     }
 }
 
-
 //Function to handle the deletion of an event or activity
 export async function handleDeleteData(type, id, datas, setDatas, setSelectedData) {
     try {
@@ -413,13 +440,86 @@ export function handleAbortDelete(setShowConfirmation) {
 }
 
 // Function to confirm the deletion of an event or activity
-export function handleConfirmDelete(type, selectedData, setShowConfirmation, handleDeleteData, datas, setDatas, setSelectedData, setIsEditing, setData) {
-    handleDeleteData(selectedData._id, datas, setDatas, setSelectedData);
+export function handleConfirmDelete(type, selectedData, setShowConfirmation, datas, setDatas, setSelectedData, setIsEditing, setData) {
+    handleDeleteData(type, selectedData._id, datas, setDatas, setSelectedData);
     setShowConfirmation(false);
     handleClosePopup(type, setSelectedData, setIsEditing, setData);
 }
 
+//Function to handle the filling of the form with the selected event or activity
+export function handleFillForm(data, setSelectedData, setIsEditing, handleSelection) {
+    
+    setIsEditing(true);
+    handleSelection(data.type === "event");
 
+    setSelectedData(data);
+}
+
+//Function to update activity and event on drop (drag and drop)
+export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
+    if (!item) {
+        console.error("Item not found");
+        return;
+    }
+
+    let deadline, endDate, startDate;
+
+    if (item.type === "activity") {
+        deadline = new Date(start).toISOString().split('T')[0];
+    } else if (item.type === "event") {
+        startDate = new Date(start);
+        endDate = new Date(start);
+
+        if (item.allDay) {
+            // Set the start at 08:00 and end midnight
+            startDate.setHours(8, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+        } else {
+            startDate.setHours(item.start.getHours(), item.start.getMinutes(), 0, 0);
+            endDate.setHours(item.end.getHours(), item.end.getMinutes(), 0, 0);
+        }
+
+    }
+
+    const updatedDatas = await Promise.all(
+        datas.map(async (data) => {
+            if (data._id === item._id) {
+                try {
+                    const response = await fetch(`/api/${item.type}/${item._id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            ...item, 
+                            ...(item.type === 'activity' 
+                            ? { deadline }
+                            : {start: startDate, end: endDate})
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error updating activity: ${response.status}`);
+                    }
+
+                    const updatedData = await response.json();
+                    if (updatedData) {
+                        return updatedData;
+                    }
+                } catch (error) {
+                    console.error('Error updating activity:', error);
+                    return data;
+                }
+            }
+            return data;
+        })
+    );
+
+    setDetas(updatedDatas);
+}
+
+
+    
 
 
 
