@@ -109,52 +109,8 @@ function Calendar() {
 }, []); 
        
 
-    // Function to fetch events from the server
-    const fetchEvents = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/api/events', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await response.json();
-            console.log(data);
-            setEvents(data);
-        } catch (error) {
-            console.error('Error fetching events:', error);
-        }
-    };
-
-    // Function to fetch activities from the server
-    const fetchActivities = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/api/activities', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await response.json();
-            console.log(data);
-            setActivities(data);
-        } catch (error) {
-            console.error('Error fetching activities:', error);
-        }
-    };
-
     useEffect(() => {
-        fetchEvents();
+        fetchData('events', setEvents);
         fetchData('activities', setActivities);
     }, []);
 
@@ -308,37 +264,6 @@ function Calendar() {
     } catch (error) {console.error('Error while adding event:', error);}
     };
 
-    
-    const handleDropEvent = (event, start, end) => {
-        console.log("Event dropped:", event, start, end);
-        const updatedEvents = events.map(e => {
-            if (e.id === event.id) {
-                return {
-                    ...e,
-                    start,
-                    end,
-                };
-            }
-            return e;
-        });
-        setEvents(updatedEvents);
-    };
-
-    const handleDropActivity = (activity, deadline) => {
-        console.log("Activity dropped:", activity, deadline);
-        const updatedActivities = activities.map(a => {
-            if (a.id === activity.id) {
-                return {
-                    ...a,
-                    deadline,
-                    start: deadline,
-                    end: deadline,
-                };
-            }
-            return a;
-        });
-        setActivities(updatedActivities);
-    };
 
     const onEventDrop = ({event, start}) => {
         const end = new Date(start);
@@ -349,7 +274,6 @@ function Calendar() {
             handleUpdateDataOnDrop(event, start, activities, setActivities);
         }
     };
-
 
 
     //Call handelEventClick or handleActivityClick
@@ -368,13 +292,12 @@ function Calendar() {
     };
 
 
-    
     return (
         <div className="calendar">
             <div className="div-calendar-container">
                 <DnDCalendar
                     localizer={localizer}
-                    events={[...normalizeData(activities, 'activity'), ...normalizeEvents(events)]}
+                    events={[...normalizeData(activities, 'activity'), ...normalizeData(events, 'event')]}
                     startAccessor="start"
                     endAccessor="end"
                     onSelectEvent={onItemSelect}
@@ -475,7 +398,8 @@ function Calendar() {
                             setSelectedEvent={setSelectedEvent}
                             updateAllFutureEvents={updateAllFutureEvents}
                             setUpdateAllFutureEvents={setUpdateAllFutureEvents}
-                            handleAddEvent={handleAddEvent}
+
+                            username={username}
                         />
                     ) : (
                         <ActivitiesFunction
