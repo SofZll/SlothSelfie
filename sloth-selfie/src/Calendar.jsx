@@ -69,6 +69,7 @@ function Calendar() {
         eventLocation: '', // eventLocation of the event
         userId: '', // User ID of whom creates the event
         type: 'event',
+        //notify: false,
     });
 
     //Define the activity data structure
@@ -210,6 +211,7 @@ function Calendar() {
             repeatMode: isRepeated ? selectedEvent.repeatMode : "ntimes",
             eventLocation: selectedEvent.eventLocation || "",
             userId: selectedEvent.userId,
+            //notify: selectedEvent.notify,
         });
 
         console.log("eventData", eventData);
@@ -241,6 +243,7 @@ function Calendar() {
             repeatEndDate: eventData.repeatEndDate,
             eventLocation: eventData.eventLocation,
             userId: eventData.userId,
+            //notify: eventData.notify,
         };
         try{
         if (eventData.allDay) {
