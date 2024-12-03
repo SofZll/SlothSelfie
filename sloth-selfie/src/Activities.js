@@ -32,8 +32,9 @@ function ActivitiesFunction(props){
         e.preventDefault();
         if (props.selectedActivity) {
             handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing);
+            props.setIsEditing(false);
         } else {
-            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, username);
+            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing, username);
         }
     }
 

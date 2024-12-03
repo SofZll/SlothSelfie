@@ -76,7 +76,7 @@ export function normalizeData (datas, type) {
 };
 
 //Function to save data in front and clen the form
-export function resetInputFiels(type, setData) {
+export function resetInputFiels(type, setData, setIsEditing) {
     
     
     if (type === "activity") {
@@ -98,6 +98,8 @@ export function resetInputFiels(type, setData) {
         handleDataChange('repeatCount', '', setData);
         handleDataChange('eventLocation', '', setData);
     }
+
+    setIsEditing(false);
 }
 
 //Function to handle set of new data
@@ -116,9 +118,10 @@ export async function newData2Add(data, username) {
 
         return newData;
     } else if (data.type === "event") {
+        console.log(data._id);
         const { originalId, title, date, time, duration, allDay, repeatFrequency, repeatEndDate, repeatCount, eventLocation } = data;
         const newData = {
-            originalId: originalId,
+            originalId: originalId || data._id,
             title: title,
             date: date,
             time: time,
@@ -136,7 +139,7 @@ export async function newData2Add(data, username) {
 
 
 // Handle adding an event or activity
-export async function handleAddData(e, data, setData, datas, setDatas, username) {
+export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing, username) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -174,7 +177,7 @@ export async function handleAddData(e, data, setData, datas, setDatas, username)
         if (savedData) {
             console.log(`Added ${data.type}:`, savedData);
 
-            resetInputFiels(data.type, setData);
+            resetInputFiels(data.type, setData, setIsEditing);
             setDatas([...datas, savedData]);
         }
     } catch (error) {
@@ -320,11 +323,8 @@ export async function updateOverdueActivities(activities, setActivities) {
 export function handleClosePopup(type, setSelectedData, setIsEditing, setData) {
     setSelectedData(null);
 
-    if (type === "event") {
-        setIsEditing(false);
-    }
 
-    resetInputFiels(type, setData);
+    resetInputFiels(type, setData, setIsEditing);
 }
 
 //Function to handle the update of an event or activity
@@ -529,7 +529,7 @@ export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing)
         if (deletedData) {
             console.log(`Deleted ${type}:`, deletedData);
 
-            resetInputFiels(type, setIsEditing, setData);
+            resetInputFiels(type, setData, setIsEditing);
         }
     } catch (error) {
         console.error(`Error deleting ${type}:`, error);
@@ -563,7 +563,7 @@ export function calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequ
 
 
 // Function to generate repeated events con handleAddData
-export function generateRepeatedEvents (e, eventData, setEventData, events, setEvents, username) {
+export function generateRepeatedEvents (e, eventData, setEventData, events, setEvents, setIsEditing, username) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -603,7 +603,7 @@ export function generateRepeatedEvents (e, eventData, setEventData, events, setE
     }
 
     newEvents.forEach(async (event) => {
-        handleAddData(null, event, setEventData, events, setEvents, username);
+        handleAddData(null, event, setEventData, events, setEvents, setIsEditing, username);
     });
 
 };

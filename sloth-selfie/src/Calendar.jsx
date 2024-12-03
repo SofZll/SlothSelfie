@@ -320,7 +320,7 @@ function Calendar() {
                             <button className="btn" onClick={() => setShowConfirmation(true)}>
                                 Delete
                             </button>
-                            <button className="btn" onClick={() => handleClosePopupE(setSelectedEvent, setIsEditing, setEventData)}>
+                            <button className="btn" onClick={() => handleClosePopup('event', setSelectedEvent, setIsEditing, setEventData)}>
                                 X
                             </button>
                         </div>
@@ -352,7 +352,7 @@ function Calendar() {
                             <button className='btn' onClick={() => setShowConfirmation(true)}>
                                 Delete
                             </button>
-                            <button className='btn' onClick={() => handleClosePopup('activity', setSelectedActivity, setIsEditing, setActivityData) }>
+                            <button className='btn' onClick={() => handleClosePopup('activity', setSelectedActivity, setIsEditing, setActivityData)}>
                                 X
                             </button>
                         </div>
