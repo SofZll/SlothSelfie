@@ -29,11 +29,12 @@ function EventsFunction(props) {
         if (props.selectedEvent) {
             console.log("Submitting update for event:", props.selectedEvent);
             handleUpdateData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.selectedEvent, props.setSelectedEvent, props.setIsEditing);
+            props.setIsEditing(false);
         } else {
             if (props.eventData.repeatFrequency !== "none") {
-                generateRepeatedEvents(props.eventData, props.events, props.setEvents, props.username);
+                generateRepeatedEvents(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.username);
             } else {
-                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.username);
+                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.username);
             }
         }
     }
