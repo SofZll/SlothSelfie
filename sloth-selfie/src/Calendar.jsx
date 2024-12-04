@@ -7,7 +7,6 @@ import './css/App.css';
 import './css/Calendar.css';
 import moment from 'moment';
 import { StyleContext } from './StyleContext';
-import { handleEventDataChange, convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleAbortDeleteEvent, handleConfirmDeleteEvent, handleClosePopupE} from './EventUtils';
 import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop } from './CalendarUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
@@ -109,14 +108,16 @@ function Calendar() {
         setSelectingView(true);
     };
 
-    useEffect(() => {
-        console.log('Current activities:', activities);
-    }, [activities]);
-
     //setting the date to the current date as a filter at the start
     useEffect(() => {
-        handleEventDataChange('date', new Date(), setEventData);
-    }, []);
+        if (!isEditing) {
+            if (inEvent) {
+                handleDataChange('date', new Date().toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'), setEventData);
+            } else {
+                handleDataChange('deadline', new Date().toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'), setActivityData);
+            }
+        }
+    }, [isEditing, inEvent]);
 
     const handleChangeEvent = () => {
 
@@ -153,91 +154,6 @@ function Calendar() {
             handleChangeEvent();
         }
     }, [selectedEvent]);
-
-    async function handleAddEvent(e, eventData, setEventData, events, setEvents, isEditing, setIsEditing, selectedEvent, setSelectedEvent, updateAllFutureEvents, setUpdateAllFutureEvents) {
-        if (e && e.preventDefault) {
-            e.preventDefault();
-          }
-        console.log("Adding event:", eventData);
-
-        const { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, userId } = eventData;
-        let newEvent = {
-            //originalId: events.length + 1, //problems here
-            //originalId: eventData._id,
-            title: eventData.title,
-            date: eventData.date,
-            time: eventData.time,
-            duration: eventData.allDay ? eventData.days : eventData.duration,
-            allDay: eventData.allDay,
-            repeatFrequency: eventData.repeatFrequency,
-            repeatEndDate: eventData.repeatEndDate,
-            eventLocation: eventData.eventLocation,
-            userId: eventData.userId,
-            //notify: eventData.notify,
-        };
-        try{
-        if (eventData.allDay) {
-            newEvent = convertAllDayToTimedEvent(newEvent);
-        }
-
-        if (eventData.repeatFrequency !== 'none') {
-            let repeatedEvents = [];
-
-            //until or ntimes
-            if (eventData.repeatMode === 'until' && eventData.repeatEndDate) {
-                repeatedEvents = generateRepeatedEvents(newEvent, eventData.repeatEndDate);
-            } else if (eventData.repeatMode === 'ntimes' && eventData.repeatCount) {
-                repeatedEvents = generateRepeatedEvents(newEvent, null, eventData.repeatCount);
-            }
-
-        //    setEvents([...events, ...repeatedEvents]);
-        //} else {
-        //    setEvents([...events, newEvent]);
-        //}
-
-           // Include all repeated events for the API call
-           newEvent.repeatedEvents = repeatedEvents;
-        }
-
-        // Send event data to the backend
-        const response = await fetch('http://localhost:8000/api/event', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newEvent),
-        });
-
-        if (!response.ok) {
-            throw new Error('Errore nella creazione dell\'evento');
-        }
-
-        // Parse the response
-        const savedEvent = await response.json();
-        console.log("Evento salvato dal backend:", savedEvent);
-
-        // Update state with the new event
-        setEvents([...events, savedEvent]);
-    
-        // Reset input fields
-        handleEventDataChange('originalId', '', setEventData);
-        handleEventDataChange('title', '', setEventData);
-        handleEventDataChange('date', '', setEventData);
-        handleEventDataChange('time', '00:00', setEventData);
-        handleEventDataChange('duration', '', setEventData);
-        handleEventDataChange('allDay', false, setEventData);
-        handleEventDataChange('days', 1, setEventData);
-        handleEventDataChange('repeatFrequency', 'none', setEventData);
-        handleEventDataChange('repeatEndDate', '', setEventData);
-        handleEventDataChange('repeatCount', '', setEventData);
-        handleEventDataChange('eventLocation', '', setEventData);
-    
-        setIsEditing(false);
-        setUpdateAllFutureEvents(false); 
-
-    } catch (error) {console.error('Error while adding event:', error);}
-    };
-
 
     const onEventDrop = ({event, start}) => {
         const end = new Date(start);
