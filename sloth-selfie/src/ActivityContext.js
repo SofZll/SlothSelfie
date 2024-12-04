@@ -18,15 +18,16 @@ export const ActivityProvider = ({ children }) => {
     // Get the username of the authenticated user
     useEffect(() => {
         const fetchUsername = async () => {
-          try {
-            const response = await fetch('http://localhost:8000/api/user/username', {
-            credentials: 'include'
-            });const data = await response.json();
-            console.log('Username:', data.username);
-            setUsername(data.username);
-        } catch (error) {
-            console.error('Error fetching username:', error);
-        }
+            try {
+                const response = await fetch('http://localhost:8000/api/user/username', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                console.log('Username:', data.username);
+                setUsername(data.username);
+            } catch (error) {
+                console.error('Error fetching username:', error);
+            }
         };
     
         fetchUsername();

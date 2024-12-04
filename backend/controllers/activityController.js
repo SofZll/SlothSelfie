@@ -4,23 +4,31 @@ const User = require('../models/userModel');
 
 // Creating an activity
 const createActivity = async (req, res) => {
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
+    const { title, deadline, completed } = req.body;
+    
     try {
-        const newActivity = new Activity(req.body);
-        await newActivity.save();
-        res.status(201).json(newActivity);
+        const activity = new Activity({ title, deadline, completed, user: user._id });
+        const savedActivity = await activity.save();
+        res.status(200).json(savedActivity);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Error creating activity:', error);
+        res.status(500).json({ message: error.message });
     }
 };
 
 // fetch all activities
 const getActivities = async (req, res) => {
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
+    
     try {
-        const activities = await Activity.find({ username: req.session.username }); // filtering activities by user
+        const activities = await Activity.find({user: user._id});
         res.status(200).json(activities);
     } catch (error) {
         console.error('Error fetching activities:', error);
-        res.status(500).json({ success: false, message: 'Error fetching activities' });
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -28,20 +36,17 @@ const getActivities = async (req, res) => {
 const updateActivity = async (req, res) => {
     const{activityId} = req.params;
     const {title, deadline, completed} = req.body;
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
+
     try {
         const activity = await Activity.findById(activityId);
         if (!activity) {
             return res.status(404).json({ message: "Activity not found" });
         }
         //we find the current user and check if it is his activity
-        const currentUser = await User.findById(req.session.userId);
-        console.log('Current user:', currentUser);
-        console.log('Activity user:', activity.userId);
-        if (!currentUser) {
-            return res.status(401).json({ message: "User not found" });
-        }
-        if (activity.userId.toString() !== currentUser.username) {
-            return res.status(403).json({ message: "You are not authorized to edit this activity" });
+        if (activity.user.toString() !== user._id.toString()) {
+            return res.status(403).json({ message: "You are not allowed to update this activity" });
         }
 
         // Update the activity
