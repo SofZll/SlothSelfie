@@ -3,27 +3,16 @@ import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
 import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData } from './CalendarUtils';
-import {  handleUpdateActivity} from './ActivityUtils';
-
-import { ActivityContext } from './ActivityContext';
-//import { ActivityContext } from './ActivityContext';
-//import { ActivityContext } from './ActivityContext.Oldjs'; 
-
 
 
 function ActivitiesFunction(props){
-    const { activities, setActivities, username } = useContext(ActivityContext);
-    console.log(username);
-    //const { activities, setActivities } = useContext(ActivityContext);
-    //const[activityData, setActivityData] = useContext(ActivityContext); Old
-
+    
 
     // Pre-fill the form with the selected activity
     useEffect(() => {
         if (props.selectedActivity) {
-            handleDataChange('id', props.selectedActivity.id, props.setActivityData);
             handleDataChange('title', props.selectedActivity.title, props.setActivityData);
-            handleDataChange('deadline', props.selectedActivity.deadline, props.setActivityData);
+            handleDataChange('deadline', props.selectedActivity.deadline.split('T')[0], props.setActivityData);
             handleDataChange('completed', props.selectedActivity.completed, props.setActivityData);
         }
     }, [props.selectedActivity]);
@@ -34,7 +23,7 @@ function ActivitiesFunction(props){
             handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing);
             props.setIsEditing(false);
         } else {
-            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing, username);
+            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing, props.username);
         }
     }
 
@@ -72,7 +61,7 @@ function ActivitiesFunction(props){
                         {props.activities.filter(activity => !activity.completed).sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map(activity => (
                             <div className="activity-card" key={activity._id}>
                                 <h2>{activity.title}</h2>
-                                <p>Due: {activity.deadline}</p>
+                                <p>Due: {activity.deadline.split('T')[0]}</p>
                                 <button className="btn" onClick={() => handleRemoveActivity(activity._id, props.activities, props.setActivities)}>
                                     Done
                                 </button>
