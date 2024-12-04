@@ -135,13 +135,8 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
     if (e && e.preventDefault) {
         e.preventDefault();
     }
-
-    console.log("type:", data.type);
-
-    console.log("Adding data:", data);
     
     const newData = await newData2Add(data);
-    console.log("New data:", newData);
 
     try {
 
@@ -163,7 +158,6 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
         const savedData = await response.json();
 
         if (savedData) {
-            console.log(`Added ${data.type}:`, savedData);
 
             resetInputFiels(data.type, setData, setIsEditing);
             setDatas([...datas, savedData]);
@@ -192,39 +186,10 @@ export async function fetchData (type, setData) {
 
         const data = await response.json();
         if (data) {
-            console.log(`Fetched ${type}:`, data);
             setData(data);
         }
     } catch (error) {
         console.error(`Error fetching ${type}:`, error);
-    }
-}
-
-//Handle fetching by data id
-export async function fetchDataById (type, id) {
-    try {
-        const response = await fetch(`http://localhost:8000/api/${type}/${id}`, {
-            method: "GET",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        if (!response.ok) {
-            console.error(`Error fetching ${type}:`, response);
-            return;
-        }
-
-        const data = await response.json();
-        if (data) {
-            console.log(`Fetched ${type}:`, data);
-            return data;
-        }
-        
-    } catch (error) {
-        console.error(`Error fetching ${type}:`, error);
-        return;
     }
 }
 
@@ -236,8 +201,6 @@ export async function handleRemoveActivity(activityId, activities, setActivities
     }
 
     try{
-        //const response = await fetch(`/api/activities/${activityId}`, {
-        //locale:
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`, {
             method: 'DELETE',
             credentials: "include",
@@ -259,7 +222,6 @@ export async function handleRemoveActivity(activityId, activities, setActivities
         });
 
         setActivities(updatedActivities);
-        console.log("Current activities:", updatedActivities);
     }catch (error) {
         console.error('Error while removing activity:', error);
     }
@@ -396,7 +358,6 @@ export async function handleDeleteData(type, id, datas, setDatas, setSelectedDat
         // Get the saved note from the backend
         const deletedData = await response.json();
         if (deletedData) {
-            console.log(`Deleted ${type}:`, deletedData);
 
             const updatedDatas = datas.filter((data) => data._id !== id);
             setDatas(updatedDatas);
