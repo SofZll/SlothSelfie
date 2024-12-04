@@ -1,12 +1,11 @@
-function calculateTime(time, date) {
-    const currentTime = new Date();
-    const [hours, minutes] = time.split(':');
-    const tmp = new Date(date);
-    tmp.setHours(hours);
-    tmp.setMinutes(minutes);
-    tmp.setSeconds(0);
+function calculateTime(dateTime) {
+    const parsedDate = new Date(dateTime);
+    if (isNaN(parsedDate)) {
+        return 'Invalid date';
+    }
 
-    const diff = currentTime - tmp;
+    const currentTime = new Date();
+    const diff = currentTime - parsedDate;
     const minutesDiff = Math.floor(diff / 60000);
     const hoursDiff = Math.floor(minutesDiff / 60);
     const daysDiff = Math.floor(hoursDiff / 24);
