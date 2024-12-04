@@ -84,7 +84,7 @@ function Calendar() {
        
 
     useEffect(() => {
-        //fetchData('events', setEvents);
+        fetchData('events', setEvents);
         fetchData('activities', setActivities);
     }, []);
 
@@ -303,10 +303,10 @@ function Calendar() {
                             <div className="popup-delete">
                                 <h2>Are you sure you want to delete this event?</h2>
                                 <div>
-                                    <button className="btn" onClick={() => handleConfirmDeleteEvent(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setIsEditing, setEventData)}>
+                                    <button className="btn" onClick={() => handleConfirmDelete('event', selectedEvent, setShowConfirmation, events, setEvents, setSelectedEvent, setIsEditing, setEventData)}>
                                         Yes
                                     </button>
-                                    <button className="btn" onClick={() => handleAbortDeleteEvent(setShowConfirmation)}>
+                                    <button className="btn" onClick={() => handleAbortDelete(setShowConfirmation)}>
                                         No
                                     </button>
                                 </div>

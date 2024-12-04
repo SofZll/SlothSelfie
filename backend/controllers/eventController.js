@@ -52,13 +52,19 @@ const updateEvent = async (req, res) => {
 
 // Delete an event
 const deleteEvent = async (req, res) => {
-  try {
-    const event = await Event.findByIdAndDelete(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Evento non trovato' });
-    res.status(200).json({ message: 'Evento eliminato con successo' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+    const {eventId} = req.params;
+    try {
+      const event = await Event.findById(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      await Event.findByIdAndDelete(eventId);
+      res.status(200).json({ message: "Event deleted" });
+    }
+    catch (error) {
+      console.error('Error deleting event:', error);
+      res.status(500).json({ message: error.message });
+    }
 };
 
 module.exports = {
