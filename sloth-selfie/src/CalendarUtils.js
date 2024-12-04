@@ -31,12 +31,9 @@ const setStartEnd = (data, type) => {
             // Set the start at 08:00 and end midnight
             startDate.setHours(8, 0, 0, 0);
             endDate.setHours(23, 59, 59, 999);
-            if (data.days > 1) {
-                endDate.setDate(startDate.getDate() + data.days - 1);
-            }
 
             
-        }
+        } 
     }
 
     return {startDate, endDate};
@@ -76,7 +73,7 @@ export function normalizeData (datas, type) {
 };
 
 //Function to save data in front and clen the form
-export function resetInputFiels(type, setData) {
+export function resetInputFiels(type, setData, setIsEditing) {
     
     
     if (type === "activity") {
@@ -98,6 +95,8 @@ export function resetInputFiels(type, setData) {
         handleDataChange('repeatCount', '', setData);
         handleDataChange('eventLocation', '', setData);
     }
+
+    setIsEditing(false);
 }
 
 //Function to handle set of new data
@@ -110,12 +109,13 @@ export async function newData2Add(data, username) {
             title: title,
             deadline: deadline,
             completed: false,
-            userId: username,
+            userName: username,
             type: "activity",
         };
 
         return newData;
     } else if (data.type === "event") {
+        console.log(data._id);
         const { originalId, title, date, time, duration, allDay, repeatFrequency, repeatEndDate, repeatCount, eventLocation } = data;
         const newData = {
             originalId: originalId,
@@ -127,7 +127,7 @@ export async function newData2Add(data, username) {
             repeatFrequency: repeatFrequency,
             repeatEndDate: repeatEndDate,
             eventLocation: eventLocation,
-            userId: username,
+            userName: username,
         };
 
         return newData;
@@ -136,7 +136,7 @@ export async function newData2Add(data, username) {
 
 
 // Handle adding an event or activity
-export async function handleAddData(e, data, setData, datas, setDatas, username) {
+export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing, username) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -158,6 +158,7 @@ export async function handleAddData(e, data, setData, datas, setDatas, username)
 
         const response = await fetch(`http://localhost:8000/api/${data.type}`, {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -174,7 +175,7 @@ export async function handleAddData(e, data, setData, datas, setDatas, username)
         if (savedData) {
             console.log(`Added ${data.type}:`, savedData);
 
-            resetInputFiels(data.type, setData);
+            resetInputFiels(data.type, setData, setIsEditing);
             setDatas([...datas, savedData]);
         }
     } catch (error) {
@@ -186,15 +187,17 @@ export async function handleAddData(e, data, setData, datas, setDatas, username)
 //Handle fetching data from the database
 export async function fetchData (type, setData) {
     try {
-        const response = await fetch(`http://localhost:8000/api/${(type)}`, {
+        const response = await fetch(`http://localhost:8000/api/${type}`, {
             method: "GET",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
         });
 
         if (!response.ok) {
-            throw new Error(`Error fetching ${type}: ${response.status}`);
+            console.error(`Error fetching ${type}:`, response);
+            return;
         }
 
         const data = await response.json();
@@ -202,7 +205,6 @@ export async function fetchData (type, setData) {
             console.log(`Fetched ${type}:`, data);
             setData(data);
         }
-        
     } catch (error) {
         console.error(`Error fetching ${type}:`, error);
     }
@@ -213,6 +215,7 @@ export async function fetchDataById (type, id) {
     try {
         const response = await fetch(`http://localhost:8000/api/${type}/${id}`, {
             method: "GET",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -247,6 +250,7 @@ export async function handleRemoveActivity(activityId, activities, setActivities
         //locale:
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`, {
             method: 'DELETE',
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -283,6 +287,7 @@ export async function updateOverdueActivities(activities, setActivities) {
                 try {
                     const response = await fetch(`/api/activity/${activity._id}`, {
                         method: 'PUT',
+                        credentials: "include",
                         headers: {
                             'Content-Type': 'application/json',
                         },
@@ -320,11 +325,8 @@ export async function updateOverdueActivities(activities, setActivities) {
 export function handleClosePopup(type, setSelectedData, setIsEditing, setData) {
     setSelectedData(null);
 
-    if (type === "event") {
-        setIsEditing(false);
-    }
 
-    resetInputFiels(type, setData);
+    resetInputFiels(type, setData, setIsEditing);
 }
 
 //Function to handle the update of an event or activity
@@ -336,6 +338,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
     try {
         const response = await fetch(`http://localhost:8000/api/${data.type}/${selectedData._id}`, {
             method: "PUT",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -390,6 +393,7 @@ export async function handleDeleteData(type, id, datas, setDatas, setSelectedDat
     try {
         const response = await fetch(`http://localhost:8000/api/${type}/${id}`, {
             method: "DELETE",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -466,6 +470,7 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
                 try {
                     const response = await fetch(`/api/${item.type}/${item._id}`, {
                         method: 'PUT',
+                        credentials: "include",
                         headers: {
                             'Content-Type': 'application/json',
                         },
@@ -497,7 +502,6 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
     setDetas(updatedDatas);
 }
 
-
     
 
 
@@ -515,6 +519,7 @@ export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing)
     try {
         const response = await fetch(`http://localhost:8000/api/${type}/original/${id}`, {
             method: "DELETE",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -529,7 +534,7 @@ export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing)
         if (deletedData) {
             console.log(`Deleted ${type}:`, deletedData);
 
-            resetInputFiels(type, setIsEditing, setData);
+            resetInputFiels(type, setData, setIsEditing);
         }
     } catch (error) {
         console.error(`Error deleting ${type}:`, error);
@@ -563,7 +568,7 @@ export function calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequ
 
 
 // Function to generate repeated events con handleAddData
-export function generateRepeatedEvents (e, eventData, setEventData, events, setEvents, username) {
+export function generateRepeatedEvents (e, eventData, setEventData, events, setEvents, setIsEditing, username) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -603,7 +608,7 @@ export function generateRepeatedEvents (e, eventData, setEventData, events, setE
     }
 
     newEvents.forEach(async (event) => {
-        handleAddData(null, event, setEventData, events, setEvents, username);
+        handleAddData(null, event, setEventData, events, setEvents, setIsEditing, username);
     });
 
 };
