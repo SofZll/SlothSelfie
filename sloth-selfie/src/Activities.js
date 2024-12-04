@@ -23,7 +23,7 @@ function ActivitiesFunction(props){
             handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing);
             props.setIsEditing(false);
         } else {
-            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing, props.username);
+            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing);
         }
     }
 

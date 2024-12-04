@@ -34,7 +34,7 @@ function EventsFunction(props) {
             if (props.eventData.repeatFrequency !== "none") {
                 generateRepeatedEvents(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.username);
             } else {
-                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.username);
+                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing);
             }
         }
     }
