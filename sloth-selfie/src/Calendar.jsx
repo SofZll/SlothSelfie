@@ -30,12 +30,6 @@ const initialEvents = [
 ];
 
 
-const initialActivities = [
-    // Puoi aggiungere alcune attività di esempio qui 
-    {id: 1, title: 'Study Math', deadline: '2024-10-22', completed: false },
-    {id: 2, title: 'Write Report', deadline: '2024-10-25', completed: false }
-];
-
 
 function Calendar() {
 
@@ -50,7 +44,6 @@ function Calendar() {
     const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
-    const [username, setUsername] = useState("");//username of the authenticated user
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
@@ -67,7 +60,6 @@ function Calendar() {
         repeatMode: 'ntimes', // Mode of repetition
         repeatEndDate: '', // Date of the last repetition   <-
         eventLocation: '', // eventLocation of the event
-        userId: '', // User ID of whom creates the event
         type: 'event',
         //notify: false,
     });
@@ -77,7 +69,6 @@ function Calendar() {
         title: "",
         deadline: "",
         completed: false,
-        userId: '', // User ID of whom creates the event
         type: 'activity',
     });
 
@@ -89,28 +80,11 @@ function Calendar() {
             updateStyles(false);
             updateIcon(iconLight);
         };
-    }, [updateIcon, updateStyles]);
-
-    // Get the username of the authenticated user
-  useEffect(() => {
-    const fetchUsername = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/user/username', {
-        credentials: 'include'
-        });const data = await response.json();
-        console.log('Username:', data.username);
-        setUsername(data.username);
-    } catch (error) {
-        console.error('Error fetching username:', error);
-    }
-    };
-
-    fetchUsername();
-}, []); 
+    }, [updateIcon, updateStyles]); 
        
 
     useEffect(() => {
-        fetchData('events', setEvents);
+        //fetchData('events', setEvents);
         fetchData('activities', setActivities);
     }, []);
 
@@ -320,7 +294,7 @@ function Calendar() {
                             <button className="btn" onClick={() => setShowConfirmation(true)}>
                                 Delete
                             </button>
-                            <button className="btn" onClick={() => handleClosePopupE(setSelectedEvent, setIsEditing, setEventData)}>
+                            <button className="btn" onClick={() => handleClosePopup('event', setSelectedEvent, setIsEditing, setEventData)}>
                                 X
                             </button>
                         </div>
@@ -352,7 +326,7 @@ function Calendar() {
                             <button className='btn' onClick={() => setShowConfirmation(true)}>
                                 Delete
                             </button>
-                            <button className='btn' onClick={() => handleClosePopup('activity', setSelectedActivity, setIsEditing, setActivityData) }>
+                            <button className='btn' onClick={() => handleClosePopup('activity', setSelectedActivity, setIsEditing, setActivityData)}>
                                 X
                             </button>
                         </div>
@@ -398,8 +372,6 @@ function Calendar() {
                             setSelectedEvent={setSelectedEvent}
                             updateAllFutureEvents={updateAllFutureEvents}
                             setUpdateAllFutureEvents={setUpdateAllFutureEvents}
-
-                            username={username}
                         />
                     ) : (
                         <ActivitiesFunction
@@ -414,7 +386,6 @@ function Calendar() {
 
                             selectedActivity={selectedActivity}
                             setSelectedActivity={setSelectedActivity}
-
                         />
                     )}
                 </div>
@@ -424,9 +395,5 @@ function Calendar() {
 }
 // Export the function and the events list
 export { initialEvents };
-
-
-// Export the function and the Activities list
-export { initialActivities };
 
 export default Calendar;
