@@ -155,6 +155,21 @@ const getUsername = async (req, res) => {
     }
 };
 
+// Get the userId
+const getUserId = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        console.log('UserId:', userId);
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'UserId not found' });
+        }
+        res.status(200).json({ success: true, userId: userId });
+    } catch (error) {
+        console.error('Error fetching userId:', error);
+        res.status(500).json({ success: false, message: 'Error fetching userId' });
+    }
+}
+
 // Check if the user is logged in
 const checkAuth = async (req, res) => {
     try {
@@ -176,5 +191,6 @@ module.exports = {
     editImage,
     editProfile,
     getUsername,
+    getUserId,
     checkAuth,
 };

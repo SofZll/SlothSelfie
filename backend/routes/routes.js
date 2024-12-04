@@ -1,16 +1,15 @@
 const express = require('express');
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
-const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, checkAuth} = require('../controllers/userController');
+const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, getUserId, checkAuth } = require('../controllers/userController');
 const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
 const { createNote, getNotes, updateNote, deleteNote } = require('../controllers/noteController');
 const { createNotification, getNotifications, markNotificationAsRead, markNotificationStatus} = require('../controllers/notificationController')
-//const { createPost, getPosts } = require('../controllers/hubController');
+const { createPost, createComment, getPosts , updateContent} = require('../controllers/hubController');
 const { createActivity, getActivities, updateActivity, deleteActivity } = require('../controllers/activityController');
 const { createEvent, getEvents, updateEvent, deleteEvent } = require('../controllers/eventController');
 
 const router = express.Router();
-
 
 // User endpoints
 router.post('/user/login', loginUser);
@@ -20,6 +19,7 @@ router.post('/user/edit-image', upload.single('image'), editImage);
 router.post('/user/edit-profile', editProfile);
 router.get('/user/profile', getUserProfile);
 router.get('/user/username', getUsername);
+router.get('/user/userId', getUserId);
 router.get('/user/check-auth', checkAuth);
 
 // Time machine endpoint
@@ -32,8 +32,10 @@ router.put('/notification/read-notif/:notifId', markNotificationAsRead);
 router.put('/notification/status-notif/:notifId', markNotificationStatus);
 
 // Hub endpoint
-//router.post('/hub/posts', createPost);
-//router.get('/hub/posts', getPosts);
+router.post('/hub/new-post', createPost);
+router.post('/hub/new-comment', createComment);
+router.get('/hub/posts', getPosts);
+router.put('/hub/update-content', updateContent);
 
 // Note endpoints
 router.post('/note', createNote);
