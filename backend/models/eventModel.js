@@ -4,7 +4,6 @@ const eventSchema = new mongoose.Schema({
     originalId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Event',
-        required: true,
         default: this._id,
     },
     title: {
@@ -39,7 +38,7 @@ const eventSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
-    userName: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true

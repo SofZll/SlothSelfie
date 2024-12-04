@@ -1,24 +1,41 @@
 // eventController.js
 const Event = require('../models/eventModel');
+const User = require('../models/userModel');
 
 // Creating an event
 const createEvent = async (req, res) => {
+  const userName = req.session.username;
+  const user = await User.findOne({ username: userName });
+  const { originalId, title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
+
   try {
-    const event = new Event(req.body);
-    await event.save();
-    res.status(201).json(event);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    let event;
+    if (originalId !== undefined) {
+      event = new Event({ originalId, title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
+    } else {
+      event = new Event({ title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
+    }
+    const savedEvent = await event.save();
+    res.status(200).json(savedEvent);
+  }
+  catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ message: error.message });
   }
 };
 
 // fetch all events
 const getEvents = async (req, res) => {
+  const userName = req.session.username;
+  const user = await User.findOne({ username: userName });
+
   try {
-    const events = await Event.find({ username: req.session.username }); // filtering events by user
+    const events = await Event.find({ user: user._id });
     res.status(200).json(events);
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching events' });
+  }
+  catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ message: error.message });
   }
 };
 
