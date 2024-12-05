@@ -1,111 +1,144 @@
-/*** Style Background ***/
-
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100vh;
-  background-color: #555B6E;
-  font-family: Arial, sans-serif;
-  color: #555B6E;
-}
-
 .root {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.carousel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
   align-items: center;
   height: 100%;
   width: 100%;
 }
 
 .App {
+  position: relative;
   text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content:space-around;
+  justify-content:space-around !important;
   align-items: center;
-  height: 100%;
-  width: 100%;
-}
-
-/*** Style Header ***/
-
-.App-header {
-  display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
-  align-items: center;
-  justify-content: center;
-  height: 10%;
-  width: 100%;
-  background-color: inherit;
-  margin: 0;
-  padding: 5px;
-  z-index: 900;
-}
-
-.title {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-h1 {
-  white-space: nowrap;
-  font-size: 10vmin;
-  color: #FAF9F9;
-  font-weight: bold;
+  margin-top: 0 !important;
+  height: 100vh;
 }
 
 .App-logo {
-  height: 15vmin;
+  height: 10vmin;
+  pointer-events: none;
 }
 
-/*** Style Body ***/
+.App-header {
+  background-color: #555B6E;
+  display: flex;
+  align-items: center;
+  color: #FFD6BA;
+  height: 10%;
+}
 
 .App-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: start;
-  height: 100vh;
+  justify-content: center;
+  height: 90%;
   width: 100%;
-  padding-top: 11vh;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.header-content{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  padding-top: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  margin-right: 20px;
+}
+
+h1 {
+  white-space: nowrap;
+  margin-bottom: 20px;
+  font-size: 3rem;
+  color: #FAF9F9;
 }
 
 h2 {
   margin-bottom: 20px;
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 1.5rem !important;
+  color: #555B6E !important;
 }
 
 p {
+  margin: 0;
   font-size: 1rem;
+  color: #555B6E !important;
 }
 
-/* Style Buttons */
-
-.divBtn {
+.carousel-slide {
   display: flex;
-  justify-content: space-around;
-  width: 100%;
-  height: fit-content;
-  margin: 10px 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: auto;
 }
 
-.btn,
-.btn2,
-.btnMusic,
-.btnClose,
-.btnStats {
-  padding: 6px 10px;
+.carousel .slide h2 {
+  margin-bottom: 10px;
+}
+
+.carousel .slide p {
+  margin: 0;
+}
+
+.note-image {
+  max-width: 100px !important;
+  height: 100px;
+}
+
+.hourglass{
+  max-width: 100px !important;
+  height: 100px;
+}
+
+.carousel-slide .react-calendar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40%;
+}
+
+/***
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}***/
+
+/* buttons style */
+.btn {
+  padding: 10px 15px;
   font-size: 14px;
   font-weight: bold;
   color: white;
+  background-color: #89B0AE;
   border: none;
   border-radius: 5px;
+  cursor: pointer;
   transition: background-color 0.3s ease;
   margin: 5px;
 }
@@ -118,12 +151,17 @@ p {
   background-color: #f39252;
 }
 
-.btn {
-  background-color: #89B0AE;
-}
-
 .btn2 {
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
   background-color: #f39252;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 5px;
 }
 
 .btn2:hover {
@@ -134,63 +172,23 @@ p {
   background-color: #FFD6BA;
 }
 
-.btnMusic {
-  background-color: inherit;
-}
-
-.btn-preview {
-  background-color: #244476;
+.divBtn {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  height: fit-content;
 }
 
 .icon {
-  height: 10vmin;
-  max-height: 30px;
-  width: 10vmin;
-  max-width: 30px;
+  height: 30px;
 }
 
-/*** Style tmp Calendar ***/
-
-@media (max-height: 700px) and (orientation: landscape) {
-  .react-calendar {
-    height: 44vh;
-    overflow-y: auto;
-  }
-
-  .react-calendar__viewContainer {
-    width: 100%;
-    max-width: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .react-calendar * {
-    font-size: 2vmin !important;
-    height: 5vmin !important;
-  }
-
-  .event-indicator {
-    height: 1vmin !important;
-    width: 1vmin !important;
-  }
-
-  .react-calendar__navigation {
-    height: 3vmin!important;
-    margin-bottom: 1vmin !important;
-  }
-  
-  .react-calendar__viewContainer *{
-    height: 5.7vh
-  }
-  
-  .react-calendar__tile {
-    padding:0 !important;
-  }
+.iconArrow,
+.iconTime {
+  height: 20px;
 }
-
 
 /* light background */ 
-
 .light-background {
   background-color: #FAF9F9;
   transition: background-color 0s ease;
@@ -200,110 +198,123 @@ p {
   color: #555B6E;
 }
 
-/* time machine */
-
-.div-time-machine {
-  position: fixed;
-  z-index: 1000;
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-}
-
-.btn-time-machine {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background-color: #F39252;
-  border: 2px solid #555B6E;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: move;
-}
-
-.btn-time-machine:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
-}
-
-.icon-time-machine {
-  height: 40px;
-}
-
-/* loading page */
-
-.loading-page {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-family: Arial, sans-serif;
-}
-
-.loading-page-light {
-  color: #FFF;
-}
-
-.loading-page-dark {
+.dark-burger{
   color: #555B6E;
 }
 
-.loading-page p {
-  font-size: 18px;
-  margin: 0;
+/* time machine */
+
+.time-machine {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(0, 0, 0, 0.1);
-  border-top-color: #007bff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 15px;
+.time-machine-content {
+  background-color: #FAF9F9;
+  padding: 50px 20px 50px 20px;
+  border: 1px solid #555B6E;
+  width: 80%;
+  max-width: 400px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+.close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  color: #555B6E;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #FFF;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.time-input{
+  margin: 15px;
+}
+
+/* Media Queries */
+@media (max-width: 840px) {
+
+  .header-content{
+    position: relative;
+    width: 100%;
+  }
+
+  .App-header {
+    margin: 5px;
+    justify-content: center;
+  }
+
+  .App-logo {
+    height: 15vmin;
+    width: 18vmin !important;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  .title {
+    justify-content: center;
+  }
+
+  h2 {
+    font-size: 1.2rem !important;
+  }
+
+  .notes-section button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  .react-calendar {
+    display: flex;
+    flex-direction: column; /* Disposizione verticale */
+    align-items: center;
+  }
+  
+  .react-calendar__month-view__days {
+    display: flex;
+    width: 100%; /* Occupa tutto lo spazio in larghezza */
+  }
+  
+  .react-calendar__tile {
+    margin-bottom: 10px; /* Spaziatura tra i giorni */
+    width: 100%; /* I giorni occupano tutta la larghezza */
+  }
+
+  .App-logo {
+    width: 40%;
+  }
+
+  .carousel-slide .react-calendar {
+    height: 40%;
+  }
+
+  .carousel_structure{
+    height: 100%;
+    width: 100%;
   }
 }
-
-/* Nascondi il contenuto quando in modalità landscape */
-/*** 
-@media screen and (orientation: landscape) AND (max-height: 840px) {
-  .App {
-    display: none;
-  }
-
-  .landscape-warning {
-    display: block;
-    text-align: center;
-    padding: 20px;
-    font-size: 3rem;
-    color: red;
-  }
-}***/
-
-/*hides scrollbar on Webkit (Chrome, Safari) */
-.scrollable-list::-webkit-scrollbar {
-  display: none;
-}
-
-/*hides scrollbar on Firefox */
-.scrollable-list {
-  scrollbar-width: none;
-}
-
-/*hides scrollbar on Internet Explorer e Edge */
-.scrollable-list {
-  -ms-overflow-style: none;
-}
-
 
 /* Zoom animation */
 @keyframes zoom {
@@ -321,14 +332,11 @@ p {
   animation: zoom 0.3s forwards;
 }
 
-.popup,
-.popup-delete {
-  display: flex;
-  flex-direction: column;
+.popup {
   position: fixed;
-  max-width: 250px;
-  height: 280px;
-  top: 50%;
+  width: 250px;
+  height: 270px;
+  top: 70%;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 20px;
@@ -338,103 +346,23 @@ p {
   z-index: 1000;
 }
 
-.popup {
-  width: 80%;
-  justify-content: space-around;
+.scrollable-list {
+  list-style-type: none;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f9fa;
 }
 
-.popup-delete {
-  width: 100%;
-  justify-content: center;
+/*List used for activities and notes not in the preview*/
+.scrollable-Card-list {
+  list-style-type: none;
+  max-height: 450px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f9fa;
 }
-
-.popup h2,
-.popup p {
-  font-size: 1rem;
-  margin-bottom: 2%;
-}
-
-/* alert */
-
-.button-alert {
-  background-color: #89B0AE;
-}
-
-
-
-
-
-@media screen and (min-width: 700px){
-  .title h1 {
-    font-size: 7vmin;
-    padding-right: 1vmin;
-  }
-  
-  .App-logo {
-    height: 11vmin;
-  }
-
-  .App-body {
-    justify-content: center;
-  }
-
-  h2 {
-    font-size: 1.5rem;
-  }
-  
-  .btn,
-  .btn2 {
-    padding: 10px 15px;
-  }
-
-  .popup,
-  .popup-delete {
-    top: 50%;
-  }
-}
-
-@media screen and (min-width: 601px) and (max-width: 1036px){
-  h2 {
-    font-size: 1.4rem;
-  }
-}
-
-@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
-  .App-header {
-    display: none;
-  }
-
-  .App-body {
-    width: 90%;
-    height: 100vh;
-    align-self: end;
-    padding-top: 0;
-  }
-
-  h2 {
-    font-size: 1rem;
-  }
-  
-  .icon {
-    height: 5vmin;
-    width: 5vmin;
-  }
-
-  .btn {
-    font-size: 4vmin;
-  }
-
-  .divBtn {
-    margin: 5px 0;
-  }
-}
-
-/***
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}***/
