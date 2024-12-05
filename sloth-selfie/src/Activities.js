@@ -8,15 +8,6 @@ import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData
 function ActivitiesFunction(props){
     
 
-    // Pre-fill the form with the selected activity
-    useEffect(() => {
-        if (props.selectedActivity) {
-            handleDataChange('title', props.selectedActivity.title, props.setActivityData);
-            handleDataChange('deadline', props.selectedActivity.deadline.split('T')[0], props.setActivityData);
-            handleDataChange('completed', props.selectedActivity.completed, props.setActivityData);
-        }
-    }, [props.selectedActivity]);
-
     const handleSubmitSave = (e) => {
         e.preventDefault();
         if (props.selectedActivity) {

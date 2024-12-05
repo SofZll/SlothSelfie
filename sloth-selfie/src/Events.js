@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
@@ -34,6 +34,7 @@ function EventsFunction(props) {
             if (props.eventData.repeatFrequency !== "none") {
                 generateRepeatedEvents(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.username);
             } else {
+                console.log("Submitting new event:", props.eventData);
                 handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing);
             }
         }
@@ -45,7 +46,6 @@ function EventsFunction(props) {
             handleDataChange("repeatMode", "ntimes", props.setEventData);
         }
     }
-
     
     return (
         <div className="container-events-add">
