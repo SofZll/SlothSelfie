@@ -41,10 +41,27 @@ const getEvents = async (req, res) => {
 
 // Update an event
 const updateEvent = async (req, res) => {
+  const { eventId } = req.params;
+  const { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
+  const userName = req.session.username;
+  const user = await User.findOne({ username: userName });
   try {
-    const event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!event) return res.status(404).json({ message: 'Evento non trovato' });
-    res.status(200).json(event);
+    const event = await Event.findById(eventId);
+    if (!event){
+      return res.status(404).json({ message: 'Evento non trovato' });
+    }
+    if (event.user.toString() !== user._id.toString()) {
+      return res.status(403).json({ message: 'Non sei autorizzato a modificare questo evento' });
+    }
+
+    //update the event
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation },
+      { new: true }
+    );
+    res.status(200).json(updatedEvent);
+
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
