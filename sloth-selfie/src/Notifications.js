@@ -141,8 +141,6 @@ const NotificationFunction = () => {
         }
     };
 
-
-
     const handleAddReceiver = () => {
         if (receiverInput) {
             setReceivers([...receivers, receiverInput]);
