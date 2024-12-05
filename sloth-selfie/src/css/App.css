@@ -5,9 +5,9 @@ body {
   padding: 0;
   width: 100%;
   height: 100vh;
-  background-color: #555B6E;
+  background-color: #555b6e;
   font-family: Arial, sans-serif;
-  color: #555B6E;
+  color: #222D52;
 }
 
 .root {
@@ -55,7 +55,7 @@ body {
 h1 {
   white-space: nowrap;
   font-size: 10vmin;
-  color: #FAF9F9;
+  color: #fdffff;
   font-weight: bold;
 }
 
@@ -100,53 +100,66 @@ p {
 .btnMusic,
 .btnClose,
 .btnStats {
-  padding: 6px 10px;
+  padding: 10px 15px;
   font-size: 14px;
   font-weight: bold;
-  color: white;
+  color: #fdffff;
   border: none;
   border-radius: 5px;
   transition: background-color 0.3s ease;
   margin: 5px;
 }
 
-.btn:hover {
-  background-color: #f39252;
+.btn-preview {
+  margin: 0;
+  border-radius: 0;
+  background-color: transparent !important;
+  padding: 15px 43px;
 }
 
-.btn:active {
-  background-color: #f39252;
+.btn-preview:hover {
+  background-color: #636a80 !important;
 }
 
-.btn {
-  background-color: #89B0AE;
-}
-
+/*btn 2 colori riguardare*/
 .btn2 {
-  background-color: #f39252;
+  background-color: #FFC857;
 }
 
 .btn2:hover {
-  background-color: #FFD6BA;
-}
-
-.btn2:active {
-  background-color: #FFD6BA;
+  background-color: #fdbc39;
 }
 
 .btnMusic {
   background-color: inherit;
 }
 
-.btn-preview {
+.btn-main {
   background-color: #244476;
 }
 
+.btn-main:hover {
+  background-color: #222D52;
+  color: #fff;
+}
+
+.btn-arrows {
+  background-color: transparent;
+  color: #fdffff;
+}
+
 .icon {
-  height: 10vmin;
-  max-height: 30px;
-  width: 10vmin;
-  max-width: 30px;
+  height: 15vmin;
+  max-height: 35px;
+  width: 15vmin;
+  max-width: 35px;
+}
+
+.icon-up {
+  height: 15vmin;
+  max-height: 33px;
+  width: 15vmin;
+  max-width: 33px;
 }
 
 /*** Style tmp Calendar ***/
@@ -192,12 +205,12 @@ p {
 /* light background */ 
 
 .light-background {
-  background-color: #FAF9F9;
+  background-color: #fdffff;
   transition: background-color 0s ease;
 }
 
 .dark-h1{
-  color: #555B6E;
+  color: #222D52;
 }
 
 /* time machine */
@@ -245,11 +258,11 @@ p {
 }
 
 .loading-page-light {
-  color: #FFF;
+  color: #fdffff;
 }
 
 .loading-page-dark {
-  color: #555B6E;
+  color: #222D52;
 }
 
 .loading-page p {
@@ -332,7 +345,7 @@ p {
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: #fdffff;
   border: 1px solid #ccc;
   border-radius: 5px;
   z-index: 1000;
@@ -356,6 +369,7 @@ p {
 
 /* alert */
 
+/* colore da cambiare */
 .button-alert {
   background-color: #89B0AE;
 }
@@ -380,11 +394,6 @@ p {
 
   h2 {
     font-size: 1.5rem;
-  }
-  
-  .btn,
-  .btn2 {
-    padding: 10px 15px;
   }
 
   .popup,

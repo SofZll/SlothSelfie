@@ -3,9 +3,9 @@ const User = require('../models/userModel');
 
 // Create a new notification: FUNZIONA
 const createNotification = async (req, res) => {
-    const {receivers, message, date, time} = req.body;
+    const {receivers, message} = req.body;
 
-    if (!receivers || !message || !date || !time) {
+    if (!receivers || !message) {
         return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
@@ -27,8 +27,7 @@ const createNotification = async (req, res) => {
             sender: senderObjectId,
             receivers: receiversObjectId,
             message,
-            date,
-            time,
+            date: new Date(),
             read: receivers.map(() => false),
             responses: [], // array of responses
         });

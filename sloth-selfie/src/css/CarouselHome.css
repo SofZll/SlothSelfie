@@ -13,7 +13,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-evenly;
-    background-color: #FAF9F9;
+    background-color: #fdffff;
     height: 65vh;
     max-height: 500px;
     padding: 0 0.5rem;
@@ -38,6 +38,8 @@
 
 .divBtn4icon {
     display: none;
+    justify-content: center;
+    padding: 0 20%;
 }
 
 @media (max-height: 700px) {

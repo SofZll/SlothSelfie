@@ -16,6 +16,7 @@ function Hub({ username }) {
     const [showShare, setShowShare] = useState(false);
     const [userId, setUserId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [visiblePosts, setVisiblePosts] = useState(3);
 
     useEffect(() => {
         const getUserId = async () => {
@@ -68,12 +69,18 @@ function Hub({ username }) {
         }
     };
 
+    const loadPosts = () => {
+        setVisiblePosts(visiblePosts + 3);
+    };
+
+    const postsToShow = posts.slice(0, visiblePosts);
+
     const sortPosts = (postsToSort, option) => {
         const sortedPosts = [...postsToSort];
         if (option === 'mostRecent') {
             sortedPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
         } else if (option === 'mostLiked') {
-            sortedPosts.sort((a, b) => b.likes - a.likes);
+            sortedPosts.sort((a, b) => b.likes.length - a.likes.length);
         }
         return sortedPosts;
     };
@@ -319,7 +326,7 @@ function Hub({ username }) {
                             value={newPostText}
                             onChange={(e) => setNewPostText(e.target.value)}
                         />
-                        <button className="btn" onClick={() => handleNewContent()}>Post</button>
+                        <button className="btn btn-main" onClick={() => handleNewContent()}>Post</button>
                     </div>
                     <div className="posts-list">
                         <div className="sorting-options">
@@ -333,56 +340,63 @@ function Hub({ username }) {
                             />
                         </div>
                         {posts && posts.length > 0 ? (
-                            posts.map((post) => (
-                                <div key={post._id} className="post">
-                                    <div className="post-title">
-                                        <h3>{post.author.username}</h3>
-                                        <p>{calculateTime(post.date)}</p>
-                                    </div>
-                                    <p>{post.text}</p>
-                                    <div className="post-functions">
-                                        <span className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post._id)}>
-                                            {post.likes ? post.likes.length : 0}
-                                            <img
-                                                id={`heart-icon-post-${post._id}`}
-                                                src={isLiked(post) ? iconHeartFull : iconHeartEmpty}
-                                                alt="like"
-                                                className="heart-icon"
-                                            />
-                                        </span>
-                                        <span onClick={() => handleComments(post._id)}>{calculateComments(post.comments)}</span>
-                                        <span onClick={() => toggleModal(post)}>share</span>
-                                    </div>
-                                    <div className={`post-comments ${selectedPostId === post._id ? 'show' : ''}`}>
-                                        <div className="new-comment">
-                                            <textarea
-                                                placeholder="comment"
-                                                value={newCommentText}
-                                                onChange={(e) => setNewCommentText(e.target.value)}
-                                            />
-                                            <button className="btn" onClick={() => handleNewContent(true)}>Post</button>
+                            <>
+                                {postsToShow.map((post) => (
+                                    <div key={post._id} className="post">
+                                        <div className="post-title">
+                                            <h3>{post.author.username}</h3>
+                                            <p>{calculateTime(post.date)}</p>
                                         </div>
-                                        {post.comments.map((comment) => (
-                                            <div key={comment._id} className="comment">
-                                                <div className="comment-title">
-                                                    <h4>{comment.author.username}</h4>
-                                                    <p>{calculateTime(comment.date)}</p>
-                                                </div>
-                                                <p>{comment.text}</p>
-                                                <span className={isLiked(comment) ? 'liked' : ''} onClick={() => handleLike(post._id, true, comment._id)}>
-                                                    {comment.likes ? comment.likes.length : 0}
-                                                    <img
-                                                        id={`heart-icon-comment-${comment._id}`}
-                                                        src={isLiked(comment) ? iconHeartFull : iconHeartEmpty}
-                                                        alt="like"
-                                                        className="heart-icon"
-                                                    />
-                                                </span>
+                                        <p>{post.text}</p>
+                                        <div className="post-functions">
+                                            <span className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post._id)}>
+                                                {post.likes ? post.likes.length : 0}
+                                                <img
+                                                    id={`heart-icon-post-${post._id}`}
+                                                    src={isLiked(post) ? iconHeartFull : iconHeartEmpty}
+                                                    alt="like"
+                                                    className="heart-icon"
+                                                />
+                                            </span>
+                                            <span onClick={() => handleComments(post._id)}>{calculateComments(post.comments)}</span>
+                                            <span onClick={() => toggleModal(post)}>share</span>
+                                        </div>
+                                        <div className={`post-comments ${selectedPostId === post._id ? 'show' : ''}`}>
+                                            <div className="new-comment">
+                                                <textarea
+                                                    placeholder="comment"
+                                                    value={newCommentText}
+                                                    onChange={(e) => setNewCommentText(e.target.value)}
+                                                />
+                                                <button className="btn btn-main" onClick={() => handleNewContent(true)}>Post</button>
                                             </div>
-                                        ))}
+                                            {post.comments.map((comment) => (
+                                                <div key={comment._id} className="comment">
+                                                    <div className="comment-title">
+                                                        <h4>{comment.author.username}</h4>
+                                                        <p>{calculateTime(comment.date)}</p>
+                                                    </div>
+                                                    <p>{comment.text}</p>
+                                                    <span className={isLiked(comment) ? 'liked' : ''} onClick={() => handleLike(post._id, true, comment._id)}>
+                                                        {comment.likes ? comment.likes.length : 0}
+                                                        <img
+                                                            id={`heart-icon-comment-${comment._id}`}
+                                                            src={isLiked(comment) ? iconHeartFull : iconHeartEmpty}
+                                                            alt="like"
+                                                            className="heart-icon"
+                                                        />
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            ))
+                                ))}
+                                {visiblePosts < posts.length && (
+                                    <button className="load-more-btn" onClick={loadPosts}>
+                                        Load more
+                                    </button>
+                                )}
+                            </>
                         ) : (
                             <p>No posts to show</p>
                         )}

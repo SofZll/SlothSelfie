@@ -34,7 +34,8 @@
     left: 0;
     height: 100%;
     width: 300px;
-    background: #373A47;
+    /*background: #373A47;*/
+    background: #1c2135;
     padding: 2.5em 1.5em 0;
     font-size: 1.5em;
     transition: transform 0.3s ease-in-out;
@@ -74,7 +75,7 @@
 
 .bm-item:hover {
     color: white;
-    background-color: #555B6E;
+    background-color: #272e49;
     text-decoration: none;
 }
 

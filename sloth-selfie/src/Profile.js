@@ -281,13 +281,13 @@ function Profile() {
                         </div>
                         {isEditing ? (
                             <>
-                                <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={saveChanges}>Save changes</button>
-                                <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={cancelEdit}>Cancel</button>
+                                <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={saveChanges}>Save changes</button>
+                                <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={cancelEdit}>Cancel</button>
                             </>
                         ):(
                             <>
-                                <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={editProfile}>Edit profile</button>
-                                <button className={`btn button-edit ${showProfile ? 'show' : ''}`} onClick={logout}>Log out</button>
+                                <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={editProfile}>Edit profile</button>
+                                <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={logout}>Log out</button>
                             </>
                         )}
                     </div>

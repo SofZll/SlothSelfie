@@ -229,6 +229,21 @@
     transition: background-color 0.2s;
 }
 
+.load-more-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 7px 18px;
+    color: #555B6E;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.load-more-btn:hover {
+    color: #1C274C;
+    background-color: #dfdfdf;
+}
+
 @media screen and (min-width: 700px){
     .posts-list {
         padding-bottom: 0;

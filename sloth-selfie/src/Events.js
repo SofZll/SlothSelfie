@@ -283,7 +283,7 @@ function EventsFunction(props) {
                 </label>
             )}
             */}
-            <button className="btn" type="submit">
+            <button className="btn btn-main" type="submit">
                 {props.selectedEvent ? "Save Changes" : "Add Event"}
             </button>
             </form>
