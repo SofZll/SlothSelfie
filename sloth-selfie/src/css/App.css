@@ -72,7 +72,7 @@ h1 {
   justify-content: start;
   height: 100vh;
   width: 100%;
-  padding-top: 11vh;
+  padding-top: 10vh;
 }
 
 h2 {
@@ -152,10 +152,10 @@ p {
 }
 
 .icon {
-  height: 15vmin;
-  max-height: 35px;
-  width: 15vmin;
-  max-width: 35px;
+  height: 10vmin;
+  max-height: 30px;
+  width: 10vmin;
+  max-width: 30px;
 }
 
 .icon-up {
@@ -402,6 +402,14 @@ p {
   .popup,
   .popup-delete {
     top: 50%;
+  }
+
+
+  .icon {
+    height: 15vmin;
+    max-height: 35px;
+    width: 15vmin;
+    max-width: 35px;
   }
 }
 
