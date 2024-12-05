@@ -332,8 +332,8 @@ function PomodoroFunction() {
                     <button className='settings-choice' onClick={() => handleChoiceSelection(1)} >Set the number of cycles and their duration</button>
                     <button className='settings-choice' onClick={() => handleChoiceSelection(2)}>Set the total time of your studying session</button>
                     <div className='divBtn'>
-                        <button className='btn btn-tomato' onClick={backPage}>Back</button>
-                        <button className='btn btn-tomato' onClick={selectChoice}>Select</button>
+                        <button className='btn btn-main btn-tomato' onClick={backPage}>Back</button>
+                        <button className='btn btn-main btn-tomato' onClick={selectChoice}>Select</button>
                     </div>
                 </div>
                 <div id='pomodoro-timers-options' className="pomodoro-timers-options">
@@ -376,7 +376,7 @@ function PomodoroFunction() {
                                 />
                                 <p>of study</p>
                             </div>
-                            <button className='btn' onClick={getMinutes}>calculate minutes</button>
+                            <button className='btn btn-main' onClick={getMinutes}>calculate minutes</button>
                         </div>
                         <p>The selected total time is: {textTotal} minutes</p>
                     </div>
@@ -397,7 +397,7 @@ function PomodoroFunction() {
                         </div>
                         <div className='divBtn'>
                             <button id='btn-back-total-time-one' className='btn btn-tomato' onClick={backSelection}>Back</button>
-                            <button className='btn btn-tomato' onClick={getCycles}>Calculate cycles</button>
+                            <button className='btn btn-main btn-tomato' onClick={getCycles}>Calculate cycles</button>
                         </div>
                         <div id='suggested-cycles-div' className='suggested-cycles-div'>
                             <p>Select one of the suggested Pomodoro</p>
@@ -417,9 +417,9 @@ function PomodoroFunction() {
                     </div>
                 </div>
                 <div className='divBtn'>
-                    <button id='btn-back' className='btn btn-tomato btn-back' onClick={backSelection}>Back</button>
-                    <button id='btn-tomato-start' className='btn btn-tomato btn-tomato-start' onClick={()=>startPomodoro(false)}>Let's get started</button>
-                    <button id='btn-tomato-QS' className='btn btn-tomato' onClick={()=>startPomodoro(true)}>Quick Start</button>
+                    <button id='btn-back' className='btn btn-main btn-tomato btn-back' onClick={backSelection}>Back</button>
+                    <button id='btn-tomato-start' className='btn btn-main btn-tomato btn-tomato-start' onClick={()=>startPomodoro(false)}>Let's get started</button>
+                    <button id='btn-tomato-QS' className='btn btn-main btn-tomato' onClick={()=>startPomodoro(true)}>Quick Start</button>
                 </div>
             </div>
 

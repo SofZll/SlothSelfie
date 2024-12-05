@@ -438,7 +438,7 @@ const filterNotesByDate = (notes) => {
                         &nbsp; Deadline: {new Date(task.deadline).toLocaleDateString()}
                       </span>
                     )}
-                    <button className='btn' onClick={() => removeTask(index, noteData, setNoteData)}>Remove</button>
+                    <button className='btn btn-main' onClick={() => removeTask(index, noteData, setNoteData)}>Remove</button>
                   </li>
                 ))}
               </ul>
@@ -478,16 +478,16 @@ const filterNotesByDate = (notes) => {
               <ul>
                 {noteData.allowedUsers.map((user, index) => (
                   <li key={index}>
-                    {user} <button className = "btn" onClick={() => handleNoteDataChange('allowedUsers', noteData.allowedUsers.filter(u => u !== user), setNoteData)}>Remove</button>
+                    {user} <button className = "btn btn-main" onClick={() => handleNoteDataChange('allowedUsers', noteData.allowedUsers.filter(u => u !== user), setNoteData)}>Remove</button>
                   </li>
                 ))}
               </ul>
             </div>
           )}
-          <button className="btn" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
+          <button className="btn btn-main" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
             {/* Editing scenario*/}
             {isEditing !== null && (
-          <button className="btn" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities)}>Save Note</button>
+          <button className="btn btn-main" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities)}>Save Note</button>
           )}
         </div>
       </div>

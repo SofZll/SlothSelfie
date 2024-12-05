@@ -156,14 +156,9 @@ const NotificationFunction = () => {
         const message = document.querySelector('.text-notif textarea').value;
         
         if (receivers.length && message) {
-            const date = new Date().toISOString().split('T')[0];
-            const time = new Date().toISOString().split('T')[1].split('.')[0];
             const newNotif = {
                 receivers,
                 message,
-                date,
-                time,
-                read: receivers.map(() => false),
             };
             
             const response = await fetch('http://localhost:8000/api/notification/new-notif', {
@@ -174,6 +169,8 @@ const NotificationFunction = () => {
                 },
                 body: JSON.stringify(newNotif)
             });
+
+            const data = await response.json();
             
             if (response.ok) {
                 Swal.fire({
@@ -192,7 +189,7 @@ const NotificationFunction = () => {
             } else {
                 Swal.fire({
                     title: 'Error',
-                    text: 'Error sending notification!',
+                    text: data.message,
                     icon: 'error',
                     customClass: {
                         confirmButton: 'button-alert'
@@ -234,7 +231,7 @@ const NotificationFunction = () => {
                     <div className="new-notif">
                         <div className="add-receiver">
                             <input type="text" placeholder="Enter receiver's username" value={receiverInput} onChange={(e) => setReceiverInput(e.target.value)}/>
-                            <button className="btn new-notif-button" onClick={handleAddReceiver}>Add</button>
+                            <button className="btn btn-main new-notif-button" onClick={handleAddReceiver}>Add</button>
                         </div>
                         <div className="receivers-list">
                             {receivers.map((receiver, index) => (
@@ -246,7 +243,7 @@ const NotificationFunction = () => {
                         </div>
                         <div className="text-notif">
                             <textarea placeholder="Write here..." />
-                            <button className="btn new-notif-button" onClick={handleSend}>Send</button>
+                            <button className="btn btn-main new-notif-button" onClick={handleSend}>Send</button>
                         </div>
                     </div>
                     {/* TODO: Add a button to mark all notifications as read*/}
@@ -258,7 +255,7 @@ const NotificationFunction = () => {
                                 <div key={notif._id} id={`notif-${notif._id}`} className={`notif ${notif.read[receiverIndex] ? 'read' : 'unread'}`}>
                                     <div className="notif-title">
                                         <h6>{notif.sender.username}</h6>
-                                        <p>{calculateTime(notif.time, notif.date)}</p>
+                                        <p>{calculateTime(notif.date)}</p>
                                     </div>
                                     <p>{notif.message}</p>
                                     {notif.activity && (

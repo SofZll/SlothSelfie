@@ -55,17 +55,17 @@ export default function CarroussSel(props) {
       style={{ touchAction: 'pan-y' }}
     >
       <div className="divBtn divBtn4icon">
-          <button onClick={() => handleGoToSlide(0)} className="btn">
-            <img src={iconCalendar} alt="icon" className="icon"/>
+          <button onClick={() => handleGoToSlide(0)} className="btn btn-preview">
+            <img src={iconCalendar} alt="icon" className="icon-up"/>
           </button>
-          <button onClick={() => handleGoToSlide(1)} className="btn">
-            <img src={iconNotes} alt="icon" className="icon"/>
+          <button onClick={() => handleGoToSlide(1)} className="btn btn-preview">
+            <img src={iconNotes} alt="icon" className="icon-up"/>
           </button>
-          <button onClick={() => handleGoToSlide(2)} className="btn">
-            <img src={iconTomato} alt="icon" className="icon"/>
+          <button onClick={() => handleGoToSlide(2)} className="btn btn-preview">
+            <img src={iconTomato} alt="icon" className="icon-up"/>
           </button>
-          <button onClick={() => handleGoToSlide(3)} className="btn">
-            <img src={iconProjects} alt="icon" className="icon"/>
+          <button onClick={() => handleGoToSlide(3)} className="btn btn-preview">
+            <img src={iconProjects} alt="icon" className="icon-up"/>
           </button>
       </div>
       <Carousel
@@ -76,13 +76,13 @@ export default function CarroussSel(props) {
         animationConfig={config.gentle}
       />
       <div className="divBtn">
-        <button onClick={handlePrev} className="btn">
+        <button onClick={handlePrev} className="btn btn-arrows">
           <img src={iconArrowLeft} alt="icon" className="icon"/>
         </button>
-        <button onClick={handleSetUp} className="btn">
+        <button onClick={handleSetUp} className="btn btn-arrows">
           <img src={iconSetting} alt="icon" className="icon"/>
         </button>
-        <button onClick={handleNext} className="btn">
+        <button onClick={handleNext} className="btn btn-arrows">
           <img src={iconArrowRight} alt="icon" className="icon"/>
         </button>
       </div>

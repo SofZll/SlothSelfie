@@ -104,7 +104,7 @@ function PreviewNote() {
                 </div>
                 <div className="divBtn">
                     <Link to="/notes" onClick={handleLinkClick('/notes')}>
-                        <button className="btn btn-preview btn-primary">Manage Notes</button> {/* Bootstrap button */}
+                        <button className="btn btn-main">Manage Notes</button> {/* Bootstrap button */}
                     </Link>
                 </div>
             </div>

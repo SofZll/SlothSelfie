@@ -73,13 +73,13 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
       <div className="notes-buttons">
         <div>
         <button
-          className={`btn2 btn-edit ${clickedButton === 'edit' + index ? 'active' : ''}`}
+          className={`btn2 ${clickedButton === 'edit' + index ? 'active' : ''}`}
             onClick={() => onEdit(index)}
         >
           Edit
         </button>
         <button
-          className={`btn btn-delete ${clickedButton === 'delete' + index ? 'active' : ''}`}
+          className={`btn btn-main ${clickedButton === 'delete' + index ? 'active' : ''}`}
           onClick={() => onDelete(index)}
         >
           Delete
@@ -87,13 +87,13 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
       </div>
       <div>
         <button
-          className={`btn2 btn-duplicate ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
+          className={`btn2 ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
           onClick={() => onDuplicate(index)}
         >
           Duplicate
         </button>
         <button
-          className={`btn btn-copy ${clickedButton === 'copy' + index ? 'active' : ''}`}
+          className={`btn btn-main ${clickedButton === 'copy' + index ? 'active' : ''}`}
           onClick={() => onCopy(note.content)}
         >
           Copy

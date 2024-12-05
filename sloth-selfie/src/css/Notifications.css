@@ -39,6 +39,11 @@
     background-color: #FFC857;
 }
 
+.notif-button:hover {
+    background-color: #fdbc39;
+    color: #fff;
+}
+
 .notif-title {
     display: flex;
     justify-content: space-between;

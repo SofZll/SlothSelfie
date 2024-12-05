@@ -207,10 +207,10 @@ function Calendar() {
                         <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
                         
                         <div>
-                            <button className="btn" onClick={() => setShowConfirmation(true)}>
+                            <button className="btn btn-main" onClick={() => setShowConfirmation(true)}>
                                 Delete
                             </button>
-                            <button className="btn" onClick={() => handleClosePopup('event', setSelectedEvent, setIsEditing, setEventData)}>
+                            <button className="btn btn-main" onClick={() => handleClosePopup('event', setSelectedEvent, setIsEditing, setEventData)}>
                                 X
                             </button>
                         </div>
@@ -219,10 +219,10 @@ function Calendar() {
                             <div className="popup-delete">
                                 <h2>Are you sure you want to delete this event?</h2>
                                 <div>
-                                    <button className="btn" onClick={() => handleConfirmDelete('event', selectedEvent, setShowConfirmation, events, setEvents, setSelectedEvent, setIsEditing, setEventData)}>
+                                    <button className="btn btn-main" onClick={() => handleConfirmDelete('event', selectedEvent, setShowConfirmation, events, setEvents, setSelectedEvent, setIsEditing, setEventData)}>
                                         Yes
                                     </button>
-                                    <button className="btn" onClick={() => handleAbortDelete(setShowConfirmation)}>
+                                    <button className="btn btn-main" onClick={() => handleAbortDelete(setShowConfirmation)}>
                                         No
                                     </button>
                                 </div>
@@ -239,10 +239,10 @@ function Calendar() {
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
 
                         <div>
-                            <button className='btn' onClick={() => setShowConfirmation(true)}>
+                            <button className='btn btn-main' onClick={() => setShowConfirmation(true)}>
                                 Delete
                             </button>
-                            <button className='btn' onClick={() => handleClosePopup('activity', setSelectedActivity, setIsEditing, setActivityData)}>
+                            <button className='btn btn-main' onClick={() => handleClosePopup('activity', setSelectedActivity, setIsEditing, setActivityData)}>
                                 X
                             </button>
                         </div>
@@ -251,8 +251,8 @@ function Calendar() {
                             <div className="popup-delete">
                                 <h2>Are you sure you want to delete this activity?</h2>
                                 <div>
-                                    <button className='btn' onClick={() => handleConfirmDelete('activity', selectedActivity, setShowConfirmation, activities, setActivities, setSelectedActivity, setIsEditing, setActivityData)}>Yes</button>
-                                    <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+                                    <button className='btn btn-main' onClick={() => handleConfirmDelete('activity', selectedActivity, setShowConfirmation, activities, setActivities, setSelectedActivity, setIsEditing, setActivityData)}>Yes</button>
+                                    <button className='btn btn-main' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
                                 </div>
                             </div>
                         )}
@@ -265,13 +265,13 @@ function Calendar() {
                 <div className='selecting-view'>
                     <h2>What would you like to add?</h2>
                     <div className='btn-container'>
-                        <button className='btn' onClick={() => handleSelection(false)}>Activity</button>
-                        <button className='btn' onClick={() => handleSelection(true)}>Event</button>
+                        <button className='btn btn-main' onClick={() => handleSelection(false)}>Activity</button>
+                        <button className='btn btn-main' onClick={() => handleSelection(true)}>Event</button>
                     </div>
                 </div>
             ) : (
                 <div className='activity-event-container'>
-                    <button className='btn' onClick={() => handleBack()}>
+                    <button className='btn btn-main' onClick={() => handleBack()}>
                         <img src={iconBack} alt="back" className="icon" />
                     </button>
                     {inEvent ? (

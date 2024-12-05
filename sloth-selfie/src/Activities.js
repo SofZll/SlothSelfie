@@ -49,7 +49,7 @@ function ActivitiesFunction(props){
                         required 
                     />
                 </label>
-                <button className='btn' type="submit">
+                <button className='btn btn-main' type="submit">
                     {props.selectedActivity ? 'Save Changes' : 'Add Activity'}
                 </button>
             </form>
@@ -62,7 +62,7 @@ function ActivitiesFunction(props){
                             <div className="activity-card" key={activity._id}>
                                 <h2>{activity.title}</h2>
                                 <p>Due: {new Date(activity.deadline).toLocaleDateString()}</p>
-                                <button className="btn" onClick={() => handleRemoveActivity(activity._id, props.activities, props.setActivities)}>
+                                <button className="btn btn-main" onClick={() => handleRemoveActivity(activity._id, props.activities, props.setActivities)}>
                                     Done
                                 </button>
                             </div>
