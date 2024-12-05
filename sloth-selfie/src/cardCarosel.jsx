@@ -1,21 +1,21 @@
 import './css/CarouselHome.css';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSpring, animated } from "react-spring";
-import { marked } from 'marked';
+import {Link, useNavigate} from 'react-router-dom';
 import Calendar from 'react-calendar';
-import noteImage from './media/note.png';
 import './css/App.css';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
-import {Link, useNavigate} from 'react-router-dom';
 import PreviewPomodoro from './previewPomodoro';
-import { initialEvents } from './Events';
-import { initialActivities } from './Activities';
-import { initialNotes } from './Notes';
+import PreviewNote from './previewNote';
+import { initialEvents } from './Calendar';
+import { fetchData } from './CalendarUtils';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
     const navigate = useNavigate();
+    const [activities, setActivities] = useState([]);
+    const [event, setEvent] = useState([]);
 
     // animation page
     const handleLinkClick = (path) => (event) => {
@@ -34,23 +34,29 @@ function Card({ title, caseShow }) {
       : "0 2px 10px rgb(0 0 0 / 8%)"
     });
 
-     const hasEventOnDate = (date) => {
-        return initialEvents.some(event => event.date === date.toLocaleDateString('en-CA'));
+    // Check if there is an event on the date
+    const hasEventOnDate = (date) => {
+        return event.some(event => event.date === date.toLocaleDateString('en-CA'));
     };
 
+    // Check if there is an activity on the date
     const hasActivityOnDate = (date) => {
-        return initialActivities.some(activity => activity.deadline === date.toLocaleDateString('en-CA'));
+        return activities.some(activity => activity.deadline === date.toLocaleDateString('en-CA'));
     };
 
-  // Personalizing the tile content
+    // Adding a dot to the date if there is an event or an activity on that date
     const tileContent = ({ date, view }) => {
         if (view === 'month' && hasEventOnDate(date)) {
-            return <span className="event-indicator" style={{ backgroundColor: 'blue', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
-        }
-        if (view === 'month' && hasActivityOnDate(date)) {
+            return <span className="event-indicator" style={{ backgroundColor: '#2b59b6', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
+        } else if (view === 'month' && hasActivityOnDate(date)) {
             return <span className="event-indicator" style={{ backgroundColor: '#f72585', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
         }
     };
+
+    useEffect(() => {
+        fetchData('activities', setActivities);
+        fetchData('events', setEvent);
+    } , []);
 
     
 
@@ -59,70 +65,17 @@ function Card({ title, caseShow }) {
         case "1":
             content = (
                 <div className='inCard'>
-                    <Calendar  tileContent={tileContent} />
+                    <Calendar  tileContent={tileContent}/>
                     <div className="divBtn">
-                        <Link to="/events" onClick={handleLinkClick('/events')}>
-                        <button className="btn" style={{ color: 'blue' }}>Manage Events</button>
-                        </Link>
-                        <Link to="/activities" onClick={handleLinkClick('/activities')}>
-                            <button className="btn" style={{ color: '#f72585' }}>Manage Activities</button>
+                        <Link to="/Calendar" onClick={handleLinkClick('/Calendar')}>
+                            <button className="btn btn-main" >Manage Calendar</button>
                         </Link>
                     </div>
                 </div>
             );
             break;
             case "2":
-                content = (
-                    <div className="inCard">
-                        <div className="notes-section">
-                            <h2>Your Notes:</h2>
-                            <div className="scrollable-list">
-                                {initialNotes.length > 0 ? (
-                                    initialNotes.map((note, index) => (
-                                        <div key={index} className="card mb-3"> {/* Bootstrap card */}
-                                            <div className="card-body">
-                                                <h5 className="card-title">{note.title}</h5>
-                                                <small>Author: {note.author}</small><br />
-                                                <small>
-                                                    Access: {note.access.type === 'public' 
-                                                        ? 'Public' 
-                                                        : note.access.type === 'private' 
-                                                        ? 'Private' 
-                                                        : `Shared with: ${note.access.allowedUsers.join(', ')}`}
-                                                </small>
-                                                <p className="card-text">
-                                                    {/* Limiting note content to 200 characters, showing markdown */}
-                                                    <div
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: note.content.length > 200 
-                                                                ? marked(note.content.substring(0, 200) + "...")
-                                                                : marked(note.content)
-                                                        }}
-                                                    />
-                                                </p>
-                                                {/* Using d-flex and justify-content-between for proper alignment */}
-                                                <div className="d-flex justify-content-between mt-3">
-                                                    <small className="text-muted">Category: {note.category}</small><br />
-                                                    <small className="text-muted">Created on: {new Date(note.createDate).toLocaleDateString()}</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div>
-                                        <h2>No notes yet!</h2>
-                                        <img src={noteImage} alt="Note illustration" className="note-image" />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <div className="divBtn">
-                            <Link to="/notes" onClick={handleLinkClick('/notes')}>
-                                <button className="btn btn-primary">Manage Notes</button> {/* Bootstrap button */}
-                            </Link>
-                        </div>
-                    </div>
-                );
+                content = <PreviewNote />;
                 break;
         case "3":
             content = <PreviewPomodoro />;
@@ -131,9 +84,11 @@ function Card({ title, caseShow }) {
             content = (
                 <div className='inCard'>
                     <p>Content for other stuff 3</p>
-                    <button className="btn">Start</button>
+                    <button className="btn btn-main">Start</button>
                 </div>
             );
+            break;
+        default:
             break;
     }
 

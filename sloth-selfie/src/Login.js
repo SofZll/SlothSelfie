@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import './css/Login.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
 
 function Form({ formType, setFormType, handleLogin}) {
+    const [name, setName] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,12 +17,20 @@ function Form({ formType, setFormType, handleLogin}) {
         e.preventDefault();
         if (formType === 'login') {
             if (!username || !password) {
-                alert('Please enter a username and password!');
+                Swal.fire({
+                    title: 'Login failed',
+                    icon: 'error',
+                    text: 'Please enter username and password',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
                 return;
             }
 
-            fetch('/api/login', {
+            fetch('http://localhost:8000/api/user/login', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -34,7 +44,15 @@ function Form({ formType, setFormType, handleLogin}) {
                     navigate('/home');
                 }
                 else {
-                    console.error('Login failed:', data.message);
+                    console.log('Login failed:', data.message);
+                    Swal.fire({
+                        title: 'Login failed',
+                        icon: 'error',
+                        text: data.message,
+                        customClass: {
+                            confirmButton: 'button-alert'
+                        }
+                    });
                 }
             })
             .catch((error) => {
@@ -43,16 +61,24 @@ function Form({ formType, setFormType, handleLogin}) {
 
         } else if (formType === 'register') {
             if (!username || !email || !password) {
-                alert('Please enter a username, email, and password!');
+                Swal.fire({
+                    title: 'Registration failed',
+                    icon: 'error',
+                    text: 'Please fill in all fields',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
                 return;
             }
 
-            fetch('/api/register', {
+            fetch('http://localhost:8000/api/user/register', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ name, username, email, password })
             })
             .then(response => response.json())
             .then(data => {
@@ -61,6 +87,14 @@ function Form({ formType, setFormType, handleLogin}) {
                 }
                 else {
                     console.error('Registration failed:', data.message);
+                    Swal.fire({
+                        title: 'Registration failed',
+                        icon: 'error',
+                        text: data.message,
+                        customClass: {
+                            confirmButton: 'button-alert'
+                        }
+                    });
                 }
             })
             .catch((error) => {
@@ -78,6 +112,18 @@ function Form({ formType, setFormType, handleLogin}) {
             <div className="login-box">
                 <h1 className="login-title">{formType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
                 <form id={`login-form`} onSubmit={handleSubmit}>
+                    {formType === 'register' && (
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                id="name"
+                                placeholder="Name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </div>
+                    )}
                     <div className="form-group">
                         <input
                             type="text"

@@ -4,6 +4,7 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import PomodoroTimer from './PomodoroTimer';
+import Swal from 'sweetalert2';
 
 function PomodoroFunction() {
     const { updateStyles, updateIcon } = useContext(StyleContext);
@@ -28,12 +29,26 @@ function PomodoroFunction() {
         if (!defaultStart) {
             if (textStudio === '' || textBreak === '' || textCycles === '' || textTotal === ''
                 || isNaN(textStudio) || isNaN(textBreak) || isNaN(textCycles) || isNaN(textTotal)) {
-                alert("Please enter valid Pomodoro settings.");
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Please enter valid numbers for the study, break, cycles and total time.',
+                    icon: 'error',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
                 return;
             }
 
             if (parseInt(textTotal) !== (parseInt(textStudio) + parseInt(textBreak)) * parseInt(textCycles)) {
-                alert("The total time doesn't match the study and break time and the number of cycles.");
+                Swal.fire({
+                    title: 'Error',
+                    text: 'The total time does not match the study, break and cycles time.',
+                    icon: 'error',
+                    customClass: {
+                        confirmButton: 'button-alert'
+                    }
+                });
                 return;
             }
         }
@@ -82,7 +97,14 @@ function PomodoroFunction() {
                 console.error('Element with ID "pomodoro-total-time-option" not found.');
             }
         } else {
-            alert("Please select an option.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please select a valid option.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
         }
 
         if (selectionPomodoroSettings && (choiceSelection === 1 || choiceSelection === 2)) {
@@ -106,7 +128,7 @@ function PomodoroFunction() {
     };
 
     const backPage = () => {
-        window.location.href = '/';
+        window.location.href = '/home';
     };
 
     const backSelection = () => {
@@ -192,17 +214,38 @@ function PomodoroFunction() {
         let cycles = parseInt(textCycles);
 
         if (isNaN(study) || study <= 0) {
-            alert("Please enter a valid positive number for study time.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for study time.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
 
         if (isNaN(breakTime) || breakTime <= 0) {
-            alert("Please enter a valid positive number for break time.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for break time.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
 
         if (isNaN(cycles) || cycles <= 0) {
-            alert("Please enter a valid positive number for cycles.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for cycles.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
 
@@ -216,14 +259,28 @@ function PomodoroFunction() {
         let study2 = parseInt(timeStudySuggest2);
 
         if (isNaN(time) || time <= 0) {
-            alert("Please enter a valid positive number for total time.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for total time.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
 
         let cycles1 = Math.floor(time / 30);
 
         if (cycles1 <= 0) {
-            alert("Please enter a bigger value for total time.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter a valid positive number for total time.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'button-alert'
+                }
+            });
             return;
         }
         else if (time - cycles1*study1 < cycles1*2) {
@@ -264,17 +321,19 @@ function PomodoroFunction() {
         };
     }, [updateIcon, updateStyles]);
 
+    
+
     return (
         <div className='div-pomodoro'>
             <div id="select-pomodoro" className="select-pomodoro">
                 <h2>Select a Pomodoro and <br/>start your learning session</h2>
                 <div id='selection-pomodoro-settings' className='selection-pomodoro-settings'>
-                    <p>Chouse the settings of your Pomodoro study session</p>
+                    <p>Choose the settings of your Pomodoro study session</p>
                     <button className='settings-choice' onClick={() => handleChoiceSelection(1)} >Set the number of cycles and their duration</button>
                     <button className='settings-choice' onClick={() => handleChoiceSelection(2)}>Set the total time of your studying session</button>
                     <div className='divBtn'>
-                        <button className='btn btn-tomato' onClick={backPage}>Back</button>
-                        <botton className='btn btn-tomato' onClick={selectChoice}>Select</botton>
+                        <button className='btn btn-main btn-tomato' onClick={backPage}>Back</button>
+                        <button className='btn btn-main btn-tomato' onClick={selectChoice}>Select</button>
                     </div>
                 </div>
                 <div id='pomodoro-timers-options' className="pomodoro-timers-options">
@@ -317,7 +376,7 @@ function PomodoroFunction() {
                                 />
                                 <p>of study</p>
                             </div>
-                            <button className='btn' onClick={getMinutes}>calculate minutes</button>
+                            <button className='btn btn-main' onClick={getMinutes}>calculate minutes</button>
                         </div>
                         <p>The selected total time is: {textTotal} minutes</p>
                     </div>
@@ -338,7 +397,7 @@ function PomodoroFunction() {
                         </div>
                         <div className='divBtn'>
                             <button id='btn-back-total-time-one' className='btn btn-tomato' onClick={backSelection}>Back</button>
-                            <button className='btn btn-tomato' onClick={getCycles}>Calculate cycles</button>
+                            <button className='btn btn-main btn-tomato' onClick={getCycles}>Calculate cycles</button>
                         </div>
                         <div id='suggested-cycles-div' className='suggested-cycles-div'>
                             <p>Select one of the suggested Pomodoro</p>
@@ -358,9 +417,9 @@ function PomodoroFunction() {
                     </div>
                 </div>
                 <div className='divBtn'>
-                    <button id='btn-back' className='btn btn-tomato btn-back' onClick={backSelection}>Back</button>
-                    <button id='btn-tomato-start' className='btn btn-tomato btn-tomato-start' onClick={()=>startPomodoro(false)}>Let's get started</button>
-                    <botton id='btn-tomato-QS' className='btn btn-tomato' onClick={()=>startPomodoro(true)}>Quick Start</botton>
+                    <button id='btn-back' className='btn btn-main btn-tomato btn-back' onClick={backSelection}>Back</button>
+                    <button id='btn-tomato-start' className='btn btn-main btn-tomato btn-tomato-start' onClick={()=>startPomodoro(false)}>Let's get started</button>
+                    <button id='btn-tomato-QS' className='btn btn-main btn-tomato' onClick={()=>startPomodoro(true)}>Quick Start</button>
                 </div>
             </div>
 

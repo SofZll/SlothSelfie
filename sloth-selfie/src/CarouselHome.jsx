@@ -1,16 +1,15 @@
 import Carousel from "react-spring-3d-carousel";
-import './css/App.css';
+import './css/CarouselHome.css';
 import { useState, useEffect } from "react";
 import { config } from "react-spring";
 import { useSwipeable } from 'react-swipeable';
-import TimeMachine from "./TimeMachine";
 import iconCalendar from './media/calendar.svg';
 import iconNotes from './media/notes.svg';
 import iconTomato from './media/tomato.svg';
 import iconProjects from './media/projects.svg'; 
 import iconArrowLeft from './media/arrowLeft.svg';
 import iconArrowRight from './media/arrowRight.svg';
-import iconTimeMachine from './media/time-machine.svg';
+import iconSetting from './media/setting.svg';
 
 export default function CarroussSel(props) {
 
@@ -27,11 +26,8 @@ export default function CarroussSel(props) {
 
   const [offsetRadius, setOffsetRadius] = useState(2);
   const [showArrows, setShowArrows] = useState(false);
-  const [goToSlide, setGoToSlide] = useState(null);
+  const [goToSlide, setGoToSlide] = useState(0);
   const [cards] = useState(table);
-
-  // State for time machine
-  const [machineOpen, setMachineOpen] = useState(false);
 
   useEffect(() => {
     setOffsetRadius(props.offset);
@@ -50,31 +46,26 @@ export default function CarroussSel(props) {
     setGoToSlide(index);
   };
 
-  // functions to show and close the time machine
-  const showTimeMachine = () => {
-    setMachineOpen(true);
+  const handleSetUp = () => {
+    props.setSetUp(!props.setUp);
   };
 
-  const closeTimeMachine = () => {
-    setMachineOpen(false);
-  }
-
   return (
-    <div className="carousel" {...handlers}
-      style={{ width: props.width, height: props.height, margin: props.margin, touchAction: 'pan-y' }}
+    <div className="carousel-div" {...handlers}
+      style={{ touchAction: 'pan-y' }}
     >
       <div className="divBtn divBtn4icon">
-          <button onClick={() => handleGoToSlide(0)} className="btn">
-            <img src={iconCalendar} alt="icon" className="icon"/>
+          <button onClick={() => handleGoToSlide(0)} className={`btn btn-preview  ${goToSlide === 0 ? 'active' : ''}`}>
+            <img src={iconCalendar} alt="icon" className="icon-up"/>
           </button>
-          <button onClick={() => handleGoToSlide(1)} className="btn">
-            <img src={iconNotes} alt="icon" className="icon"/>
+          <button onClick={() => handleGoToSlide(1)} className={`btn btn-preview  ${goToSlide === 1 ? 'active' : ''}`}>
+            <img src={iconNotes} alt="icon" className="icon-up"/>
           </button>
-          <button onClick={() => handleGoToSlide(2)} className="btn">
-            <img src={iconTomato} alt="icon" className="icon"/>
+          <button onClick={() => handleGoToSlide(2)} className={`btn btn-preview  ${goToSlide === 2 ? 'active' : ''}`}>
+            <img src={iconTomato} alt="icon" className="icon-up"/>
           </button>
-          <button onClick={() => handleGoToSlide(3)} className="btn">
-            <img src={iconProjects} alt="icon" className="icon"/>
+          <button onClick={() => handleGoToSlide(3)} className={`btn btn-preview  ${goToSlide === 3 ? 'active' : ''}`}>
+            <img src={iconProjects} alt="icon" className="icon-up"/>
           </button>
       </div>
       <Carousel
@@ -83,19 +74,16 @@ export default function CarroussSel(props) {
         offsetRadius={offsetRadius}
         showNavigation={showArrows}
         animationConfig={config.gentle}
-        height={props.height}
       />
       <div className="divBtn">
-        <button onClick={handlePrev} className="btn">
-          <img src={iconArrowLeft} alt="icon" className="iconArrow"/>
+        <button onClick={handlePrev} className="btn btn-arrows">
+          <img src={iconArrowLeft} alt="icon" className="icon"/>
         </button>
-        {/* time machine */}
-        <button onClick={showTimeMachine} className="btn">
-          <img src={iconTimeMachine} alt="icon" className="icon"/>
+        <button onClick={handleSetUp} className="btn btn-arrows">
+          <img src={iconSetting} alt="icon" className="icon"/>
         </button>
-        <TimeMachine isOpen={machineOpen} onClose={closeTimeMachine}/>
-        <button onClick={handleNext} className="btn">
-          <img src={iconArrowRight} alt="icon" className="iconArrow"/>
+        <button onClick={handleNext} className="btn btn-arrows">
+          <img src={iconArrowRight} alt="icon" className="icon"/>
         </button>
       </div>
         
