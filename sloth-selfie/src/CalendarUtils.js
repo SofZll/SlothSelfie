@@ -52,19 +52,51 @@ export function normalizeData (datas, type) {
                 title: data.title,
                 start: new Date(),
                 end: new Date(),
-                deadline: new Date(),
-                completed: data.completed,
+                ...(type === "activity" ? 
+                    {
+                        deadline: new Date(),
+                        completed: data.completed,
+                    } : {
+                        time: data.time,
+                        itLast: data.duration,
+                        precise: data.isPrecise,
+                        allDay: data.allDay,
+                        repeatFrequency: data.repeatFrequency,
+                        repeatMode: data.repeatMode,
+                        repeatEndDate: data.repeatEndDate,
+                        repeatCount: data.repeatCount,
+                        eventLocation: data.eventLocation,
+                        //notify: data.notify,
+                    }
+                ),
                 type: type
             };
         }
+
+        console.log(data, "ooooooooooooooooooooooooooooooooooooooooooo");
         
         return {
             _id: data._id,
             title: data.title,
             start: startDate,
             end: endDate,
-            deadline: data.deadline,
-            completed: data.completed,
+            ...(type === "event" ?
+                {
+                    time: data.time,
+                    itLast: data.duration,
+                    precise: data.isPrecise,
+                    allDay: data.allDay,
+                    repeatFrequency: data.repeatFrequency,
+                    repeatMode: data.repeatMode,
+                    repeatEndDate: data.repeatEndDate,
+                    repeatCount: data.repeatCount,
+                    eventLocation: data.eventLocation,
+                    //notify: data.notify,
+                } : {
+                    deadline: data.deadline,
+                    completed: data.completed,
+                }
+            ),
             type: type
         };
     });
@@ -112,17 +144,19 @@ export async function newData2Add(data) {
 
         return newData;
     } else if (data.type === "event") {
-        console.log(data._id);
-        const { title, date, time, duration, allDay, eventLocation } = data;
+        console.log(data, 'gggggggggggggggg');
+        const { title, date, time, duration, allDay, eventLocation, isPreciseTime } = data;
         const newData = {
             title: title,
             date: date,
             time: time,
             duration: allDay ? data.days : duration,
+            isPrecise: isPreciseTime,
             allDay: allDay,
             repeatFrequency: 'none',
             repeatEndDate: null,
             eventLocation: eventLocation,
+            type: "event",
         };
 
         return newData;
@@ -140,6 +174,8 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
 
     try {
 
+        console.log(data.type);
+        console.log(data);
 
         const response = await fetch(`http://localhost:8000/api/${data.type}`, {
             method: "POST",
@@ -304,7 +340,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     title: data.title,
                     date: data.date,
                     time: data.time,
-                    duration: data.allDay ? data.days : data.duration,
+                    duration: data.allDay ? data.days : data.itLast,
                     allDay: data.allDay,
                     repeatFrequency: data.repeatFrequency,
                     repeatEndDate: data.repeatEndDate,
@@ -381,10 +417,33 @@ export function handleConfirmDelete(type, selectedData, setShowConfirmation, dat
 }
 
 //Function to handle the filling of the form with the selected event or activity
-export function handleFillForm(data, setSelectedData, setIsEditing, handleSelection) {
+export function handleFillForm(data, setData, setIsEditing, handleSelection, setSelectedData) {
     
     setIsEditing(true);
     handleSelection(data.type === "event");
+    console.log(data, "ooooooooooooooooooooooooooooooooooooooooooo");
+
+    if (data.type === "activity") {
+        handleDataChange('title', data.title, setData);
+        handleDataChange('deadline', data.deadline.split('T')[0], setData);
+        handleDataChange('completed', data.completed, setData);
+    } else if (data.type === "event") {
+        handleDataChange('title', data.title, setData);
+        handleDataChange('date', new Date(data.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'), setData);
+        handleDataChange('isPreciseTime', data.precise, setData);
+        handleDataChange('time', new Date(data.start).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }), setData);
+        handleDataChange('allDay', data.allDay, setData);
+        if (data.allDay) {
+            handleDataChange('days', data.itLast, setData);
+        } else {
+            handleDataChange('duration', data.itLast, setData);
+        }
+        handleDataChange('repeatFrequency', data.repeatFrequency, setData);
+        handleDataChange('repeatEndDate', data.repeatEndDate, setData);
+        handleDataChange('repeatCount', data.repeatCount, setData);
+        handleDataChange('repeatMode', data.repeatMode, setData);
+        handleDataChange('eventLocation', data.eventLocation, setData);
+    }
 
     setSelectedData(data);
 }

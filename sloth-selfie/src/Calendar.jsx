@@ -149,11 +149,6 @@ function Calendar() {
         console.log("Form prefilled", selectedEvent);
     };
 
-    useEffect(() => {
-        if (selectedEvent) {
-            handleChangeEvent();
-        }
-    }, [selectedEvent]);
 
     const onEventDrop = ({event, start}) => {
         const end = new Date(start);
@@ -174,9 +169,9 @@ function Calendar() {
         }
 
         if (item.type === 'event') {
-            handleFillForm(item, setSelectedEvent, setIsEditing, handleSelection);
+            handleFillForm(item, setEventData, setIsEditing, handleSelection, setSelectedEvent);
         } else if (item.type === 'activity') {
-            handleFillForm(item, setSelectedActivity, setIsEditing, handleSelection);
+            handleFillForm(item, setActivityData, setIsEditing, handleSelection, setSelectedActivity);
         }
         
     };

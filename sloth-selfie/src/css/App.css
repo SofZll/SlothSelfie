@@ -15,41 +15,68 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  height: 100vh;
+}
+
+.carousel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
   height: 100%;
   width: 100%;
 }
 
 .App {
+  position: relative;
   text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content:space-around;
+  justify-content:space-around !important;
   align-items: center;
-  height: 100%;
+  margin-top: 0 !important;
+  height: 100vh;
+}
+
+.App-logo {
+  height: 10vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  background-color: #555B6E;
+  display: flex;
+  align-items: center;
+  color: #FFD6BA;
+  height: 10%;
+}
+
+.App-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 90%;
   width: 100%;
 }
 
-/*** Style Header ***/
+.App-link {
+  color: #61dafb;
+}
 
-.App-header {
+.header-content{
   display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
   align-items: center;
   justify-content: center;
-  height: 10%;
-  width: 100%;
-  background-color: inherit;
-  margin: 0;
-  padding: 5px;
-  z-index: 900;
 }
 
 .title {
+  padding-top: 10px;
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-around;
+  margin-right: 20px;
 }
 
 h1 {
@@ -59,35 +86,39 @@ h1 {
   font-weight: bold;
 }
 
-.App-logo {
-  height: 15vmin;
+p {
+  margin: 0;
+  font-size: 1rem;
+  color: #555B6E !important;
 }
 
-/*** Style Body ***/
-
-.App-body {
+.carousel-slide {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: start;
-  height: 100vh;
-  width: 100%;
-  padding-top: 11vh;
+  justify-content: center;
+  height: auto;
 }
 
-h2 {
-  margin-bottom: 20px;
-  font-size: 1.2rem;
-  font-weight: bold;
+.carousel .slide h2 {
+  margin-bottom: 10px;
 }
 
-p {
-  font-size: 1rem;
+.carousel .slide p {
+  margin: 0;
 }
 
-/* Style Buttons */
+.note-image {
+  max-width: 100px !important;
+  height: 100px;
+}
 
-.divBtn {
+.hourglass{
+  max-width: 100px !important;
+  height: 100px;
+}
+
+.carousel-slide .react-calendar {
   display: flex;
   justify-content: space-around;
   width: 100%;
@@ -106,6 +137,7 @@ p {
   color: #fdffff;
   border: none;
   border-radius: 5px;
+  cursor: pointer;
   transition: background-color 0.3s ease;
   margin: 5px;
 }
@@ -165,48 +197,12 @@ p {
   max-width: 33px;
 }
 
-/*** Style tmp Calendar ***/
-
-@media (max-height: 700px) and (orientation: landscape) {
-  .react-calendar {
-    height: 44vh;
-    overflow-y: auto;
-  }
-
-  .react-calendar__viewContainer {
-    width: 100%;
-    max-width: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .react-calendar * {
-    font-size: 2vmin !important;
-    height: 5vmin !important;
-  }
-
-  .event-indicator {
-    height: 1vmin !important;
-    width: 1vmin !important;
-  }
-
-  .react-calendar__navigation {
-    height: 3vmin!important;
-    margin-bottom: 1vmin !important;
-  }
-  
-  .react-calendar__viewContainer *{
-    height: 5.7vh
-  }
-  
-  .react-calendar__tile {
-    padding:0 !important;
-  }
+.iconArrow,
+.iconTime {
+  height: 20px;
 }
 
-
 /* light background */ 
-
 .light-background {
   background-color: #fafafa;
   transition: background-color 0s ease;
@@ -216,37 +212,57 @@ p {
   color: #222D52;
 }
 
+.dark-burger{
+  color: #555B6E;
+}
+
 /* time machine */
 
-.div-time-machine {
-  position: fixed;
-  z-index: 1000;
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-}
-
-.btn-time-machine {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background-color: #F39252;
-  border: 2px solid #555B6E;
+.time-machine {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.time-machine-content {
+  background-color: #FAF9F9;
+  padding: 50px 20px 50px 20px;
+  border: 1px solid #555B6E;
+  width: 80%;
+  max-width: 400px;
+  border-radius: 10px;
+  text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: move;
+  position: relative;
 }
 
-.btn-time-machine:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
+.close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  color: #555B6E;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
 }
 
-.icon-time-machine {
-  height: 40px;
+.close:hover,
+.close:focus {
+  color: #FFF;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.time-input{
+  margin: 15px;
 }
 
 /* loading page */
@@ -287,39 +303,30 @@ p {
   to {
     transform: rotate(360deg);
   }
-}
-
-/* Nascondi il contenuto quando in modalità landscape */
-/*** 
-@media screen and (orientation: landscape) AND (max-height: 840px) {
-  .App {
-    display: none;
+  
+  .react-calendar__month-view__days {
+    display: flex;
+    width: 100%; /* Occupa tutto lo spazio in larghezza */
+  }
+  
+  .react-calendar__tile {
+    margin-bottom: 10px; /* Spaziatura tra i giorni */
+    width: 100%; /* I giorni occupano tutta la larghezza */
   }
 
-  .landscape-warning {
-    display: block;
-    text-align: center;
-    padding: 20px;
-    font-size: 3rem;
-    color: red;
+  .App-logo {
+    width: 40%;
   }
-}***/
 
-/*hides scrollbar on Webkit (Chrome, Safari) */
-.scrollable-list::-webkit-scrollbar {
-  display: none;
+  .carousel-slide .react-calendar {
+    height: 40%;
+  }
+
+  .carousel_structure{
+    height: 100%;
+    width: 100%;
+  }
 }
-
-/*hides scrollbar on Firefox */
-.scrollable-list {
-  scrollbar-width: none;
-}
-
-/*hides scrollbar on Internet Explorer e Edge */
-.scrollable-list {
-  -ms-overflow-style: none;
-}
-
 
 /* Zoom animation */
 @keyframes zoom {
@@ -337,14 +344,11 @@ p {
   animation: zoom 0.3s forwards;
 }
 
-.popup,
-.popup-delete {
-  display: flex;
-  flex-direction: column;
+.popup {
   position: fixed;
-  max-width: 250px;
-  height: 280px;
-  top: 50%;
+  width: 250px;
+  height: 270px;
+  top: 70%;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 20px;
