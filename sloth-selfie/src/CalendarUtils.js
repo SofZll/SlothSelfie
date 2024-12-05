@@ -18,24 +18,19 @@ const setStartEnd = (data, type) => {
         startDate = new Date(endDate.getTime() - 60 * 60 * 1000);
         
     } else if (type === "event") {
-        if (data.start && data.end) {
-            startDate = new Date(data.start);
-            endDate = new Date(data.end);
-        } else {
-            startDate = new Date(`${data.date}T${data.time}`);
-            const durationInMilliseconds = Number(data.duration) * 60 * 60 * 1000;
-            endDate = new Date(startDate.getTime() + durationInMilliseconds);
-        }
+        startDate = new Date(data.date);
 
+        
         if (data.allDay) {
+            //Set end = start + duration
+            endDate = new Date(startDate.getTime() + (Number(data.duration)-1) * 24 * 60 * 60 * 1000);
             // Set the start at 08:00 and end midnight
             startDate.setHours(8, 0, 0, 0);
             endDate.setHours(23, 59, 59, 999);
-            if (data.days > 1) {
-                endDate.setDate(startDate.getDate() + data.days - 1);
-            }
-
-            
+        } else {
+            startDate.setHours(data.time.split(":")[0], data.time.split(":")[1], 0, 0);
+            //set endDate il giorno dopo a startDate
+            endDate = new Date(startDate.getTime() + Number(data.duration) * 60 * 60 * 1000);
         }
     }
 
@@ -103,8 +98,8 @@ export function resetInputFiels(type, setData, setIsEditing) {
 }
 
 //Function to handle set of new data
-export async function newData2Add(data, username) {
-    console.log(username);
+export async function newData2Add(data) {
+    
     
     if (data.type === "activity") {
         const { deadline, title } = data;
@@ -112,25 +107,22 @@ export async function newData2Add(data, username) {
             title: title,
             deadline: deadline,
             completed: false,
-            userId: username,
             type: "activity",
         };
 
         return newData;
     } else if (data.type === "event") {
         console.log(data._id);
-        const { originalId, title, date, time, duration, allDay, repeatFrequency, repeatEndDate, repeatCount, eventLocation } = data;
+        const { title, date, time, duration, allDay, eventLocation } = data;
         const newData = {
-            originalId: originalId || data._id,
             title: title,
             date: date,
             time: time,
             duration: allDay ? data.days : duration,
             allDay: allDay,
-            repeatFrequency: repeatFrequency,
-            repeatEndDate: repeatEndDate,
+            repeatFrequency: 'none',
+            repeatEndDate: null,
             eventLocation: eventLocation,
-            userId: username,
         };
 
         return newData;
@@ -139,28 +131,19 @@ export async function newData2Add(data, username) {
 
 
 // Handle adding an event or activity
-export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing, username) {
+export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
-
-    console.log("type:", data.type);
-
-    console.log(username);
-
-    console.log("Adding data:", data);
     
-    const newData = await newData2Add(data, username);
-    console.log("New data:", newData);
+    const newData = await newData2Add(data);
 
     try {
-        if (!username) {
-            console.error("Username not defined");
-        }
 
 
         const response = await fetch(`http://localhost:8000/api/${data.type}`, {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -175,7 +158,6 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
         const savedData = await response.json();
 
         if (savedData) {
-            console.log(`Added ${data.type}:`, savedData);
 
             resetInputFiels(data.type, setData, setIsEditing);
             setDatas([...datas, savedData]);
@@ -189,33 +171,9 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
 //Handle fetching data from the database
 export async function fetchData (type, setData) {
     try {
-        const response = await fetch(`http://localhost:8000/api/${(type)}`, {
+        const response = await fetch(`http://localhost:8000/api/${type}`, {
             method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error fetching ${type}: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (data) {
-            console.log(`Fetched ${type}:`, data);
-            setData(data);
-        }
-        
-    } catch (error) {
-        console.error(`Error fetching ${type}:`, error);
-    }
-}
-
-//Handle fetching by data id
-export async function fetchDataById (type, id) {
-    try {
-        const response = await fetch(`http://localhost:8000/api/${type}/${id}`, {
-            method: "GET",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -228,13 +186,10 @@ export async function fetchDataById (type, id) {
 
         const data = await response.json();
         if (data) {
-            console.log(`Fetched ${type}:`, data);
-            return data;
+            setData(data);
         }
-        
     } catch (error) {
         console.error(`Error fetching ${type}:`, error);
-        return;
     }
 }
 
@@ -246,10 +201,9 @@ export async function handleRemoveActivity(activityId, activities, setActivities
     }
 
     try{
-        //const response = await fetch(`/api/activities/${activityId}`, {
-        //locale:
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`, {
             method: 'DELETE',
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -268,7 +222,6 @@ export async function handleRemoveActivity(activityId, activities, setActivities
         });
 
         setActivities(updatedActivities);
-        console.log("Current activities:", updatedActivities);
     }catch (error) {
         console.error('Error while removing activity:', error);
     }
@@ -286,6 +239,7 @@ export async function updateOverdueActivities(activities, setActivities) {
                 try {
                     const response = await fetch(`/api/activity/${activity._id}`, {
                         method: 'PUT',
+                        credentials: "include",
                         headers: {
                             'Content-Type': 'application/json',
                         },
@@ -336,6 +290,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
     try {
         const response = await fetch(`http://localhost:8000/api/${data.type}/${selectedData._id}`, {
             method: "PUT",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -390,6 +345,7 @@ export async function handleDeleteData(type, id, datas, setDatas, setSelectedDat
     try {
         const response = await fetch(`http://localhost:8000/api/${type}/${id}`, {
             method: "DELETE",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -402,7 +358,6 @@ export async function handleDeleteData(type, id, datas, setDatas, setSelectedDat
         // Get the saved note from the backend
         const deletedData = await response.json();
         if (deletedData) {
-            console.log(`Deleted ${type}:`, deletedData);
 
             const updatedDatas = datas.filter((data) => data._id !== id);
             setDatas(updatedDatas);
@@ -466,6 +421,7 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
                 try {
                     const response = await fetch(`/api/${item.type}/${item._id}`, {
                         method: 'PUT',
+                        credentials: "include",
                         headers: {
                             'Content-Type': 'application/json',
                         },
@@ -497,7 +453,6 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
     setDetas(updatedDatas);
 }
 
-
     
 
 
@@ -515,6 +470,7 @@ export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing)
     try {
         const response = await fetch(`http://localhost:8000/api/${type}/original/${id}`, {
             method: "DELETE",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },

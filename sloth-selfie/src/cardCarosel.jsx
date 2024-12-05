@@ -1,5 +1,5 @@
 import './css/CarouselHome.css';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSpring, animated } from "react-spring";
 import {Link, useNavigate} from 'react-router-dom';
 import Calendar from 'react-calendar';
@@ -8,11 +8,14 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import PreviewPomodoro from './previewPomodoro';
 import PreviewNote from './previewNote';
-import { initialEvents, initialActivities } from './Calendar';
+import { initialEvents } from './Calendar';
+import { fetchData } from './CalendarUtils';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
     const navigate = useNavigate();
+    const [activities, setActivities] = useState([]);
+    const [event, setEvent] = useState([]);
 
     // animation page
     const handleLinkClick = (path) => (event) => {
@@ -31,23 +34,29 @@ function Card({ title, caseShow }) {
       : "0 2px 10px rgb(0 0 0 / 8%)"
     });
 
+    // Check if there is an event on the date
     const hasEventOnDate = (date) => {
-        return initialEvents.some(event => event.date === date.toLocaleDateString('en-CA'));
+        return event.some(event => event.date === date.toLocaleDateString('en-CA'));
     };
 
+    // Check if there is an activity on the date
     const hasActivityOnDate = (date) => {
-        return initialActivities.some(activity => activity.deadline === date.toLocaleDateString('en-CA'));
+        return activities.some(activity => activity.deadline === date.toLocaleDateString('en-CA'));
     };
 
-  // Personalizing the tile content
+    // Adding a dot to the date if there is an event or an activity on that date
     const tileContent = ({ date, view }) => {
         if (view === 'month' && hasEventOnDate(date)) {
-            return <span className="event-indicator" style={{ backgroundColor: 'blue', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
-        }
-        if (view === 'month' && hasActivityOnDate(date)) {
+            return <span className="event-indicator" style={{ backgroundColor: '#2b59b6', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
+        } else if (view === 'month' && hasActivityOnDate(date)) {
             return <span className="event-indicator" style={{ backgroundColor: '#f72585', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
         }
     };
+
+    useEffect(() => {
+        fetchData('activities', setActivities);
+        fetchData('events', setEvent);
+    } , []);
 
     
 
