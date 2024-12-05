@@ -14,6 +14,7 @@
 }
 
 .notif {
+    position: relative;
     width: 90%;
     background-color: #e7e7e7;
     border-radius: 10px;
@@ -53,10 +54,12 @@
     height: 40px;
     padding: 10px;
     border-radius: 10px 10px 0 0;
+    padding-right: 42px;
 }
 
 .notif-title h6 {
     margin: 0;
+    font-weight: bold;
 }
 
 .notif-list {
@@ -124,7 +127,43 @@
 
 .text-notif {
     width: 100%;
-    margin: 1rem 0;
+    margin-top: 1rem;
+}
+
+.close-notif {
+    position: absolute;
+    top: 0;
+    right: 15px;
+    color: #ccc;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-notif:hover,
+.close-notif:focus {
+    color: #FFF;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.notif-close-all {
+    display: flex;
+    justify-content: right;
+    width: 90%;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.btn-close-all {
+    color: #555B6E;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+
+.btn-close-all:hover {
+    background-color: #eeeeee;
 }
 
 @media screen and (min-width: 700px){

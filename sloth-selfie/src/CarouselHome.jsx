@@ -26,7 +26,7 @@ export default function CarroussSel(props) {
 
   const [offsetRadius, setOffsetRadius] = useState(2);
   const [showArrows, setShowArrows] = useState(false);
-  const [goToSlide, setGoToSlide] = useState(null);
+  const [goToSlide, setGoToSlide] = useState(0);
   const [cards] = useState(table);
 
   useEffect(() => {
@@ -55,16 +55,16 @@ export default function CarroussSel(props) {
       style={{ touchAction: 'pan-y' }}
     >
       <div className="divBtn divBtn4icon">
-          <button onClick={() => handleGoToSlide(0)} className="btn btn-preview">
+          <button onClick={() => handleGoToSlide(0)} className={`btn btn-preview  ${goToSlide === 0 ? 'active' : ''}`}>
             <img src={iconCalendar} alt="icon" className="icon-up"/>
           </button>
-          <button onClick={() => handleGoToSlide(1)} className="btn btn-preview">
+          <button onClick={() => handleGoToSlide(1)} className={`btn btn-preview  ${goToSlide === 1 ? 'active' : ''}`}>
             <img src={iconNotes} alt="icon" className="icon-up"/>
           </button>
-          <button onClick={() => handleGoToSlide(2)} className="btn btn-preview">
+          <button onClick={() => handleGoToSlide(2)} className={`btn btn-preview  ${goToSlide === 2 ? 'active' : ''}`}>
             <img src={iconTomato} alt="icon" className="icon-up"/>
           </button>
-          <button onClick={() => handleGoToSlide(3)} className="btn btn-preview">
+          <button onClick={() => handleGoToSlide(3)} className={`btn btn-preview  ${goToSlide === 3 ? 'active' : ''}`}>
             <img src={iconProjects} alt="icon" className="icon-up"/>
           </button>
       </div>

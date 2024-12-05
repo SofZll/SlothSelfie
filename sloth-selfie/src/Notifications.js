@@ -249,6 +249,10 @@ const NotificationFunction = () => {
                     {/* TODO: Add a button to mark all notifications as read*/}
                     {/* TODO: Change colors if the notification is related to an event or an activity */}
                     <div className="notif-list">
+                        <div className="notif-close-all">
+                            {/* TODO: funzione che legge tutte le norifiche */}
+                            <button className="btn btn-close-all">close all</button>
+                        </div>
                         {notifs.map((notif) => {
                             const receiverIndex = notif.receivers.findIndex(r => r.username === username);
                             return !notif.read[receiverIndex] && (
@@ -256,6 +260,7 @@ const NotificationFunction = () => {
                                     <div className="notif-title">
                                         <h6>{notif.sender.username}</h6>
                                         <p>{calculateTime(notif.date)}</p>
+                                        <span className="close-notif" onClick={() => handleReadNotif(notif._id)}>&times;</span>
                                     </div>
                                     <p>{notif.message}</p>
                                     {notif.activity && (
@@ -270,9 +275,7 @@ const NotificationFunction = () => {
                                             <p>Date: {notif.event.date}</p>
                                         </>
                                     )}
-                                    {!(notif.event || notif.activity) ? (
-                                        <button className="btn notif-button" onClick={() => handleReadNotif(notif._id)}>Read</button>
-                                    ):(
+                                    {(notif.event || notif.activity) && (
                                         <>
                                             <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'accepted')}>Accept</button>
                                             <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'declined')}>Decline</button>
