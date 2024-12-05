@@ -61,7 +61,7 @@ function ActivitiesFunction(props){
                         {props.activities.filter(activity => !activity.completed).sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map(activity => (
                             <div className="activity-card" key={activity._id}>
                                 <h2>{activity.title}</h2>
-                                <p>Due: {activity.deadline.split('T')[0]}</p>
+                                <p>Due: {new Date(activity.deadline).toLocaleDateString()}</p>
                                 <button className="btn" onClick={() => handleRemoveActivity(activity._id, props.activities, props.setActivities)}>
                                     Done
                                 </button>
