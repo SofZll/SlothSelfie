@@ -1,89 +1,304 @@
-import { a } from "react-spring";
+
+import Swal from 'sweetalert2';
+import { handleAddActivity } from './ActivityUtils';
+
+//Function to fetch notes from the server
+export async function fetchNotes(setNotes) {
+  try {
+      //const response = await fetch('/api/notes', {
+      //locale:
+      const response = await fetch('http://localhost:8000/api/notes', {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
+
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log(data);
+      if (Array.isArray(data.notes)) {
+          setNotes(data.notes);
+      } else {
+          console.error('La risposta non contiene un array di note:', data);
+      }
+  } catch (error) {
+      console.error('Errore if fetching di notes:', error);
+  }
+};
+
+// Function to handle changes in note data
+export function handleNoteDataChange (field, value, setNoteData) {
+  setNoteData((prevData) => ({
+      ...prevData,
+      [field]: value
+  }));
+  };
 
 export function canUserAccess(note, currentUser) {
-    if (!note.access) {
+  
+    if (!note.noteAccess) {
         return false; // if no access is defined, the note is private
     }
-    if (note.access.type === 'public') {
+    if (note.noteAccess === 'public') {
       return true;  // open to everyone
     }
-    if (note.access.type === 'private') {
-      return note.author === currentUser;  //only the author can access
+    if (note.noteAccess === 'private') {
+      return note.noteAuthor === currentUser;  //only the author can access
     }
-    if (note.access.type === 'restricted') {
+    if (note.noteAccess === 'restricted') {
         //Verify if allowedUsers is an array and if it contains the current user
-        console.log('Allowed Users:', note.access.allowedUsers);
-        return Array.isArray(note.access.allowedUsers) && 
-               note.access.allowedUsers.includes(currentUser);
+        return Array.isArray(note.allowedUsers) && 
+               note.allowedUsers.includes(currentUser);
     }
 
     return false;
   }
 
-export function handleDuplicateNote (index, notes, setNotes) {
-    const noteToDuplicate = notes[index];
-    const duplicatedNote = { ...noteToDuplicate, date: new Date() }; // Duplicate with a new date
-    setNotes([...notes, duplicatedNote]);
+  export function addTask(taskText, noteData, setNoteData) {
+
+    if (!Array.isArray(noteData.tasks)) {
+      noteData.tasks = [];
+    }
+  
+    const newTask = {
+      id: noteData.tasks.length,
+      text: taskText,
+      completed: false,  // every new task is not completed
+      deadline: noteData.taskDeadline || null //if specified we create an activity
+    };
+
+    // Aggiorna noteData con il nuovo task
+    setNoteData(prevNoteData => ({
+      ...prevNoteData,
+      tasks: [...prevNoteData.tasks, newTask],
+      taskDeadline: ''
+    }));
+  }
+
+  export function removeTask(taskIndex, noteData, setNoteData) {
+    const updatedTasks = noteData.tasks.filter((task, i) => i !== taskIndex);
+    setNoteData(prevNoteData => ({
+      ...prevNoteData,
+      tasks: updatedTasks
+    }));
+};
+
+//marks a task as completed
+export function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
+  const updatedTasks = noteData.tasks.map((task, i) =>
+    i === taskIndex ? { ...task, completed: !task.completed } : task
+  );
+  handleNoteDataChange('tasks', updatedTasks, setNoteData);
+};
+
+export async function handleDuplicateNote (noteId, notes, setNotes) {
+
+    const noteToDuplicate = notes
+        .find(note => note._id === noteId);
+
+    if (!noteToDuplicate) {
+        console.error("Nota non trovata per l'ID:", noteId);
+        return;
+    }
+
+    const noteToDuplicateNoId = { ...noteToDuplicate, _id: null };
+    // creates a new note, the backend will assign a new id
+    const duplicatedNote = { 
+      ...noteToDuplicateNoId, 
+      createDate: new Date().toISOString(),
+      updateDate: new Date().toISOString(),
   };
 
-export function handleDeleteNote(index, notes, setNotes) {
-    setNotes(notes.filter((_, i) => i !== index));
-};
+    try {
+        //const response = await fetch('/note', {
+        //locale:
+         const response = await fetch('http://localhost:8000/api/note', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(duplicatedNote)
+        });
 
-export function handleEditNote(index, notes, setNoteTitle, setNoteCategory, setNoteContent, setIsEditing, setNoteAuthor, setNoteAccess, setAllowedUsers) {
-  setIsEditing(index);
-  setNoteTitle(notes[index].title);
-  setNoteCategory(notes[index].category);
-  setNoteContent(notes[index].content);
-  setNoteAuthor(notes[index].author);
-  setNoteAccess(notes[index].access.type);
-  setAllowedUsers(notes[index].access.allowedUsers);
-};
+        if (!response.ok) {
+            throw new Error("Error while duplicating note");
+        }
+        const savedNote = await response.json();
+        console.log("Saved duplicated note:", savedNote);
 
-export function handleSaveEdit(index, notes, setNotes, noteTitle, noteCategory, noteContent, setIsEditing, setNoteTitle, setNoteCategory, setNoteContent, noteAuthor, noteAccess, allowedUsers, setNoteAuthor, setNoteAccess, setAllowedUsers) {
-  const updatedNote = {
-    ...notes[index],
-    title: noteTitle,
-    author: noteAuthor,
-    access: { 
-      type: noteAccess, 
-      allowedUsers: noteAccess === 'restricted' ? allowedUsers : [] // Add allowed users if restricted
-    },
-    category: noteCategory,
-    content: noteContent,
-    updateDate: new Date() // updates the modify date
-  };
-
-  const updatedNotes = [...notes];
-  updatedNotes[index] = updatedNote;
-  setNotes(updatedNotes);
-  setIsEditing(null); // exit from edit mode
-  setNoteTitle('');
-  setNoteCategory('');
-  setNoteContent('');
-  setNoteAuthor('');
-  setNoteAccess('public');
-  setAllowedUsers([]);
-};
-
-export function sortNotes(notes, sortCriterion) {
-    switch (sortCriterion) {
-      case 'alphabetical':
-        return [...notes].sort((a, b) => a.title.localeCompare(b.title));
-      case 'length':
-        return [...notes].sort((a, b) => b.content.length - a.content.length);
-      case 'most_recent':
-        return [...notes].sort((a, b) => b.updateDate - a.updateDate);
-      case 'least_recent':
-        return [...notes].sort((a, b) => a.updateDate - b.updateDate);
-
-      default:
-        return notes;
+        setNotes([...notes, savedNote]);
+        fetchNotes(setNotes);
+    } catch (error) {
+        console.error("Errore durante la duplicazione della nota:", error);
     }
   };
 
+export async function handleDeleteNote(noteId, notes, setNotes) {
+    if (!noteId) 
+      console.error("ID della nota non trovato");
+
+    try {
+        const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Error while deleting note in backend');
+        }
+
+        //updating frontend
+        setNotes(notes.filter(note => note._id !== noteId));
+        fetchNotes(setNotes);
+    } catch (error) {
+        console.error('Errore durante l\'eliminazione della nota:', error);
+    }
+};
+
+export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
+  const noteToEdit = notes
+        .find(note => note._id === noteId);
+
+    if (!noteToEdit) {
+        console.error("Nota non trovata per l'ID:", noteId);
+        return;
+    }
+
+    console.log("Editing note with ID:", noteId);
+    console.log("Note data:", noteToEdit);
+  
+  setNoteData({
+      ...noteToEdit,
+      tasks: noteToEdit.tasks || [], // we prevent errors if undefined
+      allowedUsers: noteToEdit.allowedUsers || [] // we prevent errors if undefined
+  });
+  
+  setIsEditing(noteId);
+}
+
+export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
+    console.log("ID della nota durante il salvataggio:", noteId);
+
+    const noteToUpdate = notes.find(note => note._id === noteId);
+    console.log("note._id:", noteToUpdate._id);
+
+    if (!noteToUpdate) {
+        console.error("Nota non trovata");
+        return;
+    }
+
+    console.log("Nota da aggiornare:", noteToUpdate);
+
+    // Before updating the note, check if there are tasks with deadlines to add as activities
+    if (noteData.isTodo) {
+      console.log("Adding tasks as activities...");
+      
+      noteData.tasks.forEach(task => {
+          if (task.deadline) {
+              // Verify if the activity already exists
+              const activityExists = activities.some(activity => activity.title === task.text && activity.deadline === task.deadline);
+
+              if (!activityExists) {
+                  const activityData = {
+                      title: task.text,
+                      deadline: task.deadline,
+                  };
+
+                  // Add the activity
+                  setActivities(prevActivities => [
+                      ...prevActivities,
+                      activityData
+                  ]);
+                  handleAddActivity(null, activityData, setActivities, noteData.noteAuthor);// TODO DA AGGIUSTARE
+              } else {
+                  console.log(`Activity for task "${task.text}" already exists.`);
+              }
+          }
+      });
+  }
+    const updatedNote = {
+      ...noteToUpdate.note,
+      title: noteData.title,
+      noteAuthor: noteData.noteAuthor,
+      noteAccess: noteData.noteAccess, 
+      allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [], // Add allowed users if restricted
+      category: noteData.category,
+      content: noteData.content,
+      tasks: noteData.tasks,
+      updateDate: new Date() // updates the modify date
+    };
+    try {
+      const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedNote),
+          credentials: 'include'
+      });
+
+      if (!response.ok) {
+          throw new Error("Error while updating note");
+      }
+
+      const updatedNotes = notes.map(note =>
+        note._id === noteId ? { note: updatedNote } : note
+      );
+      setNotes(updatedNotes);
+      fetchNotes(setNotes);
+      console.log("Updated Notes:", updatedNotes);
+      setIsEditing(null); // exit from edit mode
+      //resetting fields
+      handleNoteDataChange('title', '', setNoteData);
+      handleNoteDataChange('category', '', setNoteData);
+      handleNoteDataChange('content', '', setNoteData);
+      handleNoteDataChange('noteAccess', 'public', setNoteData);
+      handleNoteDataChange('isTodo', false, setNoteData);
+      handleNoteDataChange('tasks', [], setNoteData);
+    } catch (error) {
+      console.error("Errore nell'aggiornamento della nota:", error);
+  }
+};
+
+export function sortNotes(notes, sortCriterion) {
+  return [...notes].sort((a, b) => {
+    const aDate = a.updateDate instanceof Date ? a.updateDate : new Date(a.updateDate);
+    const bDate = b.updateDate instanceof Date ? b.updateDate : new Date(b.updateDate);
+    
+    switch (sortCriterion) {
+      case 'alphabetical':
+        const aTitle = a.title || '';
+        const bTitle = b.title || '';
+        return aTitle.localeCompare(bTitle);
+      case 'length':
+        const aContentLength = a.content ? a.content.length : 0;
+        const bContentLength = b.content ? b.content.length : 0;
+        return bContentLength - aContentLength;
+      case 'most_recent':
+        return bDate - aDate;
+      case 'least_recent':
+        return aDate - bDate;
+      default:
+        return 0;
+    }
+  });
+}
+
   export function handleCopyContent(content) {
     navigator.clipboard.writeText(content).then(() => {
-      alert('Content copied to clipboard!');
+      Swal.fire({
+        title: 'Content copied',
+        icon: 'success',
+        text: 'The note content has been copied to the clipboard',
+        customClass: {
+          confirmButton: 'button-alert'
+        }
+      });
     });
   };

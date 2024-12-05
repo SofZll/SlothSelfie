@@ -1,17 +1,73 @@
-import React, { useState } from "react";
-import "./css/App.css";
+import React, { useEffect, useState } from "react";
+import './css/TimeMachine.css';
+import Swal from "sweetalert2";
 
 const TimeMachine = ({isOpen, onClose}) => {
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');
+    const [currentDate, setCurrentDate] = useState('');
+    const [currentTime, setCurrentTime] = useState('');
+    
+    useEffect(() => {
+        // Message for future me: comment once the server is running
+        const now = new Date();
+        const date = now.toISOString().split('T')[0];
+        const time = now.toTimeString().split(' ')[0].slice(0, 5);
+        setCurrentDate(date);
+        setCurrentTime(time);
 
-    const handleSubmit = (e) => {
+        // The server returns the current time if there is no time set
+        // Fetch selected time from server
+        fetch('http://localhost:8000/api/time/selected-time')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Time is set on:', data);
+                setCurrentDate(data.date);
+                setCurrentTime(data.time);
+            })
+            .catch(error => {
+                console.error("Error fetching selected time: ", error);
+            }); 
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (inputTime && inputDate) {
-          alert(`You have chosen to go back to: ${inputDate} ${inputTime}`);
-          onClose();
-        } else {
-          alert("No time entered. Please try again.");
+        let combinedDateTime = '';
+        const buttonClicked = e.nativeEvent.submitter.value;
+        if (buttonClicked === 'set-time' && !inputTime && !inputDate) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please enter a date and time',
+            });
+
+            return;
+        } else if (buttonClicked === 'set-time' && inputTime && inputDate) {
+            combinedDateTime = `${inputDate}T${inputTime}:00.000Z`;
+        } else if (buttonClicked === 'reset-time') {
+            const now = new Date();
+            combinedDateTime = now.toISOString();
+        }
+
+        try {
+            const response = await fetch('http://localhost:8000/api/time/fetch-state',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ combinedDateTime })   
+            })
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('State fetched:', data);
+            } else {
+                console.error('Error fetching state');
+            }
+
+            onClose();
+        } catch (error) {
+            console.error('Error setting time:', error);
         }
     }
 
@@ -22,8 +78,13 @@ const TimeMachine = ({isOpen, onClose}) => {
     return (
         <div className="time-machine">
             <div className="time-machine-content">
-            <span className="close" onClick={onClose}>&times;</span>
-                <h2>Hi "user"! <br/> Do you wish to go back in time?</h2>
+                <span className="close" onClick={onClose}>&times;</span>
+                <h2>Hi! &#128527;<br/> Do you wish to travel in time?</h2>
+                <p>Right now the time is set on: </p>
+                <p className="current-time">
+                    <span>Date: {currentDate}</span>
+                    <span>Time: {currentTime}</span>
+                </p>
                 <form onSubmit={handleSubmit}>
                     <label htmlFor="date">Enter a date:</label>
                     <input
@@ -33,7 +94,7 @@ const TimeMachine = ({isOpen, onClose}) => {
                         value={inputDate}
                         onChange={(e) => setInputDate(e.target.value)}
                         required
-                    />
+                    /><br/>
                     <label htmlFor="time">Enter a time:</label>
                     <input
                         className="time-input"
@@ -43,7 +104,8 @@ const TimeMachine = ({isOpen, onClose}) => {
                         onChange={(e) => setInputTime(e.target.value)}
                         required
                     /><br/><br/>
-                    <button type="submit" className="btn">Go back in time!</button>
+                    <button type="submit" className="btn" value="set-time">Go back in time!</button>
+                    <button type="submit" className="btn" value="reset-time">Reset time</button>
                 </form>
             </div>
         </div>

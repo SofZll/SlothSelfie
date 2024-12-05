@@ -2,7 +2,6 @@ import React, { createContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import iconHomeLight from './media/SlothLight.svg';
 import iconHomeDark from './media/SlothDark.svg';
-import { update } from 'react-spring';
 
 export const StyleContext = createContext();
 
@@ -18,6 +17,7 @@ export const StyleProvider = ({ children }) => {
         const header = document.querySelector('.App-header');
         const h1 = document.querySelector('h1');
         const burgers = document.querySelectorAll('.bm-burger-bars');
+        const loadingPage = document.querySelector('.loading-page');
         if (isLight) {
             if (header) header.classList.add('light-background');
             if (h1) h1.classList.add('dark-h1');
@@ -25,6 +25,7 @@ export const StyleProvider = ({ children }) => {
                 burger.style.backgroundColor = '#555B6E';
             });
             document.body.classList.add('light-background');
+            if (loadingPage) loadingPage.classList.add('loading-page-dark');
         } else {
             if (header) header.classList.remove('light-background');
             if (h1) h1.classList.remove('dark-h1');
@@ -32,11 +33,12 @@ export const StyleProvider = ({ children }) => {
                 burger.style.backgroundColor = '#FAF9F9';
             });
             document.body.classList.remove('light-background');
+            if (loadingPage) loadingPage.classList.remove('loading-page-dark');
         }
     };
 
-    useEffect(() => {
-        if ((location.pathname === '/notes') || (location.pathname === '/profile') || (location.pathname === '/activities') || (location.pathname === '/events') || (location.pathname === '/pomodoro') || (location.pathname === '/projects')) {
+    useEffect(() => { 
+        if ((location.pathname === '/notifications') || (location.pathname === '/notes') || (location.pathname === '/profile') || (location.pathname === '/activities') || (location.pathname === '/events') || (location.pathname === '/pomodoro') || (location.pathname === '/projects') || (location.pathname === '/hub')) {
             updateStyles(true);
             updateIcon(iconHomeDark);
         } else {

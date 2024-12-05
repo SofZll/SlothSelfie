@@ -1,14 +1,15 @@
 const User = require('../models/userModel');
 
 // TODO: implement a hashing function to store passwords securely
+// TODO: implement the possibility to change the password
 
-// Function to log in a user
+// Log in a user: FUNZIONA
 const loginUser = async (req, res) => {
     const { username, password } = req.body;
     try {
 
         // Check if the user exists
-        const user = await User.findOne({ username});
+        const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -19,8 +20,19 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid password' });
         }
 
-        req.session.userId = user._id;
+        req.session.userId = user._id.toString();
+        console.log('Session UserId:', req.session.userId);
         req.session.username = user.username;
+        console.log('Session Username:', req.session.username);
+
+        await req.session.save((err) => {
+            if (err) {
+                console.error('Error saving session:', err);
+            }
+        });
+
+        console.log('Session ID after login:', req.sessionID); // Debugging line
+        console.log('Session after login:', req.session); // Debugging line
 
         res.status(200).json({ success: true, user });
     } catch (error) {
@@ -29,18 +41,18 @@ const loginUser = async (req, res) => {
     }
 };
 
-// Function to register a new user
+// Register a new user: FUNZIONA
 const registerUser = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { name, username, email, password } = req.body;
     try {
         // Check if the user already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ username }); 
         if (existingUser) {
             return res.status(400).json({ success: false, message: 'User already exists' });
         }
 
         // Create a new user
-        const newUser = new User({ username, email, password });
+        const newUser = new User({ name, username, email, password });
         await newUser.save();
         
         res.status(201).json({ success: true, user: newUser });
@@ -50,7 +62,7 @@ const registerUser = async (req, res) => {
     }
 };
 
-// Function to log out a user
+// Log out a user: FUNZIONA
 const logoutUser = async (req, res) => {
     try {
         // Destroy the session and clear the cookie
@@ -67,27 +79,118 @@ const logoutUser = async (req, res) => {
     }
 };
 
-// Function to get the profile image
-const getUserImage = async (req, res) => {
+// Edit the user's profile image: FUNZIONA
+const editImage = async (req, res) => {
     try {
-        // Fetch the user and check if the image exists
-        const user = await User.findById(req.params.userId);
-        if (!user || !user.image || !user.image.data) {
-            return res.status(404).json({ success: false, message: 'Image not found' });
+        const user = await User.findById(req.session.userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
+        user.image = {
+            data: req.file.buffer,
+            contentType: req.file.mimetype
+        };
+        await user.save();
 
-        res.set('Content-Type', user.image.contentType);
-        res.send(user.image.data);
+        res.status(200).json({ success: true, message: 'Image uploaded successfully' });
     } catch (error) {
-        console.error('Error fetching user image:', error);
-        res.status(500).json({ success: false, message: 'Error fetching user image' });
+        console.error('Error editing image:', error);
+        res.status(500).json({ success: false, message: 'Error editing image' });
     }
 };
 
+// Edit the user's profile: FUNZIONA
+const editProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const { name, email, birthday, phoneNumber, gender } = req.body;
+        user.name = name;
+        user.email = email;
+        user.birthday = birthday;
+        user.phoneNumber = phoneNumber;
+        user.gender = gender;
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'Profile updated successfully' });
+    } catch (error) {
+        console.error('Error editing profile:', error);
+        res.status(500).json({ success: false, message: 'Error editing profile' });
+    }
+};
+
+// Get the profile info: FUNZIONA
+const getUserProfile = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'UserId not found' });
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        res.status(200).json({ success: true, user });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ success: false, message: 'Error fetching user profile' });
+    }
+};
+
+// Get the username: FUNZIONA
+const getUsername = async (req, res) => {
+    try {
+        const username = req.session.username;
+        console.log('Username:', username);
+        if (!username) {
+            return res.status(400).json({ success: false, message: 'Username not found' });
+        }
+        res.status(200).json({ success: true, username: username });
+    } catch (error) {
+        console.error('Error fetching username:', error);
+        res.status(500).json({ success: false, message: 'Error fetching username' });
+    }
+};
+
+// Get the userId
+const getUserId = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        console.log('UserId:', userId);
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'UserId not found' });
+        }
+        res.status(200).json({ success: true, userId: userId });
+    } catch (error) {
+        console.error('Error fetching userId:', error);
+        res.status(500).json({ success: false, message: 'Error fetching userId' });
+    }
+}
+
+// Check if the user is logged in
+const checkAuth = async (req, res) => {
+    try {
+        if (req.session.userId) {
+            return res.status(200).json({ success: true, message: 'User is logged in' });
+        }
+        res.status(401).json({ success: false, message: 'User is not logged in' });
+    } catch (error) {
+        console.error('Error checking authentication:', error);
+        res.status(500).json({ success: false, message: 'Error checking authentication' });
+    }
+}
 
 module.exports = {
     loginUser,
     registerUser,
     logoutUser,
-    getUserImage
+    getUserProfile,
+    editImage,
+    editProfile,
+    getUsername,
+    getUserId,
+    checkAuth,
 };

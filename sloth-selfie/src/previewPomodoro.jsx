@@ -4,14 +4,28 @@ import "./css/Pomodoro.css";
 import iconYellowTomato from './media/yellowTomato.svg';
 import iconRedTomato from './media/redTomato.svg';
 import { Link, useNavigate } from 'react-router-dom';
+import { stringTime, tomatoPlay, passingTime } from './pomodoroUtils';
+import { to } from 'react-spring';
 
 
 const PreviewPomodoro = () => {
-  const [timeLeft, setTimeLeft] = useState(30*60);
-  const [isStudioTime, setIsStudioTime] = useState(true);
-  const [playTomato, setPlayTomato] = useState(false);
-  const [stringPrintTime, setStringPrintTime] = useState('30:00');
   const navigate = useNavigate();
+  const [soundAudio, setSoundAudio] = useState('./media/meow.mp3');
+
+  const [dataPomodoro, setDataPomodoro] = useState({
+    timeLeft: 30*60,
+    cyclesLeft: 5,
+    cycles: 5,
+    isStudioTime: true,
+    studioTime: 30*60,
+    breakTime: 5*60,
+    notStartedYet: true,
+    done: false,
+    studioTimeTotal: 0,
+  });
+
+  const [playTomato, setPlayTomato] = useState(false);
+  const [stringPrintTime, setStringPrintTime] = useState(stringTime(dataPomodoro.timeLeft));
 
   // animation page
   const handleLinkClick = (path) => (event) => {
@@ -23,60 +37,40 @@ const PreviewPomodoro = () => {
     }, 300);
   };
 
-  useEffect(() => {
-    if (playTomato) {
-      if (timeLeft === 0) {
-      
-        if (isStudioTime) {
-          setTimeLeft(5*60);
-        } else {
-          setTimeLeft(30*60);
-        }
-        setIsStudioTime(!isStudioTime);
-      } else {
+  useEffect(() => { 
+    if (playTomato && dataPomodoro.cyclesLeft > 0) {
         const timer = setTimeout(() => {
-          setTimeLeft(timeLeft - 1);
+            passingTime(dataPomodoro, setDataPomodoro, setPlayTomato, setStringPrintTime);
         }, 1000);
 
-        setStringPrintTime(stringTime(timeLeft));
-
         return () => clearTimeout(timer);
-      };
-    } else {
-      return;
     }
-    
-  }, [timeLeft, isStudioTime, playTomato]);
+  }, [dataPomodoro, playTomato]);
 
-  const stringTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-
-    return `${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
-  }
-
-  const tomatoPlay = () => {
-    setPlayTomato(prevPlayTomato => !prevPlayTomato);
-  }
+  useEffect(() => {
+    setStringPrintTime(stringTime(dataPomodoro.timeLeft));
+  }, [dataPomodoro.timeLeft]);
 
   return (
     <div className='container'>
       <p>Start your study session!</p><br/>
-      <div className={isStudioTime ? 'containerRed' : 'containerYellow'}>
+      <div className={dataPomodoro.isStudioTime ? 'containerRed' : 'containerYellow'}>
         <img 
-          src={isStudioTime ? iconRedTomato : iconYellowTomato} 
+          src={dataPomodoro.isStudioTime ? iconRedTomato : iconYellowTomato} 
           alt='Tomato' 
           className='tomatoPrew' 
         />
-        <h2 className={isStudioTime ? 'counterRed' : 'counterYellow'}>
+        <h2 className={dataPomodoro.isStudioTime ? 'counterRed' : 'counterYellow'}>
           {stringPrintTime}
         </h2>
       </div>
       <div className="divBtn">
-              <button  onClick={tomatoPlay} className="btn">{playTomato ? "Stop" : "Play"}</button>
-          <Link to="/pomodoro" onClick={handleLinkClick('/pomodoro')}>
-              <button className="btn">Start</button>
-          </Link>
+          <button  onClick={() => tomatoPlay (setDataPomodoro, dataPomodoro, setPlayTomato, playTomato, setStringPrintTime)} className="btn btn-main">{playTomato ? 
+            (dataPomodoro.done ? "Reset timer" : "Stop timer") : (dataPomodoro.notStartedYet ? "Quick start" : "Play timer")}
+          </button>
+        <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
+          <button className="btn btn-main">Set Pomodoro</button>
+        </Link>
       </div>
     </div>
   );

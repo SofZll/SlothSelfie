@@ -1,0 +1,262 @@
+
+.posts-list {
+    width: 100%;
+    max-width: 400px;
+    overflow: auto;
+    padding-bottom: 100px;
+}
+
+.posts-list h3 {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.posts-list h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.posts-list h4 {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.sorting-options {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 15px 0;
+}
+
+.sorting-options label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 17px;
+    margin: 0;
+}
+
+.post {
+    width: 100%;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #FFF;
+    border-radius: 10px;
+}
+
+.post-title,
+.post-functions,
+.comment-title,
+.comment-function {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.post-functions {
+    font-size: 15px;
+}
+
+.post-functions span {
+    cursor: pointer;
+}
+
+.post-functions .liked {
+    color: #1C274C;
+}
+
+/* Heart animation */
+@keyframes heartBeat {
+    0% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.1);
+    }
+    50% {
+        transform: scale(1);
+    }
+}
+
+.heart-icon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin-left: 2px;
+}
+
+.heart-icon.animate {
+    animation: heartBeat 0.5s ease-in-out;
+}
+
+.post-comments {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    visibility: hidden;
+    overflow: hidden;
+    max-height: 0;
+    background-color: #FAF9F9;
+}
+
+.post-comments.show {
+    max-height: 200px;
+    visibility: visible;
+    transition: max-height 0.5s ease-out;
+    overflow: auto;
+    padding: 0 10px 20px 10px;
+}
+
+.post-comments p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.post-comments span {
+    display: flex;
+    text-align: left;
+    font-size: 15px;
+}
+
+.comment {
+    padding: 15px;
+    border-radius: 10px;
+    /*border: 1px solid #555b6e;*/
+    background-color: #e7e7e7;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comment-title {
+    padding: 0;
+    height: 20px;
+}
+
+.new-post,
+.new-comment {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.new-post {
+    margin: 10px;
+    padding: 0 20px;
+}
+
+.new-comment {
+    margin: 0;
+    padding: 10px 10px;
+}
+
+.new-post textarea,
+.new-comment textarea{
+    width: 80%;
+    height: 100px;
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.new-post textarea {
+    height: 100px;
+}
+
+.new-comment textarea {
+    height: 50px;
+}
+
+.share-options {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    position: relative;
+    width: 300px;
+    text-align: center;
+}
+
+.modal-content h3 {
+    font-weight: bold;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #555B6E;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.share-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.share-button {
+    padding: 10px;
+    background-color: #89B0AE;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.load-more-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 7px 18px;
+    color: #555B6E;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.load-more-btn:hover {
+    color: #1C274C;
+    background-color: #dfdfdf;
+}
+
+@media screen and (min-width: 700px){
+    .posts-list {
+        padding-bottom: 0;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #FFF;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .share-button:hover {
+        background-color: #44485a;
+    }
+}

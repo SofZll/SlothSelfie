@@ -1,0 +1,42 @@
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const contentSchema = new mongoose.Schema({
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    type: {
+        type: String,
+        enum: ['post', 'comment'],
+        required: true,
+    },
+    date: {
+        type: Date,
+        required: true,
+    },
+    text: {
+        type: String,
+        required: true,
+    },
+    likes: {
+        type: [Schema.Types.ObjectId],
+        ref: 'User',
+        default: [],
+    },
+    comments: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Content',
+    }],
+    associatedPost: {
+        type: Schema.Types.ObjectId,
+        ref: 'Content',
+    }
+}, {
+    timestamps: true,
+});
+
+const Content = mongoose.model('Content', contentSchema);
+
+module.exports = Content;

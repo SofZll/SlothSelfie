@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { slide as Hamburger } from 'react-burger-menu';
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import './css/Menu.css';
 import iconHome from './media/home.svg';
 import iconUser from './media/user.svg';
@@ -9,8 +9,14 @@ import iconTomato from './media/tomatoDark.svg';
 import iconNote from './media/notesDark.svg';
 import iconProject from './media/projectsDark.svg';
 
-const Menu = ({username}) => {
+const Menu = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const location = useLocation();
+    const [isHomeActive, setIsHomeActive] = useState(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
+    const [profileData, setProfileData] = useState({
+        username: '',
+        profile_image: ''
+    });
 
     const handleStateChange = (state) => {
         setIsOpen(state.isOpen);
@@ -20,42 +26,97 @@ const Menu = ({username}) => {
         setIsOpen(false);
     };
 
+    // Since the image is stored a Buffer we need to convert it to base64
+    let base64Image = '';
+    const bufferToBase64 = (buffer) => {
+        const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
+        return btoa(binary);
+    };
+  
+    useEffect(() => {
+        const fetchProfileData = async () => {
+            try {
+                const response = await fetch(`http://localhost:8000/api/user/profile`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.user) {
+                    if (data.user.image?.data?.data) {
+                        const buffer = data.user.image.data.data;
+                        base64Image = `data:${data.user.image.contentType};base64,${bufferToBase64(buffer)}`;
+                    }
+
+                    const formattedBirthday = data.user.birthday ? new Date(data.user.birthday).toISOString().split('T')[0] : '';
+                    
+                    setProfileData({
+                        username: data.user.username || '',
+                        profile_image: base64Image
+                    });
+
+                    console.log('Profile data:', data.user);
+                }
+            } catch (error) {
+                console.error('Error fetching profile data:', error);
+            }
+        };
+
+        fetchProfileData();
+    }, []); 
+
+    useEffect(() => {
+        setIsHomeActive(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
+        
+    }, [location]);
+
     return (
         <>
             <Hamburger isOpen={isOpen} onStateChange={handleStateChange}>
-                <div className="navbar-message">
-                    Welcome back, {username}!
-                </div>
-                <Link to="/profile" onClick={closeMenu}>Profile</Link>
-                <Link to="/" onClick={closeMenu}>Home</Link>
-                <Link to="/events" onClick={closeMenu}>Events</Link>
-                <Link to="/activities" onClick={closeMenu}>Activities</Link>
+                <Link to="/home" onClick={closeMenu}>Home</Link>
+                <Link to="/Calendar" onClick={closeMenu}>Calendar</Link>
                 <Link to="/notes" onClick={closeMenu}>Notes</Link>
                 <Link to="/pomodoro" onClick={closeMenu}>Pomodoro</Link>
+                <Link to="/notifications" onClick={closeMenu}>Notifications</Link>
+                <div className="menu-profile">
+                    <div className="menu-profile-link">
+                        {profileData.profile_image && (
+                            <div className="img-wrap">
+                                <img src={profileData.profile_image} alt="img-profile"/>
+                            </div>
+                        )}
+                        <div className="menu-profile-info">
+                            <span className="menu-profile-username">{profileData.username}</span>
+                            <Link to="/profile" onClick={closeMenu}>
+                                <span className="menu-profile-small">Profile</span>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
                 {/*<Link to="/projects">Projects</Link>*/}
             </Hamburger>
-
-        <nav className="mobile-nav">
-            <Link to="/">
-                <img src={iconHome} alt="Home" />
-            </Link>
-            <Link to="/events">
-                <img src={iconCalendar} alt="Events" />
-            </Link>
-            <Link to="/notes">
-                <img src={iconNote} alt="Notes" />
-            </Link>
-            <Link to="/pomodoro">
-                <img src={iconTomato} alt="Pomodoro" />
-            </Link>
-            <Link to="/projects">
-                <img src={iconProject} alt="Projects" />
-            </Link>
-            <Link to="/profile">
-                <img src={iconUser} alt="Profile" />
-            </Link>
-        </nav>
-    </>
+            <nav className="mobile-nav">
+                <NavLink to="/home"  className={(isHomeActive ? "active" : "")} >
+                    <img src={iconHome} alt="Home" />
+                </NavLink>
+                <NavLink to="/Calendar" activeClassName="active">
+                    <img src={iconCalendar} alt="Calendar" />
+                </NavLink>
+                <NavLink to="/notes" activeClassName="active">
+                    <img src={iconNote} alt="Notes" />
+                </NavLink>
+                <NavLink to="/pomodoro" activeClassName="active">
+                    <img src={iconTomato} alt="Pomodoro" />
+                </NavLink>
+                <NavLink to="/projects" activeClassName="active">
+                    <img src={iconProject} alt="Projects" />
+                </NavLink>
+                <NavLink to="/profile" activeClassName="active">
+                    <img src={iconUser} alt="Profile" />
+                </NavLink>
+            </nav>
+        </>
     );
 };
 

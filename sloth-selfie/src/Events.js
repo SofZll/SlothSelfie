@@ -1,365 +1,294 @@
-import React, { useState, useEffect , useContext} from 'react';
-import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
+import React, { useEffect } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
-import './css/Events.css';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { convertAllDayToTimedEvent, generateRepeatedEvents, normalizeEvents, handleDeleteEvent, handleUpdateEvent, handleAbortDelete, handleConfirmDelete, handleClosePopupE} from './EventUtils';
-import iconDark from './media/SlothDark.svg';
-import iconLight from './media/SlothLight.svg';
-import { StyleContext } from './StyleContext';
-
-//TODO: edit di eventi ripetuti(vanno solo title e location)
-
-const localizer = momentLocalizer(moment);
-
-const initialEvents = [
-  // Puoi aggiungere alcuni eventi di esempio qui 
-  // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
-  {id: 1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
-];
-
-// Custom component to display the event
-const EventComponent = ({ event }) => {
-  return (
-    <span>
-      <strong>{event.title}</strong>
-      <br />
-      <em>eventLocation:{event.eventLocation}</em>
-    </span>
-  );
-};
+import './css/Calendar.css';
+import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents } from './CalendarUtils';
+import Select from 'react-select';
 
 
-function EventsFunction() {
-  const { updateStyles, updateIcon } = useContext(StyleContext);
-  const [events, setEvents] = useState(initialEvents || []);
-  const [id, setId] = useState("");
-  const [originalId, setOriginalId] = useState("");
-  const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('00:00');
-  const [isPreciseTime, setIsPreciseTime] = useState(false); // State for precise time input
-  const [duration, setDuration] = useState('');//hours
-  const [allDay, setAllDay] = useState(false);
-  const [days, setDays] = useState(1); // Number of days
-  const [repeatFrequency, setRepeatFrequency] = useState('none'); // Freqence of repetition
-  const [repeatCount, setRepeatCount] = useState(null); // Number of repetitions
-  const [repeatMode, setRepeatMode] = useState('ntimes'); // Mode of repetition
-  const [repeatEndDate, setRepeatEndDate] = useState(''); // Date of the last repetition
-  const [eventLocation, seteventLocation] = useState(''); // eventLocation of the event
-  const [filterDate, setFilterDate] = useState(new Date()); // default day: today
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);//option to chose in the editing form
-  const [isEditing, setIsEditing] = useState(false);
+function EventsFunction(props) {
 
-  // change style page onload document
-  useEffect(() => {
-    updateStyles(true);
-    updateIcon(iconDark);
-
-    return () => {
-        updateStyles(false);
-        updateIcon(iconLight);
+    // Function to generate time options  
+    const generateTimeOptions = () => {
+        const options = [];
+        for (let hour = 0; hour < 24; hour++) {
+        for (let minutes of [0, 15, 30, 45]) {
+            const formattedHour = hour < 10 ? `0${hour}` : hour;
+            const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+            options.push({ value: `${formattedHour}:${formattedMinutes}`, label: `${formattedHour}:${formattedMinutes}` });
+        }
+        }
+        return options;
     };
-  }, [updateIcon, updateStyles]);
-
-  useEffect(() => {
-    //setting the date to the current date as a filter at the start
-    const today = new Date();
-    setFilterDate(today);
-  }, []);
-
-  useEffect(() => {
-    if (selectedEvent) {// Pre-fill the form with the selected event
-        console.log("Selected event:", selectedEvent);
-        setId(selectedEvent.id);
-        setOriginalId(selectedEvent.id);
-        setTitle(selectedEvent.title);
-        setDate(selectedEvent.start ? new Date(selectedEvent.start).toISOString().substring(0, 10) : ''); // Format as YYYY-MM-DD
-        setTime(selectedEvent.start ? new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''); // Format as HH:MM
-        setDuration(selectedEvent.duration || 1);
-        setAllDay(selectedEvent.allDay);
-        setDays(selectedEvent.allDay ? selectedEvent.duration : 1);
-        setRepeatFrequency(selectedEvent.repeatFrequency);
-        setRepeatCount(selectedEvent.repeatCount);
-        setRepeatEndDate(selectedEvent.repeatEndDate);
-        seteventLocation(selectedEvent.eventLocation);
-        console.log("form prefilled", selectedEvent);
-    }
-  },[selectedEvent]);
-  
-  function handleEventClick(event) {
-    console.log("Event clicked:", event); 
-    setSelectedEvent(event);
-    setIsEditing(true);
-  }
-
-  // Function to generate time options
-  const generateTimeOptions = () => {
-    const options = [];
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minutes of [0, 15, 30, 45]) {
-          const formattedHour = hour < 10 ? `0${hour}` : hour;
-          const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-          options.push(`${formattedHour}:${formattedMinutes}`);
-      }
-  }
-    return options;
-  };
-
-  const handleAddEvent = (e) => {
-    e.preventDefault();
-    let newEvent = {
-      id: events.length + 1,
-      originalId: events.length + 1,
-      title,
-      date,
-      time,
-      duration: allDay ? days : duration,
-      allDay,
-      repeatFrequency,
-      repeatEndDate,
-      eventLocation,
-    };
-
-    if(allDay){
-      newEvent = convertAllDayToTimedEvent(newEvent);
-    }
     
-    // If we have a repeat frequency, generate repeated events
-    if (repeatFrequency !== 'none') {
-      let repeatedEvents = [];
-  
-      if (repeatMode === 'until' && repeatEndDate) {
-        // Generate events based on an end date
-        repeatedEvents = generateRepeatedEvents(newEvent, repeatEndDate);
-      } else if (repeatMode === 'ntimes' && repeatCount) {
-        // Generate events based on a number of repetitions N
-        repeatedEvents = generateRepeatedEvents(newEvent, null, repeatCount);
-      }
-  
-      setEvents([...events, ...repeatedEvents]);
-      console.log("Current Events:", [...events, ...repeatedEvents]);
-    } else {
-      setEvents([...events, newEvent]);
-      console.log("Current Events:", [...events, newEvent]);
-    }
-    // Reset input fields
-    setId('');
-    setOriginalId('');
-    setTitle('');
-    setDate('');
-    setTime('00:00');
-    setDuration('');
-    setAllDay(false);
-    setDays(1);
-    setRepeatFrequency('none');
-    setRepeatEndDate('');
-    setRepeatCount('');
-    seteventLocation('');
-    setIsEditing(false);
-    setUpdateAllFutureEvents(false); 
-  };
-  return (
-    <div className= "Event">
-      <h2>Add Event</h2>
-      <form onSubmit={(e) => {
+    const options = generateTimeOptions();
+
+    const handleSubmitSave = (e) => {
         e.preventDefault();
         console.log("Form submit triggered");
-        if (selectedEvent) {
-          console.log("Submitting update for event:", selectedEvent);
-          handleUpdateEvent(e, id, title, date, time, duration, allDay, days, repeatFrequency, repeatEndDate, repeatCount, eventLocation, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, updateAllFutureEvents, setIsEditing, originalId, setOriginalId);
+        if (props.selectedEvent) {
+            console.log("Submitting update for event:", props.selectedEvent);
+            handleUpdateData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.selectedEvent, props.setSelectedEvent, props.setIsEditing);
+            props.setIsEditing(false);
         } else {
-          handleAddEvent(e);
+            if (props.eventData.repeatFrequency !== "none") {
+                generateRepeatedEvents(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.username);
+            } else {
+                console.log("Submitting new event:", props.eventData);
+                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing);
+            }
         }
-      }}>
-        <input 
-          type="text" 
-          placeholder="Title" 
-          value={title} 
-          onChange={(e) => setTitle(e.target.value)} 
-          required 
-        />
-        <input 
-          type="date" 
-          value={date} 
-          onChange={(e) => setDate(e.target.value)} 
-          required 
-        />
-       {!allDay && (
-          <>
+    }
+
+    const handleFrequencyChange = (selectedOption) => {
+        handleDataChange("repeatFrequency", selectedOption.value, props.setEventData);
+        if (selectedOption.value === "none") {
+            handleDataChange("repeatMode", "ntimes", props.setEventData);
+        }
+    }
+    
+    return (
+        <div className="container-events-add">
+            <h2>{props.selectedEvent ? "Edit Event" : "Add Event"}</h2>
+
+            <form onSubmit={(e) => handleSubmitSave(e)}>
+            <label>Event Title:
+                <input
+                    type="text"
+                    placeholder="Add Title"
+                    value={props.eventData.title}
+                    onChange={(e) => handleDataChange("title", e.target.value, props.setEventData)}
+                    required
+                />
+            </label>
+            <br />
+    
+            <label>Event Date:
+                <input
+                    type="date"
+                    value={props.eventData.date}
+                    onChange={(e) => handleDataChange("date", e.target.value, props.setEventData)}
+                    required
+                />
+            </label>
+            <br />
+    
             <label>
-              <input 
-                type="checkbox" 
-                checked={isPreciseTime} 
-                onChange={(e) => setIsPreciseTime(e.target.checked)} 
-              />
-              Use Precise Time
+                <input
+                    className="checkbox"
+                    type="checkbox"
+                    checked={props.eventData.allDay}
+                    onChange={(e) => handleDataChange("allDay", e.target.checked, props.setEventData)}
+                />
+                All Day
+            </label>
+            <br />
+    
+            {!props.eventData.allDay ? (
+                <>
+                <div className="time-filter">
+                    <label>
+                        <input
+                            className="checkbox"
+                            type="checkbox"
+                            checked={props.eventData.isPreciseTime}
+                            onChange={(e) => handleDataChange("isPreciseTime", e.target.checked, props.setEventData)}
+                        />
+                        Use Precise Time
+                    </label>
+    
+                    {props.eventData.isPreciseTime ? (
+                        <input
+                            type="time"
+                            value={props.eventData.time}
+                            onChange={(e) => handleDataChange("time", e.target.value, props.setEventData)}
+                            required
+                        />
+                    ) : (
+                        <Select
+                            value={options.find((option) => option.value === props.eventData.time)}
+                            onChange={(selectedOption) => handleDataChange("time", selectedOption.value, props.setEventData)}
+                            options={options}
+                            isSearchable
+                            styles={{
+                                menu: (provided) => ({
+                                    ...provided,
+                                    maxHeight: 200,
+                                }),
+                                menuList: (provided) => ({
+                                    ...provided,
+                                    maxHeight: 200,
+                                }),
+                            }}
+                        />  
+                    )}
+                </div>
+
+                <label>Duration:
+                    <input
+                        type="number"
+                        placeholder="hours"
+                        value={props.eventData.duration}
+                        onChange={(e) => handleDataChange("duration", e.target.value, props.setEventData)}
+                        min="1"
+                        required
+                    />
+                </label>
+                </>
+            ) : (
+                <label>Number of days:
+                    <input
+                        type="number"
+                        placeholder="Number of days"
+                        value={props.eventData.days}
+                        onChange={(e) => handleDataChange("days", e.target.value, props.setEventData)}
+                        min="1"
+                    />
+                </label>
+            )}
+            <br />
+    
+            {props.isEditing && (
+                <label>
+                    <input
+                        className="checkbox"
+                        type="checkbox"
+                        onChange={(e) => props.setUpdateAllFutureEvents(e.target.checked)
+                        }
+                    />
+                    Update all future instances
+                    <br />
+                </label>
+            )}
+
+            <label>Frequency:
+                <Select
+                    value={options.find((option) => option.value === props.eventData.repeatFrequency)}
+                    onChange={(selectedOption) => handleFrequencyChange(selectedOption)}
+                    options={[
+                        { value: "none", label: "No repetition" },
+                        { value: "daily", label: "Daily" },
+                        { value: "weekly", label: "Weekly" },
+                        { value: "monthly", label: "Monthly" },
+                        { value: "yearly", label: "Yearly" },
+                    ]}
+                    styles={{
+                        menu: (provided) => ({
+                            ...provided,
+                            maxHeight: 90,
+                            overflowY: "auto",
+                        }),
+                        menuList: (provided) => ({
+                            ...provided,
+                            maxHeight: 90,
+                        }),
+                    }}
+                />
+                <br />
             </label>
 
-            {isPreciseTime ? (
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                required
-              />
-            ) : (
-              <select value={time} onChange={(e) => setTime(e.target.value)} required>
-                {generateTimeOptions().map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+            {props.eventData.repeatFrequency !== "none" && (
+                <div>
+                    <label>Repeat Mode:
+                        <Select
+                            value={options.find((option) => option.value === props.eventData.repeatMode)}
+                            onChange={(selectedOption) => handleDataChange("repeatMode", selectedOption.value, props.setEventData)}
+                            options= {[
+                                { value: 'ntimes', label: 'N Times' },
+                                { value: 'until', label: 'Until' },
+                            ]}
+                            styles={{
+                                menu: (provided) => ({
+                                    ...provided,
+                                    maxHeight: 90,
+                                    overflowY: 'auto',
+                                }),
+                                menuList: (provided) => ({
+                                    ...provided,
+                                    maxHeight: 90,
+                                }),
+                            }}
+                        />
+                    </label>
+                    <br />
+    
+                    {props.eventData.repeatMode === "ntimes" ? (
+                        <label>Number of repetitions:
+                            <input
+                                type="number"
+                                value={props.eventData.repeatCount}
+                                onChange={(e) => handleDataChange("repeatCount", e.target.value, props.setEventData)}
+                                defaultValue={1}
+                                min="1"
+                            />
+                        </label>
+                    ) : (
+                        <label>Repeat until:
+                            <input
+                                type="date"
+                                value={props.eventData.repeatEndDate}
+                                onChange={(e) => handleDataChange("repeatEndDate", e.target.value, props.setEventData)}
+                            />
+                        </label>
+                    )}
+                </div>
             )}
-          </>
-        )}
-        
-        {!allDay && (
-          <input 
-            type="number" 
-            placeholder="Duration (hours)" 
-            value={duration} 
-            onChange={(e) => setDuration(e.target.value)} 
-            min="1" 
-            required 
-          />
-        )}
-
-        {allDay && (
-          <input 
-            type="number" 
-            placeholder="Number of days" 
-            value={days} 
-            onChange={(e) => setDays(e.target.value)} 
-            min="1" 
-          />
-        )}
-
-  <label>
-    <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
-    All Day
-  </label>
-
-  {isEditing && (
-    <label>
-        <input 
-            type="checkbox" 
-            onChange={(e) => setUpdateAllFutureEvents(e.target.checked)} 
-        />
-        Update all the future instances
-    </label>
-)}
-        <select 
-          value={repeatFrequency} 
-          onChange={(e) => {
-            setRepeatFrequency(e.target.value);
-            if (e.target.value === 'none') {
-              setRepeatMode('ntimes'); // Reset at default value
-            }
-          }}
-        >
-          <option value="none">No repetition</option>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
-          {repeatFrequency !== 'none' && (
-          <div>
-          <label>
-            Repeat Mode:
-            <select onChange={(e) => setRepeatMode(e.target.value)}>
-              <option value="ntimes">N Times</option>
-              <option value="until">Until</option>
-            </select>
-          </label>
-    
-          {repeatMode === 'ntimes' && (
-            <div>
-              <label>Number of repetitions:</label>
-              <input 
-                type="number" 
-                value={repeatCount} 
-                onChange={(e) => setRepeatCount(e.target.value)} 
-                defaultValue={1}
-                min="1" 
-              />
-            </div>
-          )}
-    
-          {repeatMode === 'until' && (
-            <div>
-              <label>Repeat until:</label>
-              <input 
-                type="date" 
-                value={repeatEndDate} 
-                onChange={(e) => setRepeatEndDate(e.target.value)} 
-              />
-            </div>
-          )}
+            <label>Event Location:
+                <input
+                    type="text"
+                    placeholder="physical or virtual"
+                    value={props.eventData.eventLocation}
+                    onChange={(e) => handleDataChange("eventLocation", e.target.value, props.setEventData)}
+                />
+            </label>
+            {/* Field for notification 
+            <label>
+                <input
+                    className="checkbox"
+                    type="checkbox"
+                    checked={props.eventData.notify}
+                    onChange={(e) => handleEventDataChange("notify", e.target.checked, props.setEventData)}
+                />
+                Check this box to receive a notification
+            </label>
+            {props.eventData.notify && (
+                <label>
+                    <Select
+                        value={options.find((option) => option.value === props.eventData.notificationTime)}
+                        onChange={(selectedOption) => handleEventDataChange("notificationTime", selectedOption.value, props.setEventData)}
+                        options={[
+                            { value: "0", label: "At the time of the event" },
+                            { value: "sameDay", label: "same day" },
+                            { value: "60", label: "1 hour before" },
+                            { value: "120", label: "2 hours before" },
+                            { value: "1440", label: "1 day before" },
+                        ]}
+                        styles={{
+                            control: (provided) => ({
+                                ...provided,
+                                width: 170,
+                            }),
+                            menu: (provided) => ({
+                                ...provided,
+                                maxHeight: 150,
+                                overflowY: "auto",
+                            }),
+                            menuList: (provided) => ({
+                                ...provided,
+                                maxHeight: 150,
+                            }),
+                        }}
+                        menuPlacement="top"
+                    />
+                </label>
+            )}
+            */}
+            <button className="btn btn-main" type="submit">
+                {props.selectedEvent ? "Save Changes" : "Add Event"}
+            </button>
+            </form>
         </div>
-      )}
-
-        <input type="text"
-          placeholder="eventLocation (physical or virtual)"
-          value={eventLocation} onChange={(e) => seteventLocation(e.target.value)}
-        />
-        <button className='btn' type="submit">
-          {selectedEvent ? 'Save Changes' : 'Add Event'}
-        </button>
-      </form>
-
-       {/* React Big Calendar to display events */}
-       <h2>Your Events:</h2>
-       <div className="calendar-container">
-        <BigCalendar
-          localizer={localizer}
-          events={normalizeEvents(events)}
-          startAccessor="start"
-          endAccessor="end"
-          onSelectEvent={handleEventClick}
-          titleAccessor="title"
-          style={{ height: 500 }}
-          components={{
-            event: EventComponent
-          }}
-        />
-        {/* Display popup for the selected activity*/}
-        {selectedEvent && (
-            <div className="popup">
-            <h2>Editing mode:</h2>
-            <h2>{selectedEvent.title}</h2>
-            <p>Location: {selectedEvent.eventLocation}</p>
-            <p>Start: {selectedEvent.start.toLocaleString()}</p>
-            <p>End: {selectedEvent.end.toLocaleString()}</p>
-            <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-            <button className='btn' onClick={() =>{
-                setShowConfirmation(true);
-                console.log(setShowConfirmation);
-            }}>
-            Delete
-              </button>
-            {showConfirmation && (
-              <div className="popup">
-                <h2>Are you sure you want to delete this event?</h2>
-                <button className='btn' onClick={() => handleConfirmDelete(selectedEvent, setShowConfirmation, handleDeleteEvent, events, setEvents, setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>Yes</button>
-                <button className='btn' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
-              </div>
-            )}
-            <button className='btn' onClick={() => handleClosePopupE(setSelectedEvent, setId, setTitle, setDate, setTime, setDuration, setAllDay, setDays, setRepeatFrequency, setRepeatEndDate, setRepeatCount, seteventLocation, setIsEditing, setOriginalId)}>X</button>
-            </div>
-          )}
-      </div>
-    </div>
-  );
+    ); 
 }
-
-// Export the function and the events list
-export { initialEvents };
 
 export default EventsFunction;
