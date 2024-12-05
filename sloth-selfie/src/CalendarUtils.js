@@ -288,7 +288,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
     }
 
     try {
-        const response = await fetch(`http://localhost:8000/api/${data.type}/${selectedData._id}`, {
+        const response = await fetch(`http://localhost:8000/api/${selectedData.type}/${selectedData._id}`, {
             method: "PUT",
             credentials: "include",
             headers: {
@@ -396,23 +396,12 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
         return;
     }
 
-    let deadline, endDate, startDate;
+    let deadline, date;
 
     if (item.type === "activity") {
         deadline = new Date(start).toISOString().split('T')[0];
     } else if (item.type === "event") {
-        startDate = new Date(start);
-        endDate = new Date(start);
-
-        if (item.allDay) {
-            // Set the start at 08:00 and end midnight
-            startDate.setHours(8, 0, 0, 0);
-            endDate.setHours(23, 59, 59, 999);
-        } else {
-            startDate.setHours(item.start.getHours(), item.start.getMinutes(), 0, 0);
-            endDate.setHours(item.end.getHours(), item.end.getMinutes(), 0, 0);
-        }
-
+        date = new Date(start);
     }
 
     const updatedDatas = await Promise.all(
@@ -429,7 +418,7 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
                             ...item, 
                             ...(item.type === 'activity' 
                             ? { deadline }
-                            : {start: startDate, end: endDate})
+                            : { date })
                         }),
                     });
 
