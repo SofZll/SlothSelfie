@@ -269,7 +269,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                             <h2>Share your Pomodoro</h2>
                             <p>Create a new Pomodoro room for you and your friends</p>
                             
-                            <button className='btn' onClick={() => settingShare(false)}>Start session</button>
+                            <button className='btn btn-main' onClick={() => settingShare(false)}>Start session</button>
                             <hr/>
                             <p>Get in a Pomodoro room</p>
                             <form onSubmit={(e) => {e.preventDefault(); settingShare(true);}}>
@@ -277,7 +277,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                                     <input type="text" value={sessionCode} onChange={(e) => setSessionCode(e.target.value)} required/>
                                 </label>
                                 <br/>
-                                <button className="btn" type="submit">Join</button>
+                                <button className="btn btn-main" type="submit">Join</button>
                             </form>
                         </>
                     ) : (
@@ -293,7 +293,7 @@ function PomodoroTimer({timeStudio, timeBreak, numberCycles, timeTotal}) {
                                     <img src={iconTelegram} alt="Telegram" className='iconTelegram'/>
                                 </a>
                             </div>
-                            <button className='btn' onClick={() => exitShare()}>End session</button>
+                            <button className='btn btn-main' onClick={() => exitShare()}>End session</button>
                         </div>
                     )}
                     
