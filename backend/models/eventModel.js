@@ -18,6 +18,10 @@ const eventSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    isPreciseTime: {
+        type: Boolean,
+        default: false,
+    },
     duration: {
         type: Number,
         required: true,
