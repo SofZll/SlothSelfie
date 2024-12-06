@@ -14,6 +14,10 @@
     width: 100%;
 }
 
+.calendar-main {
+    height: 60vh;
+}
+
 .selecting-view {
     margin: 20px;
     display: flex;
@@ -189,4 +193,9 @@ input {
     .scrollable-Card-list {
         height: 40vh;
     }
+
+    .calendar-main {
+        height: 90vh;
+    }
+
 }
