@@ -35,7 +35,7 @@ function EventsFunction(props) {
                 generateRepeatedEvents(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.username);
             } else {
                 console.log("Submitting new event:", props.eventData);
-                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing);
+                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, '');
             }
         }
     }
@@ -147,19 +147,7 @@ function EventsFunction(props) {
                 </label>
             )}
             <br />
-    
-            {props.isEditing && (
-                <label>
-                    <input
-                        className="checkbox"
-                        type="checkbox"
-                        onChange={(e) => props.setUpdateAllFutureEvents(e.target.checked)
-                        }
-                    />
-                    Update all future instances
-                    <br />
-                </label>
-            )}
+
 
             <label>Frequency:
                 <Select
@@ -231,6 +219,21 @@ function EventsFunction(props) {
                             />
                         </label>
                     )}
+
+                    {props.isEditing && (
+                        <label>
+                            <input
+                                className="checkbox"
+                                type="checkbox"
+                                onChange={(e) => props.setUpdateAllFutureEvents(e.target.checked)
+                                }
+                            />
+                            Update all future instances
+                            <br />
+                        </label>
+                    )}
+
+                    
                 </div>
             )}
             <label>Event Location:
