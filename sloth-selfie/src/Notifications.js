@@ -10,6 +10,7 @@ const NotificationFunction = () => {
     const [receiverInput, setReceiverInput] = useState('');
     const [receivers, setReceivers] = useState([]);
     const [notifs, setNotifs] = useState([]);
+    const [hasRead, setHasRead] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -34,12 +35,18 @@ const NotificationFunction = () => {
                 toast: true, // Show as a toast popup
                 position: 'top-end' // Position on top-right
             });
+
+            checkHasRead();
         });
 
         return () => {
             socket.off('notification');
         };
     }, []);
+
+    useEffect(() => {
+        checkHasRead();
+    }, [notifs]);
 
     const fetchUsername = async () => {
         try {
@@ -73,8 +80,9 @@ const NotificationFunction = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Fetched notifications:', data.notifications); // Debugging log
+                console.log('Fetched notifications:', data.notifications);
                 setNotifs(data.notifications);
+                checkHasRead();
             } else {
                 console.log('Error fetching notifications');
             }
@@ -110,6 +118,8 @@ const NotificationFunction = () => {
             } else {
                 console.log('Error reading notification');
             }
+
+            checkHasRead();
         } catch (error) {
             console.error('Error reading notification');
         }
@@ -138,6 +148,41 @@ const NotificationFunction = () => {
             }
         } catch (error) {
             console.error('Error updating notification status');
+        }
+    };
+
+    const handleCloseAll = async () => {
+        const notifElements = document.querySelectorAll('.notif');
+        notifElements.forEach(notifElement => {
+            notifElement.classList.add('disappearing');
+        });
+
+        try {
+            const response = await fetch('http://localhost:8000/api/notification/close-all', {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                setTimeout(() => {
+                    setNotifs(notifs.map(notif => {
+                        const receiverIndex = notif.receivers.findIndex(r => r.username === username);
+                        if (receiverIndex !== -1) {
+                            notif.read[receiverIndex] = true;
+                        }
+                        return notif;
+                    }));
+                }, 500);
+            } else {
+                console.log('Error closing all notifications');
+            }
+
+            checkHasRead();
+        } catch (error) {
+            console.error('Error closing all notifications');
         }
     };
 
@@ -197,6 +242,7 @@ const NotificationFunction = () => {
                 });
                 return;
             }
+            checkHasRead();
         } else if (!receivers.length) {
             Swal.fire({
                 title: 'Error',
@@ -217,6 +263,23 @@ const NotificationFunction = () => {
             });
         }
     };
+
+    const checkHasRead = () => {
+        if (notifs.length > 0) {
+            const unreadNotifs = notifs.filter(notif => {
+                const receiverIndex = notif.receivers.findIndex(r => r.username === username);
+                return !notif.read[receiverIndex];
+            });
+
+            if (unreadNotifs.length > 0) {
+                setHasRead(false);
+            } else {
+                setHasRead(true);
+            }
+        } else {
+            setHasRead(true);
+        }
+    }
 
     return (
         <>
@@ -246,13 +309,13 @@ const NotificationFunction = () => {
                             <button className="btn btn-main new-notif-button" onClick={handleSend}>Send</button>
                         </div>
                     </div>
-                    {/* TODO: Add a button to mark all notifications as read*/}
                     {/* TODO: Change colors if the notification is related to an event or an activity */}
                     <div className="notif-list">
-                        <div className="notif-close-all">
-                            {/* TODO: funzione che legge tutte le norifiche */}
-                            <button className="btn btn-close-all">close all</button>
-                        </div>
+                        {!hasRead && (
+                            <div className="notif-close-all">
+                                <button className="btn btn-close-all" onClick={() => handleCloseAll()}>close all</button>
+                            </div>
+                        )}
                         {notifs.map((notif) => {
                             const receiverIndex = notif.receivers.findIndex(r => r.username === username);
                             return !notif.read[receiverIndex] && (
