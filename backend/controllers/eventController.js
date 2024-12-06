@@ -13,7 +13,7 @@ const createEvent = async (req, res) => {
     if (originalId !== '') {
       event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
     } else {
-      event = new Event({ title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
+      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
     }
     const savedEvent = await event.save();
     res.status(200).json(savedEvent);

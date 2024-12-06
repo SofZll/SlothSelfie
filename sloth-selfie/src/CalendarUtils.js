@@ -1,5 +1,4 @@
 
-import { update } from "react-spring";
 import Swal from "sweetalert2";
 
 //Functoin to handle change the current Event or Activity data
@@ -161,18 +160,19 @@ export async function newData2Add(data, originalId) {
             originalId: originalId,
         };
 
+        console.log(newData);
         return newData;
     }
 }
 
 
 // Handle adding an event or activity
-export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing, originalId) {
+export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
     
-    const newData = await newData2Add(data, originalId);
+    const newData = await newData2Add(data, '');
 
     try {
 
@@ -421,7 +421,6 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
     
     setIsEditing(true);
     handleSelection(data.type === "event");
-    console.log(data, "ooooooooooooooooooooooooooooooooooooooooooo");
 
     if (data.type === "activity") {
         handleDataChange('title', data.title, setData);
@@ -513,10 +512,6 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
 
 
 
-
-        
-
-
 //Function to handle the deletion of a repeted events by the original id
 export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing) {
     try {
@@ -546,10 +541,11 @@ export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing)
 }
 
 //Function to handle the calculation of the last date of a repeated event
-export function calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequency) {
+export function calcLastDate(eventData) {
     let lastDate;
+    const { repeatMode, repeatEndDate, repeatFrequency, repeatCount } = eventData;
 
-    if (repeatMode === "end") {
+    if (repeatMode === "until") {
         lastDate = repeatEndDate;
     } else if (repeatMode === "count") {
         const currentDate = new Date();
@@ -569,16 +565,41 @@ export function calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequ
     return lastDate;
 }
 
-//Function to generate the first event of a repeated event calling handleAddData
-export function generateFirstEvent (eventData, setEventData, events, setEvents, setIsEditing, username) {
+//Function to generate the first event of a repeated event calling newDta2Add and return the original id
+export async function generateFirstEvent (data, datas, setDatas) {
 
-    const newEvent = {
-        ...eventData,
-    };
+    const newData = await newData2Add(data, '');
+    let originalId;
 
-    handleAddData(null, newEvent, setEventData, events, setEvents, setIsEditing, username);
+    try {
 
-    return newEvent._id;
+        const response = await fetch(`http://localhost:8000/api/event`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newData),
+        });
+        if (!response.ok) {
+            throw new Error(`Error adding ${data.type}: ${response.status}`);
+        }
+
+        // Get the saved data from the backend
+        const savedData = await response.json();
+
+
+        if (savedData) {
+
+            setDatas([...datas, savedData]);
+            return savedData.originalId;
+        }
+    } catch (error) {
+        console.error(`Error adding ${data.type}:`, error);
+    }
+
+    return originalId;
+
 }
 
 //Function to update the current date of a repeated event
@@ -597,38 +618,62 @@ export function updateCurrentDate(currentDate, repeatFrequency) {
 
 
 // Function to generate repeated events con handleAddData
-export function generateRepeatedEvents (e, eventData, setEventData, events, setEvents, setIsEditing, username) {
+export async function generateRepeatedEvents (e, eventData, events, setEvents) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
 
-    const { date, repeatFrequency, repeatMode, repeatEndDate, repeatCount } = eventData;
+    const { date, repeatFrequency } = eventData;
 
     const newEvents = [];
     let currentDate = new Date(date);
-    const lastDate = new Date(calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequency));
+    const lastDate = new Date(calcLastDate(eventData));
 
-    const originalId = generateFirstEvent(eventData, setEventData, events, setEvents, setIsEditing, username);
+    let newData = {
+        ...eventData
+    }
+
+    let originalId = await generateFirstEvent(newData, events, setEvents);
+    if (!originalId) {
+        console.error("Error generating first event");
+        return
+    }
+
     updateCurrentDate(currentDate, repeatFrequency);
 
     while (currentDate <= lastDate) {
-        const newEvent = {
+        let newEvent = {
             ...eventData,
             date: currentDate.toISOString().split('T')[0],
-            originalId: originalId,
         };
 
-        newEvents.push(newEvent);
+        const data2add = await newData2Add(newEvent, originalId);
+        console.log(data2add, 'data2add');
+        newEvents.push(data2add);
 
         updateCurrentDate(currentDate, repeatFrequency);
     }
 
-    console.log(newEvents);
+    console.log(newEvents, 'iiiiiiiiiiiiiiiiiiiiiiii');
 
     newEvents.forEach(async (event) => {
-        handleAddData(null, event, setEventData, events, setEvents, setIsEditing, username, originalId);
-    });
+        try {
+            const response = await fetch(`http://localhost:8000/api/event`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(event),
+            });
 
+            if (!response.ok) {
+                throw new Error(`Error adding event: ${response.status}`);
+            }
+        } catch (error) {
+            console.error(`Error adding event:`, error);
+        }
+    });
 };
 
 
