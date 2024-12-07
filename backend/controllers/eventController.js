@@ -6,14 +6,14 @@ const User = require('../models/userModel');
 const createEvent = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
-  const { originalId, title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
+  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
 
   try {
     let event;
-    if (originalId !== undefined) {
-      event = new Event({ originalId, title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
+    if (originalId !== '') {
+      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
     } else {
-      event = new Event({ title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
+      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
     }
     const savedEvent = await event.save();
     res.status(200).json(savedEvent);
@@ -42,7 +42,7 @@ const getEvents = async (req, res) => {
 // Update an event
 const updateEvent = async (req, res) => {
   const { eventId } = req.params;
-  const { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
+  const { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
   try {
@@ -57,7 +57,7 @@ const updateEvent = async (req, res) => {
     //update the event
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { title, date, time, duration, allDay, repeatFrequency, repeatEndDate, EventLocation },
+      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation },
       { new: true }
     );
     res.status(200).json(updatedEvent);

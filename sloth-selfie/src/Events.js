@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents } from './CalendarUtils';
+import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents, resetInputFiels } from './CalendarUtils';
 import Select from 'react-select';
 
 
@@ -32,7 +32,8 @@ function EventsFunction(props) {
             props.setIsEditing(false);
         } else {
             if (props.eventData.repeatFrequency !== "none") {
-                generateRepeatedEvents(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.username);
+                generateRepeatedEvents(e, props.eventData, props.events, props.setEvents);
+                resetInputFiels("event", props.setEventData, props.setIsEditing);
             } else {
                 console.log("Submitting new event:", props.eventData);
                 handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing);
@@ -147,19 +148,7 @@ function EventsFunction(props) {
                 </label>
             )}
             <br />
-    
-            {props.isEditing && (
-                <label>
-                    <input
-                        className="checkbox"
-                        type="checkbox"
-                        onChange={(e) => props.setUpdateAllFutureEvents(e.target.checked)
-                        }
-                    />
-                    Update all future instances
-                    <br />
-                </label>
-            )}
+
 
             <label>Frequency:
                 <Select
@@ -231,6 +220,21 @@ function EventsFunction(props) {
                             />
                         </label>
                     )}
+
+                    {props.isEditing && (
+                        <label>
+                            <input
+                                className="checkbox"
+                                type="checkbox"
+                                onChange={(e) => props.setUpdateAllFutureEvents(e.target.checked)
+                                }
+                            />
+                            Update all future instances
+                            <br />
+                        </label>
+                    )}
+
+                    
                 </div>
             )}
             <label>Event Location:
