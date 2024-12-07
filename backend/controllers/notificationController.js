@@ -114,9 +114,30 @@ const markNotificationStatus = async (req, res) => {
     }
 };
 
+const markAllAsRead = async (req, res) => {
+    try {
+        const username = req.session.username;
+        const user = await User.findOne({ username });
+
+        const notifications = await Notification.find({ receivers: user._id });
+
+        for (const notification of notifications) {
+            const receiverIndex = notification.receivers.findIndex(r => r.equals(user._id));
+            notification.read[receiverIndex] = true;
+            await notification.save();
+        }
+
+        res.status(200).json({ success: true, message: 'All notifications marked as read' });
+    } catch (error){
+        console.error('Error marking all notifications as read:', error);
+        res.status(500).json({ success: false, message: 'Error marking all notifications as read' });
+    }
+};
+
 module.exports = {
     createNotification,
     getNotifications,
     markNotificationAsRead,
     markNotificationStatus,
+    markAllAsRead,
 };

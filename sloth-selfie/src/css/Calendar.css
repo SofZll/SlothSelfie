@@ -123,6 +123,10 @@ input {
     border-radius: 5px;
 }
 
+.rbc-addons-dnd.rbc-calendar {
+    width: 90%;
+}
+
 /* For larger screens */
 @media screen and (min-width: 700px){
     .calendar {

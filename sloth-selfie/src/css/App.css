@@ -44,6 +44,7 @@ body {
   margin: 0;
   padding: 5px;
   z-index: 900;
+  gap: 1rem;
 }
 
 .title {
