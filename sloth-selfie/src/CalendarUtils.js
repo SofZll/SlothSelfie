@@ -59,21 +59,20 @@ export function normalizeData (datas, type) {
                     } : {
                         time: data.time,
                         itLast: data.duration,
-                        precise: data.isPrecise,
+                        isPreciseTime: data.isPreciseTime,
                         allDay: data.allDay,
                         repeatFrequency: data.repeatFrequency,
                         repeatMode: data.repeatMode,
                         repeatEndDate: data.repeatEndDate,
                         repeatCount: data.repeatCount,
                         eventLocation: data.eventLocation,
+                        originalId: data.originalId,
                         //notify: data.notify,
                     }
                 ),
                 type: type
             };
         }
-
-        console.log(data, "ooooooooooooooooooooooooooooooooooooooooooo");
         
         return {
             _id: data._id,
@@ -84,13 +83,14 @@ export function normalizeData (datas, type) {
                 {
                     time: data.time,
                     itLast: data.duration,
-                    precise: data.isPrecise,
+                    isPreciseTime: data.isPreciseTime,
                     allDay: data.allDay,
                     repeatFrequency: data.repeatFrequency,
                     repeatMode: data.repeatMode,
                     repeatEndDate: data.repeatEndDate,
                     repeatCount: data.repeatCount,
                     eventLocation: data.eventLocation,
+                    originalId: data.originalId,
                     //notify: data.notify,
                 } : {
                     deadline: data.deadline,
@@ -117,6 +117,7 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('title', '', setData);
         handleDataChange('date', '', setData);
         handleDataChange('time', '00:00', setData);
+        handleDataChange('isPreciseTime', false, setData);
         handleDataChange('duration', '', setData);
         handleDataChange('allDay', false, setData);
         handleDataChange('days', 1, setData);
@@ -130,7 +131,7 @@ export function resetInputFiels(type, setData, setIsEditing) {
 }
 
 //Function to handle set of new data
-export async function newData2Add(data) {
+export async function newData2Add(data, originalId) {
     
     
     if (data.type === "activity") {
@@ -144,21 +145,22 @@ export async function newData2Add(data) {
 
         return newData;
     } else if (data.type === "event") {
-        console.log(data, 'gggggggggggggggg');
-        const { title, date, time, duration, allDay, eventLocation, isPreciseTime } = data;
+        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate } = data;
         const newData = {
             title: title,
             date: date,
             time: time,
             duration: allDay ? data.days : duration,
-            isPrecise: isPreciseTime,
+            isPreciseTime: isPreciseTime,
             allDay: allDay,
-            repeatFrequency: 'none',
-            repeatEndDate: null,
+            repeatFrequency: repeatFrequency,
+            repeatEndDate: repeatEndDate,
             eventLocation: eventLocation,
             type: "event",
+            originalId: originalId,
         };
 
+        console.log(newData);
         return newData;
     }
 }
@@ -170,12 +172,9 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
         e.preventDefault();
     }
     
-    const newData = await newData2Add(data);
+    const newData = await newData2Add(data, '');
 
     try {
-
-        console.log(data.type);
-        console.log(data);
 
         const response = await fetch(`http://localhost:8000/api/${data.type}`, {
             method: "POST",
@@ -193,10 +192,11 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
         // Get the saved data from the backend
         const savedData = await response.json();
 
+
         if (savedData) {
 
-            resetInputFiels(data.type, setData, setIsEditing);
             setDatas([...datas, savedData]);
+            resetInputFiels(data.type, setData, setIsEditing);
         }
     } catch (error) {
         console.error(`Error adding ${data.type}:`, error);
@@ -421,7 +421,6 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
     
     setIsEditing(true);
     handleSelection(data.type === "event");
-    console.log(data, "ooooooooooooooooooooooooooooooooooooooooooo");
 
     if (data.type === "activity") {
         handleDataChange('title', data.title, setData);
@@ -430,7 +429,7 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
     } else if (data.type === "event") {
         handleDataChange('title', data.title, setData);
         handleDataChange('date', new Date(data.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'), setData);
-        handleDataChange('isPreciseTime', data.precise, setData);
+        handleDataChange('isPreciseTime', data.isPreciseTime, setData);
         handleDataChange('time', new Date(data.start).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }), setData);
         handleDataChange('allDay', data.allDay, setData);
         if (data.allDay) {
@@ -438,7 +437,11 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
         } else {
             handleDataChange('duration', data.itLast, setData);
         }
-        handleDataChange('repeatFrequency', data.repeatFrequency, setData);
+        if (!data.repeatFrequency) {
+            handleDataChange('repeatFrequency', 'none', setData);
+        } else if (!data.repeatFrequency) {
+            handleDataChange('repeatFrequency', data.repeatFrequency, setData);
+        }
         handleDataChange('repeatEndDate', data.repeatEndDate, setData);
         handleDataChange('repeatCount', data.repeatCount, setData);
         handleDataChange('repeatMode', data.repeatMode, setData);
@@ -509,10 +512,6 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
 
 
 
-
-        
-
-
 //Function to handle the deletion of a repeted events by the original id
 export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing) {
     try {
@@ -542,10 +541,11 @@ export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing)
 }
 
 //Function to handle the calculation of the last date of a repeated event
-export function calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequency) {
+export function calcLastDate(eventData) {
     let lastDate;
+    const { repeatMode, repeatEndDate, repeatFrequency, repeatCount } = eventData;
 
-    if (repeatMode === "end") {
+    if (repeatMode === "until") {
         lastDate = repeatEndDate;
     } else if (repeatMode === "count") {
         const currentDate = new Date();
@@ -565,51 +565,115 @@ export function calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequ
     return lastDate;
 }
 
+//Function to generate the first event of a repeated event calling newDta2Add and return the original id
+export async function generateFirstEvent (data, datas, setDatas) {
+
+    const newData = await newData2Add(data, '');
+    let originalId;
+
+    try {
+
+        const response = await fetch(`http://localhost:8000/api/event`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newData),
+        });
+        if (!response.ok) {
+            throw new Error(`Error adding ${data.type}: ${response.status}`);
+        }
+
+        // Get the saved data from the backend
+        const savedData = await response.json();
+
+
+        if (savedData) {
+
+            setDatas([...datas, savedData]);
+            return savedData.originalId;
+        }
+    } catch (error) {
+        console.error(`Error adding ${data.type}:`, error);
+    }
+
+    return originalId;
+
+}
+
+//Function to update the current date of a repeated event
+export function updateCurrentDate(currentDate, repeatFrequency) {
+    if (repeatFrequency === "daily") {
+        currentDate.setDate(currentDate.getDate() + 1);
+    } else if (repeatFrequency === "weekly") {
+        currentDate.setDate(currentDate.getDate() + 7);
+    } else if (repeatFrequency === "monthly") {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+    } else if (repeatFrequency === "yearly") {
+        currentDate.setFullYear(currentDate.getFullYear() + 1);
+    }
+}
+
+
 
 // Function to generate repeated events con handleAddData
-export function generateRepeatedEvents (e, eventData, setEventData, events, setEvents, setIsEditing, username) {
+export async function generateRepeatedEvents (e, eventData, events, setEvents) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
 
-    const { date, repeatFrequency, repeatMode, repeatEndDate, repeatCount } = eventData;
+    const { date, repeatFrequency } = eventData;
 
     const newEvents = [];
     let currentDate = new Date(date);
-    const lastDate = new Date(calcLastDate(repeatMode, repeatEndDate, repeatCount, repeatFrequency));
+    const lastDate = new Date(calcLastDate(eventData));
 
+    let newData = {
+        ...eventData
+    }
 
+    let originalId = await generateFirstEvent(newData, events, setEvents);
+    if (!originalId) {
+        console.error("Error generating first event");
+        return
+    }
+
+    updateCurrentDate(currentDate, repeatFrequency);
 
     while (currentDate <= lastDate) {
-        const newEvent = {
+        let newEvent = {
             ...eventData,
             date: currentDate.toISOString().split('T')[0],
         };
 
-        newEvents.push(newEvent);
+        const data2add = await newData2Add(newEvent, originalId);
+        console.log(data2add, 'data2add');
+        newEvents.push(data2add);
 
-        switch (repeatFrequency) {
-            case "daily":
-                currentDate.setDate(currentDate.getDate() + 1);
-                break;
-            case "weekly":
-                currentDate.setDate(currentDate.getDate() + 7);
-                break;
-            case "monthly":
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                break;
-            case "yearly":
-                currentDate.setFullYear(currentDate.getFullYear() + 1);
-                break;
-            default:
-                break;
-        }
+        updateCurrentDate(currentDate, repeatFrequency);
     }
 
-    newEvents.forEach(async (event) => {
-        handleAddData(null, event, setEventData, events, setEvents, setIsEditing, username);
-    });
+    console.log(newEvents, 'iiiiiiiiiiiiiiiiiiiiiiii');
 
+    newEvents.forEach(async (event) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/event`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(event),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error adding event: ${response.status}`);
+            }
+        } catch (error) {
+            console.error(`Error adding event:`, error);
+        }
+    });
 };
 
 

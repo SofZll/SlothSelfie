@@ -119,36 +119,6 @@ function Calendar() {
         }
     }, [isEditing, inEvent]);
 
-    const handleChangeEvent = () => {
-
-        const isRepeated = selectedEvent.repeatFrequency !== 'none';
-        console.log("repeated event", isRepeated);
-        console.log("repedetion", selectedEvent.repeatFrequency);
-
-        setEventData({
-            originalId: selectedEvent.originalId,
-            title: selectedEvent.title,
-            date: !isRepeated && selectedEvent.date
-                ? selectedEvent.date
-                : new Date(selectedEvent.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'),
-            time: selectedEvent.time || '00:00',
-            isPreciseTime: selectedEvent.isPreciseTime,
-            duration: selectedEvent.duration || 1,
-            allDay: selectedEvent.allDay,
-            days: selectedEvent.allDay ? selectedEvent.duration : 1,
-            repeatFrequency: isRepeated ? selectedEvent.repeatFrequency : "none", //boh continua a darmi i default qui, forse devo mettere un campo isRepeated?
-            repeatCount: isRepeated ? selectedEvent.repeatCount : 1, //qui
-            repeatEndDate: isRepeated ? selectedEvent.repeatEndDate : "", //e qui
-            repeatMode: isRepeated ? selectedEvent.repeatMode : "ntimes",
-            eventLocation: selectedEvent.eventLocation || "",
-            userId: selectedEvent.userId,
-            //notify: selectedEvent.notify,
-        });
-
-        console.log("eventData", eventData);
-        console.log("Form prefilled", selectedEvent);
-    };
-
 
     const onEventDrop = ({event, start}) => {
         const end = new Date(start);
@@ -187,7 +157,7 @@ function Calendar() {
                     endAccessor="end"
                     onSelectEvent={onItemSelect}
                     titleAccessor="title"
-                    style={{ height: "60vh" }}
+                    className='calendar-main'
                     onEventDrop={onEventDrop}
                     resizable
                 />
