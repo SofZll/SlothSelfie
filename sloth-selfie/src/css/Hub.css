@@ -46,6 +46,10 @@
     border-radius: 10px;
 }
 
+.post p {
+    margin: 10px;
+}
+
 .post-title,
 .post-functions,
 .comment-title,
@@ -54,6 +58,17 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
+}
+
+.post-title img {
+    width: 33px;
+    height: 33px;
+    border-radius: 50%;
+}
+
+.post-title h3,
+.post-title p{
+    margin: 0;
 }
 
 .post-functions {
@@ -66,6 +81,20 @@
 
 .post-functions .liked {
     color: #1C274C;
+}
+
+.post-image {
+    width: 70%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin: 10px auto;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Heart animation */
@@ -140,35 +169,103 @@
     max-width: 400px;
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 1rem;
+    align-items: center;    
 }
 
 .new-post {
-    margin: 10px;
-    padding: 0 20px;
+    position: relative;
+    flex-direction: row;
 }
 
 .new-comment {
     margin: 0;
-    padding: 10px 10px;
+    padding: 10px 0;
 }
 
 .new-post textarea,
 .new-comment textarea{
-    width: 80%;
-    height: 100px;
     border-radius: 10px;
     padding: 10px;
-    border: 1px solid #ccc;
 }
 
 .new-post textarea {
-    height: 100px;
+    width: 100%;
+    height: 90px;
+    border: 0;
+}
+
+.new-post textarea:focus {
+    outline: none;
+    border: none;
 }
 
 .new-comment textarea {
+    width: 80%;
     height: 50px;
+    border: 1px solid #ccc;
+}
+
+.new-comment textarea:focus {
+    outline: none;
+}
+
+.post-text {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    width: 80%;
+    height: 135px;
+}
+
+.post-text.bigger {
+    height: 205px;
+}
+
+.post-input {
+    position: absolute;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    flex-direction: row;
+    gap: 2rem;
+    bottom: 10px;
+    left: 20px;
+}
+
+.input-image {
+    width: 60px;
+    height: 60px;
+    margin-left: 10px;
+    opacity: 0.5;
+    border-radius: 5px;
+}
+
+.delete-image{
+    position: absolute;
+    bottom: 78px;
+    left: 48px;
+    width: 25px;
+    height: 25px;
+}
+
+.post-input img:hover,
+.delete-image:hover {
+    cursor: pointer;
+}
+
+.small-img {
+    height: 25px;
+    width: 25px;
+}
+
+.smaller-img {
+    height: 23px;
+    width: 23px;
 }
 
 .share-options {

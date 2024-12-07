@@ -4,6 +4,7 @@ const User = require('../models/userModel');
 // Create post
 const createPost = async (req, res) => {
     const {userId, text} = req.body;
+    const image = req.file;
 
     console.log('Received data:', { userId, text });
 
@@ -22,8 +23,13 @@ const createPost = async (req, res) => {
             type: 'post',
             date: new Date(),
             text: text,
+            image: image ? { data: image.buffer, contentType: image.mimetype } : null,
             comments: [],
         });
+
+        if (image && image.size > 1000000) {
+            newPost.image = image ? { data: image.buffer, contentType: image.mimetype } : null;
+        }
 
         console.log(newPost.likes);
 
@@ -79,7 +85,7 @@ const getPosts = async (req, res) => {
         const posts = await Content.find({ type: 'post' })
             .populate({
                 path: 'author',
-                select: 'username',
+                select: 'username image',
             })
             .populate({
                 path: 'comments',
@@ -97,7 +103,6 @@ const getPosts = async (req, res) => {
 };
 
 // Update content
-
 const updateContent = async (req, res) => {
     try {
         const {contentId, likes} = req.body;

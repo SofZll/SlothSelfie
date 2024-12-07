@@ -3,6 +3,11 @@ import Select from 'react-select';
 import "./css/Hub.css";
 import iconHeartEmpty from "./media/heartEmpty.svg";
 import iconHeartFull from "./media/heartFull.svg";
+import image from "./media/image.svg";
+import gif from "./media/gif.svg";
+//import video from "./media/video.svg";
+import maps from "./media/maps.svg";
+import camera from "./media/camera.svg";
 import { calculateTime } from "./globalFunctions";
 import Swal from 'sweetalert2';
 
@@ -17,6 +22,11 @@ function Hub({ username }) {
     const [userId, setUserId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [visiblePosts, setVisiblePosts] = useState(3);
+
+
+    const [inputImage, setInputImage] = useState(null);
+    const [inputGif, setInputGif] = useState(null);
+    const [inputMap, setInputMap] = useState(null);
 
     useEffect(() => {
         const getUserId = async () => {
@@ -44,6 +54,11 @@ function Hub({ username }) {
         getUserId();
     }, [sortingOption]);
 
+    const bufferToBase64 = (buffer) => {
+        const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
+        return btoa(binary);
+    };
+
     const fetchPosts = async () => {
         try {
             const response = await fetch('http://localhost:8000/api/hub/posts', {
@@ -57,7 +72,22 @@ function Hub({ username }) {
             if (response.ok){
                 const data = await response.json();
                 console.log('Posts:', data.posts);
-                const sortedPosts = sortPosts(data.posts, sortingOption);
+
+                const processedPosts = data.posts.map(post => {
+                    if (post.author.image?.data?.data) {
+                        const buffer = post.author.image.data.data;
+                        const base64Image = `data:${post.author.image.contentType};base64,${bufferToBase64(buffer)}`;
+                        post.author.imageUrl = base64Image;
+                    }
+                    if (post.image?.data?.data) {
+                        const buffer = post.image.data.data;
+                        const base64Image = `data:${post.image.contentType};base64,${bufferToBase64(buffer)}`;
+                        post.image = base64Image;
+                    }
+                    return post;
+                });
+
+                const sortedPosts = sortPosts(processedPosts, sortingOption);
                 setPosts(sortedPosts);
             } else {
                 console.error('Error fetching posts');
@@ -242,19 +272,20 @@ function Hub({ username }) {
                 return;
             }
 
-            const newPost = {
-                userId: userId,
-                text: newPostText,
-            };
-    
+
+            const newPost = new FormData();
+            newPost.append('userId', userId);
+            newPost.append('text', newPostText);
+            if (inputImage != null) {
+                newPost.append('image', document.getElementById('imageInput').files[0]);
+                console.log('Image:', document.getElementById('imageInput').files[0]);
+            }
+
             try {
                 const response = await fetch('http://localhost:8000/api/hub/new-post', {
                     method: 'POST',
                     credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(newPost),
+                    body: newPost,
                 });
     
                 if (response.ok) {
@@ -262,6 +293,7 @@ function Hub({ username }) {
                     console.log('New post:', data.post);
                     fetchPosts();
                     setNewPostText('');
+                    setInputImage(null);
                 } else {
                     console.error('Error posting');
                 }
@@ -280,7 +312,7 @@ function Hub({ username }) {
                 });
                 return;
             }
-    
+
             const newComment = {
                 userId: userId,
                 text: newCommentText,
@@ -311,6 +343,32 @@ function Hub({ username }) {
         }
     };
 
+    const cameraClick = () => {
+        const cameraInput = document.getElementById('cameraInput');
+        cameraInput.click();
+    }
+
+    const imageClick = () => {
+        const imageInput = document.getElementById('imageInput');
+        imageInput.click();
+    }
+
+    const gifClick = () => {
+        console.log('GIF');
+    }
+
+    const mapsClick = () => {
+        console.log('Maps');
+    }
+
+    const inputChange = (event, setState) => {
+        const file = event.target.files[0];
+        if (file) {
+            const fileUrl = URL.createObjectURL(file);
+            setState(fileUrl);
+        }
+    };
+
     return (
         <>
             {loading ? (
@@ -321,11 +379,42 @@ function Hub({ username }) {
             ) : (
                 <>
                     <div className="new-post">
-                        <textarea
-                            placeholder="What's on your mind?"
-                            value={newPostText}
-                            onChange={(e) => setNewPostText(e.target.value)}
-                        />
+                        <div className={`post-text ${inputImage ? "bigger" : ""}`}>
+                            <textarea
+                                placeholder="What's on your mind?"
+                                value={newPostText}
+                                onChange={(e) => setNewPostText(e.target.value)}
+                            />
+                            {inputImage && (
+                                <>
+                                    <img className="input-image" src={inputImage} alt="inputImage" />
+                                    <span className="delete-image" onClick={() => setInputImage(null)}>&times;</span>
+                                </>
+                            )}
+                            <div className="post-input">
+                                <img className="small-img" src={camera} alt="camera" onClick={() => cameraClick()}/>
+                                <input
+                                    id="cameraInput"
+                                    type="file" 
+                                    accept="image/*" 
+                                    capture="environment" 
+                                    onChange={(e) => inputChange(e, setInputImage)}
+                                    style={{ display: 'none' }}
+                                />
+                                <img className="smaller-img" src={image} alt="inputImage2" onClick={() => imageClick()}/>
+                                <input
+                                    id="imageInput"
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={(e) => inputChange(e, setInputImage)}
+                                    style={{ display: 'none' }}
+                                />
+                                <img className="small-img"src={gif} alt="gif" onClick={() => gifClick()}/>
+                                {/* da implementare */}
+                                <img className="smaller-img" src={maps} alt="maps" onClick={() => mapsClick()}/>
+                                {/* da implementare */}
+                            </div>
+                        </div>
                         <button className="btn btn-main" onClick={() => handleNewContent()}>Post</button>
                     </div>
                     <div className="posts-list">
@@ -344,9 +433,15 @@ function Hub({ username }) {
                                 {postsToShow.map((post) => (
                                     <div key={post._id} className="post">
                                         <div className="post-title">
-                                            <h3>{post.author.username}</h3>
+                                            <div className="user-info">
+                                                <img src={post.author.imageUrl} alt="user" />
+                                                <h3>{post.author.username}</h3>
+                                            </div>
                                             <p>{calculateTime(post.date)}</p>
                                         </div>
+                                        {post.image && (
+                                            <img className="post-image" src={post.image} alt="post" />
+                                        )}
                                         <p>{post.text}</p>
                                         <div className="post-functions">
                                             <span className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post._id)}>
