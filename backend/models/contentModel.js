@@ -20,6 +20,16 @@ const contentSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    image: {
+        data: {
+            type: Buffer,
+            default: null,
+        },
+        contentType: {
+            type: String,
+            default: 'image/jpeg',
+        },
+    },
     likes: {
         type: [Schema.Types.ObjectId],
         ref: 'User',

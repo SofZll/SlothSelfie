@@ -33,7 +33,7 @@ router.put('/notification/status-notif/:notifId', markNotificationStatus);
 router.put('/notification/close-all', markAllAsRead);
 
 // Hub endpoint
-router.post('/hub/new-post', createPost);
+router.post('/hub/new-post', upload.single('image'), createPost);
 router.post('/hub/new-comment', createComment);
 router.get('/hub/posts', getPosts);
 router.put('/hub/update-content', updateContent);
