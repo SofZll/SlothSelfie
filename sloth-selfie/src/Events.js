@@ -2,7 +2,7 @@ import React from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents, resetInputFiels } from './CalendarUtils';
+import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents, resetInputFiels, fetchData } from './CalendarUtils';
 import Select from 'react-select';
 
 
