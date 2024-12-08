@@ -543,22 +543,23 @@ export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing)
 //Function to handle the calculation of the last date of a repeated event
 export function calcLastDate(eventData) {
     let lastDate;
-    const { repeatMode, repeatEndDate, repeatFrequency, repeatCount } = eventData;
+    const { date, repeatMode, repeatEndDate, repeatFrequency, repeatCount } = eventData;
 
     if (repeatMode === "until") {
         lastDate = repeatEndDate;
-    } else if (repeatMode === "count") {
-        const currentDate = new Date();
+    } else if (repeatMode === "ntimes") {
+        const currentDate = new Date(date);
         if (repeatFrequency === "daily") {
-            currentDate.setDate(currentDate.getDate() + repeatCount);
+            currentDate.setDate(currentDate.getDate() + Number(repeatCount)-1);
         } else if (repeatFrequency === "weekly") {
-            currentDate.setDate(currentDate.getDate() + repeatCount * 7);
+            currentDate.setDate(currentDate.getDate() + (Number(repeatCount)-1) * 7);
         } else if (repeatFrequency === "monthly") {
-            currentDate.setMonth(currentDate.getMonth() + repeatCount);
+            currentDate.setMonth(currentDate.getMonth() + Number(repeatCount)-1);
         } else if (repeatFrequency === "yearly") {
-            currentDate.setFullYear(currentDate.getFullYear() + repeatCount);
+            currentDate.setFullYear(currentDate.getFullYear() + Number(repeatCount)-1);
         }
         lastDate = currentDate.toISOString().split('T')[0];
+        console.log(lastDate, 'lastDate aaaaaaaaaaaaaaaaaaaaa');
 
     }
 
@@ -566,10 +567,9 @@ export function calcLastDate(eventData) {
 }
 
 //Function to generate the first event of a repeated event calling newDta2Add and return the original id
-export async function generateFirstEvent (data, datas, setDatas) {
+export async function generateEvent (data, originalId) {
 
-    const newData = await newData2Add(data, '');
-    let originalId;
+    const newData = await newData2Add(data, originalId ? originalId : '');
 
     try {
 
@@ -590,15 +590,13 @@ export async function generateFirstEvent (data, datas, setDatas) {
 
 
         if (savedData) {
-
-            setDatas([...datas, savedData]);
-            return savedData.originalId;
+            return savedData;
         }
     } catch (error) {
         console.error(`Error adding ${data.type}:`, error);
     }
 
-    return originalId;
+    return null;
 
 }
 
@@ -626,6 +624,7 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents) {
     const { date, repeatFrequency } = eventData;
 
     const newEvents = [];
+    const events2Add = [];
     let currentDate = new Date(date);
     const lastDate = new Date(calcLastDate(eventData));
 
@@ -633,47 +632,44 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents) {
         ...eventData
     }
 
-    let originalId = await generateFirstEvent(newData, events, setEvents);
-    if (!originalId) {
+    const firstEvent = await generateEvent(newData);
+    if (!firstEvent) {
         console.error("Error generating first event");
         return
     }
+    const originalId = firstEvent.originalId;
+    events2Add.push(firstEvent);
 
     updateCurrentDate(currentDate, repeatFrequency);
 
     while (currentDate <= lastDate) {
-        let newEvent = {
+        const data2add = {
             ...eventData,
             date: currentDate.toISOString().split('T')[0],
         };
 
-        const data2add = await newData2Add(newEvent, originalId);
         console.log(data2add, 'data2add');
         newEvents.push(data2add);
 
         updateCurrentDate(currentDate, repeatFrequency);
     }
 
-    console.log(newEvents, 'iiiiiiiiiiiiiiiiiiiiiiii');
-
-    newEvents.forEach(async (event) => {
-        try {
-            const response = await fetch(`http://localhost:8000/api/event`, {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(event),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error adding event: ${response.status}`);
+    await Promise.all(
+        newEvents.map(async (event) => {
+            const tmp = await generateEvent(event, originalId);
+            if (!tmp) {
+                console.error("Error generating repeated event");
+                return;
+            } else {
+                events2Add.push(tmp);
             }
-        } catch (error) {
-            console.error(`Error adding event:`, error);
-        }
-    });
+
+        })
+    );
+
+
+
+    setEvents([...events, ...events2Add]);
 };
 
 
