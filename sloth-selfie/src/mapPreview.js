@@ -1,15 +1,49 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 
-const MapPreview = ({ center }) => {
+const MapPreview = ({ center , id = 0 , isPost = false}) => {
     const mapRef = useRef(null);
 
-    useEffect(() => {
-        if (!mapRef.current) {
-            mapRef.current = L.map("map").setView(center || [0, 0], 13);
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(mapRef.current);
+    const newIcon = L.icon({
+        iconUrl: 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png',
+        iconSize: [25, 25],
+        iconAnchor: [12.5, 25],
+        popupAnchor: [0, -25],
+    });
 
-            L.marker(center).addTo(mapRef.current);
+    useEffect(() => {
+        const mapId = `map-${id}`;
+        const container = document.getElementById(mapId);
+
+        if (!container) return;
+
+        if (mapRef.current) {
+            mapRef.current.remove();
+        }
+
+        if (container && !mapRef.current) {
+            if (!isPost){
+                mapRef.current = L.map(container, {
+                    center: center || [0, 0],
+                    zoom: 15,
+                    // disable all default user interactions
+                    zoomControl: false,
+                    dragging: false,
+                    scrollWheelZoom: false,
+                    doubleClickZoom: false,
+                    boxZoom: false,
+                    keyboard: false,
+                    touchZoom: false,
+                });
+            } else {
+                mapRef.current = L.map(container, {
+                    center: center || [0, 0],
+                    zoom: 15,
+                });
+            }
+
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(mapRef.current);
+            L.marker(center, {icon: newIcon}).addTo(mapRef.current);
         }
 
         return () => {
@@ -20,7 +54,7 @@ const MapPreview = ({ center }) => {
         };
     }, [center]);
 
-    return <div id='map' className="map" />;
+    return <div id={`map-${id}`} className={`map ${isPost ? "post" : ""}`} />;
 }
 
 export default MapPreview;
