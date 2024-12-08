@@ -10,6 +10,7 @@ import maps from "./media/maps.svg";
 import camera from "./media/camera.svg";
 import { calculateTime } from "./globalFunctions";
 import Swal from 'sweetalert2';
+import MapPreview from "./mapPreview";
 
 function Hub({ username }) {
     const [posts, setPosts] = useState([]);
@@ -23,10 +24,14 @@ function Hub({ username }) {
     const [loading, setLoading] = useState(true);
     const [visiblePosts, setVisiblePosts] = useState(3);
 
-
     const [inputImage, setInputImage] = useState(null);
     const [inputGif, setInputGif] = useState(null);
     const [inputMap, setInputMap] = useState(null);
+
+    const [longitude, setLongitude] = useState(null);
+    const [latitude, setLatitude] = useState(null);
+    const center = [latitude, longitude];
+    const [showMap, setShowMap] = useState(false);
 
     useEffect(() => {
         const getUserId = async () => {
@@ -281,6 +286,11 @@ function Hub({ username }) {
                 console.log('Image:', document.getElementById('imageInput').files[0]);
             }
 
+            if (latitude && longitude) {
+                newPost.append('latitude', latitude);
+                newPost.append('longitude', longitude);
+            }
+
             try {
                 const response = await fetch('http://localhost:8000/api/hub/new-post', {
                     method: 'POST',
@@ -358,7 +368,8 @@ function Hub({ username }) {
     }
 
     const mapsClick = () => {
-        console.log('Maps');
+        getPosition();
+        setShowMap(!showMap);
     }
 
     const inputChange = (event, setState) => {
@@ -367,6 +378,15 @@ function Hub({ username }) {
             const fileUrl = URL.createObjectURL(file);
             setState(fileUrl);
         }
+    };
+
+    // geolocation
+    const getPosition = () => {
+        navigator.geolocation.getCurrentPosition((position) => {
+            setLatitude(position.coords.latitude);
+            setLongitude(position.coords.longitude);
+            console.log(latitude, longitude);
+        });
     };
 
     return (
@@ -379,7 +399,7 @@ function Hub({ username }) {
             ) : (
                 <>
                     <div className="new-post">
-                        <div className={`post-text ${inputImage ? "bigger" : ""}`}>
+                        <div className={`post-text ${inputImage ? "bigger" : ""} ${showMap ? "bigger2" : ""}`}>
                             <textarea
                                 placeholder="What's on your mind?"
                                 value={newPostText}
@@ -390,6 +410,9 @@ function Hub({ username }) {
                                     <img className="input-image" src={inputImage} alt="inputImage" />
                                     <span className="delete-image" onClick={() => setInputImage(null)}>&times;</span>
                                 </>
+                            )}
+                            {showMap && latitude && longitude && (
+                                <MapPreview center={center} />
                             )}
                             <div className="post-input">
                                 <img className="small-img" src={camera} alt="camera" onClick={() => cameraClick()}/>
@@ -412,7 +435,6 @@ function Hub({ username }) {
                                 <img className="small-img"src={gif} alt="gif" onClick={() => gifClick()}/>
                                 {/* da implementare */}
                                 <img className="smaller-img" src={maps} alt="maps" onClick={() => mapsClick()}/>
-                                {/* da implementare */}
                             </div>
                         </div>
                         <button className="btn btn-main" onClick={() => handleNewContent()}>Post</button>

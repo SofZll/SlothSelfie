@@ -104,8 +104,8 @@ const TimeMachine = ({isOpen, onClose}) => {
                         onChange={(e) => setInputTime(e.target.value)}
                         required
                     /><br/><br/>
-                    <button type="submit" className="btn" value="set-time">Go back in time!</button>
-                    <button type="submit" className="btn" value="reset-time">Reset time</button>
+                    <button type="submit" className="btn btn-main" value="set-time">Go back in time!</button>
+                    <button type="submit" className="btn btn-main" value="reset-time">Reset time</button>
                 </form>
             </div>
         </div>

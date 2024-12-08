@@ -226,6 +226,10 @@
     height: 205px;
 }
 
+.post-text.bigger2 {
+    height: 275px;
+}
+
 .post-input {
     position: absolute;
     display: flex;
@@ -256,6 +260,13 @@
 .post-input img:hover,
 .delete-image:hover {
     cursor: pointer;
+}
+
+.map {
+    width: 230px;
+    height: 125px;
+    border-radius: 10px;
+    margin: 0 auto;
 }
 
 .small-img {
@@ -355,5 +366,9 @@
 
     .share-button:hover {
         background-color: #44485a;
+    }
+
+    .posts-list {
+        max-width: 500px;
     }
 }

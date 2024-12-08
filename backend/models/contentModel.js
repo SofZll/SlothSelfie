@@ -30,6 +30,16 @@ const contentSchema = new mongoose.Schema({
             default: 'image/jpeg',
         },
     },
+    location: {
+        latitude: {
+            type: Number,
+            default: null,
+        },
+        longitude: {
+            type: Number,
+            default: null,
+        },
+    },
     likes: {
         type: [Schema.Types.ObjectId],
         ref: 'User',
