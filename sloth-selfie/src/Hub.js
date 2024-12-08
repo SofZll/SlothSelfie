@@ -26,12 +26,12 @@ function Hub({ username }) {
 
     const [inputImage, setInputImage] = useState(null);
     const [inputGif, setInputGif] = useState(null);
-    const [inputMap, setInputMap] = useState(null);
 
     const [longitude, setLongitude] = useState(null);
     const [latitude, setLatitude] = useState(null);
     const center = [latitude, longitude];
     const [showMap, setShowMap] = useState(false);
+    const [chosen, setChosen] = useState(false);
 
     useEffect(() => {
         const getUserId = async () => {
@@ -304,6 +304,7 @@ function Hub({ username }) {
                     fetchPosts();
                     setNewPostText('');
                     setInputImage(null);
+                    setShowMap(false);
                 } else {
                     console.error('Error posting');
                 }
@@ -356,11 +357,13 @@ function Hub({ username }) {
     const cameraClick = () => {
         const cameraInput = document.getElementById('cameraInput');
         cameraInput.click();
+        setChosen(true);
     }
 
     const imageClick = () => {
         const imageInput = document.getElementById('imageInput');
         imageInput.click();
+        setChosen(true);
     }
 
     const gifClick = () => {
@@ -370,6 +373,7 @@ function Hub({ username }) {
     const mapsClick = () => {
         getPosition();
         setShowMap(!showMap);
+        setChosen(true);
     }
 
     const inputChange = (event, setState) => {
@@ -408,14 +412,18 @@ function Hub({ username }) {
                             {inputImage && (
                                 <>
                                     <img className="input-image" src={inputImage} alt="inputImage" />
-                                    <span className="delete-image" onClick={() => setInputImage(null)}>&times;</span>
+                                    <span className="delete-image" onClick={() => {setInputImage(null); setChosen(false);}}>&times;</span>
                                 </>
                             )}
                             {showMap && latitude && longitude && (
-                                <MapPreview center={center} />
+                                <>
+                                    <a href={`https://www.google.com/maps?q=${latitude},${longitude}`} className="link-map" target="_blank" rel="noopener noreferrer">Open on Google maps</a>
+                                    <MapPreview center={center} />
+                                    <span className="delete-map" onClick={() => {setShowMap(false); setChosen(false);}}>&times;</span>
+                                </>
                             )}
                             <div className="post-input">
-                                <img className="small-img" src={camera} alt="camera" onClick={() => cameraClick()}/>
+                                <img className="small-img" src={camera} alt="camera" onClick={() => !chosen && cameraClick()} />
                                 <input
                                     id="cameraInput"
                                     type="file" 
@@ -424,7 +432,7 @@ function Hub({ username }) {
                                     onChange={(e) => inputChange(e, setInputImage)}
                                     style={{ display: 'none' }}
                                 />
-                                <img className="smaller-img" src={image} alt="inputImage2" onClick={() => imageClick()}/>
+                                <img className="smaller-img" src={image} alt="inputImage2" onClick={() => !chosen && imageClick()} />
                                 <input
                                     id="imageInput"
                                     type="file" 
@@ -432,9 +440,9 @@ function Hub({ username }) {
                                     onChange={(e) => inputChange(e, setInputImage)}
                                     style={{ display: 'none' }}
                                 />
-                                <img className="small-img"src={gif} alt="gif" onClick={() => gifClick()}/>
+                                <img className="small-img"src={gif} alt="gif" onClick={() => !chosen && gifClick()} />
                                 {/* da implementare */}
-                                <img className="smaller-img" src={maps} alt="maps" onClick={() => mapsClick()}/>
+                                <img className="smaller-img" src={maps} alt="maps" onClick={() => !chosen && mapsClick()} />
                             </div>
                         </div>
                         <button className="btn btn-main" onClick={() => handleNewContent()}>Post</button>
@@ -461,10 +469,16 @@ function Hub({ username }) {
                                             </div>
                                             <p>{calculateTime(post.date)}</p>
                                         </div>
+                                        <p>{post.text}</p>
                                         {post.image && (
                                             <img className="post-image" src={post.image} alt="post" />
                                         )}
-                                        <p>{post.text}</p>
+                                        {post.location.latitude && post.location.longitude && (
+                                            <>
+                                                <a href={`https://www.google.com/maps?q=${post.location.latitude},${post.location.longitude}`} className="link-map" target="_blank" rel="noopener noreferrer">Open on Google maps</a>
+                                                <MapPreview center={[post.location.latitude, post.location.longitude]} id={post._id} isPost="true" />
+                                            </>
+                                        )}
                                         <div className="post-functions">
                                             <span className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post._id)}>
                                                 {post.likes ? post.likes.length : 0}
