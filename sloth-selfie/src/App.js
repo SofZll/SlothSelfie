@@ -18,6 +18,7 @@ import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
 import { ActivityProvider } from './ActivityContext';
 import socket from './socket';
+import 'leaflet/dist/leaflet.css';
 
 function App() {
   const [loading, setLoading] = useState(true);
