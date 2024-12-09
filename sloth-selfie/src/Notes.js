@@ -7,7 +7,7 @@ import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
-import { handleAddData} from './CalendarUtils';
+//import { handleAddData} from './CalendarUtils';
 import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';
 
@@ -80,7 +80,7 @@ function NotesFunction() {
   const [isEditing, setIsEditing] = useState(null);
   const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
   const [filteredNotes, setFilteredNotes] = useState([]);
-  const { activities, setActivities, setActivityData} = useContext(ActivityContext);
+  const { activities, setActivities, setActivityData, handleAddData, handleDeleteData} = useContext(ActivityContext);
   
   //defining the note data structure
   const [noteData, setNoteData] = useState({
@@ -490,7 +490,7 @@ const filterNotesByDate = (notes) => {
           <button className="btn btn-main" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
             {/* Editing scenario*/}
             {isEditing !== null && (
-          <button className="btn btn-main" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities)}>Save Note</button>
+          <button className="btn btn-main" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities, handleAddData, handleDeleteData)}>Save Note</button>
           )}
         </div>
       </div>
