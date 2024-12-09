@@ -1,6 +1,5 @@
 
 import Swal from 'sweetalert2';
-//import { handleAddData, handleDeleteData} from './CalendarUtils';
 
 //Function to fetch notes from the server
 export async function fetchNotes(setNotes) {
@@ -200,8 +199,6 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
 
       console.log("Stato delle activities:", activities);
       
-      //TODO: SE SPUNTO LA ACTIVITY NON LA ELIMINA DA CALENDAR -> err 404 problemi di id
-      //CI SONO PROBLEMI DI CONTEXT, NON PRENDE LA LISTA DI ACTIVITIES MA SI BASA SOLO SU TASKS
   noteData.tasks.forEach(task => {
     if (task.deadline) {
       // check if the task is already an activity
@@ -234,11 +231,10 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
 
         if (activityToDelete) {
           console.log("Attività da eliminare:", activityToDelete);
-          console.log("id di Attività da eliminare:", activityToDelete._id);
           setActivities(prevActivities => 
             prevActivities.filter(activity => activity._id !== activityToDelete._id)
           );
-          handleDeleteData( activityToDelete.type, activityToDelete._id, activities, setActivities);
+          handleDeleteData( 'activity', activityToDelete._id, activities, setActivities);
           console.log(`Attività per il task "${task.text}" è stata eliminata.`);
         }
       } else {

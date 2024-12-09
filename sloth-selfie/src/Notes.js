@@ -7,11 +7,9 @@ import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
-//import { handleAddData} from './CalendarUtils';
 import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';
 
-//TODO1: manca COLLEGAMENTO CON TASK E ACTIVITY
 
 const initialNotes = [
     // Puoi aggiungere alcune note di esempio qui 
@@ -268,7 +266,7 @@ useEffect(() => {
   }
 }
 
-////If a date is selected it will filter the notes by that date
+//If a date is selected it will filter the notes by that date
 const filterNotesByDate = (notes) => {
   if (!filterDate) return notes;
 
