@@ -1,7 +1,6 @@
 
 import Swal from 'sweetalert2';
-import { handleAddActivity } from './ActivityUtils';
-import { handleAddData } from './CalendarUtils';
+import { handleAddData, handleDeleteData} from './CalendarUtils';
 
 //Function to fetch notes from the server
 export async function fetchNotes(setNotes) {
@@ -200,31 +199,50 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
     if (noteData.isTodo) {
       console.log("Adding tasks as activities...");
       
-      noteData.tasks.forEach(task => {
-          if (task.deadline) {
-              // Verify if the activity already exists
-              const activityExists = activities.some(activity => activity.title === task.text && activity.deadline === task.deadline);
+      //TODO: SE CLICCO SU EDIT E SAVE SENZA MODIFICHE MI CREA UN'ATTIVITA' DOPPIA, SE LA SPUNTO NON LA ELIMINA DA CALENDAR
+  noteData.tasks.forEach(task => {
+    if (task.deadline) {
+      // check if the task is already an activity
+      const activityExists = activities.some(activity => 
+        activity.title === task.text && activity.deadline === task.deadline
+      );
 
-              if (!activityExists) {
-                  const activityData = {
-                      title: task.text,
-                      deadline: task.deadline,
-                      type: 'activity',
-                  };
+      if (task.completed === false && !activityExists) {
+        // add a new activity to the calendar
+        const activityData = {
+          title: task.text,
+          deadline: task.deadline,
+          type: 'activity',
+        };
 
-                  // Add the activity
-                  setActivities(prevActivities => [
-                      ...prevActivities,
-                      activityData
-                  ]);
-                  console.log("Adding activity:", activityData);
-                  handleAddData(null, activityData, setActivities, noteData.noteAuthor);
-              } else {
-                  console.log(`Activity for task "${task.text}" already exists.`);
-              }
-          }
-      });
-  }
+        setActivities(prevActivities => [
+          ...prevActivities,
+          activityData
+        ]);
+        console.log("Adding activity:", activityData);
+
+        handleAddData(null, activityData, setActivities, noteData.noteAuthor);
+
+      } else if (task.completed === true && activityExists) {
+        // remove the activity from the calendar
+        const activityToDelete = activities.find(activity => 
+          activity.title === task.text && activity.deadline === task.deadline
+        );
+
+        if (activityToDelete) {
+          setActivities(prevActivities => 
+            prevActivities.filter(activity => activity._id !== activityToDelete.id)
+          );
+          console.log(`Attività per il task "${task.text}" è stata eliminata.`);
+
+          handleDeleteData(activityToDelete._id, activities, setActivities);
+        }
+      } else {
+        console.log(`No change for task "${task.text}", skipping.`);
+      }
+    }
+  });
+}
     const updatedNote = {
       ...noteToUpdate.note,
       title: noteData.title,

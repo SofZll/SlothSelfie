@@ -7,8 +7,7 @@ import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
-import {handleAddActivity} from './ActivityUtils';
-import { handleAddData, handleDeleteData } from './CalendarUtils';
+import { handleAddData} from './CalendarUtils';
 import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';
 
@@ -218,7 +217,7 @@ useEffect(() => {
      if (noteData.isTodo) {
       console.log("Adding tasks as activities...");
       noteData.tasks.forEach(task => {
-        if (task.deadline) {
+        if (task.deadline && task.completed === false) {
           //we create an activity
           const activityData = {
             title: task.text,
