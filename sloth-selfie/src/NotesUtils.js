@@ -1,6 +1,7 @@
 
 import Swal from 'sweetalert2';
 import { handleAddActivity } from './ActivityUtils';
+import { handleAddData } from './CalendarUtils';
 
 //Function to fetch notes from the server
 export async function fetchNotes(setNotes) {
@@ -208,6 +209,7 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
                   const activityData = {
                       title: task.text,
                       deadline: task.deadline,
+                      type: 'activity',
                   };
 
                   // Add the activity
@@ -215,7 +217,8 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
                       ...prevActivities,
                       activityData
                   ]);
-                  handleAddActivity(null, activityData, setActivities, noteData.noteAuthor);// TODO DA AGGIUSTARE
+                  console.log("Adding activity:", activityData);
+                  handleAddData(null, activityData, setActivities, noteData.noteAuthor);
               } else {
                   console.log(`Activity for task "${task.text}" already exists.`);
               }
