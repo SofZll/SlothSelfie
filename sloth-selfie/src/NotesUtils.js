@@ -1,6 +1,6 @@
 
 import Swal from 'sweetalert2';
-import { handleAddData, handleDeleteData} from './CalendarUtils';
+//import { handleAddData, handleDeleteData} from './CalendarUtils';
 
 //Function to fetch notes from the server
 export async function fetchNotes(setNotes) {
@@ -181,7 +181,7 @@ export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
   setIsEditing(noteId);
 }
 
-export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
+export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities, handleAddData, handleDeleteData) {
     console.log("ID della nota durante il salvataggio:", noteId);
 
     const noteToUpdate = notes.find(note => note._id === noteId);
@@ -200,7 +200,7 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
 
       console.log("Stato delle activities:", activities);
       
-      //TODO: SE SPUNTO LA ACTIVITY NON LA ELIMINA DA CALENDAR -> err 500 problemi di id
+      //TODO: SE SPUNTO LA ACTIVITY NON LA ELIMINA DA CALENDAR -> err 404 problemi di id
       //CI SONO PROBLEMI DI CONTEXT, NON PRENDE LA LISTA DI ACTIVITIES MA SI BASA SOLO SU TASKS
   noteData.tasks.forEach(task => {
     if (task.deadline) {

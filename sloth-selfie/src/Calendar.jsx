@@ -38,12 +38,14 @@ function Calendar() {
 
     const { updateStyles, updateIcon } = useContext(StyleContext);
     const [events, setEvents] = useState([]);
-    const [activities, setActivities] = useState([]); //useContext(ActivityContext);
+    //const [activities, setActivities] = useState([]); //useContext(ActivityContext); //useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedActivity, setSelectedActivity] = useState(null);
     const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
+
+    const { activities, setActivities, activityData, setActivityData, handleAddData, handleDeleteData} = useContext(ActivityContext);
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
@@ -64,6 +66,7 @@ function Calendar() {
         //notify: false,
     });
 
+/*-----------------OLD-----------------
     //Define the activity data structure
     const [activityData, setActivityData] = useState({
         title: "",
@@ -71,6 +74,7 @@ function Calendar() {
         completed: false,
         type: 'activity',
     });
+*/
 
     useEffect(() => {
         updateStyles(true);
