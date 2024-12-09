@@ -8,6 +8,7 @@ import { StyleContext } from './StyleContext';
 import { a } from 'react-spring';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import {handleAddActivity} from './ActivityUtils';
+import { handleAddData, handleDeleteData } from './CalendarUtils';
 import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';
 
@@ -222,8 +223,11 @@ useEffect(() => {
           const activityData = {
             title: task.text,
             deadline: task.deadline,
+            type: 'activity',
           };
-          handleAddActivity(null, activityData, setActivityData, activities, setActivities, username);
+          console.log("Activity data:", activityData);
+          setActivities(prevActivities => [...prevActivities, activityData]);
+          handleAddData(null, activityData, setActivityData, activities, setActivities, username);
         }else {
           console.log("Task without deadline:", task);}
       });
