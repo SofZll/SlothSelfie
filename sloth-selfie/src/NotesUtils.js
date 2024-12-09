@@ -65,7 +65,6 @@ export function canUserAccess(note, currentUser) {
     }
   
     const newTask = {
-      id: noteData.tasks.length,
       text: taskText,
       completed: false,  // every new task is not completed
       deadline: noteData.taskDeadline || null //if specified we create an activity
@@ -198,8 +197,11 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
     // Before updating the note, check if there are tasks with deadlines to add as activities
     if (noteData.isTodo) {
       console.log("Adding tasks as activities...");
+
+      console.log("Stato delle activities:", activities);
       
-      //TODO: SE CLICCO SU EDIT E SAVE SENZA MODIFICHE MI CREA UN'ATTIVITA' DOPPIA, SE LA SPUNTO NON LA ELIMINA DA CALENDAR
+      //TODO: SE SPUNTO LA ACTIVITY NON LA ELIMINA DA CALENDAR -> err 500 problemi di id
+      //CI SONO PROBLEMI DI CONTEXT, NON PRENDE LA LISTA DI ACTIVITIES MA SI BASA SOLO SU TASKS
   noteData.tasks.forEach(task => {
     if (task.deadline) {
       // check if the task is already an activity
@@ -207,7 +209,7 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
         activity.title === task.text && activity.deadline === task.deadline
       );
 
-      if (task.completed === false && !activityExists) {
+      if (!task.completed && !activityExists) {
         // add a new activity to the calendar
         const activityData = {
           title: task.text,
@@ -223,19 +225,21 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
 
         handleAddData(null, activityData, setActivities, noteData.noteAuthor);
 
-      } else if (task.completed === true && activityExists) {
+      } else if (task.completed && activityExists) {
+        console.log("Stato delle activities:", activities);
         // remove the activity from the calendar
         const activityToDelete = activities.find(activity => 
           activity.title === task.text && activity.deadline === task.deadline
         );
 
         if (activityToDelete) {
+          console.log("Attività da eliminare:", activityToDelete);
+          console.log("id di Attività da eliminare:", activityToDelete._id);
           setActivities(prevActivities => 
-            prevActivities.filter(activity => activity._id !== activityToDelete.id)
+            prevActivities.filter(activity => activity._id !== activityToDelete._id)
           );
+          handleDeleteData( activityToDelete.type, activityToDelete._id, activities, setActivities);
           console.log(`Attività per il task "${task.text}" è stata eliminata.`);
-
-          handleDeleteData(activityToDelete._id, activities, setActivities);
         }
       } else {
         console.log(`No change for task "${task.text}", skipping.`);

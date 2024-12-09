@@ -25,7 +25,6 @@ const noteSchema = new mongoose.Schema({
         },
     tasks: [
         {
-            id: { type: Number },
             text: { type: String },
             completed: { type: Boolean, default: false },
             deadline: { type: Date, default: null },
