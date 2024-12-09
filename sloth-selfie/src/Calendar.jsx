@@ -10,6 +10,7 @@ import { StyleContext } from './StyleContext';
 import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop } from './CalendarUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
+import { ActivityContext } from './ActivityContext'; //
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import iconBack from './media/leftBackArrow.svg';
@@ -37,7 +38,7 @@ function Calendar() {
 
     const { updateStyles, updateIcon } = useContext(StyleContext);
     const [events, setEvents] = useState([]);
-    const [activities, setActivities] = useState([]);
+    const [activities, setActivities] = useState([]); //useContext(ActivityContext);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedActivity, setSelectedActivity] = useState(null);
     const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);
