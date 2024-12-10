@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 
 // Create post
 const createPost = async (req, res) => {
-    const {userId, text} = req.body;
+    const {userId, text, latitude, longitude} = req.body;
     const image = req.file;
 
     console.log('Received data:', { userId, text });
@@ -24,12 +24,12 @@ const createPost = async (req, res) => {
             date: new Date(),
             text: text,
             image: image ? { data: image.buffer, contentType: image.mimetype } : null,
+            location: {
+                latitude: latitude || null,
+                longitude: longitude || null,
+            },
             comments: [],
         });
-
-        if (image && image.size > 1000000) {
-            newPost.image = image ? { data: image.buffer, contentType: image.mimetype } : null;
-        }
 
         console.log(newPost.likes);
 

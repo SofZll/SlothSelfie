@@ -47,7 +47,7 @@
 }
 
 .post p {
-    margin: 10px;
+    margin: 0;
 }
 
 .post-title,
@@ -75,20 +75,27 @@
     font-size: 15px;
 }
 
-.post-functions span {
-    cursor: pointer;
-}
-
 .post-functions .liked {
     color: #1C274C;
 }
 
-.post-image {
+.post-image,
+.map.post {
     width: 70%;
-    height: 200px;
     object-fit: cover;
     border-radius: 10px;
-    margin: 10px auto;
+}
+
+.post-image {
+    height: 200px;
+    margin: 6px auto;
+}
+
+.map.post {
+    opacity: 1;
+    height: 150px;
+    box-shadow: none;
+    margin: 0 auto 6px auto;
 }
 
 .user-info {
@@ -213,7 +220,6 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 10px;
     margin: 10px;
     background-color: #fff;
     border: 1px solid #ccc;
@@ -224,6 +230,20 @@
 
 .post-text.bigger {
     height: 205px;
+}
+
+.post-text.bigger2 {
+    height: 275px;
+}
+
+.post-text.bigger2 textarea{
+    height: 70px;
+}
+
+.link-map {
+    font-size: 12px;
+    text-align: left;
+    margin: 5px 20px;
 }
 
 .post-input {
@@ -240,22 +260,42 @@
 .input-image {
     width: 60px;
     height: 60px;
-    margin-left: 10px;
+    margin-left: 15px;
     opacity: 0.5;
     border-radius: 5px;
 }
 
-.delete-image{
+.delete-image,
+.delete-map {
     position: absolute;
-    bottom: 78px;
-    left: 48px;
-    width: 25px;
-    height: 25px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+}
+
+.delete-image {
+    bottom: 82px;
+    left: 46px;
+}
+
+.delete-map {
+    bottom: 145px;
+    left: 220px;
+    z-index: 1000;
 }
 
 .post-input img:hover,
 .delete-image:hover {
     cursor: pointer;
+}
+
+.map {
+    width: 230px;
+    height: 125px;
+    border-radius: 5px;
+    margin-left: 20px;
+    opacity: 0.5;
 }
 
 .small-img {
@@ -355,5 +395,9 @@
 
     .share-button:hover {
         background-color: #44485a;
+    }
+
+    .posts-list {
+        max-width: 500px;
     }
 }
