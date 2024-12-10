@@ -84,9 +84,27 @@ const deleteEvent = async (req, res) => {
     }
 };
 
+// Delete multiple events
+const deleteMultipleEvent = async (req, res) => {
+  const { originalId } = req.params;
+  try {
+    const events = await Event.find({ originalId });
+    if (!events) {
+      return res.status(404).json({ message: "Events not found" });
+    }
+    await Event.deleteMany({ originalId });
+    res.status(200).json({ message: "Events deleted" });
+  }
+  catch (error) {
+    console.error('Error deleting events:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
     createEvent,
     getEvents,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    deleteMultipleEvent
 };

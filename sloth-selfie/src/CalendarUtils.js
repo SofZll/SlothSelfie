@@ -121,9 +121,9 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('duration', '', setData);
         handleDataChange('allDay', false, setData);
         handleDataChange('days', 1, setData);
-        handleDataChange('repeatFrequency', 'none', setData);
+        handleDataChange('repeatFrequency', "none", setData);
         handleDataChange('repeatEndDate', '', setData);
-        handleDataChange('repeatCount', '', setData);
+        handleDataChange('repeatCount', 1, setData);
         handleDataChange('eventLocation', '', setData);
     }
 
@@ -404,9 +404,10 @@ export async function handleDeleteData(type, id, datas, setDatas, setSelectedDat
     }
 }
 
-// Function to Abort the deletion
-export function handleAbortDelete(setShowConfirmation) {
+// Function to Abort the deletionS
+export function handleAbortDelete(setShowConfirmation, type, setIsEditing, setData) {
     setShowConfirmation(false);
+    resetInputFiels(type, setData, setIsEditing);
 }
 
 // Function to confirm the deletion of an event or activity
@@ -437,14 +438,13 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
         } else {
             handleDataChange('duration', data.itLast, setData);
         }
-        if (!data.repeatFrequency) {
-            handleDataChange('repeatFrequency', 'none', setData);
-        } else if (!data.repeatFrequency) {
+        if (data.repeatFrequency === "none") {
+            handleDataChange('repeatFrequency', "none", setData);
+        } else {
             handleDataChange('repeatFrequency', data.repeatFrequency, setData);
+            handleDataChange('repeatMode', "until", setData);
+            handleDataChange('repeatEndDate', data.repeatEndDate.split('T')[0], setData);
         }
-        handleDataChange('repeatEndDate', data.repeatEndDate, setData);
-        handleDataChange('repeatCount', data.repeatCount, setData);
-        handleDataChange('repeatMode', data.repeatMode, setData);
         handleDataChange('eventLocation', data.eventLocation, setData);
     }
 
@@ -513,9 +513,9 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
 
 
 //Function to handle the deletion of a repeted events by the original id
-export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing) {
+export async function handleDeleteRepeatedEvent(data, setData, setIsEditing) {
     try {
-        const response = await fetch(`http://localhost:8000/api/${type}/original/${id}`, {
+        const response = await fetch(`http://localhost:8000/api/event/original/${data.originalId}`, {
             method: "DELETE",
             credentials: "include",
             headers: {
@@ -524,18 +524,18 @@ export async function handleDeleteRepeatedEvent(type, id, setData, setIsEditing)
         });
 
         if (!response.ok) {
-            console.error(`Error deleting ${type}:`, response);
+            console.error(`Error deleting repeted events`, response);
         }
 
         // Get the saved note from the backend
         const deletedData = await response.json();
         if (deletedData) {
-            console.log(`Deleted ${type}:`, deletedData);
+            console.log(`Deleted repeted events:`, deletedData);
 
-            resetInputFiels(type, setData, setIsEditing);
+            resetInputFiels('event', setData, setIsEditing);
         }
     } catch (error) {
-        console.error(`Error deleting ${type}:`, error);
+        console.error(`Error deleting repeted events:`, error);
     }
 
 }
@@ -559,7 +559,6 @@ export function calcLastDate(eventData) {
             currentDate.setFullYear(currentDate.getFullYear() + Number(repeatCount)-1);
         }
         lastDate = currentDate.toISOString().split('T')[0];
-        console.log(lastDate, 'lastDate aaaaaaaaaaaaaaaaaaaaa');
 
     }
 
@@ -629,7 +628,8 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents) {
     const lastDate = new Date(calcLastDate(eventData));
 
     let newData = {
-        ...eventData
+        ...eventData,
+        repeatEndDate: lastDate.toISOString().split('T')[0],
     }
 
     const firstEvent = await generateEvent(newData);
@@ -646,9 +646,9 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents) {
         const data2add = {
             ...eventData,
             date: currentDate.toISOString().split('T')[0],
+            repeatEndDate: lastDate.toISOString().split('T')[0],
         };
 
-        console.log(data2add, 'data2add');
         newEvents.push(data2add);
 
         updateCurrentDate(currentDate, repeatFrequency);

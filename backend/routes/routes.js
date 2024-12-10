@@ -7,7 +7,7 @@ const { createNote, getNotes, updateNote, deleteNote } = require('../controllers
 const { createNotification, getNotifications, markNotificationAsRead, markNotificationStatus, markAllAsRead} = require('../controllers/notificationController')
 const { createPost, createComment, getPosts , updateContent} = require('../controllers/hubController');
 const { createActivity, getActivities, updateActivity, deleteActivity } = require('../controllers/activityController');
-const { createEvent, getEvents, updateEvent, deleteEvent } = require('../controllers/eventController');
+const { createEvent, getEvents, updateEvent, deleteEvent, deleteMultipleEvent } = require('../controllers/eventController');
 
 const router = express.Router();
 
@@ -56,5 +56,6 @@ router.post('/event', createEvent);
 router.get('/events', getEvents);
 router.put('/event/:eventId', updateEvent);
 router.delete('/event/:eventId', deleteEvent);
+router.delete('/event/original/:originalId', deleteMultipleEvent);
 
 module.exports = router;
