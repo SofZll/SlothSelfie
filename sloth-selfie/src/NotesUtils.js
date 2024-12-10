@@ -1,6 +1,5 @@
 
 import Swal from 'sweetalert2';
-import { handleAddActivity } from './ActivityUtils';
 
 //Function to fetch notes from the server
 export async function fetchNotes(setNotes) {
@@ -65,7 +64,6 @@ export function canUserAccess(note, currentUser) {
     }
   
     const newTask = {
-      id: noteData.tasks.length,
       text: taskText,
       completed: false,  // every new task is not completed
       deadline: noteData.taskDeadline || null //if specified we create an activity
@@ -182,7 +180,7 @@ export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
   setIsEditing(noteId);
 }
 
-export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
+export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities, handleAddData, handleDeleteData) {
     console.log("ID della nota durante il salvataggio:", noteId);
 
     const noteToUpdate = notes.find(note => note._id === noteId);
@@ -198,30 +196,53 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
     // Before updating the note, check if there are tasks with deadlines to add as activities
     if (noteData.isTodo) {
       console.log("Adding tasks as activities...");
+
+      console.log("Stato delle activities:", activities);
       
-      noteData.tasks.forEach(task => {
-          if (task.deadline) {
-              // Verify if the activity already exists
-              const activityExists = activities.some(activity => activity.title === task.text && activity.deadline === task.deadline);
+  noteData.tasks.forEach(task => {
+    if (task.deadline) {
+      // check if the task is already an activity
+      const activityExists = activities.some(activity => 
+        activity.title === task.text && activity.deadline === task.deadline
+      );
 
-              if (!activityExists) {
-                  const activityData = {
-                      title: task.text,
-                      deadline: task.deadline,
-                  };
+      if (!task.completed && !activityExists) {
+        // add a new activity to the calendar
+        const activityData = {
+          title: task.text,
+          deadline: task.deadline,
+          type: 'activity',
+        };
 
-                  // Add the activity
-                  setActivities(prevActivities => [
-                      ...prevActivities,
-                      activityData
-                  ]);
-                  handleAddActivity(null, activityData, setActivities, noteData.noteAuthor);// TODO DA AGGIUSTARE
-              } else {
-                  console.log(`Activity for task "${task.text}" already exists.`);
-              }
-          }
-      });
-  }
+        setActivities(prevActivities => [
+          ...prevActivities,
+          activityData
+        ]);
+        console.log("Adding activity:", activityData);
+
+        handleAddData(null, activityData, setActivities, noteData.noteAuthor);
+
+      } else if (task.completed && activityExists) {
+        console.log("Stato delle activities:", activities);
+        // remove the activity from the calendar
+        const activityToDelete = activities.find(activity => 
+          activity.title === task.text && activity.deadline === task.deadline
+        );
+
+        if (activityToDelete) {
+          console.log("Attività da eliminare:", activityToDelete);
+          setActivities(prevActivities => 
+            prevActivities.filter(activity => activity._id !== activityToDelete._id)
+          );
+          handleDeleteData( 'activity', activityToDelete._id, activities, setActivities);
+          console.log(`Attività per il task "${task.text}" è stata eliminata.`);
+        }
+      } else {
+        console.log(`No change for task "${task.text}", skipping.`);
+      }
+    }
+  });
+}
     const updatedNote = {
       ...noteToUpdate.note,
       title: noteData.title,
