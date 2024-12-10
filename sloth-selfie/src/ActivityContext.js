@@ -4,7 +4,6 @@ export const ActivityContext = createContext();
 
 export const ActivityProvider = ({ children }) => {
     const [activities, setActivities] = useState([]);
-    const [username, setUsername] = useState('');
     
     //Define the activity data structure
     const [activityData, setActivityData] = useState({
@@ -15,24 +14,7 @@ export const ActivityProvider = ({ children }) => {
         type: 'activity',
     });
 
-    // Get the username of the authenticated user
-    useEffect(() => {
-        const fetchUsername = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/api/user/username', {
-                    credentials: 'include'
-                });
-                const data = await response.json();
-                console.log('Username:', data.username);
-                setUsername(data.username);
-            } catch (error) {
-                console.error('Error fetching username:', error);
-            }
-        };
-    
-        fetchUsername();
-    }, []); 
-
+    /*
     //Functoin to handle change the current Event or Activity data
     function handleDataChange(field, value, setData) {
         setData((prevData) => ({
@@ -195,9 +177,9 @@ export const ActivityProvider = ({ children }) => {
         }
     }
 
-           
+    */     
     return (
-        <ActivityContext.Provider value={{ activities, setActivities, activityData, setActivityData, username, fetchData, handleAddData, handleDeleteData, newData2Add, resetInputFiels, handleDataChange}}>
+        <ActivityContext.Provider value={{ activities, setActivities, activityData, setActivityData}}>
             {children}
         </ActivityContext.Provider>
     );

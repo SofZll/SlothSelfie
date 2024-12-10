@@ -1,5 +1,6 @@
 
 import Swal from 'sweetalert2';
+import { handleAddData, handleDeleteData } from './CalendarUtils';
 
 //Function to fetch notes from the server
 export async function fetchNotes(setNotes) {
@@ -180,7 +181,7 @@ export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
   setIsEditing(noteId);
 }
 
-export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities, handleAddData, handleDeleteData) {
+export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
     console.log("ID della nota durante il salvataggio:", noteId);
 
     const noteToUpdate = notes.find(note => note._id === noteId);
@@ -220,7 +221,7 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
         ]);
         console.log("Adding activity:", activityData);
 
-        handleAddData(null, activityData, setActivities, noteData.noteAuthor);
+        handleAddData(null, activityData, setActivities, activities, setActivities, setIsEditing);
 
       } else if (task.completed && activityExists) {
         console.log("Stato delle activities:", activities);
