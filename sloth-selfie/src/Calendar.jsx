@@ -7,7 +7,7 @@ import './css/App.css';
 import './css/Calendar.css';
 import moment from 'moment';
 import { StyleContext } from './StyleContext';
-import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop } from './CalendarUtils';
+import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop, handleDeleteRepeatedEvent } from './CalendarUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import iconDark from './media/SlothDark.svg';
@@ -146,6 +146,15 @@ function Calendar() {
         
     };
 
+    //Delete the selected event
+    const selectionDelete = () => {
+        if(updateAllFutureEvents){
+            handleDeleteRepeatedEvent(selectedEvent, setEvents, setIsEditing);
+        } else {
+            handleConfirmDelete('event', selectedEvent, setShowConfirmation, events, setEvents, setSelectedEvent, setIsEditing, setEventData);
+        }
+    };
+
 
     return (
         <div className="calendar">
@@ -184,10 +193,10 @@ function Calendar() {
                             <div className="popup-delete">
                                 <h2>Are you sure you want to delete this event?</h2>
                                 <div>
-                                    <button className="btn btn-main" onClick={() => handleConfirmDelete('event', selectedEvent, setShowConfirmation, events, setEvents, setSelectedEvent, setIsEditing, setEventData)}>
+                                    <button className="btn btn-main" onClick={() => selectionDelete()}>
                                         Yes
                                     </button>
-                                    <button className="btn btn-main" onClick={() => handleAbortDelete(setShowConfirmation)}>
+                                    <button className="btn btn-main" onClick={() => handleAbortDelete(setShowConfirmation, 'event', setIsEditing, setEventData)}>
                                         No
                                     </button>
                                 </div>
@@ -217,7 +226,7 @@ function Calendar() {
                                 <h2>Are you sure you want to delete this activity?</h2>
                                 <div>
                                     <button className='btn btn-main' onClick={() => handleConfirmDelete('activity', selectedActivity, setShowConfirmation, activities, setActivities, setSelectedActivity, setIsEditing, setActivityData)}>Yes</button>
-                                    <button className='btn btn-main' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+                                    <button className='btn btn-main' onClick={() => handleAbortDelete(setShowConfirmation, 'activity', setIsEditing, setActivityData)}>No</button>
                                 </div>
                             </div>
                         )}
