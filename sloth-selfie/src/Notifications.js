@@ -322,7 +322,7 @@ const NotificationFunction = () => {
                                 <div key={notif._id} id={`notif-${notif._id}`} className={`notif ${notif.read[receiverIndex] ? 'read' : 'unread'}`}>
                                     <div className="notif-title">
                                         <h6>{notif.sender.username}</h6>
-                                        <p>{calculateTime(notif.date)}</p>
+                                        <p>{calculateTime(notif.createdAt)}</p>
                                         <span className="close-notif" onClick={() => handleReadNotif(notif._id)}>&times;</span>
                                     </div>
                                     <p>{notif.message}</p>

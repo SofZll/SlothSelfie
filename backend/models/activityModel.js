@@ -21,6 +21,14 @@ const activitySchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    notify: {
+        type: Boolean,
+        default: false
+    },
+    notificationTime: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true });
 
