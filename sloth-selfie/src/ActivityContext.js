@@ -12,6 +12,8 @@ export const ActivityProvider = ({ children }) => {
         completed: false,
         userId: '', // User ID of whom creates the event
         type: 'activity',
+        notify: false,
+        notificationTime: '0',
     });
 
     return (

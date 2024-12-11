@@ -1,16 +1,19 @@
-// eventController.js
 const Activity = require('../models/activityModel');
 const User = require('../models/userModel');
+const { createNotification } = require('../controllers/notificationController');
 
 // Creating an activity
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-    const { title, deadline, completed } = req.body;
+    const { title, deadline, completed, notify, notificationTime} = req.body;
     
     try {
-        const activity = new Activity({ title, deadline, completed, user: user._id });
+        // TODO: da aggiungere la logica degli eventi e delle attività condivise
+        const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime });
         const savedActivity = await activity.save();
+        if (notify) await createNotification({ activityId: savedActivity._id }, res, true);
+        console.log(savedActivity);
         res.status(200).json(savedActivity);
     } catch (error) {
         console.error('Error creating activity:', error);
