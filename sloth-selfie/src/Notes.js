@@ -5,7 +5,6 @@ import NoteCard from './NoteCard';
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
-import { a } from 'react-spring';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';

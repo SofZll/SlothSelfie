@@ -45,7 +45,7 @@ function Calendar() {
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
 
-    const { activities, setActivities, activityData, setActivityData, handleAddData, handleDeleteData} = useContext(ActivityContext);
+    const { activities, setActivities, activityData, setActivityData } = useContext(ActivityContext);
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
