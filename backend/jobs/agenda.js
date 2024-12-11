@@ -1,5 +1,6 @@
 const Agenda = require('agenda');
 //connected users
+require('dotenv').config();
 
 const agenda = new Agenda({ db: { address: process.env.MONGODB_URI } });
 
