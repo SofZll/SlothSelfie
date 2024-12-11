@@ -21,7 +21,7 @@ const noteSchema = new mongoose.Schema({
         default: 'public',
     },
     allowedUsers: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'User',
     }],
     isTodo: {
@@ -29,8 +29,9 @@ const noteSchema = new mongoose.Schema({
         default: false,
     },
     tasks: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Task',
+        text: { type: String },
+        completed: { type: Boolean, default: false },
+        deadline: { type: Date, default: null },
     }],
     taskDeadline: {
         type: Date,
