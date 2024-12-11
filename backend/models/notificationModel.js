@@ -15,7 +15,7 @@ const notificationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    date: {
+    createdAt: {
         type: Date,
         required: true,
     },
@@ -31,6 +31,10 @@ const notificationSchema = new mongoose.Schema({
     event: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Event',
+        required: false,
+    },
+    dateNotif: {
+        type: Date,
         required: false,
     },
     responses: [{

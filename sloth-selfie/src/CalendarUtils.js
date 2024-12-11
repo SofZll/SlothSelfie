@@ -111,6 +111,8 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('title', '', setData);
         handleDataChange('deadline', '', setData);
         handleDataChange('completed', false, setData);
+        handleDataChange('notify', false, setData);
+        handleDataChange('notificationTime', '0', setData);
     } else if (type === "event") {
         handleDataChange('id', '', setData);
         handleDataChange('originalId', '', setData);
@@ -135,12 +137,14 @@ export async function newData2Add(data, originalId) {
     
     
     if (data.type === "activity") {
-        const { deadline, title } = data;
+        const { deadline, title, notify, notificationTime} = data;
         const newData = {
             title: title,
             deadline: deadline,
             completed: false,
             type: "activity",
+            notify: notify,
+            notificationTime: notificationTime,
         };
 
         return newData;

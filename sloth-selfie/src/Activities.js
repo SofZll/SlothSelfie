@@ -3,10 +3,15 @@ import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
 import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData } from './CalendarUtils';
-
+import Select from 'react-select';
 
 function ActivitiesFunction(props){
     
+    const options = [
+        { value: "0", label: "same day" },
+        { value: "1440", label: "1 day before" },
+    ];
+
 
     const handleSubmitSave = (e) => {
         e.preventDefault();
@@ -40,6 +45,40 @@ function ActivitiesFunction(props){
                         required 
                     />
                 </label>
+                <label>
+                    <input
+                        className="checkbox"
+                        type="checkbox"
+                        checked={props.activityData.notify}
+                        onChange={(e) => handleDataChange("notify", e.target.checked, props.setActivityData)}
+                    />
+                    Check this box to receive a notification
+                </label>
+                {props.activityData.notify && (
+                    <label>
+                        <Select
+                            value={options.find((option) => option.value === props.activityData.notificationTime)}
+                            onChange={(selectedOption) => handleDataChange("notificationTime", selectedOption.value, props.setActivityData)}
+                            options={options}
+                            styles={{
+                                control: (provided) => ({
+                                    ...provided,
+                                    width: 170,
+                                }),
+                                menu: (provided) => ({
+                                    ...provided,
+                                    maxHeight: 150,
+                                    overflowY: "auto",
+                                }),
+                                menuList: (provided) => ({
+                                    ...provided,
+                                    maxHeight: 150,
+                                }),
+                            }}
+                            menuPlacement="top"
+                        />
+                    </label>
+                )}
                 <button className='btn btn-main' type="submit">
                     {props.selectedActivity ? 'Save Changes' : 'Add Activity'}
                 </button>

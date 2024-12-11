@@ -5,8 +5,6 @@ import iconYellowTomato from './media/yellowTomato.svg';
 import iconRedTomato from './media/redTomato.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { stringTime, tomatoPlay, passingTime } from './pomodoroUtils';
-import { to } from 'react-spring';
-
 
 const PreviewPomodoro = () => {
   const navigate = useNavigate();
