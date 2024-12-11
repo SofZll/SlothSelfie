@@ -6,7 +6,6 @@ import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
-import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';
 import { handleAddData } from './CalendarUtils';
 
@@ -78,7 +77,8 @@ function NotesFunction() {
   const [isEditing, setIsEditing] = useState(null);
   const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
   const [filteredNotes, setFilteredNotes] = useState([]);
-  const { activities, setActivities, setActivityData } = useContext(ActivityContext);
+
+  const [taskDeadline, setTaskDeadline] = useState(null);
   
   //defining the note data structure
   const [noteData, setNoteData] = useState({
@@ -100,7 +100,6 @@ function NotesFunction() {
       }
     ],
     */
-    taskDeadline: '', // Deadline for the task while creating it, it is used to set the deadline before creating the task
     createDate: new Date(), //used in Notecard
     updateDate: new Date(), //used in Notecard
   });
@@ -223,8 +222,8 @@ useEffect(() => {
             type: 'activity',
           };
           console.log("Activity data:", activityData);
-          setActivities(prevActivities => [...prevActivities, activityData]);
-          handleAddData(null, activityData, setActivityData, activities, setActivities, isEditing);
+          //setActivities(prevActivities => [...prevActivities, activityData]);
+          //handleAddData(null, activityData, setActivityData, activities, setActivities, isEditing);
         }else {
           console.log("Task without deadline:", task);}
       });
@@ -414,8 +413,8 @@ const filterNotesByDate = (notes) => {
               <label>Task Deadline (Optional):</label>
               <input
                 type="date" 
-                value={noteData.taskDeadline || ''}  // Usa taskDeadline
-                onChange={(e) => handleNoteDataChange('taskDeadline', e.target.value, setNoteData)}
+                value={taskDeadline || new Date().toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-')}  // Usa taskDeadline
+                onChange={(e) => setTaskDeadline(e.target.value)}
               />
               {noteData.tasks && noteData.tasks.length > 0 && (
               <ul>
@@ -484,7 +483,7 @@ const filterNotesByDate = (notes) => {
           <button className="btn btn-main" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
             {/* Editing scenario*/}
             {isEditing !== null && (
-          <button className="btn btn-main" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities)}>Save Note</button>
+          <button className="btn btn-main" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing/*, activities, setActivities*/)}>Save Note</button>
           )}
         </div>
       </div>

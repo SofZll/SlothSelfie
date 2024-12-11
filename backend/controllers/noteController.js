@@ -1,9 +1,20 @@
 const Note = require('../models/noteModel');
 const User = require('../models/userModel');
+const  { createTask, getTasks, updateTask, deleteTask, getTaskById } = require('./taskController');
 
 // Create a new note
 const createNote = async (req, res) => {
-    const {title, category, content, noteAccess, noteAuthor, allowedUsers, isTodo, tasks, taskDeadline } = req.body;
+    const {title, category, content, noteAccess, noteAuthor, allowedUsers, isTodo, tasks } = req.body;
+    const newTasks = [];
+
+    if (isTodo) {
+        for (let i = 0; i < tasks.length; i++) {
+            const task = tasks[i];
+            const newTask = await createTask(task);
+            newTasks.push(newTask._id);
+        }
+    }
+
     try {
         const note = new Note({
             title,
@@ -13,10 +24,11 @@ const createNote = async (req, res) => {
             noteAccess,
             allowedUsers: noteAccess === 'restricted' ? allowedUsers : [],
             isTodo,
-            tasks,
+            tasks: isTodo ? newTasks : [],
             createDate: new Date(),
             updateDate: new Date(),
         });
+
         await note.save();
         res.status(201).json({ success: true, note });
     } catch (error) {
@@ -41,22 +53,39 @@ const updateNote = async (req, res) => {
     const { noteId } = req.params;
     const { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline } = req.body;
 
-    try{
+
     const note = await Note.findById(noteId);
     if (!note) {
-    return res.status(404).json({ success: false, message: 'Note not found' });
-    }
-    //we find the current user and check if it is the author of the note
-    const currentUser = await User.findById(req.session.userId);
-    if (!currentUser) {
-        return res.status(401).json({ success: false, message: 'User not found' });
-    }
-    if (note.noteAuthor.toString() !== currentUser.username) {
-        return res.status(403).json({ success: false, message: 'You are not authorized to edit this note' });
+        return res.status(404).json({ success: false, message: 'Note not found' });
     }
 
-    // Update the note
-    const updatedNote = await Note.findByIdAndUpdate(
+    if (isTodo) {
+        for (let i = 0; i < note.tasks.length; i++) {
+            const task = await getTaskById(note.tasks[i]);
+            if (!task) {
+                //create a new task
+                const newTask = await createTask(tasks[i]);
+                tasks[i] = newTask._id;
+                note.tasks.push(newTask._id);
+            } else {
+                //update the task
+                await updateTask(note.tasks[i], tasks[i]);
+            }
+        }
+    }
+
+    try{
+        //we find the current user and check if it is the author of the note
+        const currentUser = await User.findById(req.session.userId);
+        if (!currentUser) {
+            return res.status(401).json({ success: false, message: 'User not found' });
+        }
+        if (note.noteAuthor.toString() !== currentUser.username) {
+            return res.status(403).json({ success: false, message: 'You are not authorized to edit this note' });
+        }
+
+        // Update the note
+        const updatedNote = await Note.findByIdAndUpdate(
             noteId,
             { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline },
             { new: true }
@@ -72,8 +101,17 @@ const updateNote = async (req, res) => {
 // Delete a note
 const deleteNote = async (req, res) => {
     const { noteId } = req.params;
+    const note = await Note.findById(noteId);
+
+    if (isTodo) {
+        for (let i = 0; i < note.tasks.length; i++) {
+            const taskId = note.tasks[i];
+            await deleteTask(taskId);
+        }
+    }
+        
     try {
-        const note = await Note.findByIdAndDelete(noteId);
+        note.deleteOne();
         if (!note) {
             return res.status(404).json({ success: false, message: 'Note not found' });
         }
