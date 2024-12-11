@@ -2,6 +2,7 @@
 import Swal from 'sweetalert2';
 import { handleAddData, handleDeleteData } from './CalendarUtils';
 
+//TODO: Move to globalFunctions.js
 //Function to fetch notes from the server
 export async function fetchNotes(setNotes) {
   try {
@@ -30,6 +31,7 @@ export async function fetchNotes(setNotes) {
   }
 };
 
+//TODO: Move to globalFunctions.js
 // Function to handle changes in note data
 export function handleNoteDataChange (field, value, setNoteData) {
   setNoteData((prevData) => ({
@@ -38,6 +40,7 @@ export function handleNoteDataChange (field, value, setNoteData) {
   }));
   };
 
+//TODO: Move in backend
 export function canUserAccess(note, currentUser) {
   
     if (!note.noteAccess) {
@@ -58,6 +61,7 @@ export function canUserAccess(note, currentUser) {
     return false;
   }
 
+  //TODO: Move in backend
   export function addTask(taskText, noteData, setNoteData) {
 
     if (!Array.isArray(noteData.tasks)) {
@@ -78,6 +82,7 @@ export function canUserAccess(note, currentUser) {
     }));
   }
 
+  //TODO: Move in backend
   export function removeTask(taskIndex, noteData, setNoteData) {
     const updatedTasks = noteData.tasks.filter((task, i) => i !== taskIndex);
     setNoteData(prevNoteData => ({
@@ -136,30 +141,35 @@ export async function handleDuplicateNote (noteId, notes, setNotes) {
     }
   };
 
+//Function to handle the deletion of a note
 export async function handleDeleteNote(noteId, notes, setNotes) {
-    if (!noteId) 
-      console.error("ID della nota non trovato");
+  if (!noteId) {
+    console.error("ID della nota non trovato");
+    return;
+  }
 
-    try {
-        const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+  try {
+    const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-        if (!response.ok) {
-            throw new Error('Error while deleting note in backend');
-        }
-
-        //updating frontend
-        setNotes(notes.filter(note => note._id !== noteId));
-        fetchNotes(setNotes);
-    } catch (error) {
-        console.error('Errore durante l\'eliminazione della nota:', error);
+    if (!response.ok) {
+      throw new Error('Error while deleting note in backend');
     }
+
+    //updating frontend
+    setNotes(notes.filter(note => note._id !== noteId));
+    fetchNotes(setNotes);
+  } catch (error) {
+    console.error('Errore durante l\'eliminazione della nota:', error);
+  }
 };
 
+//TODO: Move in Note.js
 export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
   const noteToEdit = notes
         .find(note => note._id === noteId);
@@ -181,6 +191,7 @@ export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
   setIsEditing(noteId);
 }
 
+//TODO: delete
 export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
     console.log("ID della nota durante il salvataggio:", noteId);
 
@@ -288,6 +299,7 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
   }
 };
 
+//Function to sort the nots for the selected sort criterion
 export function sortNotes(notes, sortCriterion) {
   return [...notes].sort((a, b) => {
     const aDate = a.updateDate instanceof Date ? a.updateDate : new Date(a.updateDate);
@@ -312,15 +324,146 @@ export function sortNotes(notes, sortCriterion) {
   });
 }
 
-  export function handleCopyContent(content) {
-    navigator.clipboard.writeText(content).then(() => {
-      Swal.fire({
-        title: 'Content copied',
-        icon: 'success',
-        text: 'The note content has been copied to the clipboard',
-        customClass: {
-          confirmButton: 'button-alert'
-        }
-      });
+//Function to handle resetting fields of the form
+export async function handleResetForm (setNoteData) {
+  handleNoteDataChange('title', '', setNoteData);
+  handleNoteDataChange('category', '', setNoteData);
+  handleNoteDataChange('content', '', setNoteData);
+  handleNoteDataChange('noteAccess', 'public', setNoteData);
+  handleNoteDataChange('isTodo', false, setNoteData);
+  handleNoteDataChange('tasks', [], setNoteData);
+}
+
+//Function to handle the creation of a new note
+export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
+
+  if (!noteData.title || !noteData.category || !noteData.content) {
+    popUpAlert('Add Note Error', 'Missing required fields', 'error');
+    return;
+  }
+  
+  if (noteData.isTodo && noteData.tasks.length === 0) {
+    popUpAlert('Add Note Error', 'Please add at least one task to your to-do list', 'error');
+    return;
+  }
+
+  if (!noteData.isTodo && noteData.content.trim() === "") {
+    popUpAlert('Add Note Error', 'Please add content to your note', 'error');
+    return;
+  }
+
+  const newNote = {
+    ...noteData,
+    content: noteData.isTodo ? "" : noteData.content.trim(),
+    allowedHost: noteData.noteAccess === 'restricted' ? noteData.allowedHost : [],
+    tasks: noteData.isTodo 
+    ? noteData.tasks.map(task => ({ 
+      ...task, 
+      completed: task.completed || false,
+      deadline: task.deadline || null
+    })) : [],
+    createDate: noteData.createDate ? new Date(noteData.createDate) : new Date(),
+    updateDate: noteData.updateDate ? new Date(noteData.updateDate) : new Date(),
+  }
+
+  try {
+    const response = await fetch('http://localhost:8000/api/note', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newNote)
     });
+
+    if (!response.ok) {
+      throw new Error('Errore nella creazione della nota');
+    }
+
+    // Get the saved note from the backend
+    const savedNote = await response.json();
+
+    if (savedNote) {
+      setNotes([...notes, savedNote]);
+      handleResetForm(setNoteData);
+    }
+  } catch(error) {
+    console.error('Error while adding note:', error);
+  }
+
+}
+
+//Function to save the edit of a note
+export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
+
+  const noteToUpdate = notes.find(note => note._id === noteId);
+
+  if (!noteToUpdate) {
+    console.error("Nota non trovata");
+    return;
+  }
+
+  const updatedNote = {
+    ...noteToUpdate.note,
+    title: noteData.title,
+    noteAccess: noteData.noteAccess,
+    allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [],
+    category: noteData.category,
+    content: noteData.content,
+    tasks: noteData.isTodo 
+    ? noteData.tasks.map(task => ({ 
+      ...task, 
+      completed: task.completed || false,
+      deadline: task.deadline || null
+    })) : [],
+    updateDate: new Date()
   };
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedNote)
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while updating note');
+    }
+
+    const savedNote = await response.json();
+
+    if (savedNote) {
+      const updatedNotes = notes.map(note =>
+        note._id === noteId ? { note: savedNote } : note
+      );
+  
+      setNotes(updatedNotes);
+      setIsEditing(null);
+      handleResetForm(setNoteData);
+    }
+  } catch (error) {
+    console.error('Error while saving note:', error);
+  }
+};
+
+//Function to handle the deletion of a note
+//TODO: Check why this is not working with toDoList
+export function handleCopyContent(content) {
+  navigator.clipboard.writeText(content).then(() => {
+    popUpAlert('Contenuto copiato', 'Il contenuto è stato copiato negli appunti', 'success');
+  });
+};
+
+function popUpAlert(title, message, icon) {
+  Swal.fire({
+    title: title,
+    icon: icon,
+    text: message,
+    customClass: {
+      confirmButton: 'button-alert'
+    }
+  });
+}

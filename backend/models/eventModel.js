@@ -42,6 +42,10 @@ const eventSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    allawedHosts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }],
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

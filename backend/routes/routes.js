@@ -4,6 +4,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, getUserId, checkAuth } = require('../controllers/userController');
 const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
 const { createNote, getNotes, updateNote, deleteNote } = require('../controllers/noteController');
+const { createTask, getTasks, updateTask, deleteTask } = require('../controllers/taskController');
 const { createNotification, getNotifications, markNotificationAsRead, markNotificationStatus, markAllAsRead} = require('../controllers/notificationController')
 const { createPost, createComment, getPosts , updateContent} = require('../controllers/hubController');
 const { createActivity, getActivities, updateActivity, deleteActivity } = require('../controllers/activityController');
@@ -44,6 +45,11 @@ router.get('/notes', getNotes);
 router.put('/note/:noteId', updateNote);
 router.delete('/note/:noteId', deleteNote);
 
+// Task endpoints
+router.post('/task', createTask);
+router.get('/tasks', getTasks);
+router.put('/task/:taskId', updateTask);
+router.delete('/task/:taskId', deleteTask);
 
 // Activity endpoints
 router.post('/activity', createActivity);
