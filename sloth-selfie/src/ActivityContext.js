@@ -13,6 +13,8 @@ export const ActivityProvider = ({ children }) => {
         completed: false,
         userId: '', // User ID of whom creates the event
         type: 'activity',
+        notify: false,
+        notificationTime: '0',
     });
 
     // Get the username of the authenticated user
@@ -50,6 +52,8 @@ export const ActivityProvider = ({ children }) => {
             handleDataChange('title', '', setData);
             handleDataChange('deadline', '', setData);
             handleDataChange('completed', false, setData);
+            handleDataChange('notify', false, setData);
+            handleDataChange('notificationTime', '0', setData);
         } else if (type === "event") {
             handleDataChange('id', '', setData);
             handleDataChange('originalId', '', setData);
@@ -74,12 +78,14 @@ export const ActivityProvider = ({ children }) => {
     
     
         if (data.type === "activity") {
-            const { deadline, title } = data;
+            const { deadline, title, notify, notificationTime} = data;
             const newData = {
                 title: title,
                 deadline: deadline,
                 completed: false,
                 type: "activity",
+                notify: notify,
+                notificationTime: notificationTime,
             };
 
             return newData;

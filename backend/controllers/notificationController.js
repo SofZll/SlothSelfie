@@ -1,44 +1,102 @@
 const Notification = require('../models/notificationModel');
 const User = require('../models/userModel');
+const Activity = require('../models/activityModel');
+const Event = require('../models/eventModel');
+const { calculateDate } = require('../utils/utils');
 
 // Create a new notification: FUNZIONA
-const createNotification = async (req, res) => {
-    const {receivers, message} = req.body;
+const createNotification = async (req, res, internalCall = false) => {
+    let activityId, eventId, receivers, message;
 
+    if (internalCall) ({ activityId, eventId, receivers, message } = req)
+    else ({ activityId, eventId, receivers, message } = req.body)
+
+    console.log({ activityId, eventId, receivers, message });
+    try {
+        const senderUsername = internalCall ? await getSenderUsername({ activityId, eventId }) : req.session.username;
+        console.log(senderUsername);
+        const senderUser = await User.findOne({ username: senderUsername });
+        console.log(senderUser);
+        const notificationData = internalCall ? await getDataInternal({ activityId, eventId }) : await getDataStandard({ receivers, message });
+        console.log(notificationData);
+        const { message, receiversObjectId, activity, dateNotif} = notificationData;
+        const notification = new Notification({
+            sender: senderUser._id,
+            receivers: receiversObjectId,
+            message: message,
+            createdAt: new Date(),
+            read: receiversObjectId.map(() => false),
+            activity: activity ? activity._id : null,
+            dateNotif: dateNotif,
+            responses: [],
+        });
+
+        // creazione notifica schedule
+
+        console.log(notification);
+        await notification.save();
+        if (!internalCall) res.status(201).json({ success: true, notification });
+    } catch (error) {
+        console.error('Error creating notification:', error);
+        if (!internalCall) res.status(500).json({ success: false, message: 'Error creating notification' });
+    }
+}
+
+const getSenderUsername = async ({ activityId, eventId }) => {
+    if (activityId) {
+        console.log(activityId);
+        const activity = await Activity.findOne({ _id: activityId }).populate('user');
+        console.log(activity);
+        console.log(activity.user);
+        return activity.user.username;
+    } else {
+        /*
+        const event = await Event.findOne({ _id: eventId });
+        return event.user.username;
+        */
+    }
+}
+
+const getDataInternal = async ({ activityId, eventId }) => {
+    if (activityId) {
+        const activity = await Activity.findOne({ _id: activityId }).populate('user');
+        if (!activity) return null;
+
+        const message = `Activity: ${activity.title} - Deadline: ${activity.deadline}`;
+        const dateNotif = calculateDate(activity.deadline, activity.notificationTime);
+
+        return {
+            message,
+            receiversObjectId: [activity.user._id],
+            activity,
+            dateNotif,
+        };
+    } else if (eventId) {
+        // TODO
+    }
+    return null;
+}
+
+const getDataStandard = async ({ receivers, message }) => {
     if (!receivers || !message) {
         return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
-    try {
-        const senderUsername = req.session.username;
-        const senderUser = await User.findOne({ username: senderUsername });
-        const senderObjectId = senderUser._id;
-
-        const receiversObjectId = [];
-        for (const receiver of receivers) {
-            const receiverUser = await User.findOne({ username: receiver });
-            if (!receiverUser) {
-                return res.status(400).json({ success: false, message: `Invalid receiver username: ${receiver}` });
-            }
-            receiversObjectId.push(receiverUser._id);
+    const receiversObjectId = [];
+    for (const receiver of receivers) {
+        const receiverUser = await User.findOne({ username: receiver });
+        if (!receiverUser) {
+            return res.status(400).json({ success: false, message: `Invalid receiver username: ${receiver}` });
         }
-
-        const notification = new Notification({
-            sender: senderObjectId,
-            receivers: receiversObjectId,
-            message,
-            date: new Date(),
-            read: receivers.map(() => false),
-            responses: [], // array of responses
-        });
-
-        console.log(notification);
-        await notification.save();
-        res.status(201).json({ success: true, notification });
-    } catch (error) {
-        console.error('Error creating notification:', error);
-        res.status(500).json({ success: false, message: 'Error creating notification' });
+        receiversObjectId.push(receiverUser._id);
     }
+
+    return {
+        message,
+        receiversObjectId,
+        activity: null,
+        dateNotif: null,
+    };
 }
 
 // Get all notifications: FUNZIONA

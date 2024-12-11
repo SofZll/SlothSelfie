@@ -14,6 +14,7 @@ const path = require('path');
 const connectDB = require('./config/db');
 require('dotenv').config();
 const socketIo = require('socket.io');
+const agenda = require('./jobs/agenda');
 
 
 const cors = require('cors');
@@ -105,8 +106,6 @@ const settingPomodoro = {}
 let sessionCode;
 
 let interval = null;
-
-
 
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
@@ -288,7 +287,7 @@ io.on('connection', (socket) => {
         io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
     });
 
-    // notification stuff
+    // notification stuff - agenda
 
     socket.on('authenticated', (isAuthenticated) => {
         if (isAuthenticated) {
