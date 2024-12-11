@@ -164,7 +164,6 @@ export async function newData2Add(data, originalId) {
             originalId: originalId,
         };
 
-        console.log(newData);
         return newData;
     }
 }
@@ -401,7 +400,9 @@ export async function handleDeleteData(type, id, datas, setDatas, setSelectedDat
 
             const updatedDatas = datas.filter((data) => data._id !== id);
             setDatas(updatedDatas);
-            setSelectedData(null);
+            if (setSelectedData){
+                setSelectedData(null);
+            }
         }
     } catch (error) {
         console.error(`Error deleting ${type}:`, error);

@@ -9,6 +9,7 @@ import { a } from 'react-spring';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import { ActivityContext } from './ActivityContext';
 import Swal from 'sweetalert2';
+import { handleAddData } from './CalendarUtils';
 
 
 const initialNotes = [
@@ -78,7 +79,7 @@ function NotesFunction() {
   const [isEditing, setIsEditing] = useState(null);
   const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
   const [filteredNotes, setFilteredNotes] = useState([]);
-  const { activities, setActivities, setActivityData, handleAddData, handleDeleteData} = useContext(ActivityContext);
+  const { activities, setActivities, setActivityData } = useContext(ActivityContext);
   
   //defining the note data structure
   const [noteData, setNoteData] = useState({
@@ -224,7 +225,7 @@ useEffect(() => {
           };
           console.log("Activity data:", activityData);
           setActivities(prevActivities => [...prevActivities, activityData]);
-          handleAddData(null, activityData, setActivityData, activities, setActivities, username);
+          handleAddData(null, activityData, setActivityData, activities, setActivities, isEditing);
         }else {
           console.log("Task without deadline:", task);}
       });
@@ -358,12 +359,8 @@ const filterNotesByDate = (notes) => {
             />
           </div>
           <div className='div-input-author'>
-            <label htmlFor='Author'>Author name: </label>
-            <input
-              value={noteData.noteAuthor}
-              onChange={(e) => handleNoteDataChange('noteAuthor', e.target.value, setNoteData)}
-              placeholder="Enter username"
-            />
+            <p>Author name: </p>
+            <p>{noteData.noteAuthor}</p>
           </div>
           <div className='div-input-category'>
             <label htmlFor='category'>Note category: </label>
@@ -488,7 +485,7 @@ const filterNotesByDate = (notes) => {
           <button className="btn btn-main" onClick={handleAddNote} disabled={isEditing !== null}>Add Note</button>
             {/* Editing scenario*/}
             {isEditing !== null && (
-          <button className="btn btn-main" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities, handleAddData, handleDeleteData)}>Save Note</button>
+          <button className="btn btn-main" onClick={() => handleSaveEdit(isEditing, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities)}>Save Note</button>
           )}
         </div>
       </div>
