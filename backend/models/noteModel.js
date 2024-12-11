@@ -29,14 +29,9 @@ const noteSchema = new mongoose.Schema({
         default: false,
     },
     tasks: [{
-        text: { type: String },
-        completed: { type: Boolean, default: false },
-        deadline: { type: Date, default: null },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Task',
     }],
-    taskDeadline: {
-        type: Date,
-        default: null
-    },
     createDate:{
         type: Date,
         default: Date.now

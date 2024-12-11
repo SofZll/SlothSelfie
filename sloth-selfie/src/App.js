@@ -16,7 +16,6 @@ import ProfileFunction from './Profile';
 import HubFunction from './Hub';
 import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
-import { ActivityProvider } from './ActivityContext';
 import socket from './socket';
 import 'leaflet/dist/leaflet.css';
 
@@ -184,7 +183,6 @@ function App() {
   return (
     <Router>
       <StyleProvider>
-        <ActivityProvider>
           { loading ? (
             <div className="loading-page loading-page-light">
               <div className="spinner"></div>
@@ -266,7 +264,6 @@ function App() {
               </div>
             </div>
           )}
-        </ActivityProvider>
       </StyleProvider>
     </Router>
   );
