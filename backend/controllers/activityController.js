@@ -6,11 +6,15 @@ const { createNotification } = require('../controllers/notificationController');
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-    const { title, deadline, completed, notify, notificationTime} = req.body;
+    const { title, deadline, completed, notify, notificationTime, sharedWith} = req.body;
     
     try {
         // TODO: da aggiungere la logica degli eventi e delle attività condivise
-        const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime });
+        let sharedWithUsers = [];
+        if (sharedWith && Array.isArray(sharedWith)) {
+            sharedWithUsers = await User.find({ username: { $in: sharedWith } });
+        }
+        const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id), });
         const savedActivity = await activity.save();
         if (notify) await createNotification({ activityId: savedActivity._id }, res, true);
         console.log(savedActivity);

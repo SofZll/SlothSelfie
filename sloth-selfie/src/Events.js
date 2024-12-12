@@ -299,11 +299,12 @@ function EventsFunction(props) {
                 placeholder="Type username and press Enter" 
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                    const newUser = e.target.value.trim();
-                    if (newUser && props.eventData?.sharedWith?.length >= 0 && !props.eventData.sharedWith.includes(newUser)) {
-                        handleDataChange('sharedWith', [...props.eventData.sharedWith, newUser], props.setEventData);
-                        e.target.value = ''; // Clear input field
-                    }
+                        e.preventDefault();
+                        const newUser = e.target.value.trim();
+                        if (newUser && props.eventData?.sharedWith?.length >= 0 && !props.eventData.sharedWith.includes(newUser)) {
+                            handleDataChange('sharedWith', [...props.eventData.sharedWith, newUser], props.setEventData);
+                            e.target.value = ''; // Clear input field
+                        }
                     }
                 }}
                 />
