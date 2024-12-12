@@ -202,9 +202,14 @@ const NotificationFunction = () => {
         
         if (receivers.length && message) {
             const newNotif = {
+                activityId: null,
+                eventId: null,
                 receivers,
                 message,
             };
+
+            console.log('New notification:', newNotif);
+            console.log('New notification:', JSON.stringify(newNotif));
             
             const response = await fetch('http://localhost:8000/api/notification/new-notif', {
                 method: 'POST',

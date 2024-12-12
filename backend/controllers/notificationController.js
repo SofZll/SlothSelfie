@@ -8,6 +8,9 @@ const { calculateDate } = require('../utils/utils');
 const createNotification = async (req, res, internalCall = false) => {
     let activityId, eventId, receivers, message;
 
+    console.log('Request Body:', req.body);
+    console.log('Internal Call:', internalCall);
+
     if (internalCall) ({ activityId, eventId, receivers, message } = req)
     else ({ activityId, eventId, receivers, message } = req.body)
 
@@ -19,11 +22,11 @@ const createNotification = async (req, res, internalCall = false) => {
         console.log(senderUser);
         const notificationData = internalCall ? await getDataInternal({ activityId, eventId }) : await getDataStandard({ receivers, message });
         console.log(notificationData);
-        const { message, receiversObjectId, activity, dateNotif} = notificationData;
+        const { message: messageVal, receiversObjectId, activity, dateNotif} = notificationData;
         const notification = new Notification({
             sender: senderUser._id,
             receivers: receiversObjectId,
-            message: message,
+            message: messageVal,
             createdAt: new Date(),
             read: receiversObjectId.map(() => false),
             activity: activity ? activity._id : null,
