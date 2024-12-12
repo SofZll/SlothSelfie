@@ -50,7 +50,11 @@ const eventSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
-    }
+    },
+    sharedWith: [{
+        type: String,
+        ref: 'User',
+    }]
 }, { timestamps: true });
 
 const Event = mongoose.model('Event', eventSchema);

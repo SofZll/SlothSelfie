@@ -29,7 +29,11 @@ const activitySchema = new mongoose.Schema({
     notificationTime: {
         type: Number,
         default: 0
-    }
+    },
+    sharedWith: [{
+        type: String,
+        ref: 'User',
+    }]
 }, { timestamps: true });
 
 const Activity = mongoose.model('Activity', activitySchema);
