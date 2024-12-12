@@ -53,10 +53,9 @@ function ActivitiesFunction(props){
                 type="text" 
                 placeholder="Type username and press Enter" 
                 onKeyDown={(e) => {
-                    console.log('sharedWith:', props.activityData.sharedWith);
                     if (e.key === 'Enter') {
                         const newUser = e.target.value.trim();
-                        if (newUser && Array.isArray(props.activityData.sharedWith) && !props.activityData.sharedWith.includes(newUser)) {
+                        if (newUser && props.activityData?.sharedWith?.length >= 0 && !props.activityData.sharedWith.includes(newUser)) {
                             handleDataChange('sharedWith', [...props.activityData.sharedWith, newUser], props.setActivityData);
                             e.target.value = ''; // Clear input field
                         }
@@ -67,7 +66,7 @@ function ActivitiesFunction(props){
                 <ul>
                 {(props.activityData.sharedWith || []).map((user, index) => (
                     <li key={index}>
-                    {user} <button onClick={() => handleDataChange('sharedWith', props.activityData.sharedWith.filter(u => u !== user), props.setActivityData)}>Remove</button>
+                    {user} <button className='btn btn-main' onClick={() => handleDataChange('sharedWith', props.activityData.sharedWith.filter(u => u !== user), props.setActivityData)}>Remove</button>
                     </li>
                 ))}
                 </ul>

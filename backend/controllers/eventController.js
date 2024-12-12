@@ -13,7 +13,7 @@ const createEvent = async (req, res) => {
 
     let sharedWithUsers = [];
     if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
-      sharedWithUsers = await User.find({ username: { $in: sharedWith } });
+      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
     }
 
     if (originalId !== '') {
