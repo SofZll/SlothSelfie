@@ -9,7 +9,6 @@ const createActivity = async (req, res) => {
     const { title, deadline, completed, notify, notificationTime, sharedWith} = req.body;
     
     try {
-        // TODO: da aggiungere la logica degli eventi e delle attività condivise
         let sharedWithUsers = [];
         if (sharedWith && Array.isArray(sharedWith)) {
             sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');

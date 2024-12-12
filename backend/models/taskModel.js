@@ -13,7 +13,7 @@ const taskSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    allawedHosts: [{
+    sharedWith: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     }],

@@ -128,6 +128,7 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('repeatEndDate', '', setData);
         handleDataChange('repeatCount', 1, setData);
         handleDataChange('eventLocation', '', setData);
+        handleDataChange('sharedWith', [], setData);
     }
 
     setIsEditing(false);

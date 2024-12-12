@@ -13,10 +13,6 @@ const activitySchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    allawedHosts: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    }],
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
