@@ -60,6 +60,7 @@ function Calendar() {
         repeatEndDate: '', // Date of the last repetition   <-
         eventLocation: '', // eventLocation of the event
         type: 'event',
+        sharedWith: [],
         //notify: false,
     });
 
@@ -69,6 +70,7 @@ function Calendar() {
         deadline: "",
         completed: false,
         type: 'activity',
+        sharedWith: [],
     });
 
     useEffect(() => {

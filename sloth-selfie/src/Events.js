@@ -311,7 +311,7 @@ function EventsFunction(props) {
                 <ul>
                 {(props.eventData?.sharedWith || []).map((user, index) => (
                     <li key={index}>
-                    {user} <button onClick={() => handleDataChange('sharedWith', props.eventData.sharedWith.filter(u => u !== user), props.setEventData)}>Remove</button>
+                    {user} <button className="btn btn-main" onClick={() => handleDataChange('sharedWith', props.eventData.sharedWith.filter(u => u !== user), props.setEventData)}>Remove</button>
                     </li>
                 ))}
                 </ul>
