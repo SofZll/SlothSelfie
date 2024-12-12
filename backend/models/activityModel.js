@@ -31,7 +31,7 @@ const activitySchema = new mongoose.Schema({
         default: 0
     },
     sharedWith: [{
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     }]
 }, { timestamps: true });

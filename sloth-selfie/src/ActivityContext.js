@@ -14,7 +14,7 @@ export const ActivityProvider = ({ children }) => {
         type: 'activity',
         notify: false,
         notificationTime: '0',
-        sharedWith: []
+        sharedWith: [],
     });
 
     return (

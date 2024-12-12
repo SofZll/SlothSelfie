@@ -52,7 +52,7 @@ const eventSchema = new mongoose.Schema({
         required: true
     },
     sharedWith: [{
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     }]
 }, { timestamps: true });

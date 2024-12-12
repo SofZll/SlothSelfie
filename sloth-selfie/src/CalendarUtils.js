@@ -113,6 +113,7 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('completed', false, setData);
         handleDataChange('notify', false, setData);
         handleDataChange('notificationTime', '0', setData);
+        handleDataChange('sharedWith', [], setData);
     } else if (type === "event") {
         handleDataChange('id', '', setData);
         handleDataChange('originalId', '', setData);
@@ -137,7 +138,7 @@ export async function newData2Add(data, originalId) {
     
     
     if (data.type === "activity") {
-        const { deadline, title, notify, notificationTime} = data;
+        const { deadline, title, notify, notificationTime, sharedWith} = data;
         const newData = {
             title: title,
             deadline: deadline,
@@ -145,11 +146,12 @@ export async function newData2Add(data, originalId) {
             type: "activity",
             notify: notify,
             notificationTime: notificationTime,
+            sharedWith: sharedWith,
         };
 
         return newData;
     } else if (data.type === "event") {
-        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate } = data;
+        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate, sharedWith } = data;
         const newData = {
             title: title,
             date: date,
@@ -162,6 +164,7 @@ export async function newData2Add(data, originalId) {
             eventLocation: eventLocation,
             type: "event",
             originalId: originalId,
+            sharedWith: sharedWith,
         };
 
         return newData;
@@ -339,6 +342,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     title: data.title,
                     deadline: data.deadline,
                     completed: data.completed,
+                    sharedWith: data.sharedWith,
                 } : {
                     title: data.title,
                     date: data.date,
@@ -349,6 +353,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     repeatEndDate: data.repeatEndDate,
                     repeatCount: data.repeatCount,
                     eventLocation: data.eventLocation,
+                    sharedWith: data.sharedWith,
                 }
             ),
         });
@@ -432,6 +437,7 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
         handleDataChange('title', data.title, setData);
         handleDataChange('deadline', data.deadline.split('T')[0], setData);
         handleDataChange('completed', data.completed, setData);
+        handleDataChange('sharedWith', data.sharedWith, setData);
     } else if (data.type === "event") {
         handleDataChange('title', data.title, setData);
         handleDataChange('date', new Date(data.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'), setData);
@@ -451,6 +457,7 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
             handleDataChange('repeatEndDate', data.repeatEndDate.split('T')[0], setData);
         }
         handleDataChange('eventLocation', data.eventLocation, setData);
+        handleDataChange('sharedWith', data.sharedWith, setData);
     }
 
     setSelectedData(data);

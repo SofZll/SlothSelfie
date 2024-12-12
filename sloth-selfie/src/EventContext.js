@@ -22,7 +22,7 @@ export const EventProvider = ({ children }) => {
         eventLocation: '', // eventLocation of the event
         type: 'event',
         //notify: false,
-        sharedWith: []
+        sharedWith: [],
     });
 
     return (
