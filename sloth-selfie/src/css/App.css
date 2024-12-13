@@ -245,7 +245,7 @@ textarea {
   height: 70px;
   border-radius: 50%;
   background-color: #F39252;
-  border: 2px solid #555B6E;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -261,6 +261,44 @@ textarea {
 
 .icon-time-machine {
   height: 40px;
+}
+
+/* custom select */
+
+.custom-select__control {
+  width: 150px;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.custom-select__menu {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.custom-select__menu-list {
+  max-height: 100px;
+}
+
+.custom-select__value-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.custom-select__single-value {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1;
 }
 
 /* loading page */
@@ -403,7 +441,7 @@ textarea {
 
 @media screen and (min-width: 700px){
   .title h1 {
-    font-size: 7vmin;
+    font-size: 6vmin;
     padding-right: 1vmin;
   }
   

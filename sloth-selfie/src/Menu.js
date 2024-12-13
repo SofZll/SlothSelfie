@@ -51,8 +51,6 @@ const Menu = () => {
                         base64Image = `data:${data.user.image.contentType};base64,${bufferToBase64(buffer)}`;
                     }
 
-                    const formattedBirthday = data.user.birthday ? new Date(data.user.birthday).toISOString().split('T')[0] : '';
-                    
                     setProfileData({
                         username: data.user.username || '',
                         profile_image: base64Image
