@@ -57,6 +57,7 @@ export function normalizeData (datas, type) {
                     {
                         deadline: new Date(),
                         completed: data.completed,
+                        sharedWith: data.sharedWith,
                     } : {
                         time: data.time,
                         itLast: data.duration,
@@ -68,6 +69,7 @@ export function normalizeData (datas, type) {
                         repeatCount: data.repeatCount,
                         eventLocation: data.eventLocation,
                         originalId: data.originalId,
+                        sharedWith: data.sharedWith,
                         //notify: data.notify,
                     }
                 ),
@@ -92,10 +94,12 @@ export function normalizeData (datas, type) {
                     repeatCount: data.repeatCount,
                     eventLocation: data.eventLocation,
                     originalId: data.originalId,
+                    sharedWith: data.sharedWith,
                     //notify: data.notify,
                 } : {
                     deadline: data.deadline,
                     completed: data.completed,
+                    sharedWith: data.sharedWith,
                 }
             ),
             type: type
@@ -686,5 +690,4 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
 
     setEvents([...events, ...events2Add]);
 };
-
 

@@ -36,8 +36,19 @@ const getEvents = async (req, res) => {
   const user = await User.findOne({ username: userName });
 
   try {
-    const events = await Event.find({ user: user._id });
-    res.status(200).json(events);
+    const events = await Event.find({
+      $or: [
+        { user: user._id }, // events created by the user
+        { sharedWith: user._id } // events shared with the user
+      ]
+    })
+    .populate('sharedWith', 'username'); // Populates the sharedWith field with the username of the users
+    //we only need the username on the frontend
+    const eventsWithUsernames = events.map(event => ({
+      ...event.toObject(),
+      sharedWith: event.sharedWith.map(user => user.username)
+    }));
+    res.status(200).json(eventsWithUsernames);
   }
   catch (error) {
     console.error('Error fetching events:', error);
@@ -48,7 +59,7 @@ const getEvents = async (req, res) => {
 // Update an event
 const updateEvent = async (req, res) => {
   const { eventId } = req.params;
-  const { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
+  const { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith } = req.body;
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
   try {
@@ -60,10 +71,17 @@ const updateEvent = async (req, res) => {
       return res.status(403).json({ message: 'Non sei autorizzato a modificare questo evento' });
     }
 
+     // get the users to share the event with
+     let sharedWithUsers = [];
+     if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+       sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
+     }
+     console.log(sharedWithUsers); //TODO: Nel popup se non si refresha la pagina si vedono gli id sia con add che con edit
+
     //update the event
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation },
+      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith: sharedWithUsers.map(u => u._id) },
       { new: true }
     );
     res.status(200).json(updatedEvent);
@@ -112,5 +130,5 @@ module.exports = {
     getEvents,
     updateEvent,
     deleteEvent,
-    deleteMultipleEvent
+    deleteMultipleEvent,
 };
