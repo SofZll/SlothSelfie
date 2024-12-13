@@ -63,33 +63,7 @@ function ActivitiesFunction(props){
                             value={options.find((option) => option.value === props.activityData.notificationTime)}
                             onChange={(selectedOption) => handleDataChange("notificationTime", selectedOption.value, props.setActivityData)}
                             options={options}
-                            styles={{
-                                control: (provided) => ({
-                                    ...provided,
-                                    width: 170,
-                                    height: 45,
-                                }),
-                                menu: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 150,
-                                    overflowY: "auto",
-                                }),
-                                menuList: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 150,
-                                }),
-                                valueContainer: (provided) => ({
-                                    ...provided,
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                }),
-                                input: (provided) => ({
-                                    ...provided,
-                                    margin: 0,
-                                    padding: 0,
-                                }),
-                            }}
+                            classNamePrefix="custom-select"
                             menuPlacement="top"
                         />
                     </label>

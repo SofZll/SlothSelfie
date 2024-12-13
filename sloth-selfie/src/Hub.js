@@ -449,6 +449,7 @@ function Hub({ username }) {
                                 onChange={handleSortChange}
                                 options={sortingOptions}
                                 isSearchable={false}
+                                classNamePrefix="custom-select"
                             />
                         </div>
                         {posts && posts.length > 0 ? (

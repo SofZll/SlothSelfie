@@ -24,6 +24,11 @@
     justify-content: center;
     align-items: center;
     gap: 20px;
+    width: 70%;
+}
+
+.calendar .centered-label input {
+    height: 15px;
 }
 
 .div-calendar-container {
@@ -80,6 +85,7 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
+    gap: 4px;
 }
 
 .container-events-add input {
@@ -105,6 +111,10 @@
 
 .time-filter label {
     margin: 0;
+}
+
+.time-filter input {
+    height: 15px;
 }
 
 /* Activities */

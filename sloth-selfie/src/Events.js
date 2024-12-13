@@ -110,34 +110,7 @@ function EventsFunction(props) {
                             onChange={(selectedOption) => handleDataChange("time", selectedOption.value, props.setEventData)}
                             options={options}
                             isSearchable
-                            styles={{
-                                menu: (provided) => ({
-                                    ...provided,
-                                    width: 150,
-                                    maxHeight: 200,
-                                }),
-                                menuList: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 200,
-                                }),
-                                control: (provided) => ({
-                                    ...provided,
-                                    height: 50,
-                                    width: 150,
-                                    margin: 10,
-                                }),
-                                valueContainer: (provided) => ({
-                                    ...provided,
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                }),
-                                input: (provided) => ({
-                                    ...provided,
-                                    margin: 0,
-                                    padding: 0,
-                                }),
-                            }}
+                            classNamePrefix="custom-select"
                         />  
                     )}
                 </div>
@@ -178,32 +151,7 @@ function EventsFunction(props) {
                         { value: "monthly", label: "Monthly" },
                         { value: "yearly", label: "Yearly" },
                     ]}
-                    styles={{
-                        menu: (provided) => ({
-                            ...provided,
-                            maxHeight: 90,
-                            overflowY: "auto",
-                        }),
-                        menuList: (provided) => ({
-                            ...provided,
-                            maxHeight: 90,
-                        }),
-                        control: (provided) => ({
-                            ...provided,
-                            height: 45,
-                        }),
-                        valueContainer: (provided) => ({
-                            ...provided,
-                            height: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                        }),
-                        input: (provided) => ({
-                            ...provided,
-                            margin: 0,
-                            padding: 0,
-                        }),
-                    }}
+                    classNamePrefix="custom-select"
                 />
             </label>
 
@@ -218,37 +166,12 @@ function EventsFunction(props) {
                                 { value: 'ntimes', label: 'N Times' },
                                 { value: 'until', label: 'Until' },
                             ]}
-                            styles={{
-                                menu: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 90,
-                                    overflowY: 'auto',
-                                }),
-                                menuList: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 90,
-                                }),
-                                control: (provided) => ({
-                                    ...provided,
-                                    height: 45,
-                                }),
-                                valueContainer: (provided) => ({
-                                    ...provided,
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                }),
-                                input: (provided) => ({
-                                    ...provided,
-                                    margin: 2,
-                                    padding: 2,
-                                }),
-                            }}
+                            classNamePrefix="custom-select"
                         />
                     </label>
     
                     {props.eventData.repeatMode === "ntimes" ? (
-                        <label>Number of repetitions:
+                        <label>N° times:
                             <input
                                 type="number"
                                 value={props.eventData.repeatCount}
