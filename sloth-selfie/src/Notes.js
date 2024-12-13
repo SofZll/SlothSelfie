@@ -8,6 +8,7 @@ import { StyleContext } from './StyleContext';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import Swal from 'sweetalert2';
 import { handleAddData } from './CalendarUtils';
+import ShareInput from './ShareInput';
 
 
 const initialNotes = [
@@ -79,7 +80,7 @@ function NotesFunction() {
   const [filteredNotes, setFilteredNotes] = useState([]);
 
   const [taskDeadline, setTaskDeadline] = useState(null);
-  
+
   //defining the note data structure
   const [noteData, setNoteData] = useState({
     title: "",
@@ -276,6 +277,20 @@ const filterNotesByDate = (notes) => {
   });
 };
 
+  // ShareInput
+  const [receivers, setReceivers] = useState([]);
+  const [triggerResetReceivers, setTriggerResetReceivers] = useState(0);
+
+  const changeReceivers = (newReceivers) => {
+    setReceivers(newReceivers);
+  }
+
+  const resetReceivers = () => {
+      setReceivers([]);
+      setTriggerResetReceivers((prev) => prev+1);
+      console.log(triggerResetReceivers);
+  }
+
   return (
     <div className="notes-div">
 
@@ -373,6 +388,7 @@ const filterNotesByDate = (notes) => {
               <option value="Others">Others</option>
             </select>
           </div>
+          <ShareInput changeReceivers={changeReceivers} resetReceivers={triggerResetReceivers}/>
         </div>
 
         <div className='div-content'>

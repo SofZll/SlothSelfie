@@ -1,14 +1,15 @@
 import React, { useState, useEffect} from 'react';
 import './css/Notifications.css';
 import Swal from 'sweetalert2'
-import { calculateTime } from './globalFunctions';
+import { calculateTime, sortElements } from './globalFunctions';
+import ShareInput from './ShareInput';
 import socket from './socket';
 
 const NotificationFunction = () => {
     const [loading, setLoading] = useState(true);
     const [username, setUsername] = useState('');
-    const [receiverInput, setReceiverInput] = useState('');
     const [receivers, setReceivers] = useState([]);
+    const [triggerResetReceivers, setTriggerResetReceivers] = useState(0);
     const [notifs, setNotifs] = useState([]);
     const [hasRead, setHasRead] = useState('');
 
@@ -81,7 +82,8 @@ const NotificationFunction = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Fetched notifications:', data.notifications);
-                setNotifs(data.notifications);
+                const sortedNotifs = sortElements(data.notifications, 'mostRecent');
+                setNotifs(sortedNotifs);
                 checkHasRead();
             } else {
                 console.log('Error fetching notifications');
@@ -186,17 +188,6 @@ const NotificationFunction = () => {
         }
     };
 
-    const handleAddReceiver = () => {
-        if (receiverInput) {
-            setReceivers([...receivers, receiverInput]);
-            setReceiverInput('');
-        }
-    }
-
-    const handleRemoveReceiver = (index) => {
-        setReceivers(receivers.filter((_, i) => i !== index));
-    }
-
     const handleSend = async () => {
         const message = document.querySelector('.text-notif textarea').value;
         
@@ -233,7 +224,7 @@ const NotificationFunction = () => {
                 });
 
                 socket.emit('send-notification', newNotif);
-                setReceivers([]);
+                resetReceivers();
                 document.querySelector('.text-notif textarea').value = '';
                 fetchNotifications();
             } else {
@@ -286,6 +277,16 @@ const NotificationFunction = () => {
         }
     }
 
+    const changeReceivers = (newReceivers) => {
+        setReceivers(newReceivers);
+    }
+
+    const resetReceivers = () => {
+        setReceivers([]);
+        setTriggerResetReceivers((prev) => prev+1);
+        console.log(triggerResetReceivers);
+    }
+
     return (
         <>
             {loading ? (
@@ -297,18 +298,7 @@ const NotificationFunction = () => {
                 <div className="notifs">
                     <h5>Notifications</h5>
                     <div className="new-notif">
-                        <div className="add-receiver">
-                            <input type="text" placeholder="Enter receiver's username" value={receiverInput} onChange={(e) => setReceiverInput(e.target.value)}/>
-                            <button className="btn btn-main new-notif-button" onClick={handleAddReceiver}>Add</button>
-                        </div>
-                        <div className="receivers-list">
-                            {receivers.map((receiver, index) => (
-                                <div key={index} className="receiver-tag">
-                                    {receiver}
-                                    <button className="remove-receiver-button" onClick={() => handleRemoveReceiver(index)}>&times;</button>
-                                </div>
-                            ))}
-                        </div>
+                        <ShareInput changeReceivers={changeReceivers} resetReceivers={triggerResetReceivers} />
                         <div className="text-notif">
                             <textarea placeholder="Write here..." />
                             <button className="btn btn-main new-notif-button" onClick={handleSend}>Send</button>
@@ -331,18 +321,6 @@ const NotificationFunction = () => {
                                         <span className="close-notif" onClick={() => handleReadNotif(notif._id)}>&times;</span>
                                     </div>
                                     <p>{notif.message}</p>
-                                    {notif.activity && (
-                                        <>
-                                            <p>Activity: {notif.activity.title}</p>
-                                            <p>Deadline: {notif.activity.deadline}</p>
-                                        </>
-                                    )}
-                                    {notif.event && (
-                                        <>
-                                            <p>Event: {notif.event.title}</p>
-                                            <p>Date: {notif.event.date}</p>
-                                        </>
-                                    )}
                                     {(notif.event || notif.activity) && (
                                         <>
                                             <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'accepted')}>Accept</button>

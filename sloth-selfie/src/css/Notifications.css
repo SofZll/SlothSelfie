@@ -97,34 +97,6 @@
     background-color: #244476;
 }
 
-.add-receiver {
-    display: flex;
-    justify-content: space-between;
-    margin: 1rem 0;
-    width: 90%;
-}
-
-.receivers-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    width: 90%;
-}
-
-.receiver-tag {
-    display: flex;
-    justify-content: center;
-}
-
-.remove-receiver-button{
-    width: 25px;
-    height: 25px;
-    border: none;
-    border-radius: 3px;
-    color: #555B6E;
-    margin-left: 7px;
-}
-
 .text-notif {
     width: 100%;
     margin-top: 1rem;

@@ -65,7 +65,9 @@ const getDataInternal = async ({ activityId, eventId }) => {
         const activity = await Activity.findOne({ _id: activityId }).populate('user');
         if (!activity) return null;
 
-        const message = `Activity: ${activity.title} - Deadline: ${activity.deadline}`;
+        const deadlineDate = new Date(activity.deadline);
+        const formattedDeadline = `${deadlineDate.getFullYear()}-${String(deadlineDate.getMonth() + 1).padStart(2, '0')}-${String(deadlineDate.getDate()).padStart(2, '0')} ${String(deadlineDate.getHours()).padStart(2, '0')}:${String(deadlineDate.getMinutes()).padStart(2, '0')}`;
+        const message = `Activity: ${activity.title} - Deadline: ${formattedDeadline}`;
         const dateNotif = calculateDate(activity.deadline, activity.notificationTime);
 
         return {
@@ -112,7 +114,13 @@ const getNotifications = async (req, res) => {
         }
         
         const notifications = await Notification.find({ receivers: user._id }).populate('sender', 'username').populate('receivers', 'username');
-        res.status(200).json({ success: true, notifications });
+
+        const notificationsWithDate = notifications.map(notification => ({
+            ...notification.toObject(),
+            date: notification.createdAt
+        }));
+
+        res.status(200).json({ success: true, notifications: notificationsWithDate });
     } catch (error) {
         console.error('Error fetching notifications:', error.message);
         res.status(500).json({ success: false, message: 'Error fetching notifications' });
