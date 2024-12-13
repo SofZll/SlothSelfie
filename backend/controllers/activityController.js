@@ -30,7 +30,12 @@ const getActivities = async (req, res) => {
     const user = await User.findOne({ username: userName });
     
     try {
-        const activities = await Activity.find({user: user._id})
+        const activities = await Activity.find({
+            $or: [
+              { user: user._id }, // activities created by the user
+              { sharedWith: user._id } // activities shared with the user
+            ]
+          })
         .populate('sharedWith', 'username');// Populates the sharedWith field with the username of the users
         //we only need the username on the frontend
         const activitiesWithUsernames = activities.map(activities => ({
@@ -51,6 +56,13 @@ const updateActivity = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
 
+    // get the users to share the activity with
+    let sharedWithUsers = [];
+    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
+    }
+    console.log(sharedWithUsers);
+
     try {
         const activity = await Activity.findById(activityId);
         if (!activity) {
@@ -64,7 +76,7 @@ const updateActivity = async (req, res) => {
         // Update the activity
         const updatedActivity = await Activity.findByIdAndUpdate(
             activityId,
-            { title, deadline, completed },
+            { title, deadline, completed, sharedWith: sharedWithUsers.map(u => u._id) },
             { new: true }
         );
         res.status(200).json(updatedActivity);

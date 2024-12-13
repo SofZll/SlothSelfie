@@ -158,11 +158,6 @@ function Calendar() {
     };
 
 
-    console.log('selectedEvent:', selectedEvent);
-    console.log('selectedEvent.sharedWith:', selectedEvent?.sharedWith);
-    console.log('selectedActivity:', selectedActivity);
-    console.log('selectedActivity.sharedWith:', selectedActivity?.sharedWith);
-
     return (
         <div className="calendar">
             <div className="div-calendar-container">

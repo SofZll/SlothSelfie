@@ -36,7 +36,12 @@ const getEvents = async (req, res) => {
   const user = await User.findOne({ username: userName });
 
   try {
-    const events = await Event.find({ user: user._id })
+    const events = await Event.find({
+      $or: [
+        { user: user._id }, // events created by the user
+        { sharedWith: user._id } // events shared with the user
+      ]
+    })
     .populate('sharedWith', 'username'); // Populates the sharedWith field with the username of the users
     //we only need the username on the frontend
     const eventsWithUsernames = events.map(event => ({
@@ -66,10 +71,17 @@ const updateEvent = async (req, res) => {
       return res.status(403).json({ message: 'Non sei autorizzato a modificare questo evento' });
     }
 
+     // get the users to share the event with
+     let sharedWithUsers = [];
+     if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+       sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
+     }
+     console.log(sharedWithUsers); //TODO: Nel popup se non si refresha la pagina si vedono gli id sia con add che con edit
+
     //update the event
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith },
+      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith: sharedWithUsers.map(u => u._id) },
       { new: true }
     );
     res.status(200).json(updatedEvent);
