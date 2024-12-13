@@ -8,16 +8,21 @@ import gif from "./media/gif.svg";
 //import video from "./media/video.svg";
 import maps from "./media/maps.svg";
 import camera from "./media/camera.svg";
-import { calculateTime } from "./globalFunctions";
+import { calculateTime, sortElements} from "./globalFunctions";
 import Swal from 'sweetalert2';
 import MapPreview from "./mapPreview";
 
 function Hub({ username }) {
+    const sortingOptions = [
+        {value: 'mostRecent', label: 'Most Recent'},
+        {value: 'mostLiked', label: 'Most Liked'}
+    ];
+
     const [posts, setPosts] = useState([]);
     const [newPostText, setNewPostText] = useState('');
     const [newCommentText, setNewCommentText] = useState('');
     const [selectedPostId, setSelectedPostId] = useState(null);
-    const [sortingOption, setSortingOption] = useState('mostRecent');
+    const [sortingOption, setSortingOption] = useState(sortingOptions[0]);
     const [sharePost, setSharePost] = useState(null);
     const [showShare, setShowShare] = useState(false);
     const [userId, setUserId] = useState(null);
@@ -57,6 +62,11 @@ function Hub({ username }) {
 
         fetchPosts();
         getUserId();
+    }, []);
+
+    useEffect(() => {
+        const sortedPosts = sortElements(posts, sortingOption.value);
+        setPosts(sortedPosts);
     }, [sortingOption]);
 
     const bufferToBase64 = (buffer) => {
@@ -92,7 +102,7 @@ function Hub({ username }) {
                     return post;
                 });
 
-                const sortedPosts = sortPosts(processedPosts, sortingOption);
+                const sortedPosts = sortElements(processedPosts, sortingOption.value);
                 setPosts(sortedPosts);
             } else {
                 console.error('Error fetching posts');
@@ -110,20 +120,8 @@ function Hub({ username }) {
 
     const postsToShow = posts.slice(0, visiblePosts);
 
-    const sortPosts = (postsToSort, option) => {
-        const sortedPosts = [...postsToSort];
-        if (option === 'mostRecent') {
-            sortedPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
-        } else if (option === 'mostLiked') {
-            sortedPosts.sort((a, b) => b.likes.length - a.likes.length);
-        }
-        return sortedPosts;
-    };
-
     const handleSortChange = (option) => {
-        setSortingOption(option.value);
-        const sortedPosts = sortPosts(posts, option.value);
-        setPosts(sortedPosts);
+        setSortingOption(option);
     };
 
     const calculateComments = (comments) => {
@@ -253,11 +251,6 @@ function Hub({ username }) {
         setShowShare(!showShare);
         setSharePost(post);
     };
-
-    const sortingOptions = [
-        {value: 'mostRecent', label: 'Most Recent'},
-        {value: 'mostLiked', label: 'Most Liked'}
-    ];
 
     const isLiked = (item) => {
         return item.likes.includes(userId);
