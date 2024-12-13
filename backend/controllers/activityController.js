@@ -30,8 +30,14 @@ const getActivities = async (req, res) => {
     const user = await User.findOne({ username: userName });
     
     try {
-        const activities = await Activity.find({user: user._id});
-        res.status(200).json(activities);
+        const activities = await Activity.find({user: user._id})
+        .populate('sharedWith', 'username');// Populates the sharedWith field with the username of the users
+        //we only need the username on the frontend
+        const activitiesWithUsernames = activities.map(activities => ({
+            ...activities.toObject(),
+            sharedWith: activities.sharedWith.map(user => user.username)
+          }));
+        res.status(200).json(activitiesWithUsernames);
     } catch (error) {
         console.error('Error fetching activities:', error);
         res.status(500).json({ message: error.message });
