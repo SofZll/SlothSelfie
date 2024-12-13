@@ -60,6 +60,7 @@ function Calendar() {
         repeatEndDate: '', // Date of the last repetition   <-
         eventLocation: '', // eventLocation of the event
         type: 'event',
+        sharedWith: [],
         //notify: false,
     });
 
@@ -69,6 +70,7 @@ function Calendar() {
         deadline: "",
         completed: false,
         type: 'activity',
+        sharedWith: [],
     });
 
     useEffect(() => {
@@ -179,6 +181,7 @@ function Calendar() {
                         <p>Start: {new Date(selectedEvent.start).toLocaleString()}</p>
                         <p>End: {new Date(selectedEvent.end).toLocaleString()}</p>
                         <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
+                        <p>Shared with: {selectedEvent.sharedWith}</p>
                         
                         <div>
                             <button className="btn btn-main" onClick={() => setShowConfirmation(true)}>
@@ -211,6 +214,7 @@ function Calendar() {
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {new Date(selectedActivity.deadline).toLocaleDateString()}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
+                        <p>Shared with: {selectedActivity.sharedWith}</p>
 
                         <div>
                             <button className='btn btn-main' onClick={() => setShowConfirmation(true)}>

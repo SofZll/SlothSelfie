@@ -290,6 +290,35 @@ function EventsFunction(props) {
                 </label>
             )}
             */}
+
+            {/*Here we have the list for shared Events with other Users */}
+            <div>
+                <label>Share your event with:
+            <input 
+                type="text" 
+                placeholder="Type username and press Enter" 
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const newUser = e.target.value.trim();
+                        if (newUser && props.eventData?.sharedWith?.length >= 0 && !props.eventData.sharedWith.includes(newUser)) {
+                            handleDataChange('sharedWith', [...props.eventData.sharedWith, newUser], props.setEventData);
+                            e.target.value = ''; // Clear input field
+                        }
+                    }
+                }}
+                />
+                <ul>
+                {(props.eventData?.sharedWith || []).map((user, index) => (
+                    <li key={index}>
+                    {user} <button className="btn btn-main" onClick={() => handleDataChange('sharedWith', props.eventData.sharedWith.filter(u => u !== user), props.setEventData)}>Remove</button>
+                    </li>
+                ))}
+                </ul>
+            </label>
+            </div>
+
+
             <button className="btn btn-main" type="submit">
                 {props.selectedEvent ? "Save Changes" : "Add Event"}
             </button>

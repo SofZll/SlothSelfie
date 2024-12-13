@@ -6,14 +6,20 @@ const User = require('../models/userModel');
 const createEvent = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
-  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
+  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith } = req.body;
 
   try {
     let event;
+
+    let sharedWithUsers = [];
+    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
+    }
+
     if (originalId !== '') {
-      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
+      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, sharedWith: sharedWithUsers.map(u => u._id) });
     } else {
-      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
+      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, sharedWith: sharedWithUsers.map(u => u._id) });
     }
     const savedEvent = await event.save();
     res.status(200).json(savedEvent);
