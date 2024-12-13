@@ -6,6 +6,11 @@
     width: 90%;
 }
 
+.share-input input {
+    width: 80%;
+    height: 45px;
+}
+
 .add-receiver {
     display: flex;
     justify-content: space-between;

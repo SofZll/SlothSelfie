@@ -1,7 +1,7 @@
 import React, { useState, useEffect} from 'react';
 import './css/Notifications.css';
 import Swal from 'sweetalert2'
-import { calculateTime, sortElements } from './globalFunctions';
+import { calculateTime, sortElements, changeReceivers, resetReceivers} from './globalFunctions';
 import ShareInput from './ShareInput';
 import socket from './socket';
 
@@ -224,7 +224,7 @@ const NotificationFunction = () => {
                 });
 
                 socket.emit('send-notification', newNotif);
-                resetReceivers();
+                resetReceivers(setReceivers, setTriggerResetReceivers);
                 document.querySelector('.text-notif textarea').value = '';
                 fetchNotifications();
             } else {
@@ -277,16 +277,6 @@ const NotificationFunction = () => {
         }
     }
 
-    const changeReceivers = (newReceivers) => {
-        setReceivers(newReceivers);
-    }
-
-    const resetReceivers = () => {
-        setReceivers([]);
-        setTriggerResetReceivers((prev) => prev+1);
-        console.log(triggerResetReceivers);
-    }
-
     return (
         <>
             {loading ? (
@@ -298,7 +288,7 @@ const NotificationFunction = () => {
                 <div className="notifs">
                     <h5>Notifications</h5>
                     <div className="new-notif">
-                        <ShareInput changeReceivers={changeReceivers} resetReceivers={triggerResetReceivers} />
+                        <ShareInput changeReceivers={changeReceivers({ setReceivers })} resetReceivers={triggerResetReceivers} />
                         <div className="text-notif">
                             <textarea placeholder="Write here..." />
                             <button className="btn btn-main new-notif-button" onClick={handleSend}>Send</button>
