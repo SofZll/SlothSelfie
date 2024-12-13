@@ -6,11 +6,6 @@
     top: 36px;
 }
 
-.bm-burger-bars {
-    height: 5px !important;
-    background: #F9F9F9;
-}
-
 .bm-burger-bars-hover {
     background: #373A47;
 }
