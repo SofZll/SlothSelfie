@@ -29,3 +29,12 @@ export function sortElements(elements, option) {
     }
     return sortedElements;
 };
+
+export const changeReceivers = ({ setReceivers }) => (newReceivers) => {
+    setReceivers(newReceivers);
+};
+
+export const resetReceivers = (setReceivers, setTriggerResetReceivers) => {
+    setReceivers([]);
+    setTriggerResetReceivers(prev => prev+1);
+};

@@ -43,6 +43,8 @@ function Calendar() {
     const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [receivers, setReceivers] = useState([]);
+    const [triggerReceiversReset, setTriggerReceiversReset] = useState(0);
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
@@ -266,6 +268,11 @@ function Calendar() {
                             setSelectedEvent={setSelectedEvent}
                             updateAllFutureEvents={updateAllFutureEvents}
                             setUpdateAllFutureEvents={setUpdateAllFutureEvents}
+                            
+                            receivers={receivers}
+                            setReceivers={setReceivers}
+                            triggerReceiversReset={triggerReceiversReset}
+                            setTriggerReceiversReset={setTriggerReceiversReset}
                         />
                     ) : (
                         <ActivitiesFunction
@@ -280,6 +287,11 @@ function Calendar() {
 
                             selectedActivity={selectedActivity}
                             setSelectedActivity={setSelectedActivity}
+
+                            receivers={receivers}
+                            setReceivers={setReceivers}
+                            triggerReceiversReset={triggerReceiversReset}
+                            setTriggerReceiversReset={setTriggerReceiversReset}
                         />
                     )}
                 </div>

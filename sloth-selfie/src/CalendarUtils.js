@@ -1,5 +1,6 @@
 
 import Swal from "sweetalert2";
+import { resetReceivers } from "./globalFunctions";
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
@@ -135,11 +136,11 @@ export function resetInputFiels(type, setData, setIsEditing) {
 }
 
 //Function to handle set of new data
-export async function newData2Add(data, originalId) {
+export async function newData2Add(data, originalId, receivers) {
     
     
     if (data.type === "activity") {
-        const { deadline, title, notify, notificationTime, sharedWith} = data;
+        const { deadline, title, notify, notificationTime } = data;
         const newData = {
             title: title,
             deadline: deadline,
@@ -147,12 +148,12 @@ export async function newData2Add(data, originalId) {
             type: "activity",
             notify: notify,
             notificationTime: notificationTime,
-            sharedWith: sharedWith,
+            sharedWith: receivers,
         };
 
         return newData;
     } else if (data.type === "event") {
-        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate, sharedWith } = data;
+        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate } = data;
         const newData = {
             title: title,
             date: date,
@@ -165,7 +166,7 @@ export async function newData2Add(data, originalId) {
             eventLocation: eventLocation,
             type: "event",
             originalId: originalId,
-            sharedWith: sharedWith,
+            sharedWith: receivers,
         };
 
         return newData;
@@ -174,12 +175,12 @@ export async function newData2Add(data, originalId) {
 
 
 // Handle adding an event or activity
-export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing) {
+export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing, receivers, setReceivers, setTriggerResetReceivers) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
     
-    const newData = await newData2Add(data, '');
+    const newData = await newData2Add(data, '', receivers);
 
     try {
 
@@ -204,6 +205,7 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
 
             setDatas([...datas, savedData]);
             resetInputFiels(data.type, setData, setIsEditing);
+            resetReceivers(setReceivers, setTriggerResetReceivers);
         }
     } catch (error) {
         console.error(`Error adding ${data.type}:`, error);
@@ -579,9 +581,9 @@ export function calcLastDate(eventData) {
 }
 
 //Function to generate the first event of a repeated event calling newDta2Add and return the original id
-export async function generateEvent (data, originalId) {
+export async function generateEvent (data, originalId, receivers) {
 
-    const newData = await newData2Add(data, originalId ? originalId : '');
+    const newData = await newData2Add(data, originalId ? originalId : '', receivers);
 
     try {
 
@@ -628,7 +630,7 @@ export function updateCurrentDate(currentDate, repeatFrequency) {
 
 
 // Function to generate repeated events con handleAddData
-export async function generateRepeatedEvents (e, eventData, events, setEvents) {
+export async function generateRepeatedEvents (e, eventData, events, setEvents, receivers) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -645,7 +647,7 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents) {
         repeatEndDate: lastDate.toISOString().split('T')[0],
     }
 
-    const firstEvent = await generateEvent(newData);
+    const firstEvent = await generateEvent(newData, '', receivers);
     if (!firstEvent) {
         console.error("Error generating first event");
         return
@@ -669,7 +671,7 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents) {
 
     await Promise.all(
         newEvents.map(async (event) => {
-            const tmp = await generateEvent(event, originalId);
+            const tmp = await generateEvent(event, originalId, receivers);
             if (!tmp) {
                 console.error("Error generating repeated event");
                 return;

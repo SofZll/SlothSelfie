@@ -4,7 +4,8 @@ import './css/App.css';
 import './css/Calendar.css';
 import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents, resetInputFiels } from './CalendarUtils';
 import Select from 'react-select';
-
+import ShareInput from './ShareInput';
+import { changeReceivers } from './globalFunctions';
 
 function EventsFunction(props) {
 
@@ -32,11 +33,11 @@ function EventsFunction(props) {
             props.setIsEditing(false);
         } else {
             if (props.eventData.repeatFrequency !== "none") {
-                generateRepeatedEvents(e, props.eventData, props.events, props.setEvents);
+                generateRepeatedEvents(e, props.eventData, props.events, props.setEvents, props.receivers);
                 resetInputFiels("event", props.setEventData, props.setIsEditing);
             } else {
                 console.log("Submitting new event:", props.eventData);
-                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing);
+                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.receivers, props.setReceivers, props.setTriggerResetReceivers);
             }
         }
     }
@@ -63,7 +64,6 @@ function EventsFunction(props) {
                     required
                 />
             </label>
-            <br />
     
             <label>Event Date:
                 <input
@@ -73,9 +73,8 @@ function EventsFunction(props) {
                     required
                 />
             </label>
-            <br />
-    
-            <label>
+
+            <label className="centered-label">
                 <input
                     className="checkbox"
                     type="checkbox"
@@ -84,12 +83,11 @@ function EventsFunction(props) {
                 />
                 All Day
             </label>
-            <br />
-    
+
             {!props.eventData.allDay ? (
                 <>
                 <div className="time-filter">
-                    <label>
+                    <label className="centered-label">
                         <input
                             className="checkbox"
                             type="checkbox"
@@ -115,11 +113,29 @@ function EventsFunction(props) {
                             styles={{
                                 menu: (provided) => ({
                                     ...provided,
+                                    width: 150,
                                     maxHeight: 200,
                                 }),
                                 menuList: (provided) => ({
                                     ...provided,
                                     maxHeight: 200,
+                                }),
+                                control: (provided) => ({
+                                    ...provided,
+                                    height: 50,
+                                    width: 150,
+                                    margin: 10,
+                                }),
+                                valueContainer: (provided) => ({
+                                    ...provided,
+                                    height: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }),
+                                input: (provided) => ({
+                                    ...provided,
+                                    margin: 0,
+                                    padding: 0,
                                 }),
                             }}
                         />  
@@ -148,10 +164,9 @@ function EventsFunction(props) {
                     />
                 </label>
             )}
-            <br />
 
 
-            <label>Frequency:
+            <label className="centered-label">Frequency:
                 <Select
                     value={options.find((option) => option.value === props.eventData.repeatFrequency)}
                     onChange={(selectedOption) => handleFrequencyChange(selectedOption)}
@@ -173,14 +188,28 @@ function EventsFunction(props) {
                             ...provided,
                             maxHeight: 90,
                         }),
+                        control: (provided) => ({
+                            ...provided,
+                            height: 45,
+                        }),
+                        valueContainer: (provided) => ({
+                            ...provided,
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                        }),
+                        input: (provided) => ({
+                            ...provided,
+                            margin: 0,
+                            padding: 0,
+                        }),
                     }}
                 />
-                <br />
             </label>
 
             {props.eventData.repeatFrequency !== "none" && (
-                <div>
-                    <label>Repeat Mode:
+                <div className="repeat-div">
+                    <label className="centered-label">Repeat Mode:
                         <Select
                             value={options.find((option) => option.value === props.eventData.repeatMode)}
                             onChange={(selectedOption) => handleDataChange("repeatMode", selectedOption.value, props.setEventData)}
@@ -199,10 +228,24 @@ function EventsFunction(props) {
                                     ...provided,
                                     maxHeight: 90,
                                 }),
+                                control: (provided) => ({
+                                    ...provided,
+                                    height: 45,
+                                }),
+                                valueContainer: (provided) => ({
+                                    ...provided,
+                                    height: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }),
+                                input: (provided) => ({
+                                    ...provided,
+                                    margin: 2,
+                                    padding: 2,
+                                }),
                             }}
                         />
                     </label>
-                    <br />
     
                     {props.eventData.repeatMode === "ntimes" ? (
                         <label>Number of repetitions:
@@ -233,7 +276,6 @@ function EventsFunction(props) {
                                 }
                             />
                             Update all future instances
-                            <br />
                         </label>
                     )}
 
@@ -291,33 +333,7 @@ function EventsFunction(props) {
             )}
             */}
 
-            {/*Here we have the list for shared Events with other Users */}
-            <div>
-                <label>Share your event with:
-            <input 
-                type="text" 
-                placeholder="Type username and press Enter" 
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const newUser = e.target.value.trim();
-                        if (newUser && props.eventData?.sharedWith?.length >= 0 && !props.eventData.sharedWith.includes(newUser)) {
-                            handleDataChange('sharedWith', [...props.eventData.sharedWith, newUser], props.setEventData);
-                            e.target.value = ''; // Clear input field
-                        }
-                    }
-                }}
-                />
-                <ul>
-                {(props.eventData?.sharedWith || []).map((user, index) => (
-                    <li key={index}>
-                    {user} <button className="btn btn-main" onClick={() => handleDataChange('sharedWith', props.eventData.sharedWith.filter(u => u !== user), props.setEventData)}>Remove</button>
-                    </li>
-                ))}
-                </ul>
-            </label>
-            </div>
-
+            <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerResetReceivers}/>
 
             <button className="btn btn-main" type="submit">
                 {props.selectedEvent ? "Save Changes" : "Add Event"}

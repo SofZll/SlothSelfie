@@ -4,6 +4,8 @@ import './css/App.css';
 import './css/Calendar.css';
 import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData } from './CalendarUtils';
 import Select from 'react-select';
+import ShareInput from './ShareInput';
+import { changeReceivers } from './globalFunctions';
 
 function ActivitiesFunction(props){
     
@@ -19,15 +21,15 @@ function ActivitiesFunction(props){
             handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing);
             props.setIsEditing(false);
         } else {
-            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing);
+            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing, props.receivers, props.setReceivers, props.setTriggerReceiversReset);
         }
     }
-
+    
   
     return (
         <div className="container-activity-add">
             <h2>Activities</h2>
-            <form onSubmit={(e) => handleSubmitSave(e)}>
+            <form>
                 <label>Activity:
                     <input 
                         type="text" 
@@ -45,35 +47,8 @@ function ActivitiesFunction(props){
                         required 
                     />
                 </label>
-
-                {/*Here we have the list for shared Events with other Users */}
-            <div>
-                <label>Share your activity with:
-            <input 
-                type="text" 
-                placeholder="Type username and press Enter" 
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        const newUser = e.target.value.trim();
-                        if (newUser && props.activityData?.sharedWith?.length >= 0 && !props.activityData.sharedWith.includes(newUser)) {
-                            handleDataChange('sharedWith', [...props.activityData.sharedWith, newUser], props.setActivityData);
-                            e.target.value = ''; // Clear input field
-                        }
-                    console.log(props.activityData);
-                    }
-                }}
-                />
-                <ul>
-                {(props.activityData.sharedWith || []).map((user, index) => (
-                    <li key={index}>
-                    {user} <button className='btn btn-main' onClick={() => handleDataChange('sharedWith', props.activityData.sharedWith.filter(u => u !== user), props.setActivityData)}>Remove</button>
-                    </li>
-                ))}
-                </ul>
-            </label>
-            </div>
-
-                <label>
+                <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerReceiversReset}/>
+                <label className='centered-label'>
                     <input
                         className="checkbox"
                         type="checkbox"
@@ -83,7 +58,7 @@ function ActivitiesFunction(props){
                     Check this box to receive a notification
                 </label>
                 {props.activityData.notify && (
-                    <label>
+                    <label className='centered-label'>
                         <Select
                             value={options.find((option) => option.value === props.activityData.notificationTime)}
                             onChange={(selectedOption) => handleDataChange("notificationTime", selectedOption.value, props.setActivityData)}
@@ -92,6 +67,7 @@ function ActivitiesFunction(props){
                                 control: (provided) => ({
                                     ...provided,
                                     width: 170,
+                                    height: 45,
                                 }),
                                 menu: (provided) => ({
                                     ...provided,
@@ -102,12 +78,23 @@ function ActivitiesFunction(props){
                                     ...provided,
                                     maxHeight: 150,
                                 }),
+                                valueContainer: (provided) => ({
+                                    ...provided,
+                                    height: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }),
+                                input: (provided) => ({
+                                    ...provided,
+                                    margin: 0,
+                                    padding: 0,
+                                }),
                             }}
                             menuPlacement="top"
                         />
                     </label>
                 )}
-                <button className='btn btn-main' type="submit">
+                <button className='btn btn-main' type="submit" onClick={handleSubmitSave}>
                     {props.selectedActivity ? 'Save Changes' : 'Add Activity'}
                 </button>
             </form>

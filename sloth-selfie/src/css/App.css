@@ -86,6 +86,23 @@ p {
   font-size: 1rem;
 }
 
+input {
+  height: 40px;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+textarea {
+  width: 90%;
+  height: 100px;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
 /* Style Buttons */
 
 .divBtn {

@@ -53,13 +53,13 @@ const ShareInput = ({ changeReceivers, resetReceivers}) => {
                     value={receiverInput} 
                     onChange={(e) => setReceiverInput(e.target.value)}
                     onKeyDown={enterKey}/>
-                <button className="btn btn-main new-notif-button" onClick={() => addReceiver()}>Add</button>
+                <button type="button" className="btn btn-main new-notif-button" onClick={() => addReceiver()}>Add</button>
             </div>
             <div className="receivers-list">
                 {receivers.map((receiver, index) => (
                     <div key={index} className="receiver-tag">
                         {receiver}
-                        <button className="remove-receiver-button" onClick={() => removeReceiver(index)}>&times;</button>
+                        <button type="button" className="remove-receiver-button" onClick={() => removeReceiver(index)}>&times;</button>
                     </div>
                 ))}
             </div>
