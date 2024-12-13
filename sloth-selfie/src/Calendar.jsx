@@ -183,7 +183,11 @@ function Calendar() {
                         <p>Start: {new Date(selectedEvent.start).toLocaleString()}</p>
                         <p>End: {new Date(selectedEvent.end).toLocaleString()}</p>
                         <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
-                        <p>Shared with: {selectedEvent.sharedWith}</p>
+                        <p>Shared with: 
+                            {Array.isArray(selectedEvent.sharedWith) && selectedEvent.sharedWith.length > 0 
+                                ? (selectedEvent.sharedWith.join(', '))
+                                : 'No users shared with'}
+                        </p>
                         
                         <div>
                             <button className="btn btn-main" onClick={() => setShowConfirmation(true)}>
@@ -216,7 +220,11 @@ function Calendar() {
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {new Date(selectedActivity.deadline).toLocaleDateString()}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
-                        <p>Shared with: {selectedActivity.sharedWith}</p>
+                        <p>Shared with: 
+                            {Array.isArray(selectedActivity.sharedWith) && selectedActivity.sharedWith.length > 0 
+                                ? (selectedActivity.sharedWith.join(', '))
+                                : 'No users shared with'}
+                        </p>
 
                         <div>
                             <button className='btn btn-main' onClick={() => setShowConfirmation(true)}>
