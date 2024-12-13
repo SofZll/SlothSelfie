@@ -2,9 +2,6 @@ import React, { useEffect, useState, useContext } from 'react';
 import './css/App.css';
 import './css/Notes.css';
 import NoteCard from './NoteCard';
-import iconDark from './media/SlothDark.svg';
-import iconLight from './media/SlothLight.svg';
-import { StyleContext } from './StyleContext';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent } from './NotesUtils';
 import Swal from 'sweetalert2';
 import { handleAddData } from './CalendarUtils';
@@ -70,7 +67,6 @@ const initialNotes = [
 ];
 
 function NotesFunction() {
-  const { updateStyles, updateIcon } = useContext(StyleContext);
   const [notes, setNotes] = useState(initialNotes || []);
   const [sortCriterion, setSortCriterion] = useState('most_recent');
   const [filterDate, setFilterDate] = useState('');
@@ -141,18 +137,6 @@ useEffect(() => {
   const filteredAndSorted = filterNotesByDate(sortNotes(notes, sortCriterion));
   setFilteredNotes(filteredAndSorted);
 }, [notes, filterDate, sortCriterion, username]);
-
-  // change style page onload document
-  useEffect(() => {
-    updateStyles(true);
-    updateIcon(iconDark);
-
-    return () => {
-        updateStyles(false);
-        updateIcon(iconLight);
-    };
-  }, [updateIcon, updateStyles]);
-
 
   const handleAddNote = async () => {
 

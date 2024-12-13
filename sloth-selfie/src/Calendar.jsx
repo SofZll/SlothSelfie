@@ -6,12 +6,9 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
 import moment from 'moment';
-import { StyleContext } from './StyleContext';
 import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop, handleDeleteRepeatedEvent } from './CalendarUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
-import iconDark from './media/SlothDark.svg';
-import iconLight from './media/SlothLight.svg';
 import iconBack from './media/leftBackArrow.svg';
 
 //TODO: edit di eventi ripetuti: non vanno edit e delete di updateAllFutureInstances e non aggiorna time e duration
@@ -35,7 +32,6 @@ function Calendar() {
     const [selectingView, setSelectingView] = useState(true);
     const [inEvent, setInEvent] = useState(true);
 
-    const { updateStyles, updateIcon } = useContext(StyleContext);
     const [events, setEvents] = useState([]);
     const [activities, setActivities] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
@@ -74,16 +70,6 @@ function Calendar() {
         type: 'activity',
         sharedWith: [],
     });
-
-    useEffect(() => {
-        updateStyles(true);
-        updateIcon(iconDark);
-
-        return () => {
-            updateStyles(false);
-            updateIcon(iconLight);
-        };
-    }, [updateIcon, updateStyles]); 
        
 
     useEffect(() => {

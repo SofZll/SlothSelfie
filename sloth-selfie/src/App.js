@@ -9,6 +9,7 @@ import NotificationFunction from './Notifications';
 import Form from './Login';
 import Card from "./cardCarosel";
 import Carousel from "./CarouselHome";
+import iconDark from './media/SlothDark.svg';
 import { v4 as uuidv4 } from "uuid";
 import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
@@ -66,22 +67,6 @@ function App() {
     console.log("Login status:", status);
     setIsAuthenticated(status);
   };
-
-  /*
-  // Function to open the app in fullscreen mode
-  const openFullscreen = () => {
-    const elem = document.documentElement; // L'intero documento sarà a schermo intero
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if (elem.mozRequestFullScreen) { // Firefox
-      elem.mozRequestFullScreen();
-    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari e Opera
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { // IE/Edge
-      elem.msRequestFullscreen();
-    }
-  };
-  */
 
   const isMobileLandscape = () => {
     const isMobileWidth = window.matchMedia('(max-width: 700px)').matches; // Soglia di 500px per modalità cellulare
@@ -141,8 +126,6 @@ function App() {
     }
   }, []);
 
-  
-
   // Function to show and close the time machine
   const toggleTimeMachine = () => {
     setMachineOpen(prevState => !prevState);
@@ -194,7 +177,13 @@ function App() {
               <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
               <header className="App-header">
                   <div className="title">
-                    <h1>Sloth Selfie</h1>
+                  <StyleContext.Consumer>
+                    {({ icon }) => (
+                      <h1 style={{ color: icon === iconDark ? '#222D52' : '#FAF9F9' }}>
+                        Sloth Selfie
+                      </h1>
+                    )}
+                  </StyleContext.Consumer>
                   </div>
                   <StyleContext.Consumer>
                     {({ icon }) => <img src={icon} className="App-logo" alt="logo" />}
@@ -239,7 +228,7 @@ function App() {
                   <Route path="/notifications" element={<NotificationFunction />} />
                   <Route path="/pomodoro" element={<PomodoroFunction />} />
                   <Route path="/notes" element={<NotesFunction />} />
-                  <Route path="/Calendar" element={<Calendar />} />
+                  <Route path="/calendar" element={<Calendar />} />
                   <Route path="/hub" element={<HubFunction />} />
                 </Routes>
                 {/* time machine */}

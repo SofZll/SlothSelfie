@@ -5,6 +5,10 @@
     padding-bottom: 100px;
 }
 
+.posts-list span {
+    cursor: pointer;
+}
+
 .posts-list h3 {
     font-size: 17px;
     font-weight: bold;
@@ -172,7 +176,7 @@
 .new-post,
 .new-comment {
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     display: flex;
     justify-content: center;
     align-items: center;    

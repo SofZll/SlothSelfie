@@ -53,7 +53,7 @@ body {
   align-items: center;
 }
 
-h1 {
+.App-header h1 {
   white-space: nowrap;
   font-size: 10vmin;
   color: #fdffff;
@@ -230,10 +230,6 @@ textarea {
   transition: background-color 0s ease;
 }
 
-.dark-h1{
-  color: #222D52;
-}
-
 /* time machine */
 
 .div-time-machine {
@@ -299,6 +295,12 @@ textarea {
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 15px;
+}
+
+/*burger*/
+.bm-burger-bars {
+  height: 5px !important;
+  background: #F9F9F9;
 }
 
 @keyframes spin {
