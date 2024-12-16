@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents, resetInputFiels } from './CalendarUtils';
+import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents, resetInputFiels, optionsNotif} from './CalendarUtils';
 import Select from 'react-select';
 import ShareInput from './ShareInput';
 import { changeReceivers } from './globalFunctions';
@@ -214,51 +214,28 @@ function EventsFunction(props) {
                     onChange={(e) => handleDataChange("eventLocation", e.target.value, props.setEventData)}
                 />
             </label>
-            {/* Field for notification 
-            <label>
+            <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerResetReceivers}/>
+            {/* Field for notification */}
+            <label className="centered-label">
                 <input
                     className="checkbox"
                     type="checkbox"
                     checked={props.eventData.notify}
-                    onChange={(e) => handleEventDataChange("notify", e.target.checked, props.setEventData)}
+                    onChange={(e) => handleDataChange("notify", e.target.checked, props.setEventData)}
                 />
                 Check this box to receive a notification
             </label>
             {props.eventData.notify && (
-                <label>
+                <label className="centered-label">
                     <Select
                         value={options.find((option) => option.value === props.eventData.notificationTime)}
-                        onChange={(selectedOption) => handleEventDataChange("notificationTime", selectedOption.value, props.setEventData)}
-                        options={[
-                            { value: "0", label: "At the time of the event" },
-                            { value: "sameDay", label: "same day" },
-                            { value: "60", label: "1 hour before" },
-                            { value: "120", label: "2 hours before" },
-                            { value: "1440", label: "1 day before" },
-                        ]}
-                        styles={{
-                            control: (provided) => ({
-                                ...provided,
-                                width: 170,
-                            }),
-                            menu: (provided) => ({
-                                ...provided,
-                                maxHeight: 150,
-                                overflowY: "auto",
-                            }),
-                            menuList: (provided) => ({
-                                ...provided,
-                                maxHeight: 150,
-                            }),
-                        }}
+                        onChange={(selectedOption) => handleDataChange("notificationTime", selectedOption.value, props.setEventData)}
+                        options={optionsNotif}
+                        classNamePrefix="custom-select"
                         menuPlacement="top"
                     />
                 </label>
             )}
-            */}
-
-            <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerResetReceivers}/>
-
             <button className="btn btn-main" type="submit">
                 {props.selectedEvent ? "Save Changes" : "Add Event"}
             </button>

@@ -16,20 +16,19 @@ const createNotification = async (req, res, internalCall = false) => {
 
     console.log({ activityId, eventId, receivers, message });
     try {
-        const senderUsername = internalCall ? await getSenderUsername({ activityId, eventId }) : req.session.username;
-        console.log(senderUsername);
-        const senderUser = await User.findOne({ username: senderUsername });
-        console.log(senderUser);
         const notificationData = internalCall ? await getDataInternal({ activityId, eventId }) : await getDataStandard({ receivers, message });
-        console.log(notificationData);
-        const { message: messageVal, receiversObjectId, activity, dateNotif} = notificationData;
+        const { message: messageVal, receiversObjectId, element, dateNotif} = notificationData;
+        const senderUsername = internalCall ? element.user.username : req.session.username;
+        const senderUser = await User.findOne({ username: senderUsername });
+
         const notification = new Notification({
             sender: senderUser._id,
             receivers: receiversObjectId,
             message: messageVal,
             createdAt: new Date(),
             read: receiversObjectId.map(() => false),
-            activity: activity ? activity._id : null,
+            activity: activityId ? activityId : null,
+            event: eventId ? eventId : null,
             dateNotif: dateNotif,
             responses: [],
         });
@@ -45,41 +44,39 @@ const createNotification = async (req, res, internalCall = false) => {
     }
 }
 
-const getSenderUsername = async ({ activityId, eventId }) => {
-    if (activityId) {
-        console.log(activityId);
-        const activity = await Activity.findOne({ _id: activityId }).populate('user');
-        console.log(activity);
-        console.log(activity.user);
-        return activity.user.username;
-    } else {
-        /*
-        const event = await Event.findOne({ _id: eventId });
-        return event.user.username;
-        */
-    }
-}
-
 const getDataInternal = async ({ activityId, eventId }) => {
+    let element, date, type;
+
     if (activityId) {
-        const activity = await Activity.findOne({ _id: activityId }).populate('user');
-        if (!activity) return null;
-
-        const deadlineDate = new Date(activity.deadline);
-        const formattedDeadline = `${deadlineDate.getFullYear()}-${String(deadlineDate.getMonth() + 1).padStart(2, '0')}-${String(deadlineDate.getDate()).padStart(2, '0')} ${String(deadlineDate.getHours()).padStart(2, '0')}:${String(deadlineDate.getMinutes()).padStart(2, '0')}`;
-        const message = `Activity: ${activity.title} - Deadline: ${formattedDeadline}`;
-        const dateNotif = calculateDate(activity.deadline, activity.notificationTime);
-
-        return {
-            message,
-            receiversObjectId: [activity.user._id],
-            activity,
-            dateNotif,
-        };
-    } else if (eventId) {
-        // TODO
+        element = await Activity.findOne({ _id: activityId }).populate('user').populate('sharedWith');
+        date = new Date(element.deadline);
+        type = 'Activity';
     }
-    return null;
+    else if (eventId) {
+        element = await Event.findOne({ _id: eventId }).populate('user').populate('sharedWith');
+        date = new Date(element.date);
+        type = 'Event';
+    }
+    if (!element) return null;
+
+    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const message = `${type}: ${element.title} - Date: ${formattedDate}`;
+    const dateNotif = calculateDate(date, element.notificationTime);
+
+    receiversObjectId = [];
+    receiversObjectId.push(element.user._id);
+    if (element.sharedWith != []) {
+        for (const receiver of element.sharedWith) {
+            receiversObjectId.push(receiver._id);
+        }
+    }
+
+    return {
+        message,
+        receiversObjectId,
+        element,
+        dateNotif,
+    }
 }
 
 const getDataStandard = async ({ receivers, message }) => {
@@ -100,6 +97,7 @@ const getDataStandard = async ({ receivers, message }) => {
         message,
         receiversObjectId,
         activity: null,
+        event: null,
         dateNotif: null,
     };
 }

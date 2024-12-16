@@ -2,19 +2,12 @@ import React from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData } from './CalendarUtils';
+import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData, optionsNotif} from './CalendarUtils';
 import Select from 'react-select';
 import ShareInput from './ShareInput';
 import { changeReceivers } from './globalFunctions';
 
 function ActivitiesFunction(props){
-    
-    const options = [
-        { value: "0", label: "same day" },
-        { value: "1440", label: "1 day before" },
-    ];
-
-
     const handleSubmitSave = (e) => {
         e.preventDefault();
         if (props.selectedActivity) {
@@ -48,6 +41,7 @@ function ActivitiesFunction(props){
                     />
                 </label>
                 <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerReceiversReset}/>
+                {/* Field for notification */}
                 <label className='centered-label'>
                     <input
                         className="checkbox"
@@ -60,9 +54,9 @@ function ActivitiesFunction(props){
                 {props.activityData.notify && (
                     <label className='centered-label'>
                         <Select
-                            value={options.find((option) => option.value === props.activityData.notificationTime)}
+                            value={optionsNotif.find((option) => option.value === props.activityData.notificationTime)}
                             onChange={(selectedOption) => handleDataChange("notificationTime", selectedOption.value, props.setActivityData)}
-                            options={options}
+                            options={optionsNotif}
                             classNamePrefix="custom-select"
                             menuPlacement="top"
                         />

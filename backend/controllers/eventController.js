@@ -7,7 +7,7 @@ const { createNotification } = require('../controllers/notificationController');
 const createEvent = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
-  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith } = req.body;
+  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, notify, notificationTime, sharedWith } = req.body;
 
   try {
     let event;
@@ -18,9 +18,9 @@ const createEvent = async (req, res) => {
     }
 
     if (originalId !== '') {
-      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, sharedWith: sharedWithUsers.map(u => u._id) });
+      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
     } else {
-      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, sharedWith: sharedWithUsers.map(u => u._id) });
+      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
     }
     const savedEvent = await event.save();
 

@@ -59,7 +59,8 @@ function Calendar() {
         eventLocation: '', // eventLocation of the event
         type: 'event',
         sharedWith: [],
-        //notify: false,
+        notify: false,
+        notificationTime: 0,
     });
 
     //Define the activity data structure
@@ -69,6 +70,8 @@ function Calendar() {
         completed: false,
         type: 'activity',
         sharedWith: [],
+        notify: false,
+        notificationTime: 0,
     });
        
 
