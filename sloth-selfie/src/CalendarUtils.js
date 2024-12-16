@@ -1,6 +1,12 @@
 
 import Swal from "sweetalert2";
 import { resetReceivers } from "./globalFunctions";
+import socket from './socket'
+
+export const optionsNotif = [
+    { value: "0", label: "same day" },
+    { value: "1440", label: "1 day before" },
+];
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
@@ -58,6 +64,8 @@ export function normalizeData (datas, type) {
                         deadline: new Date(),
                         completed: data.completed,
                         sharedWith: data.sharedWith,
+                        notify: data.notify,
+                        notificationTime: data.notificationTime,
                     } : {
                         time: data.time,
                         itLast: data.duration,
@@ -70,7 +78,8 @@ export function normalizeData (datas, type) {
                         eventLocation: data.eventLocation,
                         originalId: data.originalId,
                         sharedWith: data.sharedWith,
-                        //notify: data.notify,
+                        notify: data.notify,
+                        notificationTime: data.notificationTime,
                     }
                 ),
                 type: type
@@ -95,11 +104,14 @@ export function normalizeData (datas, type) {
                     eventLocation: data.eventLocation,
                     originalId: data.originalId,
                     sharedWith: data.sharedWith,
-                    //notify: data.notify,
+                    notify: data.notify,
+                    notificationTime: data.notificationTime,
                 } : {
                     deadline: data.deadline,
                     completed: data.completed,
                     sharedWith: data.sharedWith,
+                    notify: data.notify,
+                    notificationTime: data.notificationTime,
                 }
             ),
             type: type
@@ -133,6 +145,8 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('repeatEndDate', '', setData);
         handleDataChange('repeatCount', 1, setData);
         handleDataChange('eventLocation', '', setData);
+        handleDataChange('notify', false, setData);
+        handleDataChange('notificationTime', '0', setData);
         handleDataChange('sharedWith', [], setData);
     }
 
@@ -157,7 +171,7 @@ export async function newData2Add(data, originalId, receivers) {
 
         return newData;
     } else if (data.type === "event") {
-        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate } = data;
+        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate, notify, notificationTime} = data;
         const newData = {
             title: title,
             date: date,
@@ -170,6 +184,8 @@ export async function newData2Add(data, originalId, receivers) {
             eventLocation: eventLocation,
             type: "event",
             originalId: originalId,
+            notify: notify,
+            notificationTime: notificationTime,
             sharedWith: receivers,
         };
 
@@ -199,6 +215,8 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
 
         if (!response.ok) {
             throw new Error(`Error adding ${data.type}: ${response.status}`);
+        } else {
+            if (data.notify) socket.emit('send-notification', newData);
         }
 
         // Get the saved data from the backend
@@ -350,6 +368,8 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     deadline: data.deadline,
                     completed: data.completed,
                     sharedWith: data.sharedWith,
+                    notify: data.notify,
+                    notificationTime: data.notificationTime,
                 } : {
                     title: data.title,
                     date: data.date,
@@ -361,6 +381,8 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     repeatCount: data.repeatCount,
                     eventLocation: data.eventLocation,
                     sharedWith: data.sharedWith,
+                    notify: data.notify,
+                    notificationTime: data.notificationTime,
                 }
             ),
         });
