@@ -19,6 +19,7 @@ import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
 import socket from './socket';
 import 'leaflet/dist/leaflet.css';
+import Swal from 'sweetalert2';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -58,8 +59,26 @@ function App() {
   useEffect(() => {
     checkAuth();
 
+    socket.on('notification', (newNotif) => {
+      console.log('New notification received:', newNotif);
+
+      Swal.fire({
+        title: `${newNotif.sender.username}`,
+        text: `${newNotif.message}`,
+        icon: 'info',
+        customClass: {
+          confirmButton: 'button-alert'
+        },
+        timer: 5000,
+        timerProgressBar: true,
+        toast: true, // Show as a toast popup
+        position: 'top-end' // Position on top-right
+      });
+    });
+
     return () => {
       socket.off('authenticated');
+      socket.off("notification");
     }
   }, []);
   
