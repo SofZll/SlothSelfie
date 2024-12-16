@@ -99,6 +99,7 @@ function EventsFunction(props) {
     
                     {props.eventData.isPreciseTime ? (
                         <input
+                            className="time-filter-not-select"
                             type="time"
                             value={props.eventData.time}
                             onChange={(e) => handleDataChange("time", e.target.value, props.setEventData)}

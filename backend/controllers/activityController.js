@@ -8,6 +8,7 @@ const createActivity = async (req, res) => {
     const user = await User.findOne({ username: userName });
     const { title, deadline, completed, notify, notificationTime, sharedWith} = req.body;
     
+    console.log(req.body);
     try {
         let sharedWithUsers = [];
         if (sharedWith && Array.isArray(sharedWith)) {
@@ -15,6 +16,8 @@ const createActivity = async (req, res) => {
         }
         const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id), });
         const savedActivity = await activity.save();
+
+        // Create a notification if the notify flag is set
         if (notify) await createNotification({ activityId: savedActivity._id }, res, true);
         console.log(savedActivity);
         res.status(200).json(savedActivity);

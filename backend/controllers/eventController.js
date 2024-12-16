@@ -1,6 +1,7 @@
 // eventController.js
 const Event = require('../models/eventModel');
 const User = require('../models/userModel');
+const { createNotification } = require('../controllers/notificationController');
 
 // Creating an event
 const createEvent = async (req, res) => {
@@ -22,6 +23,9 @@ const createEvent = async (req, res) => {
       event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, sharedWith: sharedWithUsers.map(u => u._id) });
     }
     const savedEvent = await event.save();
+
+    // Create a notification if the notify flag is set
+    if (notify) await createNotification({ eventId: savedEvent._id }, res, true);
     res.status(200).json(savedEvent);
   }
   catch (error) {

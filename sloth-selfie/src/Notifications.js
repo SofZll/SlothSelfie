@@ -20,29 +20,6 @@ const NotificationFunction = () => {
         };
         
         fetchData();
-
-        socket.on('notification', (newNotif) => {
-            console.log('New notification received:', newNotif);
-
-            Swal.fire({
-                title: `${newNotif.sender.username}`,
-                text: `${newNotif.message}`,
-                icon: 'info',
-                customClass: {
-                    confirmButton: 'button-alert'
-                },
-                timer: 5000,
-                timerProgressBar: true,
-                toast: true, // Show as a toast popup
-                position: 'top-end' // Position on top-right
-            });
-
-            checkHasRead();
-        });
-
-        return () => {
-            socket.off('notification');
-        };
     }, []);
 
     useEffect(() => {
