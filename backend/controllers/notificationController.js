@@ -174,6 +174,13 @@ const markNotificationStatus = async (req, res) => {
         notification.responses.push({ receiver: receiver._id, status });
         await notification.save();
 
+        if (status === 'Accepted') {
+            // come dovrei assegnare gli eventi e le attività ai vari utenti?
+            // - se l'evento/attività è stata creata da un utente, allora l'utente che ha accettato la notifica diventa il proprietario dell'evento/attività
+            // - creazione di un nuovo evento?
+            // - campo aggiuntivo che indica gli utenti che hanno accettato
+        }
+
         res.status(200).json({ success: true, message: 'Notification status marked' });
     } catch (error) {
         console.error('Error marking notification status:', error);

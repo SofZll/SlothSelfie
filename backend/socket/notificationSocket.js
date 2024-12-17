@@ -31,8 +31,9 @@ const notificationSocket = {
                 if (receiverSocketId) {
                     console.log(`Sending notification to ${receiver}: ${message}`);
                     io.to(receiverSocketId).emit('notification', {
+                        title: 'New notification',
                         sender: { username: sender },
-                        message
+                        body: message,
                     });
                 }
             });

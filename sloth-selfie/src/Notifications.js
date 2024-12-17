@@ -290,8 +290,8 @@ const NotificationFunction = () => {
                                     <p>{notif.message}</p>
                                     {(notif.event || notif.activity) && (
                                         <>
-                                            <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'accepted')}>Accept</button>
-                                            <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'declined')}>Decline</button>
+                                            <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'Accepted')}>Accept</button>
+                                            <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'Declined')}>Decline</button>
                                         </>
                                     )}
                                 </div>
