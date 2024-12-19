@@ -41,6 +41,7 @@ function Calendar() {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [receivers, setReceivers] = useState([]);
     const [triggerReceiversReset, setTriggerReceiversReset] = useState(0);
+     const [username, setUsername] = useState("");//username of the authenticated user
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
@@ -142,12 +143,14 @@ function Calendar() {
     //Delete the selected event
     const selectionDelete = () => {
         if(updateAllFutureEvents){
-            handleDeleteRepeatedEvent(selectedEvent, setEvents, setIsEditing);
+            handleDeleteRepeatedEvent(selectedEvent, setEvents, setIsEditing, setSelectedEvent);
         } else {
             handleConfirmDelete('event', selectedEvent, setShowConfirmation, events, setEvents, setSelectedEvent, setIsEditing, setEventData);
         }
     };
 
+    // Ensure events is an array
+    console.log(events); //Problemi di formato con eventi multipli eliminati
 
     return (
         <div className="calendar">

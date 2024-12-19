@@ -55,8 +55,11 @@ const getActivities = async (req, res) => {
 // Updating an activity
 const updateActivity = async (req, res) => {
     const{activityId} = req.params;
-    const {title, deadline, completed} = req.body;
+    const {title, deadline, completed, sharedWith} = req.body;
     const userName = req.session.username;
+    // Log per verificare il nome utente
+    console.log("User in session:", userName);
+
     const user = await User.findOne({ username: userName });
 
     // get the users to share the activity with
@@ -72,8 +75,10 @@ const updateActivity = async (req, res) => {
             return res.status(404).json({ message: "Activity not found" });
         }
         //we find the current user and check if it is his activity
+        console.log(activity.user.toString());
+        console.log(user._id.toString());
         if (activity.user.toString() !== user._id.toString()) {
-            return res.status(403).json({ message: "You are not allowed to update this activity" });
+            return res.status(403).json({ message: "You are not allowed to update this activity" });//problems if user has no activities yet
         }
 
         // Update the activity
