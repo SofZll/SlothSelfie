@@ -552,9 +552,48 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
     
 
 
+//Function to handle the update of a repeated event
+export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, setSelectedData) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/event/original/${data.originalId}`, {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
 
+        if (!response.ok) {
+            console.error(`Error updating repeated events`, response);
+        }
 
+        // Parse the response to get the updated events
+        const updatedResponse = await response.json();
 
+        if (updatedResponse.updatedEvents) {
+            const updatedEvents = updatedResponse.updatedEvents;
+
+            // Update all matching events in the state
+            setData((prevData) =>
+                prevData.map((event) =>
+                    event.originalId === data.originalId 
+                        ? updatedEvents.find((updatedEvent) => updatedEvent.originalId === event.originalId) || event
+                        : event
+                )
+            );
+
+            // Reset editing state
+            setIsEditing(false);
+            setSelectedData(null);
+        } else {
+            console.warn("No updated events returned by the server.");
+        }
+    }
+    catch (error) {
+        console.error(`Error updating repeated events:`, error);
+    }
+}
 
 
 //Function to handle the deletion of a repeted events by the original id
