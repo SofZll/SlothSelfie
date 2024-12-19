@@ -121,7 +121,7 @@ const deleteMultipleEvent = async (req, res) => {
       return res.status(404).json({ message: "Events not found" });
     }
     await Event.deleteMany({ originalId });
-    res.status(200).json({ message: "Events deleted", deletedEvents: events });
+    res.status(200).json({ message: "Events deleted" });
   }
   catch (error) {
     console.error('Error deleting events:', error);

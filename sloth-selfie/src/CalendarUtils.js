@@ -47,13 +47,10 @@ const setStartEnd = (data, type) => {
 
 // Convert Data to the format required by React Big Calendar
 export function normalizeData (datas, type) {
-    if (!Array.isArray(datas)) {
-        console.error("normalizeData expects an array, but got:", datas);
-    }
-
     return (type === "activity" ? datas.filter(data => !data.completed) : datas).map((data) => {
 
         const { startDate, endDate } = setStartEnd(data, type);
+
 
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
             console.error(`Invalid date for event: ${JSON.stringify(data)}`);
@@ -573,16 +570,8 @@ export async function handleDeleteRepeatedEvent(data, setData, setIsEditing) {
 
         // Get the saved note from the backend
         const deletedData = await response.json();
-
-        if (deletedData.message === 'Events deleted') {
-            console.log(`Deleted repeated events:`, deletedData.deletedEvents);
-
-            // we remove all the repeated events with the same originalId
-            setData((prevData) => {
-                const updatedData = prevData.filter(event => event.originalId !== data.originalId);
-                console.log('updatedData:', updatedData);
-                return updatedData;
-            });
+        if (deletedData) {
+            console.log(`Deleted repeted events:`, deletedData);
 
             resetInputFiels('event', setData, setIsEditing);
         }

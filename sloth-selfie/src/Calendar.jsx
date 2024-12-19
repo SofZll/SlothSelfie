@@ -148,9 +148,6 @@ function Calendar() {
         }
     };
 
-    // Ensure events is an array
-    console.log(events); //Problemi di formato con eventi multipli eliminati
-
 
     return (
         <div className="calendar">
