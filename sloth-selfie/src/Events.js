@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents, resetInputFiels, optionsNotif} from './CalendarUtils';
+import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents, resetInputFiels, optionsNotif, handleUpdateRepeatedEvent} from './CalendarUtils';
 import Select from 'react-select';
 import ShareInput from './ShareInput';
 import { changeReceivers } from './globalFunctions';
@@ -28,9 +28,19 @@ function EventsFunction(props) {
         e.preventDefault();
         console.log("Form submit triggered");
         if (props.selectedEvent) {
-            console.log("Submitting update for event:", props.selectedEvent);
-            handleUpdateData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.selectedEvent, props.setSelectedEvent, props.setIsEditing);
-            props.setIsEditing(false);
+            if (props.updateAllFutureEvents) {
+                console.log("Updating all future repeated events");
+                handleUpdateRepeatedEvent(
+                    props.eventData, 
+                    props.setEvents, 
+                    props.setIsEditing, 
+                    props.setSelectedEvent
+                );
+            } else {
+                console.log("Submitting update for event:", props.selectedEvent);
+                handleUpdateData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.selectedEvent, props.setSelectedEvent, props.setIsEditing);
+                props.setIsEditing(false);
+            }
         } else {
             if (props.eventData.repeatFrequency !== "none") {
                 generateRepeatedEvents(e, props.eventData, props.events, props.setEvents, props.receivers);

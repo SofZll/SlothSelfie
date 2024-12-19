@@ -41,7 +41,6 @@ function Calendar() {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [receivers, setReceivers] = useState([]);
     const [triggerReceiversReset, setTriggerReceiversReset] = useState(0);
-     const [username, setUsername] = useState("");//username of the authenticated user
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
