@@ -1,32 +1,26 @@
 const Note = require('../models/noteModel');
 const User = require('../models/userModel');
-const  { createTask, getTasks, updateTask, deleteTask, getTaskById } = require('./taskController');
+const  { updateTask, deleteTask, getTaskById } = require('./taskController');
 
 // Create a new note
 const createNote = async (req, res) => {
-    const {title, category, content, noteAccess, noteAuthor, allowedUsers, isTodo, tasks } = req.body;
-    const newTasks = [];
+    const {title, category, content, noteAccess, allowedUsers, isTodo, tasks } = req.body;
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
 
-    if (isTodo) {
-        for (let i = 0; i < tasks.length; i++) {
-            const task = tasks[i];
-            const newTask = await createTask(task);
-            newTasks.push(newTask._id);
-        }
-    }
 
     try {
         const note = new Note({
             title,
             category,
             content,
-            noteAuthor,
             noteAccess,
             allowedUsers: noteAccess === 'restricted' ? allowedUsers : [],
             isTodo,
-            tasks: isTodo ? newTasks : [],
+            tasks: isTodo ? tasks : [],
             createDate: new Date(),
             updateDate: new Date(),
+            user: user._id,
         });
 
         await note.save();
@@ -39,9 +33,16 @@ const createNote = async (req, res) => {
 
 // Fetch all notes
 const getNotes = async (req, res) => {
+
     try {
-        const notes = await Note.find({ username: req.session.username });
+        const userName = req.session.username;
+        const user = await User.findOne({ username: userName });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        const notes = await Note.find({ user: user._id }).populate('tasks');
         res.status(200).json({ success: true, notes });
+
     } catch (error) {
         console.error('Error fetching notes:', error);
         res.status(500).json({ success: false, message: 'Error fetching notes' });

@@ -35,7 +35,7 @@ function NoteCard({ note, onEdit, onDelete, onDuplicate, onCopy, index, clickedB
           ? 'Public' 
           : note.noteAccess === 'private' 
           ? 'Private' 
-          : `Shared with: ${note.allowedUsers.join(', ')}`}
+          : `Shared with: ${note.allowedUsers && note.allowedUsers.join(', ')}`}
     </small>
     {/* Shows the todo list if it is one */}
     {note.isTodo ? (

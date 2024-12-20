@@ -4,30 +4,31 @@ import { handleAddData, handleDeleteData } from './CalendarUtils';
 
 //TODO: Move to globalFunctions.js
 //Function to fetch notes from the server
-export async function fetchNotes(setNotes) {
+export async function fetchNotes() {
   try {
-      //const response = await fetch('/api/notes', {
-      //locale:
-      const response = await fetch('http://localhost:8000/api/notes', {
-          method: 'GET',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-      });
+    
+    const response = await fetch('http://localhost:8000/api/notes', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      if (!response.ok) {
-          throw new Error('Network response was not ok');
-      }
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
 
-      const data = await response.json();
-      console.log(data);
-      if (Array.isArray(data.notes)) {
-          setNotes(data.notes);
-      } else {
-          console.error('La risposta non contiene un array di note:', data);
-      }
+    const data = await response.json();
+    console.log('Data aaaaaaaaaaaaaaaaaaaaaaaaaa:', data);
+    if (Array.isArray(data.notes)) {
+      return data.notes;
+    } else {
+      console.error('La risposta non contiene un array di note:', data);
+      return [];
+    }
   } catch (error) {
-      console.error('Errore if fetching di notes:', error);
+    console.error('Errore if fetching di notes:', error);
   }
 };
 
@@ -61,42 +62,131 @@ export function canUserAccess(note, currentUser) {
     return false;
   }
 
-  //TODO: Move in backend
-  export function addTask(taskText, noteData, setNoteData) {
 
-    if (!Array.isArray(noteData.tasks)) {
-      noteData.tasks = [];
-    }
-  
-    const newTask = {
-      text: taskText,
-      completed: false,  // every new task is not completed
-      deadline: noteData.taskDeadline || null //if specified we create an activity
-    };
+export async function addTask(taskText, noteData, setNoteData, taskDeadline) {
 
-    // Aggiorna noteData con il nuovo task
-    setNoteData(prevNoteData => ({
-      ...prevNoteData,
-      tasks: [...prevNoteData.tasks, newTask],
-      taskDeadline: ''
-    }));
+  if (!Array.isArray(noteData.tasks)) {
+    noteData.tasks = [];
   }
 
-  //TODO: Move in backend
-  export function removeTask(taskIndex, noteData, setNoteData) {
-    const updatedTasks = noteData.tasks.filter((task, i) => i !== taskIndex);
+  const newTask = {
+    text: taskText,
+    completed: false,
+    deadline: taskDeadline !== '' ? new Date(taskDeadline) : null
+  };
+
+  try {
+    const response = fetch('http://localhost:8000/api/note', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newTask)
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while adding task');
+    }
+    
+    const savedTask = await response.json();
+    if (savedTask) {
+      setNoteData(prevNoteData => ({
+        ...prevNoteData,
+        tasks: [...prevNoteData.tasks, savedTask]
+      }));
+    }
+  } catch (error) {
+    console.error('Error while adding task:', error);
+  }
+}
+
+export async function removeTask(taskIndex, noteData, setNoteData) {
+
+  if (!Array.isArray(noteData.tasks)) {
+    console.error('Tasks array not found');
+    return;
+  }
+
+  if (taskIndex < 0 || taskIndex >= noteData.tasks.length) {
+    console.error('Invalid task index:', taskIndex);
+    return;
+  }
+
+  const taskToDelete = noteData.tasks[taskIndex];
+  if (!taskToDelete) {
+    console.error('Task not found:', taskIndex);
+    return;
+  }
+
+  try {
+    const response = fetch(`http://localhost:8000/api/note/${taskToDelete._id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while deleting task');
+    }
+
+
     setNoteData(prevNoteData => ({
       ...prevNoteData,
-      tasks: updatedTasks
+      tasks: prevNoteData.tasks.filter((task, i) => i !== taskIndex)
     }));
+  } catch (error) {
+    console.error('Error while deleting task:', error);
+  }
 };
 
 //marks a task as completed
-export function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
-  const updatedTasks = noteData.tasks.map((task, i) =>
-    i === taskIndex ? { ...task, completed: !task.completed } : task
-  );
-  handleNoteDataChange('tasks', updatedTasks, setNoteData);
+export async function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
+  
+  if (!Array.isArray(noteData.tasks)) {
+    console.error('Tasks array not found');
+    return;
+  }
+
+  if (taskIndex < 0 || taskIndex >= noteData.tasks.length) {
+    console.error('Invalid task index:', taskIndex);
+    return;
+  }
+
+  const taskToToggle = noteData.tasks[taskIndex];
+  if (!taskToToggle) {
+    console.error('Task not found:', taskIndex);
+    return;
+  }
+
+  try {
+    const response = fetch(`http://localhost:8000/api/note/${taskToToggle._id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        completed: !taskToToggle.completed
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while updating task');
+    }
+
+    const updatedTask = await response.json();
+    if (updatedTask) {
+      setNoteData(prevNoteData => ({
+        ...prevNoteData,
+        tasks: prevNoteData.tasks.map((task, i) => 
+          i === taskIndex ? updatedTask : task
+        )
+      }));
+    }
+  } catch (error) {
+    console.error('Error while updating task:', error);
+  }
+  
 };
 
 export async function handleDuplicateNote (noteId, notes, setNotes) {
@@ -301,6 +391,10 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
 
 //Function to sort the nots for the selected sort criterion
 export function sortNotes(notes, sortCriterion) {
+  if (!Array.isArray(notes)) {
+    console.error('Notes array not found');
+    return [];
+  }
   return [...notes].sort((a, b) => {
     const aDate = a.updateDate instanceof Date ? a.updateDate : new Date(a.updateDate);
     const bDate = b.updateDate instanceof Date ? b.updateDate : new Date(b.updateDate);
@@ -357,11 +451,7 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
     content: noteData.isTodo ? "" : noteData.content.trim(),
     allowedHost: noteData.noteAccess === 'restricted' ? noteData.allowedHost : [],
     tasks: noteData.isTodo 
-    ? noteData.tasks.map(task => ({ 
-      ...task, 
-      completed: task.completed || false,
-      deadline: task.deadline || null
-    })) : [],
+    ? noteData.tasks.map(task => (task._id)) : [],
     createDate: noteData.createDate ? new Date(noteData.createDate) : new Date(),
     updateDate: noteData.updateDate ? new Date(noteData.updateDate) : new Date(),
   }
@@ -467,3 +557,26 @@ function popUpAlert(title, message, icon) {
     }
   });
 }
+
+// Get the username of the authenticated user
+export async function fetchUsername() {
+  try {
+    const response = await fetch('http://localhost:8000/api/user/username', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while fetching user');
+    }
+
+    const data = await response.json();
+    return data.username;
+  } catch (error) {
+    console.error('Error while fetching user:', error);
+  }
+}
+
