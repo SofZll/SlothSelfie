@@ -55,7 +55,7 @@ const getActivities = async (req, res) => {
 // Updating an activity
 const updateActivity = async (req, res) => {
     const{activityId} = req.params;
-    const {title, deadline, completed} = req.body;
+    const {title, deadline, completed, sharedWith} = req.body;
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
 

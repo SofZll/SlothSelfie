@@ -2,12 +2,13 @@ import React from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData, optionsNotif} from './CalendarUtils';
-import Select from 'react-select';
+import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData } from './CalendarUtils';
 import ShareInput from './ShareInput';
+import NotificationInput from './NotificationInput';
 import { changeReceivers } from './globalFunctions';
 
 function ActivitiesFunction(props){
+    const [customValue, setCustomValue] = React.useState('');
     const handleSubmitSave = (e) => {
         e.preventDefault();
         if (props.selectedActivity) {
@@ -42,26 +43,7 @@ function ActivitiesFunction(props){
                 </label>
                 <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerReceiversReset}/>
                 {/* Field for notification */}
-                <label className='centered-label'>
-                    <input
-                        className="checkbox"
-                        type="checkbox"
-                        checked={props.activityData.notify}
-                        onChange={(e) => handleDataChange("notify", e.target.checked, props.setActivityData)}
-                    />
-                    Check this box to receive a notification
-                </label>
-                {props.activityData.notify && (
-                    <label className='centered-label'>
-                        <Select
-                            value={optionsNotif.find((option) => option.value === props.activityData.notificationTime)}
-                            onChange={(selectedOption) => handleDataChange("notificationTime", selectedOption.value, props.setActivityData)}
-                            options={optionsNotif}
-                            classNamePrefix="custom-select"
-                            menuPlacement="top"
-                        />
-                    </label>
-                )}
+                <NotificationInput data={props.activityData} setData={props.setActivityData} customValue={customValue} setCustomValue={setCustomValue}/>
                 <button className='btn btn-main' type="submit" onClick={handleSubmitSave}>
                     {props.selectedActivity ? 'Save Changes' : 'Add Activity'}
                 </button>

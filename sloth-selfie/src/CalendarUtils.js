@@ -5,7 +5,23 @@ import socket from './socket'
 
 export const optionsNotif = [
     { value: "0", label: "same day" },
+    { value: "5", label: "5 minutes before" },
+    { value: "15", label: "15 minutes before" },
+    { value: "60", label: "1 hour before" },
+    { value: "120", label: "2 hours before" },
     { value: "1440", label: "1 day before" },
+    { value: "custom", label: "Customize" }
+];
+
+export const optionsRepetition = [
+    { value: "none", label: "None" },
+    { value: "three", label: "3 times" },
+    { value: "minutely", label: "Minutely" },
+    { value: "hourly", label: "Hourly" },
+    { value: "daily", label: "Daily" },
+    { value: "weekly", label: "Weekly" },
+    { value: "monthly", label: "Monthly" },
+    { value: "untilAnswer", label: "Until answered" },
 ];
 
 //Functoin to handle change the current Event or Activity data

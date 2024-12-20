@@ -277,12 +277,13 @@ textarea {
 }
 
 .custom-select__menu {
-  max-height: 100px;
+  max-height: 120px;
   overflow-y: auto;
 }
 
 .custom-select__menu-list {
-  max-height: 100px;
+  max-height: 120px;
+  overflow-y: hidden !important;
 }
 
 .custom-select__value-container {
@@ -290,7 +291,6 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 8px;
 }
 
 .custom-select__single-value {
