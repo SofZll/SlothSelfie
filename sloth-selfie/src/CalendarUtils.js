@@ -26,10 +26,14 @@ export const optionsRepetition = [
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
-    setData((prevData) => ({
-        ...prevData,
-        [field]: value
-    }));
+    setData((prevData) => {
+        const updatedData = {
+            ...prevData,
+            [field]: value,
+        };
+        //console.log(`Updated data (${field} = ${value}):`, updatedData);
+        return updatedData;
+    });
 }
 
 const setStartEnd = (data, type) => {
@@ -63,6 +67,10 @@ const setStartEnd = (data, type) => {
 
 // Convert Data to the format required by React Big Calendar
 export function normalizeData (datas, type) {
+    if (!Array.isArray(datas)) {
+        console.error("normalizeData expects an array, but got:", datas);
+    }
+
     return (type === "activity" ? datas.filter(data => !data.completed) : datas).map((data) => {
 
         const { startDate, endDate } = setStartEnd(data, type);
@@ -564,13 +572,51 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
     
 
 
+//Function to handle the update of a repeated event
+export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, selectedData, setSelectedData) {
+    console.log("Final data before sending:", selectedData); //perde l'originalId
+    try {
+        const response = await fetch(`http://localhost:8000/api/event/original/${selectedData.originalId}`, {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            console.error(`Error updating repeated events`, response);
+        }
 
+        // Parse the response to get the updated events
+        const updatedResponse = await response.json();
 
+        if (updatedResponse.updatedEvents) {
+            const updatedEvents = updatedResponse.updatedEvents;
+            console.log("Updated events:", updatedEvents);
+            // Update all matching events in the state -> non li vedo
+            setData((prevData) =>
+                prevData.map((event) => {
+                    const updatedEvent = updatedEvents.find((e) => e._id === event._id);
+                    return updatedEvent ? { ...event, ...updatedEvent } : event;
+                })
+            );
 
+            // Reset editing state
+            setIsEditing(false);
+            setSelectedData(null);
+        } else {
+            console.warn("No updated events returned by the server.");
+        }
+    }
+    catch (error) {
+        console.error(`Error updating repeated events:`, error);
+    }
+}
 
 
 //Function to handle the deletion of a repeted events by the original id
-export async function handleDeleteRepeatedEvent(data, setData, setIsEditing) {
+export async function handleDeleteRepeatedEvent(data, setData, setIsEditing, setSelectedData) {
     try {
         const response = await fetch(`http://localhost:8000/api/event/original/${data.originalId}`, {
             method: "DELETE",
@@ -586,10 +632,20 @@ export async function handleDeleteRepeatedEvent(data, setData, setIsEditing) {
 
         // Get the saved note from the backend
         const deletedData = await response.json();
-        if (deletedData) {
-            console.log(`Deleted repeted events:`, deletedData);
+        if (deletedData.deletedEvents) {
+            console.log(`Deleted repeated events:`, deletedData.deletedEvents);
+            // we remove all the repeated events with the same originalId
+            setData((prevData) => {
+                const updatedData = prevData.filter(event => event.originalId !== data.originalId);
+                console.log('updatedData:', updatedData);
+                return updatedData;
+            });
+            setIsEditing(false);
+            setSelectedData(null);
 
-            resetInputFiels('event', setData, setIsEditing);
+            //handleDataChange('title', '', setData); ->questa causa problemi
+
+            //resetInputFiels('event', setData, setIsEditing);
         }
     } catch (error) {
         console.error(`Error deleting repeted events:`, error);
