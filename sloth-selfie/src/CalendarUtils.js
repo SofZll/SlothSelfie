@@ -10,10 +10,14 @@ export const optionsNotif = [
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
-    setData((prevData) => ({
-        ...prevData,
-        [field]: value
-    }));
+    setData((prevData) => {
+        const updatedData = {
+            ...prevData,
+            [field]: value,
+        };
+        //console.log(`Updated data (${field} = ${value}):`, updatedData);
+        return updatedData;
+    });
 }
 
 const setStartEnd = (data, type) => {
@@ -553,9 +557,10 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
 
 
 //Function to handle the update of a repeated event
-export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, setSelectedData) {
+export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, selectedData, setSelectedData) {
+    console.log("Final data before sending:", selectedData); //perde l'originalId
     try {
-        const response = await fetch(`http://localhost:8000/api/event/original/${data.originalId}`, {
+        const response = await fetch(`http://localhost:8000/api/event/original/${selectedData.originalId}`, {
             method: "PUT",
             credentials: "include",
             headers: {
@@ -563,7 +568,6 @@ export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, set
             },
             body: JSON.stringify(data),
         });
-
         if (!response.ok) {
             console.error(`Error updating repeated events`, response);
         }
@@ -573,14 +577,13 @@ export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, set
 
         if (updatedResponse.updatedEvents) {
             const updatedEvents = updatedResponse.updatedEvents;
-
-            // Update all matching events in the state
+            console.log("Updated events:", updatedEvents);
+            // Update all matching events in the state -> non li vedo
             setData((prevData) =>
-                prevData.map((event) =>
-                    event.originalId === data.originalId 
-                        ? updatedEvents.find((updatedEvent) => updatedEvent.originalId === event.originalId) || event
-                        : event
-                )
+                prevData.map((event) => {
+                    const updatedEvent = updatedEvents.find((e) => e._id === event._id);
+                    return updatedEvent ? { ...event, ...updatedEvent } : event;
+                })
             );
 
             // Reset editing state

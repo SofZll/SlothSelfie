@@ -34,6 +34,7 @@ function EventsFunction(props) {
                     props.eventData, 
                     props.setEvents, 
                     props.setIsEditing, 
+                    props.selectedEvent,
                     props.setSelectedEvent
                 );
             } else {

@@ -11,9 +11,9 @@ import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import iconBack from './media/leftBackArrow.svg';
 
-//TODO: edit di eventi ripetuti: non vanno edit e delete di updateAllFutureInstances e non aggiorna time e duration
-//IL PROBLEMA STA NEI 3 CAMPI <- CHE RISULTANO UNDEFINED
-//IL PROBLEMA STA NEL FETCH DEI CAMPI, MA TANTO POI DOVREMO PRENDERLI DAL DB E IL PROBLEMA RICOMINCIA...
+//TODO: edit di eventi ripetuti: problemi con originalId, se crei due eventi ripetuti diversi inserisce lo stesso originalId
+//location non si compila
+//attività da err di put per overdueActivities
 
 const localizer = momentLocalizer(moment);
 
@@ -21,7 +21,6 @@ const DnDCalendar = withDragAndDrop(BigCalendar);
 
 const initialEvents = [
   // Puoi aggiungere alcuni eventi di esempio qui 
-  // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
   {id: 1, originalId:1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
 ];
 
@@ -44,7 +43,7 @@ function Calendar() {
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
-        originalId: "", //DA RIVEDERE
+        originalId: "",
         title: '',
         date: '',
         time: '00:00',
