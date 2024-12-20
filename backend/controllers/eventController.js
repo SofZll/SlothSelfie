@@ -95,6 +95,46 @@ const updateEvent = async (req, res) => {
   }
 };
 
+// Update multiple events
+const updateMultipleEvent = async (req, res) => {
+  const { originalId, userId } = req.params;
+  const { title, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith } = req.body;
+  try {
+    const events = await Event.find({ originalId });
+    if (!events) {
+      return res.status(404).json({ message: "Events not found" });
+    }
+    let sharedWithUsers = [];
+    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
+    }
+
+    // update the events
+    await Event.updateMany(
+      { originalId, userId },
+      {
+        $set: {
+          title,
+          time,
+          isPreciseTime,
+          duration,
+          allDay,
+          repeatFrequency,
+          repeatEndDate,
+          eventLocation,
+          sharedWith: sharedWithUsers.map((u) => u._id),
+        },
+      }
+    );
+
+    res.status(200).json({ message: "Events updated", updatedEvents: events });
+  }
+  catch (error) {
+    console.error('Error updating events:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Delete an event
 const deleteEvent = async (req, res) => {
     const {eventId} = req.params;
@@ -121,7 +161,7 @@ const deleteMultipleEvent = async (req, res) => {
       return res.status(404).json({ message: "Events not found" });
     }
     await Event.deleteMany({ originalId });
-    res.status(200).json({ message: "Events deleted" });
+    res.status(200).json({ message: "Events deleted", deletedEvents: events });
   }
   catch (error) {
     console.error('Error deleting events:', error);
@@ -133,6 +173,7 @@ module.exports = {
     createEvent,
     getEvents,
     updateEvent,
+    updateMultipleEvent,
     deleteEvent,
     deleteMultipleEvent,
 };
