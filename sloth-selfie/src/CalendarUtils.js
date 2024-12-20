@@ -1,12 +1,23 @@
 
 import Swal from "sweetalert2";
+import { resetReceivers } from "./globalFunctions";
+import socket from './socket'
+
+export const optionsNotif = [
+    { value: "0", label: "same day" },
+    { value: "1440", label: "1 day before" },
+];
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
-    setData((prevData) => ({
-        ...prevData,
-        [field]: value
-    }));
+    setData((prevData) => {
+        const updatedData = {
+            ...prevData,
+            [field]: value,
+        };
+        //console.log(`Updated data (${field} = ${value}):`, updatedData);
+        return updatedData;
+    });
 }
 
 const setStartEnd = (data, type) => {
@@ -40,6 +51,10 @@ const setStartEnd = (data, type) => {
 
 // Convert Data to the format required by React Big Calendar
 export function normalizeData (datas, type) {
+    if (!Array.isArray(datas)) {
+        console.error("normalizeData expects an array, but got:", datas);
+    }
+
     return (type === "activity" ? datas.filter(data => !data.completed) : datas).map((data) => {
 
         const { startDate, endDate } = setStartEnd(data, type);
@@ -56,6 +71,9 @@ export function normalizeData (datas, type) {
                     {
                         deadline: new Date(),
                         completed: data.completed,
+                        sharedWith: data.sharedWith,
+                        notify: data.notify,
+                        notificationTime: data.notificationTime,
                     } : {
                         time: data.time,
                         itLast: data.duration,
@@ -67,7 +85,9 @@ export function normalizeData (datas, type) {
                         repeatCount: data.repeatCount,
                         eventLocation: data.eventLocation,
                         originalId: data.originalId,
-                        //notify: data.notify,
+                        sharedWith: data.sharedWith,
+                        notify: data.notify,
+                        notificationTime: data.notificationTime,
                     }
                 ),
                 type: type
@@ -91,10 +111,15 @@ export function normalizeData (datas, type) {
                     repeatCount: data.repeatCount,
                     eventLocation: data.eventLocation,
                     originalId: data.originalId,
-                    //notify: data.notify,
+                    sharedWith: data.sharedWith,
+                    notify: data.notify,
+                    notificationTime: data.notificationTime,
                 } : {
                     deadline: data.deadline,
                     completed: data.completed,
+                    sharedWith: data.sharedWith,
+                    notify: data.notify,
+                    notificationTime: data.notificationTime,
                 }
             ),
             type: type
@@ -113,6 +138,7 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('completed', false, setData);
         handleDataChange('notify', false, setData);
         handleDataChange('notificationTime', '0', setData);
+        handleDataChange('sharedWith', [], setData);
     } else if (type === "event") {
         handleDataChange('id', '', setData);
         handleDataChange('originalId', '', setData);
@@ -127,17 +153,20 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('repeatEndDate', '', setData);
         handleDataChange('repeatCount', 1, setData);
         handleDataChange('eventLocation', '', setData);
+        handleDataChange('notify', false, setData);
+        handleDataChange('notificationTime', '0', setData);
+        handleDataChange('sharedWith', [], setData);
     }
 
     setIsEditing(false);
 }
 
 //Function to handle set of new data
-export async function newData2Add(data, originalId) {
+export async function newData2Add(data, originalId, receivers) {
     
     
     if (data.type === "activity") {
-        const { deadline, title, notify, notificationTime} = data;
+        const { deadline, title, notify, notificationTime } = data;
         const newData = {
             title: title,
             deadline: deadline,
@@ -145,11 +174,12 @@ export async function newData2Add(data, originalId) {
             type: "activity",
             notify: notify,
             notificationTime: notificationTime,
+            sharedWith: receivers,
         };
 
         return newData;
     } else if (data.type === "event") {
-        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate } = data;
+        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate, notify, notificationTime} = data;
         const newData = {
             title: title,
             date: date,
@@ -162,6 +192,9 @@ export async function newData2Add(data, originalId) {
             eventLocation: eventLocation,
             type: "event",
             originalId: originalId,
+            notify: notify,
+            notificationTime: notificationTime,
+            sharedWith: receivers,
         };
 
         return newData;
@@ -170,12 +203,12 @@ export async function newData2Add(data, originalId) {
 
 
 // Handle adding an event or activity
-export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing) {
+export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing, receivers, setReceivers, setTriggerResetReceivers) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
     
-    const newData = await newData2Add(data, '');
+    const newData = await newData2Add(data, '', receivers);
 
     try {
 
@@ -190,6 +223,8 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
 
         if (!response.ok) {
             throw new Error(`Error adding ${data.type}: ${response.status}`);
+        } else {
+            if (data.notify) socket.emit('send-notification', newData);
         }
 
         // Get the saved data from the backend
@@ -200,6 +235,7 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
 
             setDatas([...datas, savedData]);
             resetInputFiels(data.type, setData, setIsEditing);
+            resetReceivers(setReceivers, setTriggerResetReceivers);
         }
     } catch (error) {
         console.error(`Error adding ${data.type}:`, error);
@@ -339,6 +375,9 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     title: data.title,
                     deadline: data.deadline,
                     completed: data.completed,
+                    sharedWith: data.sharedWith,
+                    notify: data.notify,
+                    notificationTime: data.notificationTime,
                 } : {
                     title: data.title,
                     date: data.date,
@@ -349,6 +388,9 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     repeatEndDate: data.repeatEndDate,
                     repeatCount: data.repeatCount,
                     eventLocation: data.eventLocation,
+                    sharedWith: data.sharedWith,
+                    notify: data.notify,
+                    notificationTime: data.notificationTime,
                 }
             ),
         });
@@ -432,6 +474,7 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
         handleDataChange('title', data.title, setData);
         handleDataChange('deadline', data.deadline.split('T')[0], setData);
         handleDataChange('completed', data.completed, setData);
+        handleDataChange('sharedWith', data.sharedWith, setData);
     } else if (data.type === "event") {
         handleDataChange('title', data.title, setData);
         handleDataChange('date', new Date(data.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'), setData);
@@ -451,6 +494,7 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
             handleDataChange('repeatEndDate', data.repeatEndDate.split('T')[0], setData);
         }
         handleDataChange('eventLocation', data.eventLocation, setData);
+        handleDataChange('sharedWith', data.sharedWith, setData);
     }
 
     setSelectedData(data);
@@ -512,13 +556,51 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
     
 
 
+//Function to handle the update of a repeated event
+export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, selectedData, setSelectedData) {
+    console.log("Final data before sending:", selectedData); //perde l'originalId
+    try {
+        const response = await fetch(`http://localhost:8000/api/event/original/${selectedData.originalId}`, {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            console.error(`Error updating repeated events`, response);
+        }
 
+        // Parse the response to get the updated events
+        const updatedResponse = await response.json();
 
+        if (updatedResponse.updatedEvents) {
+            const updatedEvents = updatedResponse.updatedEvents;
+            console.log("Updated events:", updatedEvents);
+            // Update all matching events in the state -> non li vedo
+            setData((prevData) =>
+                prevData.map((event) => {
+                    const updatedEvent = updatedEvents.find((e) => e._id === event._id);
+                    return updatedEvent ? { ...event, ...updatedEvent } : event;
+                })
+            );
 
+            // Reset editing state
+            setIsEditing(false);
+            setSelectedData(null);
+        } else {
+            console.warn("No updated events returned by the server.");
+        }
+    }
+    catch (error) {
+        console.error(`Error updating repeated events:`, error);
+    }
+}
 
 
 //Function to handle the deletion of a repeted events by the original id
-export async function handleDeleteRepeatedEvent(data, setData, setIsEditing) {
+export async function handleDeleteRepeatedEvent(data, setData, setIsEditing, setSelectedData) {
     try {
         const response = await fetch(`http://localhost:8000/api/event/original/${data.originalId}`, {
             method: "DELETE",
@@ -534,10 +616,20 @@ export async function handleDeleteRepeatedEvent(data, setData, setIsEditing) {
 
         // Get the saved note from the backend
         const deletedData = await response.json();
-        if (deletedData) {
-            console.log(`Deleted repeted events:`, deletedData);
+        if (deletedData.deletedEvents) {
+            console.log(`Deleted repeated events:`, deletedData.deletedEvents);
+            // we remove all the repeated events with the same originalId
+            setData((prevData) => {
+                const updatedData = prevData.filter(event => event.originalId !== data.originalId);
+                console.log('updatedData:', updatedData);
+                return updatedData;
+            });
+            setIsEditing(false);
+            setSelectedData(null);
 
-            resetInputFiels('event', setData, setIsEditing);
+            //handleDataChange('title', '', setData); ->questa causa problemi
+
+            //resetInputFiels('event', setData, setIsEditing);
         }
     } catch (error) {
         console.error(`Error deleting repeted events:`, error);
@@ -571,9 +663,9 @@ export function calcLastDate(eventData) {
 }
 
 //Function to generate the first event of a repeated event calling newDta2Add and return the original id
-export async function generateEvent (data, originalId) {
+export async function generateEvent (data, originalId, receivers) {
 
-    const newData = await newData2Add(data, originalId ? originalId : '');
+    const newData = await newData2Add(data, originalId ? originalId : '', receivers);
 
     try {
 
@@ -620,7 +712,7 @@ export function updateCurrentDate(currentDate, repeatFrequency) {
 
 
 // Function to generate repeated events con handleAddData
-export async function generateRepeatedEvents (e, eventData, events, setEvents) {
+export async function generateRepeatedEvents (e, eventData, events, setEvents, receivers) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -637,7 +729,7 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents) {
         repeatEndDate: lastDate.toISOString().split('T')[0],
     }
 
-    const firstEvent = await generateEvent(newData);
+    const firstEvent = await generateEvent(newData, '', receivers);
     if (!firstEvent) {
         console.error("Error generating first event");
         return
@@ -661,7 +753,7 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents) {
 
     await Promise.all(
         newEvents.map(async (event) => {
-            const tmp = await generateEvent(event, originalId);
+            const tmp = await generateEvent(event, originalId, receivers);
             if (!tmp) {
                 console.error("Error generating repeated event");
                 return;
@@ -676,5 +768,4 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents) {
 
     setEvents([...events, ...events2Add]);
 };
-
 

@@ -6,12 +6,18 @@ const { createNotification } = require('../controllers/notificationController');
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-    const { title, deadline, completed, notify, notificationTime} = req.body;
+    const { title, deadline, completed, notify, notificationTime, sharedWith} = req.body;
     
+    console.log(req.body);
     try {
-        // TODO: da aggiungere la logica degli eventi e delle attività condivise
-        const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime });
+        let sharedWithUsers = [];
+        if (sharedWith && Array.isArray(sharedWith)) {
+            sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
+        }
+        const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id), });
         const savedActivity = await activity.save();
+
+        // Create a notification if the notify flag is set
         if (notify) await createNotification({ activityId: savedActivity._id }, res, true);
         console.log(savedActivity);
         res.status(200).json(savedActivity);
@@ -27,8 +33,19 @@ const getActivities = async (req, res) => {
     const user = await User.findOne({ username: userName });
     
     try {
-        const activities = await Activity.find({user: user._id});
-        res.status(200).json(activities);
+        const activities = await Activity.find({
+            $or: [
+              { user: user._id }, // activities created by the user
+              { sharedWith: user._id } // activities shared with the user
+            ]
+          })
+        .populate('sharedWith', 'username');// Populates the sharedWith field with the username of the users
+        //we only need the username on the frontend
+        const activitiesWithUsernames = activities.map(activities => ({
+            ...activities.toObject(),
+            sharedWith: activities.sharedWith.map(user => user.username)
+          }));
+        res.status(200).json(activitiesWithUsernames);
     } catch (error) {
         console.error('Error fetching activities:', error);
         res.status(500).json({ message: error.message });
@@ -38,9 +55,19 @@ const getActivities = async (req, res) => {
 // Updating an activity
 const updateActivity = async (req, res) => {
     const{activityId} = req.params;
-    const {title, deadline, completed} = req.body;
+    const {title, deadline, completed, sharedWith} = req.body;
     const userName = req.session.username;
+    // Log per verificare il nome utente
+    console.log("User in session:", userName);
+
     const user = await User.findOne({ username: userName });
+
+    // get the users to share the activity with
+    let sharedWithUsers = [];
+    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
+    }
+    console.log(sharedWithUsers);
 
     try {
         const activity = await Activity.findById(activityId);
@@ -48,14 +75,16 @@ const updateActivity = async (req, res) => {
             return res.status(404).json({ message: "Activity not found" });
         }
         //we find the current user and check if it is his activity
+        console.log(activity.user.toString());
+        console.log(user._id.toString());
         if (activity.user.toString() !== user._id.toString()) {
-            return res.status(403).json({ message: "You are not allowed to update this activity" });
+            return res.status(403).json({ message: "You are not allowed to update this activity" });//problems if user has no activities yet
         }
 
         // Update the activity
         const updatedActivity = await Activity.findByIdAndUpdate(
             activityId,
-            { title, deadline, completed },
+            { title, deadline, completed, sharedWith: sharedWithUsers.map(u => u._id) },
             { new: true }
         );
         res.status(200).json(updatedActivity);

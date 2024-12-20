@@ -7,6 +7,30 @@
     width: 100%;
 }
 
+.calendar label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 87%;
+    text-align: left;
+}
+
+.calendar input {
+    height: 40px;
+}
+
+.calendar .centered-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 70%;
+}
+
+.calendar .centered-label input {
+    height: 15px;
+}
+
 .div-calendar-container {
     display: flex;
     flex-direction: column;
@@ -53,9 +77,6 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-}
-
-.container-events-add {
     padding: 20px 0 11vh 0;
 }
 
@@ -64,11 +85,40 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
+    gap: 4px;
 }
 
-input {
-    padding: 5px;
-    margin: 5px;
+.container-events-add input {
+    width: 70%;
+}
+
+.repeat-div,
+.time-filter{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.repeat-div {
+    flex-direction: column;
+    width: 100%;
+}
+
+.time-filter {
+    flex-direction: row;
+    width: 87%;
+}
+
+.time-filter label {
+    margin: 0;
+}
+
+.time-filter input {
+    height: 15px;
+}
+
+.time-filter-not-select {
+    height: 40px !important;
 }
 
 /* Activities */
@@ -76,8 +126,17 @@ input {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 99%;
+    width: 100%;
     padding: 20px 0 11vh 0;
+}
+
+.container-activity-add input {
+    width: 75%;
+}
+
+.container-activity-add input[type="checkbox"],
+.container-events-add input[type="checkbox"] {
+    width: 15px;
 }
 
 .activities-list {

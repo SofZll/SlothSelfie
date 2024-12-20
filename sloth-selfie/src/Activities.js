@@ -2,32 +2,27 @@ import React from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData } from './CalendarUtils';
+import { handleDataChange, handleAddData, handleRemoveActivity, handleUpdateData, optionsNotif} from './CalendarUtils';
 import Select from 'react-select';
+import ShareInput from './ShareInput';
+import { changeReceivers } from './globalFunctions';
 
 function ActivitiesFunction(props){
-    
-    const options = [
-        { value: "0", label: "same day" },
-        { value: "1440", label: "1 day before" },
-    ];
-
-
     const handleSubmitSave = (e) => {
         e.preventDefault();
         if (props.selectedActivity) {
             handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing);
             props.setIsEditing(false);
         } else {
-            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing);
+            handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing, props.receivers, props.setReceivers, props.setTriggerReceiversReset);
         }
     }
-
+    
   
     return (
         <div className="container-activity-add">
             <h2>Activities</h2>
-            <form onSubmit={(e) => handleSubmitSave(e)}>
+            <form>
                 <label>Activity:
                     <input 
                         type="text" 
@@ -45,7 +40,9 @@ function ActivitiesFunction(props){
                         required 
                     />
                 </label>
-                <label>
+                <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerReceiversReset}/>
+                {/* Field for notification */}
+                <label className='centered-label'>
                     <input
                         className="checkbox"
                         type="checkbox"
@@ -55,31 +52,17 @@ function ActivitiesFunction(props){
                     Check this box to receive a notification
                 </label>
                 {props.activityData.notify && (
-                    <label>
+                    <label className='centered-label'>
                         <Select
-                            value={options.find((option) => option.value === props.activityData.notificationTime)}
+                            value={optionsNotif.find((option) => option.value === props.activityData.notificationTime)}
                             onChange={(selectedOption) => handleDataChange("notificationTime", selectedOption.value, props.setActivityData)}
-                            options={options}
-                            styles={{
-                                control: (provided) => ({
-                                    ...provided,
-                                    width: 170,
-                                }),
-                                menu: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 150,
-                                    overflowY: "auto",
-                                }),
-                                menuList: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 150,
-                                }),
-                            }}
+                            options={optionsNotif}
+                            classNamePrefix="custom-select"
                             menuPlacement="top"
                         />
                     </label>
                 )}
-                <button className='btn btn-main' type="submit">
+                <button className='btn btn-main' type="submit" onClick={handleSubmitSave}>
                     {props.selectedActivity ? 'Save Changes' : 'Add Activity'}
                 </button>
             </form>
