@@ -11,7 +11,7 @@ import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import iconBack from './media/leftBackArrow.svg';
 
-//TODO: edit di eventi ripetuti: problemi con originalId, se crei due eventi ripetuti diversi inserisce lo stesso originalId
+//TODO: edit di eventi ripetuti: da errore se non refresh manuale di pagina
 //location non si compila
 //attività da err di put per overdueActivities
 

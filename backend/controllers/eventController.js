@@ -2,6 +2,7 @@
 const Event = require('../models/eventModel');
 const User = require('../models/userModel');
 const { createNotification } = require('../controllers/notificationController');
+const mongoose = require('mongoose');
 
 // Creating an event
 const createEvent = async (req, res) => {
@@ -20,7 +21,7 @@ const createEvent = async (req, res) => {
     if (originalId !== '') {
       event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
     } else {
-      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
+      event = new Event({ originalId: new mongoose.Types.ObjectId(), title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
     }
     const savedEvent = await event.save();
 

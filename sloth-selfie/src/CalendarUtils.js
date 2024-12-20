@@ -54,6 +54,7 @@ export function normalizeData (datas, type) {
     if (!Array.isArray(datas)) {
         console.error("normalizeData expects an array, but got:", datas);
     }
+    console.log("Data to normalize:", datas);
 
     return (type === "activity" ? datas.filter(data => !data.completed) : datas).map((data) => {
 
@@ -578,11 +579,13 @@ export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, sel
         if (updatedResponse.updatedEvents) {
             const updatedEvents = updatedResponse.updatedEvents;
             console.log("Updated events:", updatedEvents);
-            // Update all matching events in the state -> non li vedo
+            // Update all matching events in the state
             setData((prevData) =>
                 prevData.map((event) => {
+                    if (event.originalId === selectedData.originalId) {
                     const updatedEvent = updatedEvents.find((e) => e._id === event._id);
                     return updatedEvent ? { ...event, ...updatedEvent } : event;
+                    }
                 })
             );
 
