@@ -97,8 +97,8 @@ const updateEvent = async (req, res) => {
 
 // Update multiple events
 const updateMultipleEvent = async (req, res) => {
-  const { originalId } = req.params;
-  const { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith } = req.body;
+  const { originalId, userId } = req.params;
+  const { title, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith } = req.body;
   try {
     const events = await Event.find({ originalId });
     if (!events) {
@@ -111,11 +111,10 @@ const updateMultipleEvent = async (req, res) => {
 
     // update the events
     await Event.updateMany(
-      { originalId, user: user._id },
+      { originalId, userId },
       {
         $set: {
           title,
-          date,
           time,
           isPreciseTime,
           duration,
@@ -128,7 +127,7 @@ const updateMultipleEvent = async (req, res) => {
       }
     );
 
-    res.status(200).json({ message: "Events updated", updatedEvents: updatedEvents });
+    res.status(200).json({ message: "Events updated", updatedEvents: events });
   }
   catch (error) {
     console.error('Error updating events:', error);
