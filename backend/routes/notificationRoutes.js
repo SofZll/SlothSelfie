@@ -5,7 +5,7 @@ const { createNotification, getNotifications, markNotificationAsRead, markNotifi
 const router = express.Router();
 
 // Notification endpoints
-router.post('/notification/new-notif', createNotification);
+router.post('/notification/new-notif', (req, res) => { createNotification(req, res, false) });
 router.get('/notification/get-notifications', getNotifications);
 router.put('/notification/read-notif/:notifId', markNotificationAsRead);
 router.put('/notification/status-notif/:notifId', markNotificationStatus);

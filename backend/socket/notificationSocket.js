@@ -29,6 +29,7 @@ const notificationSocket = {
             receivers.forEach((receiver) => {
                 const receiverSocketId = userSocketMap[receiver];
                 if (receiverSocketId) {
+                    console.log(`Sending notification to ${receiver}: ${message}`);
                     io.to(receiverSocketId).emit('notification', {
                         sender: { username: sender },
                         message

@@ -1,9 +1,12 @@
-
 .posts-list {
     width: 100%;
     max-width: 400px;
     overflow: auto;
     padding-bottom: 100px;
+}
+
+.posts-list span {
+    cursor: pointer;
 }
 
 .posts-list h3 {
@@ -36,6 +39,10 @@
     align-items: center;
     font-size: 17px;
     margin: 0;
+}
+
+.sorting-options input {
+    height: 15px;
 }
 
 .post {
@@ -173,7 +180,7 @@
 .new-post,
 .new-comment {
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     display: flex;
     justify-content: center;
     align-items: center;    

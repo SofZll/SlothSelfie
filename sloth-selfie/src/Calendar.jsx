@@ -6,17 +6,14 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
 import moment from 'moment';
-import { StyleContext } from './StyleContext';
 import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop, handleDeleteRepeatedEvent } from './CalendarUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
-import iconDark from './media/SlothDark.svg';
-import iconLight from './media/SlothLight.svg';
 import iconBack from './media/leftBackArrow.svg';
 
-//TODO: edit di eventi ripetuti: non vanno edit e delete di updateAllFutureInstances e non aggiorna time e duration
-//IL PROBLEMA STA NEI 3 CAMPI <- CHE RISULTANO UNDEFINED
-//IL PROBLEMA STA NEL FETCH DEI CAMPI, MA TANTO POI DOVREMO PRENDERLI DAL DB E IL PROBLEMA RICOMINCIA...
+//TODO: edit di eventi ripetuti: problemi con originalId, se crei due eventi ripetuti diversi inserisce lo stesso originalId
+//location non si compila
+//attività da err di put per overdueActivities
 
 const localizer = momentLocalizer(moment);
 
@@ -24,7 +21,6 @@ const DnDCalendar = withDragAndDrop(BigCalendar);
 
 const initialEvents = [
   // Puoi aggiungere alcuni eventi di esempio qui 
-  // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
   {id: 1, originalId:1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
 ];
 
@@ -35,7 +31,6 @@ function Calendar() {
     const [selectingView, setSelectingView] = useState(true);
     const [inEvent, setInEvent] = useState(true);
 
-    const { updateStyles, updateIcon } = useContext(StyleContext);
     const [events, setEvents] = useState([]);
     const [activities, setActivities] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
@@ -43,10 +38,12 @@ function Calendar() {
     const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [receivers, setReceivers] = useState([]);
+    const [triggerReceiversReset, setTriggerReceiversReset] = useState(0);
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
-        originalId: "", //DA RIVEDERE
+        originalId: "",
         title: '',
         date: '',
         time: '00:00',
@@ -60,7 +57,9 @@ function Calendar() {
         repeatEndDate: '', // Date of the last repetition   <-
         eventLocation: '', // eventLocation of the event
         type: 'event',
-        //notify: false,
+        sharedWith: [],
+        notify: false,
+        notificationTime: 0,
     });
 
     //Define the activity data structure
@@ -69,17 +68,10 @@ function Calendar() {
         deadline: "",
         completed: false,
         type: 'activity',
+        sharedWith: [],
+        notify: false,
+        notificationTime: 0,
     });
-
-    useEffect(() => {
-        updateStyles(true);
-        updateIcon(iconDark);
-
-        return () => {
-            updateStyles(false);
-            updateIcon(iconLight);
-        };
-    }, [updateIcon, updateStyles]); 
        
 
     useEffect(() => {
@@ -149,12 +141,14 @@ function Calendar() {
     //Delete the selected event
     const selectionDelete = () => {
         if(updateAllFutureEvents){
-            handleDeleteRepeatedEvent(selectedEvent, setEvents, setIsEditing);
+            handleDeleteRepeatedEvent(selectedEvent, setEvents, setIsEditing, setSelectedEvent);
         } else {
             handleConfirmDelete('event', selectedEvent, setShowConfirmation, events, setEvents, setSelectedEvent, setIsEditing, setEventData);
         }
     };
 
+    // Ensure events is an array
+    console.log(events); //Problemi di formato con eventi multipli eliminati
 
     return (
         <div className="calendar">
@@ -179,6 +173,11 @@ function Calendar() {
                         <p>Start: {new Date(selectedEvent.start).toLocaleString()}</p>
                         <p>End: {new Date(selectedEvent.end).toLocaleString()}</p>
                         <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
+                        <p>Shared with: 
+                            {Array.isArray(selectedEvent.sharedWith) && selectedEvent.sharedWith.length > 0 
+                                ? (selectedEvent.sharedWith.join(', '))
+                                : 'No users shared with'}
+                        </p>
                         
                         <div>
                             <button className="btn btn-main" onClick={() => setShowConfirmation(true)}>
@@ -211,6 +210,11 @@ function Calendar() {
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {new Date(selectedActivity.deadline).toLocaleDateString()}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
+                        <p>Shared with: 
+                            {Array.isArray(selectedActivity.sharedWith) && selectedActivity.sharedWith.length > 0 
+                                ? (selectedActivity.sharedWith.join(', '))
+                                : 'No users shared with'}
+                        </p>
 
                         <div>
                             <button className='btn btn-main' onClick={() => setShowConfirmation(true)}>
@@ -262,6 +266,11 @@ function Calendar() {
                             setSelectedEvent={setSelectedEvent}
                             updateAllFutureEvents={updateAllFutureEvents}
                             setUpdateAllFutureEvents={setUpdateAllFutureEvents}
+                            
+                            receivers={receivers}
+                            setReceivers={setReceivers}
+                            triggerReceiversReset={triggerReceiversReset}
+                            setTriggerReceiversReset={setTriggerReceiversReset}
                         />
                     ) : (
                         <ActivitiesFunction
@@ -276,6 +285,11 @@ function Calendar() {
 
                             selectedActivity={selectedActivity}
                             setSelectedActivity={setSelectedActivity}
+
+                            receivers={receivers}
+                            setReceivers={setReceivers}
+                            triggerReceiversReset={triggerReceiversReset}
+                            setTriggerReceiversReset={setTriggerReceiversReset}
                         />
                     )}
                 </div>

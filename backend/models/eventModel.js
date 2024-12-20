@@ -42,15 +42,23 @@ const eventSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
-    allawedHosts: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    }],
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
-    }
+    },
+    notify: {
+        type: Boolean,
+        default: false
+    },
+    notificationTime: {
+        type: Number,
+        default: 0
+    },
+    sharedWith: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }]
 }, { timestamps: true });
 
 const Event = mongoose.model('Event', eventSchema);

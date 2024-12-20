@@ -1,21 +1,31 @@
 // eventController.js
 const Event = require('../models/eventModel');
 const User = require('../models/userModel');
+const { createNotification } = require('../controllers/notificationController');
 
 // Creating an event
 const createEvent = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
-  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
+  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, notify, notificationTime, sharedWith } = req.body;
 
   try {
     let event;
+
+    let sharedWithUsers = [];
+    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
+    }
+
     if (originalId !== '') {
-      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
+      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
     } else {
-      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id });
+      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
     }
     const savedEvent = await event.save();
+
+    // Create a notification if the notify flag is set
+    if (notify) await createNotification({ eventId: savedEvent._id }, res, true);
     res.status(200).json(savedEvent);
   }
   catch (error) {
@@ -30,8 +40,19 @@ const getEvents = async (req, res) => {
   const user = await User.findOne({ username: userName });
 
   try {
-    const events = await Event.find({ user: user._id });
-    res.status(200).json(events);
+    const events = await Event.find({
+      $or: [
+        { user: user._id }, // events created by the user
+        { sharedWith: user._id } // events shared with the user
+      ]
+    })
+    .populate('sharedWith', 'username'); // Populates the sharedWith field with the username of the users
+    //we only need the username on the frontend
+    const eventsWithUsernames = events.map(event => ({
+      ...event.toObject(),
+      sharedWith: event.sharedWith.map(user => user.username)
+    }));
+    res.status(200).json(eventsWithUsernames);
   }
   catch (error) {
     console.error('Error fetching events:', error);
@@ -42,7 +63,7 @@ const getEvents = async (req, res) => {
 // Update an event
 const updateEvent = async (req, res) => {
   const { eventId } = req.params;
-  const { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation } = req.body;
+  const { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith } = req.body;
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
   try {
@@ -54,16 +75,63 @@ const updateEvent = async (req, res) => {
       return res.status(403).json({ message: 'Non sei autorizzato a modificare questo evento' });
     }
 
+     // get the users to share the event with
+     let sharedWithUsers = [];
+     if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+       sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
+     }
+     console.log(sharedWithUsers); //TODO: Nel popup se non si refresha la pagina si vedono gli id sia con add che con edit
+
     //update the event
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation },
+      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith: sharedWithUsers.map(u => u._id) },
       { new: true }
     );
     res.status(200).json(updatedEvent);
 
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+// Update multiple events
+const updateMultipleEvent = async (req, res) => {
+  const { originalId, userId } = req.params;
+  const { title, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith } = req.body;
+  try {
+    const events = await Event.find({ originalId });
+    if (!events) {
+      return res.status(404).json({ message: "Events not found" });
+    }
+    let sharedWithUsers = [];
+    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
+    }
+
+    // update the events
+    await Event.updateMany(
+      { originalId, userId },
+      {
+        $set: {
+          title,
+          time,
+          isPreciseTime,
+          duration,
+          allDay,
+          repeatFrequency,
+          repeatEndDate,
+          eventLocation,
+          sharedWith: sharedWithUsers.map((u) => u._id),
+        },
+      }
+    );
+
+    res.status(200).json({ message: "Events updated", updatedEvents: events });
+  }
+  catch (error) {
+    console.error('Error updating events:', error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -93,7 +161,7 @@ const deleteMultipleEvent = async (req, res) => {
       return res.status(404).json({ message: "Events not found" });
     }
     await Event.deleteMany({ originalId });
-    res.status(200).json({ message: "Events deleted" });
+    res.status(200).json({ message: "Events deleted", deletedEvents: events });
   }
   catch (error) {
     console.error('Error deleting events:', error);
@@ -105,6 +173,7 @@ module.exports = {
     createEvent,
     getEvents,
     updateEvent,
+    updateMultipleEvent,
     deleteEvent,
-    deleteMultipleEvent
+    deleteMultipleEvent,
 };
