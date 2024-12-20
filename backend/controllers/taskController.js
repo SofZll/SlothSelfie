@@ -4,12 +4,12 @@ const User = require('../models/userModel');
 
 // Creating a task
 const createTask = async (req, res) => {
-  const userName = req.session.username;
-  const user = await User.findOne({ username: userName });
-    const { title, deadline } = req.body;
+    const { text, deadline } = req.body;
+    const userName = req.session.username;
+    const user = await User.findOne({ user: userName });
 
     try {
-        const task = new Task({ title, deadline, completed: false, user: user._id });
+        const task = new Task({ text, deadline, completed:false, user: user._id });
         const savedTask = await task.save();
         res.status(200).json(savedTask);
     } catch (error) {
@@ -18,10 +18,34 @@ const createTask = async (req, res) => {
     }
 };
 
+// change task completed value
+const markTaskCompleted = async (req, res) => {
+    const { taskId } = req.params;
+    const userName = req.session.username;
+    const user = await User.findOne({ user: userName });
+
+    try {
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+        if (task.user.toString() !== user._id.toString()) {
+            return res.status(403).json({ message: 'You are not authorized to update this task' });
+        }
+
+        task.completed = !task.completed;
+        const updatedTask = await task.save();
+        res.status(200).json(updatedTask);
+    } catch (error) {
+        console.error('Error updating task:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // fetch all tasks
 const getTasks = async (req, res) => {
     const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
+    const user = await User.findOne({ user: userName });
     
     try {
         const tasks = await Task.find({ user: user._id });
@@ -53,7 +77,7 @@ const updateTask = async (req, res) => {
     const { taskId } = req.params;
     const { title, deadline, completed } = req.body;
     const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
+    const user = await User.findOne({ user: userName });
     try {
         const task = await Task.findById(taskId);
         if (!task) {
@@ -96,5 +120,6 @@ module.exports = {
     getTasks,
     updateTask,
     deleteTask,
-    getTaskById
+    getTaskById,
+    markTaskCompleted
 };

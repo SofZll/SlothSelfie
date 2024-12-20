@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
-    title: {
+    text: {
         type: String,
         required: true
     },
     deadline: {
-        type: Date,
-        required: true
+        type: Date
     },
     completed: {
         type: Boolean,
