@@ -1,9 +1,45 @@
 import React from 'react';
 import './css/NotificationInput.css';
 import Select from 'react-select';
-import { handleDataChange, optionsNotif, optionsRepetition} from './CalendarUtils';
+import { handleDataChange } from './CalendarUtils';
 
 function NotificationInput(props){
+    const optionsNotif = [
+        { value: "0", label: "same day" },
+        { value: "5", label: "5 minutes before" },
+        { value: "15", label: "15 minutes before" },
+        { value: "60", label: "1 hour before" },
+        { value: "120", label: "2 hours before" },
+        { value: "1440", label: "1 day before" },
+        { value: "custom", label: "Customize" }
+    ];
+    
+    const optionsRepetition = [
+        { value: "none", label: "None" },
+        { value: "three", label: "3 times" },
+        { value: "minutely", label: "Minutely" },
+        { value: "hourly", label: "Hourly" },
+        { value: "daily", label: "Daily" },
+        { value: "weekly", label: "Weekly" },
+        { value: "monthly", label: "Monthly" },
+        { value: "untilAnswer", label: "Until answered" },
+    ];
+    
+    const handleDateTimeChange = (date, time) => {
+        const dateTime = new Date(`${date}T${time}`);
+        handleDataChange("customValue", dateTime.toISOString(), props.setData);
+    };
+
+    const handleNotificationChange = (type, value) => {
+        props.setData((prevData) => ({
+            ...prevData,
+            notificationType: {
+                ...prevData.notificationType,
+                [type]: value,
+            },
+        }));
+    };
+
     return (
         <>
             <div className="notification-row">
@@ -36,26 +72,53 @@ function NotificationInput(props){
                         <div className="custom-time">
                             <input
                                 type="date"
-                                value={props.data.deadline}
-                                onChange={(e) => handleDataChange("deadline", e.target.value, props.setData)}
+                                value={props.customDate}
+                                onChange={(e) => handleDateTimeChange(e.target.value, props.customTime)}
                                 required
                             />
                             <input
                                 type="time"
-                                value={props.customValue}
-                                onChange={(e) => props.setCustomValue(e.target.value)}
+                                value={props.customTime}
+                                onChange={(e) => handleDateTimeChange(props.customDate, e.target.value)}
                                 required
                             />
                         </div>
                     )}
                     <div className="notification-row input-small">
                         <Select
-                            value={optionsRepetition.find((option) => option.value === props.data.NotificationRepeat)}
+                            value={optionsRepetition.find((option) => option.value === props.data.notificationRepeat)}
                             onChange={(selectedOption) => handleDataChange("notificationRepeat", selectedOption.value, props.setData)}
                             options={optionsRepetition}
                             classNamePrefix="custom-select"
                             placeholder="Repetition"
                         />
+                    </div>
+                    <div className="notification-row">
+                        <label> How would you like to be notified? </label>
+                        <div className="notification-type">
+                            <input
+                                type="checkbox"
+                                checked={props.data.notificationType.email}
+                                onChange={(e) => handleNotificationChange("email", e.target.checked)}
+                            />
+                            <label>Email</label>
+                        </div>
+                        <div className="notification-type">
+                            <input
+                                type="checkbox"
+                                checked={props.data.notificationType.OS}
+                                onChange={(e) => handleNotificationChange("OS", e.target.checked)}
+                            />
+                            <label>OS</label>
+                        </div>
+                        <div className="notification-type">
+                            <input
+                                type="checkbox"
+                                checked={props.data.notificationType.SMS}
+                                onChange={(e) => handleNotificationChange("SMS", e.target.checked)}
+                            />
+                            <label>SMS</label>
+                        </div>
                     </div>
                 </>
             )}

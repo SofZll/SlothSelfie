@@ -11,6 +11,11 @@ const notificationSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    type: {
+        type: String,
+        enum: ['email', 'OS', 'SMS'],
+        required: true,
+    },
     message: {
         type: String,
         required: true,
@@ -35,6 +40,10 @@ const notificationSchema = new mongoose.Schema({
     },
     dateNotif: {
         type: Date,
+        required: false,
+    },
+    frequencyNotif: {
+        type: String,
         required: false,
     },
     responses: [{
