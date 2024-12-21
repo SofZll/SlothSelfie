@@ -11,9 +11,8 @@ import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import iconBack from './media/leftBackArrow.svg';
 
-//TODO: edit di eventi ripetuti: da errore se non refresh manuale di pagina
-//location non si compila
-//attività da err di put per overdueActivities
+//TODO: edit di eventi ripetuti: non vedo cambiamenti finchè non faccio refresh manuale di pagina
+//sharedWith nel popup appare con gli id anzichè con gli username finchè non faccio refresh manuale di pagina sia con add che con edit
 
 const localizer = momentLocalizer(moment);
 
@@ -148,7 +147,7 @@ function Calendar() {
     };
 
     // Ensure events is an array
-    console.log(events); //Problemi di formato con eventi multipli eliminati
+    console.log(events);
 
     return (
         <div className="calendar">

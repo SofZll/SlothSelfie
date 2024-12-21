@@ -580,14 +580,16 @@ export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, sel
             const updatedEvents = updatedResponse.updatedEvents;
             console.log("Updated events:", updatedEvents);
             // Update all matching events in the state
-            setData((prevData) =>
-                prevData.map((event) => {
+            setData((prevData) => {
+                const newData = prevData.map((event) => {
                     if (event.originalId === selectedData.originalId) {
-                    const updatedEvent = updatedEvents.find((e) => e._id === event._id);
-                    return updatedEvent ? { ...event, ...updatedEvent } : event;
+                        const updatedEvent = updatedEvents.find((e) => e._id === event._id);
+                        return updatedEvent ? { ...event, ...updatedEvent } : event;
                     }
-                })
-            );
+                    return event; // keep the other events as they are
+                });
+                return [...newData]; // return the updated data
+            });
 
             // Reset editing state
             setIsEditing(false);

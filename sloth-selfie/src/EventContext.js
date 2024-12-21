@@ -7,7 +7,7 @@ export const EventProvider = ({ children }) => {
 
     //Define the event data structure
     const [eventData, setEventData] = useState({
-        originalId: "", //DA RIVEDERE
+        originalId: "",
         title: '',
         date: '',
         time: '00:00',
