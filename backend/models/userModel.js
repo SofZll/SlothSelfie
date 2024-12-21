@@ -40,7 +40,18 @@ const userSchema = new mongoose.Schema({
             type: String,
             default: 'image/jpeg',
         },
-    }
+    },
+    NoAvailability: [
+        {
+            startDate: { type: Date, required: true },
+            endDate: { type: Date, required: true },
+            repeatFrequency: { 
+                type: String, 
+                enum: ['none', 'daily', 'weekly', 'monthly', 'yearly'], 
+                default: 'none' 
+            },
+        },
+    ],
 }, {
     timestamps: true,
 });

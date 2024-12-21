@@ -774,3 +774,123 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
     setEvents([...events, ...events2Add]);
 };
 
+
+// Function to fetch the user's no availability time intervals
+export async function fetchNoAvailability(setNoAvailability) {
+    try {
+        const response = await fetch(`/user/no-availability`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('No availability fetched successfully:', result.NoAvailability);
+            setNoAvailability(result.NoAvailability);
+        } else {
+            const error = await response.json();
+            console.error('Failed to fetch no availability:', error.message);
+            throw new Error(error.message);
+        }
+    } catch (error) {
+        console.error('Error fetching no availability:', error);
+        throw error;
+    }
+}
+
+// Function to add a no availability time interval
+export async function addNoAvailability(startDate, endDate, repeatFrequency) {
+    try {
+        const response = await fetch(`/user/add-no-availability`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ startDate, endDate, repeatFrequency }),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('No availability added successfully:', result.message);
+            return result;
+        } else {
+            const error = await response.json();
+            console.error('Failed to add no availability:', error.message);
+            throw new Error(error.message);
+        }
+    } catch (error) {
+        console.error('Error adding no availability:', error);
+        throw error;
+    }
+}
+
+// Function to remove a no availability time interval
+export async function removeNoAvailability(noAvailabilityId) {
+    try {
+        const response = await fetch(`/user/remove-no-availability`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: noAvailabilityId }),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('No availability removed successfully:', result.message);
+            return result;
+        } else {
+            const error = await response.json();
+            console.error('Failed to remove no availability:', error.message);
+            throw new Error(error.message);
+        }
+    } catch (error) {
+        console.error('Error removing no availability:', error);
+        throw error;
+    }
+}
+
+// Function to check if a user is available for a new group event
+export function isUserAvailable(events, startDate, endDate) {
+    const checkStart = new Date(startDate);
+    const checkEnd = new Date(endDate);
+
+    for (const event of events) {
+        const { startDate: eventStart, endDate: eventEnd, repeatFrequency } = event;
+        let currentStart = new Date(eventStart);
+        let currentEnd = new Date(eventEnd);
+
+        // Controls overlapping
+        if (isOverlapping(checkStart, checkEnd, currentStart, currentEnd)) {
+            return false;
+        }
+
+        // Calculates repetitions if necesssary
+        if (repeatFrequency) {
+            while (currentStart <= checkEnd) {
+                currentStart = new Date(currentStart);
+                currentEnd = new Date(currentEnd);
+
+                updateCurrentDate(currentStart, repeatFrequency);
+                updateCurrentDate(currentEnd, repeatFrequency);
+
+                if (isOverlapping(checkStart, checkEnd, currentStart, currentEnd)) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+// Function to check if two intervals are overlapping
+function isOverlapping(start1, end1, start2, end2) {
+    return (
+        (start1 >= start2 && start1 <= end2) || // start inside interval
+        (end1 >= start2 && end1 <= end2) || // end inside interval
+        (start1 <= start2 && end1 >= end2) // Contained interval
+    );
+}
