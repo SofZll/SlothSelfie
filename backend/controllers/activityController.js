@@ -73,11 +73,9 @@ const updateActivity = async (req, res) => {
         if (!activity) {
             return res.status(404).json({ message: "Activity not found" });
         }
-        //we find the current user and check if it is his activity
-        console.log(activity.user.toString());
-        console.log(user._id.toString());
-        if (activity.user.toString() !== user._id.toString()) {
-            return res.status(403).json({ message: "You are not allowed to update this activity" });//problems if user has no activities yet
+        //we find the current user and check if it is his activity, or if it is shared with him
+        if (activity.user.toString() !== user._id.toString()&& !activity.sharedWith.includes(user._id.toString())) {
+            return res.status(403).json({ message: "You are not allowed to update this activity" });
         }
 
         // Update the activity

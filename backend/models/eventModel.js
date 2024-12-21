@@ -38,7 +38,7 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         default: null,
     },
-    EventLocation: {
+    eventLocation: {
         type: String,
         default: null,
     },

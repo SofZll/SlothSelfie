@@ -183,6 +183,60 @@ const checkAuth = async (req, res) => {
     }
 }
 
+//Fetch user's no availability time intervals
+ const getNoAvailability = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const user= await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        res.status(200).json({ success: true, NoAvailability: user.NoAvailability });
+    }
+    catch (error) {
+        console.error('Error fetching no availability:', error);
+        res.status(500).json({ success: false, message: 'Error fetching no availability' });
+    }
+}
+
+// Add time intervals for no availability for group events
+ const addNoAvailability = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const { startDate, endDate, repeatFrequency } = req.body;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        user.NoAvailability.push({ startDate, endDate, repeatFrequency });
+        await user.save();
+        res.status(200).json({ success: true, message: 'No availability added successfully' });
+    }
+    catch (error) {
+        console.error('Error adding no availability:', error);
+        res.status(500).json({ success: false, message: 'Error adding no availability' });
+    }
+}
+
+//Remove time intervals for no availability for group events
+const removeNoAvailability = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const { startDate, endDate, repeatFrequency } = req.body;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        user.NoAvailability.pull({ startDate, endDate, repeatFrequency });
+        await user.save();
+        res.status(200).json({ success: true, message: 'No availability removed successfully' });
+    }
+    catch (error) {
+        console.error('Error removing no availability:', error);
+        res.status(500).json({ success: false, message: 'Error removing no availability' });
+    }
+}
+
 module.exports = {
     loginUser,
     registerUser,
@@ -193,4 +247,7 @@ module.exports = {
     getUsername,
     getUserId,
     checkAuth,
+    getNoAvailability,
+    addNoAvailability,
+    removeNoAvailability,
 };
