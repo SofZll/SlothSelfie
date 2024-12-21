@@ -17,7 +17,8 @@ function Profile() {
         birthday: '', 
         phoneNumber: '', 
         gender:'', 
-        profile_image: ''
+        profile_image: '',
+        noAvailability: [], // Array of objects containing the user's no availability for group events
     });
 
     const navigate = useNavigate();

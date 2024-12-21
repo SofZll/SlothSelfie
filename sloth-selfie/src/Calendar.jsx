@@ -14,6 +14,8 @@ import iconBack from './media/leftBackArrow.svg';
 //TODO: edit di eventi ripetuti: non vedo cambiamenti finchè non faccio refresh manuale di pagina
 //sharedWith nel popup appare con gli id anzichè con gli username finchè non faccio refresh manuale di pagina sia con add che con edit
 
+//TODO: noAvailability per eventi di gruppo, collegalo con user
+
 const localizer = momentLocalizer(moment);
 
 const DnDCalendar = withDragAndDrop(BigCalendar);
