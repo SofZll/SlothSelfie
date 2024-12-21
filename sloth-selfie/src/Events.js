@@ -228,7 +228,7 @@ function EventsFunction(props) {
             </label>
             <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerResetReceivers}/>
             {/* Field for notification */}
-            <NotificationInput data={props.eventData} setData={props.setEventData} customValue={props.customValue} setCustomValue={props.setCustomValue}/>
+            <NotificationInput data={props.eventData} setData={props.setEventData}/>
             <button className="btn btn-main" type="submit">
                 {props.selectedEvent ? "Save Changes" : "Add Event"}
             </button>

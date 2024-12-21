@@ -3,27 +3,6 @@ import Swal from "sweetalert2";
 import { resetReceivers } from "./globalFunctions";
 import socket from './socket'
 
-export const optionsNotif = [
-    { value: "0", label: "same day" },
-    { value: "5", label: "5 minutes before" },
-    { value: "15", label: "15 minutes before" },
-    { value: "60", label: "1 hour before" },
-    { value: "120", label: "2 hours before" },
-    { value: "1440", label: "1 day before" },
-    { value: "custom", label: "Customize" }
-];
-
-export const optionsRepetition = [
-    { value: "none", label: "None" },
-    { value: "three", label: "3 times" },
-    { value: "minutely", label: "Minutely" },
-    { value: "hourly", label: "Hourly" },
-    { value: "daily", label: "Daily" },
-    { value: "weekly", label: "Weekly" },
-    { value: "monthly", label: "Monthly" },
-    { value: "untilAnswer", label: "Until answered" },
-];
-
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
     setData((prevData) => {
@@ -83,13 +62,12 @@ export function normalizeData (datas, type) {
                 title: data.title,
                 start: new Date(),
                 end: new Date(),
+                ...getNotificationData(data),
                 ...(type === "activity" ? 
                     {
                         deadline: new Date(),
                         completed: data.completed,
                         sharedWith: data.sharedWith,
-                        notify: data.notify,
-                        notificationTime: data.notificationTime,
                     } : {
                         time: data.time,
                         itLast: data.duration,
@@ -102,8 +80,6 @@ export function normalizeData (datas, type) {
                         eventLocation: data.eventLocation,
                         originalId: data.originalId,
                         sharedWith: data.sharedWith,
-                        notify: data.notify,
-                        notificationTime: data.notificationTime,
                     }
                 ),
                 type: type
@@ -115,6 +91,7 @@ export function normalizeData (datas, type) {
             title: data.title,
             start: startDate,
             end: endDate,
+            ...getNotificationData(data),
             ...(type === "event" ?
                 {
                     time: data.time,
@@ -128,8 +105,6 @@ export function normalizeData (datas, type) {
                     eventLocation: data.eventLocation,
                     originalId: data.originalId,
                     sharedWith: data.sharedWith,
-                    notify: data.notify,
-                    notificationTime: data.notificationTime,
                 } : {
                     deadline: data.deadline,
                     completed: data.completed,
@@ -143,6 +118,16 @@ export function normalizeData (datas, type) {
     });
 };
 
+function getNotificationData(data) {
+    return {
+        notify: data.notify,
+        notificationTime: data.notificationTime,
+        customValue: data.customValue,
+        notificationRepeat: data.notificationRepeat,
+        notificationType: data.notificationType,
+    };
+}
+
 //Function to save data in front and clen the form
 export function resetInputFiels(type, setData, setIsEditing) {
     
@@ -152,8 +137,6 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('title', '', setData);
         handleDataChange('deadline', '', setData);
         handleDataChange('completed', false, setData);
-        handleDataChange('notify', false, setData);
-        handleDataChange('notificationTime', '0', setData);
         handleDataChange('sharedWith', [], setData);
     } else if (type === "event") {
         handleDataChange('id', '', setData);
@@ -169,10 +152,18 @@ export function resetInputFiels(type, setData, setIsEditing) {
         handleDataChange('repeatEndDate', '', setData);
         handleDataChange('repeatCount', 1, setData);
         handleDataChange('eventLocation', '', setData);
-        handleDataChange('notify', false, setData);
-        handleDataChange('notificationTime', '0', setData);
         handleDataChange('sharedWith', [], setData);
     }
+
+    handleDataChange('notify', false, setData);
+    handleDataChange('notificationTime', '0', setData);
+    handleDataChange('customValue', '', setData);
+    handleDataChange('notificationRepeat', '0', setData);
+    handleDataChange('notificationType', {
+        email: false,
+        OS: false,
+        SMS: false,
+    }, setData);
 
     setIsEditing(false);
 }
@@ -182,7 +173,7 @@ export async function newData2Add(data, originalId, receivers) {
     
     
     if (data.type === "activity") {
-        const { deadline, title, notify, notificationTime } = data;
+        const { deadline, title, notify, notificationTime, customValue, notificationRepeat, notificationType} = data;
         const newData = {
             title: title,
             deadline: deadline,
@@ -190,12 +181,15 @@ export async function newData2Add(data, originalId, receivers) {
             type: "activity",
             notify: notify,
             notificationTime: notificationTime,
+            customValue: customValue,
+            notificationRepeat: notificationRepeat,
+            notificationType: notificationType,
             sharedWith: receivers,
         };
 
         return newData;
     } else if (data.type === "event") {
-        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate, notify, notificationTime} = data;
+        const { title, date, time, duration, allDay, eventLocation, isPreciseTime, repeatFrequency, repeatEndDate, notify, notificationTime, customValue, notificationRepeat, notificationType} = data;
         const newData = {
             title: title,
             date: date,
@@ -210,6 +204,9 @@ export async function newData2Add(data, originalId, receivers) {
             originalId: originalId,
             notify: notify,
             notificationTime: notificationTime,
+            customValue: customValue,
+            notificationRepeat: notificationRepeat,
+            notificationType: notificationType,
             sharedWith: receivers,
         };
 
@@ -392,8 +389,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     deadline: data.deadline,
                     completed: data.completed,
                     sharedWith: data.sharedWith,
-                    notify: data.notify,
-                    notificationTime: data.notificationTime,
+                    ...getNotificationData(data),
                 } : {
                     title: data.title,
                     date: data.date,
@@ -405,9 +401,8 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     repeatCount: data.repeatCount,
                     eventLocation: data.eventLocation,
                     sharedWith: data.sharedWith,
-                    notify: data.notify,
-                    notificationTime: data.notificationTime,
-                }
+                    ...getNotificationData(data),
+                },
             ),
         });
 

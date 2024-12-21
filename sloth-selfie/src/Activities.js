@@ -8,7 +8,6 @@ import NotificationInput from './NotificationInput';
 import { changeReceivers } from './globalFunctions';
 
 function ActivitiesFunction(props){
-    const [customValue, setCustomValue] = React.useState('');
     const handleSubmitSave = (e) => {
         e.preventDefault();
         if (props.selectedActivity) {
@@ -43,7 +42,7 @@ function ActivitiesFunction(props){
                 </label>
                 <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerReceiversReset}/>
                 {/* Field for notification */}
-                <NotificationInput data={props.activityData} setData={props.setActivityData} customValue={customValue} setCustomValue={setCustomValue}/>
+                <NotificationInput data={props.activityData} setData={props.setActivityData} />
                 <button className='btn btn-main' type="submit" onClick={handleSubmitSave}>
                     {props.selectedActivity ? 'Save Changes' : 'Add Activity'}
                 </button>

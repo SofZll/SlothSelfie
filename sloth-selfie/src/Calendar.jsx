@@ -41,6 +41,18 @@ function Calendar() {
     const [receivers, setReceivers] = useState([]);
     const [triggerReceiversReset, setTriggerReceiversReset] = useState(0);
 
+    const notificationDefaults = {
+        notify: false,
+        notificationTime: '0',
+        customValue: '',
+        notificationRepeat: '0',
+        notificationType:{
+            email: false,
+            OS: false,
+            SMS: false,
+        },
+    };
+
     // Define the event data structure
     const [eventData, setEventData] = useState({
         originalId: "",
@@ -58,8 +70,7 @@ function Calendar() {
         eventLocation: '', // eventLocation of the event
         type: 'event',
         sharedWith: [],
-        notify: false,
-        notificationTime: 0,
+        ...notificationDefaults,
     });
 
     //Define the activity data structure
@@ -69,10 +80,8 @@ function Calendar() {
         completed: false,
         type: 'activity',
         sharedWith: [],
-        notify: false,
-        notificationTime: 0,
+        ...notificationDefaults,
     });
-       
 
     useEffect(() => {
         fetchData('events', setEvents);
