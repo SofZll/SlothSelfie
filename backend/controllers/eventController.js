@@ -2,12 +2,13 @@
 const Event = require('../models/eventModel');
 const User = require('../models/userModel');
 const { createNotification } = require('../controllers/notificationController');
+const mongoose = require('mongoose');
 
 // Creating an event
 const createEvent = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
-  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, notify, notificationTime, sharedWith } = req.body;
+  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, notify, notificationTime, sharedWith } = req.body;
 
   try {
     let event;
@@ -18,9 +19,9 @@ const createEvent = async (req, res) => {
     }
 
     if (originalId !== '') {
-      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
+      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
     } else {
-      event = new Event({ originalId: user._id, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
+      event = new Event({ originalId: new mongoose.Types.ObjectId(), title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
     }
     const savedEvent = await event.save();
 
@@ -63,7 +64,7 @@ const getEvents = async (req, res) => {
 // Update an event
 const updateEvent = async (req, res) => {
   const { eventId } = req.params;
-  const { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith } = req.body;
+  const { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith } = req.body;
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
   try {
@@ -85,7 +86,7 @@ const updateEvent = async (req, res) => {
     //update the event
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, EventLocation, sharedWith: sharedWithUsers.map(u => u._id) },
+      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith: sharedWithUsers.map(u => u._id) },
       { new: true }
     );
     res.status(200).json(updatedEvent);
