@@ -2,13 +2,12 @@ const Activity = require('../models/activityModel');
 const User = require('../models/userModel');
 const { createNotification } = require('../controllers/notificationController');
 
-// Creating an activity
+// Creating an activinotenotety
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
     const { title, deadline, completed, notify, notificationTime, sharedWith} = req.body;
     
-    console.log(req.body);
     try {
         let sharedWithUsers = [];
         if (sharedWith && Array.isArray(sharedWith)) {

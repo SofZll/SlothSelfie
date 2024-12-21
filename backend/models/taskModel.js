@@ -6,7 +6,8 @@ const taskSchema = new mongoose.Schema({
         required: true
     },
     deadline: {
-        type: Date
+        type: Date,
+        default: null
     },
     completed: {
         type: Boolean,

@@ -66,7 +66,7 @@ export function canUserAccess(note, currentUser) {
 export async function addTask(taskText, noteData, setNoteData, taskDeadline) {
 
   if (!Array.isArray(noteData.tasks)) {
-    noteData.tasks = [];
+    handleNoteDataChange('tasks', [], setNoteData);
   }
 
   const newTask = {
@@ -76,8 +76,9 @@ export async function addTask(taskText, noteData, setNoteData, taskDeadline) {
   };
 
   try {
-    const response = fetch('http://localhost:8000/api/note', {
+    const response = fetch('http://localhost:8000/api/task', {
       method: 'POST',
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json'
       },
@@ -87,6 +88,7 @@ export async function addTask(taskText, noteData, setNoteData, taskDeadline) {
     if (!response.ok) {
       throw new Error('Error while adding task');
     }
+
     
     const savedTask = await response.json();
     if (savedTask) {
@@ -121,6 +123,7 @@ export async function removeTask(taskIndex, noteData, setNoteData) {
   try {
     const response = fetch(`http://localhost:8000/api/note/${taskToDelete._id}`, {
       method: 'DELETE',
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json'
       }
@@ -162,6 +165,7 @@ export async function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
   try {
     const response = fetch(`http://localhost:8000/api/note/${taskToToggle._id}`, {
       method: 'PUT',
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json'
       },
@@ -212,6 +216,7 @@ export async function handleDuplicateNote (noteId, notes, setNotes) {
         //locale:
          const response = await fetch('http://localhost:8000/api/note', {
             method: 'POST',
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json'
             },

@@ -4,13 +4,14 @@ const User = require('../models/userModel');
 
 // Creating a task
 const createTask = async (req, res) => {
-    const { text, deadline } = req.body;
+    const { text, deadline, completed } = req.body;
     const userName = req.session.username;
-    const user = await User.findOne({ user: userName });
+    const user = await User.findOne({ username: userName });
 
     try {
-        const task = new Task({ text, deadline, completed:false, user: user._id });
+        const task = new Task({ text, deadline, completed, user: user._id });
         const savedTask = await task.save();
+        console.log(savedTask);
         res.status(200).json(savedTask);
     } catch (error) {
         console.error('Error creating task:', error);
