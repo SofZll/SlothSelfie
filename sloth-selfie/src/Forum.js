@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Select from 'react-select';
-import "./css/Hub.css";
+import "./css/Forum.css";
 import iconHeartEmpty from "./media/heartEmpty.svg";
 import iconHeartFull from "./media/heartFull.svg";
 import image from "./media/image.svg";
@@ -12,7 +12,7 @@ import { calculateTime, sortElements} from "./globalFunctions";
 import Swal from 'sweetalert2';
 import MapPreview from "./mapPreview";
 
-function Hub({ username }) {
+function ForumFunction({ username }) {
     const sortingOptions = [
         {value: 'mostRecent', label: 'Most Recent'},
         {value: 'mostLiked', label: 'Most Liked'}
@@ -76,7 +76,7 @@ function Hub({ username }) {
 
     const fetchPosts = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/hub/posts', {
+            const response = await fetch('http://localhost:8000/api/forum/posts', {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -148,7 +148,7 @@ function Hub({ username }) {
             }
 
             try {
-                const response = await fetch('http://localhost:8000/api/hub/update-content', {
+                const response = await fetch('http://localhost:8000/api/forum/update-content', {
                     method: 'PUT',
                     credentials: 'include',
                     headers: {
@@ -179,7 +179,7 @@ function Hub({ username }) {
             }
 
             try {
-                const response = await fetch('http://localhost:8000/api/hub/update-content', {
+                const response = await fetch('http://localhost:8000/api/forum/update-content', {
                     method: 'PUT',
                     credentials: 'include',
                     headers: {
@@ -285,7 +285,7 @@ function Hub({ username }) {
             }
 
             try {
-                const response = await fetch('http://localhost:8000/api/hub/new-post', {
+                const response = await fetch('http://localhost:8000/api/forum/new-post', {
                     method: 'POST',
                     credentials: 'include',
                     body: newPost,
@@ -324,7 +324,7 @@ function Hub({ username }) {
             };
 
             try {
-                const response = await fetch('http://localhost:8000/api/hub/new-comment', {
+                const response = await fetch('http://localhost:8000/api/forum/new-comment', {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
@@ -541,4 +541,4 @@ function Hub({ username }) {
     )
 };
 
-export default Hub;
+export default ForumFunction;

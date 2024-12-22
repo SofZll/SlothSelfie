@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
 import ProfileFunction from './Profile';
-import HubFunction from './Hub';
+import ForumFunction from './Forum';
 import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
 import socket from './socket';
@@ -272,7 +272,7 @@ function App() {
                   <Route path="/pomodoro" element={<PomodoroFunction />} />
                   <Route path="/notes" element={<NotesFunction />} />
                   <Route path="/calendar" element={<Calendar />} />
-                  <Route path="/hub" element={<HubFunction />} />
+                  <Route path="/forum" element={<ForumFunction />} />
                 </Routes>
                 {/* time machine */}
                 <div
