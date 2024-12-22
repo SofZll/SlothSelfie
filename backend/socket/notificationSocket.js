@@ -25,6 +25,7 @@ const notificationSocket = {
             const { receivers, message } = notif;
             const sender = socket.request.session.username;
             console.log('Sender:', sender);
+            console.log('Receivers:', receivers);
 
             receivers.forEach((receiver) => {
                 const receiverSocketId = userSocketMap[receiver];

@@ -236,8 +236,6 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
 
         if (!response.ok) {
             throw new Error(`Error adding ${data.type}: ${response.status}`);
-        } else {
-            if (data.notify) socket.emit('send-notification', newData);
         }
 
         // Get the saved data from the backend

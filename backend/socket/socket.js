@@ -1,15 +1,22 @@
-const pomodoroSocket = require('./pomodoroSocket');
-const notificationSocket = require('./notificationSocket');
+let io;
 
-const socketHandler = (io) => {
-    const settingPomodoro = {};
-    const userSocketMap = {};
-    let intervals = {};
-
-    io.on('connection', (socket) => {
-        pomodoroSocket.registerHandlers(socket, io, settingPomodoro, userSocketMap, intervals);
-        notificationSocket.registerHandlers(socket, io, userSocketMap);
+const init = (server) => {
+    io = require('socket.io')(server, {
+        cors: {
+            origin: 'http://localhost:3000', 
+            methods: ['GET', 'POST'],
+            allowedHeaders: ['Content-Type', 'Authorization'],
+            credentials: true
+        }
     });
+    return io;
 };
 
-module.exports = socketHandler;
+const getIO = () => {
+    if (!io) {
+        throw new Error('Socket.IO not initialized!');
+    }
+    return io;
+};
+
+module.exports = { init, getIO };
