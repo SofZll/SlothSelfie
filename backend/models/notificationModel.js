@@ -12,9 +12,9 @@ const notificationSchema = new mongoose.Schema({
         required: true,
     },
     type: {
-        type: String,
+        type: [String],
         enum: ['email', 'OS', 'SMS'],
-        required: true,
+        default: ['OS'],
     },
     message: {
         type: String,

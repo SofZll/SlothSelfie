@@ -2,7 +2,7 @@ const Notification = require('../models/notificationModel');
 const User = require('../models/userModel');
 const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
-const { calculateDate } = require('../utils/utils');
+const socket = require('../socket/socket');
 
 // Create a new notification: FUNZIONA
 const createNotification = async (req, res, internalCall = false) => {
@@ -11,38 +11,64 @@ const createNotification = async (req, res, internalCall = false) => {
     console.log('Request Body:', req.body);
     console.log('Internal Call:', internalCall);
 
-    if (internalCall) ({ activityId, eventId, receivers, message } = req)
-    else ({ activityId, eventId, receivers, message } = req.body)
+    if (internalCall) ({ activityId, eventId, receivers, message, dateNotif, frequencyNotif, type } = req)
+    else {
+        ({ activityId, eventId, receivers, message } = req.body);
+        dateNotif = null;
+        frequencyNotif = null;
+        type = 'OS';
+    }
 
-    console.log({ activityId, eventId, receivers, message });
+    console.log({ activityId, eventId, receivers, message, dateNotif, frequencyNotif, type });
     try {
         const notificationData = internalCall ? await getDataInternal({ activityId, eventId }) : await getDataStandard({ receivers, message });
-        const { message: messageVal, receiversObjectId, element, dateNotif} = notificationData;
+        const { message: messageVal, receiversObjectId, element } = notificationData;
         const senderUsername = internalCall ? element.user.username : req.session.username;
         const senderUser = await User.findOne({ username: senderUsername });
+
+        const notificationType = Object.keys(type).filter(key => type[key] === true);
+
+        const notificationDate = new Date(dateNotif);
 
         const notification = new Notification({
             sender: senderUser._id,
             receivers: receiversObjectId,
+            type: notificationType,
             message: messageVal,
             createdAt: new Date(),
             read: receiversObjectId.map(() => false),
             activity: activityId ? activityId : null,
             event: eventId ? eventId : null,
-            dateNotif: dateNotif,
+            dateNotif: notificationDate,
+            frequencyNotif: frequencyNotif,
             responses: [],
         });
-
         // creazione notifica schedule
 
         console.log(notification);
         await notification.save();
+
+        emitNotification(receiversObjectId, messageVal);
+
         if (!internalCall) res.status(201).json({ success: true, notification });
     } catch (error) {
         console.error('Error creating notification:', error);
         if (!internalCall) res.status(500).json({ success: false, message: 'Error creating notification' });
     }
 }
+
+const emitNotification = (receivers, message) => {
+    const io = socket.getIO();
+    if (!io) {
+        console.error("Socket.IO instance not found.");
+        return;
+    }
+
+    io.emit('send-notification', {
+        receivers,
+        message,
+    });
+};
 
 const getDataInternal = async ({ activityId, eventId }) => {
     let element, date, type;
@@ -52,7 +78,7 @@ const getDataInternal = async ({ activityId, eventId }) => {
         date = new Date(element.deadline);
         type = 'Activity';
     }
-    else if (eventId) {
+    else if (eventId) {dateNotif
         element = await Event.findOne({ _id: eventId }).populate('user').populate('sharedWith');
         date = new Date(element.date);
         type = 'Event';
@@ -61,7 +87,6 @@ const getDataInternal = async ({ activityId, eventId }) => {
 
     const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const message = `${type}: ${element.title} - Date: ${formattedDate}`;
-    const dateNotif = calculateDate(date, element.notificationTime);
 
     receiversObjectId = [];
     receiversObjectId.push(element.user._id);
@@ -75,7 +100,6 @@ const getDataInternal = async ({ activityId, eventId }) => {
         message,
         receiversObjectId,
         element,
-        dateNotif,
     }
 }
 
@@ -98,7 +122,6 @@ const getDataStandard = async ({ receivers, message }) => {
         receiversObjectId,
         activity: null,
         event: null,
-        dateNotif: null,
     };
 }
 

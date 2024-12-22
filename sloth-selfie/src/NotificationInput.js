@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState }  from 'react';
 import './css/NotificationInput.css';
 import Select from 'react-select';
 import { handleDataChange } from './CalendarUtils';
 
 function NotificationInput(props){
+    const [customDate, setCustomDate] = useState('');
+    const [customTime, setCustomTime] = useState('');
     const optionsNotif = [
         { value: "0", label: "same day" },
         { value: "5", label: "5 minutes before" },
@@ -11,7 +13,7 @@ function NotificationInput(props){
         { value: "60", label: "1 hour before" },
         { value: "120", label: "2 hours before" },
         { value: "1440", label: "1 day before" },
-        { value: "custom", label: "Customize" }
+        { value: "-1", label: "Customize" }
     ];
     
     const optionsRepetition = [
@@ -26,8 +28,13 @@ function NotificationInput(props){
     ];
     
     const handleDateTimeChange = (date, time) => {
-        const dateTime = new Date(`${date}T${time}`);
-        handleDataChange("customValue", dateTime.toISOString(), props.setData);
+        const dateValue = date || customDate;
+        const timeValue = time || customTime;
+        const dateTime = new Date(`${dateValue}T${timeValue}`);
+        
+        handleDataChange("customValue", dateTime, props.setData);
+        setCustomDate(dateValue);
+        setCustomTime(timeValue);
     };
 
     const handleNotificationChange = (type, value) => {
@@ -68,18 +75,18 @@ function NotificationInput(props){
                             placeholder="Select time"
                         />
                     </div>
-                    {props.data.notificationTime === 'custom' && (
+                    {props.data.notificationTime === "-1" && (
                         <div className="custom-time">
                             <input
                                 type="date"
-                                value={props.customDate}
-                                onChange={(e) => handleDateTimeChange(e.target.value, props.customTime)}
+                                value={customDate}
+                                onChange={(e) => handleDateTimeChange(e.target.value, customTime)}
                                 required
                             />
                             <input
                                 type="time"
-                                value={props.customTime}
-                                onChange={(e) => handleDateTimeChange(props.customDate, e.target.value)}
+                                value={customTime}
+                                onChange={(e) => handleDateTimeChange(customDate, e.target.value)}
                                 required
                             />
                         </div>
