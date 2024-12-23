@@ -187,12 +187,17 @@ const checkAuth = async (req, res) => {
  const getNoAvailability = async (req, res) => {
     try {
         const userId = req.session.userId;
-        const user= await User.findById(userId);
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User not logged in' });
+        }
+
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-        res.status(200).json({ success: true, NoAvailability: user.NoAvailability });
-    }
+
+        res.status(200).json({ success: true, noAvailability: user.noAvailability });
+    } 
     catch (error) {
         console.error('Error fetching no availability:', error);
         res.status(500).json({ success: false, message: 'Error fetching no availability' });
@@ -204,13 +209,15 @@ const checkAuth = async (req, res) => {
     try {
         const userId = req.session.userId;
         const { startDate, endDate, repeatFrequency } = req.body;
+        const newNoAvailability = { startDate, endDate, repeatFrequency };
         const user = await User.findById(userId);
+        console.log('Received data:', req.body);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-        user.NoAvailability.push({ startDate, endDate, repeatFrequency });
+        user.noAvailability.push({ startDate, endDate, repeatFrequency });
         await user.save();
-        res.status(200).json({ success: true, message: 'No availability added successfully' });
+        res.status(200).json({ success: true, noAvailability: newNoAvailability, message: 'No availability added successfully' });
     }
     catch (error) {
         console.error('Error adding no availability:', error);
@@ -221,21 +228,26 @@ const checkAuth = async (req, res) => {
 //Remove time intervals for no availability for group events
 const removeNoAvailability = async (req, res) => {
     try {
+        const { id } = req.params;  //id of the time interval to remove
         const userId = req.session.userId;
-        const { startDate, endDate, repeatFrequency } = req.body;
+
+        // find the user
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-        user.NoAvailability.pull({ startDate, endDate, repeatFrequency });
+
+        // Remove the specified no availability time interval
+        user.noAvailability.pull({ _id: id });
+
         await user.save();
+
         res.status(200).json({ success: true, message: 'No availability removed successfully' });
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error removing no availability:', error);
         res.status(500).json({ success: false, message: 'Error removing no availability' });
     }
-}
+};
 
 module.exports = {
     loginUser,

@@ -23,14 +23,29 @@ const CalendarNoAvailability = () => {
 
     const handleAddNoAvailability = async (e) => {
         e.preventDefault();
+        console.log('Sending data:', formData);
         try {
+             // Validation
+            if (!formData.startDate || !formData.endDate) {
+                console.error('Start date or end date is missing');
+                return;
+            }
+            if (new Date(formData.startDate) > new Date(formData.endDate)) {
+                console.error('Start date cannot be after end date');
+                return;
+            }
+
             const result = await addNoAvailability(
                 formData.startDate,
                 formData.endDate,
                 formData.repeatFrequency
             );
-            setNoAvailability([...noAvailability, result.NoAvailability]); // we update the state with a new period of no availability
+
+            console.log('Result from backend:', result);
+
+            setNoAvailability(prev => [...prev, result.noAvailability]);// we update the state with a new period of no availability
             setFormData({ startDate: '', endDate: '', repeatFrequency: 'none' }); // Reset form
+            // Fetch degli ultimi dati dopo l'aggiunta
         } catch (error) {
             console.error('Error adding no availability:', error);
         }
@@ -44,6 +59,7 @@ const CalendarNoAvailability = () => {
             console.error('Error removing no availability:', error);
         }
     };
+    console.log('noAvailability data:', noAvailability);
 
     return (
         <div>
@@ -79,7 +95,6 @@ const CalendarNoAvailability = () => {
                                 onChange={handleInputChange}
                             >
                                 <option value="none">None</option>
-                                <option value="daily">Daily</option>
                                 <option value="weekly">Weekly</option>
                                 <option value="monthly">Monthly</option>
                                 <option value="yearly">Yearly</option>
@@ -88,12 +103,12 @@ const CalendarNoAvailability = () => {
                         <button className = 'btn-small-blue' type="submit">Add No Availability</button>
                     </form>
 
-                    {/* List of periods */}
+                    {/* List of periods */ /*new Date(selectedEvent.start).toLocaleString() */}
                     <ul>
                         {noAvailability.map((item) => (
-                            <li key={item._id}>
-                                {item.startDate} - {item.endDate} ({item.repeatFrequency})
-                                <button onClick={() => handleRemoveNoAvailability(item._id)}>
+                            <li key={item._id}> 
+                                {new Date(item.startDate).toLocaleDateString() } - {new Date(item.endDate).toLocaleDateString() } ({item.repeatFrequency})
+                                <button className='btn-small-blue' onClick={() => handleRemoveNoAvailability(item._id)}>
                                     Remove
                                 </button>
                             </li>
