@@ -49,6 +49,7 @@ export function normalizeData (datas, type) {
     if (!Array.isArray(datas)) {
         console.error("normalizeData expects an array, but got:", datas);
     }
+    console.log("Data to normalize:", datas);
 
     return (type === "activity" ? datas.filter(data => !data.completed) : datas).map((data) => {
 
@@ -587,13 +588,17 @@ export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, sel
         if (updatedResponse.updatedEvents) {
             const updatedEvents = updatedResponse.updatedEvents;
             console.log("Updated events:", updatedEvents);
-            // Update all matching events in the state -> non li vedo
-            setData((prevData) =>
-                prevData.map((event) => {
-                    const updatedEvent = updatedEvents.find((e) => e._id === event._id);
-                    return updatedEvent ? { ...event, ...updatedEvent } : event;
-                })
-            );
+            // Update all matching events in the state
+            setData((prevData) => {
+                const newData = prevData.map((event) => {
+                    if (event.originalId === selectedData.originalId) {
+                        const updatedEvent = updatedEvents.find((e) => e._id === event._id);
+                        return updatedEvent ? { ...event, ...updatedEvent } : event;
+                    }
+                    return event; // keep the other events as they are
+                });
+                return [...newData]; // return the updated data
+            });
 
             // Reset editing state
             setIsEditing(false);
@@ -778,3 +783,119 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
     setEvents([...events, ...events2Add]);
 };
 
+
+// Function to fetch the user's no availability time intervals
+export async function fetchNoAvailability(setNoAvailability){
+    try {
+        const response = await fetch('http://localhost:8000/api/user/no-availability', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setNoAvailability(data.noAvailability);
+            console.log('No availability fetched successfully:', data.noAvailability);
+        } else {
+            throw new Error('Error fetching no availability');
+        }
+    } catch (error) {
+        console.error('Error fetching no availability:', error);
+        throw error;
+    }
+};
+// Function to add a no availability time interval
+export async function addNoAvailability(startDate, endDate, repeatFrequency) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/user/add-no-availability`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ startDate, endDate, repeatFrequency }),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            return result;
+        } else {
+            const error = await response.json();
+            console.error('Failed to add no availability:', error.message);
+            throw new Error(error.message);
+        }
+    } catch (error) {
+        console.error('Error adding no availability:', error);
+        throw error;
+    }
+}
+
+// Function to remove a no availability time interval
+export async function removeNoAvailability(noAvailabilityId) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/user/remove-no-availability/${noAvailabilityId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
+        if (response.ok) {
+            const result = await response.json();
+            console.log('No availability removed successfully:', result.message);
+            return result;
+        } else {
+            const textResponse = await response.text();
+            console.error('Error response:', textResponse);
+        }
+    } catch (error) {
+        console.error('Error removing no availability:', error);
+        throw error;
+    }
+}
+
+// Function to check if a user is available for a new group event
+export async function isUserAvailable(events, startDate, endDate) {
+    const checkStart = new Date(startDate);
+    const checkEnd = new Date(endDate);
+
+    for (const event of events) {
+        const { startDate: eventStart, endDate: eventEnd, repeatFrequency } = event;
+        let currentStart = new Date(eventStart);
+        let currentEnd = new Date(eventEnd);
+
+        // Controls overlapping
+        if (isOverlapping(checkStart, checkEnd, currentStart, currentEnd)) {
+            return false;
+        }
+
+        // Calculates repetitions if necesssary
+        if (repeatFrequency) {
+            while (currentStart <= checkEnd) {
+                currentStart = new Date(currentStart);
+                currentEnd = new Date(currentEnd);
+
+                updateCurrentDate(currentStart, repeatFrequency);
+                updateCurrentDate(currentEnd, repeatFrequency);
+
+                if (isOverlapping(checkStart, checkEnd, currentStart, currentEnd)) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+// Function to check if two intervals are overlapping
+function isOverlapping(start1, end1, start2, end2) {
+    return (
+        (start1 >= start2 && start1 <= end2) || // start inside interval
+        (end1 >= start2 && end1 <= end2) || // end inside interval
+        (start1 <= start2 && end1 >= end2) // Contained interval
+    );
+}
