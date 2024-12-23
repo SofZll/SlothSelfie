@@ -18,6 +18,6 @@ router.get('/user/userId', getUserId);
 router.get('/user/check-auth', checkAuth);
 router.get('/user/no-availability', getNoAvailability);
 router.post('/user/add-no-availability', addNoAvailability);
-router.post('/user/remove-no-availability', removeNoAvailability);
+router.post('/user/remove-no-availability/:noAvailabilityId', removeNoAvailability);
 
 module.exports = router;

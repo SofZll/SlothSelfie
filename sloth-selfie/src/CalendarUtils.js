@@ -776,44 +776,42 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
 
 
 // Function to fetch the user's no availability time intervals
-export async function fetchNoAvailability(setNoAvailability) {
+export async function fetchNoAvailability(setNoAvailability){
     try {
-        const response = await fetch(`/user/no-availability`, {
+        const response = await fetch('http://localhost:8000/api/user/no-availability', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
         });
 
         if (response.ok) {
-            const result = await response.json();
-            console.log('No availability fetched successfully:', result.NoAvailability);
-            setNoAvailability(result.NoAvailability);
+            const data = await response.json();
+            setNoAvailability(data.noAvailability);
+            console.log('No availability fetched successfully:', data.noAvailability);
         } else {
-            const error = await response.json();
-            console.error('Failed to fetch no availability:', error.message);
-            throw new Error(error.message);
+            throw new Error('Error fetching no availability');
         }
     } catch (error) {
         console.error('Error fetching no availability:', error);
         throw error;
     }
-}
-
+};
 // Function to add a no availability time interval
 export async function addNoAvailability(startDate, endDate, repeatFrequency) {
     try {
-        const response = await fetch(`/user/add-no-availability`, {
+        const response = await fetch(`http://localhost:8000/api/user/add-no-availability`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify({ startDate, endDate, repeatFrequency }),
         });
 
         if (response.ok) {
             const result = await response.json();
-            console.log('No availability added successfully:', result.message);
             return result;
         } else {
             const error = await response.json();
@@ -826,14 +824,15 @@ export async function addNoAvailability(startDate, endDate, repeatFrequency) {
     }
 }
 
-// Function to remove a no availability time interval
+// Function to remove a no availability time interval -> non va
 export async function removeNoAvailability(noAvailabilityId) {
     try {
-        const response = await fetch(`/user/remove-no-availability`, {
+        const response = await fetch(`http://localhost:8000/api/user/remove-no-availability/${noAvailabilityId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify({ id: noAvailabilityId }),
         });
 
@@ -853,7 +852,7 @@ export async function removeNoAvailability(noAvailabilityId) {
 }
 
 // Function to check if a user is available for a new group event
-export function isUserAvailable(events, startDate, endDate) {
+export async function isUserAvailable(events, startDate, endDate) {
     const checkStart = new Date(startDate);
     const checkEnd = new Date(endDate);
 
