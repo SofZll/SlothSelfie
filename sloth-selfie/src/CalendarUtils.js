@@ -824,7 +824,7 @@ export async function addNoAvailability(startDate, endDate, repeatFrequency) {
     }
 }
 
-// Function to remove a no availability time interval -> non va
+// Function to remove a no availability time interval
 export async function removeNoAvailability(noAvailabilityId) {
     try {
         const response = await fetch(`http://localhost:8000/api/user/remove-no-availability/${noAvailabilityId}`, {
@@ -833,17 +833,14 @@ export async function removeNoAvailability(noAvailabilityId) {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify({ id: noAvailabilityId }),
         });
-
         if (response.ok) {
             const result = await response.json();
             console.log('No availability removed successfully:', result.message);
             return result;
         } else {
-            const error = await response.json();
-            console.error('Failed to remove no availability:', error.message);
-            throw new Error(error.message);
+            const textResponse = await response.text();
+            console.error('Error response:', textResponse);
         }
     } catch (error) {
         console.error('Error removing no availability:', error);

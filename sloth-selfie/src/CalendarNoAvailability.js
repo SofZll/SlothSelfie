@@ -103,16 +103,18 @@ const CalendarNoAvailability = () => {
                         <button className = 'btn-small-blue' type="submit">Add No Availability</button>
                     </form>
 
-                    {/* List of periods */ /*new Date(selectedEvent.start).toLocaleString() */}
+                    {/* List of periods */}
                     <ul>
+                    <div className="scrollable-Card-list">
                         {noAvailability.map((item) => (
-                            <li key={item._id}> 
+                            <div className= 'activity-card' key={item._id}> 
                                 {new Date(item.startDate).toLocaleDateString() } - {new Date(item.endDate).toLocaleDateString() } ({item.repeatFrequency})
                                 <button className='btn-small-blue' onClick={() => handleRemoveNoAvailability(item._id)}>
                                     Remove
                                 </button>
-                            </li>
+                            </div>
                         ))}
+                    </div>
                     </ul>
                 </div>
             }

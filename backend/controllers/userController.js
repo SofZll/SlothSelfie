@@ -228,18 +228,20 @@ const checkAuth = async (req, res) => {
 //Remove time intervals for no availability for group events
 const removeNoAvailability = async (req, res) => {
     try {
-        const { id } = req.params;  //id of the time interval to remove
+        const { noAvailabilityId } = req.params;  //id of the time interval to remove
         const userId = req.session.userId;
-
         // find the user
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-
         // Remove the specified no availability time interval
-        user.noAvailability.pull({ _id: id });
+        const noAvailabilityIndex = user.noAvailability.findIndex(item => item._id.toString() === noAvailabilityId);
+        if (noAvailabilityIndex === -1) {
+            return res.status(404).json({ success: false, message: 'No availability not found' });
+        }
 
+        user.noAvailability.splice(noAvailabilityIndex, 1);  //remove the no availability time interval from the array
         await user.save();
 
         res.status(200).json({ success: true, message: 'No availability removed successfully' });
