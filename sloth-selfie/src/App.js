@@ -292,7 +292,6 @@ function App() {
                   >
                     <img src={iconTimeMachine} alt="icon" className="icon" />
                   </button>
-                  <button onClick={notifyMe}>Notify me!</button>
                 </div>
               </div>
             </div>
