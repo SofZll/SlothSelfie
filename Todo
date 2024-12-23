@@ -9,9 +9,9 @@ TODO:
 
     // Calendar
     - Connect events and notifications
-    - Add shared events - AGGIUNGERE ARRAY USERID PER EVENTI E ATTIVITÀ
     - Accept or reject events trough notifications
     - User time settings
+    - Gli utenti possono indicare certi intervalli di tempo (anche ripetuti) come non disponibili per eventi di gruppo
     - Configure icalendar, google calendar, mail and apple calendar // da rileggere
     - Resources as users
     - Manager user
@@ -30,10 +30,12 @@ TODO:
     // Other
     - Aggiungere i loading anche per il calendario e le note
     - Google login
+    - Sincronizza note e calendario in preview
 FIX:
     - Time machine ON events and activities popup
 
 DONE:
     - Hub back
     - If an item has a deadline, it should automatically be added to the calendar
+    - Add shared events - AGGIUNGERE ARRAY USERID PER EVENTI E ATTIVITÀ
 

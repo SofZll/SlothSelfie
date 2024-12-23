@@ -6,14 +6,16 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
 import moment from 'moment';
-import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop, handleDeleteRepeatedEvent } from './CalendarUtils';
+import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop, handleDeleteRepeatedEvent, isUserAvailable } from './CalendarUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import iconBack from './media/leftBackArrow.svg';
+import CalendarNoAvailability from './CalendarNoAvailability';
 
-//TODO: edit di eventi ripetuti: problemi con originalId, se crei due eventi ripetuti diversi inserisce lo stesso originalId
-//location non si compila
-//attività da err di put per overdueActivities
+//TODO: edit di eventi ripetuti: non vedo cambiamenti finchè non faccio refresh manuale di pagina
+//sharedWith nel popup appare con gli id anzichè con gli username finchè non faccio refresh manuale di pagina sia con add che con edit
+
+//TODO: noAvailability per eventi di gruppo, collegalo con user e aggiungi controllo se creano evento con sharedWith
 
 const localizer = momentLocalizer(moment);
 
@@ -40,7 +42,7 @@ function Calendar() {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [receivers, setReceivers] = useState([]);
     const [triggerReceiversReset, setTriggerReceiversReset] = useState(0);
-
+    const [showNoAvailabilityForm, setShowNoAvailabilityForm] = useState(false);
     const notificationDefaults = {
         notify: false,
         notificationTime: '0',
@@ -157,7 +159,7 @@ function Calendar() {
     };
 
     // Ensure events is an array
-    console.log(events); //Problemi di formato con eventi multipli eliminati
+    console.log(events);
 
     return (
         <div className="calendar">
@@ -250,6 +252,17 @@ function Calendar() {
 
             {selectingView ? (
                 <div className='selecting-view'>
+                    <button  
+                    className="btn-small-blue"
+                    onClick={() => setShowNoAvailabilityForm(!showNoAvailabilityForm)}
+                >
+                    {showNoAvailabilityForm ? 'Close No Availability Form' : 'Insert No Availability'}
+                </button>
+
+                {/* shows the component only if the form is open*/}
+                {showNoAvailabilityForm && (
+                    <CalendarNoAvailability />
+                )}
                     <h2>What would you like to add?</h2>
                     <div className='btn-container'>
                         <button className='btn btn-main' onClick={() => handleSelection(false)}>Activity</button>

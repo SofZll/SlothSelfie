@@ -159,9 +159,18 @@ textarea {
   background-color: #244476;
 }
 
-.btn-main:hover {
+.btn-main, .btn-small-blue:hover {
   background-color: #222D52;
   color: #fff;
+}
+
+.btn-small-blue {
+  background-color: #244476;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 5px 10px;
 }
 
 .btn-arrows {
