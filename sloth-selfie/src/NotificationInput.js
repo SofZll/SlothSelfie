@@ -19,11 +19,11 @@ function NotificationInput(props){
     const optionsRepetition = [
         { value: "none", label: "None" },
         { value: "three", label: "3 times" },
-        { value: "minutely", label: "Minutely" },
-        { value: "hourly", label: "Hourly" },
-        { value: "daily", label: "Daily" },
-        { value: "weekly", label: "Weekly" },
-        { value: "monthly", label: "Monthly" },
+        { value: "1 minute", label: "Minutely" },
+        { value: "1 hour", label: "Hourly" },
+        { value: "1 day", label: "Daily" },
+        { value: "1 week", label: "Weekly" },
+        { value: "1 month", label: "Monthly" },
         { value: "untilAnswer", label: "Until answered" },
     ];
     

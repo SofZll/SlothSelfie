@@ -292,7 +292,7 @@ function Profile() {
                         )}
                     </div>
                     <div className="mini-forum">
-                        <button className="button-forum" onClick={navigateforum}>Forum</button>
+                        <button className="button-forum" onClick={navigateforum}>FORUM</button>
                     </div>
                     {!isDesktop && (
                         <NotificationFunction /> 
