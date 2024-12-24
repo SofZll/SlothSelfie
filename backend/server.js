@@ -9,19 +9,16 @@ const routes = require('./routes/index');
 const path = require('path');
 const connectDB = require('./config/db');
 require('dotenv').config();
-const socketIo = require('socket.io');
-const socketHandler = require('./socket/socket');
+const socketHandler = require('./socket/socketHandler');
+const socket = require('./socket/socket');
 const app = express();
 
 const http = require('http');
 const server = http.createServer(app);
-const io = socketIo(server, {
-    cors: {
-        origin: 'http://localhost:3000', // La tua origine
-        methods: ['GET', 'POST'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        credentials: true // Permetti le credenziali (cookie)
-    }
+const io = socket.init(server);
+
+io.use((socket, next) => {
+    session(socket.request, {}, next);
 });
 
 //locale:
@@ -35,10 +32,6 @@ app.use(bodyParser.json());
 
 // Session middleware
 app.use(session);
-
-io.use((socket, next) => {
-    session(socket.request, {}, next);
-});
 
 app.use((req, res, next) => {
     console.log('Session ID:', req.sessionID);

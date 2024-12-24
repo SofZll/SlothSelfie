@@ -21,7 +21,15 @@ export const EventProvider = ({ children }) => {
         repeatEndDate: '', // Date of the last repetition   <-
         eventLocation: '', // eventLocation of the event
         type: 'event',
-        //notify: false,
+        notify: false,
+        notificationTime: '0',
+        customValue: '',
+        notificationRepeat: '0',
+        notificationType:{
+            email: false,
+            OS: false,
+            SMS: false,
+        },
         sharedWith: [],
     });
 

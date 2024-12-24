@@ -30,6 +30,7 @@ TODO:
     // Other
     - Aggiungere i loading anche per il calendario e le note
     - Google login
+    - Sincronizza note e calendario in preview
 FIX:
     - Time machine ON events and activities popup
 

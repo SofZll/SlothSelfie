@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const createEvent = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
-  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, notify, notificationTime, sharedWith } = req.body;
+  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, notify, notificationTime, customValue, notificationRepeat, notificationType, sharedWith } = req.body;
 
   try {
     let event;
@@ -25,8 +25,14 @@ const createEvent = async (req, res) => {
     }
     const savedEvent = await event.save();
 
+    // Calculate the date of the notification
+    let dateNotif;
+    console.log(customValue);
+    if (customValue) dateNotif = new Date(customValue);
+    else dateNotif = calculateDate(deadline, notificationTime);
+
     // Create a notification if the notify flag is set
-    if (notify) await createNotification({ eventId: savedEvent._id }, res, true);
+    if (notify) await createNotification({ elementId: savedEvent._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);
     res.status(200).json(savedEvent);
   }
   catch (error) {

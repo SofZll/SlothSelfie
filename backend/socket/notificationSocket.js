@@ -25,14 +25,16 @@ const notificationSocket = {
             const { receivers, message } = notif;
             const sender = socket.request.session.username;
             console.log('Sender:', sender);
+            console.log('Receivers:', receivers);
 
             receivers.forEach((receiver) => {
                 const receiverSocketId = userSocketMap[receiver];
                 if (receiverSocketId) {
                     console.log(`Sending notification to ${receiver}: ${message}`);
                     io.to(receiverSocketId).emit('notification', {
+                        title: 'New notification',
                         sender: { username: sender },
-                        message
+                        body: message,
                     });
                 }
             });

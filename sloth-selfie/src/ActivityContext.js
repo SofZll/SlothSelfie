@@ -14,6 +14,13 @@ export const ActivityProvider = ({ children }) => {
         type: 'activity',
         notify: false,
         notificationTime: '0',
+        customValue: '',
+        notificationRepeat: '0',
+        notificationType:{
+            email: false,
+            OS: false,
+            SMS: false,
+        },
         sharedWith: [],
     });
 

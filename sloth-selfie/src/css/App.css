@@ -159,9 +159,18 @@ textarea {
   background-color: #244476;
 }
 
-.btn-main:hover {
+.btn-main, .btn-small-blue:hover {
   background-color: #222D52;
   color: #fff;
+}
+
+.btn-small-blue {
+  background-color: #244476;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 5px 10px;
 }
 
 .btn-arrows {
@@ -277,12 +286,13 @@ textarea {
 }
 
 .custom-select__menu {
-  max-height: 100px;
+  max-height: 120px;
   overflow-y: auto;
 }
 
 .custom-select__menu-list {
-  max-height: 100px;
+  max-height: 120px;
+  overflow-y: hidden !important;
 }
 
 .custom-select__value-container {
@@ -290,7 +300,6 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 8px;
 }
 
 .custom-select__single-value {

@@ -1,23 +1,32 @@
 const Activity = require('../models/activityModel');
 const User = require('../models/userModel');
 const { createNotification } = require('../controllers/notificationController');
+const { calculateDate } = require('../utils/utils');
 
 // Creating an activinotenotety
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-    const { title, deadline, completed, notify, notificationTime, sharedWith} = req.body;
+    const { title, deadline, completed, notify, notificationTime, customValue, notificationRepeat, notificationType, sharedWith} = req.body;
     
     try {
         let sharedWithUsers = [];
+        sharedWithUsers.push(user);
         if (sharedWith && Array.isArray(sharedWith)) {
             sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
         }
         const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id), });
         const savedActivity = await activity.save();
 
+        // Calculate the date of the notification
+        let dateNotif;
+        console.log(customValue);
+        if (customValue) dateNotif = new Date(customValue);
+        else dateNotif = calculateDate(deadline, notificationTime);
+        
         // Create a notification if the notify flag is set
-        if (notify) await createNotification({ activityId: savedActivity._id }, res, true);
+        if (notify) await createNotification({ elementId: savedActivity._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);
+
         console.log(savedActivity);
         res.status(200).json(savedActivity);
     } catch (error) {

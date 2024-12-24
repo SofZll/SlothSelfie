@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
 import ProfileFunction from './Profile';
-import HubFunction from './Hub';
+import ForumFunction from './Forum';
 import TimeMachine from './TimeMachine';
 import iconTimeMachine from './media/time-machine.svg';
 import socket from './socket';
@@ -62,18 +62,21 @@ function App() {
     socket.on('notification', (newNotif) => {
       console.log('New notification received:', newNotif);
 
-      Swal.fire({
-        title: `${newNotif.sender.username}`,
-        text: `${newNotif.message}`,
-        icon: 'info',
-        customClass: {
-          confirmButton: 'button-alert'
-        },
-        timer: 5000,
-        timerProgressBar: true,
-        toast: true, // Show as a toast popup
-        position: 'top-end' // Position on top-right
+      const notification = new Notification(newNotif.title, {
+        body: newNotif.body,
+        icon: newNotif.icon,
+        badge: newNotif.badge,
       });
+
+      notification.onclick = () => {
+        console.log('Notification clicked');
+        Swal.fire({
+          title: newNotif.title,
+          text: newNotif.body,
+          icon: 'info',
+          confirmButtonText: 'Ok',
+        });
+      }
     });
 
     return () => {
@@ -181,6 +184,27 @@ function App() {
       toggleTimeMachine();
     }
   };
+
+  function notifyMe() {
+    if (!("Notification" in window)) {
+      // Check if the browser supports notifications
+      alert("This browser does not support desktop notification");
+    } else if (Notification.permission === "granted") {
+      // Check whether notification permissions have already been granted;
+      // if so, create a notification
+      const notification = new Notification("Hi there!");
+      // …
+    } else if (Notification.permission !== "denied") {
+      // We need to ask the user for permission
+      Notification.requestPermission().then((permission) => {
+        // If the user accepts, let's create a notification
+        if (permission === "granted") {
+          const notification = new Notification("Hi there!");
+          // …
+        }
+      });
+    }
+  }
   
   return (
     <Router>
@@ -248,7 +272,7 @@ function App() {
                   <Route path="/pomodoro" element={<PomodoroFunction />} />
                   <Route path="/notes" element={<NotesFunction />} />
                   <Route path="/calendar" element={<Calendar />} />
-                  <Route path="/hub" element={<HubFunction />} />
+                  <Route path="/forum" element={<ForumFunction />} />
                 </Routes>
                 {/* time machine */}
                 <div
