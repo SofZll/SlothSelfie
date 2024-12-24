@@ -6,7 +6,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
 import moment from 'moment';
-import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop, handleDeleteRepeatedEvent, isUserAvailable } from './CalendarUtils';
+import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop, handleDeleteRepeatedEvent } from './CalendarUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
 import iconBack from './media/leftBackArrow.svg';
@@ -16,6 +16,7 @@ import CalendarNoAvailability from './CalendarNoAvailability';
 //sharedWith nel popup appare con gli id anzichè con gli username finchè non faccio refresh manuale di pagina sia con add che con edit
 
 //TODO: noAvailability per eventi di gruppo, collegalo con user e aggiungi controllo se creano evento con sharedWith
+    //->check if users are available for events in edit e risolvi undefined
 
 const localizer = momentLocalizer(moment);
 

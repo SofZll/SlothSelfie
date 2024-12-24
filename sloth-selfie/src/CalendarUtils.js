@@ -2,6 +2,7 @@
 import Swal from "sweetalert2";
 import { resetReceivers } from "./globalFunctions";
 import socket from './socket'
+import { get } from "mongoose";
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
@@ -216,7 +217,7 @@ export async function newData2Add(data, originalId, receivers) {
 }
 
 
-// Handle adding an event or activity
+// Handle adding an event or activity //TODO: check if users are available for events
 export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing, receivers, setReceivers, setTriggerResetReceivers) {
     if (e && e.preventDefault) {
         e.preventDefault();
@@ -226,6 +227,25 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
 
     try {
 
+        if (data.type === "event" ) {
+           // First, check if users are available
+            const { startDate, endDate } = data.start ? { startDate: new Date(data.start), endDate: new Date(data.end) } : setStartEnd(data, data.type);
+
+            //debug
+            //const id = await getUserIdFromUsername(receivers[0]);
+            //console.log("ID:", id);                               //mi da undefined
+            //debug
+
+            const isAvailable = await checkAvailabilityForSharedWith(receivers, startDate, endDate);
+
+            if (!isAvailable) {
+                console.log("Non è possibile aggiungere l'evento perché il receiver non è disponibile.");
+                alert("Non è possibile aggiungere l'evento perché il receiver non è disponibile.");
+                return; // Don't add the event if there's a conflict
+            }
+        }
+
+        // Proceed to add the event (if users are available)
         const response = await fetch(`http://localhost:8000/api/${data.type}`, {
             method: "POST",
             credentials: "include",
@@ -368,13 +388,27 @@ export function handleClosePopup(type, setSelectedData, setIsEditing, setData) {
     resetInputFiels(type, setData, setIsEditing);
 }
 
-//Function to handle the update of an event or activity
+//Function to handle the update of an event or activity //TODO: check if users are available for events
 export async function handleUpdateData(e, data, setData, datas, setDatas, selectedData, setSelectedData, setIsEditing) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
 
     try {
+        if (data.type === "event" ) {
+            // First, check if users are available
+             const { startDate, endDate } = data.start ? { startDate: new Date(data.start), endDate: new Date(data.end) } : setStartEnd(data, data.type);
+ 
+             const isAvailable = await checkAvailabilityForSharedWith(data.sharedWith, startDate, endDate); //testa il sharedWith
+ 
+             if (!isAvailable) {
+                 console.log("Non è possibile modificare l'evento perché il receiver non è disponibile.");
+                 alert("Non è possibile modificare l'evento perché il receiver non è disponibile.");
+                 return; // Don't add the event if there's a conflict
+             }
+         }
+ 
+         // Proceed to edit the event (if users are available)
         const response = await fetch(`http://localhost:8000/api/${selectedData.type}/${selectedData._id}`, {
             method: "PUT",
             credentials: "include",
@@ -857,45 +891,87 @@ export async function removeNoAvailability(noAvailabilityId) {
     }
 }
 
-// Function to check if a user is available for a new group event
-export async function isUserAvailable(events, startDate, endDate) {
-    const checkStart = new Date(startDate);
-    const checkEnd = new Date(endDate);
+// Function to get the user ID from the username
+async function getUserIdFromUsername(username) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/user/${username}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
 
-    for (const event of events) {
-        const { startDate: eventStart, endDate: eventEnd, repeatFrequency } = event;
-        let currentStart = new Date(eventStart);
-        let currentEnd = new Date(eventEnd);
-
-        // Controls overlapping
-        if (isOverlapping(checkStart, checkEnd, currentStart, currentEnd)) {
-            return false;
+        if (response.ok) {
+            const data = await response.json();
+            console.log('id recuperato:', data._id);
+            return data._id;
+        } else {
+            throw new Error('Error fetching no availability');
         }
-
-        // Calculates repetitions if necesssary
-        if (repeatFrequency) {
-            while (currentStart <= checkEnd) {
-                currentStart = new Date(currentStart);
-                currentEnd = new Date(currentEnd);
-
-                updateCurrentDate(currentStart, repeatFrequency);
-                updateCurrentDate(currentEnd, repeatFrequency);
-
-                if (isOverlapping(checkStart, checkEnd, currentStart, currentEnd)) {
-                    return false;
-                }
-            }
-        }
+    } catch (error) {
+        console.error('EErrore nel recuperare  ID utente', error);
+        throw error;
     }
-
-    return true;
 }
 
-// Function to check if two intervals are overlapping
+// Function to get the user's no availability data
+async function getUserAvailabilityWithId(userId) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/user/no-availability/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('No availability fetched successfully:', data.noAvailability);
+            return data.noAvailability;
+        } else {
+            throw new Error('Error fetching no availability');
+        }
+    } catch (error) {
+        console.error('EErrore nel recuperare la disponibilità', error);
+        throw error;
+    }
+}
+
+// Function to check if there is an overlap in the user's availability
 function isOverlapping(start1, end1, start2, end2) {
     return (
         (start1 >= start2 && start1 <= end2) || // start inside interval
         (end1 >= start2 && end1 <= end2) || // end inside interval
         (start1 <= start2 && end1 >= end2) // Contained interval
     );
+}
+
+// Function to check availability of users in sharedWith
+async function checkAvailabilityForSharedWith(receivers, startDate, endDate) {
+    try {
+        // Get user IDs from usernames
+        const userId =  await getUserIdFromUsername(receivers[0]); //mi da undefined
+        console.log("User ID:", userId);
+
+        const noAvailability = await getUserAvailabilityWithId('676a8300980e537f1b4cd782'); //userId
+        console.log("No availability:", noAvailability);
+
+        // Check if the user's availability overlaps with the new event
+        for (const unavailablePeriod of noAvailability) {
+            const { startDate: unavailableStart, endDate: unavailableEnd } = unavailablePeriod;
+
+            if (isOverlapping(new Date(startDate), new Date(endDate), new Date(unavailableStart), new Date(unavailableEnd))) {
+                alert(`L'utente con ID ${userId} non è disponibile durante questo periodo.`);
+                return false; // Return false if there's an overlap
+            }
+        }
+
+        // Return true if no conflicts found
+        return true;
+    } catch (error) {
+        console.error("Errore nel controllare la disponibilità:", error);
+        return false; // Return false in case of an error
+    }
 }
