@@ -2,41 +2,92 @@ const Notification = require('../models/notificationModel');
 const User = require('../models/userModel');
 const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
-const { calculateDate } = require('../utils/utils');
+const agenda = require('../jobs/agenda');
+const { emitNotification } = require('../utils/utils');
 
 // Create a new notification: FUNZIONA
 const createNotification = async (req, res, internalCall = false) => {
-    let activityId, eventId, receivers, message;
+    let elementId, receivers, message;
 
     console.log('Request Body:', req.body);
     console.log('Internal Call:', internalCall);
 
-    if (internalCall) ({ activityId, eventId, receivers, message } = req)
-    else ({ activityId, eventId, receivers, message } = req.body)
+    if (internalCall) ({ elementId, receivers, message, dateNotif, frequencyNotif, type } = req)
+    else {
+        ({ receivers, message } = req.body);
+        elementId = null;
+        dateNotif = null;
+        frequencyNotif = null;
+        type = 'OS';
+    }
 
-    console.log({ activityId, eventId, receivers, message });
+    console.log({ elementId , receivers, message, dateNotif, frequencyNotif, type });
     try {
-        const notificationData = internalCall ? await getDataInternal({ activityId, eventId }) : await getDataStandard({ receivers, message });
-        const { message: messageVal, receiversObjectId, element, dateNotif} = notificationData;
+        const notificationData = internalCall ? await getDataInternal({ elementId }) : await getDataStandard({ receivers, message });
+        const { message: messageVal, receiversObjectId, element, deadline} = notificationData;
         const senderUsername = internalCall ? element.user.username : req.session.username;
         const senderUser = await User.findOne({ username: senderUsername });
+
+        const notificationType = Object.keys(type).filter(key => type[key] === true);
+
+        const notificationDate = new Date(dateNotif);
 
         const notification = new Notification({
             sender: senderUser._id,
             receivers: receiversObjectId,
+            type: notificationType,
             message: messageVal,
             createdAt: new Date(),
             read: receiversObjectId.map(() => false),
-            activity: activityId ? activityId : null,
-            event: eventId ? eventId : null,
-            dateNotif: dateNotif,
+            element: elementId ? elementId : null,
+            dateNotif: notificationDate,
+            frequencyNotif: frequencyNotif,
             responses: [],
         });
-
-        // creazione notifica schedule
-
+        
         console.log(notification);
         await notification.save();
+
+        // creazione notifica schedule
+        if (dateNotif) {
+            await agenda.schedule(dateNotif, 'send notification', {
+                receivers: receiversObjectId,
+                message: messageVal,
+            });
+        } else {
+            await agenda.now('send notification', {
+                receivers: receiversObjectId,
+                message: messageVal,
+            });
+        }
+
+        if (frequencyNotif != 'none') {
+            if (frequencyNotif == 'three') {
+                const endDate = new Date(deadline);
+                const repetition = 3;
+                await scheduleMultipleNotifications(agenda, startDate = dateNotif, endDate, repetition, 'send notification', {
+                    receivers: receiversObjectId,
+                    message: messageVal,
+                
+                });
+            } else if (frequencyNotif == 'untilAnswer') {
+                // logica personalizzata per untilAnswer
+                await agenda.every('1 hour', 'send notification', {
+                    receivers: receiversObjectId,
+                    message: messageVal,
+                    startDate: dateNotif,
+                });
+            } else {
+                await agenda.every(frequencyNotif, 'send notification', {
+                    receivers: receiversObjectId,
+                    message: messageVal,
+                    startDate: dateNotif,
+                });
+            }
+        }
+
+        emitNotification(receiversObjectId, messageVal);
+
         if (!internalCall) res.status(201).json({ success: true, notification });
     } catch (error) {
         console.error('Error creating notification:', error);
@@ -44,24 +95,25 @@ const createNotification = async (req, res, internalCall = false) => {
     }
 }
 
-const getDataInternal = async ({ activityId, eventId }) => {
+const getDataInternal = async ({ elementId }) => {
     let element, date, type;
 
-    if (activityId) {
-        element = await Activity.findOne({ _id: activityId }).populate('user').populate('sharedWith');
+    element = await Activity.findOne({ _id: elementId }).populate('user').populate('sharedWith');
+
+    if (element) {
         date = new Date(element.deadline);
         type = 'Activity';
-    }
-    else if (eventId) {
-        element = await Event.findOne({ _id: eventId }).populate('user').populate('sharedWith');
-        date = new Date(element.date);
-        type = 'Event';
+    } else {
+        element = await Event.findOne({ _id: elementId }).populate('user').populate('sharedWith');
+        if (element) {
+            date = new Date(element.date);
+            type = 'Event';
+        }
     }
     if (!element) return null;
 
     const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const message = `${type}: ${element.title} - Date: ${formattedDate}`;
-    const dateNotif = calculateDate(date, element.notificationTime);
 
     receiversObjectId = [];
     receiversObjectId.push(element.user._id);
@@ -75,7 +127,7 @@ const getDataInternal = async ({ activityId, eventId }) => {
         message,
         receiversObjectId,
         element,
-        dateNotif,
+        deadline: date,
     }
 }
 
@@ -96,10 +148,26 @@ const getDataStandard = async ({ receivers, message }) => {
     return {
         message,
         receiversObjectId,
-        activity: null,
-        event: null,
-        dateNotif: null,
     };
+}
+
+const scheduleMultipleNotifications = async (agenda, startDate, endDate, repetitions, jobName, data) => {
+    const end = new Date(endDate);
+    const totMinutes = (end - new Date(startDate)) / 60000;
+    const interval = totMinutes / (repetitions -1);
+
+    for (let i = 0; i < repetitions; i++) {
+        let date = new Date(startDate);
+        date.setMinutes(date.getMinutes() + interval * i);
+
+        if ( i == repetitions - 1) {
+            date.setMinutes(date.getMinutes() + 60);
+        }
+        console.log('Date:', date);
+
+        await agenda.schedule(date, jobName, data);
+        console.log(`Scheduled job ${jobName} at ${date}`);
+    }
 }
 
 // Get all notifications: FUNZIONA
@@ -173,6 +241,13 @@ const markNotificationStatus = async (req, res) => {
 
         notification.responses.push({ receiver: receiver._id, status });
         await notification.save();
+
+        if (status === 'Accepted') {
+            // come dovrei assegnare gli eventi e le attività ai vari utenti?
+            // - se l'evento/attività è stata creata da un utente, allora l'utente che ha accettato la notifica diventa il proprietario dell'evento/attività
+            // - creazione di un nuovo evento?
+            // - campo aggiuntivo che indica gli utenti che hanno accettato
+        }
 
         res.status(200).json({ success: true, message: 'Notification status marked' });
     } catch (error) {

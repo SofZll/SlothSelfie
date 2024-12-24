@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
             default: 'image/jpeg',
         },
     },
-    NoAvailability: [
+    noAvailability: [
         {
             startDate: { type: Date, required: true },
             endDate: { type: Date, required: true },
