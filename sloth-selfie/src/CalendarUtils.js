@@ -231,16 +231,9 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
            // First, check if users are available
             const { startDate, endDate } = data.start ? { startDate: new Date(data.start), endDate: new Date(data.end) } : setStartEnd(data, data.type);
 
-            //debug
-            //const id = await getUserIdFromUsername(receivers[0]);
-            //console.log("ID:", id);                               //mi da undefined
-            //debug
-
             const isAvailable = await checkAvailabilityForSharedWith(receivers, startDate, endDate);
 
             if (!isAvailable) {
-                console.log("Non è possibile aggiungere l'evento perché il receiver non è disponibile.");
-                alert("Non è possibile aggiungere l'evento perché il receiver non è disponibile.");
                 return; // Don't add the event if there's a conflict
             }
         }
@@ -904,8 +897,7 @@ async function getUserIdFromUsername(username) {
 
         if (response.ok) {
             const data = await response.json();
-            console.log('id recuperato:', data._id);
-            return data._id;
+            return data.userId;
         } else {
             throw new Error('Error fetching no availability');
         }
@@ -955,7 +947,7 @@ async function checkAvailabilityForSharedWith(receivers, startDate, endDate) {
         const userId =  await getUserIdFromUsername(receivers[0]); //mi da undefined
         console.log("User ID:", userId);
 
-        const noAvailability = await getUserAvailabilityWithId('676a8300980e537f1b4cd782'); //userId
+        const noAvailability = await getUserAvailabilityWithId(userId); //userId
         console.log("No availability:", noAvailability);
 
         // Check if the user's availability overlaps with the new event
@@ -963,7 +955,11 @@ async function checkAvailabilityForSharedWith(receivers, startDate, endDate) {
             const { startDate: unavailableStart, endDate: unavailableEnd } = unavailablePeriod;
 
             if (isOverlapping(new Date(startDate), new Date(endDate), new Date(unavailableStart), new Date(unavailableEnd))) {
-                alert(`L'utente con ID ${userId} non è disponibile durante questo periodo.`);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: `The user "${receivers[0]}" is not available during this period.`,
+                });
                 return false; // Return false if there's an overlap
             }
         }
