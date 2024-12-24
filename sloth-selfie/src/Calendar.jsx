@@ -16,7 +16,7 @@ import CalendarNoAvailability from './CalendarNoAvailability';
 //sharedWith nel popup appare con gli id anzichè con gli username finchè non faccio refresh manuale di pagina sia con add che con edit
 
 //TODO: noAvailability per eventi di gruppo, collegalo con user e aggiungi controllo se creano evento con sharedWith
-    //->check if users are available for events in edit e risolvi undefined
+    //->check if users are available for events in edit
 
 const localizer = momentLocalizer(moment);
 

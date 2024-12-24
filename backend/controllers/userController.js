@@ -254,7 +254,6 @@ const removeNoAvailability = async (req, res) => {
 // Route to get the userId from the username
 const getUserIdFromUsername = async (req, res) => {
     const { username } = req.params;
-    console.log('Username:', username);
 
     if (!username) {
         return res.status(400).json({ success: false, message: 'Username is required' });
@@ -263,13 +262,12 @@ const getUserIdFromUsername = async (req, res) => {
     try {
         // find the user
         const user = await User.findOne({ username: username });
-
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
         // Restituisci l'ID dell'utente
-        res.status(200).json({ success: true, userId: user._id });
+        res.status(200).json({ success: true, userId: user._id.toString() });
     } catch (error) {
         console.error('Error fetching userId from username:', error);
         res.status(500).json({ success: false, message: 'Error fetching userId' });
@@ -279,7 +277,6 @@ const getUserIdFromUsername = async (req, res) => {
 //route to get the no availability time intervals of a user given the userId
 const getUserNoAvailabilityWithId = async (req, res) => {
     const { userId } = req.params;
-    console.log('UserId:', userId);
 
     if (!userId) {
         return res.status(400).json({ success: false, message: 'UserId is required' });
