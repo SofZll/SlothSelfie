@@ -224,7 +224,7 @@ function NotesFunction() {
         </div>
 
         <div className="notes-container">
-          {Array.isArray(filteredNotes) && notes.length === 0 ? (
+          {Array.isArray(filteredNotes) && filteredNotes.length === 0 ? (
             <p>No notes found</p>
           ) : (
             filteredNotes.map((note) => {
@@ -325,7 +325,7 @@ function NotesFunction() {
                             onChange={() => toggleTaskCompletion(index, noteData, setNoteData)}
                           />
                           {task.text}
-                          {task.deadline && <span> - Deadline: {task.deadline}</span>}
+                          {task.deadline && <span> - Deadline: {new Date(task.deadline).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-')}</span>}
                           <button className="btn btn-main" onClick={() => removeTask(index, noteData, setNoteData)}>Remove</button>
                         </li>
                       ))}

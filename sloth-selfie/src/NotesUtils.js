@@ -39,28 +39,22 @@ export function handleNoteDataChange (field, value, setNoteData) {
       ...prevData,
       [field]: value
   }));
-  };
+};
 
-//TODO: Move in backend
 export function canUserAccess(note, currentUser) {
   
-    if (!note.noteAccess) {
-        return false; // if no access is defined, the note is private
-    }
-    if (note.noteAccess === 'public') {
-      return true;  // open to everyone
-    }
-    if (note.noteAccess === 'private') {
-      return note.noteAuthor === currentUser;  //only the author can access
-    }
-    if (note.noteAccess === 'restricted') {
-        //Verify if allowedUsers is an array and if it contains the current user
-        return Array.isArray(note.allowedUsers) && 
-               note.allowedUsers.includes(currentUser);
-    }
-
+  if (!note.noteAccess) {
     return false;
+  } else if (note.noteAccess === 'public') {
+    return true;
+  } else if (note.noteAccess === 'private') {
+    return note.noteAuthor === currentUser;
+  } else if (note.noteAccess === 'restricted') {
+    return Array.isArray(note.allowedUsers) && note.allowedUsers.includes(currentUser);
   }
+
+  return false;
+}
 
 
 export async function addTask(taskText, noteData, setNoteData, taskDeadline) {
@@ -72,11 +66,11 @@ export async function addTask(taskText, noteData, setNoteData, taskDeadline) {
   const newTask = {
     text: taskText,
     completed: false,
-    deadline: taskDeadline !== '' ? new Date(taskDeadline) : null
+    deadline: taskDeadline !== null ? new Date(taskDeadline) : null
   };
 
   try {
-    const response = fetch('http://localhost:8000/api/task', {
+    const response = await fetch('http://localhost:8000/api/task', {
       method: 'POST',
       credentials: "include",
       headers: {
@@ -121,7 +115,7 @@ export async function removeTask(taskIndex, noteData, setNoteData) {
   }
 
   try {
-    const response = fetch(`http://localhost:8000/api/note/${taskToDelete._id}`, {
+    const response = await fetch(`http://localhost:8000/api/task/${taskToDelete._id}`, {
       method: 'DELETE',
       credentials: "include",
       headers: {
@@ -143,7 +137,6 @@ export async function removeTask(taskIndex, noteData, setNoteData) {
   }
 };
 
-//marks a task as completed
 export async function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
   
   if (!Array.isArray(noteData.tasks)) {
@@ -161,17 +154,15 @@ export async function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
     console.error('Task not found:', taskIndex);
     return;
   }
+  console.log('Task to toggle:', taskToToggle._id);
 
   try {
-    const response = fetch(`http://localhost:8000/api/note/${taskToToggle._id}`, {
+    const response = await fetch(`http://localhost:8000/api/task/complete/${taskToToggle._id}`, {
       method: 'PUT',
       credentials: "include",
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        completed: !taskToToggle.completed
-      })
     });
 
     if (!response.ok) {
@@ -266,21 +257,20 @@ export async function handleDeleteNote(noteId, notes, setNotes) {
 
 //TODO: Move in Note.js
 export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
-  const noteToEdit = notes
-        .find(note => note._id === noteId);
+  const noteToEdit = notes.find(note => note._id === noteId);
 
-    if (!noteToEdit) {
-        console.error("Nota non trovata per l'ID:", noteId);
-        return;
-    }
+  if (!noteToEdit) {
+    console.error("Nota non trovata per l'ID:", noteId);
+    return;
+  }
 
-    console.log("Editing note with ID:", noteId);
-    console.log("Note data:", noteToEdit);
+  console.log("Editing note with ID:", noteId);
+  console.log("Note data:", noteToEdit);
   
   setNoteData({
-      ...noteToEdit,
-      tasks: noteToEdit.tasks || [], // we prevent errors if undefined
-      allowedUsers: noteToEdit.allowedUsers || [] // we prevent errors if undefined
+    ...noteToEdit,
+    tasks: noteToEdit.tasks || [],
+    allowedUsers: noteToEdit.allowedUsers || [],
   });
   
   setIsEditing(noteId);
