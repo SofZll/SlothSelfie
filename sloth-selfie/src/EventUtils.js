@@ -150,7 +150,7 @@ export function handleClosePopupE(setSelectedEvent, setIsEditing, setEventData) 
     handleEventDataChange('eventLocation', '', setEventData);
 }
 
-// Handle updating an event -> // CON EVENTI RIPETUTI MODIFICA SOLO TITLE E LOCATION
+// Handle updating an event
 export function handleUpdateEvent(
     e, 
     eventData,
