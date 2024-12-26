@@ -50,7 +50,7 @@ export function normalizeData (datas, type) {
     if (!Array.isArray(datas)) {
         console.error("normalizeData expects an array, but got:", datas);
     }
-    console.log("Data to normalize:", datas);
+    //console.log("Data to normalize:", datas);
 
     return (type === "activity" ? datas.filter(data => !data.completed) : datas).map((data) => {
 
@@ -217,7 +217,7 @@ export async function newData2Add(data, originalId, receivers) {
 }
 
 
-// Handle adding an event or activity //TODO: check if users are available for events
+// Handle adding an event or activity
 export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing, receivers, setReceivers, setTriggerResetReceivers) {
     if (e && e.preventDefault) {
         e.preventDefault();
@@ -381,7 +381,7 @@ export function handleClosePopup(type, setSelectedData, setIsEditing, setData) {
     resetInputFiels(type, setData, setIsEditing);
 }
 
-//Function to handle the update of an event or activity //TODO: check if users are available for events
+//Function to handle the update of an event or activity
 export async function handleUpdateData(e, data, setData, datas, setDatas, selectedData, setSelectedData, setIsEditing) {
     if (e && e.preventDefault) {
         e.preventDefault();
@@ -392,11 +392,8 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
             // First, check if users are available
              const { startDate, endDate } = data.start ? { startDate: new Date(data.start), endDate: new Date(data.end) } : setStartEnd(data, data.type);
  
-             const isAvailable = await checkAvailabilityForSharedWith(data.sharedWith, startDate, endDate); //testa il sharedWith
- 
+             const isAvailable = await checkAvailabilityForSharedWith(data.sharedWith, startDate, endDate);
              if (!isAvailable) {
-                 console.log("Non è possibile modificare l'evento perché il receiver non è disponibile.");
-                 alert("Non è possibile modificare l'evento perché il receiver non è disponibile.");
                  return; // Don't add the event if there's a conflict
              }
          }
@@ -595,7 +592,7 @@ export async function handleUpdateDataOnDrop(item, start, datas, setDetas) {
 
 //Function to handle the update of a repeated event
 export async function handleUpdateRepeatedEvent(data, setData, setIsEditing, selectedData, setSelectedData) {
-    console.log("Final data before sending:", selectedData); //perde l'originalId
+    console.log("Final data before sending:", selectedData);
     try {
         const response = await fetch(`http://localhost:8000/api/event/original/${selectedData.originalId}`, {
             method: "PUT",
@@ -776,6 +773,14 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
         return
     }
     const originalId = firstEvent.originalId;
+
+    // check if the users are available for the first event
+    const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(eventData.start), new Date(eventData.end));
+    if (!isAvailable) {
+        console.error("Conflict detected for the first event.");
+        return; // Don't add the event if there's a conflict
+    }
+
     events2Add.push(firstEvent);
 
     updateCurrentDate(currentDate, repeatFrequency);
@@ -786,6 +791,8 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
             date: currentDate.toISOString().split('T')[0],
             repeatEndDate: lastDate.toISOString().split('T')[0],
         };
+
+        //qui devo controllare la disponibilità per ogni evento ripetuto
 
         newEvents.push(data2add);
 
@@ -940,31 +947,62 @@ function isOverlapping(start1, end1, start2, end2) {
     );
 }
 
-// Function to check availability of users in sharedWith
+// Function to check availability of users in sharedWith -> riguarda per eventi ripetuti
 async function checkAvailabilityForSharedWith(receivers, startDate, endDate) {
     try {
         // Get user IDs from usernames
-        const userId =  await getUserIdFromUsername(receivers[0]); //mi da undefined
+        const userId =  await getUserIdFromUsername(receivers[0]);
         console.log("User ID:", userId);
 
-        const noAvailability = await getUserAvailabilityWithId(userId); //userId
+        const noAvailability = await getUserAvailabilityWithId(userId);
         console.log("No availability:", noAvailability);
+
+        const newStartDate = new Date(startDate);
+        const newEndDate = new Date(endDate);
 
         // Check if the user's availability overlaps with the new event
         for (const unavailablePeriod of noAvailability) {
-            const { startDate: unavailableStart, endDate: unavailableEnd } = unavailablePeriod;
+            const { startDate: unavailableStart, endDate: unavailableEnd, repeatFrequency } = unavailablePeriod;
 
-            if (isOverlapping(new Date(startDate), new Date(endDate), new Date(unavailableStart), new Date(unavailableEnd))) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: `The user "${receivers[0]}" is not available during this period.`,
-                });
-                return false; // Return false if there's an overlap
+            if(repeatFrequency === "none") {
+                // Check for a single period
+                if (isOverlapping(new Date(startDate), new Date(endDate), new Date(unavailableStart), new Date(unavailableEnd))) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: `The user "${receivers[0]}" is not available during this period.`,
+                    });
+                    return false; // Return false if there's an overlap
+                }
+            }
+            // Check for repeated periods
+            else {
+                let currentStart = new Date(unavailableStart);
+                let currentEnd = new Date(unavailableEnd);
+
+                while (currentStart <= newEndDate) {
+                    if (isOverlapping(
+                        newStartDate, 
+                        newEndDate, 
+                        currentStart, 
+                        currentEnd
+                    )) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: `The user "${receivers[0]}" is not available during this period.`,
+                        });
+                        return false; // Return false if there's an overlap
+                    }
+
+                    // We update the dates for the next occurrence
+                    updateCurrentDate(currentStart, repeatFrequency);
+                    updateCurrentDate(currentEnd, repeatFrequency);
+                }
             }
         }
 
-        // Return true if no conflicts found
+        // no overlaps found, the user is available
         return true;
     } catch (error) {
         console.error("Errore nel controllare la disponibilità:", error);
