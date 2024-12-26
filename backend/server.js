@@ -12,6 +12,7 @@ require('dotenv').config();
 const socketHandler = require('./socket/socketHandler');
 const socket = require('./socket/socket');
 const app = express();
+const agenda = require('./jobs/agenda');
 
 const http = require('http');
 const server = http.createServer(app);
@@ -19,6 +20,13 @@ const io = socket.init(server);
 
 io.use((socket, next) => {
     session(socket.request, {}, next);
+});
+
+io.on('connection', (socket) => {
+    console.log('Client connected');
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
 });
 
 //locale:
@@ -53,8 +61,16 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-
 socketHandler(io);
+
+agenda.on('ready', () => {
+    console.log('Agenda started');
+    agenda.start();
+});
+
+agenda.on('error', (error) => {
+    console.error('Agenda connection error:', error);
+});
 
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {

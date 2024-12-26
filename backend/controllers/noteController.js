@@ -1,6 +1,6 @@
 const Note = require('../models/noteModel');
 const User = require('../models/userModel');
-const  { createTask, getTasks, updateTask, deleteTask, getTaskById } = require('./taskController');
+const { createTask, getTasks, updateTask, deleteTask, getTaskById } = require('./taskController');
 
 // Create a new note
 const createNote = async (req, res) => {
@@ -25,8 +25,8 @@ const createNote = async (req, res) => {
             allowedUsers: noteAccess === 'restricted' ? allowedUsers : [],
             isTodo,
             tasks: isTodo ? newTasks : [],
-            createDate: new Date(),
-            updateDate: new Date(),
+            createDate: new Date().toISOString(),
+            updateDate: new Date().toISOString(),
         });
 
         await note.save();

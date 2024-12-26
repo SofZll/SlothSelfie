@@ -3,7 +3,6 @@ const User = require('../models/userModel');
 const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
 const agenda = require('../jobs/agenda');
-const { emitNotification } = require('../utils/utils');
 
 // Create a new notification: FUNZIONA
 const createNotification = async (req, res, internalCall = false) => {
@@ -30,14 +29,16 @@ const createNotification = async (req, res, internalCall = false) => {
 
         const notificationType = Object.keys(type).filter(key => type[key] === true);
 
-        const notificationDate = new Date(dateNotif);
+        let notificationDate;
+        if (dateNotif) notificationDate = new Date(dateNotif).toISOString();
+        else notificationDate = new Date().toISOString();
 
         const notification = new Notification({
             sender: senderUser._id,
             receivers: receiversObjectId,
             type: notificationType,
             message: messageVal,
-            createdAt: new Date(),
+            createdAt: new Date().toISOString(),
             read: receiversObjectId.map(() => false),
             element: elementId ? elementId : null,
             dateNotif: notificationDate,
@@ -48,45 +49,54 @@ const createNotification = async (req, res, internalCall = false) => {
         console.log(notification);
         await notification.save();
 
+        const receiversUsername = await Promise.all(receiversObjectId.map(async receiver => {
+            const user = await User.findById(receiver);
+            return user.username;
+        }));
+
         // creazione notifica schedule
-        if (dateNotif) {
-            await agenda.schedule(dateNotif, 'send notification', {
-                receivers: receiversObjectId,
+        if (notificationDate) {
+            await agenda.schedule(notificationDate, 'send notification', {
+                sender: senderUser.username,
+                receivers: receiversUsername,
                 message: messageVal,
             });
+            console.log(`Scheduled job 'send notification' at ${notificationDate}`);
         } else {
             await agenda.now('send notification', {
-                receivers: receiversObjectId,
+                sender: senderUser.username,
+                receivers: receiversUsername,
                 message: messageVal,
             });
+            console.log(`Scheduled job 'send notification' now`);
         }
 
         if (frequencyNotif != 'none') {
             if (frequencyNotif == 'three') {
-                const endDate = new Date(deadline);
+                const endDate = new Date(deadline).toISOString();
                 const repetition = 3;
-                await scheduleMultipleNotifications(agenda, startDate = dateNotif, endDate, repetition, 'send notification', {
-                    receivers: receiversObjectId,
+                await scheduleMultipleNotifications(agenda, startDate = notificationDate, endDate, repetition, 'send notification', {
+                    sender: senderUser.username,
+                    receivers: receiversUsername,
                     message: messageVal,
-                
                 });
             } else if (frequencyNotif == 'untilAnswer') {
                 // logica personalizzata per untilAnswer
                 await agenda.every('1 hour', 'send notification', {
-                    receivers: receiversObjectId,
+                    sender: senderUser.username,
+                    receivers: receiversUsername,
                     message: messageVal,
-                    startDate: dateNotif,
+                    startDate: notificationDate,
                 });
             } else {
                 await agenda.every(frequencyNotif, 'send notification', {
-                    receivers: receiversObjectId,
+                    sender: senderUser.username,
+                    receivers: receiversUsername,
                     message: messageVal,
-                    startDate: dateNotif,
+                    startDate: notificationDate,
                 });
             }
         }
-
-        emitNotification(receiversObjectId, messageVal);
 
         if (!internalCall) res.status(201).json({ success: true, notification });
     } catch (error) {
@@ -152,12 +162,12 @@ const getDataStandard = async ({ receivers, message }) => {
 }
 
 const scheduleMultipleNotifications = async (agenda, startDate, endDate, repetitions, jobName, data) => {
-    const end = new Date(endDate);
-    const totMinutes = (end - new Date(startDate)) / 60000;
+    const end = new Date(endDate).toISOString();
+    const totMinutes = (end - new Date(startDate).toISOString()) / 60000;
     const interval = totMinutes / (repetitions -1);
 
     for (let i = 0; i < repetitions; i++) {
-        let date = new Date(startDate);
+        let date = new Date(startDate).toISOString();
         date.setMinutes(date.getMinutes() + interval * i);
 
         if ( i == repetitions - 1) {
