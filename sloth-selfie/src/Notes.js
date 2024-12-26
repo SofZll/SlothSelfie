@@ -5,8 +5,7 @@ import NoteCard from './NoteCard';
 import iconDark from './media/SlothDark.svg';
 import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
-import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEdit, sortNotes,  handleCopyContent, fetchUsername, handleAddNote } from './NotesUtils';
-import Swal from 'sweetalert2';
+import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEditNote, sortNotes,  handleCopyContent, fetchUsername, handleAddNote } from './NotesUtils';
 import ShareInput from './ShareInput';
 
 
@@ -72,7 +71,7 @@ function NotesFunction() {
 
   const [notes, setNotes] = useState([] || initialNotes);
   const [sortCriterion, setSortCriterion] = useState('most_recent');
-  const [filterDate, setFilterDate] = useState('');
+  const [filterDate, setFilterDate] = useState("");
 
   const [isEditing, setIsEditing] = useState(null);
   const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
@@ -140,6 +139,7 @@ function NotesFunction() {
   useEffect(() => {
     console.log('Notesssssssssssssssss:', notes);
     const filteredAndSorted = filterNotesByDate(sortNotes(notes, sortCriterion));
+    console.log('Filtered and sorted notes:', filteredAndSorted);
     setFilteredNotes(filteredAndSorted);
   }, [notes, filterDate, sortCriterion]);
 
@@ -147,7 +147,7 @@ function NotesFunction() {
   const handleEditCard = (note) => {
     const noteToEdit = notes.find(n => n.id === note.id && canUserAccess(n, username));
     if (noteToEdit) {
-      handleEditNote(noteToEdit.id, notes, setNoteData, setIsEditing);
+      handleEditNote(noteToEdit.id, notes, setNotes, noteData, setNoteData, setIsEditing);
     } else {
       console.error("Note not found or access denied", note);
     }
@@ -230,11 +230,13 @@ function NotesFunction() {
             filteredNotes.map((note) => {
               return (
                 <NoteCard
-                  key={note.id}
+                  key={note._id}
+                  noteAuthor={username}
                   note={note}
-                  onDuplicate={() => handleDuplicateNote(note.id, notes, setNotes)}
+                  setNotes={setNotes}
+                  onDuplicate={() => { handleDuplicateNote(note._id, notes, setNotes) }} // Add curly braces
                   onCopy={() => handleCopyContent(note.content)}
-                  onDelete={() => handleDeleteNote(note.id, notes, setNotes)}
+                  onDelete={() => handleDeleteNote(note._id, notes, setNotes)}
                   onEdit={() => handleEditCard(note)}
                 />
               );
@@ -363,9 +365,9 @@ function NotesFunction() {
           )}
           
           {isEditing ? (
-            <button className="btn btn-main">Add Note</button>
+            <button className="btn btn-main" onClick={() => handleSaveEditNote(noteData.id, notes, setNotes, noteData, setNoteData, setIsEditing)}>Save Note</button>
           ) : (
-            <button className="btn btn-main">Save Note</button>
+            <button className="btn btn-main" onClick={() => handleAddNote(noteData, setNoteData, notes, setNotes)}>Add Note</button>
           )}
         </div>
       </div>

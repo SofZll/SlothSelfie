@@ -20,7 +20,6 @@ export async function fetchNotes() {
     }
 
     const data = await response.json();
-    console.log('Data aaaaaaaaaaaaaaaaaaaaaaaaaa:', data);
     if (Array.isArray(data.notes)) {
       return data.notes;
     } else {
@@ -137,22 +136,22 @@ export async function removeTask(taskIndex, noteData, setNoteData) {
   }
 };
 
-export async function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
+export async function toggleTaskCompletion(taskIndex, noteData, setNoteData = null) {
   
   if (!Array.isArray(noteData.tasks)) {
     console.error('Tasks array not found');
-    return;
+    return null;
   }
 
   if (taskIndex < 0 || taskIndex >= noteData.tasks.length) {
     console.error('Invalid task index:', taskIndex);
-    return;
+    return null;
   }
 
   const taskToToggle = noteData.tasks[taskIndex];
   if (!taskToToggle) {
     console.error('Task not found:', taskIndex);
-    return;
+    return null;
   }
   console.log('Task to toggle:', taskToToggle._id);
 
@@ -171,12 +170,15 @@ export async function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
 
     const updatedTask = await response.json();
     if (updatedTask) {
-      setNoteData(prevNoteData => ({
-        ...prevNoteData,
-        tasks: prevNoteData.tasks.map((task, i) => 
-          i === taskIndex ? updatedTask : task
-        )
-      }));
+      if(setNoteData !== null) {
+        setNoteData(prevNoteData => ({
+          ...prevNoteData,
+          tasks: prevNoteData.tasks.map((task, i) => 
+            i === taskIndex ? updatedTask : task
+          )
+        }));
+      }
+      return updatedTask;
     }
   } catch (error) {
     console.error('Error while updating task:', error);
@@ -249,7 +251,6 @@ export async function handleDeleteNote(noteId, notes, setNotes) {
 
     //updating frontend
     setNotes(notes.filter(note => note._id !== noteId));
-    fetchNotes(setNotes);
   } catch (error) {
     console.error('Errore durante l\'eliminazione della nota:', error);
   }
@@ -426,30 +427,30 @@ export async function handleResetForm (setNoteData) {
 //Function to handle the creation of a new note
 export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
 
-  if (!noteData.title || !noteData.category || !noteData.content) {
+  if (!noteData.title || !noteData.category) {
     popUpAlert('Add Note Error', 'Missing required fields', 'error');
+    console.log(noteData);
     return;
   }
   
   if (noteData.isTodo && noteData.tasks.length === 0) {
     popUpAlert('Add Note Error', 'Please add at least one task to your to-do list', 'error');
     return;
-  }
-
-  if (!noteData.isTodo && noteData.content.trim() === "") {
+  } else if (!noteData.isTodo && (!noteData.content || noteData.content.trim() === "")) {
     popUpAlert('Add Note Error', 'Please add content to your note', 'error');
     return;
   }
 
   const newNote = {
     ...noteData,
-    content: noteData.isTodo ? "" : noteData.content.trim(),
+    content: noteData.content.trim(),
     allowedHost: noteData.noteAccess === 'restricted' ? noteData.allowedHost : [],
     tasks: noteData.isTodo 
     ? noteData.tasks.map(task => (task._id)) : [],
     createDate: noteData.createDate ? new Date(noteData.createDate) : new Date(),
     updateDate: noteData.updateDate ? new Date(noteData.updateDate) : new Date(),
   }
+
 
   try {
     const response = await fetch('http://localhost:8000/api/note', {
@@ -469,7 +470,7 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
     const savedNote = await response.json();
 
     if (savedNote) {
-      setNotes([...notes, savedNote]);
+      setNotes([...notes, savedNote.note ]);
       handleResetForm(setNoteData);
     }
   } catch(error) {
@@ -479,7 +480,7 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
 }
 
 //Function to save the edit of a note
-export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
+export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing) {
 
   const noteToUpdate = notes.find(note => note._id === noteId);
 
@@ -497,7 +498,7 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
     content: noteData.content,
     tasks: noteData.isTodo 
     ? noteData.tasks.map(task => ({ 
-      ...task, 
+      ...task,
       completed: task.completed || false,
       deadline: task.deadline || null
     })) : [],
@@ -519,6 +520,7 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
     }
 
     const savedNote = await response.json();
+
 
     if (savedNote) {
       const updatedNotes = notes.map(note =>
