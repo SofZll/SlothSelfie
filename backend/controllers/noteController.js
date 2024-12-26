@@ -1,6 +1,6 @@
 const Note = require('../models/noteModel');
 const User = require('../models/userModel');
-const  { updateTask, deleteTask, getTaskById } = require('./taskController');
+const  { deleteTasks } = require('./taskController');
 
 // Create a new note
 const createNote = async (req, res) => {
@@ -24,7 +24,8 @@ const createNote = async (req, res) => {
         });
 
         await note.save();
-        res.status(201).json({ success: true, note });
+        const savedNote = await Note.findById(note._id).populate('tasks');
+        res.status(201).json({ success: true, note: savedNote });
     } catch (error) {
         console.error('Error creating note:', error);
         res.status(500).json({ success: false, message: 'Error creating note' });
@@ -103,20 +104,23 @@ const updateNote = async (req, res) => {
 const deleteNote = async (req, res) => {
     const { noteId } = req.params;
     const note = await Note.findById(noteId);
-
-    if (isTodo) {
-        for (let i = 0; i < note.tasks.length; i++) {
-            const taskId = note.tasks[i];
-            await deleteTask(taskId);
-        }
-    }
         
     try {
-        note.deleteOne();
         if (!note) {
             return res.status(404).json({ success: false, message: 'Note not found' });
         }
+
+        // Delete all tasks associated with the note
+        if (note.isTodo) {
+            const tasksDeleted = await deleteTasks(note.tasks);
+            if (!tasksDeleted) {
+                return res.status(500).json({ success: false, message: 'Error deleting tasks' });
+            }
+        }
+
+        await Note.findByIdAndDelete(noteId);
         res.status(200).json({ success: true, message: 'Note deleted successfully' });
+
     } catch (error) {
         console.error('Error deleting note:', error);
         res.status(500).json({ success: false, message: 'Error deleting note' });

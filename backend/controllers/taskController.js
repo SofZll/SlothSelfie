@@ -78,9 +78,25 @@ const deleteTask = async (req, res) => {
     }
 };
 
+const deleteTasks = async (idTasks) => {
+    try {
+        for (let i = 0; i < idTasks.length; i++) {
+            const deletedTask = await Task.findByIdAndDelete(idTasks[i]);
+            if (!deletedTask) {
+                return false;
+            }
+        }
+        return true;
+    } catch (error) {
+        console.error('Error deleting tasks:', error);
+        return false;
+    }
+}
+
 module.exports = {
     createTask,
     getTasks,
     deleteTask,
-    markTaskCompleted
+    markTaskCompleted,
+    deleteTasks
 };
