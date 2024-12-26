@@ -2,6 +2,7 @@
 const Event = require('../models/eventModel');
 const User = require('../models/userModel');
 const { createNotification } = require('../controllers/notificationController');
+const { calculateDate } = require('../utils/utils');
 const mongoose = require('mongoose');
 
 // Creating an event
@@ -27,9 +28,10 @@ const createEvent = async (req, res) => {
 
     // Calculate the date of the notification
     let dateNotif;
+    const dateTime = new Date(`${date}T${time}`).toISOString();
     console.log(customValue);
-    if (customValue) dateNotif = new Date(customValue);
-    else dateNotif = calculateDate(deadline, notificationTime);
+    if (customValue) dateNotif = new Date(customValue).toISOString();
+    else dateNotif = calculateDate(dateTime, notificationTime);
 
     // Create a notification if the notify flag is set
     if (notify) await createNotification({ elementId: savedEvent._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);

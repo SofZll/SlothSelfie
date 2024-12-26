@@ -21,7 +21,7 @@ const createPost = async (req, res) => {
         const newPost = new Content({
             author: user._id,
             type: 'post',
-            date: new Date(),
+            date: new Date().toISOString(),
             text: text,
             image: image ? { data: image.buffer, contentType: image.mimetype } : null,
             location: {
@@ -59,7 +59,7 @@ const createComment = async (req, res) => {
         const newComment = new Content({
             author: user._id,
             type: 'comment',
-            date: new Date(),
+            date: new Date().toISOString(),
             text: text,
             associatedPost: post._id,
         });

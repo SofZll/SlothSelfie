@@ -22,7 +22,7 @@ const createActivity = async (req, res) => {
         // Calculate the date of the notification
         let dateNotif;
         console.log(customValue);
-        if (customValue) dateNotif = new Date(customValue);
+        if (customValue) dateNotif = new Date(customValue).toISOString();
         else dateNotif = calculateDate(deadline, notificationTime);
         
         // Create a notification if the notify flag is set

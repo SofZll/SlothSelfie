@@ -170,8 +170,6 @@ const NotificationFunction = () => {
         
         if (receivers.length && message) {
             const newNotif = {
-                activityId: null,
-                eventId: null,
                 receivers,
                 message,
             };
@@ -200,7 +198,6 @@ const NotificationFunction = () => {
                     }
                 });
 
-                socket.emit('send-notification', newNotif);
                 resetReceivers(setReceivers, setTriggerResetReceivers);
                 document.querySelector('.text-notif textarea').value = '';
                 fetchNotifications();
@@ -288,7 +285,7 @@ const NotificationFunction = () => {
                                         <span className="close-notif" onClick={() => handleReadNotif(notif._id)}>&times;</span>
                                     </div>
                                     <p>{notif.message}</p>
-                                    {(notif.event || notif.activity) && (
+                                    {(notif.element) && (
                                         <>
                                             <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'Accepted')}>Accept</button>
                                             <button className="btn notif-button" onClick={() => handleStatusNotif(notif._id, 'Declined')}>Decline</button>

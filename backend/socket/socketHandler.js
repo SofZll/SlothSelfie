@@ -1,9 +1,9 @@
 const pomodoroSocket = require('./pomodoroSocket');
 const notificationSocket = require('./notificationSocket');
+const userSocketMap = require('./userSocketMap');
 
 const socketHandler = (io) => {
     const settingPomodoro = {};
-    const userSocketMap = {};
     let intervals = {};
 
     io.on('connection', (socket) => {
