@@ -774,15 +774,14 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
     }
     const originalId = firstEvent.originalId;
 
+    console.log("First event generated:", firstEvent);
     // check if the users are available for the first event
-    const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(eventData.start), new Date(eventData.end));
+    const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(firstEvent.date), new Date(firstEvent.date));
     if (!isAvailable) {
-        console.error("Conflict detected for the first event.");
-        return; // Don't add the event if there's a conflict
+        console.log("Conflict detected for the first event.");
+        return; // Don't add the event if there's a conflict -> //perchè me lo aggiunge lo stesso sul giorno di inizio...? aggiunge anche se metto data prima di inizio noAvailability e l'intervallo finisce dentro
     }
-
     events2Add.push(firstEvent);
-
     updateCurrentDate(currentDate, repeatFrequency);
 
     while (currentDate <= lastDate) {
@@ -792,7 +791,12 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
             repeatEndDate: lastDate.toISOString().split('T')[0],
         };
 
-        //qui devo controllare la disponibilità per ogni evento ripetuto
+        //check if the users are available for the repeated event
+        const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(data2add.start), new Date(data2add.start));
+        if (!isAvailable) {
+            console.log("Conflict detected for the repeated event.");
+            break; // Don't add the event if there's a conflict
+        }
 
         newEvents.push(data2add);
 
@@ -801,15 +805,19 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
 
     await Promise.all(
         newEvents.map(async (event) => {
-            const tmp = await generateEvent(event, originalId, receivers);
-            if (!tmp) {
-                console.error("Error generating repeated event");
-                return;
-            } else {
-                events2Add.push(tmp);
+            const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(event.start), new Date(event.start));
+            if (isAvailable) {
+                const tmp = await generateEvent(event, originalId, receivers);
+                if (!tmp) {
+                    console.error("Error generating repeated event");
+                    return;
+                } else {
+                    events2Add.push(tmp);
+                }
+            }else {   console.error("Conflict detected for the repeated event.");
             }
-
         })
+        
     );
 
 

@@ -16,7 +16,7 @@ import CalendarNoAvailability from './CalendarNoAvailability';
 //sharedWith nel popup appare con gli id anzichè con gli username finchè non faccio refresh manuale di pagina sia con add che con edit
 
 //TODO: noAvailability per eventi di gruppo, collegalo con user e aggiungi controllo se creano evento con sharedWith
-    //-> riguarda noAvailability per eventi ripetuti
+    //-> riguarda noAvailability per eventi ripetuti in generateRepeatedEvents, lo fa aggiungere lo stesso sul giorno di inizio e se metto data prima di inizio noAvailability e l'intervallo finisce dentro li aggiunge tutti
 
 const localizer = momentLocalizer(moment);
 
