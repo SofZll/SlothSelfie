@@ -29,7 +29,7 @@ const createEvent = async (req, res) => {
     let dateNotif;
     console.log(customValue);
     if (customValue) dateNotif = new Date(customValue);
-    else dateNotif = calculateDate(deadline, notificationTime);
+    //else dateNotif = calculateDate(deadline, notificationTime);
 
     // Create a notification if the notify flag is set
     if (notify) await createNotification({ elementId: savedEvent._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);
