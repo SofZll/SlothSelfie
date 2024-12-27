@@ -3,13 +3,12 @@ const User = require('../models/userModel');
 const { createNotification } = require('../controllers/notificationController');
 const { calculateDate } = require('../utils/utils');
 
-// Creating an activity
+// Creating an activinotenotety
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
     const { title, deadline, completed, notify, notificationTime, customValue, notificationRepeat, notificationType, sharedWith} = req.body;
     
-    console.log(req.body);
     try {
         let sharedWithUsers = [];
         sharedWithUsers.push(user);

@@ -12,10 +12,6 @@ const noteSchema = new mongoose.Schema({
     content: { 
         type: String 
     },
-    noteAuthor: {
-        type: String,
-        required: true,
-    },
     noteAccess: {
         type: String,
         default: 'public',
@@ -39,7 +35,16 @@ const noteSchema = new mongoose.Schema({
     updateDate:{
         type: Date,
         default: Date.now
-    }
+    },
+    user:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    sharedWith: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }]
 }, { timestamps: true });
 
 const Note = mongoose.model('Note', noteSchema);
