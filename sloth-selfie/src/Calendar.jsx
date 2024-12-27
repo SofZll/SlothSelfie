@@ -13,7 +13,7 @@ import iconBack from './media/leftBackArrow.svg';
 import CalendarNoAvailability from './CalendarNoAvailability';
 
 //TODO: edit di eventi ripetuti: non vedo cambiamenti finchè non faccio refresh manuale di pagina
-//sharedWith nel popup appare con gli id anzichè con gli username finchè non faccio refresh manuale di pagina sia con add che con edit
+//problemi: non si modifica sharedWith con edit
 
 const localizer = momentLocalizer(moment);
 
