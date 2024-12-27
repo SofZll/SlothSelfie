@@ -61,11 +61,13 @@ function App() {
 
     socket.on('notification', (newNotif) => {
       console.log('New notification received:', newNotif);
-
+      
       const notification = new Notification(newNotif.title, {
         body: newNotif.body,
-        icon: newNotif.icon,
-        badge: newNotif.badge,
+        //icon: newNotif.icon,
+        //badge: newNotif.badge,
+        sender: newNotif.sender,
+        type: newNotif.type,
       });
 
       notification.onclick = () => {
@@ -79,15 +81,9 @@ function App() {
       }
     });
 
-    socket.on('send-notification', (notif) => {
-      console.log('Direct send-notification received:', notif);
-    });
-  
-
     return () => {
       socket.off('authenticated');
       socket.off("notification");
-      socket.off('send-notification');
     }
   }, []);
   
