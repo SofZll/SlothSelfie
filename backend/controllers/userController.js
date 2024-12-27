@@ -155,7 +155,7 @@ const getUsername = async (req, res) => {
     }
 };
 
-// Get the userId
+// Get the userId from the session
 const getUserId = async (req, res) => {
     try {
         const userId = req.session.userId;
@@ -251,6 +251,53 @@ const removeNoAvailability = async (req, res) => {
     }
 };
 
+// Route to get the userId from the username
+const getUserIdFromUsername = async (req, res) => {
+    const { username } = req.params;
+
+    if (!username) {
+        return res.status(400).json({ success: false, message: 'Username is required' });
+    }
+
+    try {
+        // find the user
+        const user = await User.findOne({ username: username });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Restituisci l'ID dell'utente
+        res.status(200).json({ success: true, userId: user._id.toString() });
+    } catch (error) {
+        console.error('Error fetching userId from username:', error);
+        res.status(500).json({ success: false, message: 'Error fetching userId' });
+    }
+};
+
+//route to get the no availability time intervals of a user given the userId
+const getUserNoAvailabilityWithId = async (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        return res.status(400).json({ success: false, message: 'UserId is required' });
+    }
+
+    try {
+        // find the user
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Return the no availability time intervals of the user
+        res.status(200).json({ success: true, noAvailability: user.noAvailability });
+    } catch (error) {
+        console.error('Error fetching no availability with userId:', error);
+        res.status(500).json({ success: false, message: 'Error fetching no availability' });
+    }
+};
+
 module.exports = {
     loginUser,
     registerUser,
@@ -264,4 +311,6 @@ module.exports = {
     getNoAvailability,
     addNoAvailability,
     removeNoAvailability,
+    getUserIdFromUsername,
+    getUserNoAvailabilityWithId,
 };

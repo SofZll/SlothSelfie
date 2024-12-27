@@ -4,30 +4,30 @@ import { handleAddData, handleDeleteData } from './CalendarUtils';
 
 //TODO: Move to globalFunctions.js
 //Function to fetch notes from the server
-export async function fetchNotes(setNotes) {
+export async function fetchNotes() {
   try {
-      //const response = await fetch('/api/notes', {
-      //locale:
-      const response = await fetch('http://localhost:8000/api/notes', {
-          method: 'GET',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-      });
+    
+    const response = await fetch('http://localhost:8000/api/notes', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      if (!response.ok) {
-          throw new Error('Network response was not ok');
-      }
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
 
-      const data = await response.json();
-      console.log(data);
-      if (Array.isArray(data.notes)) {
-          setNotes(data.notes);
-      } else {
-          console.error('La risposta non contiene un array di note:', data);
-      }
+    const data = await response.json();
+    if (Array.isArray(data.notes)) {
+      return data.notes;
+    } else {
+      console.error('La risposta non contiene un array di note:', data);
+      return [];
+    }
   } catch (error) {
-      console.error('Errore if fetching di notes:', error);
+    console.error('Errore if fetching di notes:', error);
   }
 };
 
@@ -38,108 +38,243 @@ export function handleNoteDataChange (field, value, setNoteData) {
       ...prevData,
       [field]: value
   }));
-  };
+};
 
-//TODO: Move in backend
 export function canUserAccess(note, currentUser) {
   
-    if (!note.noteAccess) {
-        return false; // if no access is defined, the note is private
-    }
-    if (note.noteAccess === 'public') {
-      return true;  // open to everyone
-    }
-    if (note.noteAccess === 'private') {
-      return note.noteAuthor === currentUser;  //only the author can access
-    }
-    if (note.noteAccess === 'restricted') {
-        //Verify if allowedUsers is an array and if it contains the current user
-        return Array.isArray(note.allowedUsers) && 
-               note.allowedUsers.includes(currentUser);
-    }
-
+  if (!note.noteAccess) {
     return false;
+  } else if (note.noteAccess === 'public') {
+    return true;
+  } else if (note.noteAccess === 'private') {
+    return note.noteAuthor === currentUser;
+  } else if (note.noteAccess === 'restricted') {
+    return Array.isArray(note.allowedUsers) && note.allowedUsers.includes(currentUser);
   }
 
-  //TODO: Move in backend
-  export function addTask(taskText, noteData, setNoteData) {
+  return false;
+}
 
-    if (!Array.isArray(noteData.tasks)) {
-      noteData.tasks = [];
+export async function addTask(taskText, noteData, setNoteData, taskDeadline) {
+
+  if (!Array.isArray(noteData.tasks)) {
+    handleNoteDataChange('tasks', [], setNoteData);
+  }
+
+  const newTask = {
+    text: taskText,
+    completed: false,
+    deadline: taskDeadline !== null ? new Date(taskDeadline) : null
+  };
+
+  try {
+    const response = await fetch('http://localhost:8000/api/task', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newTask)
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while adding task');
     }
-  
-    const newTask = {
-      text: taskText,
-      completed: false,  // every new task is not completed
-      deadline: noteData.taskDeadline || null //if specified we create an activity
-    };
 
-    // Aggiorna noteData con il nuovo task
-    setNoteData(prevNoteData => ({
-      ...prevNoteData,
-      tasks: [...prevNoteData.tasks, newTask],
-      taskDeadline: ''
-    }));
+    
+    const savedTask = await response.json();
+    if (savedTask) {
+      setNoteData(prevNoteData => ({
+        ...prevNoteData,
+        tasks: [...prevNoteData.tasks, savedTask]
+      }));
+    }
+  } catch (error) {
+    console.error('Error while adding task:', error);
+  }
+}
+
+export async function removeTask(taskIndex, noteData, setNoteData) {
+
+  if (!Array.isArray(noteData.tasks)) {
+    console.error('Tasks array not found');
+    return;
   }
 
-  //TODO: Move in backend
-  export function removeTask(taskIndex, noteData, setNoteData) {
-    const updatedTasks = noteData.tasks.filter((task, i) => i !== taskIndex);
+  if (taskIndex < 0 || taskIndex >= noteData.tasks.length) {
+    console.error('Invalid task index:', taskIndex);
+    return;
+  }
+
+  const taskToDelete = noteData.tasks[taskIndex];
+  if (!taskToDelete) {
+    console.error('Task not found:', taskIndex);
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/task/${taskToDelete._id}`, {
+      method: 'DELETE',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while deleting task');
+    }
+
+
     setNoteData(prevNoteData => ({
       ...prevNoteData,
-      tasks: updatedTasks
+      tasks: prevNoteData.tasks.filter((task, i) => i !== taskIndex)
     }));
+  } catch (error) {
+    console.error('Error while deleting task:', error);
+  }
 };
 
-//marks a task as completed
-export function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
-  const updatedTasks = noteData.tasks.map((task, i) =>
-    i === taskIndex ? { ...task, completed: !task.completed } : task
-  );
-  handleNoteDataChange('tasks', updatedTasks, setNoteData);
+export async function toggleTaskCompletion(taskIndex, noteData, setNoteData = null) {
+  
+  if (!Array.isArray(noteData.tasks)) {
+    console.error('Tasks array not found');
+    return null;
+  }
+
+  if (taskIndex < 0 || taskIndex >= noteData.tasks.length) {
+    console.error('Invalid task index:', taskIndex);
+    return null;
+  }
+
+  const taskToToggle = noteData.tasks[taskIndex];
+  if (!taskToToggle) {
+    console.error('Task not found:', taskIndex);
+    return null;
+  }
+  console.log('Task to toggle:', taskToToggle._id);
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/task/complete/${taskToToggle._id}`, {
+      method: 'PUT',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while updating task');
+    }
+
+    const updatedTask = await response.json();
+    if (updatedTask) {
+      if(setNoteData !== null) {
+        setNoteData(prevNoteData => ({
+          ...prevNoteData,
+          tasks: prevNoteData.tasks.map((task, i) => 
+            i === taskIndex ? updatedTask : task
+          )
+        }));
+      }
+      return updatedTask;
+    }
+  } catch (error) {
+    console.error('Error while updating task:', error);
+  }
+  
 };
+
+async function duplicateTasks (note) {
+
+  if (!note) {
+    console.error("Nota non trovata per l'ID:", note._id);
+    return;
+  }
+
+  const duplicateTask = [];
+
+  if (note.isTodo) {
+    console.log("Duplicating tasks...");
+    note.tasks.forEach(task => {
+      const newTask = {
+        ...task,
+        _id: null,
+        completed: false,
+      };
+      duplicateTask.push(newTask);
+    });
+  }
+
+  try {
+    const response = await fetch('http://localhost:8000/api/tasks', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tasks: duplicateTask })
+    });
+
+    if (!response.ok) {
+      throw new Error("Error while duplicating tasks");
+    }
+
+    const duplicatedTasks = await response.json();
+    if (duplicatedTasks) return duplicatedTasks;
+    else return [];
+
+  } catch (error) {
+    console.error("Errore durante la duplicazione dei task:", error);
+  }
+}
 
 export async function handleDuplicateNote (noteId, notes, setNotes) {
 
-    const noteToDuplicate = notes
-        .find(note => note._id === noteId);
+  const noteToDuplicate = notes.find(note => note._id === noteId);
 
-    if (!noteToDuplicate) {
-        console.error("Nota non trovata per l'ID:", noteId);
-        return;
-    }
+  if (!noteToDuplicate) {
+    console.error("Nota non trovata per l'ID:", noteId);
+    return;
+  }
 
-    const noteToDuplicateNoId = { ...noteToDuplicate, _id: null };
-    // creates a new note, the backend will assign a new id
-    const duplicatedNote = { 
-      ...noteToDuplicateNoId, 
-      createDate: new Date().toISOString(),
-      updateDate: new Date().toISOString(),
+  let duplicateTask = [];
+
+  if (noteToDuplicate.isTodo) {
+    duplicateTask = await duplicateTasks(noteToDuplicate);
+  }
+
+  const noteToDuplicateNoId = { ...noteToDuplicate, _id: null };
+
+  const duplicatedNote = { 
+    ...noteToDuplicateNoId,
+    tasks: duplicateTask,
+    createDate: new Date().toISOString(),
+    updateDate: new Date().toISOString(),
   };
 
-    try {
-        //const response = await fetch('/note', {
-        //locale:
-         const response = await fetch('http://localhost:8000/api/note', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(duplicatedNote)
-        });
+  try {
+    const response = await fetch('http://localhost:8000/api/note', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(duplicatedNote)
+    });
 
-        if (!response.ok) {
-            throw new Error("Error while duplicating note");
-        }
-        const savedNote = await response.json();
-        console.log("Saved duplicated note:", savedNote);
-
-        setNotes([...notes, savedNote]);
-        fetchNotes(setNotes);
-    } catch (error) {
-        console.error("Errore durante la duplicazione della nota:", error);
+    if (!response.ok) {
+      throw new Error("Error while duplicating note");
     }
-  };
+    const savedNote = await response.json();
+    console.log("Saved duplicated note:", savedNote);
+
+    setNotes([...notes, savedNote.note]);
+    fetchNotes(setNotes);
+  } catch (error) {
+    console.error("Errore durante la duplicazione della nota:", error);
+  }
+};
 
 //Function to handle the deletion of a note
 export async function handleDeleteNote(noteId, notes, setNotes) {
@@ -163,7 +298,6 @@ export async function handleDeleteNote(noteId, notes, setNotes) {
 
     //updating frontend
     setNotes(notes.filter(note => note._id !== noteId));
-    fetchNotes(setNotes);
   } catch (error) {
     console.error('Errore durante l\'eliminazione della nota:', error);
   }
@@ -171,21 +305,20 @@ export async function handleDeleteNote(noteId, notes, setNotes) {
 
 //TODO: Move in Note.js
 export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
-  const noteToEdit = notes
-        .find(note => note._id === noteId);
+  const noteToEdit = notes.find(note => note._id === noteId);
 
-    if (!noteToEdit) {
-        console.error("Nota non trovata per l'ID:", noteId);
-        return;
-    }
+  if (!noteToEdit) {
+    console.error("Nota non trovata per l'ID:", noteId);
+    return;
+  }
 
-    console.log("Editing note with ID:", noteId);
-    console.log("Note data:", noteToEdit);
+  console.log("Editing note with ID:", noteId);
+  console.log("Note data:", noteToEdit);
   
   setNoteData({
-      ...noteToEdit,
-      tasks: noteToEdit.tasks || [], // we prevent errors if undefined
-      allowedUsers: noteToEdit.allowedUsers || [] // we prevent errors if undefined
+    ...noteToEdit,
+    tasks: noteToEdit.tasks || [],
+    allowedUsers: noteToEdit.allowedUsers || [],
   });
   
   setIsEditing(noteId);
@@ -301,6 +434,10 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
 
 //Function to sort the nots for the selected sort criterion
 export function sortNotes(notes, sortCriterion) {
+  if (!Array.isArray(notes)) {
+    console.error('Notes array not found');
+    return [];
+  }
   return [...notes].sort((a, b) => {
     const aDate = a.updateDate instanceof Date ? a.updateDate : new Date(a.updateDate);
     const bDate = b.updateDate instanceof Date ? b.updateDate : new Date(b.updateDate);
@@ -337,34 +474,30 @@ export async function handleResetForm (setNoteData) {
 //Function to handle the creation of a new note
 export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
 
-  if (!noteData.title || !noteData.category || !noteData.content) {
+  if (!noteData.title || !noteData.category) {
     popUpAlert('Add Note Error', 'Missing required fields', 'error');
+    console.log(noteData);
     return;
   }
   
   if (noteData.isTodo && noteData.tasks.length === 0) {
     popUpAlert('Add Note Error', 'Please add at least one task to your to-do list', 'error');
     return;
-  }
-
-  if (!noteData.isTodo && noteData.content.trim() === "") {
+  } else if (!noteData.isTodo && (!noteData.content || noteData.content.trim() === "")) {
     popUpAlert('Add Note Error', 'Please add content to your note', 'error');
     return;
   }
 
   const newNote = {
     ...noteData,
-    content: noteData.isTodo ? "" : noteData.content.trim(),
+    content: noteData.content.trim(),
     allowedHost: noteData.noteAccess === 'restricted' ? noteData.allowedHost : [],
     tasks: noteData.isTodo 
-    ? noteData.tasks.map(task => ({ 
-      ...task, 
-      completed: task.completed || false,
-      deadline: task.deadline || null
-    })) : [],
+    ? noteData.tasks.map(task => (task._id)) : [],
     createDate: noteData.createDate ? new Date(noteData.createDate) : new Date(),
     updateDate: noteData.updateDate ? new Date(noteData.updateDate) : new Date(),
   }
+
 
   try {
     const response = await fetch('http://localhost:8000/api/note', {
@@ -384,7 +517,7 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
     const savedNote = await response.json();
 
     if (savedNote) {
-      setNotes([...notes, savedNote]);
+      setNotes([...notes, savedNote.note ]);
       handleResetForm(setNoteData);
     }
   } catch(error) {
@@ -394,7 +527,7 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
 }
 
 //Function to save the edit of a note
-export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
+export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing) {
 
   const noteToUpdate = notes.find(note => note._id === noteId);
 
@@ -412,7 +545,7 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
     content: noteData.content,
     tasks: noteData.isTodo 
     ? noteData.tasks.map(task => ({ 
-      ...task, 
+      ...task,
       completed: task.completed || false,
       deadline: task.deadline || null
     })) : [],
@@ -435,6 +568,7 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
 
     const savedNote = await response.json();
 
+
     if (savedNote) {
       const updatedNotes = notes.map(note =>
         note._id === noteId ? { note: savedNote } : note
@@ -449,10 +583,17 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
   }
 };
 
-//Function to handle the deletion of a note
-//TODO: Check why this is not working with toDoList
-export function handleCopyContent(content) {
-  navigator.clipboard.writeText(content).then(() => {
+export function handleCopyContent(content, toDoList) {
+  let copiedContent = content;
+
+  if (toDoList) {
+    copiedContent += '\n\nTasks:\n';
+    toDoList.forEach((task, i) => {
+      copiedContent += `${i + 1}. ${task.text} ${task.completed ? '(completed)' : ''}\n`;
+    });
+  }
+
+  navigator.clipboard.writeText(copiedContent).then(() => {
     popUpAlert('Contenuto copiato', 'Il contenuto è stato copiato negli appunti', 'success');
   });
 };
@@ -467,3 +608,26 @@ function popUpAlert(title, message, icon) {
     }
   });
 }
+
+// Get the username of the authenticated user
+export async function fetchUsername() {
+  try {
+    const response = await fetch('http://localhost:8000/api/user/username', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while fetching user');
+    }
+
+    const data = await response.json();
+    return data.username;
+  } catch (error) {
+    console.error('Error while fetching user:', error);
+  }
+}
+
