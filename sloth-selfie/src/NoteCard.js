@@ -14,12 +14,6 @@ function NoteCard({ noteAuthor, note, setNotes, onEdit, onDelete, onDuplicate, o
     breaks: true,
   });
 
-  // Convert the note content to HTML
-  function getMarkdownContent (content) {
-    if (content && content.trim()) 
-      return marked(content);
-  };
-
   const setCompleted = async (indexTask) => {
     const updatedTask = await toggleTaskCompletion(indexTask, note);
 
@@ -32,7 +26,6 @@ function NoteCard({ noteAuthor, note, setNotes, onEdit, onDelete, onDuplicate, o
     setNotes((prevNotes) => 
       prevNotes.map((prevNote) => {
         if (prevNote._id === note._id) {
-          console.log('prevNoteeeeeeeeeeeeeeeeee:', prevNote);
           return {
             ...prevNote,
             tasks: prevNote.tasks.map((task, i) =>
