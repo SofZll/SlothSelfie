@@ -74,7 +74,7 @@ function NotesFunction() {
   const [filterDate, setFilterDate] = useState("");
 
   const [isEditing, setIsEditing] = useState(null);
-  const [username, setUsername] = useState("");//username of the authenticated user, we use it for the note rendering
+  const [username, setUsername] = useState("");
   const [filteredNotes, setFilteredNotes] = useState([]);
 
   const [taskDeadline, setTaskDeadline] = useState(null);
@@ -137,7 +137,6 @@ function NotesFunction() {
 
   //filters and sorts notes every time the filter/sort criteria change
   useEffect(() => {
-    console.log('Notesssssssssssssssss:', notes);
     const filteredAndSorted = filterNotesByDate(sortNotes(notes, sortCriterion));
     console.log('Filtered and sorted notes:', filteredAndSorted);
     setFilteredNotes(filteredAndSorted);

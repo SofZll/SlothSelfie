@@ -78,6 +78,7 @@ const deleteTask = async (req, res) => {
     }
 };
 
+
 const deleteTasks = async (idTasks) => {
     try {
         for (let i = 0; i < idTasks.length; i++) {
