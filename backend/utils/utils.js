@@ -18,7 +18,7 @@ const calculateDate = (date, minusTime) => {
     return date;
 };
 
-const emitNotification = (sender, receivers, message) => {
+const emitNotification = (sender, receivers, message, type) => {
     const io = getIO();
     if (!io) {
         console.error("Socket.IO instance not found.");
@@ -34,7 +34,7 @@ const emitNotification = (sender, receivers, message) => {
                 title: 'New notification',
                 sender: { username: sender },
                 body: message,
-                icon: 'icon_url',
+                type: type,
             });
         } else {
             console.error(`Receiver ${receiver} is not connected.`);

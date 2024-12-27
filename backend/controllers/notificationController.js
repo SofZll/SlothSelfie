@@ -60,6 +60,7 @@ const createNotification = async (req, res, internalCall = false) => {
                 sender: senderUser.username,
                 receivers: receiversUsername,
                 message: messageVal,
+                type: notificationType,
             });
             console.log(`Scheduled job 'send notification' at ${notificationDate}`);
         } else {
@@ -67,6 +68,7 @@ const createNotification = async (req, res, internalCall = false) => {
                 sender: senderUser.username,
                 receivers: receiversUsername,
                 message: messageVal,
+                type: notificationType,
             });
             console.log(`Scheduled job 'send notification' now`);
         }
@@ -79,6 +81,7 @@ const createNotification = async (req, res, internalCall = false) => {
                     sender: senderUser.username,
                     receivers: receiversUsername,
                     message: messageVal,
+                    type: notificationType,
                 });
             } else if (frequencyNotif == 'untilAnswer') {
                 // logica personalizzata per untilAnswer
@@ -87,6 +90,7 @@ const createNotification = async (req, res, internalCall = false) => {
                     receivers: receiversUsername,
                     message: messageVal,
                     startDate: notificationDate,
+                    type: notificationType,
                 });
             } else {
                 await agenda.every(frequencyNotif, 'send notification', {
@@ -94,6 +98,7 @@ const createNotification = async (req, res, internalCall = false) => {
                     receivers: receiversUsername,
                     message: messageVal,
                     startDate: notificationDate,
+                    type: notificationType,
                 });
             }
         }
