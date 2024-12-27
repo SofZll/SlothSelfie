@@ -745,8 +745,6 @@ export function updateCurrentDate(currentDate, repeatFrequency) {
     }
 }
 
-
-
 // Function to generate repeated events con handleAddData
 export async function generateRepeatedEvents (e, eventData, events, setEvents, receivers) {
     if (e && e.preventDefault) {
@@ -760,12 +758,21 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
     let currentDate = new Date(date);
     const lastDate = new Date(calcLastDate(eventData));
 
-    let newData = {
+    const firstEventData = {
         ...eventData,
+        date: currentDate.toISOString().split('T')[0],
         repeatEndDate: lastDate.toISOString().split('T')[0],
+    };
+
+    // check if the users are available for the first event
+    const isFirstAvailable = await checkAvailabilityForSharedWith(receivers, new Date(firstEventData.date), new Date(firstEventData.date));
+    if (!isFirstAvailable) {
+        console.log("Conflict detected for the first event.");
+        return; // Don't add the event if there's a conflict
     }
 
-    const firstEvent = await generateEvent(newData, '', receivers);
+    // Add the first event
+    const firstEvent = await generateEvent(firstEventData, '', receivers);
     if (!firstEvent) {
         console.error("Error generating first event");
         return
@@ -773,14 +780,11 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
     const originalId = firstEvent.originalId;
 
     console.log("First event generated:", firstEvent);
-    // check if the users are available for the first event
-    const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(firstEvent.date), new Date(firstEvent.date));
-    if (!isAvailable) {
-        console.log("Conflict detected for the first event.");
-        return; // Don't add the event if there's a conflict -> //perchè me lo aggiunge lo stesso sul giorno di inizio...? aggiunge anche se metto data prima di inizio noAvailability e l'intervallo finisce dentro
-    }
+
     events2Add.push(firstEvent);
     updateCurrentDate(currentDate, repeatFrequency);
+
+    let hasConflict = false; // Flag to check if there are conflicts, in case we remove the first event and we add nothing
 
     while (currentDate <= lastDate) {
         const data2add = {
@@ -790,21 +794,29 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
         };
 
         //check if the users are available for the repeated event
-        const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(data2add.start), new Date(data2add.start));
+        console.log("Current date:", data2add.date);
+        const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(data2add.date), new Date(data2add.date));
         if (!isAvailable) {
             console.log("Conflict detected for the repeated event.");
+            hasConflict = true;
             break; // Don't add the event if there's a conflict
         }
 
         newEvents.push(data2add);
 
+        // Update the current date for repeated events
         updateCurrentDate(currentDate, repeatFrequency);
     }
 
+    if (hasConflict) {
+        console.log("Conflict detected, removing the first event.");
+        setEvents(events); // we keep the original events
+        return;
+    }
+
+    // Adds all the repeated events if there are no conflicts
     await Promise.all(
         newEvents.map(async (event) => {
-            const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(event.start), new Date(event.start));
-            if (isAvailable) {
                 const tmp = await generateEvent(event, originalId, receivers);
                 if (!tmp) {
                     console.error("Error generating repeated event");
@@ -812,14 +824,11 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
                 } else {
                     events2Add.push(tmp);
                 }
-            }else {   console.error("Conflict detected for the repeated event.");
-            }
         })
         
     );
 
-
-
+    //adds all the repeated events if there are no conflicts
     setEvents([...events, ...events2Add]);
 };
 
@@ -953,63 +962,69 @@ function isOverlapping(start1, end1, start2, end2) {
     );
 }
 
-// Function to check availability of users in sharedWith -> riguarda per eventi ripetuti
+// Function to check availability of users in sharedWith
 async function checkAvailabilityForSharedWith(receivers, startDate, endDate) {
     try {
-        // Get user IDs from usernames
-        const userId =  await getUserIdFromUsername(receivers[0]);
-        console.log("User ID:", userId);
-
-        const noAvailability = await getUserAvailabilityWithId(userId);
-        console.log("No availability:", noAvailability);
 
         const newStartDate = new Date(startDate);
         const newEndDate = new Date(endDate);
 
-        // Check if the user's availability overlaps with the new event
-        for (const unavailablePeriod of noAvailability) {
-            const { startDate: unavailableStart, endDate: unavailableEnd, repeatFrequency } = unavailablePeriod;
+        for (const receiver of receivers) {
+            
+            // Get user IDs from usernames
+            const userId =  await getUserIdFromUsername(receiver);
+            console.log("User ID:", userId);
 
-            if(repeatFrequency === "none") {
-                // Check for a single period
-                if (isOverlapping(new Date(startDate), new Date(endDate), new Date(unavailableStart), new Date(unavailableEnd))) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: `The user "${receivers[0]}" is not available during this period.`,
-                    });
-                    return false; // Return false if there's an overlap
-                }
-            }
-            // Check for repeated periods
-            else {
-                let currentStart = new Date(unavailableStart);
-                let currentEnd = new Date(unavailableEnd);
+            const noAvailability = await getUserAvailabilityWithId(userId);
+            console.log("No availability:", noAvailability);
 
-                while (currentStart <= newEndDate) {
-                    if (isOverlapping(
-                        newStartDate, 
-                        newEndDate, 
-                        currentStart, 
-                        currentEnd
-                    )) {
+            
+
+            // Check if the user's availability overlaps with the new event
+            for (const unavailablePeriod of noAvailability) {
+                const { startDate: unavailableStart, endDate: unavailableEnd, repeatFrequency } = unavailablePeriod;
+
+                if(repeatFrequency === "none") {
+                    // Check for a single period
+                    if (isOverlapping(new Date(startDate), new Date(endDate), new Date(unavailableStart), new Date(unavailableEnd))) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Oops...',
-                            text: `The user "${receivers[0]}" is not available during this period.`,
+                            text: `The user "${receiver}" is not available during this period.`,
                         });
                         return false; // Return false if there's an overlap
                     }
+                }
+                // Check for repeated periods
+                else {
+                    let currentStart = new Date(unavailableStart);
+                    let currentEnd = new Date(unavailableEnd);
 
-                    // We update the dates for the next occurrence
-                    updateCurrentDate(currentStart, repeatFrequency);
-                    updateCurrentDate(currentEnd, repeatFrequency);
+                    while (currentStart <= newEndDate) {
+                        if (isOverlapping(
+                            newStartDate, 
+                            newEndDate, 
+                            currentStart, 
+                            currentEnd
+                        )) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: `The user "${receiver}" is not available during this period.`,
+                            });
+                            return false; // Return false if there's an overlap
+                        }
+
+                        // We update the dates for the next occurrence
+                        updateCurrentDate(currentStart, repeatFrequency);
+                        updateCurrentDate(currentEnd, repeatFrequency);
+                    }
                 }
             }
         }
-
         // no overlaps found, the user is available
         return true;
+  
     } catch (error) {
         console.error("Errore nel controllare la disponibilità:", error);
         return false; // Return false in case of an error
