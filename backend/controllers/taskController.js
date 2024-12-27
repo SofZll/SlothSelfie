@@ -78,6 +78,30 @@ const deleteTask = async (req, res) => {
     }
 };
 
+const addTasks = async (req, res) => {
+    const { tasks } = req.body;
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
+    const taskIds = [];
+    console.log(tasks, 'taskssssssssssssssssss');
+    try {
+        for (let i = 0; i < tasks.length; i++) {
+            let task;
+            if (tasks[i].deadline) {
+                task = new Task({ text: tasks[i].text, deadline: tasks[i].deadline, completed: tasks[i].completed, user: user._id });
+            } else {
+                task = new Task({ text: tasks[i].text, completed: tasks[i].completed, user: user._id });
+            }
+            const savedTask = await task.save();
+            taskIds.push(savedTask._id);
+        }
+        res.status(200).json(taskIds);
+    } catch (error) {
+        console.error('Error adding tasks:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
 
 const deleteTasks = async (idTasks) => {
     try {
@@ -99,5 +123,6 @@ module.exports = {
     getTasks,
     deleteTask,
     markTaskCompleted,
-    deleteTasks
+    deleteTasks,
+    addTasks,
 };
