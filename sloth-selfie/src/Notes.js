@@ -234,7 +234,7 @@ function NotesFunction() {
                   note={note}
                   setNotes={setNotes}
                   onDuplicate={() => { handleDuplicateNote(note._id, notes, setNotes) }} // Add curly braces
-                  onCopy={() => handleCopyContent(note.content)}
+                  onCopy={() => handleCopyContent(note.content, (note.isTodo ? note.tasks : null))}
                   onDelete={() => handleDeleteNote(note._id, notes, setNotes)}
                   onEdit={() => handleEditCard(note)}
                 />

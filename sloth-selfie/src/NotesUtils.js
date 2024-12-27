@@ -55,7 +55,6 @@ export function canUserAccess(note, currentUser) {
   return false;
 }
 
-
 export async function addTask(taskText, noteData, setNoteData, taskDeadline) {
 
   if (!Array.isArray(noteData.tasks)) {
@@ -207,33 +206,27 @@ async function duplicateTasks (note) {
     });
   }
 
-  let duplicatedTasks = [];
+  try {
+    const response = await fetch('http://localhost:8000/api/tasks', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tasks: duplicateTask })
+    });
 
-  for (let i = 0; i < duplicateTask.length; i++) {
-    const task = duplicateTask[i];
-    try {
-      const response = await fetch('http://localhost:8000/api/task', {
-        method: 'POST',
-        credentials: "include",
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(task)
-      });
-
-      if (!response.ok) {
-        throw new Error('Error while duplicating task');
-      }
-
-      const savedTask = await response.json();
-      console.log("Saved duplicated task:", savedTask);
-      duplicatedTasks.push(savedTask._id);
-    } catch (error) {
-      console.error('Error while duplicating task:', error);
+    if (!response.ok) {
+      throw new Error("Error while duplicating tasks");
     }
-  }
 
-  return duplicatedTasks;
+    const duplicatedTasks = await response.json();
+    if (duplicatedTasks) return duplicatedTasks;
+    else return [];
+
+  } catch (error) {
+    console.error("Errore durante la duplicazione dei task:", error);
+  }
 }
 
 export async function handleDuplicateNote (noteId, notes, setNotes) {
@@ -590,10 +583,17 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
   }
 };
 
-//Function to handle the deletion of a note
-//TODO: Check why this is not working with toDoList
-export function handleCopyContent(content) {
-  navigator.clipboard.writeText(content).then(() => {
+export function handleCopyContent(content, toDoList) {
+  let copiedContent = content;
+
+  if (toDoList) {
+    copiedContent += '\n\nTasks:\n';
+    toDoList.forEach((task, i) => {
+      copiedContent += `${i + 1}. ${task.text} ${task.completed ? '(completed)' : ''}\n`;
+    });
+  }
+
+  navigator.clipboard.writeText(copiedContent).then(() => {
     popUpAlert('Contenuto copiato', 'Il contenuto è stato copiato negli appunti', 'success');
   });
 };
