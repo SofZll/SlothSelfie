@@ -186,48 +186,102 @@ export async function toggleTaskCompletion(taskIndex, noteData, setNoteData = nu
   
 };
 
+async function duplicateTasks (note) {
+
+  if (!note) {
+    console.error("Nota non trovata per l'ID:", note._id);
+    return;
+  }
+
+  const duplicateTask = [];
+
+  if (note.isTodo) {
+    console.log("Duplicating tasks...");
+    note.tasks.forEach(task => {
+      const newTask = {
+        ...task,
+        _id: null,
+        completed: false,
+      };
+      duplicateTask.push(newTask);
+    });
+  }
+
+  let duplicatedTasks = [];
+
+  for (let i = 0; i < duplicateTask.length; i++) {
+    const task = duplicateTask[i];
+    try {
+      const response = await fetch('http://localhost:8000/api/task', {
+        method: 'POST',
+        credentials: "include",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(task)
+      });
+
+      if (!response.ok) {
+        throw new Error('Error while duplicating task');
+      }
+
+      const savedTask = await response.json();
+      console.log("Saved duplicated task:", savedTask);
+      duplicatedTasks.push(savedTask._id);
+    } catch (error) {
+      console.error('Error while duplicating task:', error);
+    }
+  }
+
+  return duplicatedTasks;
+}
+
 export async function handleDuplicateNote (noteId, notes, setNotes) {
 
-    const noteToDuplicate = notes
-        .find(note => note._id === noteId);
+  const noteToDuplicate = notes.find(note => note._id === noteId);
 
-    if (!noteToDuplicate) {
-        console.error("Nota non trovata per l'ID:", noteId);
-        return;
-    }
+  if (!noteToDuplicate) {
+    console.error("Nota non trovata per l'ID:", noteId);
+    return;
+  }
 
-    const noteToDuplicateNoId = { ...noteToDuplicate, _id: null };
-    // creates a new note, the backend will assign a new id
-    const duplicatedNote = { 
-      ...noteToDuplicateNoId, 
-      createDate: new Date().toISOString(),
-      updateDate: new Date().toISOString(),
+  let duplicateTask = [];
+
+  if (noteToDuplicate.isTodo) {
+    duplicateTask = await duplicateTasks(noteToDuplicate);
+  }
+
+  const noteToDuplicateNoId = { ...noteToDuplicate, _id: null };
+
+  const duplicatedNote = { 
+    ...noteToDuplicateNoId,
+    tasks: duplicateTask,
+    createDate: new Date().toISOString(),
+    updateDate: new Date().toISOString(),
   };
 
-    try {
-        //const response = await fetch('/note', {
-        //locale:
-         const response = await fetch('http://localhost:8000/api/note', {
-            method: 'POST',
-            credentials: "include",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(duplicatedNote)
-        });
+  try {
+    const response = await fetch('http://localhost:8000/api/note', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(duplicatedNote)
+    });
 
-        if (!response.ok) {
-            throw new Error("Error while duplicating note");
-        }
-        const savedNote = await response.json();
-        console.log("Saved duplicated note:", savedNote);
-
-        setNotes([...notes, savedNote]);
-        fetchNotes(setNotes);
-    } catch (error) {
-        console.error("Errore durante la duplicazione della nota:", error);
+    if (!response.ok) {
+      throw new Error("Error while duplicating note");
     }
-  };
+    const savedNote = await response.json();
+    console.log("Saved duplicated note:", savedNote);
+
+    setNotes([...notes, savedNote.note]);
+    fetchNotes(setNotes);
+  } catch (error) {
+    console.error("Errore durante la duplicazione della nota:", error);
+  }
+};
 
 //Function to handle the deletion of a note
 export async function handleDeleteNote(noteId, notes, setNotes) {

@@ -1,8 +1,6 @@
 
 import Swal from "sweetalert2";
 import { resetReceivers } from "./globalFunctions";
-import socket from './socket'
-import { get } from "mongoose";
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
