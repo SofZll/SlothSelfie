@@ -56,6 +56,7 @@ function ActivitiesFunction(props){
                             <div className="activity-card" key={activity._id}>
                                 <h2>{activity.title}</h2>
                                 <p>Due: {new Date(activity.deadline).toLocaleDateString()}</p>
+                                <p>shared With: {activity.sharedWith?.length > 0 ? activity.sharedWith.join(", ") : "No users"}</p>
                                 <button className="btn btn-main" onClick={() => handleRemoveActivity(activity._id, props.activities, props.setActivities)}>
                                     Done
                                 </button>
