@@ -767,7 +767,6 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
     // check if the users are available for the first event
     const isFirstAvailable = await checkAvailabilityForSharedWith(receivers, new Date(firstEventData.date), new Date(firstEventData.date));
     if (!isFirstAvailable) {
-        console.log("Conflict detected for the first event.");
         return; // Don't add the event if there's a conflict
     }
 
@@ -778,8 +777,6 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
         return
     }
     const originalId = firstEvent.originalId;
-
-    console.log("First event generated:", firstEvent);
 
     events2Add.push(firstEvent);
     updateCurrentDate(currentDate, repeatFrequency);
@@ -794,10 +791,8 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
         };
 
         //check if the users are available for the repeated event
-        console.log("Current date:", data2add.date);
         const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(data2add.date), new Date(data2add.date));
         if (!isAvailable) {
-            console.log("Conflict detected for the repeated event.");
             hasConflict = true;
             break; // Don't add the event if there's a conflict
         }
@@ -809,8 +804,8 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
     }
 
     if (hasConflict) {
-        console.log("Conflict detected, removing the first event.");
-        setEvents(events); // we keep the original events
+        //delete the first event
+        await handleDeleteData('event', firstEvent._id, events, setEvents);
         return;
     }
 
@@ -847,7 +842,6 @@ export async function fetchNoAvailability(setNoAvailability){
         if (response.ok) {
             const data = await response.json();
             setNoAvailability(data.noAvailability);
-            console.log('No availability fetched successfully:', data.noAvailability);
         } else {
             throw new Error('Error fetching no availability');
         }
@@ -894,7 +888,6 @@ export async function removeNoAvailability(noAvailabilityId) {
         });
         if (response.ok) {
             const result = await response.json();
-            console.log('No availability removed successfully:', result.message);
             return result;
         } else {
             const textResponse = await response.text();
@@ -942,7 +935,6 @@ async function getUserAvailabilityWithId(userId) {
 
         if (response.ok) {
             const data = await response.json();
-            console.log('No availability fetched successfully:', data.noAvailability);
             return data.noAvailability;
         } else {
             throw new Error('Error fetching no availability');
@@ -973,12 +965,9 @@ async function checkAvailabilityForSharedWith(receivers, startDate, endDate) {
             
             // Get user IDs from usernames
             const userId =  await getUserIdFromUsername(receiver);
-            console.log("User ID:", userId);
 
             const noAvailability = await getUserAvailabilityWithId(userId);
-            console.log("No availability:", noAvailability);
 
-            
 
             // Check if the user's availability overlaps with the new event
             for (const unavailablePeriod of noAvailability) {

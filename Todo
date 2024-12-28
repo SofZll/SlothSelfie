@@ -11,12 +11,10 @@ TODO:
     - Connect events and notifications
     - Accept or reject events trough notifications
     - User time settings
-    - Gli utenti possono indicare certi intervalli di tempo (anche ripetuti) come non disponibili per eventi di gruppo
     - Configure icalendar, google calendar, mail and apple calendar // da rileggere
     - Resources as users
     - Manager user
     - Notifications with urgent levels
-    - Shared Activities
     - Gli eventi e le attività devono essere efficaci e possono essere modificati insieme
 
     // Pomodoro
@@ -38,4 +36,6 @@ DONE:
     - Hub back
     - If an item has a deadline, it should automatically be added to the calendar
     - Add shared events - AGGIUNGERE ARRAY USERID PER EVENTI E ATTIVITÀ
+    - Shared Activities
+    - Gli utenti possono indicare certi intervalli di tempo (anche ripetuti) come non disponibili per eventi di gruppo
 

@@ -14,6 +14,7 @@ const init = (server) => {
 
 const getIO = () => {
     if (!io) {
+        console.error("Socket.IO instance not initialized!");
         throw new Error('Socket.IO not initialized!');
     }
     return io;

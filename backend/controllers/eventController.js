@@ -2,6 +2,7 @@
 const Event = require('../models/eventModel');
 const User = require('../models/userModel');
 const { createNotification } = require('../controllers/notificationController');
+const { calculateDate } = require('../utils/utils');
 const mongoose = require('mongoose');
 
 // Creating an event
@@ -25,15 +26,24 @@ const createEvent = async (req, res) => {
     }
     const savedEvent = await event.save();
 
+    //populate the sharedWith field with the username of the users
+    const populatedEvent = await Event.findById(savedEvent._id).populate('sharedWith', 'username');
+    
     // Calculate the date of the notification
     let dateNotif;
+    const dateTime = new Date(`${date}T${time}`).toISOString();
     console.log(customValue);
-    if (customValue) dateNotif = new Date(customValue);
-    //else dateNotif = calculateDate(deadline, notificationTime);
+    if (customValue) dateNotif = new Date(customValue).toISOString();
+    else dateNotif = calculateDate(dateTime, notificationTime);
 
     // Create a notification if the notify flag is set
     if (notify) await createNotification({ elementId: savedEvent._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);
-    res.status(200).json(savedEvent);
+    
+    console.log(savedEvent);
+    res.status(200).json({
+      ...populatedEvent.toObject(),
+      sharedWith: populatedEvent.sharedWith.map(user => user.username)
+    });
   }
   catch (error) {
     console.error('Error creating event:', error);
@@ -87,15 +97,18 @@ const updateEvent = async (req, res) => {
      if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
        sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
      }
-     console.log(sharedWithUsers); //TODO: Nel popup se non si refresha la pagina si vedono gli id sia con add che con edit
 
     //update the event
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
       { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith: sharedWithUsers.map(u => u._id) },
       { new: true }
-    );
-    res.status(200).json(updatedEvent);
+    ).populate('sharedWith', 'username');
+
+    res.status(200).json({
+      ...updatedEvent.toObject(),
+      sharedWith: updatedEvent.sharedWith?.map(user => user.username) || []
+    });
 
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -134,7 +147,14 @@ const updateMultipleEvent = async (req, res) => {
       }
     );
 
-    res.status(200).json({ message: "Events updated", updatedEvents: events });
+    // populate the sharedWith field with the username of the users
+    const populatedEvents = await Event.find({ originalId }).populate('sharedWith', 'username');
+
+    res.status(200).json({ message: "Events updated", updatedEvents: populatedEvents.map(event => ({
+      ...event.toObject(),
+      sharedWith: event.sharedWith?.map(user => user.username) || []
+    }))
+    });
   }
   catch (error) {
     console.error('Error updating events:', error);
