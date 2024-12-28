@@ -6,7 +6,12 @@ const notificationSocket = {
                 console.log('Session data:', session); // Add logging to check the session data
                 if (session && session.username) {
                     const username = session.username;
-                    userSocketMap[username] = socket.id;
+                    if (!userSocketMap[username]) {
+                        userSocketMap[username] = [];
+                    }
+                    if (!userSocketMap[username].includes(socket.id)) {
+                        userSocketMap[username].push(socket.id);
+                    }
                     console.log(`User authenticated: ${username} -> ${socket.id}`);
                 } else {
                     console.log('Username not found in session');
@@ -45,7 +50,15 @@ const notificationSocket = {
             const session = socket.request.session;
             if (session && session.username) {
                 const username = session.username;
-                delete userSocketMap[username];
+                const userSockets = userSocketMap[username];
+
+                if (userSockets) {
+                    userSocketMap[username] = userSockets.filter(id => id !== socket.id);
+
+                    if (userSocketMap[username].length === 0) {
+                        delete userSocketMap[username];
+                    }
+                }
                 console.log(`User disconnected: ${username}`);
             }
         });

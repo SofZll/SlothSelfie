@@ -1,4 +1,5 @@
 const { getIO } = require('../socket/socket');
+const { pushNotification } = require('../services/pushNotification');
 const userSocketMap = require('../socket/userSocketMap');
 
 const calculateDate = (date, minusTime) => {
@@ -26,18 +27,21 @@ const emitNotification = (sender, receivers, message, type) => {
     }
 
     receivers.forEach(receiver => {
-        console.log('userSocketMap:', userSocketMap);
-        const receiverSocketId = userSocketMap[receiver];
-        if (receiverSocketId) {
-            console.log(`Sending notification to ${receiver}: ${message}`);
-            io.to(receiverSocketId).emit('notification', {
-                title: 'New notification',
-                sender: { username: sender },
-                body: message,
-                type: type,
-            });
-        } else {
-            console.error(`Receiver ${receiver} is not connected.`);
+        if (type.includes('OS')) {
+            console.log('userSocketMap:', userSocketMap);
+            const receiverSocketIds = userSocketMap[receiver]; // for multiple devices
+            if (receiverSocketIds && receiverSocketIds.length > 0) {
+                console.log(`Sending notification to ${receiver}: ${message}`);
+                receiverSocketIds.forEach(receiverSocketId => {
+                    io.to(receiverSocketId).emit('notification', {
+                        title: 'New notification',
+                        sender: { username: sender },
+                        body: message,
+                    });
+                });
+            } else {
+                pushNotification(sender, receiver, message);
+            }
         }
     });
 };

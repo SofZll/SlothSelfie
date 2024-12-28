@@ -186,7 +186,56 @@ function App() {
       toggleTimeMachine();
     }
   };
-  
+
+  // if (isAuthenticated) {
+    if ("Notification" in window && navigator.serviceWorker) {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          console.log("Notifiche attivate!");
+        }
+      });
+    }
+    
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('Service Worker registrato con successo:', registration);
+
+            return registration.pushManager.getSubscription().then(subscription => {
+              if (subscription) {
+                return subscription;
+              }
+
+              return registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: 'BNI2252O4XvM3IAQ_jF_U-dY_XZG3swWR60TYnUhBF-lTWhOWc2EvkBqaVceiQiF6xu89K8WCAPye4xf6e23EsE'
+              });
+            });
+          }).then(subscription => {
+            console.log('Subscription:', subscription);
+
+            fetch('http://localhost:3000/api/subscribe', {
+              method: 'POST',
+              credentials: 'include',
+              body: JSON.stringify(subscription),
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            }).then(response => {
+              if (response.ok) {
+                console.log('Subscription inviata con successo');
+              }
+            }).catch(error => {
+              console.error('Errore nell\'invio della Subscription:', error);
+            });
+          }).catch(error => {
+            console.error('Errore nella registrazione del Service Worker:', error);
+          });
+      });
+    }
+  //}
+
   return (
     <Router>
       <StyleProvider>
