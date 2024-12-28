@@ -1,6 +1,7 @@
 
 import Swal from "sweetalert2";
 import { resetReceivers } from "./globalFunctions";
+import { set } from "mongoose";
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
@@ -379,8 +380,13 @@ export function handleClosePopup(type, setSelectedData, setIsEditing, setData) {
     resetInputFiels(type, setData, setIsEditing);
 }
 
+export function prepareSharedWith(receivers) {
+    // Remove duplicates and empty strings
+    return Array.from(new Set(receivers.map(receiver => receiver.trim()).filter(Boolean)));
+}
+
 //Function to handle the update of an event or activity
-export async function handleUpdateData(e, data, setData, datas, setDatas, selectedData, setSelectedData, setIsEditing) {
+export async function handleUpdateData(e, data, setData, datas, setDatas, selectedData, setSelectedData, setIsEditing, receivers) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -395,6 +401,8 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                  return; // Don't add the event if there's a conflict
              }
          }
+
+         const updatedSharedWith = receivers ? prepareSharedWith(receivers) : data.sharedWith; 
  
          // Proceed to edit the event (if users are available)
         const response = await fetch(`http://localhost:8000/api/${selectedData.type}/${selectedData._id}`, {
@@ -409,7 +417,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     title: data.title,
                     deadline: data.deadline,
                     completed: data.completed,
-                    sharedWith: data.sharedWith,
+                    sharedWith: updatedSharedWith,
                     ...getNotificationData(data),
                 } : {
                     title: data.title,
@@ -421,7 +429,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     repeatEndDate: data.repeatEndDate,
                     repeatCount: data.repeatCount,
                     eventLocation: data.eventLocation,
-                    sharedWith: data.sharedWith,
+                    sharedWith: updatedSharedWith,
                     ...getNotificationData(data),
                 },
             ),
@@ -497,7 +505,7 @@ export function handleConfirmDelete(type, selectedData, setShowConfirmation, dat
 }
 
 //Function to handle the filling of the form with the selected event or activity
-export function handleFillForm(data, setData, setIsEditing, handleSelection, setSelectedData) {
+export function handleFillForm(data, setData, setIsEditing, handleSelection, setSelectedData, setReceivers) {
     
     setIsEditing(true);
     handleSelection(data.type === "event");
@@ -507,6 +515,7 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
         handleDataChange('deadline', data.deadline.split('T')[0], setData);
         handleDataChange('completed', data.completed, setData);
         handleDataChange('sharedWith', data.sharedWith, setData);
+        setReceivers(data.sharedWith || []);
     } else if (data.type === "event") {
         handleDataChange('title', data.title, setData);
         handleDataChange('date', new Date(data.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'), setData);
@@ -527,6 +536,7 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
         }
         handleDataChange('eventLocation', data.eventLocation, setData);
         handleDataChange('sharedWith', data.sharedWith, setData);
+        setReceivers(data.sharedWith || []);
     }
 
     setSelectedData(data);

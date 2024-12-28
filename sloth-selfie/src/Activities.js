@@ -11,7 +11,7 @@ function ActivitiesFunction(props){
     const handleSubmitSave = (e) => {
         e.preventDefault();
         if (props.selectedActivity) {
-            handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing);
+            handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing, props.receivers);
             props.setIsEditing(false);
         } else {
             handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing, props.receivers, props.setReceivers, props.setTriggerReceiversReset);
