@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { marked } from 'marked';
 import { toggleTaskCompletion } from './NotesUtils';
 
-function NoteCard({ noteAuthor, note, setNotes, onEdit, onDelete, onDuplicate, onCopy, index, clickedButton }) {
+function NoteCard({ note, setNotes, isPreview, onEdit, onDelete, onDuplicate, onCopy, index, clickedButton }) {
 
   const [isExpanded, setIsExpanded] = useState(false);  // State to manage the note content expansion
 
@@ -44,7 +44,7 @@ function NoteCard({ noteAuthor, note, setNotes, onEdit, onDelete, onDuplicate, o
     <div className="note-card">
       <h3>{note.title}</h3>
       <small>{note.category}</small><br/>
-      <small>Author: {noteAuthor}</small><br/>
+      <small>Author: {note.user?.username}</small><br/>
       <small>
         Access: {note.noteAccess === 'public' 
           ? 'Public' 
@@ -85,36 +85,41 @@ function NoteCard({ noteAuthor, note, setNotes, onEdit, onDelete, onDuplicate, o
       )}
       <small>Created: {new Date(note.createDate).toLocaleString()}</small><br/>
       <small>Last Modified: {new Date(note.updateDate).toLocaleString()}</small><br/>
-      <div className="notes-buttons">
-        <div>
-          <button
-            className={`btn2 ${clickedButton === 'edit' + index ? 'active' : ''}`}
-              onClick={() => onEdit(index)}
-          >
-            Edit
-          </button>
-          <button
-            className={`btn btn-main ${clickedButton === 'delete' + index ? 'active' : ''}`}
-            onClick={() => onDelete(index)}
-          >
-            Delete
-          </button>
+      
+      {!isPreview ? (
+        <div className="notes-buttons">
+          <div>
+            <button
+              className={`btn2 ${clickedButton === 'edit' + index ? 'active' : ''}`}
+                onClick={() => onEdit(index)}
+            >
+              Edit
+            </button>
+            <button
+              className={`btn btn-main ${clickedButton === 'delete' + index ? 'active' : ''}`}
+              onClick={() => onDelete(index)}
+            >
+              Delete
+            </button>
+          </div>
+          <div>
+            <button
+              className={`btn2 ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
+              onClick={() => onDuplicate(index)}
+            >
+              Duplicate
+            </button>
+            <button
+              className={`btn btn-main ${clickedButton === 'copy' + index ? 'active' : ''}`}
+              onClick={() => onCopy(note.content)}
+            >
+              Copy
+            </button>
+          </div>
         </div>
-        <div>
-          <button
-            className={`btn2 ${clickedButton === 'duplicate' + index ? 'active' : ''}`}
-            onClick={() => onDuplicate(index)}
-          >
-            Duplicate
-          </button>
-          <button
-            className={`btn btn-main ${clickedButton === 'copy' + index ? 'active' : ''}`}
-            onClick={() => onCopy(note.content)}
-          >
-            Copy
-          </button>
-        </div>
-      </div>
+      ) : (
+        <button className="btn btn-main" onClick={() => onCopy(note.content)}>Copy</button>
+      )}
     </div>
   );
 }
