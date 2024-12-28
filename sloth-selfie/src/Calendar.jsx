@@ -13,17 +13,11 @@ import iconBack from './media/leftBackArrow.svg';
 import CalendarNoAvailability from './CalendarNoAvailability';
 
 //TODO: edit di eventi ripetuti: non vedo cambiamenti finchè non faccio refresh manuale di pagina
-//problemi: non si modifica sharedWith con edit
+//problemi: non si precompila correttamente sharedwith e receivers quando seleziono/modifico un evento o attività
 
 const localizer = momentLocalizer(moment);
 
 const DnDCalendar = withDragAndDrop(BigCalendar);
-
-const initialEvents = [
-  // Puoi aggiungere alcuni eventi di esempio qui 
-  {id: 1, originalId:1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
-];
-
 
 
 function Calendar() {
@@ -140,9 +134,9 @@ function Calendar() {
         }
 
         if (item.type === 'event') {
-            handleFillForm(item, setEventData, setIsEditing, handleSelection, setSelectedEvent);
+            handleFillForm(item, setEventData, setIsEditing, handleSelection, setSelectedEvent, setReceivers);
         } else if (item.type === 'activity') {
-            handleFillForm(item, setActivityData, setIsEditing, handleSelection, setSelectedActivity);
+            handleFillForm(item, setActivityData, setIsEditing, handleSelection, setSelectedActivity, setReceivers);
         }
         
     };
@@ -318,6 +312,4 @@ function Calendar() {
     );
 }
 // Export the function and the events list
-export { initialEvents };
-
 export default Calendar;
