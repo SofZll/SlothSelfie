@@ -95,6 +95,11 @@ input {
   border-radius: 10px;
 }
 
+input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+}
+
 textarea {
   width: 90%;
   height: 100px;
@@ -159,7 +164,8 @@ textarea {
   background-color: #244476;
 }
 
-.btn-main, .btn-small-blue:hover {
+.btn-main:hover,
+.btn-small-blue:hover {
   background-color: #222D52;
   color: #fff;
 }

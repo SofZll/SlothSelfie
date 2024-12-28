@@ -9,11 +9,15 @@ const agenda = new Agenda({ db: { address: process.env.MONGO_URI, collection: 'a
 agenda.define('send notification', async job => {
     console.log('Sending notification');
     console.log(job.attrs.data);
-    const { activityId, eventId, receivers, message } = job.attrs.data;
+    const { sender, receivers, message, type } = job.attrs.data;
 
     try {
         console.log(`Invio notifica ai destinatari: ${receivers}`);
-        emitNotification(receivers, message);
+        if (emitNotification(sender, receivers, message, type)) {
+            console.log('Notification sent successfully');
+        } else {
+            console.error('Error sending notification');
+        }
     } catch (error) {
         console.error('Error sending notification:', error);
     }

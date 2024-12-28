@@ -18,17 +18,23 @@ const createActivity = async (req, res) => {
         const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id), });
         const savedActivity = await activity.save();
 
+        // Populate the sharedWith field with the username of the users
+        const populatedActivity = await Activity.findById(savedActivity._id).populate('sharedWith', 'username');
+
         // Calculate the date of the notification
         let dateNotif;
         console.log(customValue);
-        if (customValue) dateNotif = new Date(customValue);
+        if (customValue) dateNotif = new Date(customValue).toISOString();
         else dateNotif = calculateDate(deadline, notificationTime);
         
         // Create a notification if the notify flag is set
         if (notify) await createNotification({ elementId: savedActivity._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);
 
         console.log(savedActivity);
-        res.status(200).json(savedActivity);
+        res.status(200).json({
+            ...populatedActivity.toObject(),
+            sharedWith: populatedActivity.sharedWith.map(user => user.username)
+        });
     } catch (error) {
         console.error('Error creating activity:', error);
         res.status(500).json({ message: error.message });
@@ -92,8 +98,12 @@ const updateActivity = async (req, res) => {
             activityId,
             { title, deadline, completed, sharedWith: sharedWithUsers.map(u => u._id) },
             { new: true }
-        );
-        res.status(200).json(updatedActivity);
+        ).populate('sharedWith', 'username');
+
+        res.status(200).json({
+            ...updatedActivity.toObject(),
+            sharedWith: updatedActivity.sharedWith?.map(user => user.username) || []
+        });
 
     } catch (error) {
         console.error('Error updating activity:', error);
