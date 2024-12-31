@@ -9,67 +9,10 @@ import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, t
 import ShareInput from './ShareInput';
 
 
-const initialNotes = [
-    // Puoi aggiungere alcune note di esempio qui 
-    {
-      id: 0,
-      title: 'First Note',
-      category: 'Work',
-      content: 'This is a note',
-      access: { 
-        type: 'public', 
-        allowedUsers: []
-      },
-      isTodo: false,
-      tasks: [],
-      createDate: new Date(),
-      updateDate: new Date(),
-    },
-  { id: 1, title: 'Second Note', category: 'Study', content: 'This is another note', noteAuthor: 'tiziocaio200',
-    access: { 
-      type: 'private', 
-      allowedUsers: [] 
-    },
-    isTodo: false, tasks: [],
-    createDate: new Date(), updateDate: new Date() },
-  { id: 2, title: 'Third Note', category: 'Personal', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam imperdiet quam fringilla libero rutrum lobortis. Nam id vulputate odio. Cras molestie quis ante et vestibulum. Nullam viverra leo quis libero vulputate ultricies sit amet et lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas vestibulum ligula ac tortor faucibus, eget viverra elit faucibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum eu diam interdum, luctus velit in, vehicula erat. Aliquam dapibus mauris eget nulla faucibus, vitae commodo massa placerat. Nam luctus felis nec fermentum lobortis. Aliquam ac odio a neque suscipit mollis. Cras sit amet felis dolor. Nam consequat, nulla vitae lacinia malesuada, ipsum nibh pulvinar mi, sit amet eleifend elit velit id nulla. Cras pretium elit luctus, laoreet turpis sed, scelerisque tellus. Fusce venenatis feugiat diam, id tristique ligula pellentesque vitae.',
-    noteAuthor: 'Alice', access: { 
-      type: 'public', //if private Bob can't see it
-      allowedUsers: [] 
-    },
-    isTodo: false, tasks: [],
-    createDate: new Date(), updateDate: new Date() },
-  { id: 3, title: 'Fourth Note', category: 'Others', content: "# This is a markdown note\n\nHere is some **bold** text, and here is a list:\n\n- Item 1\n- Item 2\n- Item 3\n\nYou can also add [links](https://example.com) and other markdown syntax.",
-    access: { 
-      type: 'restricted', 
-      allowedUsers: ['Alice', 'tiziocaio200'] 
-    },
-    isTodo: false, tasks: [],
-    createDate: new Date(), updateDate: new Date() },
-    {
-      id: 4,
-      title: 'Fifth Note',
-      category: 'Work',
-      content: '',
-      access: { 
-        type: 'public', 
-        allowedUsers: []
-      },
-      isTodo: true, tasks: [
-        { text: "Task 1", completed: false, deadline: null },
-        { text: "Task 2", completed: true, deadline: null },
-        { text: "Task 3", completed: false, deadline: '2024-11-25' },
-      ],
-      createDate: new Date(),
-      updateDate: new Date(),
-    },
-
-];
-
 function NotesFunction() {
   const { updateStyles, updateIcon } = useContext(StyleContext);
 
-  const [notes, setNotes] = useState([] || initialNotes);
+  const [notes, setNotes] = useState([]);
   const [sortCriterion, setSortCriterion] = useState('most_recent');
   const [filterDate, setFilterDate] = useState("");
 
@@ -91,6 +34,7 @@ function NotesFunction() {
     tasks: [],
     createDate: new Date(), //used in Notecard
     updateDate: new Date(), //used in Notecard
+    user: null,
   });
 
   // change style page onload document
@@ -144,9 +88,9 @@ function NotesFunction() {
 
   //edit note function
   const handleEditCard = (note) => {
-    const noteToEdit = notes.find(n => n.id === note.id && canUserAccess(n, username));
+    const noteToEdit = notes.find(n => n._id === note._id && canUserAccess(n, username));
     if (noteToEdit) {
-      handleEditNote(noteToEdit.id, notes, setNotes, noteData, setNoteData, setIsEditing);
+      handleEditNote(noteToEdit, setNoteData, setIsEditing);
     } else {
       console.error("Note not found or access denied", note);
     }
@@ -230,9 +174,9 @@ function NotesFunction() {
               return (
                 <NoteCard
                   key={note._id}
-                  noteAuthor={username}
                   note={note}
                   setNotes={setNotes}
+                  isPreview={false}
                   onDuplicate={() => { handleDuplicateNote(note._id, notes, setNotes) }} // Add curly braces
                   onCopy={() => handleCopyContent(note.content, (note.isTodo ? note.tasks : null))}
                   onDelete={() => handleDeleteNote(note._id, notes, setNotes)}
@@ -316,7 +260,7 @@ function NotesFunction() {
                     onChange={(e) => setTaskDeadline(e.target.value)}
                   />
 
-                  {noteData.tasks && (
+                  {noteData.tasks && noteData.tasks.length > 0 &&(
                     <ul>
                       {noteData.tasks.map((task, index) => (
                         <li key={index}>
@@ -374,5 +318,4 @@ function NotesFunction() {
   );
 }
 
-export { initialNotes };
 export default NotesFunction;

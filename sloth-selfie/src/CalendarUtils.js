@@ -1,6 +1,7 @@
 
 import Swal from "sweetalert2";
 import { resetReceivers } from "./globalFunctions";
+import { set } from "mongoose";
 
 //Functoin to handle change the current Event or Activity data
 export function handleDataChange(field, value, setData) {
@@ -379,8 +380,13 @@ export function handleClosePopup(type, setSelectedData, setIsEditing, setData) {
     resetInputFiels(type, setData, setIsEditing);
 }
 
+export function prepareSharedWith(receivers) {
+    // Remove duplicates and empty strings
+    return Array.from(new Set(receivers.map(receiver => receiver.trim()).filter(Boolean)));
+}
+
 //Function to handle the update of an event or activity
-export async function handleUpdateData(e, data, setData, datas, setDatas, selectedData, setSelectedData, setIsEditing) {
+export async function handleUpdateData(e, data, setData, datas, setDatas, selectedData, setSelectedData, setIsEditing, receivers) {
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -395,6 +401,8 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                  return; // Don't add the event if there's a conflict
              }
          }
+
+         const updatedSharedWith = receivers ? prepareSharedWith(receivers) : data.sharedWith; 
  
          // Proceed to edit the event (if users are available)
         const response = await fetch(`http://localhost:8000/api/${selectedData.type}/${selectedData._id}`, {
@@ -409,7 +417,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     title: data.title,
                     deadline: data.deadline,
                     completed: data.completed,
-                    sharedWith: data.sharedWith,
+                    sharedWith: updatedSharedWith,
                     ...getNotificationData(data),
                 } : {
                     title: data.title,
@@ -421,7 +429,7 @@ export async function handleUpdateData(e, data, setData, datas, setDatas, select
                     repeatEndDate: data.repeatEndDate,
                     repeatCount: data.repeatCount,
                     eventLocation: data.eventLocation,
-                    sharedWith: data.sharedWith,
+                    sharedWith: updatedSharedWith,
                     ...getNotificationData(data),
                 },
             ),
@@ -497,7 +505,7 @@ export function handleConfirmDelete(type, selectedData, setShowConfirmation, dat
 }
 
 //Function to handle the filling of the form with the selected event or activity
-export function handleFillForm(data, setData, setIsEditing, handleSelection, setSelectedData) {
+export function handleFillForm(data, setData, setIsEditing, handleSelection, setSelectedData, setReceivers) {
     
     setIsEditing(true);
     handleSelection(data.type === "event");
@@ -507,6 +515,7 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
         handleDataChange('deadline', data.deadline.split('T')[0], setData);
         handleDataChange('completed', data.completed, setData);
         handleDataChange('sharedWith', data.sharedWith, setData);
+        setReceivers(data.sharedWith || []);
     } else if (data.type === "event") {
         handleDataChange('title', data.title, setData);
         handleDataChange('date', new Date(data.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'), setData);
@@ -527,6 +536,7 @@ export function handleFillForm(data, setData, setIsEditing, handleSelection, set
         }
         handleDataChange('eventLocation', data.eventLocation, setData);
         handleDataChange('sharedWith', data.sharedWith, setData);
+        setReceivers(data.sharedWith || []);
     }
 
     setSelectedData(data);
@@ -767,7 +777,6 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
     // check if the users are available for the first event
     const isFirstAvailable = await checkAvailabilityForSharedWith(receivers, new Date(firstEventData.date), new Date(firstEventData.date));
     if (!isFirstAvailable) {
-        console.log("Conflict detected for the first event.");
         return; // Don't add the event if there's a conflict
     }
 
@@ -778,8 +787,6 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
         return
     }
     const originalId = firstEvent.originalId;
-
-    console.log("First event generated:", firstEvent);
 
     events2Add.push(firstEvent);
     updateCurrentDate(currentDate, repeatFrequency);
@@ -794,10 +801,8 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
         };
 
         //check if the users are available for the repeated event
-        console.log("Current date:", data2add.date);
         const isAvailable = await checkAvailabilityForSharedWith(receivers, new Date(data2add.date), new Date(data2add.date));
         if (!isAvailable) {
-            console.log("Conflict detected for the repeated event.");
             hasConflict = true;
             break; // Don't add the event if there's a conflict
         }
@@ -809,8 +814,8 @@ export async function generateRepeatedEvents (e, eventData, events, setEvents, r
     }
 
     if (hasConflict) {
-        console.log("Conflict detected, removing the first event.");
-        setEvents(events); // we keep the original events
+        //delete the first event
+        await handleDeleteData('event', firstEvent._id, events, setEvents);
         return;
     }
 
@@ -847,7 +852,6 @@ export async function fetchNoAvailability(setNoAvailability){
         if (response.ok) {
             const data = await response.json();
             setNoAvailability(data.noAvailability);
-            console.log('No availability fetched successfully:', data.noAvailability);
         } else {
             throw new Error('Error fetching no availability');
         }
@@ -894,7 +898,6 @@ export async function removeNoAvailability(noAvailabilityId) {
         });
         if (response.ok) {
             const result = await response.json();
-            console.log('No availability removed successfully:', result.message);
             return result;
         } else {
             const textResponse = await response.text();
@@ -942,7 +945,6 @@ async function getUserAvailabilityWithId(userId) {
 
         if (response.ok) {
             const data = await response.json();
-            console.log('No availability fetched successfully:', data.noAvailability);
             return data.noAvailability;
         } else {
             throw new Error('Error fetching no availability');
@@ -973,12 +975,9 @@ async function checkAvailabilityForSharedWith(receivers, startDate, endDate) {
             
             // Get user IDs from usernames
             const userId =  await getUserIdFromUsername(receiver);
-            console.log("User ID:", userId);
 
             const noAvailability = await getUserAvailabilityWithId(userId);
-            console.log("No availability:", noAvailability);
 
-            
 
             // Check if the user's availability overlaps with the new event
             for (const unavailablePeriod of noAvailability) {
