@@ -46,6 +46,8 @@ function App() {
       if (response.ok) {
         setIsAuthenticated(true);
         socket.emit('authenticated', true);
+        console.log('User authenticated');
+        // registerServiceWorker();
       } else setIsAuthenticated(false);
     } catch (error) {
       console.error('Error checking authentication:', error);
@@ -82,7 +84,6 @@ function App() {
     });
 
     return () => {
-      socket.off('authenticated');
       socket.off("notification");
     }
   }, []);
@@ -187,54 +188,46 @@ function App() {
     }
   };
 
-  // if (isAuthenticated) {
-    if ("Notification" in window && navigator.serviceWorker) {
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          console.log("Notifiche attivate!");
+  /* RICORDATI DI RIGUARDARE CHECK-AUTH NON FUNZIONA 
+  if ("Notification" in window && navigator.serviceWorker) {
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        console.log("Notifiche attivate!");
+      }
+    });
+  }
+  
+  const registerServiceWorker = async () => {
+    if ('serviceWorker' in navigator && isAuthenticated) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js')
+        console.log('Service Worker registrato con successo:', registration);
+
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          return subscription;
         }
-      });
+
+        const newSubscription = registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: 'BNI2252O4XvM3IAQ_jF_U-dY_XZG3swWR60TYnUhBF-lTWhOWc2EvkBqaVceiQiF6xu89K8WCAPye4xf6e23EsE'
+        });
+        console.log('Subscription:', newSubscription);
+
+        await fetch('http://localhost:3000/api/subscribe', {
+          method: 'POST',
+          credentials: 'include',
+          body: JSON.stringify(subscription),
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+      } catch (error) {
+        console.error('Error registering service worker:', error);
+      }
     }
-    
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            console.log('Service Worker registrato con successo:', registration);
-
-            return registration.pushManager.getSubscription().then(subscription => {
-              if (subscription) {
-                return subscription;
-              }
-
-              return registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: 'BNI2252O4XvM3IAQ_jF_U-dY_XZG3swWR60TYnUhBF-lTWhOWc2EvkBqaVceiQiF6xu89K8WCAPye4xf6e23EsE'
-              });
-            });
-          }).then(subscription => {
-            console.log('Subscription:', subscription);
-
-            fetch('http://localhost:3000/api/subscribe', {
-              method: 'POST',
-              credentials: 'include',
-              body: JSON.stringify(subscription),
-              headers: {
-                'Content-Type': 'application/json',
-              }
-            }).then(response => {
-              if (response.ok) {
-                console.log('Subscription inviata con successo');
-              }
-            }).catch(error => {
-              console.error('Errore nell\'invio della Subscription:', error);
-            });
-          }).catch(error => {
-            console.error('Errore nella registrazione del Service Worker:', error);
-          });
-      });
-    }
-  //}
+  };
+  */
 
   return (
     <Router>

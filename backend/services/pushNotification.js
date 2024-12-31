@@ -21,7 +21,7 @@ const pushNotification = async (sender, receiver, message) => {
         const notificationPayload = JSON.stringify({
             title: `Notification from ${sender}`,
             body: message || 'You have a new notification!',
-            icon: '/images/notification-icon.png', // Match the service worker icon
+            icon: '../media/img/notification-icon.png',
             badge: '/images/notification-badge.png', // Match the service worker badge
             url: 'http://localhost:3000',
         });
