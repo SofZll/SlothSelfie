@@ -11,7 +11,7 @@ function ActivitiesFunction(props){
     const handleSubmitSave = (e) => {
         e.preventDefault();
         if (props.selectedActivity) {
-            handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing);
+            handleUpdateData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.selectedActivity, props.setSelectedActivity, props.setIsEditing, props.receivers);
             props.setIsEditing(false);
         } else {
             handleAddData(e, props.activityData, props.setActivityData, props.activities, props.setActivities, props.setIsEditing, props.receivers, props.setReceivers, props.setTriggerReceiversReset);
@@ -56,6 +56,7 @@ function ActivitiesFunction(props){
                             <div className="activity-card" key={activity._id}>
                                 <h2>{activity.title}</h2>
                                 <p>Due: {new Date(activity.deadline).toLocaleDateString()}</p>
+                                <p>shared With: {activity.sharedWith?.length > 0 ? activity.sharedWith.join(", ") : "No users"}</p>
                                 <button className="btn btn-main" onClick={() => handleRemoveActivity(activity._id, props.activities, props.setActivities)}>
                                     Done
                                 </button>

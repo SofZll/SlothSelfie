@@ -4,12 +4,13 @@ const  { deleteTasks } = require('./taskController');
 
 // Create a new note
 const createNote = async (req, res) => {
-    const {title, category, content, noteAccess, allowedUsers, isTodo, tasks } = req.body;
+    const {title, category, content, noteAccess, allowedUsers, isTodo, tasks, C } = req.body;
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
 
 
     try {
+
         const note = new Note({
             title,
             category,
@@ -21,6 +22,7 @@ const createNote = async (req, res) => {
             createDate: new Date(),
             updateDate: new Date(),
             user: user._id,
+            sharedWith,
         });
 
         await note.save();
@@ -38,10 +40,20 @@ const getNotes = async (req, res) => {
     try {
         const userName = req.session.username;
         const user = await User.findOne({ username: userName });
+
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-        const notes = await Note.find({ user: user._id }).populate('tasks');
+        
+        const notes = await Note.find({
+            $or: [
+                { user: user._id },
+                { noteAccess: 'public' },
+                { noteAccess: 'restricted', allowedUsers: user.username },
+            ]
+        }).populate('tasks').populate('user', 'username').populate('sharedWith', 'username');
+
+
         res.status(200).json({ success: true, notes });
 
     } catch (error) {

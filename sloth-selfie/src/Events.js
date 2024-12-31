@@ -40,7 +40,7 @@ function EventsFunction(props) {
                 );
             } else {
                 console.log("Submitting update for event:", props.selectedEvent);
-                handleUpdateData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.selectedEvent, props.setSelectedEvent, props.setIsEditing);
+                handleUpdateData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.selectedEvent, props.setSelectedEvent, props.setIsEditing, props.receivers);
                 props.setIsEditing(false);
             }
         } else {

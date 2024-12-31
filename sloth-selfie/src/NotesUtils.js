@@ -303,25 +303,18 @@ export async function handleDeleteNote(noteId, notes, setNotes) {
   }
 };
 
-//TODO: Move in Note.js
-export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
-  const noteToEdit = notes.find(note => note._id === noteId);
+export async function handleEditNote(noteToEdit, setNoteData, setIsEditing) {
 
   if (!noteToEdit) {
-    console.error("Nota non trovata per l'ID:", noteId);
+    console.error("Nota non trovata per l'ID:", noteToEdit._id);
     return;
   }
-
-  console.log("Editing note with ID:", noteId);
-  console.log("Note data:", noteToEdit);
   
   setNoteData({
     ...noteToEdit,
-    tasks: noteToEdit.tasks || [],
-    allowedUsers: noteToEdit.allowedUsers || [],
   });
-  
-  setIsEditing(noteId);
+
+  setIsEditing(noteToEdit._id);
 }
 
 //TODO: delete
