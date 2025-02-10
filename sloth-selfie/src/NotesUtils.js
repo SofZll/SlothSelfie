@@ -42,14 +42,17 @@ export function handleNoteDataChange (field, value, setNoteData) {
 
 export function canUserAccess(note, currentUser) {
   
+  //problemi se clicco su edit e modifico non mi fa salvare la nota, mi dice "nota non trovata"
+  
   if (!note.noteAccess) {
     return false;
   } else if (note.noteAccess === 'public') {
     return true;
   } else if (note.noteAccess === 'private') {
-    return note.noteAuthor === currentUser;
+    return note.user.username === currentUser;
   } else if (note.noteAccess === 'restricted') {
-    return Array.isArray(note.allowedUsers) && note.allowedUsers.includes(currentUser);
+    console.log("Allowed users:", note.allowedUsers);
+    return Array.isArray(note.allowedUsers) && (note.allowedUsers.includes(currentUser) || note.user.username === currentUser);
   }
 
   return false;

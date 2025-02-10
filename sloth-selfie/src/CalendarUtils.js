@@ -129,7 +129,7 @@ function getNotificationData(data) {
     };
 }
 
-//Function to save data in front and clen the form
+//Function to save data in front and clean the form
 export function resetInputFiels(type, setData, setIsEditing) {
     
     
@@ -663,7 +663,7 @@ export async function handleDeleteRepeatedEvent(data, setData, setIsEditing, set
         // Get the saved note from the backend
         const deletedData = await response.json();
         if (deletedData.deletedEvents) {
-            console.log(`Deleted repeated events:`, deletedData.deletedEvents);
+            console.log(`Deleted repeated events:`, deletedData.deletedEvents); // array of objects
             // we remove all the repeated events with the same originalId
             setData((prevData) => {
                 const updatedData = prevData.filter(event => event.originalId !== data.originalId);
