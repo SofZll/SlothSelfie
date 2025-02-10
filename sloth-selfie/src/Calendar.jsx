@@ -12,7 +12,7 @@ import ActivitiesFunction from './Activities';
 import iconBack from './media/leftBackArrow.svg';
 import CalendarNoAvailability from './CalendarNoAvailability';
 
-//TODO: edit di eventi ripetuti: non vedo cambiamenti finchè non faccio refresh manuale di pagina
+//TODO: quando cancello gli eventi ripetuti non si riescono a resettare i campi del form
 //problemi: non si precompila correttamente sharedwith e receivers quando seleziono/modifico un evento o attività
 
 const localizer = momentLocalizer(moment);
