@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 
 export const ActivityContext = createContext();
 
@@ -23,6 +23,10 @@ export const ActivityProvider = ({ children }) => {
         },
         sharedWith: [],
     });
+
+    useEffect(() => {
+        console.log("Stato aggiornato delle activities:", activities); //problemi
+    }, [activities]); 
 
     return (
         <ActivityContext.Provider value={{ activities, setActivities, activityData, setActivityData}}>

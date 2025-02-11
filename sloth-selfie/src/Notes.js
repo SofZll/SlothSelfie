@@ -310,9 +310,9 @@ function NotesFunction() {
           )}
           
           {isEditing ? (
-            <button className="btn btn-main" onClick={() => handleSaveEditNote(noteData._id, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities)}>Save Note</button>
+            <button className="btn btn-main" onClick={() => handleSaveEditNote(noteData._id, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities, receivers, setReceivers, setTriggerResetReceivers)}>Save Note</button>
           ) : (
-            <button className="btn btn-main" onClick={() => handleAddNote(noteData, setNoteData, notes, setNotes, receivers, setReceivers, setTriggerResetReceivers)}>Add Note</button>
+            <button className="btn btn-main" onClick={() => handleAddNote(noteData, setNoteData, notes, setNotes, setIsEditing, activities, setActivities, receivers, setReceivers, setTriggerResetReceivers)}>Add Note</button>
           )}
         </div>
       </div>
