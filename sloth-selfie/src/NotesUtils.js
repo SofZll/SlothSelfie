@@ -136,6 +136,7 @@ export async function removeTask(taskIndex, noteData, setNoteData) {
   }
 };
 
+//TODO inserire logica di aggiunta/rimozione task da calendar con toggle diretto, da fare anche con duplicate di nota e delete di nota
 export async function toggleTaskCompletion(taskIndex, noteData, setNoteData = null) {
   
   if (!Array.isArray(noteData.tasks)) {
@@ -465,8 +466,62 @@ export async function handleResetForm (setNoteData) {
   handleNoteDataChange('tasks', [], setNoteData);
 }
 
+//Function to handle the addition/deletion-by-toggle of tasks to the calendar as activities if they have a deadline TODO DEBUGGARE
+export async function ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers ) {
+  
+  if (!Array.isArray(activities)) {
+    console.error("activities is not an array", activities);
+  }
+
+  noteData.tasks.forEach(task => {
+    if (task.deadline) {
+      // Check if the task is already an activity
+      const activityExists = activities.some(activity => 
+        activity.title === task.text && activity.deadline === task.deadline
+      );
+
+      if (!task.completed && !activityExists) {
+        // Add a new activity to the calendar
+        const activityData = {
+          title: task.text,
+          deadline: task.deadline,
+          type: 'activity',
+        };
+
+        setActivities(prevActivities => [
+          ...prevActivities,
+          activityData
+        ]);
+        console.log("Adding activity:", activityData);
+
+        // Handle adding the activity data to the calendar
+        handleAddData(null, activityData, setActivities, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers);
+      } else if (task.completed && activityExists) {
+        console.log("Stato delle activities:", activities);
+
+        // Remove the activity from the calendar if the task is completed
+        const activityToDelete = activities.find(activity => 
+          activity.title === task.text && activity.deadline === task.deadline
+        );
+
+        if (activityToDelete) {
+          console.log("Attività da eliminare:", activityToDelete);
+          setActivities(prevActivities => 
+            prevActivities.filter(activity => activity._id !== activityToDelete._id)
+          );
+          handleDeleteData('activity', activityToDelete._id, activities, setActivities);
+          console.log(`Attività per il task "${task.text}" è stata eliminata.`);
+        }
+      } else {
+        console.log(`No change for task "${task.text}", skipping.`);
+      }
+    }
+  });
+}
+
+
 //Function to handle the creation of a new note
-export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
+export async function handleAddNote (noteData, setNoteData, notes, setNotes, receivers, setReceivers, setTriggerResetReceivers) {
 
   if (!noteData.title || !noteData.category) {
     popUpAlert('Add Note Error', 'Missing required fields', 'error');
@@ -480,6 +535,12 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
   } else if (!noteData.isTodo && (!noteData.content || noteData.content.trim() === "")) {
     popUpAlert('Add Note Error', 'Please add content to your note', 'error');
     return;
+  }
+
+  // Before adding the note, check if there are tasks with deadlines to add as activities
+  if (noteData.isTodo) {
+    console.log("Adding tasks as activities...");
+    ManageTasksAsActivities(noteData, notes, setNotes, receivers, setReceivers, setTriggerResetReceivers);
   }
 
   const newNote = {
@@ -522,7 +583,7 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
 }
 
 //Function to save the edit of a note
-export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing) {
+export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
 
   const noteToUpdate = notes.find(note => note._id === noteId);
 
@@ -530,6 +591,12 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
     console.error("Nota non trovata");
     return;
   }
+
+// Before updating the note, check if there are tasks with deadlines to add as activities
+if (noteData.isTodo) {
+  console.log("Adding tasks as activities...");
+  ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing);
+}
 
   const updatedNote = {
     ...noteToUpdate.note,

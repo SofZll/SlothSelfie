@@ -20,6 +20,7 @@ import iconTimeMachine from './media/time-machine.svg';
 import socket from './socket';
 import 'leaflet/dist/leaflet.css';
 import Swal from 'sweetalert2';
+import { ActivityProvider } from './ActivityContext';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -232,6 +233,7 @@ function App() {
   return (
     <Router>
       <StyleProvider>
+        <ActivityProvider>
           { loading ? (
             <div className="loading-page loading-page-light">
               <div className="spinner"></div>
@@ -319,6 +321,7 @@ function App() {
               </div>
             </div>
           )}
+        </ActivityProvider>
       </StyleProvider>
     </Router>
   );
