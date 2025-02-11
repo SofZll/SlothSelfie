@@ -42,8 +42,6 @@ export function handleNoteDataChange (field, value, setNoteData) {
 
 export function canUserAccess(note, currentUser) {
   
-  //problemi se clicco su edit e modifico non mi fa salvare la nota, mi dice "nota non trovata"
-  
   if (!note.noteAccess) {
     return false;
   } else if (note.noteAccess === 'public') {
@@ -387,7 +385,7 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
     const updatedNote = {
       ...noteToUpdate.note,
       title: noteData.title,
-      noteAuthor: noteData.noteAuthor,
+      user: noteData.user,
       noteAccess: noteData.noteAccess, 
       allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [], // Add allowed users if restricted
       category: noteData.category,
@@ -486,6 +484,7 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes) {
 
   const newNote = {
     ...noteData,
+    user: noteData.user,
     content: noteData.content.trim(),
     allowedHost: noteData.noteAccess === 'restricted' ? noteData.allowedHost : [],
     tasks: noteData.isTodo 
@@ -535,6 +534,7 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
   const updatedNote = {
     ...noteToUpdate.note,
     title: noteData.title,
+    user: noteData.user,
     noteAccess: noteData.noteAccess,
     allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [],
     category: noteData.category,
@@ -567,9 +567,8 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
 
     if (savedNote) {
       const updatedNotes = notes.map(note =>
-        note._id === noteId ? { note: savedNote } : note
+        note._id === noteId ? savedNote.note : note
       );
-  
       setNotes(updatedNotes);
       setIsEditing(null);
       handleResetForm(setNoteData);

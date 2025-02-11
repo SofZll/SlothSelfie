@@ -24,7 +24,6 @@ function NotesFunction() {
 
   //defining the note data structure
   const [noteData, setNoteData] = useState({
-    id: null,
     title: "",
     category: "",
     content: "",
@@ -308,7 +307,7 @@ function NotesFunction() {
           )}
           
           {isEditing ? (
-            <button className="btn btn-main" onClick={() => handleSaveEditNote(noteData.id, notes, setNotes, noteData, setNoteData, setIsEditing)}>Save Note</button>
+            <button className="btn btn-main" onClick={() => handleSaveEditNote(noteData._id, notes, setNotes, noteData, setNoteData, setIsEditing)}>Save Note</button>
           ) : (
             <button className="btn btn-main" onClick={() => handleAddNote(noteData, setNoteData, notes, setNotes)}>Add Note</button>
           )}

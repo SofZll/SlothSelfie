@@ -22,11 +22,12 @@ const createNote = async (req, res) => {
             createDate: new Date(),
             updateDate: new Date(),
             user: user._id,
-            sharedWith,
         });
 
         await note.save();
-        const savedNote = await Note.findById(note._id).populate('tasks');
+        const savedNote = await Note.findById(note._id)
+        .populate('user', '_id username')
+        .populate('tasks');
         res.status(201).json({ success: true, note: savedNote });
     } catch (error) {
         console.error('Error creating note:', error);
@@ -94,7 +95,7 @@ const updateNote = async (req, res) => {
         if (!currentUser) {
             return res.status(401).json({ success: false, message: 'User not found' });
         }
-        if (note.noteAuthor.toString() !== currentUser.username) {
+        if (note.user.toString() !== currentUser._id.toString()) {
             return res.status(403).json({ success: false, message: 'You are not authorized to edit this note' });
         }
 
@@ -103,7 +104,7 @@ const updateNote = async (req, res) => {
             noteId,
             { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline },
             { new: true }
-        );
+        ).populate('user', '_id username').populate('tasks');
 
         res.status(200).json({ success: true, note: updatedNote });
     } catch (error) {
