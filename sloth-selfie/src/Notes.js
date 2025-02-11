@@ -7,10 +7,13 @@ import iconLight from './media/SlothLight.svg';
 import { StyleContext } from './StyleContext';
 import { fetchNotes, handleNoteDataChange, canUserAccess, addTask, removeTask, toggleTaskCompletion, handleDuplicateNote, handleDeleteNote, handleEditNote, handleSaveEditNote, sortNotes,  handleCopyContent, fetchUsername, handleAddNote } from './NotesUtils';
 import ShareInput from './ShareInput';
+import { ActivityContext } from './ActivityContext';
 
 
 function NotesFunction() {
   const { updateStyles, updateIcon } = useContext(StyleContext);
+
+  const { activities, setActivities } = useContext(ActivityContext);
 
   const [notes, setNotes] = useState([]);
   const [sortCriterion, setSortCriterion] = useState('most_recent');
@@ -307,9 +310,9 @@ function NotesFunction() {
           )}
           
           {isEditing ? (
-            <button className="btn btn-main" onClick={() => handleSaveEditNote(noteData._id, notes, setNotes, noteData, setNoteData, setIsEditing)}>Save Note</button>
+            <button className="btn btn-main" onClick={() => handleSaveEditNote(noteData._id, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities)}>Save Note</button>
           ) : (
-            <button className="btn btn-main" onClick={() => handleAddNote(noteData, setNoteData, notes, setNotes)}>Add Note</button>
+            <button className="btn btn-main" onClick={() => handleAddNote(noteData, setNoteData, notes, setNotes, receivers, setReceivers, setTriggerResetReceivers)}>Add Note</button>
           )}
         </div>
       </div>
