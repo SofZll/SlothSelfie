@@ -136,7 +136,7 @@ export async function removeTask(taskIndex, noteData, setNoteData) {
   }
 };
 
-//TODO inserire logica di aggiunta/rimozione task da calendar con toggle diretto, da fare anche con duplicate di nota e delete di nota
+//TODO inserire logica di aggiunta/rimozione task da calendar con toggle diretto (anche in preview), da fare anche con duplicate di nota e delete di nota
 export async function toggleTaskCompletion(taskIndex, noteData, setNoteData = null) {
   
   if (!Array.isArray(noteData.tasks)) {
@@ -466,9 +466,9 @@ export async function handleResetForm (setNoteData) {
   handleNoteDataChange('tasks', [], setNoteData);
 }
 
-//Function to handle the addition/deletion-by-toggle of tasks to the calendar as activities if they have a deadline TODO DEBUGGARE
+//Function to handle the addition/deletion-by-toggle of tasks to the calendar as activities if they have a deadline TODO DEBUGGARE e rivedere la logica
 export async function ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers ) {
-  
+  console.log("Stato delle activities2:", activities);
   if (!Array.isArray(activities)) {
     console.error("activities is not an array", activities);
   }
@@ -494,10 +494,13 @@ export async function ManageTasksAsActivities(noteData, activities, setActivitie
         ]);
         console.log("Adding activity:", activityData);
 
+        console.log("Stato delle activities1.2:", activities);
+
         // Handle adding the activity data to the calendar
+        debugger;
         handleAddData(null, activityData, setActivities, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers);
       } else if (task.completed && activityExists) {
-        console.log("Stato delle activities:", activities);
+        console.log("Stato delle activities 1.3:", activities);
 
         // Remove the activity from the calendar if the task is completed
         const activityToDelete = activities.find(activity => 
@@ -521,7 +524,7 @@ export async function ManageTasksAsActivities(noteData, activities, setActivitie
 
 
 //Function to handle the creation of a new note
-export async function handleAddNote (noteData, setNoteData, notes, setNotes, receivers, setReceivers, setTriggerResetReceivers) {
+export async function handleAddNote (noteData, setNoteData, notes, setNotes, setIsEditing, activities, setActivities, receivers, setReceivers, setTriggerResetReceivers) {
 
   if (!noteData.title || !noteData.category) {
     popUpAlert('Add Note Error', 'Missing required fields', 'error');
@@ -540,7 +543,9 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes, rec
   // Before adding the note, check if there are tasks with deadlines to add as activities
   if (noteData.isTodo) {
     console.log("Adding tasks as activities...");
-    ManageTasksAsActivities(noteData, notes, setNotes, receivers, setReceivers, setTriggerResetReceivers);
+    console.log("Stato delle activities1:", activities);
+    ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers);
+    console.log("Stato delle activitiesQUI:", activities);
   }
 
   const newNote = {
@@ -583,7 +588,7 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes, rec
 }
 
 //Function to save the edit of a note
-export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
+export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities, receivers, setReceivers, setTriggerResetReceivers) {
 
   const noteToUpdate = notes.find(note => note._id === noteId);
 
@@ -595,7 +600,8 @@ export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setN
 // Before updating the note, check if there are tasks with deadlines to add as activities
 if (noteData.isTodo) {
   console.log("Adding tasks as activities...");
-  ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing);
+  console.log("Stato delle activities1:", activities);
+  ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers);
 }
 
   const updatedNote = {
