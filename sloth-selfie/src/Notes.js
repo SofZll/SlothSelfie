@@ -64,6 +64,11 @@ function NotesFunction() {
     });
   }, []);
 
+  //console log to check if the activities state is updated correctly
+  useEffect(() => {
+    console.log("Activities state updated dentro a Notes.js:", activities);
+  }, [activities]);
+
     
   //If a date is selected it will filter the notes by that date
   const filterNotesByDate = (notes) => {
