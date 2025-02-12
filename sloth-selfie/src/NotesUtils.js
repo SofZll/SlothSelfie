@@ -469,6 +469,7 @@ export async function handleResetForm (setNoteData) {
 //Function to handle the addition/deletion-by-toggle of tasks to the calendar as activities if they have a deadline TODO DEBUGGARE e rivedere la logica
 export async function ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers ) {
   console.log("Stato delle activities2:", activities);
+  
   if (!Array.isArray(activities)) {
     console.error("activities is not an array", activities);
   }
@@ -485,20 +486,33 @@ export async function ManageTasksAsActivities(noteData, activities, setActivitie
         const activityData = {
           title: task.text,
           deadline: task.deadline,
+          //completed: false,
+          //user: noteData.user,
+          //notify: false, //
+          //notificationTime: 0,
+          //sharedWith: [], //
           type: 'activity',
         };
+        /*
+        setActivities(prevActivities => {
+          const updatedActivities = [...prevActivities, activityData];
+          console.log("Nuovo stato activities:", updatedActivities); // Log corretto
+          return updatedActivities;
+        });
+        */
 
         setActivities(prevActivities => [
           ...prevActivities,
           activityData
         ]);
+
         console.log("Adding activity:", activityData);
 
-        console.log("Stato delle activities1.2:", activities);
+        console.log("Stato delle activities prima di handleAddData:", activities);
 
         // Handle adding the activity data to the calendar
-        debugger;
         handleAddData(null, activityData, setActivities, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers);
+        console.log("Stato delle activities dopo handleAddData :", activities);
       } else if (task.completed && activityExists) {
         console.log("Stato delle activities 1.3:", activities);
 
@@ -543,9 +557,8 @@ export async function handleAddNote (noteData, setNoteData, notes, setNotes, set
   // Before adding the note, check if there are tasks with deadlines to add as activities
   if (noteData.isTodo) {
     console.log("Adding tasks as activities...");
-    console.log("Stato delle activities1:", activities);
+    console.log("Stato delle activities prima di ManageTasksAsActivities:", activities);
     ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers);
-    console.log("Stato delle activitiesQUI:", activities);
   }
 
   const newNote = {

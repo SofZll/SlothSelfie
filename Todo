@@ -21,6 +21,9 @@ TODO:
     - Linking pomodoro to calendar - cicles not done should be added to the next day
     - Add pomodoro notification
 
+    // Note
+    - If an item has a deadline, it should automatically be added to the calendar
+
     // Notifications
     - Notifications for events and activities - if the user accepts the event or activity is added to the calendar
     - Notifications for communicating the acceptance of events and activities
@@ -34,7 +37,6 @@ FIX:
 
 DONE:
     - Hub back
-    - If an item has a deadline, it should automatically be added to the calendar
     - Add shared events - AGGIUNGERE ARRAY USERID PER EVENTI E ATTIVITÀ
     - Shared Activities
     - Gli utenti possono indicare certi intervalli di tempo (anche ripetuti) come non disponibili per eventi di gruppo

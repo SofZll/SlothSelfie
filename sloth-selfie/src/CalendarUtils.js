@@ -218,6 +218,7 @@ export async function newData2Add(data, originalId, receivers) {
 
 // Handle adding an event or activity
 export async function handleAddData(e, data, setData, datas, setDatas, setIsEditing, receivers, setReceivers, setTriggerResetReceivers) {
+    console.log("handleAddData chiamato con data:", data);
     if (e && e.preventDefault) {
         e.preventDefault();
     }
@@ -256,8 +257,10 @@ export async function handleAddData(e, data, setData, datas, setDatas, setIsEdit
 
 
         if (savedData) {
+            console.log("Saved Data:", savedData);
 
-            setDatas([...datas, savedData]);
+            setDatas(prevDatas => [...prevDatas, savedData]);
+            console.log("All datas:", datas);
             resetInputFiels(data.type, setData, setIsEditing);
             resetReceivers(setReceivers, setTriggerResetReceivers);
         }
