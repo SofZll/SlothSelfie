@@ -196,7 +196,7 @@
     .div-calendar-container{
         padding: 20px 0 0 0;
         width: 60%;
-        height: 100%;
+        height: 80%;
     }
 
     .activity-event-container {
@@ -261,4 +261,62 @@
         height: 90vh;
     }
 
+}
+
+/* calendar preview */
+
+.parallel-lists {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    overflow-x: auto; 
+    max-height: 10vh;
+}
+
+.scrollableCalendar-list {
+    flex: 1;
+    max-width: 48%;
+    overflow-y: auto;
+    max-height: 200px;
+}
+
+.EventShow {
+    border: 2px solid #2b59b6;
+    box-shadow: #2b59b6 0px 0px 10px;
+}
+
+.ActivityShow {
+    border: 2px solid #ffA500;
+    box-shadow: #ffA500 0px 0px 10px;
+}
+
+.event-color {
+    color: #2b59b6;
+}
+
+.activity-color {
+    color: #ffA500;
+}
+
+/* Media query for mobile */
+@media (max-width: 768px) {
+    .parallel-lists {
+        gap: 5px;
+    }
+
+    .scrollableCalendar-list {
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .parallel-lists {
+        gap: 5px;
+        max-height: 6vh;
+    }
+
+    .scrollableCalendar-list {
+        max-height: 150px;
+    }
 }
