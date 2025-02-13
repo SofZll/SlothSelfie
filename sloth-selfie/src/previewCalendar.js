@@ -38,7 +38,8 @@ function PreviewCalendar() {
                 return activityDate === formattedDate;
             });
         };
-    
+        
+        //TODO: I PUNTINI SONO UN GIORNO AVANTI.. MAGARI CON TIMEMACHINE SI SISTEMA.. ?
         // Adding a dot to the date if there is an event or an activity on that date
         const tileContent = ({ date, view }) => {
             if (view === 'month' && hasEventOnDate(date)) {

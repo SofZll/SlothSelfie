@@ -8,6 +8,10 @@ const TimeMachine = ({isOpen, onClose}) => {
     const [inputDate, setInputDate] = useState('');
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
+
+    //TODO: trova un modo per sincronizzare eventi, attività note ecc ecc con time machine
+
+
     
     /*
     useEffect(() => {
@@ -35,16 +39,16 @@ const TimeMachine = ({isOpen, onClose}) => {
 
     // Fetch the current time from the server
     useEffect(() => {
-        fetch('http://localhost:8000/api/time/fetch-state')
+        fetch('http://localhost:8000/api/time/fetch-state', {
+            method: 'GET',
+            credentials: 'include',
+          })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     console.log('Time is set on:', data);
                     setCurrentDate(data.timeEntry.date);
                     setCurrentTime(data.timeEntry.time);
-
-                    console.log('data.timeEntry.date:', data.timeEntry.date);
-                    console.log('data.timeEntry.time:', data.timeEntry.time);
 
                     /*find a way to set the state of everything
                     setActivities(data.state.activities);
@@ -61,6 +65,8 @@ const TimeMachine = ({isOpen, onClose}) => {
             });
     }, []);
 
+    //no need if the others work
+    /*
     const handleSubmit = async (e) => {
         e.preventDefault();
         let combinedDateTime = '';
@@ -100,7 +106,70 @@ const TimeMachine = ({isOpen, onClose}) => {
         } catch (error) {
             console.error('Error setting time:', error);
         }
-    }
+    }*/
+
+    // Function to set the time
+    const handleSetTime = async (e) => {
+        e.preventDefault();
+
+        if (!inputDate || !inputTime) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please enter a date and time',
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:8000/api/time/set-time", {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ date: inputDate, time: inputTime }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Time set successfully:', data);
+                setCurrentDate(inputDate);
+                setCurrentTime(inputTime);
+                onClose();
+            } else {
+                console.error('Error setting time');
+            }
+        } catch (error) {
+            console.error('Error setting time:', error);
+        }
+    };
+
+    // Function to reset the time
+    const handleResetTime = async () => {
+        try {
+            const response = await fetch("http://localhost:8000/api/time/reset-time", {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Time reset successfully:', data);
+                setCurrentDate(data.timeEntry.date);
+                setCurrentTime(data.timeEntry.time);
+                setInputDate('');
+                setInputTime('');
+            } else {
+                console.error('Error resetting time');
+            }
+        } catch (error) {
+            console.error('Error resetting time:', error);
+        }
+    };
 
     if (!isOpen) {
         return null;
@@ -116,7 +185,7 @@ const TimeMachine = ({isOpen, onClose}) => {
                     <span>Date: {currentDate}</span>
                     <span>Time: {currentTime}</span>
                 </p>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSetTime}>
                     <label htmlFor="date">Enter a date:</label>
                     <input
                         className="time-input"
@@ -136,8 +205,8 @@ const TimeMachine = ({isOpen, onClose}) => {
                         required
                     /><br/><br/>
                     <button type="submit" className="btn btn-main" value="set-time">Go back in time!</button>
-                    <button type="submit" className="btn btn-main" value="reset-time">Reset time</button>
-                </form>
+                    </form>
+                    <button onClick={handleResetTime} className="btn btn-main" value="reset-time">Reset time</button>
             </div>
         </div>
     )
