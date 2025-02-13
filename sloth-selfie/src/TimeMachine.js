@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import './css/TimeMachine.css';
 import Swal from "sweetalert2";
+import { set } from "mongoose";
 
 const TimeMachine = ({isOpen, onClose}) => {
     const [inputTime, setInputTime] = useState('');
@@ -8,6 +9,7 @@ const TimeMachine = ({isOpen, onClose}) => {
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
     
+    /*
     useEffect(() => {
         // Message for future me: comment once the server is running
         const now = new Date();
@@ -28,6 +30,35 @@ const TimeMachine = ({isOpen, onClose}) => {
             .catch(error => {
                 console.error("Error fetching selected time: ", error);
             }); 
+    }, []);
+    */
+
+    // Fetch the current time from the server
+    useEffect(() => {
+        fetch('http://localhost:8000/api/time/fetch-state')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Time is set on:', data);
+                    setCurrentDate(data.timeEntry.date);
+                    setCurrentTime(data.timeEntry.time);
+
+                    console.log('data.timeEntry.date:', data.timeEntry.date);
+                    console.log('data.timeEntry.time:', data.timeEntry.time);
+
+                    /*find a way to set the state of everything
+                    setActivities(data.state.activities);
+                    setEvents(data.state.events);
+                    setNotes(data.state.notes);
+                    setNotifications(data.state.notifications);
+                    setContents(data.state.contents);
+                    */
+
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching selected time: ", error);
+            });
     }, []);
 
     const handleSubmit = async (e) => {
