@@ -9,7 +9,7 @@ const timeMachineSchema = new mongoose.Schema({
     date: {
         type: Date,
         required: true
-    },  // "YYYY-MM-DD"
+    },
     time: {
         type: String,
         required: true
