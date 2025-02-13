@@ -5,6 +5,6 @@ const { fetchState, setTime, resetTime } = require('../controllers/timeMachineCo
 const router = express.Router();
 
 // Time machine endpoint
-router.get('/time/fetch-state', fetchState);
+router.get('/time/fetch-state', fetchState);//
 
 module.exports = router;
