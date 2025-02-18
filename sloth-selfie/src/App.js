@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-do
 import Calendar from './Calendar';
 import PomodoroFunction from './Pomodoro';
 import NotesFunction from './Notes';
-import Projects from './Projects';
 import Settings from './previewSetUp';
 import NotificationFunction from './Notifications';
 import Form from './Login';
@@ -298,7 +297,6 @@ function App() {
                   <Route path="/pomodoro" element={<PomodoroFunction />} />
                   <Route path="/notes" element={<NotesFunction />} />
                   <Route path="/calendar" element={<Calendar />} />
-                  <Route path="/projects" element={<Projects />} />
                   <Route path="/forum" element={<ForumFunction />} />
                 </Routes>
                 {/* time machine */}

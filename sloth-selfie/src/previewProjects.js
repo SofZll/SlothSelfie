@@ -1,13 +1,15 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 const PreviewProjects = () => {
+    // function to navigate to the projects page, we use window.location.href to navigate without using react-router (pure JS)
+    const manageProjects = () => {
+        window.location.href = "/projects.html";
+    };
+
     return (
-        <div className='inCard'>
+        <div className="inCard">
             <p>Preview of all your projects!</p>
-            <Link to="/projects">
-                <button className="btn btn-main">Manage Projects</button>
-            </Link>
+            <button className="btn btn-main" onClick={manageProjects}>Manage Projects</button>
         </div>
     );
 };

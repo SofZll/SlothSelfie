@@ -10,6 +10,7 @@ const contentRoutes = require('./contentRoutes');
 const timeMachineRoutes = require('./timeMachineRoutes');
 const taskRoutes = require('./taskRoutes');
 const subscriptionRoutes = require('./subscriptionRoutes');
+const projectRoutes = require('./projectsRoutes');
 
 router.use('/api', userRoutes);
 router.use('/api', noteRoutes);
@@ -20,5 +21,6 @@ router.use('/api', contentRoutes);
 router.use('/api', timeMachineRoutes);
 router.use('/api', taskRoutes);
 router.use('/api', subscriptionRoutes);
+router.use('/api', projectRoutes);
 
 module.exports = router;
