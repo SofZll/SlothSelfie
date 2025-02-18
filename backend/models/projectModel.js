@@ -20,29 +20,7 @@ const projectSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
          ref: "User"
     }],
-/*
-    phases: [
-        {
-            title: String,
-            subphases: [
-                {
-                    title: String,
-                    activities: [
-                        {
-                            type: mongoose.Schema.Types.ObjectId,
-                            ref: "Activity"
-                        }
-                    ]
-                }
-            ]
-        }
-    ],
-    activities: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Activity"
-        }
-    ],*/
+
     createdAt: {
         type: Date,
         default: Date.now 
