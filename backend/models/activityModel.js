@@ -29,7 +29,62 @@ const activitySchema = new mongoose.Schema({
     sharedWith: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-    }]
+    }],
+
+    // New fields only for Project-activities 
+    project: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project',
+        default: null }, // if this field is null, this is a normal activivty
+
+     phase: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Phase',
+        default: null
+    }, // if null, the activity has a subphase
+
+    subphase: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Subphase', 
+        default: null 
+    }, // if null, the activity has a phase
+
+    assignedTo: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "User" 
+    },
+
+    dependencies: [{
+        type: mongoose.Schema.Types.ObjectId,
+         ref: 'Activity' 
+        }],
+
+    status: {
+        type: String,
+        enum: ["Not_Activatable", "Activatable", "Active", "Completed", "Reactivated", "Overdue", "Abandoned"],
+        default: "Not_Activatable"
+    },
+
+    description: {
+        type: String
+    },
+
+    startDate: {
+        type: Date 
+    },
+
+    input: {
+        type: String  // Note or link file
+    },
+
+    output: {
+        type: String  //Note or link file
+    },
+
+    milestone: {
+        type: Boolean, default: false 
+    } 
+
 }, { timestamps: true });
 
 const Activity = mongoose.model('Activity', activitySchema);
