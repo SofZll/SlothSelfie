@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import './css/TimeMachine.css';
 import Swal from "sweetalert2";
-import { set } from "mongoose";
 
 const TimeMachine = ({isOpen, onClose}) => {
     const [inputTime, setInputTime] = useState('');
