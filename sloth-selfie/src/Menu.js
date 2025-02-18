@@ -78,8 +78,8 @@ const Menu = () => {
                 <Link to="/calendar" onClick={closeMenu}>Calendar</Link>
                 <Link to="/notes" onClick={closeMenu}>Notes</Link>
                 <Link to="/pomodoro" onClick={closeMenu}>Pomodoro</Link>
-                <Link to="/projects" onClick={closeMenu}>Projects</Link>
                 <Link to="/notifications" onClick={closeMenu}>Notifications</Link>
+                <a href="/projects.html" onClick={closeMenu}>Projects</a>
                 <div className="menu-profile">
                     <div className="menu-profile-link">
                         {profileData.profile_image && (
@@ -121,12 +121,12 @@ const Menu = () => {
                 <NavLink to="/pomodoro" activeClassName="active">
                     <img src={iconTomato} alt="Pomodoro" />
                 </NavLink>
-                <NavLink to="/projects" activeClassName="active">
-                    <img src={iconProject} alt="Projects" />
-                </NavLink>
                 <NavLink to="/profile" activeClassName="active">
                     <img src={iconUser} alt="Profile" />
                 </NavLink>
+                <a href="/projects.html">
+                    <img src={iconProject} alt="Projects" />
+                </a>
             </nav>
         </>
     );

@@ -50,6 +50,13 @@ app.use((req, res, next) => {
 
 app.use(routes);
 
+//serve static files from public folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/projects', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'projects.html'));
+});
+
 // Static files from frontend
 // const frontendPath = path.join(global.rootDir, '..', 'frontend/build');
 //locale:
