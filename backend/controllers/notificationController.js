@@ -3,7 +3,6 @@ const User = require('../models/userModel');
 const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
 const agenda = require('../jobs/agenda');
-const emitNotification = require('../utils/utils');
 
 /**
  * La funzione createNotification si occupa di creare una nuova notifica e di salvarla nel database.
@@ -26,10 +25,10 @@ const createNotification = async (req, res, internalCall = false) => {
         type = 'OS';
     }
 
-    console.log({ elementId , receivers, message, dateNotif, frequencyNotif, type });
+    console.log({ elementId, receivers, message, dateNotif, frequencyNotif, type });
     try {
         const notificationData = internalCall ? await getDataInternal({ elementId }) : await getDataStandard({ receivers, message });
-        const { message: messageVal, receiversObjectId, element, deadline} = notificationData;
+        const { message: messageVal, receiversObjectId, element, elementType, deadline} = notificationData;
         const senderUsername = internalCall ? element.user.username : req.session.username;
         const senderUser = await User.findOne({ username: senderUsername });
 
@@ -47,6 +46,7 @@ const createNotification = async (req, res, internalCall = false) => {
             createdAt: new Date().toISOString(),
             read: receiversObjectId.map(() => false),
             element: elementId ? elementId : null,
+            elementType: elementType ? elementType : null,
             dateNotif: notificationDate,
             frequencyNotif: frequencyNotif,
             responses: [],
@@ -55,26 +55,15 @@ const createNotification = async (req, res, internalCall = false) => {
         console.log(notification);
         await notification.save();
 
-        const receiversUsername = await Promise.all(receiversObjectId.map(async receiver => {
-            const user = await User.findById(receiver);
-            return user.username;
-        }));
-
         // creazione schedule della notifica in base alla data di notifica e alla frequenza
         if (notificationDate) {
             await agenda.schedule(notificationDate, 'send notification', {
-                sender: senderUser.username,
-                receivers: receiversUsername,
-                message: messageVal,
-                type: notificationType,
+                notificationId: notification._id,
             });
             console.log(`Scheduled job 'send notification' at ${notificationDate}`);
         } else {
             await agenda.now('send notification', {
-                sender: senderUser.username,
-                receivers: receiversUsername,
-                message: messageVal,
-                type: notificationType,
+                notificationId: notification._id,
             });
             console.log(`Scheduled job 'send notification' now`);
         }
@@ -84,27 +73,16 @@ const createNotification = async (req, res, internalCall = false) => {
                 const endDate = new Date(deadline).toISOString();
                 const repetition = 3;
                 await scheduleMultipleNotifications(agenda, startDate = notificationDate, endDate, repetition, 'send notification', {
-                    sender: senderUser.username,
-                    receivers: receiversUsername,
-                    message: messageVal,
-                    type: notificationType,
+                    notificationId: notification._id,
                 });
             } else if (frequencyNotif == 'untilAnswer') {
                 // TODO: logica personalizzata per untilAnswer
                 await agenda.every('1 hour', 'send notification', {
-                    sender: senderUser.username,
-                    receivers: receiversUsername,
-                    message: messageVal,
-                    startDate: notificationDate,
-                    type: notificationType,
+                    notificationId: notification._id,
                 });
             } else {
                 await agenda.every(frequencyNotif, 'send notification', {
-                    sender: senderUser.username,
-                    receivers: receiversUsername,
-                    message: messageVal,
-                    startDate: notificationDate,
-                    type: notificationType,
+                    notificationId: notification._id,
                 });
             }
         }
@@ -148,6 +126,7 @@ const getDataInternal = async ({ elementId }) => {
         message,
         receiversObjectId,
         element,
+        elementType: type,
         deadline: date,
     }
 }
