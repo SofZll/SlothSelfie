@@ -19,6 +19,13 @@ const calculateDate = (date, minusTime) => {
     return date;
 };
 
+/**
+ * La funzione per inviare la notifica, al momento viene chiamata solo dal job di Agenda
+ * @param {*} sender l'utente che invia la notifica
+ * @param {*} receivers gli utenti che ricevono la notifica
+ * @param {*} message il messaggio della notifica
+ * @param {*} type può essere 'email' o 'OS'
+ */
 const emitNotification = (sender, receivers, message, type) => {
     const io = getIO();
     if (!io) {
@@ -29,7 +36,7 @@ const emitNotification = (sender, receivers, message, type) => {
     receivers.forEach(receiver => {
         if (type.includes('OS')) {
             console.log('userSocketMap:', userSocketMap);
-            const receiverSocketIds = userSocketMap[receiver]; // for multiple devices
+            const receiverSocketIds = userSocketMap[receiver]; // se l'utente ha più dispositivi connessi
             if (receiverSocketIds && receiverSocketIds.length > 0) {
                 console.log(`Sending notification to ${receiver}: ${message}`);
                 receiverSocketIds.forEach(receiverSocketId => {
@@ -42,6 +49,9 @@ const emitNotification = (sender, receivers, message, type) => {
             } else {
                 pushNotification(sender, receiver, message);
             }
+        } elif (type.includes('email')) {
+            console.log(`Sending email notification to ${receiver}: ${message}`);
+
         }
     });
 };

@@ -3,8 +3,14 @@ const User = require('../models/userModel');
 const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
 const agenda = require('../jobs/agenda');
+const emitNotification = require('../utils/utils');
 
-// Create a new notification: FUNZIONA
+/**
+ * La funzione createNotification si occupa di creare una nuova notifica e di salvarla nel database.
+ * @param {*} req contiene i dati della notifica da creare: elementId, receivers, message, dateNotif, frequencyNotif, type.
+ * @param {*} res contiene la risposta da inviare al client.
+ * @param {*} internalCall controlla se la chiamata è stata fatta internamente o meno, è di default false.
+ */
 const createNotification = async (req, res, internalCall = false) => {
     let elementId, receivers, message;
 
@@ -54,7 +60,7 @@ const createNotification = async (req, res, internalCall = false) => {
             return user.username;
         }));
 
-        // creazione notifica schedule
+        // creazione schedule della notifica in base alla data di notifica e alla frequenza
         if (notificationDate) {
             await agenda.schedule(notificationDate, 'send notification', {
                 sender: senderUser.username,
@@ -84,7 +90,7 @@ const createNotification = async (req, res, internalCall = false) => {
                     type: notificationType,
                 });
             } else if (frequencyNotif == 'untilAnswer') {
-                // logica personalizzata per untilAnswer
+                // TODO: logica personalizzata per untilAnswer
                 await agenda.every('1 hour', 'send notification', {
                     sender: senderUser.username,
                     receivers: receiversUsername,
@@ -166,6 +172,16 @@ const getDataStandard = async ({ receivers, message }) => {
     };
 }
 
+/**
+ * La funzione scheduleMultipleNotifications si occupa di creare e gestire la programmazione di più notifiche.
+ * La data della notifica viene calcolata distribuendo le notifiche uniformemente, in base al numero di ripetizioni e alla data di inizio e fine.
+ * @param {*} agenda indica l'istanza di Agenda
+ * @param {*} startDate indica la data di inizio
+ * @param {*} endDate indica la data di fine
+ * @param {*} repetitions indica il numero di ripetizioni
+ * @param {*} jobName indica la tipologia di job da eseguire
+ * @param {*} data un oggetto contenente i dati della notifica
+ */
 const scheduleMultipleNotifications = async (agenda, startDate, endDate, repetitions, jobName, data) => {
     const end = new Date(endDate).toISOString();
     const totMinutes = (end - new Date(startDate).toISOString()) / 60000;
@@ -185,7 +201,6 @@ const scheduleMultipleNotifications = async (agenda, startDate, endDate, repetit
     }
 }
 
-// Get all notifications: FUNZIONA
 const getNotifications = async (req, res) => {
     try {
         const user = await User.findOne({ username: req.session.username });
@@ -208,7 +223,6 @@ const getNotifications = async (req, res) => {
     }
 }
 
-// Mark a notification as read: FUNZIONA
 const markNotificationAsRead = async (req, res) => {
     try {
         const { notifId } = req.params;
@@ -258,6 +272,7 @@ const markNotificationStatus = async (req, res) => {
         await notification.save();
 
         if (status === 'Accepted') {
+            // TODO: logica personalizzata per Accepted
             // come dovrei assegnare gli eventi e le attività ai vari utenti?
             // - se l'evento/attività è stata creata da un utente, allora l'utente che ha accettato la notifica diventa il proprietario dell'evento/attività
             // - creazione di un nuovo evento?
