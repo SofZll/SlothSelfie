@@ -8,6 +8,7 @@ import 'react-calendar/dist/Calendar.css';
 import PreviewPomodoro from './previewPomodoro';
 import PreviewNote from './previewNote';
 import PreviewCalendar from './previewCalendar';
+import PreviewProjects from './previewProjects';
 
 function Card({ title, caseShow }) {
     const [show, setShown] = useState(false);
@@ -43,12 +44,7 @@ function Card({ title, caseShow }) {
             content = <PreviewPomodoro />;
             break;
         case "4":
-            content = (
-                <div className='inCard'>
-                    <p>Content for other stuff 3</p>
-                    <button className="btn btn-main">Start</button>
-                </div>
-            );
+            content = <PreviewProjects/>;
             break;
         default:
             break;
