@@ -8,10 +8,37 @@
 </head>
 <body>
     <div class="container mt-4">
-        <h1 class="mb-3">Your Projects:</h1>
-        <button class="btn btn-primary" onclick="loadProjects()">Load projects</button>
         <button id="backToHome" class="btn btn-secondary">Back to Home</button>
+        <h1 class="mb-3">Your Projects:</h1>
         <ul id="projects-list" class="list-group mt-3"></ul>
+
+
+    <form id="projectForm">
+        <h2 class="mb-3">Create a new project:</h2>
+
+        <div class="mb-3">
+            <label class="form-label">Project name</label>
+            <input type="text" class="form-control" id="projectName" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" id="projectDesc" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Members (comma separated)</label>
+            <input type="text" class="form-control" id="projectActors">
+        </div>
+
+        <div id="phasesContainer">
+            <h4>Phases</h4>
+        </div>
+        <button type="button" class="btn btn-secondary mt-2" onclick="addPhase()">Add a phase</button>
+
+        <button type="submit" class="btn btn-primary mt-2">Create project</button>
+    </form>
+
     </div>
 
     <script src="./projects.js"></script>
