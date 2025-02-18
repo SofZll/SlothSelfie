@@ -93,7 +93,7 @@ function PreviewCalendar() {
                         
                     </div>
             <div className="events-section">
-            <p>Today's <span class="event-color">Events</span> and <span class="activity-color">Activities</span>:</p>
+            <p>Today's <span className="event-color">Events</span> and <span className="activity-color">Activities</span>:</p>
                 <div className="parallel-lists">
                     <div className="scrollableCalendar-list EventShow">
                         {todayEvents.length > 0 ? (
