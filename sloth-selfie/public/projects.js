@@ -24,9 +24,10 @@ function saveProject(event) {
     event.preventDefault();
 
     const project = {
-        name: document.getElementById("projectName").value,
+        title: document.getElementById("projectName").value,
+        owner: document.getElementById("projectOwner").value,
         description: document.getElementById("projectDesc").value,
-        actors: document.getElementById("projectActors").value.split(",").map(a => a.trim()),
+        members: document.getElementById("projectActors").value.split(",").map(a => a.trim()),
         phases: []
     };
 
@@ -40,7 +41,7 @@ function saveProject(event) {
         phaseDiv.querySelectorAll(".activity > .border").forEach(activityDiv => {
             phase.activity.push({
                 name: activityDiv.querySelector(".activity-name").value,
-                actors: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
+                members: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                 type: activityDiv.querySelector(".activity-type").value,
                 startDate: activityDiv.querySelector(".activity-start").value,
                 endDate: activityDiv.querySelector(".activity-end").value
@@ -56,7 +57,7 @@ function saveProject(event) {
             subPhaseDiv.querySelectorAll(".activity > .border").forEach(activityDiv => {
                 subphase.activities.push({
                     name: activityDiv.querySelector(".activity-name").value,
-                    actors: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
+                    members: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                     type: activityDiv.querySelector(".activity-type").value,
                     startDate: activityDiv.querySelector(".activity-start").value,
                     endDate: activityDiv.querySelector(".activity-end").value
@@ -68,6 +69,8 @@ function saveProject(event) {
 
         project.phases.push(phase);
     });
+
+    console.log("Project to save:", project);
 
     //POST, we save the project
     fetch(`http://localhost:8000/api/project`, {

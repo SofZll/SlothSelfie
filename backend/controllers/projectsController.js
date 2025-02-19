@@ -33,15 +33,27 @@ const createProject = async (req, res) => {
     if (!title || !owner) {
         return res.status(400).json({ error: "Titolo e owner sono obbligatori" });
     }
+
+    // finds the owner ID from the username
+    const ownerUser = await User.findOne({ username: owner });
+    if (!ownerUser) return res.status(404).json({ message: "Owner not found" });
+
+    // finds the members IDs from the usernames
+    const memberUsers = await User.find({ username: { $in: members } });
+    const memberIds = memberUsers.map(user => user._id);
+
+
     try {
         const newProject = new Project({
             title,
             description,
-            owner,
-            members: members || [],
+            owner: ownerUser._id,
+            members: memberIds || [],
             phases: phases || [],
             subphases: subphases || [],
         });
+
+        console.log('New project:', newProject);
 
         const savedProject = await newProject.save();
         res.status(201).json(savedProject);
