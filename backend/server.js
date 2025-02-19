@@ -70,7 +70,7 @@ app.get('*', (req, res) => {
 
 socketHandler(io);
 
-agenda.on('ready', () => {
+agenda.on('ready', async () => {
     console.log('Agenda started');
     agenda.start();
 });

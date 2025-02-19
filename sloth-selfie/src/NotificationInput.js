@@ -118,14 +118,6 @@ function NotificationInput(props){
                             />
                             <label>OS</label>
                         </div>
-                        <div className="notification-type">
-                            <input
-                                type="checkbox"
-                                checked={props.data.notificationType.SMS}
-                                onChange={(e) => handleNotificationChange("SMS", e.target.checked)}
-                            />
-                            <label>SMS</label>
-                        </div>
                     </div>
                 </>
             )}

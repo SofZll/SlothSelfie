@@ -2,29 +2,31 @@ const Agenda = require('agenda');
 require('dotenv').config();
 const { emitNotification } = require('../utils/utils');
 
-const agenda = new Agenda({ db: { address: process.env.MONGO_URI, collection: 'agendaJobs' },
+const agenda = new Agenda({ 
+    db: { address: process.env.MONGO_URI, collection: 'agendaJobs' },
     processEvery: '1 minute',
-});
-
-agenda.on('ready', async () => {
-    console.log('Agenda ready!');
-    await agenda.start();
 });
 
 /**
  * Job to send notification
  */
 agenda.define('send notification', async job => {
+    console.log('Job: ', job.attrs);
+    const now = new Date();
+    const { endDate } = job.attrs.data;
+    
+    if (new Date(endDate) < now) {
+        console.log('Event ended. Removing job.');
+        await job.remove();
+        return;
+    }
+
     console.log('Sending notification');
-    console.log(job.attrs.data);
     const { notificationId } = job.attrs.data;
 
     try {
-        if (emitNotification(notificationId)) {
-            console.log('Notification sent successfully');
-        } else {
-            console.error('Error sending notification');
-        }
+        await emitNotification(notificationId);
+        console.log('Notification sent successfully');
     } catch (error) {
         console.error('Error sending notification:', error);
     }

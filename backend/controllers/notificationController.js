@@ -25,7 +25,6 @@ const createNotification = async (req, res, internalCall = false) => {
         type = 'OS';
     }
 
-    console.log({ elementId, receivers, message, dateNotif, frequencyNotif, type });
     try {
         const notificationData = internalCall ? await getDataInternal({ elementId }) : await getDataStandard({ receivers, message });
         const { message: messageVal, receiversObjectId, element, elementType, deadline} = notificationData;
@@ -56,18 +55,14 @@ const createNotification = async (req, res, internalCall = false) => {
         await notification.save();
 
         // creazione schedule della notifica in base alla data di notifica e alla frequenza
-        if (notificationDate) {
-            await agenda.schedule(notificationDate, 'send notification', {
-                notificationId: notification._id,
-            });
-            console.log(`Scheduled job 'send notification' at ${notificationDate}`);
-        } else {
+        if (!notificationDate) {
             await agenda.now('send notification', {
                 notificationId: notification._id,
             });
             console.log(`Scheduled job 'send notification' now`);
         }
 
+        // FIX: quando la notifica è same day non invia la ripetizione selezionata
         if (frequencyNotif != 'none') {
             if (frequencyNotif == 'three') {
                 const endDate = new Date(deadline).toISOString();
@@ -81,10 +76,28 @@ const createNotification = async (req, res, internalCall = false) => {
                     notificationId: notification._id,
                 });
             } else {
-                await agenda.every(frequencyNotif, 'send notification', {
+                const startDate = new Date(notificationDate);
+                const endDate = new Date(deadline);
+                console.log('Start Date:', startDate);
+                console.log('End Date:', endDate);
+
+                const job = await agenda.create('send notification', {
                     notificationId: notification._id,
+                    startDate: startDate,
+                    endDate: endDate,
                 });
+
+                job.repeatEvery('1 minute');
+                job.schedule(startDate);
+                await job.save();
+                console.log(`Scheduled new job for notification ${notification._id} every ${frequencyNotif}`);
+                
             }
+        } else if (notificationDate) {
+            await agenda.schedule(notificationDate, 'send notification', {
+                notificationId: notification._id,
+            });
+            console.log(`Scheduled job 'send notification' at ${notificationDate}`);
         }
 
         if (!internalCall) res.status(201).json({ success: true, notification });
@@ -106,6 +119,8 @@ const getDataInternal = async ({ elementId }) => {
         element = await Event.findOne({ _id: elementId }).populate('user').populate('sharedWith');
         if (element) {
             date = new Date(element.date);
+            time = element.time;
+            date.setHours(time.split(':')[0], time.split(':')[1]);
             type = 'Event';
         }
     }
