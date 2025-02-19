@@ -14,6 +14,6 @@ const subphaseSchema = new mongoose.Schema({
     
 });
 
-const Subphase = mongoose.model("Phase", subphaseSchema);
+const Subphase = mongoose.model("Subphase", subphaseSchema);
 
 module.exports = Subphase;
