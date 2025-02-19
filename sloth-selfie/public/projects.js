@@ -39,12 +39,12 @@ function saveProject(event) {
         };
 
         phaseDiv.querySelectorAll(".activity > .border").forEach(activityDiv => {
-            phase.activity.push({
-                name: activityDiv.querySelector(".activity-name").value,
-                members: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
+            phase.activities.push({
+                title: activityDiv.querySelector(".activity-name").value,
+                sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                 type: activityDiv.querySelector(".activity-type").value,
                 startDate: activityDiv.querySelector(".activity-start").value,
-                endDate: activityDiv.querySelector(".activity-end").value
+                deadline: activityDiv.querySelector(".activity-end").value
             });
         });
 
@@ -56,11 +56,11 @@ function saveProject(event) {
 
             subPhaseDiv.querySelectorAll(".activity > .border").forEach(activityDiv => {
                 subphase.activities.push({
-                    name: activityDiv.querySelector(".activity-name").value,
-                    members: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
+                    title: activityDiv.querySelector(".activity-name").value,
+                    sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                     type: activityDiv.querySelector(".activity-type").value,
                     startDate: activityDiv.querySelector(".activity-start").value,
-                    endDate: activityDiv.querySelector(".activity-end").value
+                    deadline: activityDiv.querySelector(".activity-end").value
                 });
             });
 
