@@ -4,7 +4,6 @@ const Content = require('../models/contentModel');
 const Event = require('../models/eventModel');
 const Note = require('../models/noteModel');
 const Notification = require('../models/notificationModel');
-const User = require('../models/userModel');
 
 // Function to fetch the state given a specific date and time
 const fetchState = async (req, res) => {

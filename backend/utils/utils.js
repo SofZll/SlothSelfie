@@ -20,7 +20,7 @@ const calculateDate = (date, minusTime) => {
             newDate.setMinutes(newDate.getMinutes() - parseInt(minusTime));
             break;
     }
-    return date;
+    return newDate;
 };
 
 /**
@@ -41,6 +41,7 @@ const emitNotification = async (notificationId) => {
         return user.username;
     }));
 
+    // FIX: le notifiche da dispositivo arrivano solo quando l'utente è connesso
     receiversUsername.forEach(receiver => {
         if (notification.type.includes('OS')) {
             console.log('userSocketMap:', userSocketMap);
@@ -57,8 +58,8 @@ const emitNotification = async (notificationId) => {
             } else {
                 pushNotification(notification.sender, receiver, notification.message);
             }
-        } else if (notification.type.includes('email')) {
-            console.log("notification:", notification);
+        }
+        if (notification.type.includes('email')) {
             sendEmail(receiver, notification.toObject());
             console.log(`Sending email notification to ${receiver}: ${notification.message}`);
         }
@@ -68,6 +69,7 @@ const emitNotification = async (notificationId) => {
 /**
  * Funzione per inviare email
  */
+// TODO: cambiare colore della mail in base all'urgenza
 const sendEmail = async (receiver, notification) => {
 
     console.log("receiver:", receiver);

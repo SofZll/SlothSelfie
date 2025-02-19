@@ -34,7 +34,7 @@ const TimeMachine = ({isOpen, onClose}) => {
                 console.error("Error fetching selected time: ", error);
             }); 
     }, []);
-    */
+    
 
     // Fetch the current time from the server
     useEffect(() => {
@@ -55,7 +55,7 @@ const TimeMachine = ({isOpen, onClose}) => {
                     setNotes(data.state.notes);
                     setNotifications(data.state.notifications);
                     setContents(data.state.contents);
-                    */
+                    
 
                 }
             })
@@ -63,9 +63,9 @@ const TimeMachine = ({isOpen, onClose}) => {
                 console.error("Error fetching selected time: ", error);
             });
     }, []);
-
+    
     //no need if the others work
-    /*
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         let combinedDateTime = '';
@@ -105,7 +105,8 @@ const TimeMachine = ({isOpen, onClose}) => {
         } catch (error) {
             console.error('Error setting time:', error);
         }
-    }*/
+    }
+    */
 
     // Function to set the time
     const handleSetTime = async (e) => {
