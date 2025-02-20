@@ -21,6 +21,7 @@ import socket from './socket';
 import 'leaflet/dist/leaflet.css';
 import Swal from 'sweetalert2';
 import { ActivityProvider } from './ActivityContext';
+import MesssageBox from './MessageBox';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -243,6 +244,7 @@ function App() {
             <div className="App">
               <Menu/>
               <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
+              <MesssageBox/>
               <header className="App-header">
                   <div className="title">
                   <StyleContext.Consumer>
