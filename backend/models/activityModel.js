@@ -26,7 +26,7 @@ const activitySchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    sharedWith: [{
+    sharedWith: [{ //used also for assigning activities to users in projects
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     }],
@@ -49,11 +49,6 @@ const activitySchema = new mongoose.Schema({
         default: null 
     }, // if null, the activity has a phase
 
-    assignedTo: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: "User" 
-    },
-
     dependencies: [{
         type: mongoose.Schema.Types.ObjectId,
          ref: 'Activity' 
@@ -63,6 +58,12 @@ const activitySchema = new mongoose.Schema({
         type: String,
         enum: ["Not_Activatable", "Activatable", "Active", "Completed", "Reactivated", "Overdue", "Abandoned"],
         default: "Not_Activatable"
+    },
+
+    type: {
+        type: String,
+        enum: ["Sequential", "Parallel"],
+        default: "Sequential"
     },
 
     description: {

@@ -30,29 +30,59 @@ const getProjectById = async (req, res) => {
     }
 }
 
+
 //POST create a phase or subphase and return its id
-const createPhaseSubphase = async (type, phase) => {
+const createPhaseSubphase = async (type, phase, projectId, ownerId) => {
     let newPhase;
-    
-    if (type === 'phase') {
-        newPhase = new Phase({ title: phase.name, activities: phase.activities });
-    } else if (type === 'subphase') {
-        newPhase = new Subphase({ title: phase.name, activities: phase.activities });
+
+    if (type === "phase") {
+        newPhase = new Phase({ title: phase.name, project: projectId });
+    } else if (type === "subphase") {
+        newPhase = new Subphase({ title: phase.name, project: projectId });
     } else {
         throw new Error("Invalid type: must be 'phase' or 'subphase'");
     }
 
-    await newPhase.save();
+    await newPhase.save(); // we save the new phase/subphase and we get its _id
+
+    // Create the activities for the phase/subphase
+    const activityIds = await Promise.all(
+        phase.activities.map(async (activity) => {
+
+            console.log("activity.type:", activity.type);
+            console.log("activity.sharedWith:", activity.sharedWith);
+
+            // Find the users to share the activity with
+            const sharedWithUserIds = await User.find({ username: { $in: activity.sharedWith } })
+
+            // Create the activity
+            const newActivity = new Activity({
+                title: activity.title,
+                project: projectId,
+                phase: type === "phase" ? newPhase._id : undefined,
+                subphase: type === "subphase" ? newPhase._id : undefined,
+                sharedWith: sharedWithUserIds,
+                startDate: activity.startDate,
+                deadline: activity.deadline,
+                type: activity.type,
+                user: ownerId
+            });
+
+            const savedActivity = await newActivity.save();
+            return savedActivity._id;
+        })
+    );
+
+    // We update the phase/subphase with the activities
+    await newPhase.updateOne({ $push: { activities: { $each: activityIds } } });
+
     return newPhase._id;
 };
 
-//POST create a project ma TODO: non salva le activities :(
+//POST create a project
 const createProject = async (req, res) => {
-    try{
-        const { title, description, owner, members, phases, subphases } = req.body;
-        if (!title || !owner) {
-            return res.status(400).json({ error: "Titolo e owner sono obbligatori" });
-        }
+    try {
+        const { title, owner, description, members, phases } = req.body;
 
         // finds the owner ID from the username
         const ownerUser = await User.findOne({ username: owner });
@@ -64,83 +94,27 @@ const createProject = async (req, res) => {
         const memberUsers = await User.find({ username: { $in: members } });
         const memberIds = memberUsers.map(user => user._id);
 
-        //if there are phases, create them an get the IDs
-        const savedPhases = phases ? await Promise.all(phases.map(phase => createPhaseSubphase('phase', phase))) : [];
-        //if there are subphases, create them an get the IDs
-        const savedSubphases = subphases ? await Promise.all(subphases.map(subphase => createPhaseSubphase('subphase', subphase))) : [];
-
-
-        const newProject = new Project({
-            title,
-            description,
-            owner: ownerUser._id,
-            members: memberIds || [],
-            phases: savedPhases || [],
-            subphases: savedSubphases || [],
-        });
-
-        console.log('New project:', newProject);
-
-        const savedProject = await newProject.save();
-        res.status(201).json(savedProject);
-    }
-    catch (error) {
-        console.error('Error creating project:', error);
-        res.status(500).json({ message: error.message });
-    }
-}
-
-//POST create a phase or subphase and return its id (approccio diverso ma per ora non va)
-const createPhaseSubphase2 = async (type, phase, projectId) => {
-    let newPhase;
-
-    if (type === "phase") {
-        newPhase = new Phase({ title: phase.name, project: projectId });
-    } else if (type === "subphase") {
-        newPhase = new Subphase({ title: phase.name, project: projectId });
-    } else {
-        throw new Error("Invalid type: must be 'phase' or 'subphase'");
-    }
-
-    await newPhase.save(); // Salviamo la fase o sottofase e otteniamo il suo _id
-
-    // Creiamo le attività collegate alla fase o sottofase
-    const activityPromises = phase.activities.map(async (activity) => {
-        const newActivity = new Activity({
-            title: activity.name,
-            project: projectId, // Associa l'attività al progetto
-            phase: type === "phase" ? newPhase._id : undefined,
-            subphase: type === "subphase" ? newPhase._id : undefined,
-            assignedTo: activity.members,
-            startDate: activity.startDate,
-            deadline: activity.endDate,
-        });
-
-        return await newActivity.save();
-    });
-
-    await Promise.all(activityPromises); // Aspettiamo che tutte le attività siano salvate
-
-    return newPhase._id; // Ritorniamo l'ID della fase/sottofase
-};
-
-//POST create a project (non va, approccio diverso?)
-const createProject2 = async (req, res) => {
-    try {
-        const { title, owner, description, members, phases } = req.body;
-
-        // Creiamo il progetto
-        const newProject = new Project({ title, owner, description, members });
+        // Create the project
+        const newProject = new Project({ title, owner: ownerUser._id, description, members: memberIds });
         await newProject.save();
 
-        // Creiamo fasi, sottofasi e attività
+        // Create the phases and subphases with their activities
+        const phaseIds = [];
         for (const phase of phases) {
-            const phaseId = await createPhaseSubphase("phase", phase, newProject._id);
+            const phaseId = await createPhaseSubphase("phase", phase, newProject._id, ownerUser._id);
+            phaseIds.push(phaseId);
 
+            const subphaseIds = [];
             for (const subphase of phase.subphases) {
-                await createPhaseSubphase("subphase", subphase, newProject._id);
+                const subphaseId = await createPhaseSubphase("subphase", subphase, newProject._id, ownerUser._id);
+                subphaseIds.push(subphaseId);
             }
+
+            await Phase.findByIdAndUpdate(phaseId, { $push: { subphases: { $each: subphaseIds } } });
         }
+
+        // we update the project with the phases
+        await newProject.updateOne({ $set: { phases: phaseIds } });
 
         res.status(201).json({ message: "Project, phases, subphases, and activities saved successfully" });
     } catch (error) {
