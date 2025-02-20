@@ -31,7 +31,7 @@ const getProjectById = async (req, res) => {
 }
 
 
-//POST create a phase or subphase and return its id
+//POST create a phase or subphase and return its id TODO PROBLEMA IN SALVATAGGIO DI SOTTTOFASI IN DB ASSOCIATE AD UNA FASE
 const createPhaseSubphase = async (type, phase, projectId, ownerId) => {
     let newPhase;
 
@@ -153,7 +153,12 @@ const deleteProject = async (req, res) => {
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });
         }
-        res.status(204).json();
+            //delete associated phases and activities
+            await Phase.deleteMany({ project: id });
+            await Subphase.deleteMany({ project: id });
+            await Activity.deleteMany({ project: id });
+
+            res.status(200).send("Project and associated data deleted successfully.");
     }
     catch (error) {
         console.error('Error deleting project:', error);
