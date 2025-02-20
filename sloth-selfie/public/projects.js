@@ -1,3 +1,5 @@
+//TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO
+
 //GET, function to load projects from the server
 function loadProjects() {
     fetch(`http://localhost:8000/api/projects`)
@@ -38,7 +40,8 @@ function saveProject(event) {
             subphases: []
         };
 
-        phaseDiv.querySelectorAll(".activity > .border").forEach(activityDiv => {
+        phaseDiv.querySelectorAll(".activities > .border").forEach(activityDiv => {
+            console.log("Found activity div:", activityDiv);
             phase.activities.push({
                 title: activityDiv.querySelector(".activity-name").value,
                 sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
@@ -54,7 +57,8 @@ function saveProject(event) {
                 activities: []
             };
 
-            subPhaseDiv.querySelectorAll(".activity > .border").forEach(activityDiv => {
+            subPhaseDiv.querySelectorAll(".subphase-activities > .border").forEach(activityDiv => {
+                console.log("Found activity div:", activityDiv);
                 subphase.activities.push({
                     title: activityDiv.querySelector(".activity-name").value,
                     sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
@@ -85,7 +89,7 @@ function saveProject(event) {
     .then(data => {
         alert("Project saved successfully!");
         document.getElementById("projectForm").reset();
-        loadProjects(); // Ricarica la lista dei progetti
+        loadProjects(); // Reload the projects list
     })
     .catch(error => console.error("Error saving project:", error));
 
@@ -150,8 +154,8 @@ function addActivity(button, type) {
         <input type="text" class="form-control activity-actors">
         <label>Type:</label>
         <select class="form-select activity-type">
-            <option value="sequential">Sequential</option>
-            <option value="parallel">Parallel</option>
+            <option value="Sequential">Sequential</option>
+            <option value="Parallel">Parallel</option>
         </select>
         <label>Start date:</label>
         <input type="date" class="form-control activity-start">

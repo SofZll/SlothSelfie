@@ -7,10 +7,10 @@ const phaseSchema = new mongoose.Schema({
         required: true 
     },
 
-    subphases: {
+    subphases: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Subphase"
-    },
+    }],
 
     activities: [{ 
         type: mongoose.Schema.Types.ObjectId,
