@@ -1,6 +1,8 @@
-//function to load projects from the server
+//TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO
+
+//GET, function to load projects from the server
 function loadProjects() {
-    fetch("/api/projects")
+    fetch(`http://localhost:8000/api/projects`)
         .then(response => response.json())
         .then(projects => {
             const list = document.getElementById("projects-list");
@@ -9,16 +11,98 @@ function loadProjects() {
             projects.forEach(project => {
                 const li = document.createElement("li");
                 li.className = "list-group-item";
-                li.innerHTML = `<strong>${project.title}</strong> - Owner: ${project.owner}`;
+                li.innerHTML = `<strong>${project.title}</strong> - Owner: ${project.owner}
+                <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
+                <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
+                <button class="btn btn-success btn-sm ml-2" onclick="startProject('${project._id}')">Start Project</button>
+                `;
                 list.appendChild(li);
             });
+
+            console.log("Projects loaded successfully:", projects);
         })
-        .catch(error => console.error("Errore nel caricamento progetti:", error));
+        .catch(error => console.error("Error while loading projects:", error));
 }
 
 
-let phaseCounter = 0;
+// Save the project
+function saveProject(event) {
+    event.preventDefault();
 
+    const project = {
+        title: document.getElementById("projectName").value,
+        owner: document.getElementById("projectOwner").value,
+        description: document.getElementById("projectDesc").value,
+        members: document.getElementById("projectActors").value.split(",").map(a => a.trim()),
+        phases: []
+    };
+
+    document.querySelectorAll("#phasesContainer > .card").forEach(phaseDiv => {
+        const phase = {
+            name: phaseDiv.querySelector(".phase-name").value,
+            activities: [],
+            subphases: []
+        };
+
+        phaseDiv.querySelectorAll(".activities > .border").forEach(activityDiv => {
+            console.log("Found activity div:", activityDiv);
+            phase.activities.push({
+                title: activityDiv.querySelector(".activity-name").value,
+                sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
+                type: activityDiv.querySelector(".activity-type").value,
+                startDate: activityDiv.querySelector(".activity-start").value,
+                deadline: activityDiv.querySelector(".activity-end").value
+            });
+        });
+
+        phaseDiv.querySelectorAll(".subphases > .border").forEach(subPhaseDiv => {
+            const subphase = {
+                name: subPhaseDiv.querySelector(".subphase-name").value,
+                activities: []
+            };
+
+            subPhaseDiv.querySelectorAll(".subphase-activities > .border").forEach(activityDiv => {
+                console.log("Found activity div:", activityDiv);
+                subphase.activities.push({
+                    title: activityDiv.querySelector(".activity-name").value,
+                    sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
+                    type: activityDiv.querySelector(".activity-type").value,
+                    startDate: activityDiv.querySelector(".activity-start").value,
+                    deadline: activityDiv.querySelector(".activity-end").value
+                });
+            });
+
+            phase.subphases.push(subphase);
+        });
+
+        project.phases.push(phase);
+    });
+
+    console.log("Project to save:", project);
+
+    //POST, we save the project
+    fetch(`http://localhost:8000/api/project`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        credentials: 'include',
+        body: JSON.stringify(project),
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("Project saved successfully!");
+        document.getElementById("projectForm").reset();
+        loadProjects(); // Reload the projects list
+    })
+    .catch(error => console.error("Error saving project:", error));
+
+    document.getElementById("projectForm").reset();
+}
+
+//functions to add phases, subphases and activities to the project form for the frontend
+
+let phaseCounter = 0; //local counter for the phases
 // Add a new phase to the project
 function addPhase() {
     const phases = document.querySelectorAll("#phasesContainer .card");
@@ -26,8 +110,8 @@ function addPhase() {
     const phaseDiv = document.createElement("div");
     phaseDiv.classList.add("card", "p-3", "mt-3");
     phaseDiv.innerHTML = `
-        <h5>Fase ${phaseNumber}</h5>
-        <label>Fase name:</label>
+        <h5>Phase ${phaseNumber}</h5>
+        <label>Phase name:</label>
         <input type="text" class="form-control phase-name">
         <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'phase')">Add activity</button>
         <div class="activities mt-2"></div> <!-- container activities of the phase -->
@@ -73,9 +157,9 @@ function addActivity(button, type) {
         <label>Members (comma separated):</label>
         <input type="text" class="form-control activity-actors">
         <label>Type:</label>
-        <select class="form-select task-type">
-            <option value="sequential">Sequential</option>
-            <option value="parallel">Parallel</option>
+        <select class="form-select activity-type">
+            <option value="Sequential">Sequential</option>
+            <option value="Parallel">Parallel</option>
         </select>
         <label>Start date:</label>
         <input type="date" class="form-control activity-start">
@@ -99,7 +183,6 @@ function removeElement(button) {
     }
 }
 
-
 // Function to remove the form of an activity
 function closeActivityForm(button) {
     const activityDiv = button.parentElement;
@@ -114,61 +197,28 @@ function updatePhaseNumbers() {
     });
 }
 
-
-// Save the project
-function saveProject(event) {
-    event.preventDefault();
-
-    const project = {
-        name: document.getElementById("projectName").value,
-        description: document.getElementById("projectDesc").value,
-        actors: document.getElementById("projectActors").value.split(",").map(a => a.trim()),
-        phases: []
-    };
-
-    document.querySelectorAll("#phasesContainer > .card").forEach(phaseDiv => {
-        const phase = {
-            name: phaseDiv.querySelector(".phase-name").value,
-            tasks: [],
-            subphases: []
-        };
-
-        phaseDiv.querySelectorAll(".tasks > .border").forEach(taskDiv => {
-            phase.tasks.push({
-                name: taskDiv.querySelector(".task-name").value,
-                actors: taskDiv.querySelector(".task-actors").value.split(",").map(a => a.trim()),
-                type: taskDiv.querySelector(".task-type").value,
-                startDate: taskDiv.querySelector(".task-start").value,
-                endDate: taskDiv.querySelector(".task-end").value
-            });
-        });
-
-        phaseDiv.querySelectorAll(".subphases > .border").forEach(subPhaseDiv => {
-            const subphase = {
-                name: subPhaseDiv.querySelector(".subphase-name").value,
-                tasks: []
-            };
-
-            subPhaseDiv.querySelectorAll(".tasks > .border").forEach(taskDiv => {
-                subphase.tasks.push({
-                    name: taskDiv.querySelector(".task-name").value,
-                    actors: taskDiv.querySelector(".task-actors").value.split(",").map(a => a.trim()),
-                    type: taskDiv.querySelector(".task-type").value,
-                    startDate: taskDiv.querySelector(".task-start").value,
-                    endDate: taskDiv.querySelector(".task-end").value
-                });
-            });
-
-            phase.subphases.push(subphase);
-        });
-
-        project.phases.push(phase);
-    });
-
-    localStorage.setItem("project", JSON.stringify(project));
-    alert("Progetto salvato con successo!");
-    document.getElementById("projectForm").reset();
+//function to delete a project, with all phases, subphases and activities
+function deleteProject(projectId) {
+    if (confirm("Are you sure you want to delete this project?")) {
+        console.log("Deleting project with id:", projectId);
+        // DELETE request to remove the project
+        fetch(`http://localhost:8000/api/project/${projectId}`, {
+            method: "DELETE",
+            credentials: 'include',
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Project deleted successfully!");
+                loadProjects(); // Reload the projects list after deletion
+            } else {
+                alert("Error while deleting the project.");
+            }
+        })
+        .catch(error => console.error("Error deleting project:", error));
+    }
 }
+
+//listeners
 
 //load projects when the page is loaded
 document.addEventListener("DOMContentLoaded", function() {
@@ -178,6 +228,12 @@ document.addEventListener("DOMContentLoaded", function() {
 //function to save a project
 document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("projectForm").addEventListener("submit", saveProject);
+});
+
+document.getElementById("projectForm").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // the form will not be submitted if the user presses Enter
+    }
 });
 
  // button to go back to home (React)

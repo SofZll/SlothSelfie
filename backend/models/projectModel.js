@@ -21,6 +21,16 @@ const projectSchema = new mongoose.Schema({
          ref: "User"
     }],
 
+    phases: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Phase"
+    }],
+
+    subphases: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subphase"
+    }],
+
     createdAt: {
         type: Date,
         default: Date.now 

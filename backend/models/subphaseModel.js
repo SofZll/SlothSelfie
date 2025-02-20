@@ -7,6 +7,11 @@ const subphaseSchema = new mongoose.Schema({
         required: true 
     },
 
+    project: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project',
+    },
+    
     activities: [{ 
         type: mongoose.Schema.Types.ObjectId,
         ref: "Activity" 
@@ -14,6 +19,6 @@ const subphaseSchema = new mongoose.Schema({
     
 });
 
-const Subphase = mongoose.model("Phase", subphaseSchema);
+const Subphase = mongoose.model("Subphase", subphaseSchema);
 
 module.exports = Subphase;
