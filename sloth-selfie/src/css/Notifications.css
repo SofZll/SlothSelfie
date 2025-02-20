@@ -57,11 +57,6 @@
     padding-right: 42px;
 }
 
-.notif-title h6 {
-    margin: 0;
-    font-weight: bold;
-}
-
 .notif-list {
     width: 100%;
     display: flex;
