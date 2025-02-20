@@ -11,7 +11,11 @@ function loadProjects() {
             projects.forEach(project => {
                 const li = document.createElement("li");
                 li.className = "list-group-item";
-                li.innerHTML = `<strong>${project.title}</strong> - Owner: ${project.owner}`;
+                li.innerHTML = `<strong>${project.title}</strong> - Owner: ${project.owner}
+                <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
+                <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
+                <button class="btn btn-success btn-sm ml-2" onclick="startProject('${project._id}')">Start Project</button>
+                `;
                 list.appendChild(li);
             });
 
@@ -193,6 +197,26 @@ function updatePhaseNumbers() {
     });
 }
 
+//function to delete a project, with all phases, subphases and activities
+function deleteProject(projectId) {
+    if (confirm("Are you sure you want to delete this project?")) {
+        console.log("Deleting project with id:", projectId);
+        // DELETE request to remove the project
+        fetch(`http://localhost:8000/api/project/${projectId}`, {
+            method: "DELETE",
+            credentials: 'include',
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Project deleted successfully!");
+                loadProjects(); // Reload the projects list after deletion
+            } else {
+                alert("Error while deleting the project.");
+            }
+        })
+        .catch(error => console.error("Error deleting project:", error));
+    }
+}
 
 //listeners
 
