@@ -45,7 +45,6 @@ const CalendarNoAvailability = () => {
 
             setNoAvailability(prev => [...prev, result.noAvailability]);// we update the state with a new period of no availability
             setFormData({ startDate: '', endDate: '', repeatFrequency: 'none' }); // Reset form
-            // Fetch degli ultimi dati dopo l'aggiunta
         } catch (error) {
             console.error('Error adding no availability:', error);
         }
