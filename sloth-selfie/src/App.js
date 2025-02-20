@@ -124,7 +124,7 @@ function App() {
     };
 
     fetchProfileData();
-}, []); 
+  }, []); 
   
   const handleLogin = (status) => {
     console.log("Login status:", status);

@@ -11,7 +11,7 @@
     
     .message-button {
         width: 300px;
-        height: 35px;
+        height:45px;
         font-weight: bold;
         background-color: #244476;
         color: white;
@@ -50,7 +50,7 @@
     }
 
     .chat{
-        padding: 10px;
+        padding: 10px 15px;
         border-bottom: 1px solid #ccc;
     }
     
@@ -97,11 +97,12 @@
     .chat-selected-header {
         display: flex;
         align-items: center;
-        height: 40px;
+        height: 45px;
         padding: 10px;
         gap: 1rem;
         justify-content: left;
         background-color: #B0C4DE;
+        border: 1px solid #ccc;
         position:sticky;
         top: 0;
         z-index: 10;
