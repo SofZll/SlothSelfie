@@ -1,4 +1,7 @@
 //TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO
+//TODO: COME PASSO LO USER LOGGATO? LUI è L'OWNER DEL PROGETTO
+//TODO: Aggiungi le due modalità di visualizzazione, bottoni lista e gannt
+//TODO: Edit e start di progetto
 
 //GET, function to load projects from the server
 function loadProjects() {
@@ -11,10 +14,12 @@ function loadProjects() {
             projects.forEach(project => {
                 const li = document.createElement("li");
                 li.className = "list-group-item";
-                li.innerHTML = `<strong>${project.title}</strong> - Owner: ${project.owner}
+                li.innerHTML = `<strong>${project.title}</strong>
                 <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
                 <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
                 <button class="btn btn-success btn-sm ml-2" onclick="startProject('${project._id}')">Start Project</button>
+                <button class="btn btn-outline-primary btn-sm view-list" onclick="viewAsList('${project._id}')">View as List</button>
+                <button class="btn btn-outline-secondary btn-sm view-gantt" onclick="viewAsGannt('${project._id}')">View as Gantt</button>
                 `;
                 list.appendChild(li);
             });
@@ -98,6 +103,10 @@ function saveProject(event) {
     .catch(error => console.error("Error saving project:", error));
 
     document.getElementById("projectForm").reset();
+    document.getElementById("phasesContainer").innerHTML = "";//we remove the phase and subphase empty form after saving
+    document.getElementById("projectForm").style.display = "none"; // hides the form after saving
+    document.getElementById("ToggleFormBtn").textContent = "+ Add a Project"; //the button text is changed to "Add a Project" after saving
+    loadProjects(); // Reload the projects list
 }
 
 //functions to add phases, subphases and activities to the project form for the frontend
@@ -218,6 +227,101 @@ function deleteProject(projectId) {
     }
 }
 
+// Function to view the project as a list   //TODO: DA SISTEMARE, LATO BACK NON RECUPERA LE SOTTOFASI E LATO FRONT DA RIVEDERE
+function viewAsList(projectId) {
+    fetch(`http://localhost:8000/api/project/${projectId}`)
+        .then(response => response.json())
+        .then(project => {
+            const projectViewContainer = document.getElementById("project-view-container");
+            projectViewContainer.innerHTML = ""; // clear the container
+
+            //we log the project to see the structure
+            console.log("Project to view:", project);
+
+            // Title of the project
+            const projectTitle = document.createElement("h3");
+            projectTitle.innerHTML = `Project: ${project.title}`;
+            projectViewContainer.appendChild(projectTitle);
+
+            // Options to sort the activities
+            const sortOptions = document.createElement("div");
+            sortOptions.innerHTML = `
+                <label for="sortSelect">Sort activities by: </label>
+                <select id="sortSelect" class="form-select w-auto d-inline">
+                    <option value="date">Date (Default)</option>
+                    <option value="member">Member</option>
+                </select>
+            `;
+            projectViewContainer.appendChild(sortOptions);
+
+            // Container for phases and subphases
+            const listContainer = document.createElement("div");
+            projectViewContainer.appendChild(listContainer);
+
+            // Create a div for each phase and subphase
+            project.phases.forEach(phase => {
+                const phaseDiv = document.createElement("div");
+                phaseDiv.innerHTML = `<h4>Phase: ${phase.title}</h4>`;
+                listContainer.appendChild(phaseDiv);
+
+                // Container for the activities of the phase (default: date sorting)
+                const activitiesList = document.createElement("ul");
+                activitiesList.id = `activities-${phase._id}`;
+                phaseDiv.appendChild(activitiesList);
+
+
+                phase.subphases.forEach(subphase => {
+                    const subphaseDiv = document.createElement("div");
+                    subphaseDiv.innerHTML = `<h5>Subphase: ${subphase.title}</h5>`;
+                    phaseDiv.appendChild(subphaseDiv);
+
+                    // Container for the activities (default: date sorting)
+                    const activitiesList = document.createElement("ul");
+                    activitiesList.id = `activities-${subphase._id}`;
+                    subphaseDiv.appendChild(activitiesList);
+
+                    sortActivities(subphase, "date");
+                });
+            });
+
+            // Event listener to sort the activities
+            document.getElementById("sortSelect").addEventListener("change", (event) => {
+                const selectedCriteria = event.target.value;
+                project.phases.forEach(phase => {
+                    phase.subphases.forEach(subphase => {
+                        sortActivities(subphase, selectedCriteria);
+                    });
+                });
+            });
+        })
+        .catch(error => console.error("Error while fetching project:", error));
+}
+
+// Funzione per ordinare e aggiornare la lista delle attività di una sottofase
+function sortActivities(subphase, criteria) {
+    const activitiesList = document.getElementById(`activities-${subphase._id}`);
+    activitiesList.innerHTML = ""; // Pulisce la lista
+
+    // Ordina le attività in base al criterio selezionato
+    let sortedActivities = subphase.activities;
+    if (criteria === "member") {
+        sortedActivities = sortedActivities.sort((a, b) => {
+            return a.sharedWith[0].localeCompare(b.sharedWith[0]);
+        });
+    } else {
+        sortedActivities = sortedActivities.sort((a, b) => {
+            return a.deadline.localeCompare(b.deadline);
+        });
+    }
+
+    // Aggiunge le attività ordinate alla lista
+    sortedActivities.forEach(activity => {
+        const activityItem = document.createElement("li");
+        activityItem.innerHTML = `<strong>${activity.title}</strong> - Deadline: ${activity.deadline} - Member: ${activity.sharedWith[0]}`;
+        activitiesList.appendChild(activityItem);
+    });
+}
+
 //listeners
 
 //load projects when the page is loaded
@@ -233,6 +337,19 @@ document.addEventListener("DOMContentLoaded", function() {
 document.getElementById("projectForm").addEventListener("keydown", function(event) {
     if (event.key === "Enter") {
         event.preventDefault(); // the form will not be submitted if the user presses Enter
+    }
+});
+
+//button to toggle the form to add a project
+document.getElementById("ToggleFormBtn").addEventListener("click", function () {
+    let content = document.getElementById("projectForm");
+
+    if (content.style.display === "none" || content.style.display === "") {
+        content.style.display = "block";
+        this.textContent = "Close";
+    } else {
+        content.style.display = "none";
+        this.textContent = "+ Add a Project";
     }
 });
 

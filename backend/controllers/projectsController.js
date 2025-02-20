@@ -23,6 +23,26 @@ const getProjectById = async (req, res) => {
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });
         }
+        //now we get the phases of the project
+        project.phases = await Phase.find({ project: id });
+        console.log("project.phases:", project.phases);
+
+         //and the activities of each phase
+        for (const phase of project.phases) {
+            phase.activities = await Activity.find({ project: id, phase: phase._id });
+            console.log("phase.activities:", phase.activities);
+
+            //and the subphases of each phase
+            phase.subphases = await Subphase.find({ project: id, phase: phase._id });
+            console.log("phase.subphases:", phase.subphases);
+
+            //and the activities of each subphase
+            for (const subphase of phase.subphases) {
+                subphase.activities = await Activity.find({ project: id, subphase: subphase._id });
+                console.log("subphase.activities:", subphase.activities);
+            }
+        }
+        
         res.status(200).json(project);
     } catch (error) {
         console.error('Error fetching project by id:', error);
@@ -31,7 +51,7 @@ const getProjectById = async (req, res) => {
 }
 
 
-//POST create a phase or subphase and return its id TODO PROBLEMA IN SALVATAGGIO DI SOTTTOFASI IN DB ASSOCIATE AD UNA FASE
+//POST create a phase or subphase and return its id
 const createPhaseSubphase = async (type, phase, projectId, ownerId) => {
     let newPhase;
 
@@ -110,7 +130,8 @@ const createProject = async (req, res) => {
                 subphaseIds.push(subphaseId);
             }
 
-            await Phase.findByIdAndUpdate(phaseId, { $push: { subphases: { $each: subphaseIds } } });
+            // we update the phase with the subphases
+            await Phase.updateOne({ _id: phaseId }, { $set: { subphases: subphaseIds } });
         }
 
         // we update the project with the phases
@@ -124,7 +145,7 @@ const createProject = async (req, res) => {
 };
 
 
-//PUT update a project
+//PUT update a project TODO
 const updateProject = async (req, res) => {
     const { id } = req.params;
     const { title, description, owner, members, phases, subphases } = req.body;

@@ -11,6 +11,11 @@ const subphaseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Project',
     },
+
+    phase: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Phase',
+    },
     
     activities: [{ 
         type: mongoose.Schema.Types.ObjectId,
