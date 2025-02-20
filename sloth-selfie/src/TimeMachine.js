@@ -1,12 +1,88 @@
 import React, { useEffect, useState } from "react";
 import './css/TimeMachine.css';
+import iconTimeMachine from './media/time-machine.svg';
 import Swal from "sweetalert2";
 
-const TimeMachine = ({isOpen, onClose}) => {
+const TimeMachine = () => {
+    const [machineOpen, setMachineOpen] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
+      
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
+
+    const isMobileLandscape = () => {
+        const isMobileWidth = window.matchMedia('(max-width: 700px)').matches; // Soglia di 500px per modalità cellulare
+        const isLandscapeHeight = window.matchMedia('(max-height: 700px').matches;
+        const isLandscapeWidth = window.matchMedia('(max-width: 1000px').matches;
+        return isMobileWidth || (isLandscapeHeight && isLandscapeWidth);
+    };
+
+    const isMobile = () => {
+        return window.matchMedia('(max-width: 700px)').matches;
+    };
+
+    // Functions to update time machine position based on screen size
+    const updatePosition = () => {
+        if (isMobile()) {
+        const initialX = window.innerWidth * 0.8;
+        const initialY = window.innerHeight * 0.8;
+        setPosition({ x: initialX, y: initialY });
+        } else {
+        setPosition({ x: window.innerWidth * 0.9, y: window.innerHeight * 0.03 });
+        }
+    };
+
+    useEffect(() => {
+        updatePosition();
+        window.addEventListener('resize', updatePosition);
+
+        return () => {
+        window.removeEventListener('resize', updatePosition);
+        }
+    }, []);
+
+    // Function to show and close the time machine
+    const toggleTimeMachine = () => {
+        setMachineOpen(prevState => !prevState);
+    };
+
+    // Touch events for time machine
+    const handleTouchStart = (e) => {
+        const touch = e.touches[0];
+        setStartPosition({ x: touch.clientX, y: touch.clientY });
+        setIsDragging(false);
+    };
+
+    const handleTouchMove = (e) => {
+        const touch = e.touches[0];
+        
+        // Calculate delta for better performance
+        const deltaX = touch.clientX - startPosition.x;
+        const deltaY = touch.clientY - startPosition.y;
+
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        setIsDragging(true);
+
+        setPosition(prevPos => ({
+            x: prevPos.x + deltaX,
+            y: prevPos.y + deltaY,
+        }));
+
+        setStartPosition({ x: touch.clientX, y: touch.clientY });
+        }
+    };
+
+    const handleTouchEnd = (e) => {
+        if (!isDragging) {
+        toggleTimeMachine();
+        }
+    };
+
 
     //TODO: trova un modo per sincronizzare eventi, attività note ecc ecc con time machine
 
@@ -136,7 +212,7 @@ const TimeMachine = ({isOpen, onClose}) => {
                 console.log('Time set successfully:', data);
                 setCurrentDate(inputDate);
                 setCurrentTime(inputTime);
-                onClose();
+                setMachineOpen(false);
             } else {
                 console.error('Error setting time');
             }
@@ -171,44 +247,56 @@ const TimeMachine = ({isOpen, onClose}) => {
         }
     };
 
-    if (!isOpen) {
-        return null;
-    }
-
     return (
-        <div className="time-machine">
-            <div className="time-machine-content">
-                <span className="close" onClick={onClose}>&times;</span>
-                <h2>Hi! &#128527;<br/> Do you wish to travel in time?</h2>
-                <p>Right now the time is set on: </p>
-                <p className="current-time">
-                    <span>Date: {currentDate}</span>
-                    <span>Time: {currentTime}</span>
-                </p>
-                <form onSubmit={handleSetTime}>
-                    <label htmlFor="date">Enter a date:</label>
-                    <input
-                        className="time-input"
-                        type="date"
-                        id="date"
-                        value={inputDate}
-                        onChange={(e) => setInputDate(e.target.value)}
-                        required
-                    /><br/>
-                    <label htmlFor="time">Enter a time:</label>
-                    <input
-                        className="time-input"
-                        type="time"
-                        id="time"
-                        value={inputTime}
-                        onChange={(e) => setInputTime(e.target.value)}
-                        required
-                    /><br/><br/>
-                    <button type="submit" className="btn btn-main" value="set-time">Go back in time!</button>
-                    </form>
-                    <button onClick={handleResetTime} className="btn btn-main" value="reset-time">Reset time</button>
+        <>
+            <div className="div-time-machine" style={{ left: `${position.x}px` , top: `${position.y}px`}}>
+                <button
+                className="btn-time-machine"
+                onTouchStart={isMobileLandscape() ? handleTouchStart : null}
+                onTouchMove={isMobileLandscape() ? handleTouchMove : null}
+                onTouchEnd={isMobileLandscape() ? handleTouchEnd : null}
+                onClick={!isMobileLandscape() ? toggleTimeMachine : null} // Enable click on desktop
+                style={{ touchAction: 'none' }}
+                >
+                <img src={iconTimeMachine} alt="icon" className="icon" />
+                </button>
             </div>
-        </div>
+            { machineOpen && (
+                <div className="time-machine">
+                    <div className="time-machine-content">
+                        <span className="close" onClick={() => setMachineOpen(false)}>&times;</span>
+                        <h2>Hi! &#128527;<br/> Do you wish to travel in time?</h2>
+                        <p>Right now the time is set on: </p>
+                        <p className="current-time">
+                            <span>Date: {currentDate}</span>
+                            <span>Time: {currentTime}</span>
+                        </p>
+                        <form onSubmit={handleSetTime}>
+                            <label htmlFor="date">Enter a date:</label>
+                            <input
+                                className="time-input"
+                                type="date"
+                                id="date"
+                                value={inputDate}
+                                onChange={(e) => setInputDate(e.target.value)}
+                                required
+                            /><br/>
+                            <label htmlFor="time">Enter a time:</label>
+                            <input
+                                className="time-input"
+                                type="time"
+                                id="time"
+                                value={inputTime}
+                                onChange={(e) => setInputTime(e.target.value)}
+                                required
+                            /><br/><br/>
+                            <button type="submit" className="btn btn-main" value="set-time">Go back in time!</button>
+                            </form>
+                            <button onClick={handleResetTime} className="btn btn-main" value="reset-time">Reset time</button>
+                    </div>
+                </div>
+            )}
+        </>
     )
 };
 

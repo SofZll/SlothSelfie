@@ -16,7 +16,6 @@ import Menu from './Menu';
 import ProfileFunction from './Profile';
 import ForumFunction from './Forum';
 import TimeMachine from './TimeMachine';
-import iconTimeMachine from './media/time-machine.svg';
 import socket from './socket';
 import 'leaflet/dist/leaflet.css';
 import Swal from 'sweetalert2';
@@ -26,16 +25,15 @@ import MesssageBox from './MessageBox';
 function App() {
   const [loading, setLoading] = useState(true);
 
-  const [machineOpen, setMachineOpen] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
-  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formType, setFormType] = useState('login');
 
   const [inSettings, setInSettings] = useState(false);
+
+  const [profileData, setProfileData] = useState({
+    username: '',
+    profile_image: ''
+  });
 
   // Check if the user is authenticated
   const checkAuth = async () => {
@@ -89,21 +87,48 @@ function App() {
       socket.off("notification");
     }
   }, []);
+
+  // Since the image is stored a Buffer we need to convert it to base64
+  let base64Image = '';
+  const bufferToBase64 = (buffer) => {
+    const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
+    return btoa(binary);
+  };
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/user/profile`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.user) {
+          if (data.user.image?.data?.data) {
+            const buffer = data.user.image.data.data;
+            base64Image = `data:${data.user.image.contentType};base64,${bufferToBase64(buffer)}`;
+          }
+
+          setProfileData({
+            username: data.user.username || '',
+            profile_image: base64Image
+          });
+
+          console.log('Profile data:', data.user);
+        }
+      } catch (error) {
+          console.error('Error fetching profile data:', error);
+      }
+    };
+
+    fetchProfileData();
+}, []); 
   
   const handleLogin = (status) => {
     console.log("Login status:", status);
     setIsAuthenticated(status);
-  };
-
-  const isMobileLandscape = () => {
-    const isMobileWidth = window.matchMedia('(max-width: 700px)').matches; // Soglia di 500px per modalità cellulare
-    const isLandscapeHeight = window.matchMedia('(max-height: 700px').matches;
-    const isLandscapeWidth = window.matchMedia('(max-width: 1000px').matches;
-    return isMobileWidth || (isLandscapeHeight && isLandscapeWidth);
-  };
-
-  const isMobile = () => {
-    return window.matchMedia('(max-width: 700px)').matches;
   };
 
   let cards = [
@@ -132,63 +157,6 @@ function App() {
       )
     }
   ];
-
-  // Functions to update time machine position based on screen size
-  const updatePosition = () => {
-    if (isMobile()) {
-      const initialX = window.innerWidth * 0.8;
-      const initialY = window.innerHeight * 0.8;
-      setPosition({ x: initialX, y: initialY });
-    } else {
-      setPosition({ x: window.innerWidth * 0.9, y: window.innerHeight * 0.03 });
-    }
-  };
-
-  useEffect(() => {
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-    }
-  }, []);
-
-  // Function to show and close the time machine
-  const toggleTimeMachine = () => {
-    setMachineOpen(prevState => !prevState);
-  };
-
-  // Touch events for time machine
-  const handleTouchStart = (e) => {
-    const touch = e.touches[0];
-    setStartPosition({ x: touch.clientX, y: touch.clientY });
-    setIsDragging(false);
-  };
-
-  const handleTouchMove = (e) => {
-    const touch = e.touches[0];
-    
-    // Calculate delta for better performance
-    const deltaX = touch.clientX - startPosition.x;
-    const deltaY = touch.clientY - startPosition.y;
-
-    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-      setIsDragging(true);
-
-      setPosition(prevPos => ({
-        x: prevPos.x + deltaX,
-        y: prevPos.y + deltaY,
-      }));
-
-      setStartPosition({ x: touch.clientX, y: touch.clientY });
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    if (!isDragging) {
-      toggleTimeMachine();
-    }
-  };
 
   /* RICORDATI DI RIGUARDARE CHECK-AUTH NON FUNZIONA 
   if ("Notification" in window && navigator.serviceWorker) {
@@ -242,9 +210,9 @@ function App() {
             </div>
           ) : (
             <div className="App">
-              <Menu/>
-              <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
-              <MesssageBox/>
+              <Menu profileData={profileData}/>
+              <TimeMachine />
+              <MesssageBox username={profileData.username} />
               <header className="App-header">
                   <div className="title">
                   <StyleContext.Consumer>
@@ -301,25 +269,6 @@ function App() {
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/forum" element={<ForumFunction />} />
                 </Routes>
-                {/* time machine */}
-                <div
-                  className="div-time-machine"
-                  style={{
-                    left: `${position.x}px` ,
-                    top: `${position.y}px` ,
-                  }}
-                >
-                  <button
-                    className="btn-time-machine"
-                    onTouchStart={isMobileLandscape() ? handleTouchStart : null}
-                    onTouchMove={isMobileLandscape() ? handleTouchMove : null}
-                    onTouchEnd={isMobileLandscape() ? handleTouchEnd : null}
-                    onClick={!isMobileLandscape() ? toggleTimeMachine : null} // Enable click on desktop
-                    style={{ touchAction: 'none' }}
-                  >
-                    <img src={iconTimeMachine} alt="icon" className="icon" />
-                  </button>
-                </div>
               </div>
             </div>
           )}

@@ -3,7 +3,7 @@ import './css/MessageBox.css';
 import { useMediaQuery } from 'react-responsive';
 import Swal from 'sweetalert2';
 
-function MessageBox({ username}) {
+function MessageBox({ username }) {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedChat, setSelectedChat] = useState(null);
     const [newMessage, setNewMessage] = useState("");
@@ -190,7 +190,7 @@ function MessageBox({ username}) {
                         </div>
                         <div className="chat-selected-messages">
                             {selectedChat.messages.map((message, index) => (
-                                <div key={index} className={`message ${message.author === 'User1' ? 'sent' : 'received'}`}>
+                                <div key={index} className={`message ${message.author === username ? 'sent' : 'received'}`}>
                                     <p>{message.text}</p>
                                     <span>{message.date}</span>
                                 </div>
