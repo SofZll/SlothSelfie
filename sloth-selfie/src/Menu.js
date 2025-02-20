@@ -11,14 +11,10 @@ import iconNote from './media/notesDark.svg';
 import iconProject from './media/projectsDark.svg';
 import { StyleContext } from './StyleContext';
 
-const Menu = () => {
+const Menu = ({ profileData }) => {
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const [isHomeActive, setIsHomeActive] = useState(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
-    const [profileData, setProfileData] = useState({
-        username: '',
-        profile_image: ''
-    });
 
     const handleStateChange = (state) => {
         setIsOpen(state.isOpen);
@@ -27,44 +23,6 @@ const Menu = () => {
     const closeMenu = () => {
         setIsOpen(false);
     };
-
-    // Since the image is stored a Buffer we need to convert it to base64
-    let base64Image = '';
-    const bufferToBase64 = (buffer) => {
-        const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
-        return btoa(binary);
-    };
-  
-    useEffect(() => {
-        const fetchProfileData = async () => {
-            try {
-                const response = await fetch(`http://localhost:8000/api/user/profile`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-
-                const data = await response.json();
-
-                if (data.success && data.user) {
-                    if (data.user.image?.data?.data) {
-                        const buffer = data.user.image.data.data;
-                        base64Image = `data:${data.user.image.contentType};base64,${bufferToBase64(buffer)}`;
-                    }
-
-                    setProfileData({
-                        username: data.user.username || '',
-                        profile_image: base64Image
-                    });
-
-                    console.log('Profile data:', data.user);
-                }
-            } catch (error) {
-                console.error('Error fetching profile data:', error);
-            }
-        };
-
-        fetchProfileData();
-    }, []); 
 
     useEffect(() => {
         setIsHomeActive(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
