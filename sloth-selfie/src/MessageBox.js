@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import './css/MessageBox.css';
 import { useMediaQuery } from 'react-responsive';
 import Swal from 'sweetalert2';
+import avatar from './media/avatar.svg'
 
 function MessageBox({ username }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +12,7 @@ function MessageBox({ username }) {
         {
             author: {
                 username: 'User1',
-                image: 'https://via.placeholder.com/150'
+                image: avatar
             },
             messages: [
                 {
@@ -25,7 +26,7 @@ function MessageBox({ username }) {
                     date: '12:01'
                 },
                 {   
-                    author: 'User2',
+                    author: 'Kmoon',
                     text: 'Hey',
                     date: '12:02'
                 },
@@ -50,7 +51,11 @@ function MessageBox({ username }) {
                     date: '12:02'
                 }
             ],
-            lastMessage: 'Hello'
+            lastMessage: {
+                author: 'User2',
+                text: 'Hi',
+                date: '12:01'
+            }
         },
         {
             author: {
@@ -74,7 +79,11 @@ function MessageBox({ username }) {
                     date: '12:02'
                 }
             ],
-            lastMessage: 'Hi'
+            lastMessage: {
+                author: 'User2',
+                text: 'Hi',
+                date: '12:55'
+            }
         },
         {
             author: {
@@ -98,7 +107,11 @@ function MessageBox({ username }) {
                     date: '12:02'
                 }
             ],
-            lastMessage: 'Hey'
+            lastMessage: {
+                author: 'User2',
+                text: 'Hi',
+                date: '12:01'
+            }
         },
         {
             author: {
@@ -122,7 +135,11 @@ function MessageBox({ username }) {
                     date: '12:02'
                 }
             ],
-            lastMessage: 'Hey'
+            lastMessage: {
+                author: 'User2',
+                text: 'Hi',
+                date: '12:01'
+            }
         },
         {
             author: {
@@ -130,7 +147,11 @@ function MessageBox({ username }) {
                 image: 'https://via.placeholder.com/150'
             },
             messages: [],
-            lastMessage: 'Hey'
+            lastMessage: {
+                author: 'User2',
+                text: 'Hi',
+                date: '12:01'
+            }
         }
     ]);
     const messagesEndRef = useRef(null);
@@ -153,12 +174,16 @@ function MessageBox({ username }) {
                 messages: [
                     ...selectedChat.messages,
                     { 
-                        author: {username}, 
+                        author: username, 
                         text: newMessage, 
                         date: new Date()
                     }
                 ],
-                lastMessage: newMessage
+                lastMessage: {
+                    author: username,
+                    text: newMessage,
+                    date: new Date()
+                }
             };
 
             setChat(chat.map(chat => chat === selectedChat ? updateChat : chat));
@@ -178,16 +203,23 @@ function MessageBox({ username }) {
     return (
         <div className="message-container">
             <button onClick={() => setIsOpen(!isOpen)} className="message-button">
-                Messaggi
+                {selectedChat ? (
+                    <div className="chat-selected-header">
+                        <span onClick={() => handleChatClick(null)}>Back</span>
+                        <div className="chat-profile">
+                            <img src={selectedChat.author.image} alt="profile" />
+                            <div className="online-status"></div>
+                        </div>
+                        <div className="chat-content">
+                            <h6>{selectedChat.author.username}</h6>
+                            <span>status</span>
+                        </div>
+                    </div>
+                ) : <p>Messaggi</p>}
             </button>
             <div className={`message-box ${isOpen ? 'open' : ''}`}>
                 {selectedChat ? (
                     <div className="chat-selected">
-                        <div className="chat-selected-header">
-                            <span onClick={() => handleChatClick(null)}>Back</span>
-                            <img src={selectedChat.author.image} alt="profile" />
-                            <h6>{selectedChat.author.username}</h6>
-                        </div>
                         <div className="chat-selected-messages">
                             {selectedChat.messages.map((message, index) => (
                                 <div key={index} className={`message ${message.author === username ? 'sent' : 'received'}`}>
@@ -204,13 +236,22 @@ function MessageBox({ username }) {
                     </div>
                 ) : (
                     <div className="chat-all">
+                        <div className="chat-new">
+                            + nuova chat
+                        </div>
                         {chat.map((chat, index) => (
                             <div key={index} className="chat" onClick={() => handleChatClick(chat)}>
                                 <div className="chat-container">
-                                    <img src={chat.author.image} alt="profile" />
+                                    <div className="chat-profile">
+                                        <img src={chat.author.image} alt="profile" />
+                                        <div className="online-status online-status-big"></div>
+                                    </div>
                                     <div className="chat-content">
-                                        <span>{chat.author.username}</span>
-                                        <p>{chat.lastMessage}</p>
+                                        <div className="chat-header">
+                                            <span className="chat-username">{chat.author.username}</span>
+                                            <span className="chat-date">{chat.lastMessage.date}</span>
+                                        </div>
+                                        <p>{chat.lastMessage.text}</p>
                                     </div>
                                 </div>
                             </div>
