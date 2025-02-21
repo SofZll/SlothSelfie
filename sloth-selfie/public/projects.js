@@ -1,7 +1,8 @@
-//TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO
+//TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiusta visualizzazione con username
 //TODO: COME PASSO LO USER LOGGATO? LUI è L'OWNER DEL PROGETTO
-//TODO: Aggiungi le due modalità di visualizzazione, bottoni lista e gannt
+//TODO: Aggiungi la modalità di visualizzazione gannt
 //TODO: Edit e start di progetto
+//TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO
 
 //GET, function to load projects from the server
 function loadProjects() {
@@ -14,7 +15,7 @@ function loadProjects() {
             projects.forEach(project => {
                 const li = document.createElement("li");
                 li.className = "list-group-item";
-                li.innerHTML = `<strong>${project.title}</strong>
+                li.innerHTML = `<strong>${project.title}</strong>- Owner: ${project.owner}
                 <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
                 <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
                 <button class="btn btn-success btn-sm ml-2" onclick="startProject('${project._id}')">Start Project</button>
@@ -218,6 +219,9 @@ function deleteProject(projectId) {
         .then(response => {
             if (response.ok) {
                 alert("Project deleted successfully!");
+                //close the project view if the project is deleted
+                document.getElementById("project-view-container").style.display = "none";
+                document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close button
                 loadProjects(); // Reload the projects list after deletion
             } else {
                 alert("Error while deleting the project.");
@@ -227,13 +231,16 @@ function deleteProject(projectId) {
     }
 }
 
-// Function to view the project as a list   //TODO: DA SISTEMARE, LATO BACK NON RECUPERA LE SOTTOFASI E LATO FRONT DA RIVEDERE
+// Function to view the project as a list
 function viewAsList(projectId) {
     fetch(`http://localhost:8000/api/project/${projectId}`)
         .then(response => response.json())
         .then(project => {
             const projectViewContainer = document.getElementById("project-view-container");
             projectViewContainer.innerHTML = ""; // clear the container
+            projectViewContainer.style.display = "block"; // show the container
+            const closeButton = document.getElementById("closeProjectViewBtn");
+            closeButton.style.display = "inline-block"; // show the close button
 
             //we log the project to see the structure
             console.log("Project to view:", project);
@@ -242,6 +249,11 @@ function viewAsList(projectId) {
             const projectTitle = document.createElement("h3");
             projectTitle.innerHTML = `Project: ${project.title}`;
             projectViewContainer.appendChild(projectTitle);
+
+            // Description of the project
+            const projectDescription = document.createElement("h4");
+            projectDescription.innerHTML = `Description: ${project.description}`;
+            projectViewContainer.appendChild(projectDescription);
 
             // Options to sort the activities
             const sortOptions = document.createElement("div");
@@ -264,20 +276,26 @@ function viewAsList(projectId) {
                 phaseDiv.innerHTML = `<h4>Phase: ${phase.title}</h4>`;
                 listContainer.appendChild(phaseDiv);
 
-                // Container for the activities of the phase (default: date sorting)
-                const activitiesList = document.createElement("ul");
-                activitiesList.id = `activities-${phase._id}`;
-                phaseDiv.appendChild(activitiesList);
+                //list of activities of each phase (default: date sorting)
+                
+                const activitiesListphase = document.createElement("ul");
+                activitiesListphase.id = `activities-${phase._id}`;
+                activitiesListphase.innerHTML = `<h5>Activities of the Phase:</h5>`;
+                phaseDiv.appendChild(activitiesListphase);
 
+                sortActivities(phase, "date");
+                
 
+                // Container for the subphases
                 phase.subphases.forEach(subphase => {
                     const subphaseDiv = document.createElement("div");
                     subphaseDiv.innerHTML = `<h5>Subphase: ${subphase.title}</h5>`;
                     phaseDiv.appendChild(subphaseDiv);
 
-                    // Container for the activities (default: date sorting)
+                    // Container for the activities of the subphases
                     const activitiesList = document.createElement("ul");
                     activitiesList.id = `activities-${subphase._id}`;
+                    activitiesList.innerHTML = `<h5>Activities of the Subphase:</h5>`;
                     subphaseDiv.appendChild(activitiesList);
 
                     sortActivities(subphase, "date");
@@ -297,13 +315,13 @@ function viewAsList(projectId) {
         .catch(error => console.error("Error while fetching project:", error));
 }
 
-// Funzione per ordinare e aggiornare la lista delle attività di una sottofase
-function sortActivities(subphase, criteria) {
-    const activitiesList = document.getElementById(`activities-${subphase._id}`);
-    activitiesList.innerHTML = ""; // Pulisce la lista
+// Function to sort the activities of a phase/subphase based on the selected criteria //TODO: MEMBER SORTING
+function sortActivities(phase_subphase, criteria) {
+    const activitiesList = document.getElementById(`activities-${phase_subphase._id}`);
+    activitiesList.innerHTML = ""; // clears the list
 
-    // Ordina le attività in base al criterio selezionato
-    let sortedActivities = subphase.activities;
+    // orders the activities based on the selected criteria
+    let sortedActivities = phase_subphase.activities;
     if (criteria === "member") {
         sortedActivities = sortedActivities.sort((a, b) => {
             return a.sharedWith[0].localeCompare(b.sharedWith[0]);
@@ -314,13 +332,46 @@ function sortActivities(subphase, criteria) {
         });
     }
 
-    // Aggiunge le attività ordinate alla lista
+    // Adds the sorted activities to the list
     sortedActivities.forEach(activity => {
         const activityItem = document.createElement("li");
         activityItem.innerHTML = `<strong>${activity.title}</strong> - Deadline: ${activity.deadline} - Member: ${activity.sharedWith[0]}`;
         activitiesList.appendChild(activityItem);
     });
 }
+
+// Function to view the project as a Gantt chart //TODO
+function viewAsGannt(projectId) {
+    fetch(`http://localhost:8000/api/project/${projectId}`)
+        .then(response => response.json())
+        .then(project => {
+            const projectViewContainer = document.getElementById("project-view-container");
+            projectViewContainer.innerHTML = ""; // clear the container
+            projectViewContainer.style.display = "block"; // show the container
+            const closeButton = document.getElementById("closeProjectViewBtn");
+            closeButton.style.display = "inline-block"; // show the close button
+
+            // Title of the project
+            const projectTitle = document.createElement("h3");
+            projectTitle.innerHTML = `Project: ${project.title}`;
+            projectViewContainer.appendChild(projectTitle);
+
+            // Description of the project
+            const projectDescription = document.createElement("h4");
+            projectDescription.innerHTML = `Description: ${project.description}`;
+            projectViewContainer.appendChild(projectDescription);
+
+            // Container for the Gantt chart
+            const ganttContainer = document.createElement("div");
+            ganttContainer.id = "gantt-container";
+            projectViewContainer.appendChild(ganttContainer);
+
+            // Create the Gantt chart
+            createGantt(project);
+        })
+        .catch(error => console.error("Error while fetching project:", error));
+}
+
 
 //listeners
 
@@ -340,6 +391,7 @@ document.getElementById("projectForm").addEventListener("keydown", function(even
     }
 });
 
+
 //button to toggle the form to add a project
 document.getElementById("ToggleFormBtn").addEventListener("click", function () {
     let content = document.getElementById("projectForm");
@@ -352,6 +404,13 @@ document.getElementById("ToggleFormBtn").addEventListener("click", function () {
         this.textContent = "+ Add a Project";
     }
 });
+
+//button to close the project view
+document.getElementById("closeProjectViewBtn").addEventListener("click", function () {
+    document.getElementById("project-view-container").style.display = "none";
+    this.style.display = "none"; // Nasconde il bottone stesso
+});
+
 
  // button to go back to home (React)
  document.getElementById("backToHome").addEventListener("click", function () {

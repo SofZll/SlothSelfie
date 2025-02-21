@@ -24,25 +24,21 @@ const getProjectById = async (req, res) => {
             return res.status(404).json({ message: 'Project not found' });
         }
         //now we get the phases of the project
-        project.phases = await Phase.find({ project: id });
-        console.log("project.phases:", project.phases);
+        project.phases = await Phase.find({ project: id })
+        .populate("subphases"); // Populate subphases of the phase
 
-         //and the activities of each phase
+        //now we populate the activities of each phase
         for (const phase of project.phases) {
-            phase.activities = await Activity.find({ project: id, phase: phase._id });
-            console.log("phase.activities:", phase.activities);
+            phase.activities = await Activity.find({ phase: phase._id });
+        }
 
-            //and the subphases of each phase
-            phase.subphases = await Subphase.find({ project: id, phase: phase._id });
-            console.log("phase.subphases:", phase.subphases);
-
-            //and the activities of each subphase
+         // Populates activities of each subphase
+        for (const phase of project.phases) {
             for (const subphase of phase.subphases) {
-                subphase.activities = await Activity.find({ project: id, subphase: subphase._id });
-                console.log("subphase.activities:", subphase.activities);
+                subphase.activities = await Activity.find({ subphase: subphase._id });
             }
         }
-        
+
         res.status(200).json(project);
     } catch (error) {
         console.error('Error fetching project by id:', error);
