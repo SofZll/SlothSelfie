@@ -7,7 +7,10 @@ const User = require("../models/userModel");
 //GET all projects
 const getAllProjects = async (req, res) => {
     try {
-        const projects = await Project.find();
+        const projects = await Project.find()
+        .populate("owner", "username")
+        .populate("members", "username"); 
+
         res.status(200).json(projects);
     } catch (error) {
         console.error('Error fetching projects:', error);
@@ -19,7 +22,10 @@ const getAllProjects = async (req, res) => {
 const getProjectById = async (req, res) => {
     const { id } = req.params;
     try {
-        const project = await Project.findById(id);
+        const project = await Project.findById(id)
+        .populate("owner", "username")
+        .populate("members", "username");
+        
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });
         }
@@ -29,13 +35,15 @@ const getProjectById = async (req, res) => {
 
         //now we populate the activities of each phase
         for (const phase of project.phases) {
-            phase.activities = await Activity.find({ phase: phase._id });
+            phase.activities = await Activity.find({ phase: phase._id })
+            .populate("sharedWith", "username");
         }
 
          // Populates activities of each subphase
         for (const phase of project.phases) {
             for (const subphase of phase.subphases) {
-                subphase.activities = await Activity.find({ subphase: subphase._id });
+                subphase.activities = await Activity.find({ subphase: subphase._id })
+                .populate("sharedWith", "username");
             }
         }
 
