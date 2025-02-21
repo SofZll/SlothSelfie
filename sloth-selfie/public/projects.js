@@ -1,8 +1,8 @@
-//TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiusta visualizzazione con username
+//TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiungi controlli relativi
 //TODO: COME PASSO LO USER LOGGATO? LUI è L'OWNER DEL PROGETTO
 //TODO: Aggiungi la modalità di visualizzazione gannt
 //TODO: Edit e start di progetto
-//TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO
+//TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
 
 //GET, function to load projects from the server
 function loadProjects() {
@@ -15,7 +15,7 @@ function loadProjects() {
             projects.forEach(project => {
                 const li = document.createElement("li");
                 li.className = "list-group-item";
-                li.innerHTML = `<strong>${project.title}</strong>- Owner: ${project.owner}
+                li.innerHTML = `<strong>${project.title}</strong>- Owner: ${project.owner.username}- Description: ${project.description}- Members: ${project.members.map(m => m.username).join(", ")}<br>
                 <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
                 <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
                 <button class="btn btn-success btn-sm ml-2" onclick="startProject('${project._id}')">Start Project</button>
@@ -250,6 +250,11 @@ function viewAsList(projectId) {
             projectTitle.innerHTML = `Project: ${project.title}`;
             projectViewContainer.appendChild(projectTitle);
 
+            // Owner of the project
+            const projectOwner = document.createElement("h4");
+            projectOwner.innerHTML = `Owner: ${project.owner.username}`;
+            projectViewContainer.appendChild(projectOwner);
+
             // Description of the project
             const projectDescription = document.createElement("h4");
             projectDescription.innerHTML = `Description: ${project.description}`;
@@ -335,7 +340,12 @@ function sortActivities(phase_subphase, criteria) {
     // Adds the sorted activities to the list
     sortedActivities.forEach(activity => {
         const activityItem = document.createElement("li");
-        activityItem.innerHTML = `<strong>${activity.title}</strong> - Deadline: ${activity.deadline} - Member: ${activity.sharedWith[0]}`;
+
+        // Create a string with the usernames of the members
+        const sharedWithUsernames = activity.sharedWith.map(user => user.username).join(", ");
+        const startDate = new Date(activity.startDate).toLocaleDateString();
+        const deadline = new Date(activity.deadline).toLocaleDateString();
+        activityItem.innerHTML = `<strong>${activity.title}</strong> -  -Start date: ${startDate} - Deadline: ${deadline} - Members: ${sharedWithUsernames}`;
         activitiesList.appendChild(activityItem);
     });
 }
