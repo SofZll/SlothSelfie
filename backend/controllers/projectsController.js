@@ -73,9 +73,6 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId) => {
     const activityIds = await Promise.all(
         phase.activities.map(async (activity) => {
 
-            console.log("activity.type:", activity.type);
-            console.log("activity.sharedWith:", activity.sharedWith);
-
             // Find the users to share the activity with
             const sharedWithUserIds = await User.find({ username: { $in: activity.sharedWith } })
 
@@ -88,7 +85,6 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId) => {
                 sharedWith: sharedWithUserIds,
                 startDate: activity.startDate,
                 deadline: activity.deadline,
-                type: activity.type,
                 user: ownerId
             });
 

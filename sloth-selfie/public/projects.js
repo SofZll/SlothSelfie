@@ -55,7 +55,6 @@ function saveProject(event) {
             phase.activities.push({
                 title: activityDiv.querySelector(".activity-name").value,
                 sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
-                type: activityDiv.querySelector(".activity-type").value,
                 startDate: activityDiv.querySelector(".activity-start").value,
                 deadline: activityDiv.querySelector(".activity-end").value
             });
@@ -72,7 +71,6 @@ function saveProject(event) {
                 subphase.activities.push({
                     title: activityDiv.querySelector(".activity-name").value,
                     sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
-                    type: activityDiv.querySelector(".activity-type").value,
                     startDate: activityDiv.querySelector(".activity-start").value,
                     deadline: activityDiv.querySelector(".activity-end").value
                 });
@@ -166,11 +164,6 @@ function addActivity(button, type) {
         <input type="text" class="form-control activity-name">
         <label>Members (comma separated):</label>
         <input type="text" class="form-control activity-actors">
-        <label>Type:</label>
-        <select class="form-select activity-type">
-            <option value="Sequential">Sequential</option>
-            <option value="Parallel">Parallel</option>
-        </select>
         <label>Start date:</label>
         <input type="date" class="form-control activity-start">
         <label>Deadline:</label>
@@ -265,11 +258,16 @@ function viewAsList(projectId) {
             sortOptions.innerHTML = `
                 <label for="sortSelect">Sort activities by: </label>
                 <select id="sortSelect" class="form-select w-auto d-inline">
-                    <option value="date">Date (Default)</option>
+                    <option value="date">Closest deadline (Default)</option>
                     <option value="member">Member</option>
+                </select>
+                <select id="memberSelect" class="form-select w-auto" style="display: none;">
+                    <option value="">Select a member</option>
                 </select>
             `;
             projectViewContainer.appendChild(sortOptions);
+
+            var typeSelect = "date"; //default sorting
 
             // Container for phases and subphases
             const listContainer = document.createElement("div");
@@ -282,13 +280,12 @@ function viewAsList(projectId) {
                 listContainer.appendChild(phaseDiv);
 
                 //list of activities of each phase (default: date sorting)
-                
                 const activitiesListphase = document.createElement("ul");
                 activitiesListphase.id = `activities-${phase._id}`;
                 activitiesListphase.innerHTML = `<h5>Activities of the Phase:</h5>`;
                 phaseDiv.appendChild(activitiesListphase);
 
-                sortActivities(phase, "date");
+                sortActivities(phase, typeSelect);
                 
 
                 // Container for the subphases
@@ -303,14 +300,46 @@ function viewAsList(projectId) {
                     activitiesList.innerHTML = `<h5>Activities of the Subphase:</h5>`;
                     subphaseDiv.appendChild(activitiesList);
 
-                    sortActivities(subphase, "date");
+                    sortActivities(subphase, typeSelect);
                 });
             });
 
             // Event listener to sort the activities
+            //if the user selects the member sorting, we show the select with the members
             document.getElementById("sortSelect").addEventListener("change", (event) => {
                 const selectedCriteria = event.target.value;
+                const memberSelect = document.getElementById("memberSelect");
+            
+                if (selectedCriteria === "member") {
+                    typeSelect = "member";
+                    memberSelect.style.display = "inline";
+                    memberSelect.innerHTML = `<option value="">Select a member</option>`;
+            
+                    const members = project.members.map(m => m.username);
+                    members.forEach(member => {
+                        const option = document.createElement("option");
+                        option.value = member;
+                        option.textContent = member;
+                        memberSelect.appendChild(option);
+                    });
+            
+                    // Reorder the activities when the sorting criteria changes
+                    memberSelect.addEventListener("change", () => {
+                        project.phases.forEach(phase => {
+                            sortActivities(phase, "member");
+                            phase.subphases.forEach(subphase => {
+                                sortActivities(subphase, "member");
+                            });
+                        });
+                    });
+                } else {
+                    typeSelect = "date";
+                    memberSelect.style.display = "none";
+                }
+            
+                // Reorder the activities when the sorting criteria changes
                 project.phases.forEach(phase => {
+                    sortActivities(phase, selectedCriteria);
                     phase.subphases.forEach(subphase => {
                         sortActivities(subphase, selectedCriteria);
                     });
@@ -320,7 +349,7 @@ function viewAsList(projectId) {
         .catch(error => console.error("Error while fetching project:", error));
 }
 
-// Function to sort the activities of a phase/subphase based on the selected criteria //TODO: MEMBER SORTING
+// Function to sort the activities of a phase/subphase based on the selected criteria
 function sortActivities(phase_subphase, criteria) {
     const activitiesList = document.getElementById(`activities-${phase_subphase._id}`);
     activitiesList.innerHTML = ""; // clears the list
@@ -328,9 +357,20 @@ function sortActivities(phase_subphase, criteria) {
     // orders the activities based on the selected criteria
     let sortedActivities = phase_subphase.activities;
     if (criteria === "member") {
-        sortedActivities = sortedActivities.sort((a, b) => {
-            return a.sharedWith[0].localeCompare(b.sharedWith[0]);
+        //we get the member selected
+        const member = document.getElementById("memberSelect").value;
+        sortedActivities.sort((a, b) => {
+            const aHasMember = a.sharedWith.some(user => user.username === member);
+            const bHasMember = b.sharedWith.some(user => user.username === member);
+            
+            //if 'a' has the member and 'b' doesn't, 'a' comes first
+            if (aHasMember && !bHasMember) return -1;
+            //if 'b' has the member and 'a' doesn't, 'b' comes first
+            if (!aHasMember && bHasMember) return 1;
+            // If both have or don't have the member, order by deadline
+            return a.deadline.localeCompare(b.deadline);
         });
+
     } else {
         sortedActivities = sortedActivities.sort((a, b) => {
             return a.deadline.localeCompare(b.deadline);
