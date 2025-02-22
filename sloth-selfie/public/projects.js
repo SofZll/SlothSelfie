@@ -1,7 +1,8 @@
 //TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiungi controlli relativi
 //TODO: COME PASSO LO USER LOGGATO? LUI è L'OWNER DEL PROGETTO
 //TODO: Aggiungi la modalità di visualizzazione gannt
-//TODO: Edit e start di progetto
+//TODO: start di progetto
+//TODO: fare parte back e front per il salvataggio di edit (saveEdtProject)
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
 
 //GET, function to load projects from the server
@@ -128,6 +129,8 @@ function addPhase() {
         <button type="button" class="btn btn-danger mt-2" onclick="removeElement(this)">Remove Fase</button>
     `;
     document.getElementById("phasesContainer").appendChild(phaseDiv);
+
+    return phaseDiv; //used for the edit function
 }
 
 // Add a new subphase to the project
@@ -222,6 +225,76 @@ function deleteProject(projectId) {
         })
         .catch(error => console.error("Error deleting project:", error));
     }
+}
+
+//function to fill the form and edit a project
+function editProject(projectId) {
+    fetch(`http://localhost:8000/api/project/${projectId}`)
+        .then(response => response.json())
+        .then(project => {
+
+            console.log("Project to edit:", project);
+
+            // fill the form with the project data
+            document.getElementById("projectName").value = project.title;
+            document.getElementById("projectOwner").value = project.owner.username;
+            document.getElementById("projectDesc").value = project.description;
+            document.getElementById("projectActors").value = project.members.map(m => m.username).join(", ");
+
+            // reset the phases container and reload the phases
+            const phasesContainer = document.getElementById("phasesContainer");
+            phasesContainer.innerHTML = "<h4>Phases</h4>";
+            project.phases.forEach(phase => {
+                let phaseElement = addPhase(phase);
+                //fill the name of each phase
+                phaseElement.querySelector(".phase-name").value = phase.title;
+                //fill the activities of each phase
+                phase.activities.forEach(activity => {
+                    addActivity(phaseElement.querySelector(".btn-warning"), "phase");
+                    const activityDiv = phaseElement.querySelector(".activities").lastElementChild;
+                    activityDiv.querySelector(".activity-name").value = activity.title;
+                    activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
+                    activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
+                    activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);;
+                });
+
+                //fill the subphases of each phase
+                phase.subphases.forEach(subphase => {
+                    addSubPhase(phaseElement.querySelector(".btn-info"));
+                    const subphaseDiv = phaseElement.querySelector(".subphases").lastElementChild;
+                    subphaseDiv.querySelector(".subphase-name").value = subphase.title;
+                    subphase.activities.forEach(activity => {
+                        addActivity(subphaseDiv.querySelector(".btn-warning"), "subphase");
+                        const activityDiv = subphaseDiv.querySelector(".subphase-activities").lastElementChild;
+                        activityDiv.querySelector(".activity-name").value = activity.title;
+                        activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
+                        activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
+                        activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);;
+                    });
+                }
+                );
+
+            });
+
+            // set the project id in the form
+            document.getElementById("editingProjectId").value = projectId;
+
+            // change the form title and button text
+            document.getElementById("formTitle").textContent = "Edit Project:";
+            document.getElementById("createSave").textContent = "Save Project";
+
+            // show the form
+            document.getElementById("projectForm").style.display = "block";
+            document.getElementById("ToggleFormBtn").textContent = "Editing Project, click here to close";
+        })
+        .catch(error => console.error("Error loading project for edit:", error));
+}
+
+//function to correctly format the date for the input
+function formatDateForInput(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0]; //"YYYY-MM-DD"
 }
 
 // Function to view the project as a list
@@ -423,6 +496,16 @@ function viewAsGannt(projectId) {
 }
 
 
+//function to reset the form
+function resetForm() {
+    document.getElementById("projectForm").reset();
+    document.getElementById("editingProjectId").value = "";
+    document.getElementById("createSave").textContent = "Create project";
+    document.getElementById("formTitle").textContent = "Create a new project:";
+    document.getElementById("projectForm").style.display = "none"; 
+    document.getElementById("ToggleFormBtn").textContent = "+ Add a Project";
+}
+
 //listeners
 
 //load projects when the page is loaded
@@ -448,17 +531,59 @@ document.getElementById("ToggleFormBtn").addEventListener("click", function () {
 
     if (content.style.display === "none" || content.style.display === "") {
         content.style.display = "block";
-        this.textContent = "Close";
+        this.textContent = "Close"; 
     } else {
         content.style.display = "none";
         this.textContent = "+ Add a Project";
+        //remove the phases and subphases form when the form is closed
+        document.getElementById("phasesContainer").innerHTML = "<h4>Phases</h4>";
+        //reset the form
+        resetForm();
     }
+});
+
+
+//Function to save the edited project //TODO TESTA E SPEZZA IL LISTENER DALLA FUNZIONE saveEditProject
+document.getElementById("projectForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const projectId = document.getElementById("editingProjectId").value;
+    const isEditing = projectId !== ""; 
+
+    const project = {
+        title: document.getElementById("projectName").value,
+        owner: document.getElementById("projectOwner").value,
+        description: document.getElementById("projectDesc").value,
+        members: document.getElementById("projectActors").value.split(",").map(a => a.trim()),
+        phases: getPhases() // Get the phases from the form
+    };
+
+    const url = isEditing ? `http://localhost:8000/api/project/${projectId}` : `http://localhost:8000/api/project`;
+    const method = isEditing ? "PUT" : "POST";
+
+    fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        body: JSON.stringify(project),
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(isEditing ? "Project updated successfully!" : "Project saved successfully!");
+
+        // Reset form
+        resetForm();
+        
+        // reload the projects list
+        loadProjects();
+    })
+    .catch(error => console.error("Error saving project:", error));
 });
 
 //button to close the project view
 document.getElementById("closeProjectViewBtn").addEventListener("click", function () {
     document.getElementById("project-view-container").style.display = "none";
-    this.style.display = "none"; // Nasconde il bottone stesso
+    this.style.display = "none"; // Hides the close button
 });
 
 
