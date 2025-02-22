@@ -49,13 +49,27 @@
     .message-box.open {
         display: block;
         max-height: 300px;
-        height: 300px;
     }
 
     .chat-all {
         cursor: pointer;
         max-height: 300px;
-        overflow: scroll;
+        overflow: auto;
+    }
+
+    .chat-search {
+        display: flex;
+        flex-direction: row;
+        padding: 5px 10px;
+    }
+
+    .new-chat-button {
+        background-color: transparent;
+        color: #000;
+        border: none;
+        padding: 0 15px;
+        margin: 5px 0;
+        cursor: pointer;
     }
 
     .chat{
