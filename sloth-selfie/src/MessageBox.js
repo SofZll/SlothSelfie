@@ -115,7 +115,7 @@ function MessageBox({ username }) {
         },
         {
             author: {
-                username: 'User1',
+                username: 'User5',
                 image: 'https://via.placeholder.com/150'
             },
             messages: [
@@ -154,6 +154,7 @@ function MessageBox({ username }) {
             }
         }
     ]);
+    const [searchChat, setSearchChat] = useState(chat);
     const messagesEndRef = useRef(null);
     const isDesktop = useMediaQuery({ minWidth: 769 });
 
@@ -190,6 +191,23 @@ function MessageBox({ username }) {
             setSelectedChat(updateChat);
             setNewMessage("");
         }
+    }
+
+    const handleSearch = (e) => {
+        const search = e.target.value.toLowerCase();
+        const filteredChat = chat.filter(chat => chat.author.username.toLowerCase().includes(search));
+        setSearchChat(filteredChat);
+        if (search === "") {
+            setSearchChat(chat);
+        }
+    }
+
+    const handleNewChat = () => {
+        Swal.fire({
+            icon: 'info',
+            title: 'Nuovo messaggio',
+            text: 'Funzionalità non ancora implementata'
+        });
     }
 
     useEffect(() => {
@@ -236,26 +254,32 @@ function MessageBox({ username }) {
                     </div>
                 ) : (
                     <div className="chat-all">
-                        <div className="chat-new">
-                            + nuova chat
+                        <div className="chat-search">
+                            {/* search bar for chat*/}
+                            <input type="text" placeholder="Cerca" onChange={handleSearch}/>
+                            <button className="new-chat-button" onClick={handleNewChat}>+</button>
                         </div>
-                        {chat.map((chat, index) => (
-                            <div key={index} className="chat" onClick={() => handleChatClick(chat)}>
-                                <div className="chat-container">
-                                    <div className="chat-profile">
-                                        <img src={chat.author.image} alt="profile" />
-                                        <div className="online-status online-status-big"></div>
-                                    </div>
-                                    <div className="chat-content">
-                                        <div className="chat-header">
-                                            <span className="chat-username">{chat.author.username}</span>
-                                            <span className="chat-date">{chat.lastMessage.date}</span>
+                        {searchChat.length > 0 ? (
+                            searchChat.map((chat, index) => (
+                                <div key={index} className="chat" onClick={() => handleChatClick(chat)}>
+                                    <div className="chat-container">
+                                        <div className="chat-profile">
+                                            <img src={chat.author.image} alt="profile" />
+                                            <div className="online-status online-status-big"></div>
                                         </div>
-                                        <p>{chat.lastMessage.text}</p>
+                                        <div className="chat-content">
+                                            <div className="chat-header">
+                                                <span className="chat-username">{chat.author.username}</span>
+                                                <span className="chat-date">{chat.lastMessage.date}</span>
+                                            </div>
+                                            <p>{chat.lastMessage.text}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            <p>Nessun messaggio</p>
+                        )}
                     </div>
                 )}
             </div>
