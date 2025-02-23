@@ -1,39 +1,70 @@
 //TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiungi controlli relativi
-//TODO: COME PASSO LO USER LOGGATO? LUI è L'OWNER DEL PROGETTO
 //TODO: Aggiungi la modalità di visualizzazione gannt
 //TODO: start di progetto
 //TODO: fare parte back e front per il salvataggio di edit (saveEdtProject)
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
+//TODO: funzioni asincrone anche nei listener!! in delete e viewAsList e getphases eccecc
+
+// Function to get the logged user
+async function getLoggedUser() {
+    try {
+        const response = await fetch("http://localhost:8000/api/user/profile", {
+            method: "GET",
+            credentials: "include",
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.user) {
+            console.log("Logged user:", data.user.username);
+            return data.user.username; // resolve with the username of the logged user
+        } else {
+            console.warn("No user logged in.");
+            return null; // resolve with null if no user is logged in
+        }
+    } catch (error) {
+        console.error("Error while getting logged user:", error);
+        throw error; // reject with the error
+    }
+}
 
 //GET, function to load projects from the server
-function loadProjects() {
-    fetch(`http://localhost:8000/api/projects`)
-        .then(response => response.json())
-        .then(projects => {
-            const list = document.getElementById("projects-list");
-            list.innerHTML = ""; // clear the list before loading the projects
+async function loadProjects() {
+    try {
+        const response = await fetch(`http://localhost:8000/api/projects`);
+        
+        if (!response.ok) {
+            throw new Error('Error fetching projects');
+        }
 
-            projects.forEach(project => {
-                const li = document.createElement("li");
-                li.className = "list-group-item";
-                li.innerHTML = `<strong>${project.title}</strong>- Owner: ${project.owner.username}- Description: ${project.description}- Members: ${project.members.map(m => m.username).join(", ")}<br>
+        const projects = await response.json();
+        
+        const list = document.getElementById("projects-list");
+        list.innerHTML = ""; // clear the list before loading the projects
+
+        projects.forEach(project => {
+            const li = document.createElement("li");
+            li.className = "list-group-item";
+            li.innerHTML = `
+                <strong>${project.title}</strong> - Owner: ${project.owner.username} - Description: ${project.description} - Members: ${project.members.map(m => m.username).join(", ")}<br>
                 <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
                 <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
                 <button class="btn btn-success btn-sm ml-2" onclick="startProject('${project._id}')">Start Project</button>
                 <button class="btn btn-outline-primary btn-sm view-list" onclick="viewAsList('${project._id}')">View as List</button>
                 <button class="btn btn-outline-secondary btn-sm view-gantt" onclick="viewAsGannt('${project._id}')">View as Gantt</button>
-                `;
-                list.appendChild(li);
-            });
+            `;
+            list.appendChild(li);
+        });
 
-            console.log("Projects loaded successfully:", projects);
-        })
-        .catch(error => console.error("Error while loading projects:", error));
+        console.log("Projects loaded successfully:", projects);
+    } catch (error) {
+        console.error("Error while loading projects:", error);
+    }
 }
 
 
-// Save the project
-function saveProject(event) {
+// Function to save the project
+async function saveProject(event) {
     event.preventDefault();
 
     const project = {
@@ -86,27 +117,36 @@ function saveProject(event) {
     console.log("Project to save:", project);
 
     //POST, we save the project
-    fetch(`http://localhost:8000/api/project`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        credentials: 'include',
-        body: JSON.stringify(project),
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert("Project saved successfully!");
-        document.getElementById("projectForm").reset();
-        loadProjects(); // Reload the projects list
-    })
-    .catch(error => console.error("Error saving project:", error));
+    try {
+        const response = await fetch(`http://localhost:8000/api/project`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: 'include',
+            body: JSON.stringify(project),
+        });
 
-    document.getElementById("projectForm").reset();
+        const data = await response.json();
+        console.log("Server response:", data);
+
+        if (response.ok) {
+            alert("Project saved successfully!");
+            resetForm();
+            await loadProjects(); // Reload the projects list
+        } else {
+            console.error("Error saving project:", data.message);
+        }
+
+    } catch (error) {
+        console.error("Error saving project:", error);
+    }
+
     document.getElementById("phasesContainer").innerHTML = "";//we remove the phase and subphase empty form after saving
     document.getElementById("projectForm").style.display = "none"; // hides the form after saving
     document.getElementById("ToggleFormBtn").textContent = "+ Add a Project"; //the button text is changed to "Add a Project" after saving
-    loadProjects(); // Reload the projects list
+    resetForm();
+    await loadProjects(); // Reload the projects list
 }
 
 //functions to add phases, subphases and activities to the project form for the frontend
@@ -228,66 +268,85 @@ function deleteProject(projectId) {
 }
 
 //function to fill the form and edit a project
-function editProject(projectId) {
-    fetch(`http://localhost:8000/api/project/${projectId}`)
-        .then(response => response.json())
-        .then(project => {
+async function editProject(projectId) {
 
-            console.log("Project to edit:", project);
+    try {
+        // Get the logged user
+        const userLogged = await getLoggedUser();
+        
+        if (!userLogged) {
+            alert("No user is logged in!");
+            return;
+        }
+        
+        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const project = await response.json();
 
-            // fill the form with the project data
-            document.getElementById("projectName").value = project.title;
-            document.getElementById("projectOwner").value = project.owner.username;
-            document.getElementById("projectDesc").value = project.description;
-            document.getElementById("projectActors").value = project.members.map(m => m.username).join(", ");
+        console.log("Project to edit:", project);
 
-            // reset the phases container and reload the phases
-            const phasesContainer = document.getElementById("phasesContainer");
-            phasesContainer.innerHTML = "<h4>Phases</h4>";
-            project.phases.forEach(phase => {
-                let phaseElement = addPhase(phase);
-                //fill the name of each phase
-                phaseElement.querySelector(".phase-name").value = phase.title;
-                //fill the activities of each phase
-                phase.activities.forEach(activity => {
-                    addActivity(phaseElement.querySelector(".btn-warning"), "phase");
-                    const activityDiv = phaseElement.querySelector(".activities").lastElementChild;
+        // check if the logged user is the owner of the project
+        const owner = project.owner.username;
+
+        if (owner !== userLogged) {
+            alert("You can't edit this project, you are not the owner.");
+            return; // exit the function if the user is not the owner
+        }
+        
+        // fill the form with the project data
+        document.getElementById("projectName").value = project.title;
+        document.getElementById("projectOwner").value = project.owner.username;
+        document.getElementById("projectDesc").value = project.description;
+        document.getElementById("projectActors").value = project.members.map(m => m.username).join(", ");
+
+        // reset the phases container and reload the phases
+        const phasesContainer = document.getElementById("phasesContainer");
+        phasesContainer.innerHTML = "<h4>Phases</h4>";
+        project.phases.forEach(phase => {
+            let phaseElement = addPhase(phase);
+            //fill the name of each phase
+            phaseElement.querySelector(".phase-name").value = phase.title;
+            //fill the activities of each phase
+            phase.activities.forEach(activity => {
+                addActivity(phaseElement.querySelector(".btn-warning"), "phase");
+                const activityDiv = phaseElement.querySelector(".activities").lastElementChild;
+                activityDiv.querySelector(".activity-name").value = activity.title;
+                activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
+                activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
+                activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);;
+            });
+
+            //fill the subphases of each phase
+            phase.subphases.forEach(subphase => {
+                addSubPhase(phaseElement.querySelector(".btn-info"));
+                const subphaseDiv = phaseElement.querySelector(".subphases").lastElementChild;
+                subphaseDiv.querySelector(".subphase-name").value = subphase.title;
+                subphase.activities.forEach(activity => {
+                    addActivity(subphaseDiv.querySelector(".btn-warning"), "subphase");
+                    const activityDiv = subphaseDiv.querySelector(".subphase-activities").lastElementChild;
                     activityDiv.querySelector(".activity-name").value = activity.title;
                     activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
                     activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
                     activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);;
                 });
+            }
+            );
 
-                //fill the subphases of each phase
-                phase.subphases.forEach(subphase => {
-                    addSubPhase(phaseElement.querySelector(".btn-info"));
-                    const subphaseDiv = phaseElement.querySelector(".subphases").lastElementChild;
-                    subphaseDiv.querySelector(".subphase-name").value = subphase.title;
-                    subphase.activities.forEach(activity => {
-                        addActivity(subphaseDiv.querySelector(".btn-warning"), "subphase");
-                        const activityDiv = subphaseDiv.querySelector(".subphase-activities").lastElementChild;
-                        activityDiv.querySelector(".activity-name").value = activity.title;
-                        activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
-                        activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
-                        activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);;
-                    });
-                }
-                );
+        });
 
-            });
+        // set the project id in the form
+        document.getElementById("editingProjectId").value = projectId;
 
-            // set the project id in the form
-            document.getElementById("editingProjectId").value = projectId;
+        // change the form title and button text
+        document.getElementById("formTitle").textContent = "Edit Project:";
+        document.getElementById("createSave").textContent = "Save Project";
 
-            // change the form title and button text
-            document.getElementById("formTitle").textContent = "Edit Project:";
-            document.getElementById("createSave").textContent = "Save Project";
-
-            // show the form
-            document.getElementById("projectForm").style.display = "block";
-            document.getElementById("ToggleFormBtn").textContent = "Editing Project, click here to close";
-        })
-        .catch(error => console.error("Error loading project for edit:", error));
+        // show the form
+        document.getElementById("projectForm").style.display = "block";
+        document.getElementById("ToggleFormBtn").textContent = "Editing Project, click here to close";
+            
+    } catch (error) {
+        console.error("Error loading project for edit or checking logged user:", error);
+    }
 }
 
 //function to correctly format the date for the input
@@ -297,7 +356,7 @@ function formatDateForInput(dateString) {
     return date.toISOString().split("T")[0]; //"YYYY-MM-DD"
 }
 
-// Function to view the project as a list
+// Function to view the project as a list //TODO: async
 function viewAsList(projectId) {
     fetch(`http://localhost:8000/api/project/${projectId}`)
         .then(response => response.json())
@@ -463,7 +522,7 @@ function sortActivities(phase_subphase, criteria) {
     });
 }
 
-// Function to view the project as a Gantt chart //TODO
+// Function to view the project as a Gantt chart //TODO e falla async
 function viewAsGannt(projectId) {
     fetch(`http://localhost:8000/api/project/${projectId}`)
         .then(response => response.json())
@@ -497,8 +556,10 @@ function viewAsGannt(projectId) {
 
 
 //function to reset the form
-function resetForm() {
+async function resetForm() {
+    const owner = document.getElementById("projectOwner").value; //we keep the owner of the project, he is the user logged in
     document.getElementById("projectForm").reset();
+    document.getElementById("projectOwner").value = owner;
     document.getElementById("editingProjectId").value = "";
     document.getElementById("createSave").textContent = "Create project";
     document.getElementById("formTitle").textContent = "Create a new project:";
@@ -508,30 +569,44 @@ function resetForm() {
 
 //listeners
 
+//get the logged user
+document.addEventListener("DOMContentLoaded", getLoggedUser);
+
 //load projects when the page is loaded
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
     loadProjects();
 });
 
 //function to save a project
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("projectForm").addEventListener("submit", saveProject);
 });
 
-document.getElementById("projectForm").addEventListener("keydown", function(event) {
+document.getElementById("projectForm").addEventListener("keydown", async function(event) {
     if (event.key === "Enter") {
         event.preventDefault(); // the form will not be submitted if the user presses Enter
     }
 });
 
-
 //button to toggle the form to add a project
-document.getElementById("ToggleFormBtn").addEventListener("click", function () {
+document.getElementById("ToggleFormBtn").addEventListener("click", async function () {
     let content = document.getElementById("projectForm");
 
     if (content.style.display === "none" || content.style.display === "") {
         content.style.display = "block";
-        this.textContent = "Close"; 
+        this.textContent = "Close";
+
+        //fill the owner with the user logged: 
+        try {
+            const loggedUser = await getLoggedUser();
+            if (loggedUser) {
+                document.getElementById("projectOwner").value = loggedUser;
+            }
+        } catch (error) {
+            console.error("Errore nel recupero dell'utente loggato:", error);
+        }
+
+
     } else {
         content.style.display = "none";
         this.textContent = "+ Add a Project";
@@ -543,8 +618,8 @@ document.getElementById("ToggleFormBtn").addEventListener("click", function () {
 });
 
 
-//Function to save the edited project //TODO TESTA E SPEZZA IL LISTENER DALLA FUNZIONE saveEditProject
-document.getElementById("projectForm").addEventListener("submit", function(event) {
+//Function to save the edited/new project //TODO TESTA E SPEZZA IL LISTENER DALLA FUNZIONE saveEditProject
+document.getElementById("projectForm").addEventListener("submit", async function(event) {
     event.preventDefault();
 
     const projectId = document.getElementById("editingProjectId").value;
@@ -580,14 +655,14 @@ document.getElementById("projectForm").addEventListener("submit", function(event
     .catch(error => console.error("Error saving project:", error));
 });
 
+
 //button to close the project view
-document.getElementById("closeProjectViewBtn").addEventListener("click", function () {
+document.getElementById("closeProjectViewBtn").addEventListener("click", async function () {
     document.getElementById("project-view-container").style.display = "none";
     this.style.display = "none"; // Hides the close button
 });
 
-
  // button to go back to home (React)
- document.getElementById("backToHome").addEventListener("click", function () {
+ document.getElementById("backToHome").addEventListener("click", async function () {
     window.location.href = "/";
 });
