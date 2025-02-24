@@ -3,7 +3,7 @@
 //TODO: start di progetto
 //TODO: fare parte back e front per il salvataggio di edit (saveEdtProject)
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
-//TODO: funzioni asincrone anche nei listener!! in delete e viewAsList e getphases eccecc
+//TODO: Function to save the edited/new project //TODO TESTA E SPEZZA IL LISTENER DALLA FUNZIONE saveEditProject e unifica con listener saveProject
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -244,26 +244,29 @@ function updatePhaseNumbers() {
 }
 
 //function to delete a project, with all phases, subphases and activities
-function deleteProject(projectId) {
+async function deleteProject(projectId) {
     if (confirm("Are you sure you want to delete this project?")) {
         console.log("Deleting project with id:", projectId);
         // DELETE request to remove the project
-        fetch(`http://localhost:8000/api/project/${projectId}`, {
-            method: "DELETE",
-            credentials: 'include',
-        })
-        .then(response => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/project/${projectId}`, {
+                method: "DELETE",
+                credentials: 'include',
+            });
+
             if (response.ok) {
                 alert("Project deleted successfully!");
-                //close the project view if the project is deleted
+                // Close the project view if the project is deleted
                 document.getElementById("project-view-container").style.display = "none";
                 document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close button
-                loadProjects(); // Reload the projects list after deletion
+                
+                await loadProjects(); // Reload the projects list after deletion
             } else {
                 alert("Error while deleting the project.");
             }
-        })
-        .catch(error => console.error("Error deleting project:", error));
+        } catch (error) {
+            console.error("Error deleting project:", error);
+        }
     }
 }
 
@@ -356,131 +359,6 @@ function formatDateForInput(dateString) {
     return date.toISOString().split("T")[0]; //"YYYY-MM-DD"
 }
 
-// Function to view the project as a list //TODO: async
-function viewAsList(projectId) {
-    fetch(`http://localhost:8000/api/project/${projectId}`)
-        .then(response => response.json())
-        .then(project => {
-            const projectViewContainer = document.getElementById("project-view-container");
-            projectViewContainer.innerHTML = ""; // clear the container
-            projectViewContainer.style.display = "block"; // show the container
-            const closeButton = document.getElementById("closeProjectViewBtn");
-            closeButton.style.display = "inline-block"; // show the close button
-
-            //we log the project to see the structure
-            console.log("Project to view:", project);
-
-            // Title of the project
-            const projectTitle = document.createElement("h3");
-            projectTitle.innerHTML = `Project: ${project.title}`;
-            projectViewContainer.appendChild(projectTitle);
-
-            // Owner of the project
-            const projectOwner = document.createElement("h4");
-            projectOwner.innerHTML = `Owner: ${project.owner.username}`;
-            projectViewContainer.appendChild(projectOwner);
-
-            // Description of the project
-            const projectDescription = document.createElement("h4");
-            projectDescription.innerHTML = `Description: ${project.description}`;
-            projectViewContainer.appendChild(projectDescription);
-
-            // Options to sort the activities
-            const sortOptions = document.createElement("div");
-            sortOptions.innerHTML = `
-                <label for="sortSelect">Sort activities by: </label>
-                <select id="sortSelect" class="form-select w-auto d-inline">
-                    <option value="date">Closest deadline (Default)</option>
-                    <option value="member">Member</option>
-                </select>
-                <select id="memberSelect" class="form-select w-auto" style="display: none;">
-                    <option value="">Select a member</option>
-                </select>
-            `;
-            projectViewContainer.appendChild(sortOptions);
-
-            var typeSelect = "date"; //default sorting
-
-            // Container for phases and subphases
-            const listContainer = document.createElement("div");
-            projectViewContainer.appendChild(listContainer);
-
-            // Create a div for each phase and subphase
-            project.phases.forEach(phase => {
-                const phaseDiv = document.createElement("div");
-                phaseDiv.innerHTML = `<h4>Phase: ${phase.title}</h4>`;
-                listContainer.appendChild(phaseDiv);
-
-                //list of activities of each phase (default: date sorting)
-                const activitiesListphase = document.createElement("ul");
-                activitiesListphase.id = `activities-${phase._id}`;
-                activitiesListphase.innerHTML = `<h5>Activities of the Phase:</h5>`;
-                phaseDiv.appendChild(activitiesListphase);
-
-                sortActivities(phase, typeSelect);
-                
-
-                // Container for the subphases
-                phase.subphases.forEach(subphase => {
-                    const subphaseDiv = document.createElement("div");
-                    subphaseDiv.innerHTML = `<h5>Subphase: ${subphase.title}</h5>`;
-                    phaseDiv.appendChild(subphaseDiv);
-
-                    // Container for the activities of the subphases
-                    const activitiesList = document.createElement("ul");
-                    activitiesList.id = `activities-${subphase._id}`;
-                    activitiesList.innerHTML = `<h5>Activities of the Subphase:</h5>`;
-                    subphaseDiv.appendChild(activitiesList);
-
-                    sortActivities(subphase, typeSelect);
-                });
-            });
-
-            // Event listener to sort the activities
-            //if the user selects the member sorting, we show the select with the members
-            document.getElementById("sortSelect").addEventListener("change", (event) => {
-                const selectedCriteria = event.target.value;
-                const memberSelect = document.getElementById("memberSelect");
-            
-                if (selectedCriteria === "member") {
-                    typeSelect = "member";
-                    memberSelect.style.display = "inline";
-                    memberSelect.innerHTML = `<option value="">Select a member</option>`;
-            
-                    const members = project.members.map(m => m.username);
-                    members.forEach(member => {
-                        const option = document.createElement("option");
-                        option.value = member;
-                        option.textContent = member;
-                        memberSelect.appendChild(option);
-                    });
-            
-                    // Reorder the activities when the sorting criteria changes
-                    memberSelect.addEventListener("change", () => {
-                        project.phases.forEach(phase => {
-                            sortActivities(phase, "member");
-                            phase.subphases.forEach(subphase => {
-                                sortActivities(subphase, "member");
-                            });
-                        });
-                    });
-                } else {
-                    typeSelect = "date";
-                    memberSelect.style.display = "none";
-                }
-            
-                // Reorder the activities when the sorting criteria changes
-                project.phases.forEach(phase => {
-                    sortActivities(phase, selectedCriteria);
-                    phase.subphases.forEach(subphase => {
-                        sortActivities(subphase, selectedCriteria);
-                    });
-                });
-            });
-        })
-        .catch(error => console.error("Error while fetching project:", error));
-}
-
 // Function to sort the activities of a phase/subphase based on the selected criteria
 function sortActivities(phase_subphase, criteria) {
     const activitiesList = document.getElementById(`activities-${phase_subphase._id}`);
@@ -522,38 +400,158 @@ function sortActivities(phase_subphase, criteria) {
     });
 }
 
-// Function to view the project as a Gantt chart //TODO e falla async
-function viewAsGannt(projectId) {
-    fetch(`http://localhost:8000/api/project/${projectId}`)
-        .then(response => response.json())
-        .then(project => {
-            const projectViewContainer = document.getElementById("project-view-container");
-            projectViewContainer.innerHTML = ""; // clear the container
-            projectViewContainer.style.display = "block"; // show the container
-            const closeButton = document.getElementById("closeProjectViewBtn");
-            closeButton.style.display = "inline-block"; // show the close button
+//function to render the project header in the view
+function renderProjectHeader(project) {
+    const projectViewContainer = document.getElementById("project-view-container");
+    projectViewContainer.innerHTML = ""; // Clear the container
+    projectViewContainer.style.display = "block"; // Show the container
 
-            // Title of the project
-            const projectTitle = document.createElement("h3");
-            projectTitle.innerHTML = `Project: ${project.title}`;
-            projectViewContainer.appendChild(projectTitle);
+    const closeButton = document.getElementById("closeProjectViewBtn");
+    closeButton.style.display = "inline-block"; // Show the close button
 
-            // Description of the project
-            const projectDescription = document.createElement("h4");
-            projectDescription.innerHTML = `Description: ${project.description}`;
-            projectViewContainer.appendChild(projectDescription);
+    // Title of the project
+    const projectTitle = document.createElement("h3");
+    projectTitle.innerHTML = `Project: ${project.title}`;
+    projectViewContainer.appendChild(projectTitle);
 
-            // Container for the Gantt chart
-            const ganttContainer = document.createElement("div");
-            ganttContainer.id = "gantt-container";
-            projectViewContainer.appendChild(ganttContainer);
+    // Owner of the project
+    const projectOwner = document.createElement("h4");
+    projectOwner.innerHTML = `Owner: ${project.owner.username}`;
+    projectViewContainer.appendChild(projectOwner);
 
-            // Create the Gantt chart
-            createGantt(project);
-        })
-        .catch(error => console.error("Error while fetching project:", error));
+    // Description of the project
+    const projectDescription = document.createElement("h4");
+    projectDescription.innerHTML = `Description: ${project.description}`;
+    projectViewContainer.appendChild(projectDescription);
+
+    return projectViewContainer; // Returns the container
 }
 
+//Function to render the phases and subphases of the project in the list view
+function renderPhase(phase, container, typeSelect) {
+
+    // Create a div for each phase and subphase
+    const phaseDiv = document.createElement("div");
+    phaseDiv.innerHTML = `<h4>Phase: ${phase.title}</h4>`;
+    container.appendChild(phaseDiv);
+
+    // List of activities for each phase (default: date sorting)
+    const activitiesListPhase = document.createElement("ul");
+    activitiesListPhase.id = `activities-${phase._id}`;
+    activitiesListPhase.innerHTML = `<h5>Activities of the Phase:</h5>`;
+    phaseDiv.appendChild(activitiesListPhase);
+
+    sortActivities(phase, typeSelect);
+
+    // Container for subphases
+    phase.subphases.forEach(subphase => {
+        const subphaseDiv = document.createElement("div");
+        subphaseDiv.innerHTML = `<h5>Subphase: ${subphase.title}</h5>`;
+        phaseDiv.appendChild(subphaseDiv);
+
+        // Container for activities of subphases
+        const activitiesList = document.createElement("ul");
+        activitiesList.id = `activities-${subphase._id}`;
+        activitiesList.innerHTML = `<h5>Activities of the Subphase:</h5>`;
+        subphaseDiv.appendChild(activitiesList);
+
+        sortActivities(subphase, typeSelect);
+    });
+}
+
+//Event listener for the sorting of the activities in the list view
+function setupSorting(project) {
+    document.getElementById("sortSelect").addEventListener("change", (event) => {
+        const selectedCriteria = event.target.value;
+        const memberSelect = document.getElementById("memberSelect");
+
+        if (selectedCriteria === "member") {
+            memberSelect.style.display = "inline";
+            memberSelect.innerHTML = `<option value="">Select a member</option>`;
+
+            const members = project.members.map(m => m.username);
+            members.forEach(member => {
+                const option = document.createElement("option");
+                option.value = member;
+                option.textContent = member;
+                memberSelect.appendChild(option);
+            });
+
+            memberSelect.addEventListener("change", () => {
+                project.phases.forEach(phase => {
+                    sortActivities(phase, "member");
+                    phase.subphases.forEach(subphase => sortActivities(subphase, "member"));
+                });
+            });
+        } else {
+            memberSelect.style.display = "none";
+        }
+
+        project.phases.forEach(phase => {
+            sortActivities(phase, selectedCriteria);
+            phase.subphases.forEach(subphase => sortActivities(subphase, selectedCriteria));
+        });
+    });
+}
+
+// Function to view the project as a list
+async function viewAsList(projectId) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const project = await response.json();
+
+        const projectViewContainer = renderProjectHeader(project);
+
+        // Options to sort the activities
+        const sortOptions = document.createElement("div");
+        sortOptions.innerHTML = `
+            <label for="sortSelect">Sort activities by: </label>
+            <select id="sortSelect" class="form-select w-auto d-inline">
+                <option value="date">Closest deadline (Default)</option>
+                <option value="member">Member</option>
+            </select>
+            <select id="memberSelect" class="form-select w-auto" style="display: none;">
+                <option value="">Select a member</option>
+            </select>
+        `;
+        projectViewContainer.appendChild(sortOptions);
+
+        let typeSelect = "date"; // Default sorting
+
+        // Container for phases and subphases
+        const listContainer = document.createElement("div");
+        projectViewContainer.appendChild(listContainer);
+
+        // Render the phases and subphases
+        project.phases.forEach(phase => renderPhase(phase, listContainer, typeSelect));
+
+        // Event listener to sort the activities
+        setupSorting(project);
+
+    } catch (error) {
+        console.error("Error while fetching project:", error);
+    }
+}
+
+// Function to view the project as a Gantt chart
+async function viewAsGannt(projectId) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const project = await response.json();
+
+        const projectViewContainer = renderProjectHeader(project);
+
+        // Container for the Gantt chart
+        const ganttContainer = document.createElement("div");
+        ganttContainer.id = "gantt-container";
+        projectViewContainer.appendChild(ganttContainer);
+
+        // Create the Gantt chart
+        createGantt(project);
+    } catch (error) {
+        console.error("Error while fetching project:", error);
+    }
+}
 
 //function to reset the form
 async function resetForm() {
@@ -567,34 +565,13 @@ async function resetForm() {
     document.getElementById("ToggleFormBtn").textContent = "+ Add a Project";
 }
 
-//listeners
-
-//get the logged user
-document.addEventListener("DOMContentLoaded", getLoggedUser);
-
-//load projects when the page is loaded
-document.addEventListener("DOMContentLoaded", async function() {
-    loadProjects();
-});
-
-//function to save a project
-document.addEventListener("DOMContentLoaded", async function() {
-    document.getElementById("projectForm").addEventListener("submit", saveProject);
-});
-
-document.getElementById("projectForm").addEventListener("keydown", async function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault(); // the form will not be submitted if the user presses Enter
-    }
-});
-
-//button to toggle the form to add a project
-document.getElementById("ToggleFormBtn").addEventListener("click", async function () {
+//function to toggle the form to add a project
+async function toggleProjectForm() {
     let content = document.getElementById("projectForm");
 
     if (content.style.display === "none" || content.style.display === "") {
         content.style.display = "block";
-        this.textContent = "Close";
+        document.getElementById("ToggleFormBtn").textContent = "Close";
 
         //fill the owner with the user logged: 
         try {
@@ -603,22 +580,45 @@ document.getElementById("ToggleFormBtn").addEventListener("click", async functio
                 document.getElementById("projectOwner").value = loggedUser;
             }
         } catch (error) {
-            console.error("Errore nel recupero dell'utente loggato:", error);
+            console.error("Error while getting the logged user:", error);
         }
-
 
     } else {
         content.style.display = "none";
-        this.textContent = "+ Add a Project";
-        //remove the phases and subphases form when the form is closed
+        document.getElementById("ToggleFormBtn").textContent = "+ Add a Project";
+        
+        //clears the phases and subphases form when the form is closed
         document.getElementById("phasesContainer").innerHTML = "<h4>Phases</h4>";
+        
         //reset the form
         resetForm();
     }
+}
+
+//listeners
+
+//get the logged user
+document.addEventListener("DOMContentLoaded", getLoggedUser);
+
+//load projects when the page is loaded
+document.addEventListener("DOMContentLoaded", loadProjects);
+
+document.getElementById("projectForm").addEventListener("keydown", async function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // the form will not be submitted if the user presses Enter
+    }
+});
+
+//button to toggle the form to add a project
+document.getElementById("ToggleFormBtn").addEventListener("click", toggleProjectForm);
+
+//function to save a project
+document.addEventListener("DOMContentLoaded", async function() {
+    document.getElementById("projectForm").addEventListener("submit", saveProject);
 });
 
 
-//Function to save the edited/new project //TODO TESTA E SPEZZA IL LISTENER DALLA FUNZIONE saveEditProject
+//Function to save the edited/new project //TODO TESTA E SPEZZA IL LISTENER DALLA FUNZIONE saveEditProject e unifica con listener saveProject
 document.getElementById("projectForm").addEventListener("submit", async function(event) {
     event.preventDefault();
 
