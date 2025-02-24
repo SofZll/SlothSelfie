@@ -3,7 +3,8 @@
 //TODO: start di progetto
 //TODO: fare parte back e front per il salvataggio di edit (saveEdtProject)
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
-//TODO: Function to save the edited/new project //TODO TESTA E SPEZZA IL LISTENER DALLA FUNZIONE saveEditProject e unifica con listener saveProject
+//TODO: controlla le date, deve essere range fine >= inizio
+//TODO: Function to save the edited/new project saveOrUpdateProject //TODO TESTA, mi duplica le fasi lato back quando faccio edit (add funziona)
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -62,11 +63,12 @@ async function loadProjects() {
     }
 }
 
-
-// Function to save the project
-async function saveProject(event) {
+//Function to save a new or edited project
+async function saveOrUpdateProject(event) {
     event.preventDefault();
 
+    const projectId = document.getElementById("editingProjectId").value; // Get the project id if we are editing a project
+    console.log("Project id:", projectId);
     const project = {
         title: document.getElementById("projectName").value,
         owner: document.getElementById("projectOwner").value,
@@ -83,7 +85,6 @@ async function saveProject(event) {
         };
 
         phaseDiv.querySelectorAll(".activities > .border").forEach(activityDiv => {
-            console.log("Found activity div:", activityDiv);
             phase.activities.push({
                 title: activityDiv.querySelector(".activity-name").value,
                 sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
@@ -99,7 +100,6 @@ async function saveProject(event) {
             };
 
             subPhaseDiv.querySelectorAll(".subphase-activities > .border").forEach(activityDiv => {
-                console.log("Found activity div:", activityDiv);
                 subphase.activities.push({
                     title: activityDiv.querySelector(".activity-name").value,
                     sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
@@ -114,32 +114,45 @@ async function saveProject(event) {
         project.phases.push(phase);
     });
 
-    console.log("Project to save:", project);
+    console.log("Project to save or update:", project);
 
-    //POST, we save the project
     try {
-        const response = await fetch(`http://localhost:8000/api/project`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: 'include',
-            body: JSON.stringify(project),
-        });
+        let response;
+        if (projectId) {
+            // Update the existing project, PUT
+            response = await fetch(`http://localhost:8000/api/project/${projectId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: 'include',
+                body: JSON.stringify(project),
+            });
+        } else {
+            // Save the new project, POST
+            response = await fetch(`http://localhost:8000/api/project`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: 'include',
+                body: JSON.stringify(project),
+            });
+        }
 
         const data = await response.json();
         console.log("Server response:", data);
 
         if (response.ok) {
-            alert("Project saved successfully!");
+            alert(projectId ? "Project updated successfully!" : "Project saved successfully!");
             resetForm();
-            await loadProjects(); // Reload the projects list
+            await loadProjects();
         } else {
-            console.error("Error saving project:", data.message);
+            console.error("Error saving/updating project:", data.message);
         }
 
     } catch (error) {
-        console.error("Error saving project:", error);
+        console.error("Error saving/updating project:", error);
     }
 
     document.getElementById("phasesContainer").innerHTML = "";//we remove the phase and subphase empty form after saving
@@ -161,7 +174,7 @@ function addPhase() {
     phaseDiv.innerHTML = `
         <h5>Phase ${phaseNumber}</h5>
         <label>Phase name:</label>
-        <input type="text" class="form-control phase-name">
+        <input type="text" class="form-control phase-name" required>
         <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'phase')">Add activity</button>
         <div class="activities mt-2"></div> <!-- container activities of the phase -->
         <button type="button" class="btn btn-info mt-2" onclick="addSubPhase(this)">Add subphase</button>
@@ -180,7 +193,7 @@ function addSubPhase(button) {
     subPhaseDiv.classList.add("border", "p-2", "mt-2");
     subPhaseDiv.innerHTML = `
         <label>Subphase name:</label>
-        <input type="text" class="form-control subphase-name">
+        <input type="text" class="form-control subphase-name" required>
         <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'subphase')">Add activity</button>
         <div class="subphase-activities mt-2"></div> <!-- Container activities of the subphase -->
         <button type="button" class="btn btn-danger mt-2" onclick="removeElement(this)">Remove subphase</button>
@@ -204,13 +217,13 @@ function addActivity(button, type) {
     activityDiv.classList.add("border", "p-2", "mt-2");
     activityDiv.innerHTML = `
         <label>Activity name:</label>
-        <input type="text" class="form-control activity-name">
+        <input type="text" class="form-control activity-name" required>
         <label>Members (comma separated):</label>
-        <input type="text" class="form-control activity-actors">
+        <input type="text" class="form-control activity-actors" required>
         <label>Start date:</label>
-        <input type="date" class="form-control activity-start">
+        <input type="date" class="form-control activity-start" required>
         <label>Deadline:</label>
-        <input type="date" class="form-control activity-end">
+        <input type="date" class="form-control activity-end" required>
         <button type="button" class="btn btn-danger mt-2" onclick="closeActivityForm(this)">Close</button>
     `;
     activityContainer.appendChild(activityDiv);
@@ -296,6 +309,7 @@ async function editProject(projectId) {
         }
         
         // fill the form with the project data
+        document.getElementById("editingProjectId").value = projectId;
         document.getElementById("projectName").value = project.title;
         document.getElementById("projectOwner").value = project.owner.username;
         document.getElementById("projectDesc").value = project.description;
@@ -335,9 +349,6 @@ async function editProject(projectId) {
             );
 
         });
-
-        // set the project id in the form
-        document.getElementById("editingProjectId").value = projectId;
 
         // change the form title and button text
         document.getElementById("formTitle").textContent = "Edit Project:";
@@ -613,48 +624,7 @@ document.getElementById("projectForm").addEventListener("keydown", async functio
 document.getElementById("ToggleFormBtn").addEventListener("click", toggleProjectForm);
 
 //function to save a project
-document.addEventListener("DOMContentLoaded", async function() {
-    document.getElementById("projectForm").addEventListener("submit", saveProject);
-});
-
-
-//Function to save the edited/new project //TODO TESTA E SPEZZA IL LISTENER DALLA FUNZIONE saveEditProject e unifica con listener saveProject
-document.getElementById("projectForm").addEventListener("submit", async function(event) {
-    event.preventDefault();
-
-    const projectId = document.getElementById("editingProjectId").value;
-    const isEditing = projectId !== ""; 
-
-    const project = {
-        title: document.getElementById("projectName").value,
-        owner: document.getElementById("projectOwner").value,
-        description: document.getElementById("projectDesc").value,
-        members: document.getElementById("projectActors").value.split(",").map(a => a.trim()),
-        phases: getPhases() // Get the phases from the form
-    };
-
-    const url = isEditing ? `http://localhost:8000/api/project/${projectId}` : `http://localhost:8000/api/project`;
-    const method = isEditing ? "PUT" : "POST";
-
-    fetch(url, {
-        method: method,
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include',
-        body: JSON.stringify(project),
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(isEditing ? "Project updated successfully!" : "Project saved successfully!");
-
-        // Reset form
-        resetForm();
-        
-        // reload the projects list
-        loadProjects();
-    })
-    .catch(error => console.error("Error saving project:", error));
-});
-
+document.getElementById("projectForm").addEventListener("submit", saveOrUpdateProject);
 
 //button to close the project view
 document.getElementById("closeProjectViewBtn").addEventListener("click", async function () {
