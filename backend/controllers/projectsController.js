@@ -175,7 +175,11 @@ const updateProject = async (req, res) => {
         // Update the phases and subphases
         const updatedPhaseIds = [];
         for (const phase of phases) {
-            let existingPhase = await Phase.findOne({ _id: phase.id, project: project._id });
+            
+            console.log("Checking phase:", phase._id, "for project:", project._id);
+
+            let existingPhase = await Phase.findOne({ _id: phase._id, project: project._id });
+            console.log('existingPhase:', existingPhase); //null
 
             if (existingPhase) {
                 // if the phase exists, update it
@@ -200,7 +204,7 @@ const updateProject = async (req, res) => {
             // Updates the subphases
             const updatedSubphaseIds = [];
             for (const subphase of phase.subphases) {
-                let existingSubphase = await Phase.findOne({ _id: subphase.id, project: project._id });
+                let existingSubphase = await Phase.findOne({ _id: subphase._id, project: project._id });
 
                 if (existingSubphase) {
                     existingSubphase.name = subphase.name;

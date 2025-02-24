@@ -4,7 +4,7 @@
 //TODO: fare parte back e front per il salvataggio di edit (saveEdtProject)
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
 //TODO: controlla le date, deve essere range fine >= inizio
-//TODO: Function to save the edited/new project saveOrUpdateProject //TODO TESTA, mi duplica le fasi lato back quando faccio edit (add funziona)
+//TODO: da riguardare aveEditProject e attività duplicate dentro alle fasi, se edito e salvo mi duplica le attività, reset degli id nel form
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -66,8 +66,8 @@ async function loadProjects() {
 //Function to save a new or edited project
 async function saveOrUpdateProject(event) {
     event.preventDefault();
-
-    const projectId = document.getElementById("editingProjectId").value; // Get the project id if we are editing a project
+     // Get the project id if we are editing a project
+    const projectId = document.getElementById("editingProjectId").value;
     console.log("Project id:", projectId);
     const project = {
         title: document.getElementById("projectName").value,
@@ -78,14 +78,19 @@ async function saveOrUpdateProject(event) {
     };
 
     document.querySelectorAll("#phasesContainer > .card").forEach(phaseDiv => {
+        // Get the phase id if we are editing a project
+        const phaseId = phaseDiv.querySelector("#editingPhaseId").value;
         const phase = {
+            _id: phaseId ? phaseId : undefined,
             name: phaseDiv.querySelector(".phase-name").value,
             activities: [],
             subphases: []
         };
 
         phaseDiv.querySelectorAll(".activities > .border").forEach(activityDiv => {
+            const activityId = activityDiv.querySelector("#editingActivityId").value;
             phase.activities.push({
+                _id: activityId ? activityId : undefined,
                 title: activityDiv.querySelector(".activity-name").value,
                 sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                 startDate: activityDiv.querySelector(".activity-start").value,
@@ -94,13 +99,18 @@ async function saveOrUpdateProject(event) {
         });
 
         phaseDiv.querySelectorAll(".subphases > .border").forEach(subPhaseDiv => {
+            // Get the subphase id if we are editing a project
+            const subPhaseId = subPhaseDiv.querySelector("#editingSubphaseId").value;
             const subphase = {
+                _id: subPhaseId ? subPhaseId : undefined,
                 name: subPhaseDiv.querySelector(".subphase-name").value,
                 activities: []
             };
 
             subPhaseDiv.querySelectorAll(".subphase-activities > .border").forEach(activityDiv => {
+                const activityId = activityDiv.querySelector("#editingActivityId").value;
                 subphase.activities.push({
+                    _id: activityId ? activityId : undefined,
                     title: activityDiv.querySelector(".activity-name").value,
                     sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                     startDate: activityDiv.querySelector(".activity-start").value,
@@ -173,6 +183,8 @@ function addPhase() {
     phaseDiv.classList.add("card", "p-3", "mt-3");
     phaseDiv.innerHTML = `
         <h5>Phase ${phaseNumber}</h5>
+        <!-- hidden input to store the id of the phase being edited -->
+        <input type="hidden" id="editingPhaseId">
         <label>Phase name:</label>
         <input type="text" class="form-control phase-name" required>
         <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'phase')">Add activity</button>
@@ -192,6 +204,8 @@ function addSubPhase(button) {
     const subPhaseDiv = document.createElement("div");
     subPhaseDiv.classList.add("border", "p-2", "mt-2");
     subPhaseDiv.innerHTML = `
+        <!-- hidden input to store the id of the subphase being edited -->
+        <input type="hidden" id="editingSubphaseId">
         <label>Subphase name:</label>
         <input type="text" class="form-control subphase-name" required>
         <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'subphase')">Add activity</button>
@@ -216,6 +230,8 @@ function addActivity(button, type) {
     const activityDiv = document.createElement("div");
     activityDiv.classList.add("border", "p-2", "mt-2");
     activityDiv.innerHTML = `
+        <!-- hidden input to store the id of the activity being edited -->
+        <input type="hidden" id="editingActivityId">
         <label>Activity name:</label>
         <input type="text" class="form-control activity-name" required>
         <label>Members (comma separated):</label>
@@ -320,12 +336,16 @@ async function editProject(projectId) {
         phasesContainer.innerHTML = "<h4>Phases</h4>";
         project.phases.forEach(phase => {
             let phaseElement = addPhase(phase);
+            //fill the id of each existing phase
+            phaseElement.querySelector("#editingPhaseId").value = phase._id;
             //fill the name of each phase
             phaseElement.querySelector(".phase-name").value = phase.title;
             //fill the activities of each phase
             phase.activities.forEach(activity => {
                 addActivity(phaseElement.querySelector(".btn-warning"), "phase");
                 const activityDiv = phaseElement.querySelector(".activities").lastElementChild;
+                //fill the id of each existing activity
+                activityDiv.querySelector("#editingActivityId").value = activity._id;
                 activityDiv.querySelector(".activity-name").value = activity.title;
                 activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
                 activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
@@ -336,10 +356,14 @@ async function editProject(projectId) {
             phase.subphases.forEach(subphase => {
                 addSubPhase(phaseElement.querySelector(".btn-info"));
                 const subphaseDiv = phaseElement.querySelector(".subphases").lastElementChild;
+                //fill the id of each existing subphase
+                subphaseDiv.querySelector("#editingSubphaseId").value = subphase._id;
                 subphaseDiv.querySelector(".subphase-name").value = subphase.title;
                 subphase.activities.forEach(activity => {
                     addActivity(subphaseDiv.querySelector(".btn-warning"), "subphase");
                     const activityDiv = subphaseDiv.querySelector(".subphase-activities").lastElementChild;
+                    //fill the id of each existing activity
+                    activityDiv.querySelector("#editingActivityId").value = activity._id;
                     activityDiv.querySelector(".activity-name").value = activity.title;
                     activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
                     activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
@@ -569,7 +593,35 @@ async function resetForm() {
     const owner = document.getElementById("projectOwner").value; //we keep the owner of the project, he is the user logged in
     document.getElementById("projectForm").reset();
     document.getElementById("projectOwner").value = owner;
+    // Reset project ID
     document.getElementById("editingProjectId").value = "";
+    // Reset phase and subphase and respective activities IDs
+    document.querySelectorAll("#phasesContainer .card").forEach(phaseDiv => {
+        // Reset phase ID
+        phaseDiv.querySelectorAll("[id='editingPhaseId']").forEach(phaseIdInput => {
+            if (phaseIdInput) phaseIdInput.value = "";
+        });
+
+        // Reset activities inside phases
+        phaseDiv.querySelectorAll(".activities .border [id='editingActivityId']").forEach(activityIdInput => {
+            if (activityIdInput) activityIdInput.value = "";
+        });
+
+        // Reset subphases and their activities
+        phaseDiv.querySelectorAll(".subphases .border").forEach(subPhaseDiv => {
+            // Reset subphase ID
+            subPhaseDiv.querySelectorAll("[id='editingSubphaseId']").forEach(subPhaseIdInput => {
+                if (subPhaseIdInput) subPhaseIdInput.value = "";
+            });
+
+            // Reset activities inside subphases
+            subPhaseDiv.querySelectorAll(".subphase-activities .border [id='editingActivityId']").forEach(activityIdInput => {
+                if (activityIdInput) activityIdInput.value = "";
+            });
+        });
+    });
+
+    // Reset UI elements
     document.getElementById("createSave").textContent = "Create project";
     document.getElementById("formTitle").textContent = "Create a new project:";
     document.getElementById("projectForm").style.display = "none"; 
