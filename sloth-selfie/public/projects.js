@@ -4,10 +4,13 @@
 //TODO: fare parte back e front per il salvataggio di edit (saveEdtProject)
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
 //TODO: controlla le date, deve essere range fine >= inizio
+
 //TODO: da riguardare saveEditProject per eliminazione di fasi, sottofasi e attività ->
-//mi cancella l'attività della sottofase come fosse la sottofase, e la sottofase non la cancella...su db, lato front sembra ok
-//la sottofase della fase non la cancella! e l'attività della sottofase la cancella come fosse la sottofase
-//la fase la cancella, e la attività della fase la cancella
+//cancella correttamente la fase con attività e sottofasi con attività annesse
+//cancella correttamente le attività alla fase
+//NON cancella correttamente le attività alla sottofase
+//se cancello una attività da una sottofase NON funziona
+//se rimuovo una sottofase con una attività mi crea altre sottofasi.. ?
 
 // Function to get the logged user
 async function getLoggedUser() {
