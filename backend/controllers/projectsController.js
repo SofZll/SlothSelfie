@@ -145,6 +145,24 @@ const createProject = async (req, res) => {
     }
 };
 
+//finds the activities to delete and daletes them, returns the updated activity IDs. Called in updateProject
+const deleteRemovedActivities = async (newActivities, existingActivityIds) => {
+    const updatedActivityIds = newActivities
+                .filter(activity => activity._id)  // we only want the activities with an ID
+                .map(activity => activity._id.toString());
+
+                const activitiesToDelete = existingActivityIds.filter(id => !updatedActivityIds.includes(id));
+                console.log("Activities to delete:", activitiesToDelete);
+
+                //delete the activities
+                if (activitiesToDelete.length > 0) {
+                    await Activity.deleteMany({ _id: { $in: activitiesToDelete } });
+                }
+
+                return updatedActivityIds;
+
+};
+
 //PUT update a project
 const updateProject = async (req, res) => {
     try {
@@ -194,7 +212,9 @@ const updateProject = async (req, res) => {
                 // if the phase exists, update it
                 existingPhase.name = phase.name;
                 // finds the exisiting activities
-                const existingActivityIds = existingPhase.activities.map(activity => activity.toString());
+                const existingActivityIds = existingPhase.activities
+                .filter(activity => activity._id)  // we only want the activities with an ID
+                .map(activity => activity._id.toString());
                 // finds the new activities (without an ID)
                 const newActivities = phase.activities.filter(activity => !activity._id);
                 // creates the new activities and returns their IDs
@@ -202,18 +222,9 @@ const updateProject = async (req, res) => {
                 // Adds the new activities to the existing ones (without duplicates)
                 existingPhase.activities = Array.from(new Set([...existingActivityIds, ...newActivityIds]));
 
-                //finds the activities to delete
-                const updatedActivityIds = phase.activities.map(activity => activity._id.toString()); //mi da errore quando aggiungo una sottofase
-                const activitiesToDelete = existingActivityIds.filter(id => !updatedActivityIds.includes(id));
-                console.log("Activities to delete:", activitiesToDelete);
-
-                //delete the activities
-                if (activitiesToDelete.length > 0) {
-                    await Activity.deleteMany({ _id: { $in: activitiesToDelete } });
-                }
-
+                //finds the activities to delete and return the updated activity IDs
+                const updatedActivityIds = await deleteRemovedActivities(phase.activities, existingActivityIds);
                 existingPhase.activities = updatedActivityIds.concat(newActivityIds);
-
                 //save the updated phase
                 await existingPhase.save();
 
@@ -227,11 +238,12 @@ const updateProject = async (req, res) => {
             const updatedSubphaseIds = [];
             for (const subphase of phase.subphases) {
                 let existingSubphase = await Phase.findOne({ _id: subphase._id, project: project._id });
+                console.log('existingSubphase:', existingSubphase);
 
                 if (existingSubphase) {
                     existingSubphase.name = subphase.name;
 
-                    const existingActivityIds = existingSubphase.activities.map(activity => activity.toString());
+                    const existingActivityIdsSub = existingSubphase.activities.map(activity => activity.toString());
                     const newActivities = subphase.activities.filter(activity => !activity._id);
                     const newActivityIds = await createActivities(newActivities, project._id, undefined, existingSubphase._id, ownerUser._id);
 
@@ -239,34 +251,28 @@ const updateProject = async (req, res) => {
                     existingSubphase.activities = Array.from(new Set([...existingActivityIds, ...newActivityIds]));
 
                     //finds the activities to delete
-                    const updatedActivityIds = subphase.activities.map(activity => activity._id.toString());
-                    const activitiesToDelete = existingActivityIds.filter(id => !updatedActivityIds.includes(id));
-                    console.log("Activities to delete:", activitiesToDelete);
-
-                    //delete the activities
-                    if (activitiesToDelete.length > 0) {
-                        await Activity.deleteMany({ _id: { $in: activitiesToDelete } });
-                    }
-
+                    const updatedActivityIds = await deleteRemovedActivities(subphase.activities, existingActivityIdsSub);
                     existingSubphase.activities = updatedActivityIds.concat(newActivityIds);
-
+                    //save the updated subphase
                     await existingSubphase.save();
+
                 } else {
                     const newSubphaseId = await createPhaseSubphase("subphase", subphase, project._id, ownerUser._id);
                     existingSubphase = await Subphase.findById(newSubphaseId);
                 }
                 updatedSubphaseIds.push(existingSubphase._id);
 
+                /*
                 //finds the removed subphases
                 const existingSubphaseIds = existingPhase.subphases.map(subphase => subphase.toString());
                 const subphasesToDelete = existingSubphaseIds.filter(id => !updatedSubphaseIds.includes(id));
-
+                
                 console.log("Subphases to delete:", subphasesToDelete);
                 //delete the subphases
                 if (subphasesToDelete.length > 0) {
                     await Activity.deleteMany({ subphase: { $in: subphasesToDelete } });
                     await Subphase.deleteMany({ _id: { $in: subphasesToDelete } });
-                }
+                }*/
 
             }
 
@@ -278,13 +284,66 @@ const updateProject = async (req, res) => {
         // Delete the phases that were removed, with their activities and subphases
         const phasesToDelete = existingPhaseIds.filter(phaseId => !updatedPhaseIds.includes(phaseId));
         console.log("Phases to delete:", phasesToDelete);
+
         if (phasesToDelete.length > 0) {
-            console.log("Phases to delete:", phasesToDelete);
+            // Find the subphases of the phase to delete //QUI PROBLEMI, le sottofasi risultano vuote!
+            //const subphasesToDelete = await Subphase.find({ phase: { $in: phasesToDelete } }).select('_id');
+            //const subphaseIdsToDelete = subphasesToDelete.map(subphase => subphase._id.toString());
+
+            // Find the subphases of the phase to delete
+            const phasesToDeleteWithSubphases = await Phase.find({ _id: { $in: phasesToDelete } });//.populate('subphases');
+            console.log("Phases to delete with subphases:", phasesToDeleteWithSubphases);
+                        
+            //console.log("Subphases to delete:", subphasesToDelete);
+
+            // Iterate over the phases and delete the subphases and activities
+            for (const phase of phasesToDeleteWithSubphases) {
+                const subphasesToDelete = phase.subphases;
+                console.log("Subphases to delete:", subphasesToDelete);
+
+                // Delete the activities associated with the subphases
+                if (subphasesToDelete.length > 0) {
+                    const subphaseIdsToDelete = subphasesToDelete.map(subphase => subphase._id);
+                    await Activity.deleteMany({ subphase: { $in: subphaseIdsToDelete } });
+                }
+
+                // Delete the subphases
+                if (subphasesToDelete.length > 0) {
+                    await Subphase.deleteMany({ _id: { $in: subphasesToDelete.map(subphase => subphase._id) } });
+                }
+            }
+
+            // delete the activities associated with the phases
             await Activity.deleteMany({ phase: { $in: phasesToDelete } });
-            await Subphase.deleteMany({ phase: { $in: phasesToDelete } });
+
+            // delete the phases
             await Phase.deleteMany({ _id: { $in: phasesToDelete } });
         }
 
+        /*
+        //Delete the subphases that were removed with their activities
+        const existingSubphases = await Subphase.find({ project: project._id });
+        const existingSubphaseIds = existingSubphases.map(subphase => subphase._id.toString());
+        console.log('existingSubphaseIds:', existingSubphaseIds);
+
+        const updatedSubphaseIds = [];
+        for (const phase of phases) {
+            for (const subphase of phase.subphases) {
+                updatedSubphaseIds.push(subphase._id.toString());
+            }
+        }
+
+        const subphasesToDelete = existingSubphaseIds.filter(subphaseId => !updatedSubphaseIds.includes(subphaseId));
+        console.log("Subphases to delete:", subphasesToDelete);
+
+        if (subphasesToDelete.length > 0) {
+            // Delete the activities associated with the subphases
+            await Activity.deleteMany({ subphase: { $in: subphasesToDelete } });
+
+            // Delete the subphases
+            await Subphase.deleteMany({ _id: { $in: subphasesToDelete } });
+        }
+        */
         // Update the project with the updated phases
         project.phases = updatedPhaseIds;
         await project.save();
