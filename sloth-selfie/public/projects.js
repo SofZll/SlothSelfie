@@ -4,7 +4,10 @@
 //TODO: fare parte back e front per il salvataggio di edit (saveEdtProject)
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
 //TODO: controlla le date, deve essere range fine >= inizio
-//TODO: da riguardare aveEditProject e attività duplicate dentro alle fasi, se edito e salvo mi duplica le attività, reset degli id nel form
+//TODO: da riguardare saveEditProject per eliminazione di fasi, sottofasi e attività ->
+//mi cancella l'attività della sottofase come fosse la sottofase, e la sottofase non la cancella...su db, lato front sembra ok
+//la sottofase della fase non la cancella! e l'attività della sottofase la cancella come fosse la sottofase
+//la fase la cancella, e la attività della fase la cancella
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -210,7 +213,7 @@ function addSubPhase(button) {
         <input type="text" class="form-control subphase-name" required>
         <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'subphase')">Add activity</button>
         <div class="subphase-activities mt-2"></div> <!-- Container activities of the subphase -->
-        <button type="button" class="btn btn-danger mt-2" onclick="removeElement(this)">Remove subphase</button>
+        <button type="button" class="btn btn-danger mt-2" onclick="removeElement(this)">Remove Subphase</button>
     `;
     subPhaseContainer.appendChild(subPhaseDiv);
 }
@@ -240,7 +243,7 @@ function addActivity(button, type) {
         <input type="date" class="form-control activity-start" required>
         <label>Deadline:</label>
         <input type="date" class="form-control activity-end" required>
-        <button type="button" class="btn btn-danger mt-2" onclick="closeActivityForm(this)">Close</button>
+        <button type="button" class="btn btn-danger mt-2" onclick="closeActivityForm(this)">Remove Activity</button>
     `;
     activityContainer.appendChild(activityDiv);
 }
