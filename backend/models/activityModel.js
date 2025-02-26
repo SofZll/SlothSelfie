@@ -60,12 +60,6 @@ const activitySchema = new mongoose.Schema({
         default: "Not_Activatable"
     },
 
-    type: {
-        type: String,
-        enum: ["Sequential", "Parallel"],
-        default: "Sequential"
-    },
-
     description: {
         type: String
     },

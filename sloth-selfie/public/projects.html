@@ -12,12 +12,14 @@
         <h1 class="mb-3">Your Projects:</h1>
         <ul id="projects-list" class="list-group mt-3"></ul>
 
-        
+    <button id="closeProjectViewBtn" class="btn btn-danger" style="display: none;">Close</button>
     <div id="project-view-container" class="mt-4"></div>
     
     <button id="ToggleFormBtn" class="btn btn-primary"> + Add a Project</button>
     <form id="projectForm" style="display: none;">
-        <h2 class="mb-3">Create a new project:</h2>
+        <!-- hidden input to store the id of the project being edited -->
+        <input type="hidden" id="editingProjectId">
+        <h2 class="mb-3" id="formTitle">Create a new project:</h2>
 
         <div class="mb-3">
             <label class="form-label">Project name</label>
@@ -26,7 +28,7 @@
         
         <div class="mb-3">
             <label class="form-label">Project owner (username)</label>
-            <input type="text" class="form-control" id="projectOwner" required>
+            <input type="text" class="form-control" id="projectOwner" required readonly>
         </div>
 
         <div class="mb-3">
@@ -44,7 +46,7 @@
         </div>
         <button type="button" class="btn btn-secondary mt-2" onclick="addPhase()">Add a phase</button>
 
-        <button type="submit" class="btn btn-primary mt-2">Create project</button>
+        <button type="submit" class="btn btn-primary mt-2" id="createSave">Create project</button>
     </form>
 
     </div>
