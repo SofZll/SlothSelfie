@@ -20,7 +20,8 @@ import socket from './socket';
 import 'leaflet/dist/leaflet.css';
 import Swal from 'sweetalert2';
 import { ActivityProvider } from './ActivityContext';
-import MesssageBox from './MessageBox';
+import ChatBox from './ChatBox';
+import { useMediaQuery } from 'react-responsive';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -34,6 +35,8 @@ function App() {
     username: '',
     profile_image: ''
   });
+
+  const isDesktop = useMediaQuery({ minWidth: 769 });
 
   // Check if the user is authenticated
   const checkAuth = async () => {
@@ -212,7 +215,7 @@ function App() {
             <div className="App">
               <Menu profileData={profileData}/>
               <TimeMachine />
-              <MesssageBox username={profileData.username} />
+              {isDesktop && <ChatBox username={profileData.username} /> }
               <header className="App-header">
                   <div className="title">
                   <StyleContext.Consumer>
@@ -268,6 +271,12 @@ function App() {
                   <Route path="/notes" element={<NotesFunction />} />
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/forum" element={<ForumFunction />} />
+                  {!isDesktop && (
+                    <>
+                      <Route path="/chat" element={<ChatBox username={profileData.username} chatId={null} />} />
+                      <Route path="/chat/:chatId" element={<ChatBox username={profileData.username} />} />
+                    </>
+                  )}
                 </Routes>
               </div>
             </div>

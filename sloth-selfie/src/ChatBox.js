@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import './css/MessageBox.css';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import './css/ChatBox.css';
 import { useMediaQuery } from 'react-responsive';
 import Swal from 'sweetalert2';
 import avatar from './media/avatar.svg'
+import { useParams, useNavigate } from 'react-router-dom';
 
-function MessageBox({ username }) {
+function ChatBox({ username }) {
+    const { chatId } = useParams(); // get chatId from url
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [selectedChat, setSelectedChat] = useState(null);
     const [newMessage, setNewMessage] = useState("");
@@ -160,6 +163,9 @@ function MessageBox({ username }) {
 
     const handleChatClick = (chat) => {
         setSelectedChat(chat);
+        if (!isDesktop) {
+            navigate(`/chat/${chat.author.username}`);
+        }
     }
 
     const handleSendMessage = () => {
@@ -211,31 +217,43 @@ function MessageBox({ username }) {
     }
 
     useEffect(() => {
+        console.log("ChatBox mounted");
+        if (chatId) {
+            const matchedChat = chat.find(chat => chat.author.username === chatId);
+            if (matchedChat) {
+                setSelectedChat(matchedChat);
+            }
+        }
+    }, [chatId]);
+
+    useEffect(() => {
         if (selectedChat) {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
-    }, [selectedChat, selectedChat?.messages]);
-
-    if (!isDesktop) return null;
+    }, [selectedChat]);
 
     return (
-        <div className="message-container">
-            <button onClick={() => setIsOpen(!isOpen)} className="message-button">
-                {selectedChat ? (
-                    <div className="chat-selected-header">
-                        <span onClick={() => handleChatClick(null)}>Back</span>
-                        <div className="chat-profile">
-                            <img src={selectedChat.author.image} alt="profile" />
-                            <div className="online-status"></div>
+        <div className={`message-container ${isDesktop ? 'desktop' : ''}`}>
+            {isDesktop ? (
+                <button onClick={() => setIsOpen(!isOpen)} className="message-button">
+                    {selectedChat ? (
+                        <div className="chat-selected-header">
+                            <span onClick={() => handleChatClick(null)}>Back</span>
+                            <div className="chat-profile">
+                                <img src={selectedChat.author.image} alt="profile" />
+                                <div className="online-status"></div>
+                            </div>
+                            <div className="chat-content">
+                                <h6>{selectedChat.author.username}</h6>
+                                <span>status</span>
+                            </div>
                         </div>
-                        <div className="chat-content">
-                            <h6>{selectedChat.author.username}</h6>
-                            <span>status</span>
-                        </div>
-                    </div>
-                ) : <p>Messaggi</p>}
-            </button>
-            <div className={`message-box ${isOpen ? 'open' : ''}`}>
+                    ) : <p>Messaggi</p>}
+                </button>
+            ) : (
+                <h3>Messaggi</h3>
+            )}
+            <div className={`message-box ${isOpen ? 'open' : ''} ${isDesktop ? 'desktop' : ''}`}>
                 {selectedChat ? (
                     <div className="chat-selected">
                         <div className="chat-selected-messages">
@@ -253,7 +271,7 @@ function MessageBox({ username }) {
                         </div>
                     </div>
                 ) : (
-                    <div className="chat-all">
+                    <div className={`chat-all ${isDesktop ? 'desktop' : ''}`}>
                         <div className="chat-search">
                             {/* search bar for chat*/}
                             <input type="text" placeholder="Cerca" onChange={handleSearch}/>
@@ -287,4 +305,4 @@ function MessageBox({ username }) {
     );
 }
 
-export default MessageBox;
+export default ChatBox;
