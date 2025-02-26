@@ -5,13 +5,6 @@
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
 //TODO: controlla le date, deve essere range fine >= inizio
 
-//TODO: da riguardare saveEditProject per eliminazione di fasi, sottofasi e attività ->
-//cancella correttamente la fase con attività e sottofasi con attività annesse
-//cancella correttamente le attività alla fase
-//NON cancella correttamente le attività alla sottofase
-//se cancello una attività da una sottofase NON funziona
-//se rimuovo una sottofase con una attività mi crea altre sottofasi.. ?
-
 // Function to get the logged user
 async function getLoggedUser() {
     try {
@@ -251,6 +244,133 @@ function addActivity(button, type) {
     activityContainer.appendChild(activityDiv);
 }
 
+// function to remove a phase or subphase while compiling the form
+async function removeElement(button) {
+    const element = button.parentElement;
+
+    // gets the IDs of the project, phase or subphase
+    const projectIdElement = document.getElementById('editingProjectId');
+    const phaseIdElement = document.getElementById('editingPhaseId');
+    const subphaseIdElement = document.getElementById('editingSubphaseId');
+
+    const projectId = projectIdElement ? projectIdElement.value : null;
+    const phaseId = phaseIdElement ? phaseIdElement.value : null;
+    const subphaseId = subphaseIdElement ? subphaseIdElement.value : null;
+
+    // if we remove a phase, we update the counter
+    if (element.classList.contains("card")) {
+        // removes the phase from UI
+        element.remove();
+
+        // Removes the phase from the backend
+        if (phaseId) {
+            await removePhaseFromBackend(projectId, phaseId);
+        } 
+        updatePhaseNumbers();// Renumerates the phases left
+    } else {
+        // if it is a subphase, we remove it from the UI
+        element.remove(); // removes the subphase from UI
+
+        // Removes the subphase from the backend
+        if (subphaseId) {
+            await removeSubphaseFromBackend(projectId, phaseId, subphaseId);
+        }
+    }
+}
+
+//Function to remove an activity while editing the project form
+async function closeActivityForm(button) {
+    const activityDiv = button.parentElement;
+
+    // gets the IDs of the project, phase or subphase and activity
+    const projectIdElement = document.getElementById('editingProjectId');
+    const phaseIdElement = document.getElementById('editingPhaseId');
+    const subphaseIdElement = document.getElementById('editingSubphaseId');
+    const activityIdElement = activityDiv.querySelector("#editingActivityId");
+
+    if (!projectIdElement || !phaseIdElement || !subphaseIdElement) {
+        //we only remove from the UI if the IDs are not present in the db
+        activityDiv.remove();
+        return;
+    }
+
+    const projectId = projectIdElement.value;
+    const phaseId = phaseIdElement.value;
+    const subphaseId = subphaseIdElement.value;
+    const activityId = activityIdElement ? activityIdElement.value : null;
+
+    // removes the activity from the backend
+    if (activityId) {
+        await removeActivityFromBackend(projectId, phaseId, subphaseId, activityId);
+    }
+    //removes the activity from the UI
+    activityDiv.remove();
+}
+
+// function to remove a phase from the backend
+async function removePhaseFromBackend(projectId, phaseId) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/project/${projectId}/remove-phase`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectId, phaseId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            console.log('Phase deleted with success!');
+        } else {
+            alert('Error while deleting phase');
+        }
+    } catch (error) {
+        console.error('Errore:', error);
+    }
+}
+
+// function to remove a subphase from the backend
+async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/project/${projectId}/remove-subphase`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectId, phaseId, subphaseId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            console.log('Subphase deleted with success!');
+        } else {
+            alert('EError while deleting subphase');
+        }
+    } catch (error) {
+        console.error('Errore:', error);
+    }
+}
+
+//function to remove an activity from the backend
+async function removeActivityFromBackend(projectId, phaseId, subphaseId, activityId) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/project/${projectId}/remove-activity`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectId, phaseId, subphaseId, activityId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            console.log('Activity deleted with success!');
+        } else {
+            alert('Error while deleting the activity');
+        }
+    } catch (error) {
+        console.error('Errore:', error);
+    }
+}
+
+/*
 //function to remove a phase or subphase while compiling the add-form
 function removeElement(button) {
     const element = button.parentElement;
@@ -262,13 +382,15 @@ function removeElement(button) {
     } else {
         element.remove();
     }
-}
+}*/
 
+/*
 // Function to remove the form of an activity
 function closeActivityForm(button) {
     const activityDiv = button.parentElement;
     activityDiv.remove();
-}
+}*/
+
 
 //after a remove it updates the number sequence of the phases
 function updatePhaseNumbers() {
