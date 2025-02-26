@@ -1,19 +1,8 @@
 .message-container {
     display: relative;
     flex-direction: column;
-    width: 100%;
+    width: 95%;
     height: 100%;
-}
-
-.message-container.desktop {
-    position: fixed;
-    bottom: 0;
-    right: 30px;
-    width: 350px;
-    height: auto;
-    max-height: 350px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    z-index: 800;
 }
 
 .message-button {
@@ -26,7 +15,6 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     cursor: pointer;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
     transition: background 0.2s ease-in-out;
 }
 
@@ -44,13 +32,10 @@
 }
 
 .message-box {
-    width: 350px;
     background-color: #fff;
     color: #333;
     border: none;
-    max-height: 0;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
-    transition: max-height 0.4s ease-in-out;
+    height: 100%;
 }
 
 .message-box.open {
@@ -60,7 +45,6 @@
 
 .chat-all {
     cursor: pointer;
-    max-height: 300px;
     overflow: auto;
 }
 
@@ -139,7 +123,7 @@
 .chat-selected {
     display: flex;
     flex-direction: column;
-    height: 300px;
+    height: 100&;
 }
 
 .chat-selected-header {
@@ -252,4 +236,31 @@
     border-radius: 4px;
     cursor: pointer;
     margin: 5px 0;
+}
+
+@media screen and (min-width: 769px) {
+    
+    .message-container {
+        position: fixed;
+        bottom: 0;
+        right: 30px;
+        width: 350px;
+        height: auto;
+        max-height: 350px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 800;
+    }
+
+    .message-box {
+        width: 350px;
+        transition: max-height 0.4s ease-in-out;
+    }
+
+    .chat-all {
+        max-height: 300px;
+    }
+
+    .chat-selected {
+        height: 300px;
+    }
 }

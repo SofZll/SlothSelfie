@@ -232,28 +232,39 @@ function ChatBox({ username }) {
         }
     }, [selectedChat]);
 
-    return (
-        <div className={`message-container ${isDesktop ? 'desktop' : ''}`}>
-            {isDesktop ? (
-                <button onClick={() => setIsOpen(!isOpen)} className="message-button">
-                    {selectedChat ? (
-                        <div className="chat-selected-header">
-                            <span onClick={() => handleChatClick(null)}>Back</span>
-                            <div className="chat-profile">
-                                <img src={selectedChat.author.image} alt="profile" />
-                                <div className="online-status"></div>
-                            </div>
-                            <div className="chat-content">
-                                <h6>{selectedChat.author.username}</h6>
-                                <span>status</span>
-                            </div>
+    const ChatHeader = () => (
+        <>
+            {selectedChat ? (
+                <>
+                    <div className="chat-selected-header">
+                        <span onClick={() => handleChatClick(null)}>Back</span>
+                        <div className="chat-profile">
+                            <img src={selectedChat.author.image} alt="profile" />
+                            <div className="online-status"></div>
                         </div>
-                    ) : <p>Messaggi</p>}
-                </button>
+                        <div className="chat-content">
+                            <h6>{selectedChat.author.username}</h6>
+                            <span>status</span>
+                        </div>
+                    </div>
+                </>
             ) : (
                 <h3>Messaggi</h3>
+            )
+            }
+        </>
+    );
+
+    return (
+        <div className="message-container">
+            {isDesktop ? (
+                <button onClick={() => setIsOpen(!isOpen)} className="message-button">
+                    <ChatHeader />
+                </button>
+            ) : (
+                <ChatHeader />
             )}
-            <div className={`message-box ${isOpen ? 'open' : ''} ${isDesktop ? 'desktop' : ''}`}>
+            <div className={`message-box ${isOpen ? 'open' : ''}`}>
                 {selectedChat ? (
                     <div className="chat-selected">
                         <div className="chat-selected-messages">
@@ -271,7 +282,7 @@ function ChatBox({ username }) {
                         </div>
                     </div>
                 ) : (
-                    <div className={`chat-all ${isDesktop ? 'desktop' : ''}`}>
+                    <div className="chat-all">
                         <div className="chat-search">
                             {/* search bar for chat*/}
                             <input type="text" placeholder="Cerca" onChange={handleSearch}/>
