@@ -1,9 +1,9 @@
 //TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiungi controlli relativi
 //TODO: Aggiungi la modalità di visualizzazione gannt
 //TODO: start di progetto
-//TODO: fare parte back e front per il salvataggio di edit (saveEdtProject)
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
 //TODO: controlla le date, deve essere range fine >= inizio
+//non mi elimina le fasi/sottofasi/attività nell'edit, ci sono problemi con gli id front-back
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -81,7 +81,7 @@ async function saveOrUpdateProject(event) {
         const phaseId = phaseDiv.querySelector("#editingPhaseId").value;
         const phase = {
             _id: phaseId ? phaseId : undefined,
-            name: phaseDiv.querySelector(".phase-name").value,
+            title: phaseDiv.querySelector(".phase-name").value,
             activities: [],
             subphases: []
         };
@@ -102,7 +102,7 @@ async function saveOrUpdateProject(event) {
             const subPhaseId = subPhaseDiv.querySelector("#editingSubphaseId").value;
             const subphase = {
                 _id: subPhaseId ? subPhaseId : undefined,
-                name: subPhaseDiv.querySelector(".subphase-name").value,
+                title: subPhaseDiv.querySelector(".subphase-name").value,
                 activities: []
             };
 
