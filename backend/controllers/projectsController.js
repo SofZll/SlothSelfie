@@ -31,19 +31,22 @@ const getProjectById = async (req, res) => {
         }
         //now we get the phases of the project
         project.phases = await Phase.find({ project: id })
-        .populate("subphases"); // Populate subphases of the phase
+        .populate("subphases") // Populate subphases of the phase
+        .sort({ createdAt: 1 }); // Sort phases by creation order
 
         //now we populate the activities of each phase
         for (const phase of project.phases) {
             phase.activities = await Activity.find({ phase: phase._id })
-            .populate("sharedWith", "username");
+            .populate("sharedWith", "username")
+            .sort({ createdAt: 1 });
         }
 
          // Populates activities of each subphase
         for (const phase of project.phases) {
             for (const subphase of phase.subphases) {
                 subphase.activities = await Activity.find({ subphase: subphase._id })
-                .populate("sharedWith", "username");
+                .populate("sharedWith", "username")
+                .sort({ createdAt: 1 });
             }
         }
 
