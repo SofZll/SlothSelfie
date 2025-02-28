@@ -1,9 +1,9 @@
 //TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiungi controlli relativi
-//TODO: Aggiungi la modalità di visualizzazione gannt
 //TODO: start di progetto
 //TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
 //TODO: controlla le date, deve essere range fine >= inizio
 //TODO: quando clicco salva si deve chiudere la visualizzazione a lista/gannt
+//function to start a project   //TODO e capire se specifiche si riferiscono solo ad attività, da rivedere
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -51,7 +51,7 @@ async function loadProjects() {
                 <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
                 <button class="btn btn-success btn-sm ml-2" onclick="startProject('${project._id}')">Start Project</button>
                 <button class="btn btn-outline-primary btn-sm view-list" onclick="viewAsList('${project._id}')">View as List</button>
-                <button class="btn btn-outline-secondary btn-sm view-gantt" onclick="viewAsGannt('${project._id}')">View as Gantt</button>
+                <button class="btn btn-outline-secondary btn-sm view-gantt" onclick="viewAsGantt('${project._id}')">View as Gantt</button>
             `;
             list.appendChild(li);
         });
@@ -689,23 +689,217 @@ async function viewAsList(projectId) {
     }
 }
 
-// Function to view the project as a Gantt chart
-async function viewAsGannt(projectId) {
+// Function to view the project as a Gantt chart with a hierarchy sidebar
+async function viewAsGantt(projectId) {
     try {
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
         const project = await response.json();
 
         const projectViewContainer = renderProjectHeader(project);
 
+        // Create a container for both the sidebar and the Gantt chart
+        const container = document.createElement("div");
+        container.style.display = "flex"; // Sidebar + Gantt side by side
+        projectViewContainer.appendChild(container);
+
+        // Create sidebar for hierarchy
+        const sidebar = document.createElement("div");
+        sidebar.id = "gantt-sidebar";
+        sidebar.style.width = "50vh";
+        sidebar.style.padding = "15px";
+        sidebar.style.borderRight = "2px solid #ccc";
+        sidebar.style.overflowY = "auto";
+        sidebar.style.maxHeight = "80vh";
+        sidebar.style.background = "#f8f8f8";
+        sidebar.style.fontSize = "14px";
+        sidebar.style.resize = "horizontal";
+        sidebar.style.overflow = "auto";
+        container.appendChild(sidebar);
+
         // Container for the Gantt chart
         const ganttContainer = document.createElement("div");
         ganttContainer.id = "gantt-container";
-        projectViewContainer.appendChild(ganttContainer);
+        ganttContainer.style.width = "calc(100% - 90vh)";
+        container.appendChild(ganttContainer);
 
-        // Create the Gantt chart
-        createGantt(project);
+        // Generate Gantt tasks
+        const tasks = [];
+        project.phases.forEach(phase => {
+            phase.activities.forEach(activity => {
+                tasks.push({
+                    id: activity._id,
+                    name: activity.title,
+                    start: activity.startDate,
+                    end: activity.deadline,
+                    assignee: activity.assignee,  //sharedWith
+                    dependencies: activity.dependencies || []
+                });
+            });
+
+            phase.subphases.forEach(subphase => {
+                subphase.activities.forEach(activity => {
+                    tasks.push({
+                        id: activity._id,
+                        name: activity.title,
+                        start: activity.startDate,
+                        end: activity.deadline,
+                        assignee: activity.assignee,  //sharedWith
+                        dependencies: activity.dependencies || []
+                    });
+                });
+            });
+        });
+
+        // Creates the Gantt chart
+        const gantt = new Gantt("#gantt-container", tasks, {
+            on_click: (task) => console.log(task),
+            on_date_change: (task, start, end) => console.log(task, start, end),
+            on_progress_change: (task, progress) => console.log(task, progress),
+            on_delete: (task) => console.log(task),
+        });
+
+        gantt.render();
+        createHierarchy(sidebar, project);
+
     } catch (error) {
         console.error("Error while fetching project:", error);
+    }
+}
+
+// Highlight task in Gantt when clicked from sidebar
+function highlightTask(taskId) {
+    const taskElement = document.querySelector(`[data-id="${taskId}"]`);
+    if (taskElement) {
+        taskElement.style.stroke = "yellow"; // Highlight
+        setTimeout(() => taskElement.style.stroke = "", 1500);
+    }
+}
+
+// Function to generate the hierarchy in a table format in the sidebar
+function createHierarchy(sidebar, project) {
+    sidebar.innerHTML = ""; // Clear previous content
+
+    // Create a table for the hierarchy
+    const table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.style.tableLayout = "auto"; // Allow column resizing
+
+    // Table header
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+        <tr>
+            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 150px;">Phase/Subphase</th>
+            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Activity</th>
+            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Actor/s</th>
+            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Start</th>
+            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Deadline</th>
+            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Days</th>
+        </tr>
+    `;
+    table.appendChild(thead);
+
+    // Table body
+    const tbody = document.createElement("tbody");
+
+    project.phases.forEach(phase => {
+        // Create row for the phase
+        const phaseRow = document.createElement("tr");
+        const phaseCell = document.createElement("td");
+        phaseCell.textContent = phase.title;
+        phaseCell.style.fontWeight = "bold";
+        phaseCell.style.paddingLeft = "10px";
+        phaseCell.setAttribute("colspan", 1); // Make phase row span both columns
+        phaseRow.appendChild(phaseCell);
+        tbody.appendChild(phaseRow);
+
+        // Create rows for each activity in the phase
+        phase.activities.forEach(activity => {
+            addActivityRow(tbody, activity);
+        });
+
+        // Create rows for each subphase and its activities
+        phase.subphases.forEach(subphase => {
+            const subphaseRow = document.createElement("tr");
+            const subphaseCell = document.createElement("td");
+            subphaseCell.textContent = `> ${subphase.title}`;
+            subphaseCell.style.fontWeight = "bold";
+            subphaseCell.style.paddingLeft = "20px"; // Indent for subphases
+            subphaseCell.setAttribute("colspan", 1); // Make subphase row span both columns
+            subphaseRow.appendChild(subphaseCell);
+            tbody.appendChild(subphaseRow);
+
+            subphase.activities.forEach(activity => {
+                addActivityRow(tbody, activity);
+            });
+        });
+    });
+
+    table.appendChild(tbody);
+    sidebar.appendChild(table);
+}
+
+function addActivityRow(tbody, activity) {
+    const row = document.createElement("tr");
+            const phaseCell = document.createElement("td");
+            phaseCell.style.paddingLeft = "15px"; // Indent to differentiate
+            phaseCell.textContent = "";
+            row.appendChild(phaseCell);
+
+            const activityCell = document.createElement("td");
+            activityCell.textContent = activity.title;
+            activityCell.style.cursor = "pointer";
+            activityCell.style.paddingLeft = "10px";
+            activityCell.onclick = () => highlightTask(activity._id);
+            row.appendChild(activityCell);
+
+            const actorCell = document.createElement("td");
+            actorCell.textContent = activity.sharedWith.map(a => a.username).join(", ");
+            row.appendChild(actorCell);
+
+            const startDateCell = document.createElement("td");
+            startDateCell.textContent = new Date(activity.startDate).toLocaleDateString();
+            row.appendChild(startDateCell);
+
+            const deadlineCell = document.createElement("td");
+            deadlineCell.textContent = new Date(activity.deadline).toLocaleDateString();
+            row.appendChild(deadlineCell);
+
+            const daysCell = document.createElement("td");
+            const diffTime = Math.abs(new Date(activity.deadline) - new Date(activity.startDate));
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Calculate number of days
+            daysCell.textContent = diffDays;
+            row.appendChild(daysCell);
+
+            tbody.appendChild(row);
+}
+
+//function to start a project   //TODO e capire se specifiche si riferiscono solo ad attività, da rivedere
+async function startProject(projectId) {
+    try {
+        // Get the logged user
+        const userLogged = await getLoggedUser();
+        
+        if (!userLogged) {
+            alert("No user is logged in!");
+            return;
+        }
+        
+        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const project = await response.json();
+
+        // check if the logged user is the owner of the project
+        const owner = project.owner.username;
+
+        if (owner !== userLogged) {
+            alert("You can't edit this project, you are not the owner.");
+            return; // exit the function if the user is not the owner
+        }
+
+        // Start the project
+    
+    } catch (error) {
+        console.error("Error starting the project:", error);
     }
 }
 
