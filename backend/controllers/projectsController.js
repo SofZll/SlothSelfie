@@ -73,7 +73,8 @@ const createActivities = async (activities, projectId, phaseId, subphaseId, owne
             sharedWith: sharedWithUserIds,
             startDate: activity.startDate,
             deadline: activity.deadline,
-            user: ownerId
+            user: ownerId,
+            milestone: activity.milestone
         });
 
         const savedActivity = await newActivity.save();
@@ -165,6 +166,7 @@ const updateExistingActivities = async (existingActivities, activities) => {
                 existingActivity.sharedWith = await User.find({ username: { $in: activity.sharedWith } });
                 existingActivity.startDate = activity.startDate;
                 existingActivity.deadline = activity.deadline;
+                existingActivity.milestone = activity.milestone;
                 await existingActivity.save();
             }
         }
