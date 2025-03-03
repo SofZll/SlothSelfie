@@ -1,8 +1,15 @@
 //TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiungi controlli relativi
-//TODO: start di progetto
-//TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
+
+//TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi -> testa con nuovo utente
 //TODO: controlla le date, deve essere range fine >= inizio
 //TODO: quando clicco salva si deve chiudere la visualizzazione a lista/gannt
+
+//se aggiungo una attività non la vedo in gannt
+
+//TODO: in edit di progetto: owner può raggruppare attività e cambiare le sincronizzazioni tra le attività,
+// in caso di ritardi può decidere se traslare o contrarre le attività sincronizzate a quella in ritardo
+//TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto.
+//TODO: Inizio e fine attività sono eventi che finiscono sul calendario con modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo.
 //function to start a project   //TODO e capire se specifiche si riferiscono solo ad attività, da rivedere
 
 // Function to get the logged user
@@ -38,18 +45,28 @@ async function loadProjects() {
         }
 
         const projects = await response.json();
+
+        //we get the logged user and load only the projects where he is the owner or a member
+        const userLogged = await getLoggedUser();
+        if (!userLogged) {
+            alert("No user is logged in!");
+            return;
+        }
+
+        // Filter the projects where the logged user is the owner or a member
+        const userProjects = projects.filter(project => project.owner.username === userLogged || project.members.some(m => m.username === userLogged));
         
         const list = document.getElementById("projects-list");
         list.innerHTML = ""; // clear the list before loading the projects
 
-        projects.forEach(project => {
+        userProjects.forEach(project => {
             const li = document.createElement("li");
             li.className = "list-group-item";
             li.innerHTML = `
                 <strong>${project.title}</strong> - Owner: ${project.owner.username} - Description: ${project.description} - Members: ${project.members.map(m => m.username).join(", ")}<br>
                 <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
                 <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
-                <button class="btn btn-success btn-sm ml-2" onclick="startProject('${project._id}')">Start Project</button>
+                <button class="btn btn-warning btn-sm ml-2" onclick="handleActivities('${project._id}')">Handle Activities</button>
                 <button class="btn btn-outline-primary btn-sm view-list" onclick="viewAsList('${project._id}')">View as List</button>
                 <button class="btn btn-outline-secondary btn-sm view-gantt" onclick="viewAsGantt('${project._id}')">View as Gantt</button>
             `;
@@ -93,7 +110,8 @@ async function saveOrUpdateProject(event) {
                 title: activityDiv.querySelector(".activity-name").value,
                 sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                 startDate: activityDiv.querySelector(".activity-start").value,
-                deadline: activityDiv.querySelector(".activity-end").value
+                deadline: activityDiv.querySelector(".activity-end").value,
+                milestone: activityDiv.querySelector(".activity-milestone").checked
             });
         });
 
@@ -113,7 +131,8 @@ async function saveOrUpdateProject(event) {
                     title: activityDiv.querySelector(".activity-name").value,
                     sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                     startDate: activityDiv.querySelector(".activity-start").value,
-                    deadline: activityDiv.querySelector(".activity-end").value
+                    deadline: activityDiv.querySelector(".activity-end").value,
+                    milestone: activityDiv.querySelector(".activity-milestone").checked
                 });
             });
 
@@ -231,6 +250,9 @@ function addActivity(button, type) {
         <input type="date" class="form-control activity-start" required>
         <label>Deadline:</label>
         <input type="date" class="form-control activity-end" required>
+        <label>Is a milestone:</label>
+        <input type="checkbox" class="activity-milestone">
+        </br>
         <button type="button" class="btn btn-danger mt-2" onclick="closeActivityForm(this)">Remove Activity</button>
     `;
     activityContainer.appendChild(activityDiv);
@@ -242,11 +264,6 @@ async function removeElement(button) {
 
     // gets the IDs of the project from the data attribute of the form
     let projectId = document.getElementById("projectForm").getAttribute("data-project-id");
-
-    if (!projectId) {
-        console.error("Project ID not found!");
-        return;
-    }
 
     // Get the phase or subphase ID from the element
     let phaseId = element.getAttribute("data-phase-id");
@@ -288,11 +305,6 @@ async function closeActivityForm(button) {
 
     // gets the IDs of the project from the data attribute of the form
     let projectId = document.getElementById("projectForm").getAttribute("data-project-id");
-
-    if (!projectId) {
-        console.error("Project ID not found!");
-        return;
-    }
 
     // gets the IDs of the parent phase or subphase from the data-attributes
     let phaseId = activityDiv.getAttribute("data-parent-phase-id") || null;
@@ -463,7 +475,8 @@ async function editProject(projectId) {
                 activityDiv.querySelector(".activity-name").value = activity.title;
                 activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
                 activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
-                activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);;
+                activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
+                activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
             });
 
             //fill the subphases of each phase
@@ -488,7 +501,8 @@ async function editProject(projectId) {
                     activityDiv.querySelector(".activity-name").value = activity.title;
                     activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
                     activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
-                    activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);;
+                    activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
+                    activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
                 });
             }
             );
@@ -551,7 +565,9 @@ function sortActivities(phase_subphase, criteria) {
         const sharedWithUsernames = activity.sharedWith.map(user => user.username).join(", ");
         const startDate = new Date(activity.startDate).toLocaleDateString();
         const deadline = new Date(activity.deadline).toLocaleDateString();
-        activityItem.innerHTML = `<strong>${activity.title}</strong> -  -Start date: ${startDate} - Deadline: ${deadline} - Members: ${sharedWithUsernames}`;
+        //if the activity is a milestone, we add a star to the title
+        const title = activity.milestone ? `*${activity.title}` : activity.title;
+        activityItem.innerHTML = `<strong>${title}</strong> -  -Start date: ${startDate} - Deadline: ${deadline} - Members: ${sharedWithUsernames}`;
         activitiesList.appendChild(activityItem);
     });
 }
@@ -847,7 +863,13 @@ function addActivityRow(tbody, activity) {
             row.appendChild(phaseCell);
 
             const activityCell = document.createElement("td");
-            activityCell.textContent = activity.title;
+            //if it is a milestone we add a star to the title
+            if (activity.milestone) {
+                activityCell.textContent = `*${activity.title}`;
+            }
+            else {
+                activityCell.textContent = activity.title;
+            }
             activityCell.style.cursor = "pointer";
             activityCell.style.paddingLeft = "10px";
             activityCell.onclick = () => highlightTask(activity._id);
@@ -872,35 +894,6 @@ function addActivityRow(tbody, activity) {
             row.appendChild(daysCell);
 
             tbody.appendChild(row);
-}
-
-//function to start a project   //TODO e capire se specifiche si riferiscono solo ad attività, da rivedere
-async function startProject(projectId) {
-    try {
-        // Get the logged user
-        const userLogged = await getLoggedUser();
-        
-        if (!userLogged) {
-            alert("No user is logged in!");
-            return;
-        }
-        
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
-
-        // check if the logged user is the owner of the project
-        const owner = project.owner.username;
-
-        if (owner !== userLogged) {
-            alert("You can't edit this project, you are not the owner.");
-            return; // exit the function if the user is not the owner
-        }
-
-        // Start the project
-    
-    } catch (error) {
-        console.error("Error starting the project:", error);
-    }
 }
 
 //function to reset the form
@@ -972,6 +965,123 @@ async function toggleProjectForm() {
         
         //reset the form
         resetForm();
+    }
+}
+
+//function to handle activities status by the members of each activity or by the owner
+async function handleActivities(projectId) {
+    try {
+        // Get the logged user
+        const userLogged = await getLoggedUser();
+        
+        if (!userLogged) {
+            alert("No user is logged in!");
+            return;
+        }
+        
+        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const project = await response.json();
+
+        // Check if the logged user is the owner or a member
+        const isOwner = project.owner.username === userLogged;
+        const isMember = project.members.some(member => member.username === userLogged);
+        if (!isOwner && !isMember) {
+            alert("You can't handle the activities of this project, you are not the owner nor a member.");
+            return;
+        }
+
+        // Get activities: all if owner, only assigned if member
+        let activities = project.phases.flatMap(phase => phase.activities);
+        activities = activities.concat(project.phases.flatMap(phase => phase.subphases.flatMap(subphase => subphase.activities)));
+
+        if (!isOwner) {
+            activities = activities.filter(activity => activity.sharedWith.some(user => user.username === userLogged));
+        }
+
+        console.log("Activities to handle:", activities);
+        
+        // Generate the modal content
+        let modalContent = `<h2>Project Activities</h2>`;
+        if (activities.length === 0) {
+            modalContent += `<p>No activities assigned to you.</p>`;
+        } else {
+            modalContent += `<ul>`;
+            activities.forEach(activity => {
+
+                if(activity.milestone === true){ //if it is a milestone we add a star to the title
+                    modalContent += `<li><strong>*${activity.title}</strong> - Status: ${activity.status}
+                    <br>Input: <input type="text" id="input-${activity._id}" value="${activity.input || ''}">
+                        <br>
+                        <button onclick="updateActivityStatus('${activity._id}', 'started')">Start</button>
+                        <button onclick="updateActivityStatus('${activity._id}', 'completed')">Complete</button>
+                        <button onclick="updateActivityStatus('${activity._id}', 'abandoned')">Abandon</button>
+                    </li>
+                `;
+                }
+                else{
+                    modalContent += `<li><strong>${activity.title}</strong> - Status: ${activity.status}
+                    <br>Input: <input type="text" id="input-${activity._id}" value="${activity.input || ''}">
+                        <br>
+                        <button onclick="updateActivityStatus('${activity._id}', 'started')">Start</button>
+                        <button onclick="updateActivityStatus('${activity._id}', 'completed')">Complete</button>
+                        <button onclick="updateActivityStatus('${activity._id}', 'abandoned')">Abandon</button>
+                    </li>
+                `;
+                }
+            });
+            modalContent += `</ul>`;
+        }
+
+        // Show modal
+        showModal(modalContent);
+
+    } catch (error) {
+        console.error("Error handling activities of the project:", error);
+    }
+}
+
+// Function to show modal
+function showModal(content) {
+    let modal = document.getElementById("activityModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "activityModal";
+        modal.style.position = "fixed";
+        modal.style.top = "50%";
+        modal.style.left = "50%";
+        modal.style.transform = "translate(-50%, -50%)";
+        modal.style.padding = "20px";
+        modal.style.backgroundColor = "#fff";
+        modal.style.border = "1px solid black";
+        modal.innerHTML = `<div id="modalContent"></div><button onclick="closeModal()">Close</button>`;
+        document.body.appendChild(modal);
+    }
+    document.getElementById("modalContent").innerHTML = content;
+    modal.style.display = "block";
+}
+
+// Function to close modal
+function closeModal() {
+    document.getElementById("activityModal").style.display = "none";
+}
+
+// Function to update activity status   //TODO
+async function updateActivityStatus(activityId, status) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status })
+        });
+
+        if (response.ok) {
+            alert("Activity status updated!");
+            closeModal(); // Close modal after update
+        } else {
+            alert("Error updating activity status.");
+        }
+    } catch (error) {
+        console.error("Error updating activity:", error);
     }
 }
 
