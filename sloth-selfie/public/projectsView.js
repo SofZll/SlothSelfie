@@ -1,3 +1,7 @@
+//TODO: RIGHE DA SCOMMENTARE NELLA VIEW: 
+// projectDescription.innerHTML = `Description: ${project.description.content}`;
+// - ${description} TODO METTI ANCHE QUESTO NELLA LISTA IN FUTURO
+
 // Function to sort the activities of a phase/subphase based on the selected criteria
 function sortActivities(phase_subphase, criteria) {
     const activitiesList = document.getElementById(`activities-${phase_subphase._id}`);
@@ -34,9 +38,12 @@ function sortActivities(phase_subphase, criteria) {
         const sharedWithUsernames = activity.sharedWith.map(user => user.username).join(", ");
         const startDate = new Date(activity.startDate).toLocaleDateString();
         const deadline = new Date(activity.deadline).toLocaleDateString();
+        //description of the activity
+        const description = activity.description.content;
+        //- ${description}  TODO METTI ANCHE QUESTO NELLA LISTA IN FUTURO
         //if the activity is a milestone, we add a star to the title
         const title = activity.milestone ? `*${activity.title}` : activity.title;
-        activityItem.innerHTML = `<strong>${title}</strong> -  -Start date: ${startDate} - Deadline: ${deadline} - Members: ${sharedWithUsernames}`;
+        activityItem.innerHTML = `<strong>${title}</strong> - Start date: ${startDate} - Deadline: ${deadline} - Members: ${sharedWithUsernames}`;
         activitiesList.appendChild(activityItem);
     });
 }
@@ -62,7 +69,7 @@ function renderProjectHeader(project) {
 
     // Description of the project
     const projectDescription = document.createElement("h4");
-    projectDescription.innerHTML = `Description: ${project.description}`;
+    //projectDescription.innerHTML = `Description: ${project.description.content}`;  //SCOMMENTA QUESTA RIGA IN FUTURO
     projectViewContainer.appendChild(projectDescription);
 
     return projectViewContainer; // Returns the container
