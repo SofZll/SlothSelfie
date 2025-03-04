@@ -7,10 +7,16 @@
 //TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto.
 //TODO: Inizio e fine attività sono eventi che finiscono sul calendario con modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo.
 
+//TODO: aggiungi loading al caricamento di pagina
+
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
 //TODO: gestione di handleActivities
+
 //TODO: le descrizioni sono note, da gestire lato front con chiamate back
+//e da gestire la cancellazione delle note in caso si butti via tutto il progetto/fase/sottofase
+
+////TODO: iinput e output sono note
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -63,7 +69,7 @@ async function loadProjects() {
             const li = document.createElement("li");
             li.className = "list-group-item";
             li.innerHTML = `
-                <strong>${project.title}</strong> - Owner: ${project.owner.username} - Description: ${project.description} - Members: ${project.members.map(m => m.username).join(", ")}<br>
+                <strong>${project.title}</strong> - Owner: ${project.owner.username} - Members: ${project.members.map(m => m.username).join(", ")}<br>
                 <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
                 <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
                 <button class="btn btn-warning btn-sm ml-2" onclick="handleActivities('${project._id}')">Handle Activities</button>
@@ -78,6 +84,8 @@ async function loadProjects() {
         console.error("Error while loading projects:", error);
     }
 }
+
+//TODO: AGGIUNGI CONTROLLI SE DESCRIZIONE DI INTERO PROGETTO SOLO OWNER PUò MODIFICARE, fare descrizioni come note alle attività
 
 //Function to save a new or edited project
 async function saveOrUpdateProject(event) {
@@ -108,6 +116,7 @@ async function saveOrUpdateProject(event) {
             phase.activities.push({
                 _id: activityId ? activityId : undefined,
                 title: activityDiv.querySelector(".activity-name").value,
+                description: activityDiv.querySelector(".activity-description").value,
                 sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                 startDate: activityDiv.querySelector(".activity-start").value,
                 deadline: activityDiv.querySelector(".activity-end").value,
@@ -129,6 +138,7 @@ async function saveOrUpdateProject(event) {
                 subphase.activities.push({
                     _id: activityId ? activityId : undefined,
                     title: activityDiv.querySelector(".activity-name").value,
+                    description: activityDiv.querySelector(".activity-description").value,
                     sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                     startDate: activityDiv.querySelector(".activity-start").value,
                     deadline: activityDiv.querySelector(".activity-end").value,
@@ -244,6 +254,8 @@ function addActivity(button, type) {
     activityDiv.innerHTML = `
         <label>Activity name:</label>
         <input type="text" class="form-control activity-name" required>
+        <label>Activity description (optional):</label>
+        <textarea class="form-control activity-description"></textarea>
         <label>Members (comma separated):</label>
         <input type="text" class="form-control activity-actors" required>
         <label>Start date:</label>
@@ -448,7 +460,7 @@ async function editProject(projectId) {
         document.getElementById("projectForm").setAttribute("data-project-id", projectId);
         document.getElementById("projectName").value = project.title;
         document.getElementById("projectOwner").value = project.owner.username;
-        document.getElementById("projectDesc").value = project.description;
+        document.getElementById("projectDesc").value = project.description.content;
         document.getElementById("projectActors").value = project.members.map(m => m.username).join(", ");
 
         // reset the phases container and reload the phases
@@ -473,6 +485,7 @@ async function editProject(projectId) {
                 activityDiv.setAttribute("data-parent-phase-id", phase._id);
 
                 activityDiv.querySelector(".activity-name").value = activity.title;
+                activityDiv.querySelector(".activity-description").value = activity.description.content;
                 activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
                 activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
                 activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
@@ -499,6 +512,7 @@ async function editProject(projectId) {
                     //we also add the parent subphase ID to the activity div
                     activityDiv.setAttribute("data-parent-subphase-id", subphase._id);
                     activityDiv.querySelector(".activity-name").value = activity.title;
+                    activityDiv.querySelector(".activity-description").value = activity.description.content;
                     activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
                     activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
                     activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
