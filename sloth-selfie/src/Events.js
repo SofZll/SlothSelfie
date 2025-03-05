@@ -2,9 +2,11 @@ import React, { useEffect } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
-import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents } from './CalendarUtils';
+import { handleDataChange, handleUpdateData, handleAddData, generateRepeatedEvents, resetInputFiels, optionsNotif, handleUpdateRepeatedEvent} from './CalendarUtils';
 import Select from 'react-select';
-
+import ShareInput from './ShareInput';
+import NotificationInput from './NotificationInput';
+import { changeReceivers } from './globalFunctions';
 
 function EventsFunction(props) {
 
@@ -27,15 +29,27 @@ function EventsFunction(props) {
         e.preventDefault();
         console.log("Form submit triggered");
         if (props.selectedEvent) {
-            console.log("Submitting update for event:", props.selectedEvent);
-            handleUpdateData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.selectedEvent, props.setSelectedEvent, props.setIsEditing);
-            props.setIsEditing(false);
+            if (props.updateAllFutureEvents) {
+                console.log("Updating all future repeated events");
+                handleUpdateRepeatedEvent(
+                    props.eventData, 
+                    props.setEvents, 
+                    props.setIsEditing, 
+                    props.selectedEvent,
+                    props.setSelectedEvent
+                );
+            } else {
+                console.log("Submitting update for event:", props.selectedEvent);
+                handleUpdateData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.selectedEvent, props.setSelectedEvent, props.setIsEditing, props.receivers);
+                props.setIsEditing(false);
+            }
         } else {
             if (props.eventData.repeatFrequency !== "none") {
-                generateRepeatedEvents(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.username);
+                generateRepeatedEvents(e, props.eventData, props.events, props.setEvents, props.receivers);
+                resetInputFiels("event", props.setEventData, props.setIsEditing);
             } else {
                 console.log("Submitting new event:", props.eventData);
-                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing);
+                handleAddData(e, props.eventData, props.setEventData, props.events, props.setEvents, props.setIsEditing, props.receivers, props.setReceivers, props.setTriggerResetReceivers);
             }
         }
     }
@@ -46,6 +60,7 @@ function EventsFunction(props) {
             handleDataChange("repeatMode", "ntimes", props.setEventData);
         }
     }
+
     
     return (
         <div className="container-events-add">
@@ -61,7 +76,6 @@ function EventsFunction(props) {
                     required
                 />
             </label>
-            <br />
     
             <label>Event Date:
                 <input
@@ -71,9 +85,8 @@ function EventsFunction(props) {
                     required
                 />
             </label>
-            <br />
-    
-            <label>
+
+            <label className="centered-label">
                 <input
                     className="checkbox"
                     type="checkbox"
@@ -82,12 +95,11 @@ function EventsFunction(props) {
                 />
                 All Day
             </label>
-            <br />
-    
+
             {!props.eventData.allDay ? (
                 <>
                 <div className="time-filter">
-                    <label>
+                    <label className="centered-label">
                         <input
                             className="checkbox"
                             type="checkbox"
@@ -99,6 +111,7 @@ function EventsFunction(props) {
     
                     {props.eventData.isPreciseTime ? (
                         <input
+                            className="time-filter-not-select"
                             type="time"
                             value={props.eventData.time}
                             onChange={(e) => handleDataChange("time", e.target.value, props.setEventData)}
@@ -110,16 +123,7 @@ function EventsFunction(props) {
                             onChange={(selectedOption) => handleDataChange("time", selectedOption.value, props.setEventData)}
                             options={options}
                             isSearchable
-                            styles={{
-                                menu: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 200,
-                                }),
-                                menuList: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 200,
-                                }),
-                            }}
+                            classNamePrefix="custom-select"
                         />  
                     )}
                 </div>
@@ -146,25 +150,13 @@ function EventsFunction(props) {
                     />
                 </label>
             )}
-            <br />
-    
-            {props.isEditing && (
-                <label>
-                    <input
-                        className="checkbox"
-                        type="checkbox"
-                        onChange={(e) => props.setUpdateAllFutureEvents(e.target.checked)
-                        }
-                    />
-                    Update all future instances
-                    <br />
-                </label>
-            )}
 
-            <label>Frequency:
+
+            <label className="centered-label">Frequency:
                 <Select
                     value={options.find((option) => option.value === props.eventData.repeatFrequency)}
                     onChange={(selectedOption) => handleFrequencyChange(selectedOption)}
+                    isSearchable
                     options={[
                         { value: "none", label: "No repetition" },
                         { value: "daily", label: "Daily" },
@@ -172,48 +164,27 @@ function EventsFunction(props) {
                         { value: "monthly", label: "Monthly" },
                         { value: "yearly", label: "Yearly" },
                     ]}
-                    styles={{
-                        menu: (provided) => ({
-                            ...provided,
-                            maxHeight: 90,
-                            overflowY: "auto",
-                        }),
-                        menuList: (provided) => ({
-                            ...provided,
-                            maxHeight: 90,
-                        }),
-                    }}
+                    classNamePrefix="custom-select"
                 />
-                <br />
             </label>
 
             {props.eventData.repeatFrequency !== "none" && (
-                <div>
-                    <label>Repeat Mode:
+                <div className="repeat-div">
+                    <label className="centered-label">Repeat Mode:
                         <Select
                             value={options.find((option) => option.value === props.eventData.repeatMode)}
                             onChange={(selectedOption) => handleDataChange("repeatMode", selectedOption.value, props.setEventData)}
+                            isSearchable
                             options= {[
                                 { value: 'ntimes', label: 'N Times' },
                                 { value: 'until', label: 'Until' },
                             ]}
-                            styles={{
-                                menu: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 90,
-                                    overflowY: 'auto',
-                                }),
-                                menuList: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 90,
-                                }),
-                            }}
+                            classNamePrefix="custom-select"
                         />
                     </label>
-                    <br />
     
                     {props.eventData.repeatMode === "ntimes" ? (
-                        <label>Number of repetitions:
+                        <label>N° times:
                             <input
                                 type="number"
                                 value={props.eventData.repeatCount}
@@ -231,6 +202,20 @@ function EventsFunction(props) {
                             />
                         </label>
                     )}
+
+                    {props.isEditing && (
+                        <label>
+                            <input
+                                className="checkbox"
+                                type="checkbox"
+                                onChange={(e) => props.setUpdateAllFutureEvents(e.target.checked)
+                                }
+                            />
+                            Update all future instances
+                        </label>
+                    )}
+
+                    
                 </div>
             )}
             <label>Event Location:
@@ -241,48 +226,9 @@ function EventsFunction(props) {
                     onChange={(e) => handleDataChange("eventLocation", e.target.value, props.setEventData)}
                 />
             </label>
-            {/* Field for notification 
-            <label>
-                <input
-                    className="checkbox"
-                    type="checkbox"
-                    checked={props.eventData.notify}
-                    onChange={(e) => handleEventDataChange("notify", e.target.checked, props.setEventData)}
-                />
-                Check this box to receive a notification
-            </label>
-            {props.eventData.notify && (
-                <label>
-                    <Select
-                        value={options.find((option) => option.value === props.eventData.notificationTime)}
-                        onChange={(selectedOption) => handleEventDataChange("notificationTime", selectedOption.value, props.setEventData)}
-                        options={[
-                            { value: "0", label: "At the time of the event" },
-                            { value: "sameDay", label: "same day" },
-                            { value: "60", label: "1 hour before" },
-                            { value: "120", label: "2 hours before" },
-                            { value: "1440", label: "1 day before" },
-                        ]}
-                        styles={{
-                            control: (provided) => ({
-                                ...provided,
-                                width: 170,
-                            }),
-                            menu: (provided) => ({
-                                ...provided,
-                                maxHeight: 150,
-                                overflowY: "auto",
-                            }),
-                            menuList: (provided) => ({
-                                ...provided,
-                                maxHeight: 150,
-                            }),
-                        }}
-                        menuPlacement="top"
-                    />
-                </label>
-            )}
-            */}
+            <ShareInput changeReceivers={changeReceivers({setReceivers: props.setReceivers})} resetReceivers={props.setTriggerResetReceivers}/>
+            {/* Field for notification */}
+            <NotificationInput data={props.eventData} setData={props.setEventData}/>
             <button className="btn btn-main" type="submit">
                 {props.selectedEvent ? "Save Changes" : "Add Event"}
             </button>

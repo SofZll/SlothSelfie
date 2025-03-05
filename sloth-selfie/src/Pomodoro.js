@@ -1,14 +1,9 @@
 import React, { useEffect, useContext } from 'react';
 import { useState } from 'react';
-import iconDark from './media/SlothDark.svg';
-import iconLight from './media/SlothLight.svg';
-import { StyleContext } from './StyleContext';
 import PomodoroTimer from './PomodoroTimer';
 import Swal from 'sweetalert2';
 
 function PomodoroFunction() {
-    const { updateStyles, updateIcon } = useContext(StyleContext);
-
     const [choiceSelection, setChoiceSelection] = useState('0');
 
     const [textStudio, setTextStudio] = useState('30');
@@ -309,19 +304,6 @@ function PomodoroFunction() {
         setTextCycles('');
         setTextStudio('');
     }
-
-    // change style page onload document
-    useEffect(() => {
-        updateStyles(true);
-        updateIcon(iconDark);
-
-        return () => {
-            updateStyles(false);
-            updateIcon(iconLight);
-        };
-    }, [updateIcon, updateStyles]);
-
-    
 
     return (
         <div className='div-pomodoro'>

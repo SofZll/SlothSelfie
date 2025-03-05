@@ -1,0 +1,68 @@
+const notificationSocket = {
+    registerHandlers: (socket, io, userSocketMap) => {
+        socket.on('authenticated', (isAuthenticated) => {
+            if (isAuthenticated) {
+                const session = socket.request.session;
+                console.log('Session data:', session); // Add logging to check the session data
+                if (session && session.username) {
+                    const username = session.username;
+                    if (!userSocketMap[username]) {
+                        userSocketMap[username] = [];
+                    }
+                    if (!userSocketMap[username].includes(socket.id)) {
+                        userSocketMap[username].push(socket.id);
+                    }
+                    console.log(`User authenticated: ${username} -> ${socket.id}`);
+                } else {
+                    console.log('Username not found in session');
+                }
+            } else {
+                console.log('User not authenticated');
+            }
+        });
+
+        socket.on('check', () => {
+            console.log('Checking socket');
+        })
+
+        socket.on('send-notification', (notif) => {
+            console.log('Received notification');
+            const { receivers, message } = notif;
+            const sender = socket.request.session.username;
+            console.log('Sender:', sender);
+            console.log('Receivers:', receivers);
+
+            receivers.forEach((receiver) => {
+                const receiverSocketId = userSocketMap[receiver];
+                if (receiverSocketId) {
+                    console.log(`Sending notification to ${receiver}: ${message}`);
+                    io.to(receiverSocketId).emit('notification', {
+                        title: 'New notification',
+                        sender: { username: sender },
+                        body: message,
+                    });
+                }
+            });
+        });
+
+        socket.on('disconnect', () => {
+            console.log('User disconnected');
+            const session = socket.request.session;
+            if (session && session.username) {
+                const username = session.username;
+                const userSockets = userSocketMap[username];
+
+                if (userSockets) {
+                    userSocketMap[username] = userSockets.filter(id => id !== socket.id);
+
+                    if (userSocketMap[username].length === 0) {
+                        delete userSocketMap[username];
+                    }
+                }
+                console.log(`User disconnected: ${username}`);
+            }
+        });
+    }
+}
+
+module.exports = notificationSocket;

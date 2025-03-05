@@ -111,7 +111,7 @@ body {
     background-color: #e7e7e7;
 }
 
-.mini-hub{
+.mini-forum{
     margin: 20px 0;
     display: block;
     width: 100%;
@@ -130,7 +130,7 @@ body {
     background-color: #FAF9F9;
 }
 
-.button-hub {
+.button-forum {
     width: 100%;
     height: 100%;
     font-size: 18px;
@@ -171,12 +171,12 @@ body {
         padding-left: 30px;
     }
 
-    .button-hub {
+    .button-forum {
         max-width: 500px;
         width: 90%;
     }
 
-    .button-hub:hover {
+    .button-forum:hover {
         background-color: #555b6e;
         font-size: 23px;
         transition: all 0.3s;

@@ -1,22 +1,42 @@
 import React, { useState, useEffect } from "react";
 import Select from 'react-select';
-import "./css/Hub.css";
+import "./css/Forum.css";
 import iconHeartEmpty from "./media/heartEmpty.svg";
 import iconHeartFull from "./media/heartFull.svg";
-import { calculateTime } from "./globalFunctions";
+import image from "./media/image.svg";
+import gif from "./media/gif.svg";
+//import video from "./media/video.svg";
+import maps from "./media/maps.svg";
+import camera from "./media/camera.svg";
+import { calculateTime, sortElements} from "./globalFunctions";
 import Swal from 'sweetalert2';
+import MapPreview from "./mapPreview";
 
-function Hub({ username }) {
+function ForumFunction({ username }) {
+    const sortingOptions = [
+        {value: 'mostRecent', label: 'Most Recent'},
+        {value: 'mostLiked', label: 'Most Liked'}
+    ];
+
     const [posts, setPosts] = useState([]);
     const [newPostText, setNewPostText] = useState('');
     const [newCommentText, setNewCommentText] = useState('');
     const [selectedPostId, setSelectedPostId] = useState(null);
-    const [sortingOption, setSortingOption] = useState('mostRecent');
+    const [sortingOption, setSortingOption] = useState(sortingOptions[0]);
     const [sharePost, setSharePost] = useState(null);
     const [showShare, setShowShare] = useState(false);
     const [userId, setUserId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [visiblePosts, setVisiblePosts] = useState(3);
+
+    const [inputImage, setInputImage] = useState(null);
+    const [inputGif, setInputGif] = useState(null);
+
+    const [longitude, setLongitude] = useState(null);
+    const [latitude, setLatitude] = useState(null);
+    const center = [latitude, longitude];
+    const [showMap, setShowMap] = useState(false);
+    const [chosen, setChosen] = useState(false);
 
     useEffect(() => {
         const getUserId = async () => {
@@ -42,11 +62,21 @@ function Hub({ username }) {
 
         fetchPosts();
         getUserId();
+    }, []);
+
+    useEffect(() => {
+        const sortedPosts = sortElements(posts, sortingOption.value);
+        setPosts(sortedPosts);
     }, [sortingOption]);
+
+    const bufferToBase64 = (buffer) => {
+        const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
+        return btoa(binary);
+    };
 
     const fetchPosts = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/hub/posts', {
+            const response = await fetch('http://localhost:8000/api/forum/posts', {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -57,7 +87,22 @@ function Hub({ username }) {
             if (response.ok){
                 const data = await response.json();
                 console.log('Posts:', data.posts);
-                const sortedPosts = sortPosts(data.posts, sortingOption);
+
+                const processedPosts = data.posts.map(post => {
+                    if (post.author.image?.data?.data) {
+                        const buffer = post.author.image.data.data;
+                        const base64Image = `data:${post.author.image.contentType};base64,${bufferToBase64(buffer)}`;
+                        post.author.imageUrl = base64Image;
+                    }
+                    if (post.image?.data?.data) {
+                        const buffer = post.image.data.data;
+                        const base64Image = `data:${post.image.contentType};base64,${bufferToBase64(buffer)}`;
+                        post.image = base64Image;
+                    }
+                    return post;
+                });
+
+                const sortedPosts = sortElements(processedPosts, sortingOption.value);
                 setPosts(sortedPosts);
             } else {
                 console.error('Error fetching posts');
@@ -75,20 +120,8 @@ function Hub({ username }) {
 
     const postsToShow = posts.slice(0, visiblePosts);
 
-    const sortPosts = (postsToSort, option) => {
-        const sortedPosts = [...postsToSort];
-        if (option === 'mostRecent') {
-            sortedPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
-        } else if (option === 'mostLiked') {
-            sortedPosts.sort((a, b) => b.likes.length - a.likes.length);
-        }
-        return sortedPosts;
-    };
-
     const handleSortChange = (option) => {
-        setSortingOption(option.value);
-        const sortedPosts = sortPosts(posts, option.value);
-        setPosts(sortedPosts);
+        setSortingOption(option);
     };
 
     const calculateComments = (comments) => {
@@ -115,7 +148,7 @@ function Hub({ username }) {
             }
 
             try {
-                const response = await fetch('http://localhost:8000/api/hub/update-content', {
+                const response = await fetch('http://localhost:8000/api/forum/update-content', {
                     method: 'PUT',
                     credentials: 'include',
                     headers: {
@@ -146,7 +179,7 @@ function Hub({ username }) {
             }
 
             try {
-                const response = await fetch('http://localhost:8000/api/hub/update-content', {
+                const response = await fetch('http://localhost:8000/api/forum/update-content', {
                     method: 'PUT',
                     credentials: 'include',
                     headers: {
@@ -219,11 +252,6 @@ function Hub({ username }) {
         setSharePost(post);
     };
 
-    const sortingOptions = [
-        {value: 'mostRecent', label: 'Most Recent'},
-        {value: 'mostLiked', label: 'Most Liked'}
-    ];
-
     const isLiked = (item) => {
         return item.likes.includes(userId);
     };
@@ -242,19 +270,25 @@ function Hub({ username }) {
                 return;
             }
 
-            const newPost = {
-                userId: userId,
-                text: newPostText,
-            };
-    
+
+            const newPost = new FormData();
+            newPost.append('userId', userId);
+            newPost.append('text', newPostText);
+            if (inputImage != null) {
+                newPost.append('image', document.getElementById('imageInput').files[0]);
+                console.log('Image:', document.getElementById('imageInput').files[0]);
+            }
+
+            if (latitude && longitude) {
+                newPost.append('latitude', latitude);
+                newPost.append('longitude', longitude);
+            }
+
             try {
-                const response = await fetch('http://localhost:8000/api/hub/new-post', {
+                const response = await fetch('http://localhost:8000/api/forum/new-post', {
                     method: 'POST',
                     credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(newPost),
+                    body: newPost,
                 });
     
                 if (response.ok) {
@@ -262,6 +296,8 @@ function Hub({ username }) {
                     console.log('New post:', data.post);
                     fetchPosts();
                     setNewPostText('');
+                    setInputImage(null);
+                    setShowMap(false);
                 } else {
                     console.error('Error posting');
                 }
@@ -280,7 +316,7 @@ function Hub({ username }) {
                 });
                 return;
             }
-    
+
             const newComment = {
                 userId: userId,
                 text: newCommentText,
@@ -288,7 +324,7 @@ function Hub({ username }) {
             };
 
             try {
-                const response = await fetch('http://localhost:8000/api/hub/new-comment', {
+                const response = await fetch('http://localhost:8000/api/forum/new-comment', {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
@@ -311,6 +347,45 @@ function Hub({ username }) {
         }
     };
 
+    const cameraClick = () => {
+        const cameraInput = document.getElementById('cameraInput');
+        cameraInput.click();
+        setChosen(true);
+    }
+
+    const imageClick = () => {
+        const imageInput = document.getElementById('imageInput');
+        imageInput.click();
+        setChosen(true);
+    }
+
+    const gifClick = () => {
+        console.log('GIF');
+    }
+
+    const mapsClick = () => {
+        getPosition();
+        setShowMap(!showMap);
+        setChosen(true);
+    }
+
+    const inputChange = (event, setState) => {
+        const file = event.target.files[0];
+        if (file) {
+            const fileUrl = URL.createObjectURL(file);
+            setState(fileUrl);
+        }
+    };
+
+    // geolocation
+    const getPosition = () => {
+        navigator.geolocation.getCurrentPosition((position) => {
+            setLatitude(position.coords.latitude);
+            setLongitude(position.coords.longitude);
+            console.log(latitude, longitude);
+        });
+    };
+
     return (
         <>
             {loading ? (
@@ -321,11 +396,48 @@ function Hub({ username }) {
             ) : (
                 <>
                     <div className="new-post">
-                        <textarea
-                            placeholder="What's on your mind?"
-                            value={newPostText}
-                            onChange={(e) => setNewPostText(e.target.value)}
-                        />
+                        <div className={`post-text ${inputImage ? "bigger" : ""} ${showMap ? "bigger2" : ""}`}>
+                            <textarea
+                                placeholder="What's on your mind?"
+                                value={newPostText}
+                                onChange={(e) => setNewPostText(e.target.value)}
+                            />
+                            {inputImage && (
+                                <>
+                                    <img className="input-image" src={inputImage} alt="inputImage" />
+                                    <span className="delete-image" onClick={() => {setInputImage(null); setChosen(false);}}>&times;</span>
+                                </>
+                            )}
+                            {showMap && latitude && longitude && (
+                                <>
+                                    <a href={`https://www.google.com/maps?q=${latitude},${longitude}`} className="link-map" target="_blank" rel="noopener noreferrer">Open on Google maps</a>
+                                    <MapPreview center={center} />
+                                    <span className="delete-map" onClick={() => {setShowMap(false); setChosen(false);}}>&times;</span>
+                                </>
+                            )}
+                            <div className="post-input">
+                                <img className="small-img" src={camera} alt="camera" onClick={() => !chosen && cameraClick()} />
+                                <input
+                                    id="cameraInput"
+                                    type="file" 
+                                    accept="image/*" 
+                                    capture="environment" 
+                                    onChange={(e) => inputChange(e, setInputImage)}
+                                    style={{ display: 'none' }}
+                                />
+                                <img className="smaller-img" src={image} alt="inputImage2" onClick={() => !chosen && imageClick()} />
+                                <input
+                                    id="imageInput"
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={(e) => inputChange(e, setInputImage)}
+                                    style={{ display: 'none' }}
+                                />
+                                <img className="small-img"src={gif} alt="gif" onClick={() => !chosen && gifClick()} />
+                                {/* da implementare */}
+                                <img className="smaller-img" src={maps} alt="maps" onClick={() => !chosen && mapsClick()} />
+                            </div>
+                        </div>
                         <button className="btn btn-main" onClick={() => handleNewContent()}>Post</button>
                     </div>
                     <div className="posts-list">
@@ -337,6 +449,7 @@ function Hub({ username }) {
                                 onChange={handleSortChange}
                                 options={sortingOptions}
                                 isSearchable={false}
+                                classNamePrefix="custom-select"
                             />
                         </div>
                         {posts && posts.length > 0 ? (
@@ -344,10 +457,22 @@ function Hub({ username }) {
                                 {postsToShow.map((post) => (
                                     <div key={post._id} className="post">
                                         <div className="post-title">
-                                            <h3>{post.author.username}</h3>
+                                            <div className="user-info">
+                                                <img src={post.author.imageUrl} alt="user" />
+                                                <h3>{post.author.username}</h3>
+                                            </div>
                                             <p>{calculateTime(post.date)}</p>
                                         </div>
                                         <p>{post.text}</p>
+                                        {post.image && (
+                                            <img className="post-image" src={post.image} alt="post" />
+                                        )}
+                                        {post.location.latitude && post.location.longitude && (
+                                            <>
+                                                <a href={`https://www.google.com/maps?q=${post.location.latitude},${post.location.longitude}`} className="link-map" target="_blank" rel="noopener noreferrer">Open on Google maps</a>
+                                                <MapPreview center={[post.location.latitude, post.location.longitude]} id={post._id} isPost="true" />
+                                            </>
+                                        )}
                                         <div className="post-functions">
                                             <span className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post._id)}>
                                                 {post.likes ? post.likes.length : 0}
@@ -416,4 +541,4 @@ function Hub({ username }) {
     )
 };
 
-export default Hub;
+export default ForumFunction;

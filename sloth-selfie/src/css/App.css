@@ -44,6 +44,7 @@ body {
   margin: 0;
   padding: 5px;
   z-index: 900;
+  gap: 1rem;
 }
 
 .title {
@@ -52,7 +53,7 @@ body {
   align-items: center;
 }
 
-h1 {
+.App-header h1 {
   white-space: nowrap;
   font-size: 10vmin;
   color: #fdffff;
@@ -72,7 +73,7 @@ h1 {
   justify-content: start;
   height: 100vh;
   width: 100%;
-  padding-top: 11vh;
+  padding-top: 10vh;
 }
 
 h2 {
@@ -81,8 +82,35 @@ h2 {
   font-weight: bold;
 }
 
+h6,
+h5 {
+  margin: 0;
+}
+
 p {
   font-size: 1rem;
+}
+
+input {
+  height: 40px;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+}
+
+textarea {
+  width: 90%;
+  height: 100px;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
 }
 
 /* Style Buttons */
@@ -141,9 +169,19 @@ p {
   background-color: #244476;
 }
 
-.btn-main:hover {
+.btn-main:hover,
+.btn-small-blue:hover {
   background-color: #222D52;
   color: #fff;
+}
+
+.btn-small-blue {
+  background-color: #244476;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 5px 10px;
 }
 
 .btn-arrows {
@@ -152,10 +190,10 @@ p {
 }
 
 .icon {
-  height: 15vmin;
-  max-height: 35px;
-  width: 15vmin;
-  max-width: 35px;
+  height: 10vmin;
+  max-height: 30px;
+  width: 10vmin;
+  max-width: 30px;
 }
 
 .icon-up {
@@ -212,10 +250,6 @@ p {
   transition: background-color 0s ease;
 }
 
-.dark-h1{
-  color: #222D52;
-}
-
 /* time machine */
 
 .div-time-machine {
@@ -231,7 +265,7 @@ p {
   height: 70px;
   border-radius: 50%;
   background-color: #F39252;
-  border: 2px solid #555B6E;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,6 +281,44 @@ p {
 
 .icon-time-machine {
   height: 40px;
+}
+
+/* custom select */
+
+.custom-select__control {
+  width: 150px;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.custom-select__menu {
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.custom-select__menu-list {
+  max-height: 120px;
+  overflow-y: hidden !important;
+}
+
+.custom-select__value-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-select__single-value {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1;
 }
 
 /* loading page */
@@ -281,6 +353,12 @@ p {
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 15px;
+}
+
+/*burger*/
+.bm-burger-bars {
+  height: 5px !important;
+  background: #F9F9F9;
 }
 
 @keyframes spin {
@@ -383,7 +461,7 @@ p {
 
 @media screen and (min-width: 700px){
   .title h1 {
-    font-size: 7vmin;
+    font-size: 6vmin;
     padding-right: 1vmin;
   }
   
@@ -402,6 +480,14 @@ p {
   .popup,
   .popup-delete {
     top: 50%;
+  }
+
+
+  .icon {
+    height: 15vmin;
+    max-height: 35px;
+    width: 15vmin;
+    max-width: 35px;
   }
 }
 

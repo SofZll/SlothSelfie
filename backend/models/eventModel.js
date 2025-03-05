@@ -18,6 +18,10 @@ const eventSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    isPreciseTime: {
+        type: Boolean,
+        default: false,
+    },
     duration: {
         type: Number,
         required: true,
@@ -34,7 +38,7 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         default: null,
     },
-    EventLocation: {
+    eventLocation: {
         type: String,
         default: null,
     },
@@ -42,7 +46,19 @@ const eventSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
-    }
+    },
+    notify: {
+        type: Boolean,
+        default: false
+    },
+    notificationTime: {
+        type: Number,
+        default: 0
+    },
+    sharedWith: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }]
 }, { timestamps: true });
 
 const Event = mongoose.model('Event', eventSchema);

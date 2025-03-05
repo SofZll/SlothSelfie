@@ -1,4 +1,4 @@
-function calculateTime(dateTime) {
+export function calculateTime(dateTime) {
     const parsedDate = new Date(dateTime);
     if (isNaN(parsedDate)) {
         return 'Invalid date';
@@ -19,4 +19,22 @@ function calculateTime(dateTime) {
     }
 };
 
-export { calculateTime };
+// for sorting elements, currently used for posts and notifications
+export function sortElements(elements, option) {
+    const sortedElements = [...elements];
+    if (option === 'mostRecent') {
+        sortedElements.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else if (option === 'mostLiked') {
+        sortedElements.sort((a, b) => b.likes.length - a.likes.length);
+    }
+    return sortedElements;
+};
+
+export const changeReceivers = ({ setReceivers }) => (newReceivers) => {
+    setReceivers(newReceivers);
+};
+
+export const resetReceivers = (setReceivers, setTriggerResetReceivers) => {
+    setReceivers([]);
+    setTriggerResetReceivers(prev => prev+1);
+};

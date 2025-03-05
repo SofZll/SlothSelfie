@@ -9,22 +9,20 @@ TODO:
 
     // Calendar
     - Connect events and notifications
-    - Add shared events - AGGIUNGERE ARRAY USERID PER EVENTI E ATTIVITÀ
     - Accept or reject events trough notifications
     - User time settings
-    - Configure icalendar, google calendar, mail and apple calendar
+    - Configure icalendar, google calendar, mail and apple calendar // da rileggere
     - Resources as users
     - Manager user
     - Notifications with urgent levels
-    - Shared Activities
     - Gli eventi e le attività devono essere efficaci e possono essere modificati insieme
-
-    // Notes
-    - If an item has a deadline, it should automatically be added to the calendar
 
     // Pomodoro
     - Linking pomodoro to calendar - cicles not done should be added to the next day
     - Add pomodoro notification
+
+    // Note
+    - If an item has a deadline, it should automatically be added to the calendar
 
     // Notifications
     - Notifications for events and activities - if the user accepts the event or activity is added to the calendar
@@ -33,8 +31,14 @@ TODO:
     // Other
     - Aggiungere i loading anche per il calendario e le note
     - Google login
+    - Sincronizza note e calendario in preview
+    - nel forum quando clicchi l'immagine si ingrandisce
 FIX:
     - Time machine ON events and activities popup
 
 DONE:
     - Hub back
+    - Add shared events - AGGIUNGERE ARRAY USERID PER EVENTI E ATTIVITÀ
+    - Shared Activities
+    - Gli utenti possono indicare certi intervalli di tempo (anche ripetuti) come non disponibili per eventi di gruppo
+

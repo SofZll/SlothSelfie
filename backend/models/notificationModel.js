@@ -11,11 +11,16 @@ const notificationSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    type: {
+        type: [String],
+        enum: ['email', 'OS'],
+        default: ['OS'],
+    },
     message: {
         type: String,
         required: true,
     },
-    date: {
+    createdAt: {
         type: Date,
         required: true,
     },
@@ -23,14 +28,22 @@ const notificationSchema = new mongoose.Schema({
         type: [Boolean],
         required: false,
     },
-    activity: {
+    element: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Activity',
+        refPath: 'elementType',
         required: false,
     },
-    event: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event',
+    elementType: {
+        type: String,
+        required: false,
+        enum: ['Event', 'Activity'],
+    },
+    dateNotif: {
+        type: Date,
+        required: false,
+    },
+    frequencyNotif: {
+        type: String,
         required: false,
     },
     responses: [{
