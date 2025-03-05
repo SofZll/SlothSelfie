@@ -1,187 +1,325 @@
 
 import Swal from 'sweetalert2';
-import { handleAddActivity } from './ActivityUtils';
+import { handleAddData, handleDeleteData } from './CalendarUtils';
 
+//TODO: Move to globalFunctions.js
 //Function to fetch notes from the server
-export async function fetchNotes(setNotes) {
+export async function fetchNotes() {
   try {
-      //const response = await fetch('/api/notes', {
-      //locale:
-      const response = await fetch('http://localhost:8000/api/notes', {
-          method: 'GET',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-      });
+    
+    const response = await fetch('http://localhost:8000/api/notes', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      if (!response.ok) {
-          throw new Error('Network response was not ok');
-      }
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
 
-      const data = await response.json();
-      console.log(data);
-      if (Array.isArray(data.notes)) {
-          setNotes(data.notes);
-      } else {
-          console.error('La risposta non contiene un array di note:', data);
-      }
+    const data = await response.json();
+    if (Array.isArray(data.notes)) {
+      return data.notes;
+    } else {
+      console.error('La risposta non contiene un array di note:', data);
+      return [];
+    }
   } catch (error) {
-      console.error('Errore if fetching di notes:', error);
+    console.error('Errore if fetching di notes:', error);
   }
 };
 
+//TODO: Move to globalFunctions.js
 // Function to handle changes in note data
 export function handleNoteDataChange (field, value, setNoteData) {
   setNoteData((prevData) => ({
       ...prevData,
       [field]: value
   }));
-  };
+};
 
 export function canUserAccess(note, currentUser) {
   
-    if (!note.noteAccess) {
-        return false; // if no access is defined, the note is private
-    }
-    if (note.noteAccess === 'public') {
-      return true;  // open to everyone
-    }
-    if (note.noteAccess === 'private') {
-      return note.noteAuthor === currentUser;  //only the author can access
-    }
-    if (note.noteAccess === 'restricted') {
-        //Verify if allowedUsers is an array and if it contains the current user
-        return Array.isArray(note.allowedUsers) && 
-               note.allowedUsers.includes(currentUser);
-    }
-
+  if (!note.noteAccess) {
     return false;
+  } else if (note.noteAccess === 'public') {
+    return true;
+  } else if (note.noteAccess === 'private') {
+    return note.user.username === currentUser;
+  } else if (note.noteAccess === 'restricted') {
+    console.log("Allowed users:", note.allowedUsers);
+    return Array.isArray(note.allowedUsers) && (note.allowedUsers.includes(currentUser) || note.user.username === currentUser);
   }
 
-  export function addTask(taskText, noteData, setNoteData) {
+  return false;
+}
 
-    if (!Array.isArray(noteData.tasks)) {
-      noteData.tasks = [];
+export async function addTask(taskText, noteData, setNoteData, taskDeadline) {
+
+  if (!Array.isArray(noteData.tasks)) {
+    handleNoteDataChange('tasks', [], setNoteData);
+  }
+
+  const newTask = {
+    text: taskText,
+    completed: false,
+    deadline: taskDeadline !== null ? new Date(taskDeadline) : null
+  };
+
+  try {
+    const response = await fetch('http://localhost:8000/api/task', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newTask)
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while adding task');
     }
-  
-    const newTask = {
-      id: noteData.tasks.length,
-      text: taskText,
-      completed: false,  // every new task is not completed
-      deadline: noteData.taskDeadline || null //if specified we create an activity
-    };
 
-    // Aggiorna noteData con il nuovo task
-    setNoteData(prevNoteData => ({
-      ...prevNoteData,
-      tasks: [...prevNoteData.tasks, newTask],
-      taskDeadline: ''
-    }));
+    
+    const savedTask = await response.json();
+    if (savedTask) {
+      setNoteData(prevNoteData => ({
+        ...prevNoteData,
+        tasks: [...prevNoteData.tasks, savedTask]
+      }));
+    }
+  } catch (error) {
+    console.error('Error while adding task:', error);
+  }
+}
+
+export async function removeTask(taskIndex, noteData, setNoteData) {
+
+  if (!Array.isArray(noteData.tasks)) {
+    console.error('Tasks array not found');
+    return;
   }
 
-  export function removeTask(taskIndex, noteData, setNoteData) {
-    const updatedTasks = noteData.tasks.filter((task, i) => i !== taskIndex);
+  if (taskIndex < 0 || taskIndex >= noteData.tasks.length) {
+    console.error('Invalid task index:', taskIndex);
+    return;
+  }
+
+  const taskToDelete = noteData.tasks[taskIndex];
+  if (!taskToDelete) {
+    console.error('Task not found:', taskIndex);
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/task/${taskToDelete._id}`, {
+      method: 'DELETE',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while deleting task');
+    }
+
+
     setNoteData(prevNoteData => ({
       ...prevNoteData,
-      tasks: updatedTasks
+      tasks: prevNoteData.tasks.filter((task, i) => i !== taskIndex)
     }));
+  } catch (error) {
+    console.error('Error while deleting task:', error);
+  }
 };
 
-//marks a task as completed
-export function toggleTaskCompletion(taskIndex, noteData, setNoteData) {
-  const updatedTasks = noteData.tasks.map((task, i) =>
-    i === taskIndex ? { ...task, completed: !task.completed } : task
-  );
-  handleNoteDataChange('tasks', updatedTasks, setNoteData);
+//TODO inserire logica di aggiunta/rimozione task da calendar con toggle diretto (anche in preview), da fare anche con duplicate di nota e delete di nota
+export async function toggleTaskCompletion(taskIndex, noteData, setNoteData = null) {
+  
+  if (!Array.isArray(noteData.tasks)) {
+    console.error('Tasks array not found');
+    return null;
+  }
+
+  if (taskIndex < 0 || taskIndex >= noteData.tasks.length) {
+    console.error('Invalid task index:', taskIndex);
+    return null;
+  }
+
+  const taskToToggle = noteData.tasks[taskIndex];
+  if (!taskToToggle) {
+    console.error('Task not found:', taskIndex);
+    return null;
+  }
+  console.log('Task to toggle:', taskToToggle._id);
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/task/complete/${taskToToggle._id}`, {
+      method: 'PUT',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while updating task');
+    }
+
+    const updatedTask = await response.json();
+    if (updatedTask) {
+      if(setNoteData !== null) {
+        setNoteData(prevNoteData => ({
+          ...prevNoteData,
+          tasks: prevNoteData.tasks.map((task, i) => 
+            i === taskIndex ? updatedTask : task
+          )
+        }));
+      }
+      return updatedTask;
+    }
+  } catch (error) {
+    console.error('Error while updating task:', error);
+  }
+  
 };
+
+async function duplicateTasks (note) {
+
+  if (!note) {
+    console.error("Nota non trovata per l'ID:", note._id);
+    return;
+  }
+
+  const duplicateTask = [];
+
+  if (note.isTodo) {
+    console.log("Duplicating tasks...");
+    note.tasks.forEach(task => {
+      const newTask = {
+        ...task,
+        _id: null,
+        completed: false,
+      };
+      duplicateTask.push(newTask);
+    });
+  }
+
+  try {
+    const response = await fetch('http://localhost:8000/api/tasks', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tasks: duplicateTask })
+    });
+
+    if (!response.ok) {
+      throw new Error("Error while duplicating tasks");
+    }
+
+    const duplicatedTasks = await response.json();
+    if (duplicatedTasks) return duplicatedTasks;
+    else return [];
+
+  } catch (error) {
+    console.error("Errore durante la duplicazione dei task:", error);
+  }
+}
 
 export async function handleDuplicateNote (noteId, notes, setNotes) {
 
-    const noteToDuplicate = notes
-        .find(note => note._id === noteId);
+  const noteToDuplicate = notes.find(note => note._id === noteId);
 
-    if (!noteToDuplicate) {
-        console.error("Nota non trovata per l'ID:", noteId);
-        return;
-    }
+  if (!noteToDuplicate) {
+    console.error("Nota non trovata per l'ID:", noteId);
+    return;
+  }
 
-    const noteToDuplicateNoId = { ...noteToDuplicate, _id: null };
-    // creates a new note, the backend will assign a new id
-    const duplicatedNote = { 
-      ...noteToDuplicateNoId, 
-      createDate: new Date().toISOString(),
-      updateDate: new Date().toISOString(),
+  let duplicateTask = [];
+
+  if (noteToDuplicate.isTodo) {
+    duplicateTask = await duplicateTasks(noteToDuplicate);
+  }
+
+  const noteToDuplicateNoId = { ...noteToDuplicate, _id: null };
+
+  const duplicatedNote = { 
+    ...noteToDuplicateNoId,
+    tasks: duplicateTask,
+    createDate: new Date().toISOString(),
+    updateDate: new Date().toISOString(),
   };
 
-    try {
-        //const response = await fetch('/note', {
-        //locale:
-         const response = await fetch('http://localhost:8000/api/note', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(duplicatedNote)
-        });
+  try {
+    const response = await fetch('http://localhost:8000/api/note', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(duplicatedNote)
+    });
 
-        if (!response.ok) {
-            throw new Error("Error while duplicating note");
-        }
-        const savedNote = await response.json();
-        console.log("Saved duplicated note:", savedNote);
-
-        setNotes([...notes, savedNote]);
-        fetchNotes(setNotes);
-    } catch (error) {
-        console.error("Errore durante la duplicazione della nota:", error);
+    if (!response.ok) {
+      throw new Error("Error while duplicating note");
     }
-  };
+    const savedNote = await response.json();
+    console.log("Saved duplicated note:", savedNote);
 
-export async function handleDeleteNote(noteId, notes, setNotes) {
-    if (!noteId) 
-      console.error("ID della nota non trovato");
-
-    try {
-        const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error('Error while deleting note in backend');
-        }
-
-        //updating frontend
-        setNotes(notes.filter(note => note._id !== noteId));
-        fetchNotes(setNotes);
-    } catch (error) {
-        console.error('Errore durante l\'eliminazione della nota:', error);
-    }
+    setNotes([...notes, savedNote.note]);
+    fetchNotes(setNotes);
+  } catch (error) {
+    console.error("Errore durante la duplicazione della nota:", error);
+  }
 };
 
-export async function handleEditNote(noteId, notes, setNoteData, setIsEditing) {
-  const noteToEdit = notes
-        .find(note => note._id === noteId);
+//Function to handle the deletion of a note
+export async function handleDeleteNote(noteId, notes, setNotes) {
+  if (!noteId) {
+    console.error("ID della nota non trovato");
+    return;
+  }
 
-    if (!noteToEdit) {
-        console.error("Nota non trovata per l'ID:", noteId);
-        return;
+  try {
+    const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while deleting note in backend');
     }
 
-    console.log("Editing note with ID:", noteId);
-    console.log("Note data:", noteToEdit);
+    //updating frontend
+    setNotes(notes.filter(note => note._id !== noteId));
+  } catch (error) {
+    console.error('Errore durante l\'eliminazione della nota:', error);
+  }
+};
+
+export async function handleEditNote(noteToEdit, setNoteData, setIsEditing) {
+
+  if (!noteToEdit) {
+    console.error("Nota non trovata per l'ID:", noteToEdit._id);
+    return;
+  }
   
   setNoteData({
-      ...noteToEdit,
-      tasks: noteToEdit.tasks || [], // we prevent errors if undefined
-      allowedUsers: noteToEdit.allowedUsers || [] // we prevent errors if undefined
+    ...noteToEdit,
   });
-  
-  setIsEditing(noteId);
+
+  setIsEditing(noteToEdit._id);
 }
 
+//TODO: delete
 export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities) {
     console.log("ID della nota durante il salvataggio:", noteId);
 
@@ -198,34 +336,57 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
     // Before updating the note, check if there are tasks with deadlines to add as activities
     if (noteData.isTodo) {
       console.log("Adding tasks as activities...");
+
+      console.log("Stato delle activities:", activities);
       
-      noteData.tasks.forEach(task => {
-          if (task.deadline) {
-              // Verify if the activity already exists
-              const activityExists = activities.some(activity => activity.title === task.text && activity.deadline === task.deadline);
+  noteData.tasks.forEach(task => {
+    if (task.deadline) {
+      // check if the task is already an activity
+      const activityExists = activities.some(activity => 
+        activity.title === task.text && activity.deadline === task.deadline
+      );
 
-              if (!activityExists) {
-                  const activityData = {
-                      title: task.text,
-                      deadline: task.deadline,
-                  };
+      if (!task.completed && !activityExists) {
+        // add a new activity to the calendar
+        const activityData = {
+          title: task.text,
+          deadline: task.deadline,
+          type: 'activity',
+        };
 
-                  // Add the activity
-                  setActivities(prevActivities => [
-                      ...prevActivities,
-                      activityData
-                  ]);
-                  handleAddActivity(null, activityData, setActivities, noteData.noteAuthor);// TODO DA AGGIUSTARE
-              } else {
-                  console.log(`Activity for task "${task.text}" already exists.`);
-              }
-          }
-      });
-  }
+        setActivities(prevActivities => [
+          ...prevActivities,
+          activityData
+        ]);
+        console.log("Adding activity:", activityData);
+
+        handleAddData(null, activityData, setActivities, activities, setActivities, setIsEditing);
+
+      } else if (task.completed && activityExists) {
+        console.log("Stato delle activities:", activities);
+        // remove the activity from the calendar
+        const activityToDelete = activities.find(activity => 
+          activity.title === task.text && activity.deadline === task.deadline
+        );
+
+        if (activityToDelete) {
+          console.log("Attività da eliminare:", activityToDelete);
+          setActivities(prevActivities => 
+            prevActivities.filter(activity => activity._id !== activityToDelete._id)
+          );
+          handleDeleteData( 'activity', activityToDelete._id, activities, setActivities);
+          console.log(`Attività per il task "${task.text}" è stata eliminata.`);
+        }
+      } else {
+        console.log(`No change for task "${task.text}", skipping.`);
+      }
+    }
+  });
+}
     const updatedNote = {
       ...noteToUpdate.note,
       title: noteData.title,
-      noteAuthor: noteData.noteAuthor,
+      user: noteData.user,
       noteAccess: noteData.noteAccess, 
       allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [], // Add allowed users if restricted
       category: noteData.category,
@@ -266,7 +427,12 @@ export async function handleSaveEdit(noteId, notes, setNotes, noteData, setNoteD
   }
 };
 
+//Function to sort the nots for the selected sort criterion
 export function sortNotes(notes, sortCriterion) {
+  if (!Array.isArray(notes)) {
+    console.error('Notes array not found');
+    return [];
+  }
   return [...notes].sort((a, b) => {
     const aDate = a.updateDate instanceof Date ? a.updateDate : new Date(a.updateDate);
     const bDate = b.updateDate instanceof Date ? b.updateDate : new Date(b.updateDate);
@@ -290,15 +456,259 @@ export function sortNotes(notes, sortCriterion) {
   });
 }
 
-  export function handleCopyContent(content) {
-    navigator.clipboard.writeText(content).then(() => {
-      Swal.fire({
-        title: 'Content copied',
-        icon: 'success',
-        text: 'The note content has been copied to the clipboard',
-        customClass: {
-          confirmButton: 'button-alert'
+//Function to handle resetting fields of the form
+export async function handleResetForm (setNoteData) {
+  handleNoteDataChange('title', '', setNoteData);
+  handleNoteDataChange('category', '', setNoteData);
+  handleNoteDataChange('content', '', setNoteData);
+  handleNoteDataChange('noteAccess', 'public', setNoteData);
+  handleNoteDataChange('isTodo', false, setNoteData);
+  handleNoteDataChange('tasks', [], setNoteData);
+}
+
+//Function to handle the addition/deletion-by-toggle of tasks to the calendar as activities if they have a deadline TODO DEBUGGARE e rivedere la logica
+export async function ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers ) {
+  console.log("Stato delle activities2:", activities);
+  
+  if (!Array.isArray(activities)) {
+    console.error("activities is not an array", activities);
+  }
+
+  noteData.tasks.forEach(task => {
+    if (task.deadline) {
+      // Check if the task is already an activity
+      const activityExists = activities.some(activity => 
+        activity.title === task.text && activity.deadline === task.deadline
+      );
+
+      if (!task.completed && !activityExists) {
+        // Add a new activity to the calendar
+        const activityData = {
+          title: task.text,
+          deadline: task.deadline,
+          //completed: false,
+          //user: noteData.user,
+          //notify: false, //
+          //notificationTime: 0,
+          //sharedWith: [], //
+          type: 'activity',
+        };
+        /*
+        setActivities(prevActivities => {
+          const updatedActivities = [...prevActivities, activityData];
+          console.log("Nuovo stato activities:", updatedActivities); // Log corretto
+          return updatedActivities;
+        });
+        */
+
+        setActivities(prevActivities => [
+          ...prevActivities,
+          activityData
+        ]);
+
+        console.log("Adding activity:", activityData);
+
+        console.log("Stato delle activities prima di handleAddData:", activities);
+
+        // Handle adding the activity data to the calendar
+        handleAddData(null, activityData, setActivities, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers);
+        console.log("Stato delle activities dopo handleAddData :", activities);
+      } else if (task.completed && activityExists) {
+        console.log("Stato delle activities 1.3:", activities);
+
+        // Remove the activity from the calendar if the task is completed
+        const activityToDelete = activities.find(activity => 
+          activity.title === task.text && activity.deadline === task.deadline
+        );
+
+        if (activityToDelete) {
+          console.log("Attività da eliminare:", activityToDelete);
+          setActivities(prevActivities => 
+            prevActivities.filter(activity => activity._id !== activityToDelete._id)
+          );
+          handleDeleteData('activity', activityToDelete._id, activities, setActivities);
+          console.log(`Attività per il task "${task.text}" è stata eliminata.`);
         }
-      });
+      } else {
+        console.log(`No change for task "${task.text}", skipping.`);
+      }
+    }
+  });
+}
+
+
+//Function to handle the creation of a new note
+export async function handleAddNote (noteData, setNoteData, notes, setNotes, setIsEditing, activities, setActivities, receivers, setReceivers, setTriggerResetReceivers) {
+
+  if (!noteData.title || !noteData.category) {
+    popUpAlert('Add Note Error', 'Missing required fields', 'error');
+    console.log(noteData);
+    return;
+  }
+  
+  if (noteData.isTodo && noteData.tasks.length === 0) {
+    popUpAlert('Add Note Error', 'Please add at least one task to your to-do list', 'error');
+    return;
+  } else if (!noteData.isTodo && (!noteData.content || noteData.content.trim() === "")) {
+    popUpAlert('Add Note Error', 'Please add content to your note', 'error');
+    return;
+  }
+
+  // Before adding the note, check if there are tasks with deadlines to add as activities
+  if (noteData.isTodo) {
+    console.log("Adding tasks as activities...");
+    console.log("Stato delle activities prima di ManageTasksAsActivities:", activities);
+    ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers);
+  }
+
+  const newNote = {
+    ...noteData,
+    user: noteData.user,
+    content: noteData.content.trim(),
+    allowedHost: noteData.noteAccess === 'restricted' ? noteData.allowedHost : [],
+    tasks: noteData.isTodo 
+    ? noteData.tasks.map(task => (task._id)) : [],
+    createDate: noteData.createDate ? new Date(noteData.createDate) : new Date(),
+    updateDate: noteData.updateDate ? new Date(noteData.updateDate) : new Date(),
+  }
+
+
+  try {
+    const response = await fetch('http://localhost:8000/api/note', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newNote)
     });
+
+    if (!response.ok) {
+      throw new Error('Errore nella creazione della nota');
+    }
+
+    // Get the saved note from the backend
+    const savedNote = await response.json();
+
+    if (savedNote) {
+      setNotes([...notes, savedNote.note ]);
+      handleResetForm(setNoteData);
+    }
+  } catch(error) {
+    console.error('Error while adding note:', error);
+  }
+
+}
+
+//Function to save the edit of a note
+export async function handleSaveEditNote(noteId, notes, setNotes, noteData, setNoteData, setIsEditing, activities, setActivities, receivers, setReceivers, setTriggerResetReceivers) {
+
+  const noteToUpdate = notes.find(note => note._id === noteId);
+
+  if (!noteToUpdate) {
+    console.error("Nota non trovata");
+    return;
+  }
+
+// Before updating the note, check if there are tasks with deadlines to add as activities
+if (noteData.isTodo) {
+  console.log("Adding tasks as activities...");
+  console.log("Stato delle activities1:", activities);
+  ManageTasksAsActivities(noteData, activities, setActivities, setIsEditing, receivers, setReceivers, setTriggerResetReceivers);
+}
+
+  const updatedNote = {
+    ...noteToUpdate.note,
+    title: noteData.title,
+    user: noteData.user,
+    noteAccess: noteData.noteAccess,
+    allowedUsers: noteData.noteAccess === 'restricted' ? noteData.allowedUsers : [],
+    category: noteData.category,
+    content: noteData.content,
+    tasks: noteData.isTodo 
+    ? noteData.tasks.map(task => ({ 
+      ...task,
+      completed: task.completed || false,
+      deadline: task.deadline || null
+    })) : [],
+    updateDate: new Date()
   };
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedNote)
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while updating note');
+    }
+
+    const savedNote = await response.json();
+
+
+    if (savedNote) {
+      const updatedNotes = notes.map(note =>
+        note._id === noteId ? savedNote.note : note
+      );
+      setNotes(updatedNotes);
+      setIsEditing(null);
+      handleResetForm(setNoteData);
+    }
+  } catch (error) {
+    console.error('Error while saving note:', error);
+  }
+};
+
+export function handleCopyContent(content, toDoList) {
+  let copiedContent = content;
+
+  if (toDoList) {
+    copiedContent += '\n\nTasks:\n';
+    toDoList.forEach((task, i) => {
+      copiedContent += `${i + 1}. ${task.text} ${task.completed ? '(completed)' : ''}\n`;
+    });
+  }
+
+  navigator.clipboard.writeText(copiedContent).then(() => {
+    popUpAlert('Contenuto copiato', 'Il contenuto è stato copiato negli appunti', 'success');
+  });
+};
+
+function popUpAlert(title, message, icon) {
+  Swal.fire({
+    title: title,
+    icon: icon,
+    text: message,
+    customClass: {
+      confirmButton: 'button-alert'
+    }
+  });
+}
+
+// Get the username of the authenticated user
+export async function fetchUsername() {
+  try {
+    const response = await fetch('http://localhost:8000/api/user/username', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Error while fetching user');
+    }
+
+    const data = await response.json();
+    return data.username;
+  } catch (error) {
+    console.error('Error while fetching user:', error);
+  }
+}
+

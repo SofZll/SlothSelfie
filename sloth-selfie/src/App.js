@@ -9,29 +9,34 @@ import NotificationFunction from './Notifications';
 import Form from './Login';
 import Card from "./cardCarosel";
 import Carousel from "./CarouselHome";
+import iconDark from './media/SlothDark.svg';
 import { v4 as uuidv4 } from "uuid";
 import { StyleContext, StyleProvider } from './StyleContext';
 import Menu from './Menu';
 import ProfileFunction from './Profile';
-import HubFunction from './Hub';
+import ForumFunction from './Forum';
 import TimeMachine from './TimeMachine';
-import iconTimeMachine from './media/time-machine.svg';
-import { ActivityProvider } from './ActivityContext';
 import socket from './socket';
+import 'leaflet/dist/leaflet.css';
+import Swal from 'sweetalert2';
+import { ActivityProvider } from './ActivityContext';
+import ChatBox from './ChatBox';
+import { useMediaQuery } from 'react-responsive';
 
 function App() {
   const [loading, setLoading] = useState(true);
 
-  const [machineOpen, setMachineOpen] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
-  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formType, setFormType] = useState('login');
 
   const [inSettings, setInSettings] = useState(false);
+
+  const [profileData, setProfileData] = useState({
+    username: '',
+    profile_image: ''
+  });
+
+  const isDesktop = useMediaQuery({ minWidth: 769 });
 
   // Check if the user is authenticated
   const checkAuth = async () => {
@@ -44,6 +49,8 @@ function App() {
       if (response.ok) {
         setIsAuthenticated(true);
         socket.emit('authenticated', true);
+        console.log('User authenticated');
+        // registerServiceWorker();
       } else setIsAuthenticated(false);
     } catch (error) {
       console.error('Error checking authentication:', error);
@@ -57,41 +64,74 @@ function App() {
   useEffect(() => {
     checkAuth();
 
+    socket.on('notification', (newNotif) => {
+      console.log('New notification received:', newNotif);
+      
+      const notification = new Notification(newNotif.title, {
+        body: newNotif.body,
+        //icon: newNotif.icon,
+        //badge: newNotif.badge,
+        sender: newNotif.sender,
+        type: newNotif.type,
+      });
+
+      notification.onclick = () => {
+        console.log('Notification clicked');
+        Swal.fire({
+          title: newNotif.title,
+          text: newNotif.body,
+          icon: 'info',
+          confirmButtonText: 'Ok',
+        });
+      }
+    });
+
     return () => {
-      socket.off('authenticated');
+      socket.off("notification");
     }
   }, []);
+
+  // Since the image is stored a Buffer we need to convert it to base64
+  let base64Image = '';
+  const bufferToBase64 = (buffer) => {
+    const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
+    return btoa(binary);
+  };
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/user/profile`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.user) {
+          if (data.user.image?.data?.data) {
+            const buffer = data.user.image.data.data;
+            base64Image = `data:${data.user.image.contentType};base64,${bufferToBase64(buffer)}`;
+          }
+
+          setProfileData({
+            username: data.user.username || '',
+            profile_image: base64Image
+          });
+
+          console.log('Profile data:', data.user);
+        }
+      } catch (error) {
+          console.error('Error fetching profile data:', error);
+      }
+    };
+
+    fetchProfileData();
+  }, []); 
   
   const handleLogin = (status) => {
     console.log("Login status:", status);
     setIsAuthenticated(status);
-  };
-
-  /*
-  // Function to open the app in fullscreen mode
-  const openFullscreen = () => {
-    const elem = document.documentElement; // L'intero documento sarà a schermo intero
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if (elem.mozRequestFullScreen) { // Firefox
-      elem.mozRequestFullScreen();
-    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari e Opera
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { // IE/Edge
-      elem.msRequestFullscreen();
-    }
-  };
-  */
-
-  const isMobileLandscape = () => {
-    const isMobileWidth = window.matchMedia('(max-width: 700px)').matches; // Soglia di 500px per modalità cellulare
-    const isLandscapeHeight = window.matchMedia('(max-height: 700px').matches;
-    const isLandscapeWidth = window.matchMedia('(max-width: 1000px').matches;
-    return isMobileWidth || (isLandscapeHeight && isLandscapeWidth);
-  };
-
-  const isMobile = () => {
-    return window.matchMedia('(max-width: 700px)').matches;
   };
 
   let cards = [
@@ -121,65 +161,47 @@ function App() {
     }
   ];
 
-  // Functions to update time machine position based on screen size
-  const updatePosition = () => {
-    if (isMobile()) {
-      const initialX = window.innerWidth * 0.8;
-      const initialY = window.innerHeight * 0.8;
-      setPosition({ x: initialX, y: initialY });
-    } else {
-      setPosition({ x: window.innerWidth * 0.9, y: window.innerHeight * 0.03 });
-    }
-  };
-
-  useEffect(() => {
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-    }
-  }, []);
-
+  /* RICORDATI DI RIGUARDARE CHECK-AUTH NON FUNZIONA 
+  if ("Notification" in window && navigator.serviceWorker) {
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        console.log("Notifiche attivate!");
+      }
+    });
+  }
   
+  const registerServiceWorker = async () => {
+    if ('serviceWorker' in navigator && isAuthenticated) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js')
+        console.log('Service Worker registrato con successo:', registration);
 
-  // Function to show and close the time machine
-  const toggleTimeMachine = () => {
-    setMachineOpen(prevState => !prevState);
-  };
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          return subscription;
+        }
 
-  // Touch events for time machine
-  const handleTouchStart = (e) => {
-    const touch = e.touches[0];
-    setStartPosition({ x: touch.clientX, y: touch.clientY });
-    setIsDragging(false);
-  };
+        const newSubscription = registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: 'BNI2252O4XvM3IAQ_jF_U-dY_XZG3swWR60TYnUhBF-lTWhOWc2EvkBqaVceiQiF6xu89K8WCAPye4xf6e23EsE'
+        });
+        console.log('Subscription:', newSubscription);
 
-  const handleTouchMove = (e) => {
-    const touch = e.touches[0];
-    
-    // Calculate delta for better performance
-    const deltaX = touch.clientX - startPosition.x;
-    const deltaY = touch.clientY - startPosition.y;
-
-    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-      setIsDragging(true);
-
-      setPosition(prevPos => ({
-        x: prevPos.x + deltaX,
-        y: prevPos.y + deltaY,
-      }));
-
-      setStartPosition({ x: touch.clientX, y: touch.clientY });
+        await fetch('http://localhost:3000/api/subscribe', {
+          method: 'POST',
+          credentials: 'include',
+          body: JSON.stringify(subscription),
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+      } catch (error) {
+        console.error('Error registering service worker:', error);
+      }
     }
   };
+  */
 
-  const handleTouchEnd = (e) => {
-    if (!isDragging) {
-      toggleTimeMachine();
-    }
-  };
-  
   return (
     <Router>
       <StyleProvider>
@@ -191,11 +213,18 @@ function App() {
             </div>
           ) : (
             <div className="App">
-              <Menu/>
-              <TimeMachine isOpen={machineOpen} onClose={() => setMachineOpen(false)} />
+              <Menu profileData={profileData}/>
+              <TimeMachine />
+              {isDesktop && <ChatBox username={profileData.username} /> }
               <header className="App-header">
                   <div className="title">
-                    <h1>Sloth Selfie</h1>
+                  <StyleContext.Consumer>
+                    {({ icon }) => (
+                      <h1 style={{ color: icon === iconDark ? '#222D52' : '#FAF9F9' }}>
+                        Sloth Selfie
+                      </h1>
+                    )}
+                  </StyleContext.Consumer>
                   </div>
                   <StyleContext.Consumer>
                     {({ icon }) => <img src={icon} className="App-logo" alt="logo" />}
@@ -240,28 +269,15 @@ function App() {
                   <Route path="/notifications" element={<NotificationFunction />} />
                   <Route path="/pomodoro" element={<PomodoroFunction />} />
                   <Route path="/notes" element={<NotesFunction />} />
-                  <Route path="/Calendar" element={<Calendar />} />
-                  <Route path="/hub" element={<HubFunction />} />
+                  <Route path="/calendar" element={<Calendar />} />
+                  <Route path="/forum" element={<ForumFunction />} />
+                  {!isDesktop && (
+                    <>
+                      <Route path="/chat" element={<ChatBox username={profileData.username} chatId={null} />} />
+                      <Route path="/chat/:chatId" element={<ChatBox username={profileData.username} />} />
+                    </>
+                  )}
                 </Routes>
-                {/* time machine */}
-                <div
-                  className="div-time-machine"
-                  style={{
-                    left: `${position.x}px` ,
-                    top: `${position.y}px` ,
-                  }}
-                >
-                  <button
-                    className="btn-time-machine"
-                    onTouchStart={isMobileLandscape() ? handleTouchStart : null}
-                    onTouchMove={isMobileLandscape() ? handleTouchMove : null}
-                    onTouchEnd={isMobileLandscape() ? handleTouchEnd : null}
-                    onClick={!isMobileLandscape() ? toggleTimeMachine : null} // Enable click on desktop
-                    style={{ touchAction: 'none' }}
-                  >
-                    <img src={iconTimeMachine} alt="icon" className="icon" />
-                  </button>
-                </div>
               </div>
             </div>
           )}

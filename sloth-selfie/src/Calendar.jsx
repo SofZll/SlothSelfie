@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useContext} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import 'react-calendar/dist/Calendar.css';
@@ -6,28 +6,18 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './css/App.css';
 import './css/Calendar.css';
 import moment from 'moment';
-import { StyleContext } from './StyleContext';
-import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop } from './CalendarUtils';
+import { handleDataChange, normalizeData, updateOverdueActivities, handleAbortDelete, handleConfirmDelete, handleClosePopup, fetchData, handleFillForm, handleUpdateDataOnDrop, handleDeleteRepeatedEvent } from './CalendarUtils';
 import EventsFunction from './Events';
 import ActivitiesFunction from './Activities';
-import iconDark from './media/SlothDark.svg';
-import iconLight from './media/SlothLight.svg';
 import iconBack from './media/leftBackArrow.svg';
+import CalendarNoAvailability from './CalendarNoAvailability';
 
-//TODO: edit di eventi ripetuti: non vanno edit e delete di updateAllFutureInstances e non aggiorna time e duration
-//IL PROBLEMA STA NEI 3 CAMPI <- CHE RISULTANO UNDEFINED
-//IL PROBLEMA STA NEL FETCH DEI CAMPI, MA TANTO POI DOVREMO PRENDERLI DAL DB E IL PROBLEMA RICOMINCIA...
+//TODO: quando cancello gli eventi ripetuti non si riescono a resettare i campi del form
+//problemi: non si precompila correttamente sharedwith e receivers quando seleziono/modifico un evento o attività
 
 const localizer = momentLocalizer(moment);
 
 const DnDCalendar = withDragAndDrop(BigCalendar);
-
-const initialEvents = [
-  // Puoi aggiungere alcuni eventi di esempio qui 
-  // { title: 'Meeting', date: '2024-09-28', time: '14:00', duration: 2 },
-  {id: 1, originalId:1, title: 'Coffee with John',date: '2024-10-24',time: '16:00',duration: 1, repeatFrequency: 'none',repeatEndDate: '', allDay: false,},
-];
-
 
 
 function Calendar() {
@@ -35,7 +25,6 @@ function Calendar() {
     const [selectingView, setSelectingView] = useState(true);
     const [inEvent, setInEvent] = useState(true);
 
-    const { updateStyles, updateIcon } = useContext(StyleContext);
     const [events, setEvents] = useState([]);
     const [activities, setActivities] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
@@ -43,10 +32,24 @@ function Calendar() {
     const [updateAllFutureEvents, setUpdateAllFutureEvents] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [receivers, setReceivers] = useState([]);
+    const [triggerReceiversReset, setTriggerReceiversReset] = useState(0);
+    const [showNoAvailabilityForm, setShowNoAvailabilityForm] = useState(false);
+    const notificationDefaults = {
+        notify: false,
+        notificationTime: '0',
+        customValue: '',
+        notificationRepeat: '0',
+        notificationType:{
+            email: false,
+            OS: false,
+            SMS: false,
+        },
+    };
 
     // Define the event data structure
     const [eventData, setEventData] = useState({
-        originalId: "", //DA RIVEDERE
+        originalId: "",
         title: '',
         date: '',
         time: '00:00',
@@ -60,7 +63,8 @@ function Calendar() {
         repeatEndDate: '', // Date of the last repetition   <-
         eventLocation: '', // eventLocation of the event
         type: 'event',
-        //notify: false,
+        sharedWith: [],
+        ...notificationDefaults,
     });
 
     //Define the activity data structure
@@ -69,18 +73,9 @@ function Calendar() {
         deadline: "",
         completed: false,
         type: 'activity',
+        sharedWith: [],
+        ...notificationDefaults,
     });
-
-    useEffect(() => {
-        updateStyles(true);
-        updateIcon(iconDark);
-
-        return () => {
-            updateStyles(false);
-            updateIcon(iconLight);
-        };
-    }, [updateIcon, updateStyles]); 
-       
 
     useEffect(() => {
         fetchData('events', setEvents);
@@ -119,36 +114,6 @@ function Calendar() {
         }
     }, [isEditing, inEvent]);
 
-    const handleChangeEvent = () => {
-
-        const isRepeated = selectedEvent.repeatFrequency !== 'none';
-        console.log("repeated event", isRepeated);
-        console.log("repedetion", selectedEvent.repeatFrequency);
-
-        setEventData({
-            originalId: selectedEvent.originalId,
-            title: selectedEvent.title,
-            date: !isRepeated && selectedEvent.date
-                ? selectedEvent.date
-                : new Date(selectedEvent.start).toLocaleDateString('it-IT', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'),
-            time: selectedEvent.time || '00:00',
-            isPreciseTime: selectedEvent.isPreciseTime,
-            duration: selectedEvent.duration || 1,
-            allDay: selectedEvent.allDay,
-            days: selectedEvent.allDay ? selectedEvent.duration : 1,
-            repeatFrequency: isRepeated ? selectedEvent.repeatFrequency : "none", //boh continua a darmi i default qui, forse devo mettere un campo isRepeated?
-            repeatCount: isRepeated ? selectedEvent.repeatCount : 1, //qui
-            repeatEndDate: isRepeated ? selectedEvent.repeatEndDate : "", //e qui
-            repeatMode: isRepeated ? selectedEvent.repeatMode : "ntimes",
-            eventLocation: selectedEvent.eventLocation || "",
-            userId: selectedEvent.userId,
-            //notify: selectedEvent.notify,
-        });
-
-        console.log("eventData", eventData);
-        console.log("Form prefilled", selectedEvent);
-    };
-
 
     const onEventDrop = ({event, start}) => {
         const end = new Date(start);
@@ -169,13 +134,24 @@ function Calendar() {
         }
 
         if (item.type === 'event') {
-            handleFillForm(item, setEventData, setIsEditing, handleSelection, setSelectedEvent);
+            handleFillForm(item, setEventData, setIsEditing, handleSelection, setSelectedEvent, setReceivers);
         } else if (item.type === 'activity') {
-            handleFillForm(item, setActivityData, setIsEditing, handleSelection, setSelectedActivity);
+            handleFillForm(item, setActivityData, setIsEditing, handleSelection, setSelectedActivity, setReceivers);
         }
         
     };
 
+    //Delete the selected event
+    const selectionDelete = () => {
+        if(updateAllFutureEvents){
+            handleDeleteRepeatedEvent(selectedEvent, setEvents, setIsEditing, setSelectedEvent);
+        } else {
+            handleConfirmDelete('event', selectedEvent, setShowConfirmation, events, setEvents, setSelectedEvent, setIsEditing, setEventData);
+        }
+    };
+
+    // Ensure events is an array
+    console.log(events);
 
     return (
         <div className="calendar">
@@ -187,7 +163,7 @@ function Calendar() {
                     endAccessor="end"
                     onSelectEvent={onItemSelect}
                     titleAccessor="title"
-                    style={{ height: "60vh" }}
+                    className='calendar-main'
                     onEventDrop={onEventDrop}
                     resizable
                 />
@@ -200,6 +176,11 @@ function Calendar() {
                         <p>Start: {new Date(selectedEvent.start).toLocaleString()}</p>
                         <p>End: {new Date(selectedEvent.end).toLocaleString()}</p>
                         <p>All Day: {selectedEvent.allDay ? 'Yes' : 'No'}</p>
+                        <p>Shared with: 
+                            {Array.isArray(selectedEvent.sharedWith) && selectedEvent.sharedWith.length > 0 
+                                ? (selectedEvent.sharedWith.join(', '))
+                                : 'No users shared with'}
+                        </p>
                         
                         <div>
                             <button className="btn btn-main" onClick={() => setShowConfirmation(true)}>
@@ -214,10 +195,10 @@ function Calendar() {
                             <div className="popup-delete">
                                 <h2>Are you sure you want to delete this event?</h2>
                                 <div>
-                                    <button className="btn btn-main" onClick={() => handleConfirmDelete('event', selectedEvent, setShowConfirmation, events, setEvents, setSelectedEvent, setIsEditing, setEventData)}>
+                                    <button className="btn btn-main" onClick={() => selectionDelete()}>
                                         Yes
                                     </button>
-                                    <button className="btn btn-main" onClick={() => handleAbortDelete(setShowConfirmation)}>
+                                    <button className="btn btn-main" onClick={() => handleAbortDelete(setShowConfirmation, 'event', setIsEditing, setEventData)}>
                                         No
                                     </button>
                                 </div>
@@ -232,6 +213,11 @@ function Calendar() {
                         <h2>{selectedActivity.title}</h2>
                         <p>Due: {new Date(selectedActivity.deadline).toLocaleDateString()}</p>
                         <p>Completed: {selectedActivity.completed ? 'Yes' : 'No'}</p>
+                        <p>Shared with: 
+                            {Array.isArray(selectedActivity.sharedWith) && selectedActivity.sharedWith.length > 0 
+                                ? (selectedActivity.sharedWith.join(', '))
+                                : 'No users shared with'}
+                        </p>
 
                         <div>
                             <button className='btn btn-main' onClick={() => setShowConfirmation(true)}>
@@ -247,7 +233,7 @@ function Calendar() {
                                 <h2>Are you sure you want to delete this activity?</h2>
                                 <div>
                                     <button className='btn btn-main' onClick={() => handleConfirmDelete('activity', selectedActivity, setShowConfirmation, activities, setActivities, setSelectedActivity, setIsEditing, setActivityData)}>Yes</button>
-                                    <button className='btn btn-main' onClick={() => handleAbortDelete(setShowConfirmation)}>No</button>
+                                    <button className='btn btn-main' onClick={() => handleAbortDelete(setShowConfirmation, 'activity', setIsEditing, setActivityData)}>No</button>
                                 </div>
                             </div>
                         )}
@@ -258,6 +244,17 @@ function Calendar() {
 
             {selectingView ? (
                 <div className='selecting-view'>
+                    <button  
+                    className="btn-small-blue"
+                    onClick={() => setShowNoAvailabilityForm(!showNoAvailabilityForm)}
+                >
+                    {showNoAvailabilityForm ? 'Close No Availability Form' : 'Insert No Availability'}
+                </button>
+
+                {/* shows the component only if the form is open*/}
+                {showNoAvailabilityForm && (
+                    <CalendarNoAvailability />
+                )}
                     <h2>What would you like to add?</h2>
                     <div className='btn-container'>
                         <button className='btn btn-main' onClick={() => handleSelection(false)}>Activity</button>
@@ -283,6 +280,11 @@ function Calendar() {
                             setSelectedEvent={setSelectedEvent}
                             updateAllFutureEvents={updateAllFutureEvents}
                             setUpdateAllFutureEvents={setUpdateAllFutureEvents}
+                            
+                            receivers={receivers}
+                            setReceivers={setReceivers}
+                            triggerReceiversReset={triggerReceiversReset}
+                            setTriggerReceiversReset={setTriggerReceiversReset}
                         />
                     ) : (
                         <ActivitiesFunction
@@ -297,6 +299,11 @@ function Calendar() {
 
                             selectedActivity={selectedActivity}
                             setSelectedActivity={setSelectedActivity}
+
+                            receivers={receivers}
+                            setReceivers={setReceivers}
+                            triggerReceiversReset={triggerReceiversReset}
+                            setTriggerReceiversReset={setTriggerReceiversReset}
                         />
                     )}
                 </div>
@@ -305,6 +312,4 @@ function Calendar() {
     );
 }
 // Export the function and the events list
-export { initialEvents };
-
 export default Calendar;

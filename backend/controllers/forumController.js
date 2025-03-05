@@ -3,7 +3,8 @@ const User = require('../models/userModel');
 
 // Create post
 const createPost = async (req, res) => {
-    const {userId, text} = req.body;
+    const {userId, text, latitude, longitude} = req.body;
+    const image = req.file;
 
     console.log('Received data:', { userId, text });
 
@@ -20,8 +21,13 @@ const createPost = async (req, res) => {
         const newPost = new Content({
             author: user._id,
             type: 'post',
-            date: new Date(),
+            date: new Date().toISOString(),
             text: text,
+            image: image ? { data: image.buffer, contentType: image.mimetype } : null,
+            location: {
+                latitude: latitude || null,
+                longitude: longitude || null,
+            },
             comments: [],
         });
 
@@ -53,7 +59,7 @@ const createComment = async (req, res) => {
         const newComment = new Content({
             author: user._id,
             type: 'comment',
-            date: new Date(),
+            date: new Date().toISOString(),
             text: text,
             associatedPost: post._id,
         });
@@ -79,7 +85,7 @@ const getPosts = async (req, res) => {
         const posts = await Content.find({ type: 'post' })
             .populate({
                 path: 'author',
-                select: 'username',
+                select: 'username image',
             })
             .populate({
                 path: 'comments',
@@ -97,7 +103,6 @@ const getPosts = async (req, res) => {
 };
 
 // Update content
-
 const updateContent = async (req, res) => {
     try {
         const {contentId, likes} = req.body;

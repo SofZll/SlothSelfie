@@ -155,7 +155,7 @@ const getUsername = async (req, res) => {
     }
 };
 
-// Get the userId
+// Get the userId from the session
 const getUserId = async (req, res) => {
     try {
         const userId = req.session.userId;
@@ -183,6 +183,121 @@ const checkAuth = async (req, res) => {
     }
 }
 
+//Fetch user's no availability time intervals
+ const getNoAvailability = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User not logged in' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        res.status(200).json({ success: true, noAvailability: user.noAvailability });
+    } 
+    catch (error) {
+        console.error('Error fetching no availability:', error);
+        res.status(500).json({ success: false, message: 'Error fetching no availability' });
+    }
+}
+
+// Add time intervals for no availability for group events
+ const addNoAvailability = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const { startDate, endDate, repeatFrequency } = req.body;
+        const newNoAvailability = { startDate, endDate, repeatFrequency };
+        const user = await User.findById(userId);
+        console.log('Received data:', req.body);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        user.noAvailability.push({ startDate, endDate, repeatFrequency });
+        await user.save();
+        res.status(200).json({ success: true, noAvailability: newNoAvailability, message: 'No availability added successfully' });
+    }
+    catch (error) {
+        console.error('Error adding no availability:', error);
+        res.status(500).json({ success: false, message: 'Error adding no availability' });
+    }
+}
+
+//Remove time intervals for no availability for group events
+const removeNoAvailability = async (req, res) => {
+    try {
+        const { noAvailabilityId } = req.params;  //id of the time interval to remove
+        const userId = req.session.userId;
+        // find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        // Remove the specified no availability time interval
+        const noAvailabilityIndex = user.noAvailability.findIndex(item => item._id.toString() === noAvailabilityId);
+        if (noAvailabilityIndex === -1) {
+            return res.status(404).json({ success: false, message: 'No availability not found' });
+        }
+
+        user.noAvailability.splice(noAvailabilityIndex, 1);  //remove the no availability time interval from the array
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'No availability removed successfully' });
+    } catch (error) {
+        console.error('Error removing no availability:', error);
+        res.status(500).json({ success: false, message: 'Error removing no availability' });
+    }
+};
+
+// Route to get the userId from the username
+const getUserIdFromUsername = async (req, res) => {
+    const { username } = req.params;
+
+    if (!username) {
+        return res.status(400).json({ success: false, message: 'Username is required' });
+    }
+
+    try {
+        // find the user
+        const user = await User.findOne({ username: username });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Restituisci l'ID dell'utente
+        res.status(200).json({ success: true, userId: user._id.toString() });
+    } catch (error) {
+        console.error('Error fetching userId from username:', error);
+        res.status(500).json({ success: false, message: 'Error fetching userId' });
+    }
+};
+
+//route to get the no availability time intervals of a user given the userId
+const getUserNoAvailabilityWithId = async (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        return res.status(400).json({ success: false, message: 'UserId is required' });
+    }
+
+    try {
+        // find the user
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Return the no availability time intervals of the user
+        res.status(200).json({ success: true, noAvailability: user.noAvailability });
+    } catch (error) {
+        console.error('Error fetching no availability with userId:', error);
+        res.status(500).json({ success: false, message: 'Error fetching no availability' });
+    }
+};
+
 module.exports = {
     loginUser,
     registerUser,
@@ -193,4 +308,9 @@ module.exports = {
     getUsername,
     getUserId,
     checkAuth,
+    getNoAvailability,
+    addNoAvailability,
+    removeNoAvailability,
+    getUserIdFromUsername,
+    getUserNoAvailabilityWithId,
 };

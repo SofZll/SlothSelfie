@@ -52,6 +52,10 @@ export async function handleAddActivity(e, activityData, setActivityData, activi
             deadline: deadline,
             completed: false,
             userId: username, // Here we should use the authenticated user
+            type: 'activity',
+            notify: false,
+            notificationTime: '0',
+            sharedWith: []
         };
         
         try {
@@ -195,6 +199,7 @@ export async function handleUpdateActivity(e, activityData, setActivityData, act
                 title: activityData.title,
                 deadline: activityData.deadline,
                 completed: activityData.completed,
+                sharedWith: activityData.sharedWith
             }),
         });
 

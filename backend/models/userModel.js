@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const fs = require('fs').promises;
 const path = require('path');
-const defaultImagePath = path.join(__dirname, '../defaultImage.jpg');
+const defaultImagePath = path.join(__dirname, '../media/img/defaultImage.jpg');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -40,7 +40,18 @@ const userSchema = new mongoose.Schema({
             type: String,
             default: 'image/jpeg',
         },
-    }
+    },
+    noAvailability: [
+        {
+            startDate: { type: Date, required: true },
+            endDate: { type: Date, required: true },
+            repeatFrequency: { 
+                type: String, 
+                enum: ['none', 'daily', 'weekly', 'monthly', 'yearly'], 
+                default: 'none' 
+            },
+        },
+    ],
 }, {
     timestamps: true,
 });

@@ -17,13 +17,14 @@ function Profile() {
         birthday: '', 
         phoneNumber: '', 
         gender:'', 
-        profile_image: ''
+        profile_image: '',
+        noAvailability: [], // Array of objects containing the user's no availability for group events
     });
 
     const navigate = useNavigate();
 
-    const navigateHub = () => {
-        navigate('/hub');
+    const navigateforum = () => {
+        navigate('/forum');
     }
 
     // Since the image is stored a Buffer we need to convert it to base64
@@ -291,8 +292,8 @@ function Profile() {
                             </>
                         )}
                     </div>
-                    <div className="mini-hub">
-                        <button className="button-hub" onClick={navigateHub}>HUB</button>
+                    <div className="mini-forum">
+                        <button className="button-forum" onClick={navigateforum}>FORUM</button>
                     </div>
                     {!isDesktop && (
                         <NotificationFunction /> 

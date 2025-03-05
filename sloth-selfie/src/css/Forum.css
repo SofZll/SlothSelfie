@@ -1,9 +1,12 @@
-
 .posts-list {
     width: 100%;
     max-width: 400px;
     overflow: auto;
     padding-bottom: 100px;
+}
+
+.posts-list span {
+    cursor: pointer;
 }
 
 .posts-list h3 {
@@ -38,12 +41,20 @@
     margin: 0;
 }
 
+.sorting-options input {
+    height: 15px;
+}
+
 .post {
     width: 100%;
     margin-bottom: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-color: #FFF;
     border-radius: 10px;
+}
+
+.post p {
+    margin: 0;
 }
 
 .post-title,
@@ -56,16 +67,48 @@
     padding: 10px 20px;
 }
 
+.post-title img {
+    width: 33px;
+    height: 33px;
+    border-radius: 50%;
+}
+
+.post-title h3,
+.post-title p{
+    margin: 0;
+}
+
 .post-functions {
     font-size: 15px;
 }
 
-.post-functions span {
-    cursor: pointer;
-}
-
 .post-functions .liked {
     color: #1C274C;
+}
+
+.post-image,
+.map.post {
+    width: 70%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.post-image {
+    height: 200px;
+    margin: 6px auto;
+}
+
+.map.post {
+    opacity: 1;
+    height: 150px;
+    box-shadow: none;
+    margin: 0 auto 6px auto;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Heart animation */
@@ -137,38 +180,139 @@
 .new-post,
 .new-comment {
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 1rem;
+    align-items: center;    
 }
 
 .new-post {
-    margin: 10px;
-    padding: 0 20px;
+    position: relative;
+    flex-direction: row;
 }
 
 .new-comment {
     margin: 0;
-    padding: 10px 10px;
+    padding: 10px 0;
 }
 
 .new-post textarea,
 .new-comment textarea{
-    width: 80%;
-    height: 100px;
     border-radius: 10px;
     padding: 10px;
-    border: 1px solid #ccc;
 }
 
 .new-post textarea {
-    height: 100px;
+    width: 100%;
+    height: 90px;
+    border: 0;
+}
+
+.new-post textarea:focus {
+    outline: none;
+    border: none;
 }
 
 .new-comment textarea {
+    width: 80%;
     height: 50px;
+    border: 1px solid #ccc;
+}
+
+.new-comment textarea:focus {
+    outline: none;
+}
+
+.post-text {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    width: 80%;
+    height: 135px;
+}
+
+.post-text.bigger {
+    height: 205px;
+}
+
+.post-text.bigger2 {
+    height: 275px;
+}
+
+.post-text.bigger2 textarea{
+    height: 70px;
+}
+
+.link-map {
+    font-size: 12px;
+    text-align: left;
+    margin: 5px 20px;
+}
+
+.post-input {
+    position: absolute;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    flex-direction: row;
+    gap: 2rem;
+    bottom: 10px;
+    left: 20px;
+}
+
+.input-image {
+    width: 60px;
+    height: 60px;
+    margin-left: 15px;
+    opacity: 0.5;
+    border-radius: 5px;
+}
+
+.delete-image,
+.delete-map {
+    position: absolute;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+}
+
+.delete-image {
+    bottom: 82px;
+    left: 46px;
+}
+
+.delete-map {
+    bottom: 145px;
+    left: 220px;
+    z-index: 1000;
+}
+
+.post-input img:hover,
+.delete-image:hover {
+    cursor: pointer;
+}
+
+.map {
+    width: 230px;
+    height: 125px;
+    border-radius: 5px;
+    margin-left: 20px;
+    opacity: 0.5;
+}
+
+.small-img {
+    height: 25px;
+    width: 25px;
+}
+
+.smaller-img {
+    height: 23px;
+    width: 23px;
 }
 
 .share-options {
@@ -258,5 +402,9 @@
 
     .share-button:hover {
         background-color: #44485a;
+    }
+
+    .posts-list {
+        max-width: 500px;
     }
 }
