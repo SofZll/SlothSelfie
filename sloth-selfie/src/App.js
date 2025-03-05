@@ -12,6 +12,7 @@ import { ActivityProvider } from './ActivityContext';
 import { useMediaQuery } from 'react-responsive';
 import MainRoutes from './routes/MainRoutes';
 import ChatBox from './ChatBox';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   const [loading, setLoading] = useState(true);
