@@ -1,67 +1,44 @@
-import './css/CarouselHome.css';
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSpring, animated } from "react-spring";
-import {Link, useNavigate} from 'react-router-dom';
-import './css/App.css';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
+
 import PreviewPomodoro from './previewPomodoro';
 import PreviewNote from './previewNote';
 import PreviewCalendar from './previewCalendar';
 import PreviewProjects from './previewProjects';
 
-function Card({ title, caseShow }) {
-    const [show, setShown] = useState(false);
-    const navigate = useNavigate();
+import './css/App.css';
+import './css/CarouselHome.css';
 
-    // animation page
-    const handleLinkClick = (path) => (event) => {
-        event.preventDefault();
-        document.body.classList.add('zoom-in');
-        setTimeout(() => {
-            navigate(path);
-            document.body.classList.remove('zoom-in');
-        }, 300);
-    };
+
+const Card = ({ title, caseShow }) => {
+
+    const [show, setShown] = useState(false);
 
     const props3 = useSpring({
-    transform: show ? "scale(1.03)" : "scale(1)",
-    boxShadow: show
-      ? "0 20px 25px rgb(0 0 0 / 25%)"
-      : "0 2px 10px rgb(0 0 0 / 8%)"
+        transform: show ? "scale(1.03)" : "scale(1)",
+        boxShadow: show
+        ? "0 20px 25px rgb(0 0 0 / 25%)"
+        : "0 2px 10px rgb(0 0 0 / 8%)"
     });
-
-   
-    let content;
-    switch (caseShow) {
-        case "1":
-            content = <PreviewCalendar />;
-            break;
-            case "2":
-                content = <PreviewNote />;
-                break;
-        case "3":
-            content = <PreviewPomodoro />;
-            break;
-        case "4":
-            content = <PreviewProjects/>;
-            break;
-        default:
-            break;
-    }
 
     return (
         <animated.div
-        className="card"
-        style={props3}
-        onMouseEnter={() => setShown(true)}
-        onMouseLeave={() => setShown(false)}
+            className="card"
+            style={props3}
+            onMouseEnter={() => setShown(true)}
+            onMouseLeave={() => setShown(false)}
         >
-        <h2>{title}</h2>
-        {content}
+            <h2>{title}</h2>
+
+            {caseShow == 1 && <PreviewCalendar />}
+            {caseShow == 2 && <PreviewNote />}
+            {caseShow == 3 && <PreviewPomodoro />}
+            {caseShow == 4 && <PreviewProjects />}
         
         </animated.div>
     );
-    }
+}
 
-    export default Card;
+export default Card;
