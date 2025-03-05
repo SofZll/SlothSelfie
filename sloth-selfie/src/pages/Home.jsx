@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 
 import MainLayout from '../layouts/MainLayout';
 
-import Settings from '../previewSetUp';
-import CarouselHome from '../CarouselHome';
+import Settings from './previewSetUp';
+import CarouselHome from './CarouselHome';
 
 
 const Home = () => {

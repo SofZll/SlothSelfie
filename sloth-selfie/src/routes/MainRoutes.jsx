@@ -2,6 +2,7 @@ import React, { useEffect, useState, Suspence } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 
+//TODO: chambiare gli import
 import Home from '../Home'
 import Calendar from '../Calendar';
 import Pomodoro from '../Pomodoro';
