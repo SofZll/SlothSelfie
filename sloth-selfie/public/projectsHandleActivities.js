@@ -1,4 +1,4 @@
-//function to handle activities status by the members of each activity or by the owner
+// Function to handle activities status by the members of each activity or by the owner
 async function handleActivities(projectId) {
     try {
         // Get the logged user
@@ -29,73 +29,43 @@ async function handleActivities(projectId) {
         }
 
         console.log("Activities to handle:", activities);
-        
-        // Generate the modal content
-        let modalContent = `<h2>Project Activities</h2>`;
-        if (activities.length === 0) {
-            modalContent += `<p>No activities assigned to you.</p>`;
-        } else {
-            modalContent += `<ul>`;
-            activities.forEach(activity => {
 
-                if(activity.milestone === true){ //if it is a milestone we add a star to the title
-                    modalContent += `<li><strong>*${activity.title}</strong> - Status: ${activity.status}
-                    <br>Input: <input type="text" id="input-${activity._id}" value="${activity.input || ''}">
+        // Show the activities
+        let activityContainer = document.getElementById("activity-container");
+        let closeBtn = document.getElementById("closeActivityViewBtn");
+
+        let content = `<h2>Project Activities</h2>`;
+        if (activities.length === 0) {
+            content += `<p>No activities assigned to you.</p>`;
+        } else {
+            content += `<ul class="list-group">`;
+            activities.forEach(activity => {
+                let star = activity.milestone ? "*" : "";
+                content += `
+                    <li class="list-group-item">
+                        <strong>${star}${activity.title}</strong> - Status: ${activity.status}
+                        <br>Input: <input type="text" id="input-${activity._id}" value="${activity.input || ''}">
                         <br>
-                        <button onclick="updateActivityStatus('${activity._id}', 'started')">Start</button>
-                        <button onclick="updateActivityStatus('${activity._id}', 'completed')">Complete</button>
-                        <button onclick="updateActivityStatus('${activity._id}', 'abandoned')">Abandon</button>
+                        <button class="btn btn-success btn-sm" onclick="updateActivityStatus('${activity._id}', 'started')">Start</button>
+                        <button class="btn btn-primary btn-sm" onclick="updateActivityStatus('${activity._id}', 'completed')">Complete</button>
+                        <button class="btn btn-danger btn-sm" onclick="updateActivityStatus('${activity._id}', 'abandoned')">Abandon</button>
                     </li>
                 `;
-                }
-                else{
-                    modalContent += `<li><strong>${activity.title}</strong> - Status: ${activity.status}
-                    <br>Input: <input type="text" id="input-${activity._id}" value="${activity.input || ''}">
-                        <br>
-                        <button onclick="updateActivityStatus('${activity._id}', 'started')">Start</button>
-                        <button onclick="updateActivityStatus('${activity._id}', 'completed')">Complete</button>
-                        <button onclick="updateActivityStatus('${activity._id}', 'abandoned')">Abandon</button>
-                    </li>
-                `;
-                }
             });
-            modalContent += `</ul>`;
+            content += `</ul>`;
         }
 
-        // Show modal
-        showModal(modalContent);
+        // Insert the content in the activity container
+        activityContainer.innerHTML = content;
+        activityContainer.style.display = "block";
+        closeBtn.style.display = "block";
 
     } catch (error) {
         console.error("Error handling activities of the project:", error);
     }
 }
 
-// Function to show modal
-function showModal(content) {
-    let modal = document.getElementById("activityModal");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "activityModal";
-        modal.style.position = "fixed";
-        modal.style.top = "50%";
-        modal.style.left = "50%";
-        modal.style.transform = "translate(-50%, -50%)";
-        modal.style.padding = "20px";
-        modal.style.backgroundColor = "#fff";
-        modal.style.border = "1px solid black";
-        modal.innerHTML = `<div id="modalContent"></div><button onclick="closeModal()">Close</button>`;
-        document.body.appendChild(modal);
-    }
-    document.getElementById("modalContent").innerHTML = content;
-    modal.style.display = "block";
-}
-
-// Function to close modal
-function closeModal() {
-    document.getElementById("activityModal").style.display = "none";
-}
-
-// Function to update activity status   //TODO
+// Function to update activity status //TODO
 async function updateActivityStatus(activityId, status) {
     try {
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`, {
@@ -106,7 +76,7 @@ async function updateActivityStatus(activityId, status) {
 
         if (response.ok) {
             alert("Activity status updated!");
-            closeModal(); // Close modal after update
+            handleActivities(projectId); // Refresh activities
         } else {
             alert("Error updating activity status.");
         }
@@ -114,3 +84,9 @@ async function updateActivityStatus(activityId, status) {
         console.error("Error updating activity:", error);
     }
 }
+
+// listener for the close button of handle activities
+document.getElementById("closeActivityViewBtn").addEventListener("click", function () {
+    document.getElementById("activity-container").style.display = "none";
+    document.getElementById("closeActivityViewBtn").style.display = "none";
+});

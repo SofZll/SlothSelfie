@@ -11,9 +11,11 @@
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
+//TODO: AGGIUNGI CONTROLLI SE DESCRIZIONE DI INTERO PROGETTO SOLO OWNER PUò MODIFICARE
+
 //TODO: gestione di handleActivities
 
-////TODO: iinput e output sono note (eventualmente un link ad un file online)
+//TODO: iinput e output sono note (eventualmente un link ad un file online)
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -81,8 +83,6 @@ async function loadProjects() {
         console.error("Error while loading projects:", error);
     }
 }
-
-//TODO: AGGIUNGI CONTROLLI SE DESCRIZIONE DI INTERO PROGETTO SOLO OWNER PUò MODIFICARE, fare descrizioni come note alle attività
 
 //Function to save a new or edited project
 async function saveOrUpdateProject(event) {
