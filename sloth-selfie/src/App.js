@@ -17,7 +17,6 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [formType, setFormType] = useState('login');
 
   const [profileData, setProfileData] = useState({
     username: '',
