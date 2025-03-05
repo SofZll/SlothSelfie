@@ -9,7 +9,7 @@ import Notifications from '../Notifications';
 import Profile from '../Profile';
 import Forum from '../Forum';
 import ChatBox from '../ChatBox';
-import Form from '../Form';
+import AuthPage from '../AuthPage';
 import LoadingPage from '../LoadingPage';
 
 import Settings from '../previewSetUp';
@@ -72,8 +72,8 @@ const MainRoutes = ({ profileData, isDesktop }) => {
             <Suspence fallback={<LoadingPage />}>
                 <Routes>
                     <Route path='/' element={<Navigate to={authenticated ? '/home' : '/login'} />} />
-                    <Route path='/login' element={<Form formType='login' />} />
-                    <Route path='/register' element={<Form formType='register' />} />
+                    <Route path='/login' element={<AuthPage formType='login' />} />
+                    <Route path='/register' element={<AuthPage formType='register' />} />
                     <Route
                         path='/*'
                         element={
