@@ -13,10 +13,7 @@
 
 //TODO: gestione di handleActivities
 
-//TODO: le descrizioni sono note, da gestire lato front con chiamate back
-//e da gestire la cancellazione delle note in caso si butti via tutto il progetto/fase/sottofase
-
-////TODO: iinput e output sono note
+////TODO: iinput e output sono note (eventualmente un link ad un file online)
 
 // Function to get the logged user
 async function getLoggedUser() {
