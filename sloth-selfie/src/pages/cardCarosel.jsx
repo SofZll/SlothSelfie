@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useSpring, animated } from "react-spring";
+import React, { useState } from 'react';
+import { useSpring, animated } from 'react-spring';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 
@@ -17,15 +17,15 @@ const Card = ({ title, caseShow }) => {
     const [show, setShown] = useState(false);
 
     const props3 = useSpring({
-        transform: show ? "scale(1.03)" : "scale(1)",
+        transform: show ? 'scale(1.03)' : 'scale(1)',
         boxShadow: show
-        ? "0 20px 25px rgb(0 0 0 / 25%)"
-        : "0 2px 10px rgb(0 0 0 / 8%)"
+        ? '0 20px 25px rgb(0 0 0 / 25%)'
+        : '0 2px 10px rgb(0 0 0 / 8%)'
     });
 
     return (
         <animated.div
-            className="card"
+            className='card'
             style={props3}
             onMouseEnter={() => setShown(true)}
             onMouseLeave={() => setShown(false)}
@@ -40,5 +40,4 @@ const Card = ({ title, caseShow }) => {
         </animated.div>
     );
 }
-
 export default Card;

@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import Card from './cardCarosel';
 
-//TODO: sistemare bottoni e icone 
+//TODO: sistemare bottoni, import e icone 
 import './css/CarouselHome.css';
 
 import iconCalendar from './media/calendar.svg';
