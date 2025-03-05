@@ -61,19 +61,21 @@ const activitySchema = new mongoose.Schema({
     },
 
     description: {
-        type: String
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Note'
     },
 
     startDate: {
         type: Date 
     },
 
-    input: {
-        type: String  // Note or link file
+    input: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Note'
     },
-
-    output: {
-        type: String  //Note or link file
+    output: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Note'
     },
 
     milestone: {

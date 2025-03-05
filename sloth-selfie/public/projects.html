@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="projects.css">
+    <!--frappe-gantt -->
+    <script src="/dist/frappe-gantt.umd.js"></script>
+    <link rel="stylesheet" href="dist/frappe-gantt.css">
+
 </head>
 <body>
     <div class="container mt-4">
@@ -14,11 +20,12 @@
 
     <button id="closeProjectViewBtn" class="btn btn-danger" style="display: none;">Close</button>
     <div id="project-view-container" class="mt-4"></div>
+
+    <button id="closeActivityViewBtn" class="btn btn-danger" style="display: none;">Close Activities</button>
+    <div id="activity-container"></div>
     
     <button id="ToggleFormBtn" class="btn btn-primary"> + Add a Project</button>
     <form id="projectForm" style="display: none;">
-        <!-- hidden input to store the id of the project being edited -->
-        <input type="hidden" id="editingProjectId">
         <h2 class="mb-3" id="formTitle">Create a new project:</h2>
 
         <div class="mb-3">
@@ -52,5 +59,7 @@
     </div>
 
     <script src="./projects.js"></script>
+    <script src="./projectsView.js"></script>
+    <script src="./projectsHandleActivities.js"></script>
 </body>
 </html>
