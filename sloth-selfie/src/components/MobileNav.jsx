@@ -35,9 +35,9 @@ const MobileNav = () => {
             <NavLink to="/profile" activeClassName="active">
                 <img src={iconUser} alt="Profile" />
             </NavLink>
-            <NavLink to="/projects" activeClassName="active">
+            <a href="/projects.html">
                 <img src={iconProject} alt="Projects" />
-            </NavLink>
+            </a>
         </nav>
     )
 }
