@@ -26,6 +26,7 @@
     "agenda": "^5.0.0",
     "frappe-gantt": "^1.0.3",
     "leaflet": "^1.9.4",
+    "lucide-react": "^0.477.0",
     "nodemailer": "^6.10.0",
     "react-big-calendar": "^1.16.3",
     "react-copy-to-clipboard": "^5.1.0",
