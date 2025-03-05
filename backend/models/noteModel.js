@@ -16,6 +16,9 @@ const noteSchema = new mongoose.Schema({
         type: String,
         default: 'public',
     },
+    fileLink: { // Optional link to a file for projects
+        type: String
+    },
     allowedUsers: [{
         type: String,
         ref: 'User',

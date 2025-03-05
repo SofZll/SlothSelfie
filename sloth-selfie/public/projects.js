@@ -1,9 +1,21 @@
 //TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiungi controlli relativi
-//TODO: Aggiungi la modalità di visualizzazione gannt
-//TODO: start di progetto
-//TODO: VISUALIZZA PROGETTI SE SEI OWNER O SEI MEMBRO, aggiungi controlli relativi
 //TODO: controlla le date, deve essere range fine >= inizio
-//non mi elimina le fasi/sottofasi/attività nell'edit, ci sono problemi con gli id front-back
+//TODO: quando clicco salva si deve chiudere la visualizzazione a lista/gannt
+
+//TODO: in edit di progetto: owner può raggruppare attività e cambiare le sincronizzazioni tra le attività,
+// in caso di ritardi può decidere se traslare o contrarre le attività sincronizzate a quella in ritardo
+//TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto.
+//TODO: Inizio e fine attività sono eventi che finiscono sul calendario con modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo.
+
+//TODO: aggiungi loading al caricamento di pagina
+
+//TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
+
+//TODO: AGGIUNGI CONTROLLI SE DESCRIZIONE DI INTERO PROGETTO SOLO OWNER PUò MODIFICARE
+
+//TODO: gestione di handleActivities
+
+//TODO: iinput e output sono note (eventualmente un link ad un file online)
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -38,20 +50,30 @@ async function loadProjects() {
         }
 
         const projects = await response.json();
+
+        //we get the logged user and load only the projects where he is the owner or a member
+        const userLogged = await getLoggedUser();
+        if (!userLogged) {
+            alert("No user is logged in!");
+            return;
+        }
+
+        // Filter the projects where the logged user is the owner or a member
+        const userProjects = projects.filter(project => project.owner.username === userLogged || project.members.some(m => m.username === userLogged));
         
         const list = document.getElementById("projects-list");
         list.innerHTML = ""; // clear the list before loading the projects
 
-        projects.forEach(project => {
+        userProjects.forEach(project => {
             const li = document.createElement("li");
             li.className = "list-group-item";
             li.innerHTML = `
-                <strong>${project.title}</strong> - Owner: ${project.owner.username} - Description: ${project.description} - Members: ${project.members.map(m => m.username).join(", ")}<br>
+                <strong>${project.title}</strong> - Owner: ${project.owner.username} - Members: ${project.members.map(m => m.username).join(", ")}<br>
                 <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
                 <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
-                <button class="btn btn-success btn-sm ml-2" onclick="startProject('${project._id}')">Start Project</button>
+                <button class="btn btn-warning btn-sm ml-2" onclick="handleActivities('${project._id}')">Handle Activities</button>
                 <button class="btn btn-outline-primary btn-sm view-list" onclick="viewAsList('${project._id}')">View as List</button>
-                <button class="btn btn-outline-secondary btn-sm view-gantt" onclick="viewAsGannt('${project._id}')">View as Gantt</button>
+                <button class="btn btn-outline-secondary btn-sm view-gantt" onclick="viewAsGantt('${project._id}')">View as Gantt</button>
             `;
             list.appendChild(li);
         });
@@ -66,8 +88,8 @@ async function loadProjects() {
 async function saveOrUpdateProject(event) {
     event.preventDefault();
      // Get the project id if we are editing a project
-    const projectId = document.getElementById("editingProjectId").value;
-    console.log("Project id:", projectId);
+    const projectId = document.getElementById("projectForm").getAttribute("data-project-id");
+
     const project = {
         title: document.getElementById("projectName").value,
         owner: document.getElementById("projectOwner").value,
@@ -78,7 +100,7 @@ async function saveOrUpdateProject(event) {
 
     document.querySelectorAll("#phasesContainer > .card").forEach(phaseDiv => {
         // Get the phase id if we are editing a project
-        const phaseId = phaseDiv.querySelector("#editingPhaseId").value;
+        const phaseId = phaseDiv.getAttribute("data-phase-id");
         const phase = {
             _id: phaseId ? phaseId : undefined,
             title: phaseDiv.querySelector(".phase-name").value,
@@ -87,19 +109,21 @@ async function saveOrUpdateProject(event) {
         };
 
         phaseDiv.querySelectorAll(".activities > .border").forEach(activityDiv => {
-            const activityId = activityDiv.querySelector("#editingActivityId").value;
+            const activityId = activityDiv.getAttribute("data-activity-id");
             phase.activities.push({
                 _id: activityId ? activityId : undefined,
                 title: activityDiv.querySelector(".activity-name").value,
+                description: activityDiv.querySelector(".activity-description").value,
                 sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                 startDate: activityDiv.querySelector(".activity-start").value,
-                deadline: activityDiv.querySelector(".activity-end").value
+                deadline: activityDiv.querySelector(".activity-end").value,
+                milestone: activityDiv.querySelector(".activity-milestone").checked
             });
         });
 
         phaseDiv.querySelectorAll(".subphases > .border").forEach(subPhaseDiv => {
             // Get the subphase id if we are editing a project
-            const subPhaseId = subPhaseDiv.querySelector("#editingSubphaseId").value;
+            const subPhaseId = subPhaseDiv.getAttribute("data-subphase-id");
             const subphase = {
                 _id: subPhaseId ? subPhaseId : undefined,
                 title: subPhaseDiv.querySelector(".subphase-name").value,
@@ -107,13 +131,15 @@ async function saveOrUpdateProject(event) {
             };
 
             subPhaseDiv.querySelectorAll(".subphase-activities > .border").forEach(activityDiv => {
-                const activityId = activityDiv.querySelector("#editingActivityId").value;
+                const activityId = activityDiv.getAttribute("data-activity-id");
                 subphase.activities.push({
                     _id: activityId ? activityId : undefined,
                     title: activityDiv.querySelector(".activity-name").value,
+                    description: activityDiv.querySelector(".activity-description").value,
                     sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                     startDate: activityDiv.querySelector(".activity-start").value,
-                    deadline: activityDiv.querySelector(".activity-end").value
+                    deadline: activityDiv.querySelector(".activity-end").value,
+                    milestone: activityDiv.querySelector(".activity-milestone").checked
                 });
             });
 
@@ -122,8 +148,6 @@ async function saveOrUpdateProject(event) {
 
         project.phases.push(phase);
     });
-
-    console.log("Project to save or update:", project);
 
     try {
         let response;
@@ -182,8 +206,6 @@ function addPhase() {
     phaseDiv.classList.add("card", "p-3", "mt-3");
     phaseDiv.innerHTML = `
         <h5>Phase ${phaseNumber}</h5>
-        <!-- hidden input to store the id of the phase being edited -->
-        <input type="hidden" id="editingPhaseId">
         <label>Phase name:</label>
         <input type="text" class="form-control phase-name" required>
         <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'phase')">Add activity</button>
@@ -203,8 +225,6 @@ function addSubPhase(button) {
     const subPhaseDiv = document.createElement("div");
     subPhaseDiv.classList.add("border", "p-2", "mt-2");
     subPhaseDiv.innerHTML = `
-        <!-- hidden input to store the id of the subphase being edited -->
-        <input type="hidden" id="editingSubphaseId">
         <label>Subphase name:</label>
         <input type="text" class="form-control subphase-name" required>
         <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'subphase')">Add activity</button>
@@ -229,50 +249,60 @@ function addActivity(button, type) {
     const activityDiv = document.createElement("div");
     activityDiv.classList.add("border", "p-2", "mt-2");
     activityDiv.innerHTML = `
-        <!-- hidden input to store the id of the activity being edited -->
-        <input type="hidden" id="editingActivityId">
         <label>Activity name:</label>
         <input type="text" class="form-control activity-name" required>
+        <label>Activity description (optional):</label>
+        <textarea class="form-control activity-description"></textarea>
         <label>Members (comma separated):</label>
         <input type="text" class="form-control activity-actors" required>
         <label>Start date:</label>
         <input type="date" class="form-control activity-start" required>
         <label>Deadline:</label>
         <input type="date" class="form-control activity-end" required>
+        <label>Is a milestone:</label>
+        <input type="checkbox" class="activity-milestone">
+        </br>
         <button type="button" class="btn btn-danger mt-2" onclick="closeActivityForm(this)">Remove Activity</button>
     `;
     activityContainer.appendChild(activityDiv);
 }
 
-// function to remove a phase or subphase while compiling the form
+// function to remove a phase or subphase while editing the project form
 async function removeElement(button) {
     const element = button.parentElement;
 
-    // gets the IDs of the project, phase or subphase
-    const projectIdElement = document.getElementById('editingProjectId');
-    const phaseIdElement = document.getElementById('editingPhaseId');
-    const subphaseIdElement = document.getElementById('editingSubphaseId');
+    // gets the IDs of the project from the data attribute of the form
+    let projectId = document.getElementById("projectForm").getAttribute("data-project-id");
 
-    const projectId = projectIdElement ? projectIdElement.value : null;
-    const phaseId = phaseIdElement ? phaseIdElement.value : null;
-    const subphaseId = subphaseIdElement ? subphaseIdElement.value : null;
+    // Get the phase or subphase ID from the element
+    let phaseId = element.getAttribute("data-phase-id");
+    let subphaseId = element.getAttribute("data-subphase-id");
 
     // if we remove a phase, we update the counter
     if (element.classList.contains("card")) {
         // removes the phase from UI
         element.remove();
-
-        // Removes the phase from the backend
+        // Removes the phase from the backend if it has an ID
         if (phaseId) {
             await removePhaseFromBackend(projectId, phaseId);
         } 
         updatePhaseNumbers();// Renumerates the phases left
-    } else {
-        // if it is a subphase, we remove it from the UI
-        element.remove(); // removes the subphase from UI
 
-        // Removes the subphase from the backend
+    } else {// if it is a subphase
+         // removes the subphase from UI
+        element.remove();
+
+        // Removes the subphase from the backend if it has an ID
         if (subphaseId) {
+       
+            // if it is a subphase, we get the parent phase from data-parent-phase-id
+            phaseId = element.getAttribute("data-parent-phase-id");
+
+            console.log("Removing subphase with id:", subphaseId, "from phase:", phaseId);
+
+            // removes the subphase from UI
+            element.remove();
+            // Removes the subphase from the backend
             await removeSubphaseFromBackend(projectId, phaseId, subphaseId);
         }
     }
@@ -282,29 +312,23 @@ async function removeElement(button) {
 async function closeActivityForm(button) {
     const activityDiv = button.parentElement;
 
-    // gets the IDs of the project, phase or subphase and activity
-    const projectIdElement = document.getElementById('editingProjectId');
-    const phaseIdElement = document.getElementById('editingPhaseId');
-    const subphaseIdElement = document.getElementById('editingSubphaseId');
-    const activityIdElement = activityDiv.querySelector("#editingActivityId");
+    // gets the IDs of the project from the data attribute of the form
+    let projectId = document.getElementById("projectForm").getAttribute("data-project-id");
 
-    if (!projectIdElement || !phaseIdElement || !subphaseIdElement) {
-        //we only remove from the UI if the IDs are not present in the db
-        activityDiv.remove();
-        return;
-    }
+    // gets the IDs of the parent phase or subphase from the data-attributes
+    let phaseId = activityDiv.getAttribute("data-parent-phase-id") || null;
+    let subphaseId = activityDiv.getAttribute("data-parent-subphase-id") || null;
 
-    const projectId = projectIdElement.value;
-    const phaseId = phaseIdElement.value;
-    const subphaseId = subphaseIdElement.value;
-    const activityId = activityIdElement ? activityIdElement.value : null;
+    // gets the activity ID from the data-attribute
+    let activityId = activityDiv.getAttribute("data-activity-id") || null;
 
-    // removes the activity from the backend
+     //removes the activity from the UI
+     activityDiv.remove();
+
+    // removes the activity from the backend if it has an ID
     if (activityId) {
         await removeActivityFromBackend(projectId, phaseId, subphaseId, activityId);
     }
-    //removes the activity from the UI
-    activityDiv.remove();
 }
 
 // function to remove a phase from the backend
@@ -318,11 +342,11 @@ async function removePhaseFromBackend(projectId, phaseId) {
 
         const data = await response.json();
 
-        if (data.success) {
-            console.log('Phase deleted with success!');
-        } else {
-            alert('Error while deleting phase');
-        }
+        if (!response.ok) {
+            throw new Error(`Error removing phase: ${data.message}`);
+        } 
+        console.log('Phase removed successfully');
+        
     } catch (error) {
         console.error('Errore:', error);
     }
@@ -370,28 +394,6 @@ async function removeActivityFromBackend(projectId, phaseId, subphaseId, activit
     }
 }
 
-/*
-//function to remove a phase or subphase while compiling the add-form
-function removeElement(button) {
-    const element = button.parentElement;
-    
-    // if we remove a phase, we update the counter
-    if (element.classList.contains("card")) {  
-        element.remove();
-        updatePhaseNumbers(); // Renumerates the phases left
-    } else {
-        element.remove();
-    }
-}*/
-
-/*
-// Function to remove the form of an activity
-function closeActivityForm(button) {
-    const activityDiv = button.parentElement;
-    activityDiv.remove();
-}*/
-
-
 //after a remove it updates the number sequence of the phases
 function updatePhaseNumbers() {
     const phases = document.querySelectorAll("#phasesContainer .card h5");
@@ -403,7 +405,7 @@ function updatePhaseNumbers() {
 //function to delete a project, with all phases, subphases and activities
 async function deleteProject(projectId) {
     if (confirm("Are you sure you want to delete this project?")) {
-        console.log("Deleting project with id:", projectId);
+
         // DELETE request to remove the project
         try {
             const response = await fetch(`http://localhost:8000/api/project/${projectId}`, {
@@ -442,8 +444,6 @@ async function editProject(projectId) {
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
         const project = await response.json();
 
-        console.log("Project to edit:", project);
-
         // check if the logged user is the owner of the project
         const owner = project.owner.username;
 
@@ -453,10 +453,11 @@ async function editProject(projectId) {
         }
         
         // fill the form with the project data
-        document.getElementById("editingProjectId").value = projectId;
+        //we set the project ID in the form with the attribute data-project-id
+        document.getElementById("projectForm").setAttribute("data-project-id", projectId);
         document.getElementById("projectName").value = project.title;
         document.getElementById("projectOwner").value = project.owner.username;
-        document.getElementById("projectDesc").value = project.description;
+        document.getElementById("projectDesc").value = project.description.content;
         document.getElementById("projectActors").value = project.members.map(m => m.username).join(", ");
 
         // reset the phases container and reload the phases
@@ -464,38 +465,55 @@ async function editProject(projectId) {
         phasesContainer.innerHTML = "<h4>Phases</h4>";
         project.phases.forEach(phase => {
             let phaseElement = addPhase(phase);
-            //fill the id of each existing phase
-            phaseElement.querySelector("#editingPhaseId").value = phase._id;
+
+            // Adds the phase ID directly to the div
+            phaseElement.setAttribute("data-phase-id", phase._id);
+
             //fill the name of each phase
             phaseElement.querySelector(".phase-name").value = phase.title;
             //fill the activities of each phase
             phase.activities.forEach(activity => {
                 addActivity(phaseElement.querySelector(".btn-warning"), "phase");
                 const activityDiv = phaseElement.querySelector(".activities").lastElementChild;
-                //fill the id of each existing activity
-                activityDiv.querySelector("#editingActivityId").value = activity._id;
+
+                //Adds the activity ID directly to the div
+                activityDiv.setAttribute("data-activity-id", activity._id);
+                //we also add the parent phase ID to the activity div
+                activityDiv.setAttribute("data-parent-phase-id", phase._id);
+
                 activityDiv.querySelector(".activity-name").value = activity.title;
+                activityDiv.querySelector(".activity-description").value = activity.description.content;
                 activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
                 activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
-                activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);;
+                activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
+                activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
             });
 
             //fill the subphases of each phase
             phase.subphases.forEach(subphase => {
                 addSubPhase(phaseElement.querySelector(".btn-info"));
                 const subphaseDiv = phaseElement.querySelector(".subphases").lastElementChild;
-                //fill the id of each existing subphase
-                subphaseDiv.querySelector("#editingSubphaseId").value = subphase._id;
+
+                // Adds the subphase ID directly to the div
+                subphaseDiv.setAttribute("data-subphase-id", subphase._id);
+                //Adds the parent phase ID to the subphase div
+                subphaseDiv.setAttribute("data-parent-phase-id", phase._id);
+
                 subphaseDiv.querySelector(".subphase-name").value = subphase.title;
                 subphase.activities.forEach(activity => {
                     addActivity(subphaseDiv.querySelector(".btn-warning"), "subphase");
                     const activityDiv = subphaseDiv.querySelector(".subphase-activities").lastElementChild;
-                    //fill the id of each existing activity
-                    activityDiv.querySelector("#editingActivityId").value = activity._id;
+
+                    //Adds the activity ID directly to the div
+                    activityDiv.setAttribute("data-activity-id", activity._id);
+                    //we also add the parent subphase ID to the activity div
+                    activityDiv.setAttribute("data-parent-subphase-id", subphase._id);
                     activityDiv.querySelector(".activity-name").value = activity.title;
+                    activityDiv.querySelector(".activity-description").value = activity.description.content;
                     activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
                     activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
-                    activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);;
+                    activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
+                    activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
                 });
             }
             );
@@ -522,230 +540,38 @@ function formatDateForInput(dateString) {
     return date.toISOString().split("T")[0]; //"YYYY-MM-DD"
 }
 
-// Function to sort the activities of a phase/subphase based on the selected criteria
-function sortActivities(phase_subphase, criteria) {
-    const activitiesList = document.getElementById(`activities-${phase_subphase._id}`);
-    activitiesList.innerHTML = ""; // clears the list
-
-    // orders the activities based on the selected criteria
-    let sortedActivities = phase_subphase.activities;
-    if (criteria === "member") {
-        //we get the member selected
-        const member = document.getElementById("memberSelect").value;
-        sortedActivities.sort((a, b) => {
-            const aHasMember = a.sharedWith.some(user => user.username === member);
-            const bHasMember = b.sharedWith.some(user => user.username === member);
-            
-            //if 'a' has the member and 'b' doesn't, 'a' comes first
-            if (aHasMember && !bHasMember) return -1;
-            //if 'b' has the member and 'a' doesn't, 'b' comes first
-            if (!aHasMember && bHasMember) return 1;
-            // If both have or don't have the member, order by deadline
-            return a.deadline.localeCompare(b.deadline);
-        });
-
-    } else {
-        sortedActivities = sortedActivities.sort((a, b) => {
-            return a.deadline.localeCompare(b.deadline);
-        });
-    }
-
-    // Adds the sorted activities to the list
-    sortedActivities.forEach(activity => {
-        const activityItem = document.createElement("li");
-
-        // Create a string with the usernames of the members
-        const sharedWithUsernames = activity.sharedWith.map(user => user.username).join(", ");
-        const startDate = new Date(activity.startDate).toLocaleDateString();
-        const deadline = new Date(activity.deadline).toLocaleDateString();
-        activityItem.innerHTML = `<strong>${activity.title}</strong> -  -Start date: ${startDate} - Deadline: ${deadline} - Members: ${sharedWithUsernames}`;
-        activitiesList.appendChild(activityItem);
-    });
-}
-
-//function to render the project header in the view
-function renderProjectHeader(project) {
-    const projectViewContainer = document.getElementById("project-view-container");
-    projectViewContainer.innerHTML = ""; // Clear the container
-    projectViewContainer.style.display = "block"; // Show the container
-
-    const closeButton = document.getElementById("closeProjectViewBtn");
-    closeButton.style.display = "inline-block"; // Show the close button
-
-    // Title of the project
-    const projectTitle = document.createElement("h3");
-    projectTitle.innerHTML = `Project: ${project.title}`;
-    projectViewContainer.appendChild(projectTitle);
-
-    // Owner of the project
-    const projectOwner = document.createElement("h4");
-    projectOwner.innerHTML = `Owner: ${project.owner.username}`;
-    projectViewContainer.appendChild(projectOwner);
-
-    // Description of the project
-    const projectDescription = document.createElement("h4");
-    projectDescription.innerHTML = `Description: ${project.description}`;
-    projectViewContainer.appendChild(projectDescription);
-
-    return projectViewContainer; // Returns the container
-}
-
-//Function to render the phases and subphases of the project in the list view
-function renderPhase(phase, container, typeSelect) {
-
-    // Create a div for each phase and subphase
-    const phaseDiv = document.createElement("div");
-    phaseDiv.innerHTML = `<h4>Phase: ${phase.title}</h4>`;
-    container.appendChild(phaseDiv);
-
-    // List of activities for each phase (default: date sorting)
-    const activitiesListPhase = document.createElement("ul");
-    activitiesListPhase.id = `activities-${phase._id}`;
-    activitiesListPhase.innerHTML = `<h5>Activities of the Phase:</h5>`;
-    phaseDiv.appendChild(activitiesListPhase);
-
-    sortActivities(phase, typeSelect);
-
-    // Container for subphases
-    phase.subphases.forEach(subphase => {
-        const subphaseDiv = document.createElement("div");
-        subphaseDiv.innerHTML = `<h5>Subphase: ${subphase.title}</h5>`;
-        phaseDiv.appendChild(subphaseDiv);
-
-        // Container for activities of subphases
-        const activitiesList = document.createElement("ul");
-        activitiesList.id = `activities-${subphase._id}`;
-        activitiesList.innerHTML = `<h5>Activities of the Subphase:</h5>`;
-        subphaseDiv.appendChild(activitiesList);
-
-        sortActivities(subphase, typeSelect);
-    });
-}
-
-//Event listener for the sorting of the activities in the list view
-function setupSorting(project) {
-    document.getElementById("sortSelect").addEventListener("change", (event) => {
-        const selectedCriteria = event.target.value;
-        const memberSelect = document.getElementById("memberSelect");
-
-        if (selectedCriteria === "member") {
-            memberSelect.style.display = "inline";
-            memberSelect.innerHTML = `<option value="">Select a member</option>`;
-
-            const members = project.members.map(m => m.username);
-            members.forEach(member => {
-                const option = document.createElement("option");
-                option.value = member;
-                option.textContent = member;
-                memberSelect.appendChild(option);
-            });
-
-            memberSelect.addEventListener("change", () => {
-                project.phases.forEach(phase => {
-                    sortActivities(phase, "member");
-                    phase.subphases.forEach(subphase => sortActivities(subphase, "member"));
-                });
-            });
-        } else {
-            memberSelect.style.display = "none";
-        }
-
-        project.phases.forEach(phase => {
-            sortActivities(phase, selectedCriteria);
-            phase.subphases.forEach(subphase => sortActivities(subphase, selectedCriteria));
-        });
-    });
-}
-
-// Function to view the project as a list
-async function viewAsList(projectId) {
-    try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
-
-        const projectViewContainer = renderProjectHeader(project);
-
-        // Options to sort the activities
-        const sortOptions = document.createElement("div");
-        sortOptions.innerHTML = `
-            <label for="sortSelect">Sort activities by: </label>
-            <select id="sortSelect" class="form-select w-auto d-inline">
-                <option value="date">Closest deadline (Default)</option>
-                <option value="member">Member</option>
-            </select>
-            <select id="memberSelect" class="form-select w-auto" style="display: none;">
-                <option value="">Select a member</option>
-            </select>
-        `;
-        projectViewContainer.appendChild(sortOptions);
-
-        let typeSelect = "date"; // Default sorting
-
-        // Container for phases and subphases
-        const listContainer = document.createElement("div");
-        projectViewContainer.appendChild(listContainer);
-
-        // Render the phases and subphases
-        project.phases.forEach(phase => renderPhase(phase, listContainer, typeSelect));
-
-        // Event listener to sort the activities
-        setupSorting(project);
-
-    } catch (error) {
-        console.error("Error while fetching project:", error);
-    }
-}
-
-// Function to view the project as a Gantt chart
-async function viewAsGannt(projectId) {
-    try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
-
-        const projectViewContainer = renderProjectHeader(project);
-
-        // Container for the Gantt chart
-        const ganttContainer = document.createElement("div");
-        ganttContainer.id = "gantt-container";
-        projectViewContainer.appendChild(ganttContainer);
-
-        // Create the Gantt chart
-        createGantt(project);
-    } catch (error) {
-        console.error("Error while fetching project:", error);
-    }
-}
-
 //function to reset the form
 async function resetForm() {
     const owner = document.getElementById("projectOwner").value; //we keep the owner of the project, he is the user logged in
     document.getElementById("projectForm").reset();
     document.getElementById("projectOwner").value = owner;
     // Reset project ID
-    document.getElementById("editingProjectId").value = "";
+    document.getElementById("projectForm").removeAttribute("data-project-id");
+    
     // Reset phase and subphase and respective activities IDs
     document.querySelectorAll("#phasesContainer .card").forEach(phaseDiv => {
         // Reset phase ID
-        phaseDiv.querySelectorAll("[id='editingPhaseId']").forEach(phaseIdInput => {
-            if (phaseIdInput) phaseIdInput.value = "";
-        });
+        phaseDiv.removeAttribute("data-phase-id");
 
         // Reset activities inside phases
-        phaseDiv.querySelectorAll(".activities .border [id='editingActivityId']").forEach(activityIdInput => {
-            if (activityIdInput) activityIdInput.value = "";
+
+        phaseDiv.querySelectorAll(".activities .border").forEach(activityDiv => {
+            activityDiv.removeAttribute("data-activity-id");
+            activityDiv.removeAttribute("data-parent-phase-id");
         });
 
         // Reset subphases and their activities
         phaseDiv.querySelectorAll(".subphases .border").forEach(subPhaseDiv => {
             // Reset subphase ID
-            subPhaseDiv.querySelectorAll("[id='editingSubphaseId']").forEach(subPhaseIdInput => {
-                if (subPhaseIdInput) subPhaseIdInput.value = "";
-            });
+            subPhaseDiv.removeAttribute("data-subphase-id");
+            subPhaseDiv.removeAttribute("data-parent-phase-id");
 
             // Reset activities inside subphases
-            subPhaseDiv.querySelectorAll(".subphase-activities .border [id='editingActivityId']").forEach(activityIdInput => {
-                if (activityIdInput) activityIdInput.value = "";
+            subPhaseDiv.querySelectorAll(".subphase-activities .border").forEach(activityDiv => {
+                activityDiv.removeAttribute("data-activity-id");
+                activityDiv.removeAttribute("data-parent-subphase-id");
             });
+
         });
     });
 

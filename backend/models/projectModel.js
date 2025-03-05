@@ -7,7 +7,8 @@ const projectSchema = new mongoose.Schema({
     },
 
     description: { 
-        type: String
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Note'
     },
 
     owner: { 
