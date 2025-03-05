@@ -1,8 +1,14 @@
-import Carousel from "react-spring-3d-carousel";
-import './css/CarouselHome.css';
-import { useState, useEffect } from "react";
-import { config } from "react-spring";
+import React, { useState } from "react";
 import { useSwipeable } from 'react-swipeable';
+import { config } from "react-spring";
+import Carousel from "react-spring-3d-carousel";
+import { v4 as uuidv4 } from 'uuid';
+
+import Card from './cardCarosel';
+
+//TODO: sistemare bottoni, import e icone 
+import './css/CarouselHome.css';
+
 import iconCalendar from './media/calendar.svg';
 import iconNotes from './media/notes.svg';
 import iconTomato from './media/tomato.svg';
@@ -11,28 +17,29 @@ import iconArrowLeft from './media/arrowLeft.svg';
 import iconArrowRight from './media/arrowRight.svg';
 import iconSetting from './media/setting.svg';
 
-export default function CarroussSel(props) {
 
-  const handlers = useSwipeable({
-    onSwipedLeft: () => handleNext(),
-    onSwipedRight: () => handlePrev(),
-    preventDefaultTouchmoveEvent: true,
-    trackMouse: true,
-  });
+const CarouselHome = (props) => {
 
-  const table = props.cards.map((element, index) => {
-    return { ...element, onClick: () => setGoToSlide(index) };
-  });
-
-  const [offsetRadius, setOffsetRadius] = useState(2);
-  const [showArrows, setShowArrows] = useState(false);
   const [goToSlide, setGoToSlide] = useState(0);
-  const [cards] = useState(table);
 
-  useEffect(() => {
-    setOffsetRadius(props.offset);
-    setShowArrows(props.showArrows);
-  }, [props.offset, props.showArrows]);
+  const cards = useState(
+    {
+      key: uuidv4(),
+      content: ( <Card title='Calendar' caseShow='1' /> )
+    },
+    {
+      key: uuidv4(),
+      content: ( <Card title='Notes' caseShow='2' /> )
+    },
+    {
+      key: uuidv4(),
+      content: ( <Card title='Pomodoro' caseShow='3' /> )
+    },
+    {
+      key: uuidv4(),
+      content: ( <Card title='Projects' caseShow='4' /> )
+    }
+  );
 
   const handlePrev = () => {
     setGoToSlide((prev) => (prev > 0 ? prev - 1 : cards.length - 1));
@@ -42,6 +49,13 @@ export default function CarroussSel(props) {
     setGoToSlide((prev) => (prev < cards.length - 1 ? prev + 1 : 0));
   };
 
+  const handlers = useSwipeable({
+    onSwipedLeft: () => handleNext(),
+    onSwipedRight: () => handlePrev(),
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true,
+  });
+
   const handleGoToSlide = (index) => {
     setGoToSlide(index);
   };
@@ -49,6 +63,7 @@ export default function CarroussSel(props) {
   const handleSetUp = () => {
     props.setSetUp(!props.setUp);
   };
+
 
   return (
     <div className="carousel-div" {...handlers}
@@ -68,11 +83,12 @@ export default function CarroussSel(props) {
             <img src={iconProjects} alt="icon" className="icon-up"/>
           </button>
       </div>
+
       <Carousel
         slides={cards}
         goToSlide={goToSlide}
-        offsetRadius={offsetRadius}
-        showNavigation={showArrows}
+        offsetRadius={2}
+        showNavigation={false}
         animationConfig={config.gentle}
       />
       <div className="divBtn">
@@ -91,3 +107,4 @@ export default function CarroussSel(props) {
     
   );
 }
+export default CarouselHome;
