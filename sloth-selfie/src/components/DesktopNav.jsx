@@ -1,20 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { slide as Hamburger } from 'react-burger-menu';
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import './css/Menu.css';
-import iconDark from './media/SlothDark.svg';
-import iconHome from './media/home.svg';
-import iconUser from './media/user.svg';
-import iconCalendar from './media/calendarDark.svg';
-import iconTomato from './media/tomatoDark.svg';
-import iconNote from './media/notesDark.svg';
-import iconProject from './media/projectsDark.svg';
+import { Link } from 'react-router-dom';
 import { StyleContext } from './StyleContext';
 
-const Menu = ({ profileData }) => {
+const DesktopNav = () => {
+
     const [isOpen, setIsOpen] = useState(false);
-    const location = useLocation();
-    const [isHomeActive, setIsHomeActive] = useState(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
 
     const handleStateChange = (state) => {
         setIsOpen(state.isOpen);
@@ -23,11 +14,6 @@ const Menu = ({ profileData }) => {
     const closeMenu = () => {
         setIsOpen(false);
     };
-
-    useEffect(() => {
-        setIsHomeActive(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
-        
-    }, [location]);
 
     return (
         <>
@@ -56,6 +42,7 @@ const Menu = ({ profileData }) => {
                 </div>
                 {/*<Link to="/projects">Projects</Link>*/}
             </Hamburger>
+
             <StyleContext.Consumer>
                 {({ icon }) => (
                     <style>
@@ -67,29 +54,7 @@ const Menu = ({ profileData }) => {
                     </style>
                 )}
             </StyleContext.Consumer>
-            
-            <nav className="mobile-nav">
-                <NavLink to="/home"  className={(isHomeActive ? "active" : "")} >
-                    <img src={iconHome} alt="Home" />
-                </NavLink>
-                <NavLink to="/calendar" activeClassName="active">
-                    <img src={iconCalendar} alt="Calendar" />
-                </NavLink>
-                <NavLink to="/notes" activeClassName="active">
-                    <img src={iconNote} alt="Notes" />
-                </NavLink>
-                <NavLink to="/pomodoro" activeClassName="active">
-                    <img src={iconTomato} alt="Pomodoro" />
-                </NavLink>
-                <NavLink to="/profile" activeClassName="active">
-                    <img src={iconUser} alt="Profile" />
-                </NavLink>
-                <a href="/projects.html">
-                    <img src={iconProject} alt="Projects" />
-                </a>
-            </nav>
         </>
-    );
-};
-
-export default Menu;
+    )
+}
+export default DesktopNav;
