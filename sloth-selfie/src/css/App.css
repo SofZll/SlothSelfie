@@ -82,7 +82,8 @@ h2 {
   font-weight: bold;
 }
 
-h6 {
+h6,
+h5 {
   margin: 0;
 }
 

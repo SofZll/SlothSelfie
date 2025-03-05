@@ -249,7 +249,7 @@ function ChatBox({ username }) {
                     </div>
                 </>
             ) : (
-                <h3>Messaggi</h3>
+                <h5>Messaggi</h5>
             )
             }
         </>
@@ -258,7 +258,7 @@ function ChatBox({ username }) {
     return (
         <div className="message-container">
             {isDesktop ? (
-                <button onClick={() => setIsOpen(!isOpen)} className="message-button">
+                <button className="message-button" onClick={() => setIsOpen(!isOpen)}>
                     <ChatHeader />
                 </button>
             ) : (
