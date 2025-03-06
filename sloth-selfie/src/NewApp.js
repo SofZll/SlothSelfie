@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useIsDesktop } from './utils/utils';
 import { fetchProfileData } from './services/apiService';
 import './css/App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import MainRoutes from './routes/MainRoutes';
 
@@ -33,13 +34,11 @@ function NewApp() {
     }, []);
     */
     return (
-        <div className="App">
-            <MainRoutes
-                profileData={profileData} 
-                authenticated={authenticated} 
-                setAuthenticated={setAuthenticated}
-              />
-        </div>
+        <MainRoutes
+            profileData={profileData} 
+            authenticated={authenticated} 
+            setAuthenticated={setAuthenticated}
+        />
     );
 }
 

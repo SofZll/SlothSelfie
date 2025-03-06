@@ -6,23 +6,18 @@ import { v4 as uuidv4 } from 'uuid';
 
 import CardCarosel from '../components/CardCarosel';
 
-//TODO: sistemare bottoni, import e icone 
-import '../css/CarouselHome.css';
-
-import iconCalendar from '../media/calendar.svg';
-import iconNotes from '../media/notes.svg';
+import { Calendar1, NotebookPen, Presentation, MoveLeft, MoveRight, Settings } from 'lucide-react';
 import iconTomato from '../media/tomato.svg';
-import iconProjects from '../media/projects.svg'; 
-import iconArrowLeft from '../media/arrowLeft.svg';
-import iconArrowRight from '../media/arrowRight.svg';
-import iconSetting from '../media/setting.svg';
+
+
+import '../css/CarouselHome.css';
 
 
 const CarouselHome = (props) => {
 
   const [goToSlide, setGoToSlide] = useState(0);
 
-  const cards = useState(
+  const [cards] = useState([
     {
       key: uuidv4(),
       content: ( <CardCarosel title='Calendar' caseShow='1' /> )
@@ -39,7 +34,7 @@ const CarouselHome = (props) => {
       key: uuidv4(),
       content: ( <CardCarosel title='Projects' caseShow='4' /> )
     }
-  );
+  ]);
 
   const handlePrev = () => {
     setGoToSlide((prev) => (prev > 0 ? prev - 1 : cards.length - 1));
@@ -66,21 +61,21 @@ const CarouselHome = (props) => {
 
 
   return (
-    <div className='carousel-div' {...handlers}
-      style={{ touchAction: 'pan-y' }}
-    >
+    <div className='d-flex w-100 carousel-div justify-content-start align-items-center'
+      {...handlers} style={{ touchAction: 'pan-y' }}>
+
       <div className='divBtn divBtn4icon'>
           <button onClick={() => handleGoToSlide(0)} className={`btn btn-preview  ${goToSlide === 0 ? 'active' : ''}`}>
-            <img src={iconCalendar} alt='icon' className='icon-up'/>
+            <Calendar1 size={36} color="#ffffff" strokeWidth={1.75} />
           </button>
           <button onClick={() => handleGoToSlide(1)} className={`btn btn-preview  ${goToSlide === 1 ? 'active' : ''}`}>
-            <img src={iconNotes} alt='icon' className='icon-up'/>
+            <NotebookPen size={36} color="#ffffff" strokeWidth={1.75} />
           </button>
           <button onClick={() => handleGoToSlide(2)} className={`btn btn-preview  ${goToSlide === 2 ? 'active' : ''}`}>
             <img src={iconTomato} alt='icon' className='icon-up'/>
           </button>
           <button onClick={() => handleGoToSlide(3)} className={`btn btn-preview  ${goToSlide === 3 ? 'active' : ''}`}>
-            <img src={iconProjects} alt='icon' className='icon-up'/>
+            <Presentation size={36} color="#ffffff" strokeWidth={1.75} />
           </button>
       </div>
 
@@ -91,15 +86,16 @@ const CarouselHome = (props) => {
         showNavigation={false}
         animationConfig={config.gentle}
       />
+      
       <div className='divBtn'>
         <button onClick={handlePrev} className='btn btn-arrows'>
-          <img src={iconArrowLeft} alt='icon' className='icon'/>
+          <MoveLeft size={36} color="#ffffff" strokeWidth={1.75} />
         </button>
         <button onClick={handleSetUp} className='btn btn-arrows'>
-          <img src={iconSetting} alt='icon' className='icon'/>
+          <Settings size={36} color="#ffffff" strokeWidth={1.75} />
         </button>
         <button onClick={handleNext} className='btn btn-arrows'>
-          <img src={iconArrowRight} alt='icon' className='icon'/>
+          <MoveRight size={36} color="#ffffff" strokeWidth={1.75} />
         </button>
       </div>
         
