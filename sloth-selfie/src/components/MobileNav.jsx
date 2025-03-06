@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
-import iconHome from './media/home.svg';
-import iconUser from './media/user.svg';
-import iconCalendar from './media/calendarDark.svg';
-import iconTomato from './media/tomatoDark.svg';
-import iconNote from './media/notesDark.svg';
-import iconProject from './media/projectsDark.svg';
+import iconHome from '../media/home.svg';
+import iconUser from '../media/user.svg';
+import iconCalendar from '../media/calendarDark.svg';
+import iconTomato from '../media/tomatoDark.svg';
+import iconNote from '../media/notesDark.svg';
+import iconProject from '../media/projectsDark.svg';
 
 const MobileNav = () => {
 

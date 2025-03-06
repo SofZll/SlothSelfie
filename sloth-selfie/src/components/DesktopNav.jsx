@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { slide as Hamburger } from 'react-burger-menu';
 import { Link } from 'react-router-dom';
-import { StyleContext } from './StyleContext';
+import { StyleContext } from '../StyleContext';
 
 
 //TODO: va messo abbosto l'iconna del panino
@@ -27,7 +27,7 @@ const DesktopNav = () => {
                 <Link to='/notifications' onClick={closeMenu}>Notifications</Link>
                 <Link to='/forum' onClick={closeMenu}>Forum</Link>
                 <a href='/projects.html' onClick={closeMenu}>Projects</a>
-
+{/*
                 <div className='menu-profile'>
                     <div className='menu-profile-link'>
                         {profileData.profile_image && (
@@ -43,6 +43,7 @@ const DesktopNav = () => {
                         </div>
                     </div>
                 </div>
+*/}
             </Hamburger>
 
             <StyleContext.Consumer>

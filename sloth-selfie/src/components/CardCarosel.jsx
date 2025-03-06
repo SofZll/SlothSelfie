@@ -4,13 +4,13 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 
 //TODO: modifica gli import
-import PreviewPomodoro from './previewPomodoro';
-import PreviewNote from './previewNote';
-import PreviewCalendar from './previewCalendar';
-import PreviewProjects from './previewProjects';
+import PreviewPomodoro from '../previewPomodoro';
+import PreviewNote from '../previewNote';
+import PreviewCalendar from '../previewCalendar';
+import PreviewProjects from '../previewProjects';
 
-import './css/App.css';
-import './css/CarouselHome.css';
+import '../css/App.css';
+import '../css/CarouselHome.css';
 
 
 const CardCarosel = ({ title, caseShow }) => {
