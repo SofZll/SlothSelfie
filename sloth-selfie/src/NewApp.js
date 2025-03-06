@@ -17,7 +17,7 @@ const isAuthenticated = () => {
 
 function NewApp() {
     //const [authenticated, setAuthenticated] = useState(isAuthenticated());
-    const [authenticated, setAuthenticated] = useState(true);
+    const [authenticated, setAuthenticated] = useState(false);
     const isDesktop = useIsDesktop();
 
     const [profileData, setProfileData] = useState({
