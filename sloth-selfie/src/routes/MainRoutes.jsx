@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import ProtectedRoute from './ProtectedRoute';
 import { useIsDesktop } from '../utils/utils';
 
+import Home from '../pages/Home'
 //TODO: chambiare gli import
 /*
-import Home from '../Home'
 import Calendar from '../Calendar';
 import Pomodoro from '../Pomodoro';
 import Notes from '../Notes';
@@ -28,12 +28,12 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                     <Route path='/' element={<Navigate to={authenticated ? '/home' : '/login'} />} />
                     <Route path='/login' element={<AuthPage formType='login' setAuthenticated={setAuthenticated}/>} />
                     <Route path='/register' element={<AuthPage formType='register' setAuthenticated={setAuthenticated} />} />
-                    {/*
                     <Route
                         path='/*'
                         element={
                             <ProtectedRoute authenticated={authenticated}>
                                 <Route path='/home' element={<Home />} />
+                                {/*
                                 <Route path='/profile' element={<Profile />} />
                                 <Route path='/notifications' element={<Notifications />} />
                                 <Route path='/pomodoro' element={<Pomodoro />} />
@@ -46,10 +46,10 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                     <Route path='/chat/:chatId' element={<ChatBox username={profileData.username} />} />
                                     </>
                                 )}
+                                */}
                             </ProtectedRoute>
                         }
                     />
-                    */}
                 </Routes>
             </Suspense>
         </Router>
