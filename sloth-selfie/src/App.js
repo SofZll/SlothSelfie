@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import './css/App.css';
 
 import iconDark from './media/SlothDark.svg';
-import { StyleContext, StyleProvider } from './StyleContext';
+import { StyleContext, StyleProvider } from '../StyleContext';
 import Menu from './Menu';
 import TimeMachine from './TimeMachine';
 import socket from './socket';
