@@ -32,12 +32,12 @@ const CardCarosel = ({ title, caseShow }) => {
             onMouseLeave={() => setShown(false)}
         >
             <h2>{title}</h2>
-
+            {/*
             {caseShow == 1 && <PreviewCalendar />}
             {caseShow == 2 && <PreviewNote />}
             {caseShow == 3 && <PreviewPomodoro />}
             {caseShow == 4 && <PreviewProjects />}
-        
+            */}
         </animated.div>
     );
 }

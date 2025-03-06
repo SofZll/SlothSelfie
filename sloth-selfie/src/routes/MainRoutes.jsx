@@ -2,6 +2,8 @@ import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import { useIsDesktop } from '../utils/utils';
+import { StyleProvider } from '../StyleContext';
+
 
 /*
 import Home from '../pages/Home'
@@ -25,6 +27,7 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
     return (
         <Router>
             <Suspense fallback={<LoadingPageLight />}>
+            <StyleProvider>
                 <Routes>
                     <Route path='/' element={<Navigate to={authenticated ? '/home' : '/login'} />} />
                     <Route path='/login' element={<AuthPage formType='login' setAuthenticated={setAuthenticated}/>} />
@@ -33,8 +36,10 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                         path='/*'
                         element={
                             <ProtectedRoute authenticated={authenticated}>
-                                <Route path='/home' element={<Home />} />
-                                
+                                <Routes>
+                                    <Route path='/home' element={<Home />} />
+                                </Routes>
+                                {/*
                                 <Route path='/profile' element={<Profile />} />
                                 <Route path='/notifications' element={<Notifications />} />
                                 <Route path='/pomodoro' element={<Pomodoro />} />
@@ -52,6 +57,7 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                         }
                     />*/}
                 </Routes>
+            </StyleProvider>
             </Suspense>
         </Router>
     );
