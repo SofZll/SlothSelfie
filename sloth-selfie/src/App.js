@@ -14,17 +14,28 @@ import MainRoutes from './routes/MainRoutes';
 import ChatBox from './ChatBox';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+const isAuthenticated = () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return false;
+
+    // TODO: jwt decode
+    const decodedToken = JSON.parse(atob(token.split('.')[1]));
+    const isExpired = decodedToken.exp * 1000 < Date.now();
+    return !isExpired;
+};
+
 function App() {
+  const [authenticated, setAuthenticated] = useState(isAuthenticated());
   const [loading, setLoading] = useState(true);
-
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
   const [profileData, setProfileData] = useState({
     username: '',
     profile_image: ''
   });
-
   const isDesktop = useMediaQuery({ minWidth: 769 });
+
+  useEffect(() => {
+    setAuthenticated(isAuthenticated());
+  }, []);
 
   // Check if the user is authenticated
   const checkAuth = async () => {
@@ -35,18 +46,18 @@ function App() {
       });
     
       if (response.ok) {
-        setIsAuthenticated(true);
+        setAuthenticated(true);
         socket.emit('authenticated', true);
         console.log('User authenticated');
         // registerServiceWorker();
-      } else setIsAuthenticated(false);
+      } else setAuthenticated(false);
     } catch (error) {
       console.error('Error checking authentication:', error);
-      setIsAuthenticated(false);
+      setAuthenticated(false);
     } finally {
       setLoading(false);
     }
-    console.log("isAuthenticated: ", isAuthenticated);
+    console.log("authenticated: ", authenticated);
   };
 
   useEffect(() => {
@@ -119,7 +130,7 @@ function App() {
   
   const handleLogin = (status) => {
     console.log("Login status:", status);
-    setIsAuthenticated(status);
+    setAuthenticated(status);
   };
 
   /* RICORDATI DI RIGUARDARE CHECK-AUTH NON FUNZIONA 
@@ -191,7 +202,12 @@ function App() {
                 </StyleContext.Consumer>
             </header>
             <div className="App-body">
-              <MainRoutes />
+              <MainRoutes
+                profileData={profileData} 
+                isDesktop={isDesktop} 
+                authenticated={authenticated} 
+                setAuthenticated={setAuthenticated}
+              />
             </div>
           </div>
         )}

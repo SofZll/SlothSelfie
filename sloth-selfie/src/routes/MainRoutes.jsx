@@ -11,35 +11,18 @@ import Notifications from '../Notifications';
 import Profile from '../Profile';
 import Forum from '../Forum';
 import ChatBox from '../ChatBox';
-import AuthPage from '../AuthPage';
+import AuthPage from '../pages/AuthPage';
 import LoadingPage from '../LoadingPage';
 
-const isAuthenticated = () => {
-    const token = localStorage.getItem('authToken');
-    if (!token) return false;
-
-    // TODO: jwt decode
-    const decodedToken = JSON.parse(atob(token.split('.')[1]));
-    const isExpired = decodedToken.exp * 1000 < Date.now();
-    return !isExpired;
-};
-
 // TODO: isDesktop should be a general prop
-const MainRoutes = ({ profileData, isDesktop }) => {
-    const [authenticated, setAuthenticated] = useState(isAuthenticated());
-
-    useEffect(() => {
-        setAuthenticated(isAuthenticated());
-    }, []);
-
-
+const MainRoutes = ({ profileData, isDesktop, authenticated, setAuthenticated }) => {
     return (
         <Router>
             <Suspence fallback={<LoadingPage />}>
                 <Routes>
                     <Route path='/' element={<Navigate to={authenticated ? '/home' : '/login'} />} />
-                    <Route path='/login' element={<AuthPage formType='login' />} />
-                    <Route path='/register' element={<AuthPage formType='register' />} />
+                    <Route path='/login' element={<AuthPage formType='login' setAuthenticated={setAuthenticated}/>} />
+                    <Route path='/register' element={<AuthPage formType='register' setAuthenticated={setAuthenticated} />} />
                     <Route
                         path='/*'
                         element={
