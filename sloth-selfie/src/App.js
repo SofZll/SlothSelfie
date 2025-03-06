@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from 'react';
+
+import React, { useEffect, useState } from 'react';
 import './css/App.css';
 
 import iconDark from './media/SlothDark.svg';
@@ -14,18 +15,21 @@ import MainRoutes from './routes/MainRoutes';
 import ChatBox from './ChatBox';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+
 function App() {
-  const [loading, setLoading] = useState(true);
-
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [formType, setFormType] = useState('login');
-
+  //const [authenticated, setAuthenticated] = useState(isAuthenticated());
+  //const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState({
     username: '',
     profile_image: ''
   });
-
   const isDesktop = useMediaQuery({ minWidth: 769 });
+
+  /*
+  useEffect(() => {
+    setAuthenticated(isAuthenticated());
+  }, []);
+  */
 
   // Check if the user is authenticated
   const checkAuth = async () => {
@@ -36,18 +40,18 @@ function App() {
       });
     
       if (response.ok) {
-        setIsAuthenticated(true);
+        setAuthenticated(true);
         socket.emit('authenticated', true);
         console.log('User authenticated');
         // registerServiceWorker();
-      } else setIsAuthenticated(false);
+      } else setAuthenticated(false);
     } catch (error) {
       console.error('Error checking authentication:', error);
-      setIsAuthenticated(false);
+      setAuthenticated(false);
     } finally {
       setLoading(false);
     }
-    console.log("isAuthenticated: ", isAuthenticated);
+    console.log("authenticated: ", authenticated);
   };
 
   useEffect(() => {
@@ -120,7 +124,7 @@ function App() {
   
   const handleLogin = (status) => {
     console.log("Login status:", status);
-    setIsAuthenticated(status);
+    setAuthenticated(status);
   };
 
   /* RICORDATI DI RIGUARDARE CHECK-AUTH NON FUNZIONA 
@@ -165,8 +169,7 @@ function App() {
   */
 
   return (
-    <StyleProvider>
-      <ActivityProvider>
+    <>
         { loading ? (
           <div className="loading-page loading-page-light">
             <div className="spinner"></div>
@@ -192,13 +195,18 @@ function App() {
                 </StyleContext.Consumer>
             </header>
             <div className="App-body">
-              <MainRoutes />
+              <MainRoutes
+                profileData={profileData} 
+                isDesktop={isDesktop} 
+                authenticated={authenticated} 
+                setAuthenticated={setAuthenticated}
+              />
             </div>
           </div>
         )}
-      </ActivityProvider>
-    </StyleProvider>
+    </>
   );
 }
 
 export default App;
+
