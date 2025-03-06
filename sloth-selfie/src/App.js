@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from 'react';
+
+import React, { useEffect, useState } from 'react';
 import './css/App.css';
 
 import iconDark from './media/SlothDark.svg';
@@ -14,28 +15,21 @@ import MainRoutes from './routes/MainRoutes';
 import ChatBox from './ChatBox';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const isAuthenticated = () => {
-    const token = localStorage.getItem('authToken');
-    if (!token) return false;
-
-    // TODO: jwt decode
-    const decodedToken = JSON.parse(atob(token.split('.')[1]));
-    const isExpired = decodedToken.exp * 1000 < Date.now();
-    return !isExpired;
-};
 
 function App() {
-  const [authenticated, setAuthenticated] = useState(isAuthenticated());
-  const [loading, setLoading] = useState(true);
+  //const [authenticated, setAuthenticated] = useState(isAuthenticated());
+  //const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState({
     username: '',
     profile_image: ''
   });
   const isDesktop = useMediaQuery({ minWidth: 769 });
 
+  /*
   useEffect(() => {
     setAuthenticated(isAuthenticated());
   }, []);
+  */
 
   // Check if the user is authenticated
   const checkAuth = async () => {
@@ -175,8 +169,7 @@ function App() {
   */
 
   return (
-    <StyleProvider>
-      <ActivityProvider>
+    <>
         { loading ? (
           <div className="loading-page loading-page-light">
             <div className="spinner"></div>
@@ -211,9 +204,9 @@ function App() {
             </div>
           </div>
         )}
-      </ActivityProvider>
-    </StyleProvider>
+    </>
   );
 }
 
 export default App;
+
