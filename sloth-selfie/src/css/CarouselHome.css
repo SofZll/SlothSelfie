@@ -1,11 +1,7 @@
 
 .carousel-div {
-    display: flex;
     flex-direction: column-reverse;
-    justify-content: start;
-    align-items: center;
-    height: 85%;
-    width: 90%;
+    max-width: 800px;
 }
 
 .card {
@@ -47,8 +43,6 @@
     .carousel-div {
         flex-direction: column;
         justify-content: space-around;
-        width: 50%;
-        height: 88%;
     }
 
     .card {
@@ -64,19 +58,10 @@
 
 
     @media screen and (max-height: 804px) {
-        .carousel-div {
-            height: 90vh;
-        }
 
         .card {
             height: 100%;
         }
-    }
-}
-
-@media screen and (min-width: 601px) and (max-width: 1036px){
-    .carousel-div {
-        width: 80%;
     }
 }
 
@@ -87,7 +72,6 @@
     }
 
     .carousel-div {
-        height: 95%;
         flex-direction: column;
     }
 
