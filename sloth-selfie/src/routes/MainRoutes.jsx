@@ -5,9 +5,9 @@ import { useIsDesktop } from '../utils/utils';
 import { StyleProvider } from '../StyleContext';
 
 
-/*
 import Home from '../pages/Home'
 //TODO: chambiare gli import
+/*
 
 import Calendar from '../Calendar';
 import Pomodoro from '../Pomodoro';
@@ -32,7 +32,7 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                     <Route path='/' element={<Navigate to={authenticated ? '/home' : '/login'} />} />
                     <Route path='/login' element={<AuthPage formType='login' setAuthenticated={setAuthenticated}/>} />
                     <Route path='/register' element={<AuthPage formType='register' setAuthenticated={setAuthenticated} />} />
-                    {/*<Route
+                    <Route
                         path='/*'
                         element={
                             <ProtectedRoute authenticated={authenticated}>
@@ -52,10 +52,10 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                     <Route path='/chat/:chatId' element={<ChatBox username={profileData.username} />} />
                                     </>
                                 )}
-                                
+                                */}
                             </ProtectedRoute>
                         }
-                    />*/}
+                    />
                 </Routes>
             </StyleProvider>
             </Suspense>

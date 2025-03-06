@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useIsDesktop } from './utils/utils';
+import { fetchProfileData } from './services/apiService';
 import './css/App.css';
 
 import MainRoutes from './routes/MainRoutes';
@@ -16,18 +17,21 @@ const isAuthenticated = () => {
 
 function NewApp() {
     //const [authenticated, setAuthenticated] = useState(isAuthenticated());
-    const [authenticated, setAuthenticated] = useState(false);
+    const [authenticated, setAuthenticated] = useState(true);
     const isDesktop = useIsDesktop();
 
-    const [profileData, setProfileData] = useState({
-        username: '',
-        profile_image: ''
-    });
+    const [profileData, setProfileData] = useState([]);
+
+    useEffect(() => {
+        fetchProfileData().then((data) => {
+            setProfileData(data);
+        });
+    }, []);
     /*
     useEffect(() => {
         setAuthenticated(isAuthenticated());
     }, []);
-*/
+    */
     return (
         <div className="App">
             <MainRoutes
