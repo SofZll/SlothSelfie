@@ -1,10 +1,14 @@
 import React from 'react';
 import '../styles/auth.css';
+import Header from '../components/Header';
 
 const AuthLayout = ({ children }) => {
     return (
-        <div className="auth-layout">
-            {children}
+        <div>
+            <Header />
+            <main>
+                {children}    
+            </main>
         </div>
     );
 }
