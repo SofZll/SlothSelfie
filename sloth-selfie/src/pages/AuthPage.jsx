@@ -12,7 +12,7 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 // TODO: use bootstrap for styling
 const AuthPage = ({ formType = 'login', setAuthenticated }) => {
     const navigate = useNavigate();
-    const [formType, setFormType] = useState(formType);
+    const [currentFormType, setcurrentFormType] = useState(formType);
     const [showPassword, setShowPassword] = useState(false);
     const [userInfo, setUserInfo] = useState({
         name: '',
@@ -23,7 +23,7 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (formType === 'login' && validateLogin(userInfo.username, userInfo.password)) {
+        if (currentFormType === 'login' && validateLogin(userInfo.username, userInfo.password)) {
             const response = apiService('/user/login', 'POST', { username: userInfo.username, password: userInfo.password })
             if (response.ok) {
                 console.log('User logged in');
@@ -31,16 +31,16 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
                 navigate('/home');
             } else {
                 console.error('Error logging in:', response);
-                Swal.fire({ title: 'Login failed', icon: 'error', text: data.message, customClass: { confirmButton: 'button-alert' } });
+                Swal.fire({ title: 'Login failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
             }
-        } else if (formType === 'register' && validateRegister(userInfo)) {
+        } else if (currentFormType === 'register' && validateRegister(userInfo)) {
             const response = apiService('/user/register', 'POST', userInfo);
             if (response.ok) {
                 console.log('User registered');
                 // TODO: logic after registering user
             } else {
                 console.error('Error registering:', response);
-                Swal.fire({ title: 'Registration failed', icon: 'error', text: data.message, customClass: { confirmButton: 'button-alert' } });
+                Swal.fire({ title: 'Registration failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
             }
         } else Swal.fire({ title: 'Invalid input', icon: 'error', text: 'Please fill in all fields', customClass: { confirmButton: 'button-alert' } });
     }
@@ -53,9 +53,9 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
         <AuthLayout>
             <div className="login-container">
                 <div className="login-box">
-                    <h1 className="login-title">{formType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
+                    <h1 className="login-title">{currentFormType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
                     <form id={`login-form`} onSubmit={handleSubmit}>
-                        {formType === 'register' && (
+                        {currentFormType === 'register' && (
                             <div className="form-group">
                                 <input
                                     type="text"
@@ -77,7 +77,7 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
                                 required
                             />
                         </div>
-                        {formType === 'register' && (
+                        {currentFormType === 'register' && (
                             <div className="form-group">
                                 <input
                                     type="email"
@@ -94,7 +94,7 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
                                 type={showPassword ? 'text' : 'password'}
                                 id="password"
                                 placeholder="Password"
-                                value={password}
+                                value={userInfo.password}
                                 onChange={(e) => setUserInfo({ ...userInfo, password: e.target.value })}
                                 required
                             />
@@ -103,13 +103,13 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
                             </span>
                         </div>
                         <button type="submit" className="login-button">
-                            {formType === 'login' ? 'LOGIN' : 'REGISTER'}
+                            {currentFormType === 'login' ? 'LOGIN' : 'REGISTER'}
                         </button>
                         <p className="register">
-                            {formType === 'login' ? (
-                                <>Don't have an account? <span className="register-link" onClick={() => setFormType('register')}>Register!</span></>
+                            {currentFormType === 'login' ? (
+                                <>Don't have an account? <span className="register-link" onClick={() => setcurrentFormType('register')}>Register!</span></>
                             ) : (
-                                <>Already have an account? <span className="register-link" onClick={() => setFormType('login')}>Login!</span></>
+                                <>Already have an account? <span className="register-link" onClick={() => setcurrentFormType('login')}>Login!</span></>
                             )}
                         </p>
                     </form>

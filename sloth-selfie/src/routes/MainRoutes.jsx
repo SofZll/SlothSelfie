@@ -1,8 +1,10 @@
-import React, { useEffect, useState, Suspence } from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
+import { useIsDesktop } from '../utils/utils';
 
 //TODO: chambiare gli import
+/*
 import Home from '../Home'
 import Calendar from '../Calendar';
 import Pomodoro from '../Pomodoro';
@@ -11,18 +13,22 @@ import Notifications from '../Notifications';
 import Profile from '../Profile';
 import Forum from '../Forum';
 import ChatBox from '../ChatBox';
+*/
 import AuthPage from '../pages/AuthPage';
-import LoadingPage from '../LoadingPage';
+import { LoadingPageLight } from '../LoadingPage';
 
-// TODO: isDesktop should be a general prop
-const MainRoutes = ({ profileData, isDesktop, authenticated, setAuthenticated }) => {
+// TODO: implement note id and calendar id */
+const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
+    const isDesktop = useIsDesktop();
+
     return (
         <Router>
-            <Suspence fallback={<LoadingPage />}>
+            <Suspense fallback={<LoadingPageLight />}>
                 <Routes>
                     <Route path='/' element={<Navigate to={authenticated ? '/home' : '/login'} />} />
                     <Route path='/login' element={<AuthPage formType='login' setAuthenticated={setAuthenticated}/>} />
                     <Route path='/register' element={<AuthPage formType='register' setAuthenticated={setAuthenticated} />} />
+                    {/*
                     <Route
                         path='/*'
                         element={
@@ -43,8 +49,9 @@ const MainRoutes = ({ profileData, isDesktop, authenticated, setAuthenticated })
                             </ProtectedRoute>
                         }
                     />
+                    */}
                 </Routes>
-            </Suspence>
+            </Suspense>
         </Router>
     );
 };
