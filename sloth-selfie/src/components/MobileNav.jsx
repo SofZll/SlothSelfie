@@ -10,33 +10,33 @@ import iconProject from './media/projectsDark.svg';
 
 const MobileNav = () => {
 
-    const [isHomeActive, setIsHomeActive] = useState(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
+    const [isHomeActive, setIsHomeActive] = useState(location.pathname === '/' || location.pathname === '/home' || location.pathname === '/login');
     const location = useLocation();
 
     useEffect(() => {
-        setIsHomeActive(location.pathname === "/" || location.pathname === "/home" || location.pathname === "/login");
+        setIsHomeActive(location.pathname === '/' || location.pathname === '/home' || location.pathname === '/login');
         
     }, [location]);
 
     return (
-        <nav className="d-flex d-md-none justify-content-around align-items-center position-fixed bottom-0 start-0 bg-light bg-gradient">
-            <NavLink to="/home"  className={(isHomeActive ? "active" : "")} >
-                <img src={iconHome} alt="Home" />
+        <nav className='d-flex d-md-none justify-content-around align-items-center position-fixed bottom-0 start-0 bg-light bg-gradient'>
+            <NavLink to='/home'  className={(isHomeActive ? 'active' : '')} >
+                <img src={iconHome} alt='Home' />
             </NavLink>
-            <NavLink to="/calendar" activeClassName="active">
-                <img src={iconCalendar} alt="Calendar" />
+            <NavLink to='/calendar' activeClassName='active'>
+                <img src={iconCalendar} alt='Calendar' />
             </NavLink>
-            <NavLink to="/notes" activeClassName="active">
-                <img src={iconNote} alt="Notes" />
+            <NavLink to='/notes' activeClassName='active'>
+                <img src={iconNote} alt='Notes' />
             </NavLink>
-            <NavLink to="/pomodoro" activeClassName="active">
-                <img src={iconTomato} alt="Pomodoro" />
+            <NavLink to='/pomodoro' activeClassName='active'>
+                <img src={iconTomato} alt='Pomodoro' />
             </NavLink>
-            <NavLink to="/profile" activeClassName="active">
-                <img src={iconUser} alt="Profile" />
+            <NavLink to='/profile' activeClassName='active'>
+                <img src={iconUser} alt='Profile' />
             </NavLink>
-            <a href="/projects.html">
-                <img src={iconProject} alt="Projects" />
+            <a href='/projects.html'>
+                <img src={iconProject} alt='Projects' />
             </a>
         </nav>
     )

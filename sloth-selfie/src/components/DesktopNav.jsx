@@ -3,6 +3,8 @@ import { slide as Hamburger } from 'react-burger-menu';
 import { Link } from 'react-router-dom';
 import { StyleContext } from './StyleContext';
 
+
+//TODO: va messo abbosto l'iconna del panino
 const DesktopNav = () => {
 
     const [isOpen, setIsOpen] = useState(false);
@@ -18,37 +20,37 @@ const DesktopNav = () => {
     return (
         <>
             <Hamburger isOpen={isOpen} onStateChange={handleStateChange}>
-                <Link to="/home" onClick={closeMenu}>Home</Link>
-                <Link to="/calendar" onClick={closeMenu}>Calendar</Link>
-                <Link to="/notes" onClick={closeMenu}>Notes</Link>
-                <Link to="/pomodoro" onClick={closeMenu}>Pomodoro</Link>
-                <Link to="/notifications" onClick={closeMenu}>Notifications</Link>
-                <Link to="/forum" onClick={closeMenu}>Forum</Link>
-                <a href="/projects.html" onClick={closeMenu}>Projects</a>
-                <div className="menu-profile">
-                    <div className="menu-profile-link">
+                <Link to='/home' onClick={closeMenu}>Home</Link>
+                <Link to='/calendar' onClick={closeMenu}>Calendar</Link>
+                <Link to='/notes' onClick={closeMenu}>Notes</Link>
+                <Link to='/pomodoro' onClick={closeMenu}>Pomodoro</Link>
+                <Link to='/notifications' onClick={closeMenu}>Notifications</Link>
+                <Link to='/forum' onClick={closeMenu}>Forum</Link>
+                <a href='/projects.html' onClick={closeMenu}>Projects</a>
+
+                <div className='menu-profile'>
+                    <div className='menu-profile-link'>
                         {profileData.profile_image && (
-                            <div className="img-wrap">
-                                <img src={profileData.profile_image} alt="img-profile"/>
+                            <div className='img-wrap'>
+                                <img src={profileData.profile_image} alt='img-profile'/>
                             </div>
                         )}
-                        <div className="menu-profile-info">
-                            <span className="menu-profile-username">{profileData.username}</span>
-                            <Link to="/profile" onClick={closeMenu}>
-                                <span className="menu-profile-small">Profile</span>
+                        <div className='menu-profile-info'>
+                            <span className='menu-profile-username'>{profileData.username}</span>
+                            <Link to='/profile' onClick={closeMenu}>
+                                <span className='menu-profile-small'>Profile</span>
                             </Link>
                         </div>
                     </div>
                 </div>
-                {/*<Link to="/projects">Projects</Link>*/}
             </Hamburger>
 
             <StyleContext.Consumer>
-                {({ icon }) => (
+                {({ color }) => (
                     <style>
                         {`
                             .bm-burger-bars {
-                                background-color: ${icon === iconDark ? '#222D52' : '#FAF9F9'};
+                                background-color: ${color};
                             }
                         `}
                     </style>
