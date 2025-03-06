@@ -1,16 +1,15 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import iconHomeLight from './media/SlothLight.svg';
-import iconHomeDark from './media/SlothDark.svg';
 
 export const StyleContext = createContext();
 
 export const StyleProvider = ({ children }) => {
-    const [icon, setIcon] = useState(iconHomeLight);
+    const [color, setColor] = useState('#FAF9F9');
+
     const location = useLocation();
 
-    const updateIcon = (newIcon) => {
-        setIcon(newIcon);
+    const updateColor = (newColor) => {
+        setColor(newColor);
     };
 
     const updateStyles = (isLight) => {
@@ -33,11 +32,11 @@ export const StyleProvider = ({ children }) => {
         const isLight = !darkRoutes.includes(location.pathname);
 
         updateStyles(isLight);
-        updateIcon(isLight ? iconHomeDark : iconHomeLight);
+        updateColor(isLight ? '#FAF9F9' : '#222D52');
     }, [location]);
 
     return (
-        <StyleContext.Provider value={{ icon, updateIcon, updateStyles }}>
+        <StyleContext.Provider value={{ color, updateColor, updateStyles }}>
             {children}
         </StyleContext.Provider>
     );
