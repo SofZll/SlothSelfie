@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { validateLogin, validateRegister } from '../utils/validation.js'
+import { validateLogin, validateRegistration } from '../utils/validation.js'
 import AuthLayout from '../layouts/AuthLayout';
-import apiService from '../services/apiService';
+import { apiService } from '../services/apiService';
 import Swal from 'sweetalert2';
 
 // TODO: choose a library for icons react-icons or lucide-rect
@@ -21,33 +21,30 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
         password: ''
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (currentFormType === 'login' && validateLogin(userInfo.username, userInfo.password)) {
-            const response = apiService('/user/login', 'POST', { username: userInfo.username, password: userInfo.password })
-            if (response.ok) {
-                console.log('User logged in');
-                setAuthenticated(true);
-                navigate('/home');
-            } else {
-                console.error('Error logging in:', response);
-                Swal.fire({ title: 'Login failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
-            }
-        } else if (currentFormType === 'register' && validateRegister(userInfo)) {
-            const response = apiService('/user/register', 'POST', userInfo);
-            if (response.ok) {
-                console.log('User registered');
-                // TODO: logic after registering user
-            } else {
-                console.error('Error registering:', response);
-                Swal.fire({ title: 'Registration failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
-            }
+            const response = await apiService('/user/login', 'POST', { username: userInfo.username, password: userInfo.password })
+                if (response) {
+                    console.log('User logged in');
+                    localStorage.setItem('authToken', response.token);
+                    setAuthenticated(true);
+                    navigate('/home');
+                } else {
+                    console.error('Error logging in:', response);
+                    Swal.fire({ title: 'Login failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                }
+        } else if (currentFormType === 'register' && validateRegistration(userInfo)) {
+            const response = await apiService('/user/register', 'POST', userInfo)
+                if (response) {
+                    console.log('User registered');
+                    // TODO: logic after registering user
+                } else {
+                    console.error('Error registering:', response);
+                    Swal.fire({ title: 'Registration failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                }
         } else Swal.fire({ title: 'Invalid input', icon: 'error', text: 'Please fill in all fields', customClass: { confirmButton: 'button-alert' } });
     }
-
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
 
     return (
         <AuthLayout>
@@ -98,7 +95,7 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
                                 onChange={(e) => setUserInfo({ ...userInfo, password: e.target.value })}
                                 required
                             />
-                            <span className="toggle-password" onClick={togglePasswordVisibility}>
+                            <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
                                 <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                             </span>
                         </div>
