@@ -15,11 +15,7 @@ const Home = () => {
             {inSettings ? (
                 <Settings setUp={inSettings} setSetUp={setInSettings} />
             ) : (
-                <CarouselHome
-                    cards={cards}
-                    setUp={inSettings}
-                    setSetUp={setInSettings}
-                />
+                <CarouselHome setUp={inSettings} setSetUp={setInSettings} />
             )}
         </MainLayout>
     )

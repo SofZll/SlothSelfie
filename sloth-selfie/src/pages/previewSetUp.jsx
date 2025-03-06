@@ -37,8 +37,8 @@ function PreviewSetUp(props) {
 
 
     return (
-        <div id="outer-container" className="card-settings">
-            <button className="btn-cross" onClick={handleSetUp}>
+        <div id="outer-container" className="d-flex flex-column align-items-center position-relative rounded m-5 p-3">
+            <button className="btn " onClick={handleSetUp}>
                 <img src={iconCross} alt="cross" className="icon-cross" />
             </button>
             
