@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import iconCross from './media/crossDark.svg';
-import iconTomato from './media/tomatoDark.svg';
-import iconCalendar from './media/calendarDark.svg';
-import iconNote from './media/notesDark.svg';
-import iconProject from './media/projectsDark.svg';
-import './css/setting.css';
+import iconCross from '../media/crossDark.svg';
+import iconTomato from '../media/tomatoDark.svg';
+import iconCalendar from '../media/calendarDark.svg';
+import iconNote from '../media/notesDark.svg';
+import iconProject from '../media/projectsDark.svg';
+import '../css/setting.css';
 import { scaleRotate as Menu} from 'react-burger-menu';
 
 function PreviewSetUp(props) {

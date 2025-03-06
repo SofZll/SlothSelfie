@@ -1,21 +1,21 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import { config } from "react-spring";
-import Carousel from "react-spring-3d-carousel";
+import { config } from 'react-spring';
+import Carousel from 'react-spring-3d-carousel';
 import { v4 as uuidv4 } from 'uuid';
 
 import CardCarosel from '../components/CardCarosel';
 
 //TODO: sistemare bottoni, import e icone 
-import './css/CarouselHome.css';
+import '../css/CarouselHome.css';
 
-import iconCalendar from './media/calendar.svg';
-import iconNotes from './media/notes.svg';
-import iconTomato from './media/tomato.svg';
-import iconProjects from './media/projects.svg'; 
-import iconArrowLeft from './media/arrowLeft.svg';
-import iconArrowRight from './media/arrowRight.svg';
-import iconSetting from './media/setting.svg';
+import iconCalendar from '../media/calendar.svg';
+import iconNotes from '../media/notes.svg';
+import iconTomato from '../media/tomato.svg';
+import iconProjects from '../media/projects.svg'; 
+import iconArrowLeft from '../media/arrowLeft.svg';
+import iconArrowRight from '../media/arrowRight.svg';
+import iconSetting from '../media/setting.svg';
 
 
 const CarouselHome = (props) => {
@@ -66,21 +66,21 @@ const CarouselHome = (props) => {
 
 
   return (
-    <div className="carousel-div" {...handlers}
+    <div className='carousel-div' {...handlers}
       style={{ touchAction: 'pan-y' }}
     >
-      <div className="divBtn divBtn4icon">
+      <div className='divBtn divBtn4icon'>
           <button onClick={() => handleGoToSlide(0)} className={`btn btn-preview  ${goToSlide === 0 ? 'active' : ''}`}>
-            <img src={iconCalendar} alt="icon" className="icon-up"/>
+            <img src={iconCalendar} alt='icon' className='icon-up'/>
           </button>
           <button onClick={() => handleGoToSlide(1)} className={`btn btn-preview  ${goToSlide === 1 ? 'active' : ''}`}>
-            <img src={iconNotes} alt="icon" className="icon-up"/>
+            <img src={iconNotes} alt='icon' className='icon-up'/>
           </button>
           <button onClick={() => handleGoToSlide(2)} className={`btn btn-preview  ${goToSlide === 2 ? 'active' : ''}`}>
-            <img src={iconTomato} alt="icon" className="icon-up"/>
+            <img src={iconTomato} alt='icon' className='icon-up'/>
           </button>
           <button onClick={() => handleGoToSlide(3)} className={`btn btn-preview  ${goToSlide === 3 ? 'active' : ''}`}>
-            <img src={iconProjects} alt="icon" className="icon-up"/>
+            <img src={iconProjects} alt='icon' className='icon-up'/>
           </button>
       </div>
 
@@ -91,15 +91,15 @@ const CarouselHome = (props) => {
         showNavigation={false}
         animationConfig={config.gentle}
       />
-      <div className="divBtn">
-        <button onClick={handlePrev} className="btn btn-arrows">
-          <img src={iconArrowLeft} alt="icon" className="icon"/>
+      <div className='divBtn'>
+        <button onClick={handlePrev} className='btn btn-arrows'>
+          <img src={iconArrowLeft} alt='icon' className='icon'/>
         </button>
-        <button onClick={handleSetUp} className="btn btn-arrows">
-          <img src={iconSetting} alt="icon" className="icon"/>
+        <button onClick={handleSetUp} className='btn btn-arrows'>
+          <img src={iconSetting} alt='icon' className='icon'/>
         </button>
-        <button onClick={handleNext} className="btn btn-arrows">
-          <img src={iconArrowRight} alt="icon" className="icon"/>
+        <button onClick={handleNext} className='btn btn-arrows'>
+          <img src={iconArrowRight} alt='icon' className='icon'/>
         </button>
       </div>
         

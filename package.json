@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "agenda": "^5.0.0",
+    "bootstrap": "^5.3.3",
     "frappe-gantt": "^1.0.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.477.0",
