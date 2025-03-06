@@ -1,21 +1,22 @@
-import React, { useMemo } from 'react';
+import React from 'react';
+import { useIsDesktop } from '../utils/utils';
+
 import DesktopNav from '../components/DesktopNav'
 import MobileNav from '../components/MobileNav'
 import Header from '../components/Header'
-import { useIsDesktop } from '../utils/utils';
 
 const MainLayout = ({ children }) => {
     const isDesktop = useIsDesktop();
 
     return (
-        <div>
+        <div className='d-flex h-100 w-100'>
             {isDesktop ? (
                 <DesktopNav />
             ) : (
                 <MobileNav />
             )}
             <Header />
-            <main>{children}</main>
+            <main className='d-flex h-100 w-100 align-items-center justify-content-center'>{children}</main>
         </div>
     );
 };

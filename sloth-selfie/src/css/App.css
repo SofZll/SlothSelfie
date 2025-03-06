@@ -5,10 +5,11 @@ body {
   padding: 0;
   width: 100%;
   height: 100vh;
-  background-color: #555b6e;
+  background-color: #555b6e !important;
   font-family: Arial, sans-serif;
   color: #222D52;
 }
+
 
 .root {
   display: flex;
@@ -17,51 +18,6 @@ body {
   align-items: center;
   height: 100%;
   width: 100%;
-}
-
-.App {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content:space-around;
-  align-items: center;
-  height: 100%;
-  width: 100%;
-}
-
-/*** Style Header ***/
-
-.App-header {
-  display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
-  align-items: center;
-  justify-content: center;
-  height: 10%;
-  width: 100%;
-  background-color: inherit;
-  margin: 0;
-  padding: 5px;
-  z-index: 900;
-  gap: 1rem;
-}
-
-.title {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.App-header h1 {
-  white-space: nowrap;
-  font-size: 10vmin;
-  color: #fdffff;
-  font-weight: bold;
-}
-
-.App-logo {
-  height: 15vmin;
 }
 
 /*** Style Body ***/
