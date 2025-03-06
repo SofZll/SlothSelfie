@@ -32,7 +32,7 @@ export const StyleProvider = ({ children }) => {
         const isLight = !darkRoutes.includes(location.pathname);
 
         updateStyles(isLight);
-        updateColor(isLight ? '#FAF9F9' : '#222D52');
+        updateColor(isLight ? '#222D52' : '#FAF9F9');
     }, [location]);
 
     return (

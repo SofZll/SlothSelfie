@@ -23,16 +23,13 @@ function NewApp() {
         username: '',
         profile_image: ''
     });
-
+    /*
     useEffect(() => {
         setAuthenticated(isAuthenticated());
     }, []);
-
+*/
     return (
         <div className="App">
-            <header className="App-header">
-                <h1>Sloth Selfie</h1>
-            </header>
             <MainRoutes
                 profileData={profileData} 
                 authenticated={authenticated} 
