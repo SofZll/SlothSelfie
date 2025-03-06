@@ -4,7 +4,7 @@ import { config } from "react-spring";
 import Carousel from "react-spring-3d-carousel";
 import { v4 as uuidv4 } from 'uuid';
 
-import Card from './cardCarosel';
+import CardCarosel from '../components/CardCarosel';
 
 //TODO: sistemare bottoni, import e icone 
 import './css/CarouselHome.css';
@@ -25,19 +25,19 @@ const CarouselHome = (props) => {
   const cards = useState(
     {
       key: uuidv4(),
-      content: ( <Card title='Calendar' caseShow='1' /> )
+      content: ( <CardCarosel title='Calendar' caseShow='1' /> )
     },
     {
       key: uuidv4(),
-      content: ( <Card title='Notes' caseShow='2' /> )
+      content: ( <CardCarosel title='Notes' caseShow='2' /> )
     },
     {
       key: uuidv4(),
-      content: ( <Card title='Pomodoro' caseShow='3' /> )
+      content: ( <CardCarosel title='Pomodoro' caseShow='3' /> )
     },
     {
       key: uuidv4(),
-      content: ( <Card title='Projects' caseShow='4' /> )
+      content: ( <CardCarosel title='Projects' caseShow='4' /> )
     }
   );
 

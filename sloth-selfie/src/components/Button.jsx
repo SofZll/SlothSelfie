@@ -1,7 +1,12 @@
-import Styles from "./css/App.css";
+import React from 'react';
 
-function Button({ text }) {
-  return <button className={Styles.btn}>{text}</button>;
+function Button({ text, icon, alt }) {
+  return (
+    <button className='btn btn-outline-dark rounded shadow-sm'>
+      {icon && < img src={icon} alt={alt} className='icon-up' />}
+      {text}
+    </button>
+  );
 }
 
 export default Button;

@@ -3,6 +3,7 @@ import { useSpring, animated } from 'react-spring';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 
+//TODO: modifica gli import
 import PreviewPomodoro from './previewPomodoro';
 import PreviewNote from './previewNote';
 import PreviewCalendar from './previewCalendar';
@@ -12,7 +13,7 @@ import './css/App.css';
 import './css/CarouselHome.css';
 
 
-const Card = ({ title, caseShow }) => {
+const CardCarosel = ({ title, caseShow }) => {
 
     const [show, setShown] = useState(false);
 
@@ -40,4 +41,4 @@ const Card = ({ title, caseShow }) => {
         </animated.div>
     );
 }
-export default Card;
+export default CardCarosel;
