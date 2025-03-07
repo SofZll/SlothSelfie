@@ -10,7 +10,6 @@ import { Calendar1, NotebookPen, Presentation, MoveLeft, MoveRight, Settings } f
 import iconTomato from '../media/tomato.svg';
 
 //TODO: sistemare i bottoni
-import '../css/CarouselHome.css';
 
 
 const CarouselHome = (props) => {
@@ -64,17 +63,17 @@ const CarouselHome = (props) => {
     <div className='d-flex w-100 carousel-div justify-content-start align-items-center'
       {...handlers} style={{ touchAction: 'pan-y' }}>
 
-      <div className='divBtn divBtn4icon d-none d-md-flex justify-content-center'>
-          <button onClick={() => handleGoToSlide(0)} className={`btn btn-preview  ${goToSlide === 0 ? 'active' : ''}`} alt='calendar'>
+      <div className='d-none d-md-flex justify-content-center divBtn4icon'>
+          <button onClick={() => handleGoToSlide(0)} className={`btn-preview  ${goToSlide === 0 ? 'active' : ''}`} alt='calendar'>
             <Calendar1 size={36} color="#ffffff" strokeWidth={1.75} />
           </button>
-          <button onClick={() => handleGoToSlide(1)} className={`btn btn-preview  ${goToSlide === 1 ? 'active' : ''}`} alt='notes'>
+          <button onClick={() => handleGoToSlide(1)} className={`btn-preview  ${goToSlide === 1 ? 'active' : ''}`} alt='notes'>
             <NotebookPen size={36} color="#ffffff" strokeWidth={1.75} />
           </button>
-          <button onClick={() => handleGoToSlide(2)} className={`btn btn-preview  ${goToSlide === 2 ? 'active' : ''}`} alt='pomodoro'>
+          <button onClick={() => handleGoToSlide(2)} className={`btn-preview  ${goToSlide === 2 ? 'active' : ''}`} alt='pomodoro'>
             <img src={iconTomato} alt='icon' className='icon-up'/>
           </button>
-          <button onClick={() => handleGoToSlide(3)} className={`btn btn-preview  ${goToSlide === 3 ? 'active' : ''}`} alt='projects'>
+          <button onClick={() => handleGoToSlide(3)} className={`btn-preview  ${goToSlide === 3 ? 'active' : ''}`} alt='projects'>
             <Presentation size={36} color="#ffffff" strokeWidth={1.75} />
           </button>
       </div>
@@ -87,14 +86,14 @@ const CarouselHome = (props) => {
         animationConfig={config.gentle}
       />
       
-      <div className='divBtn'>
-        <button onClick={handlePrev} className='btn btn-arrows' alt='previous'>
+      <div className='d-flex justify-content-around'>
+        <button onClick={handlePrev} className='btn' alt='previous'>
           <MoveLeft size={36} color="#ffffff" strokeWidth={1.75} />
         </button>
-        <button onClick={handleSetUp} className='btn btn-arrows' alt='settings'>
+        <button onClick={handleSetUp} className='btn' alt='settings'>
           <Settings size={36} color="#ffffff" strokeWidth={1.75} />
         </button>
-        <button onClick={handleNext} className='btn btn-arrows' alt='next'>
+        <button onClick={handleNext} className='btn' alt='next'>
           <MoveRight size={36} color="#ffffff" strokeWidth={1.75} />
         </button>
       </div>

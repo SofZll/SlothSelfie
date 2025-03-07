@@ -1,0 +1,51 @@
+.btn-preview {
+    margin: 0;
+    border-radius: 0;
+    background-color: transparent !important;
+    padding: 15px 42px;
+    border: none;
+}
+
+/* Carousel */
+
+.carousel-div {
+    flex-direction: column-reverse;
+    max-width: 800px;
+}
+
+/* Card */
+
+.card {
+    background-color: #fdffff;
+    height: 65vh;
+    max-height: 500px;
+    border-radius: 10px;
+    width: 80vmin;
+    word-wrap: break-word;
+}
+
+
+@media screen and (min-width: 768px){
+    .carousel-div {
+        flex-direction: column;
+    }
+
+    .card {
+        height: 90%;
+        width: 30rem;
+        max-height: none;
+    }
+}
+
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    
+    .carousel-div {
+        flex-direction: column;
+        margin-top: 1.5rem;
+    }
+
+    .divBtn4icon {
+        display: none !important;
+    }
+}
