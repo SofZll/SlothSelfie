@@ -3,3 +3,11 @@
     width: 90%;
     max-width: 600px;
 }
+
+.r-col {
+    width: 40%;
+}
+
+.l-col {
+    width: 60%;
+}
