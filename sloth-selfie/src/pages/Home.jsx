@@ -13,7 +13,7 @@ const Home = () => {
 
     return (
         <MainLayout>
-            <div className='d-flex h-75 w-100 justify-content-center home'>
+            <div className='d-flex h-75 w-100 justify-content-center'>
                 {inSettings ? (
                     <Settings setUp={inSettings} setSetUp={setInSettings} />
                 ) : (

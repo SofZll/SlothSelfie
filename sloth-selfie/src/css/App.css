@@ -162,6 +162,7 @@ textarea {
 /*** Style tmp Calendar ***/
 
 @media (max-height: 700px) and (orientation: landscape) {
+
   .react-calendar {
     height: 44vh;
     overflow-y: auto;
@@ -454,6 +455,7 @@ textarea {
 }
 
 @media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+  
   .App-header {
     display: none;
   }
