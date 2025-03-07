@@ -8,11 +8,13 @@ import CardCarosel from '../components/CardCarosel';
 
 import { Calendar1, NotebookPen, Presentation, MoveLeft, MoveRight, Settings } from 'lucide-react';
 import iconTomato from '../media/tomato.svg';
+import { useNavigate } from 'react-router-dom';
 
 
 const CarouselHome = (props) => {
 
   const [goToSlide, setGoToSlide] = useState(0);
+  const navigate = useNavigate();
 
   const [cards] = useState([
     {
@@ -53,7 +55,8 @@ const CarouselHome = (props) => {
   };
 
   const handleSetUp = () => {
-    props.setSetUp(!props.setUp);
+    props.setSetUp(true);
+    navigate('/home/settings');
   };
 
 

@@ -15,9 +15,9 @@ const Home = ({ settings = false }) => {
         <MainLayout>
             <div className='d-flex h-75 w-100 justify-content-center'>
                 {inSettings ? (
-                    <Settings setUp={inSettings} setSetUp={setInSettings} />
+                    <Settings setSetUp={setInSettings} />
                 ) : (
-                    <CarouselHome setUp={inSettings} setSetUp={setInSettings} />
+                    <CarouselHome setSetUp={setInSettings} />
                 )}
             </div>
         </MainLayout>

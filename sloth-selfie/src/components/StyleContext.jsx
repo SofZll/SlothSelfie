@@ -28,7 +28,7 @@ export const StyleProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        const darkRoutes = ['/home', '/login', '/register'];
+        const darkRoutes = ['/home', '/home/settings', '/login', '/register'];
         const isLight = !darkRoutes.includes(location.pathname);
 
         updateStyles(isLight);
