@@ -6,6 +6,7 @@ import { StyleProvider } from '../components/StyleContext';
 
 
 import Home from '../pages/Home'
+import Profile from '../pages/ProfilePage';
 //TODO: chambiare gli import
 /*
 
@@ -13,7 +14,6 @@ import Calendar from '../Calendar';
 import Pomodoro from '../Pomodoro';
 import Notes from '../Notes';
 import Notifications from '../Notifications';
-import Profile from '../Profile';
 import Forum from '../Forum';
 import ChatBox from '../ChatBox';
 */
@@ -39,9 +39,9 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                     <Routes>
                                         <Route path='/home' element={<Home />} />
                                         <Route path='/home/settings' element={<Home settings={true} />} />
+                                        <Route path='/profile' element={<Profile profileData={profileData}/>} />
                                     </Routes>
                                     {/*
-                                    <Route path='/profile' element={<Profile />} />
                                     <Route path='/notifications' element={<Notifications />} />
                                     <Route path='/pomodoro' element={<Pomodoro />} />
                                     <Route path='/notes' element={<Notes />} />

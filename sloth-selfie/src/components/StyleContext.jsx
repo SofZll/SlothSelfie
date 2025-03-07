@@ -17,12 +17,20 @@ export const StyleProvider = ({ children }) => {
         const loadingPage = document.querySelector('.loading-page');
 
         if (isLight) {
-            if (header) header.classList.add('light-background');
+            if (header) {
+                header.classList.add('light-background');
+                header.classList.remove('dark-background');
+            }
             document.body.classList.add('light-background');
+            document.body.classList.remove('dark-background');
             if (loadingPage) loadingPage.classList.add('loading-page-dark');
         } else {
-            if (header) header.classList.remove('light-background');
+            if (header) {
+                header.classList.remove('light-background');
+                header.classList.add('dark-background');
+            }
             document.body.classList.remove('light-background');
+            document.body.classList.add('dark-background');
             if (loadingPage) loadingPage.classList.remove('loading-page-dark');
         }
     };
