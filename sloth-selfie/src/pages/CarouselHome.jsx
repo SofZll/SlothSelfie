@@ -9,7 +9,7 @@ import CardCarosel from '../components/CardCarosel';
 import { Calendar1, NotebookPen, Presentation, MoveLeft, MoveRight, Settings } from 'lucide-react';
 import iconTomato from '../media/tomato.svg';
 
-
+//TODO: sistemare i bottoni
 import '../css/CarouselHome.css';
 
 
@@ -64,17 +64,17 @@ const CarouselHome = (props) => {
     <div className='d-flex w-100 carousel-div justify-content-start align-items-center'
       {...handlers} style={{ touchAction: 'pan-y' }}>
 
-      <div className='divBtn divBtn4icon'>
-          <button onClick={() => handleGoToSlide(0)} className={`btn btn-preview  ${goToSlide === 0 ? 'active' : ''}`}>
+      <div className='divBtn divBtn4icon d-none d-md-flex justify-content-center'>
+          <button onClick={() => handleGoToSlide(0)} className={`btn btn-preview  ${goToSlide === 0 ? 'active' : ''}`} alt='calendar'>
             <Calendar1 size={36} color="#ffffff" strokeWidth={1.75} />
           </button>
-          <button onClick={() => handleGoToSlide(1)} className={`btn btn-preview  ${goToSlide === 1 ? 'active' : ''}`}>
+          <button onClick={() => handleGoToSlide(1)} className={`btn btn-preview  ${goToSlide === 1 ? 'active' : ''}`} alt='notes'>
             <NotebookPen size={36} color="#ffffff" strokeWidth={1.75} />
           </button>
-          <button onClick={() => handleGoToSlide(2)} className={`btn btn-preview  ${goToSlide === 2 ? 'active' : ''}`}>
+          <button onClick={() => handleGoToSlide(2)} className={`btn btn-preview  ${goToSlide === 2 ? 'active' : ''}`} alt='pomodoro'>
             <img src={iconTomato} alt='icon' className='icon-up'/>
           </button>
-          <button onClick={() => handleGoToSlide(3)} className={`btn btn-preview  ${goToSlide === 3 ? 'active' : ''}`}>
+          <button onClick={() => handleGoToSlide(3)} className={`btn btn-preview  ${goToSlide === 3 ? 'active' : ''}`} alt='projects'>
             <Presentation size={36} color="#ffffff" strokeWidth={1.75} />
           </button>
       </div>
@@ -88,13 +88,13 @@ const CarouselHome = (props) => {
       />
       
       <div className='divBtn'>
-        <button onClick={handlePrev} className='btn btn-arrows'>
+        <button onClick={handlePrev} className='btn btn-arrows' alt='previous'>
           <MoveLeft size={36} color="#ffffff" strokeWidth={1.75} />
         </button>
-        <button onClick={handleSetUp} className='btn btn-arrows'>
+        <button onClick={handleSetUp} className='btn btn-arrows' alt='settings'>
           <Settings size={36} color="#ffffff" strokeWidth={1.75} />
         </button>
-        <button onClick={handleNext} className='btn btn-arrows'>
+        <button onClick={handleNext} className='btn btn-arrows' alt='next'>
           <MoveRight size={36} color="#ffffff" strokeWidth={1.75} />
         </button>
       </div>
