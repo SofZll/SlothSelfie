@@ -117,7 +117,10 @@ textarea {
 }
 
 .btn-main {
+  border: none;
+  color: #fdffff ;
   background-color: #244476;
+  padding: 10px 15px;
 }
 
 .btn-main:hover,

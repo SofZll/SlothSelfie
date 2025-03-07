@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../css/setting.css';
+import Button from '../components/Button';
+
 
 import { X } from 'lucide-react';
 
@@ -22,10 +24,14 @@ function PreviewSetUp(props) {
             </button>
             
             <div className='d-flex flex-row w-100'>
-                <div className='d-flex flex-column border-end w-25'>
+                <div className='d-flex flex-column border-end r-col'>
+                    <Button text='Calendar' alt='calendar' onClick={() => handleSetting('calendar')} />
+                    <Button text='Notes' alt='notes' onClick={() => handleSetting('notes')} />
+                    <Button text='Pomodoro' alt='pomodoro' onClick={() => handleSetting('pomodoro')} />
+                    <Button text='Projects' alt='projects' onClick={() => handleSetting('projects')} />
                 </div>
 
-                <div className='cd-flex flex-column w-75'>
+                <div className='cd-flex flex-column l-col'>
                 </div>
             </div>
             
