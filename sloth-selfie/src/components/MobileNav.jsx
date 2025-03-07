@@ -15,7 +15,7 @@ const MobileNav = () => {
     }, [location]);
 
     return (
-        <nav className='d-flex d-md-none w-100 py-3 justify-content-around align-items-center position-fixed bottom-0 start-0 bg-light bg-gradient'>
+        <nav className='d-flex nav-mobile p-3 justify-content-between align-items-center position-fixed bottom-0 start-0 bg-light bg-gradient z-1'>
             <NavLink to='/home'  className={(isHomeActive ? 'active' : '')} alt='homepage'>
                 <House size={36} color="#555B6E" strokeWidth={1.75} />
             </NavLink>
@@ -28,12 +28,12 @@ const MobileNav = () => {
             <NavLink to='/pomodoro' activeClassName='active' alt='pomodoro'>
                 <img src={iconTomato} alt='Pomodoro' style={{ width: '36px' }}/>
             </NavLink>
-            <NavLink to='/profile' activeClassName='active' alt='profile'>
-                <User size={36} color="#555B6E" strokeWidth={1.75} />
-            </NavLink>
             <a href='/projects.html' alt='projects'>
             <Presentation size={36} color="#555B6E" strokeWidth={1.75} />
             </a>
+            <NavLink to='/profile' activeClassName='active' alt='profile'>
+                <User size={36} color="#555B6E" strokeWidth={1.75} />
+            </NavLink>
         </nav>
     )
 }

@@ -148,6 +148,13 @@
     text-decoration-color: #FAF9F9;
 }
 
+/* navbar mobile*/
+
+.nav-mobile {
+    flex-direction: row;
+    width: 100%;
+}
+
 
 @media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
     .bm-menu {
@@ -161,5 +168,11 @@
 
     .bm-item {
         padding: 2px;
+    }
+
+    .nav-mobile {
+        flex-direction: column;
+        width: auto;
+        height: 100%;
     }
 }

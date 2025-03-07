@@ -9,8 +9,6 @@ import CardCarosel from '../components/CardCarosel';
 import { Calendar1, NotebookPen, Presentation, MoveLeft, MoveRight, Settings } from 'lucide-react';
 import iconTomato from '../media/tomato.svg';
 
-//TODO: sistemare i bottoni
-
 
 const CarouselHome = (props) => {
 
