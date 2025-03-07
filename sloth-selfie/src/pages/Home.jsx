@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import MainLayout from '../layouts/MainLayout';
-import '../css/App.css';
+import '../css/Home.css';
 
 import Settings from './previewSetUp';
 import CarouselHome from './CarouselHome';

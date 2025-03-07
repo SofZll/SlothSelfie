@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { slide as Hamburger } from 'react-burger-menu';
 import { Link } from 'react-router-dom';
-import { StyleContext } from '../StyleContext';
-import '../css/Menu.css';
+import { StyleContext } from './StyleContext';
 
 import '../css/Menu.css';
 

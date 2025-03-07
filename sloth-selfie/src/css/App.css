@@ -94,12 +94,7 @@ textarea {
   margin: 5px;
 }
 
-.btn-preview {
-  margin: 0;
-  border-radius: 0;
-  background-color: transparent !important;
-  padding: 15px 43px;
-}
+
 
 .btn-preview:hover {
   background-color: #6d748c !important;

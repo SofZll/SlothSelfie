@@ -9,8 +9,6 @@ import PreviewNote from '../previewNote';
 import PreviewCalendar from '../previewCalendar';
 import PreviewProjects from '../previewProjects';
 
-import '../css/App.css';
-import '../css/CarouselHome.css';
 
 
 const CardCarosel = ({ title, caseShow }) => {
@@ -26,7 +24,7 @@ const CardCarosel = ({ title, caseShow }) => {
 
     return (
         <animated.div
-            className='card'
+            className='card d-flex flex-column justify-content-evenly align-items-center'
             style={props3}
             onMouseEnter={() => setShown(true)}
             onMouseLeave={() => setShown(false)}
