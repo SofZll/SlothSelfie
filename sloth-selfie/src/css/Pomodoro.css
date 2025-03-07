@@ -1,5 +1,6 @@
 /*** Preview Home ***/
 
+/*
 .container {
   display: flex;
   flex-direction: column;
@@ -9,6 +10,7 @@
   margin: 0;
   justify-content: space-evenly;
 }
+*/
 
 .tomatoPrew {
   width: 100%;
@@ -32,9 +34,11 @@
   position: absolute;
 }
 
+/*
 .container p {
   margin-bottom: 0;
 }
+  */
 
 /*** Pomodoro page ***/
 
@@ -394,12 +398,13 @@ hr {
     padding-top: 3vmin;
     font-size: 9vmin;
   }
-
+  /*
   .container {
     justify-content: space-around;
     height: 100%;
     padding-bottom: 3vmin;
   }
+  */
 
   .pomodoro-timer {
     flex-direction: row;
@@ -469,10 +474,12 @@ hr {
     font-size: 9vmin;
   }
 
+  /*
   .container {
     justify-content: space-around;
     padding-bottom: 3vmin;
   }
+  */
 
   .pomodoro-timer {
     flex-direction: row;
@@ -529,9 +536,11 @@ hr {
 
 
 @media screen and (max-height: 700px) and (orientation: portrait) {
+  /*
   .container p {
     display: none;
   }
+  */
 
   hr {
     display: none;

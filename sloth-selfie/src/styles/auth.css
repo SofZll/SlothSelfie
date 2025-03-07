@@ -11,21 +11,12 @@ h1.login-title {
     color: #333;
 }
 
-.login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
 .login-box {
     background-color: #fff;
-    padding: 40px;
     border-radius: 15px;
+    padding: 40px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     text-align: center;
-    max-width: 400px;
-    width: 100%;
 }
 
 .login-container h2 {
