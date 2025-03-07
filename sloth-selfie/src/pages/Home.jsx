@@ -7,9 +7,9 @@ import Settings from './previewSetUp';
 import CarouselHome from './CarouselHome';
 
 
-const Home = () => {
+const Home = ({ settings = false }) => {
 
-    const [inSettings, setInSettings] = useState(false);
+    const [inSettings, setInSettings] = useState(settings);
 
     return (
         <MainLayout>

@@ -38,6 +38,7 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                 <ProtectedRoute authenticated={authenticated}>
                                     <Routes>
                                         <Route path='/home' element={<Home />} />
+                                        <Route path='/home/settings' element={<Home settings={true} />} />
                                     </Routes>
                                     {/*
                                     <Route path='/profile' element={<Profile />} />
