@@ -5,6 +5,7 @@ import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
 import { useIsDesktop } from '../utils/utils';
 import Swal from 'sweetalert2';
+import '../styles/Profile.css';
 
 const ProfilePage = ({ profileData }) => {
     const isDesktop = useIsDesktop();
@@ -60,6 +61,10 @@ const ProfilePage = ({ profileData }) => {
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         navigate('/login');
+    }
+
+    const handleClickForum = () => {
+        navigate('/forum');
     }
 
     return (
@@ -133,11 +138,11 @@ const ProfilePage = ({ profileData }) => {
                     )}
                 </div>
                 <div className="mini-forum">
-                    <button className="button-forum" onClick={navigateforum}>FORUM</button>
+                    <button className="button-forum" onClick={handleClickForum}>FORUM</button>
                 </div>
-                {!isDesktop && (
+                {/*!isDesktop && (
                     <NotificationFunction /> 
-                )}
+                )*/}
             </div>
         </MainLayout>
     );
