@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../css/setting.css';
 import Button from '../components/Button';
+import { useNavigate } from 'react-router-dom';
 
 
 import { X } from 'lucide-react';
@@ -8,9 +9,11 @@ import { X } from 'lucide-react';
 function PreviewSetUp(props) {
 
     const [isSetting, setIsSetting] = useState('calendar');
+    const navigate = useNavigate();
 
     const handleSetUp = () => {
-        props.setSetUp(!props.setUp);
+        props.setSetUp(false);
+        navigate('..');
     };
 
     const handleSetting = (setting) => {

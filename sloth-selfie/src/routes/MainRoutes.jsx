@@ -5,11 +5,11 @@ import { useIsDesktop } from '../utils/utils';
 import { StyleProvider } from '../components/StyleContext';
 
 
+import Calendar from '../Calendar';
 import Home from '../pages/Home'
 //TODO: chambiare gli import
 /*
 
-import Calendar from '../Calendar';
 import Pomodoro from '../Pomodoro';
 import Notes from '../Notes';
 import Notifications from '../Notifications';
@@ -37,6 +37,7 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                             element={
                                 <ProtectedRoute authenticated={authenticated}>
                                     <Routes>
+                                        <Route path='/calendar' element={<Calendar />} />
                                         <Route path='/home' element={<Home />} />
                                         <Route path='/home/settings' element={<Home settings={true} />} />
                                     </Routes>
