@@ -1,10 +1,9 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+.container {
+    display : flex;
+    position: relative;
 }
 
-h1.login-title {
+.login-title {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 20px;
@@ -17,31 +16,22 @@ h1.login-title {
     padding: 40px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     text-align: center;
-}
-
-.login-container h2 {
-    margin-bottom: 30px;
+    max-width: 380px;
 }
 
 .form-group {
-    position: relative;
-    margin-bottom: 15px;
+    margin-bottom: 0;
 }
-
-/*
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-}
-*/
 
 .form-group input {
     width: 100%;
-    padding: 10px;
+    padding: 20px 10px 2px 10px !important;
     border: 1px solid #ddd;
-    border-radius: 20px;
-    font-size: 13px;
+    border-radius: 15px;
     background-color: #efefef;
+    height: 50px !important;
+    min-height: 50px !important;
+    font-size: 15px;
 }
 
 .form-group input:focus {
@@ -49,14 +39,22 @@ h1.login-title {
     outline: none;
 }
 
-.password-group {
-    position: relative;
+.form-group label {
+    left: 5px;
+    font-size: 14px;
+    padding: 6px 13px;
+    display: flex;
+    align-items: center;
+}
+
+.form-group label::after {
+    background-color: transparent !important;
 }
   
 .toggle-password {
     position: absolute;
     top: 50%;
-    right: 15px;
+    right: 20px;
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 13px;
@@ -67,7 +65,7 @@ h1.login-title {
     padding: 10px;
     background-color: #BEE3DB;
     border: none;
-    border-radius: 20px;
+    border-radius: 15px;
     color: #333;
     font-size: 15px;
     font-weight: bold;
@@ -79,7 +77,8 @@ h1.login-title {
 }
 
 .register {
-    margin-top: 10px;
+    margin-top: 15px;
+    margin-bottom: 0;
     font-size: 14px;
 }
 
@@ -90,15 +89,59 @@ h1.login-title {
 
 .register-link:hover {
     text-decoration: underline;
+    cursor: pointer;
 }
 
-@media screen and (max-width: 768px) {
-    h1.login-title {
-        margin-bottom: 10px;
-    }
+.auth-sloth {
+    position: absolute;
+    top: -120px;
+    left: 20%;
+    transform: translateX(-50%);
+    z-index: 10;
+    width: 200px;
+    height: auto;
+}
 
-    .form-group {
-        position: relative;
-        margin-bottom: 15px;
-    }
+.eye-cover1 {
+    position: absolute;
+    width: 20px;
+    height: 8px;
+    top: -25px;
+    left: 59px;
+    border-radius: 30%;
+    z-index: 20;
+}
+
+.eye-cover2 {
+    position: absolute;
+    width: 20px;
+    height: 8px;
+    top: -23px;
+    left: 88px;
+    border-radius: 30%;
+    z-index: 20;
+}
+
+#eyes1 {
+    width: 2px;
+    height: 2px;
+    background-color: #fff;
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid #333;
+    overflow: hidden;
+    top: 25%;
+    left: 35%;
+}
+
+#eyes2 {
+    width: 2px;
+    height: 2px;
+    background-color: #fff;
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid #333;
+    overflow: hidden;
+    top: 25%;
+    left: 32%;
 }
