@@ -26,7 +26,6 @@ function getCursorPosition(event) {
     eyes2.style.transform = `translate(-${x}, -${y})`;
 }
 
-// TODO: use bootstrap for styling
 const AuthPage = ({ formType = 'login', setAuthenticated }) => {
     const navigate = useNavigate();
     const [currentFormType, setcurrentFormType] = useState(formType);
