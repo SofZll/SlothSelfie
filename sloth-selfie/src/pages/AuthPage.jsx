@@ -48,65 +48,65 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
 
     return (
         <AuthLayout>
-            <div className="login-container">
-                <div className="login-box">
-                    <h1 className="login-title">{currentFormType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
+            <div className='container'>
+                <div className='col-auto login-box'>
+                    <h1 className='login-title'>{currentFormType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
                     <form id={`login-form`} onSubmit={handleSubmit}>
                         {currentFormType === 'register' && (
-                            <div className="form-group">
+                            <div className='form-group'>
                                 <input
-                                    type="text"
-                                    id="name"
-                                    placeholder="Name"
+                                    type='text'
+                                    id='name'
+                                    placeholder='Name'
                                     value={userInfo.name}
                                     onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
                                     required
                                 />
                             </div>
                         )}
-                        <div className="form-group">
+                        <div className='form-group'>
                             <input
-                                type="text"
-                                id="username"
-                                placeholder="Username"
+                                type='text'
+                                id='username'
+                                placeholder='Username'
                                 value={userInfo.username}
                                 onChange={(e) => setUserInfo({ ...userInfo, username: e.target.value })}
                                 required
                             />
                         </div>
                         {currentFormType === 'register' && (
-                            <div className="form-group">
+                            <div className='form-group'>
                                 <input
-                                    type="email"
-                                    id="email"
-                                    placeholder="Email"
+                                    type='email'
+                                    id='email'
+                                    placeholder='Email'
                                     value={userInfo.email}
                                     onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
                                     required
                                 />
                             </div>
                         )}
-                        <div className="form-group password-group">
+                        <div className='form-group password-group'>
                             <input
                                 type={showPassword ? 'text' : 'password'}
-                                id="password"
-                                placeholder="Password"
+                                id='password'
+                                placeholder='Password'
                                 value={userInfo.password}
                                 onChange={(e) => setUserInfo({ ...userInfo, password: e.target.value })}
                                 required
                             />
-                            <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+                            <span className='toggle-password' onClick={() => setShowPassword(!showPassword)}>
                                 <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                             </span>
                         </div>
-                        <button type="submit" className="login-button">
+                        <button type='submit' className='login-button'>
                             {currentFormType === 'login' ? 'LOGIN' : 'REGISTER'}
                         </button>
-                        <p className="register">
+                        <p className='register'>
                             {currentFormType === 'login' ? (
-                                <>Don't have an account? <span className="register-link" onClick={() => setcurrentFormType('register')}>Register!</span></>
+                                <>Don't have an account? <span className='register-link' onClick={() => setcurrentFormType('register')}>Register!</span></>
                             ) : (
-                                <>Already have an account? <span className="register-link" onClick={() => setcurrentFormType('login')}>Login!</span></>
+                                <>Already have an account? <span className='register-link' onClick={() => setcurrentFormType('login')}>Login!</span></>
                             )}
                         </p>
                     </form>

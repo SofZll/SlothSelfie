@@ -20,7 +20,7 @@ const apiService = async (endpoint, method = 'GET', body = null) => {
             console.error('API Service Error:', response);
         }
 
-        return response;
+        return response.json();
     } catch (error) {
         console.error('API Service Error:', error);
         return null;
@@ -37,7 +37,7 @@ const fetchProfileData = async () => {
     
     try {
         const response = await apiService('/user/profile');
-        if (response.ok) {
+        if (response) {
             if (response.user.image?.data?.data) {
                 const buffer = response.user.image.data.data;
                 base64Image = `data:${response.user.image.contentType};base64,${bufferToBase64(buffer)}`;
