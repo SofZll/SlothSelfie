@@ -41,11 +41,34 @@ async function handleActivities(projectId) {
             content += `<ul class="list-group">`;
             activities.forEach(activity => {
                 let star = activity.milestone ? "*" : "";
+                let inputDisabled = activity.input ? 'disabled' : '';  // Check if input already exists
+                let insertDisabled = activity.input ? 'disabled' : ''; // Disable the button if input exists
+
                 content += `
                     <li class="list-group-item">
                         <strong>${star}${activity.title}</strong> - Status: ${activity.status}
-                        <br>Input: <input type="text" id="input-${activity._id}" value="${activity.input || ''}">
                         <br>
+                        Input type: 
+                        <select id="input-type-${activity._id}" onchange="updateInputType('${activity._id}')">
+                            <option value="text">Text</option>
+                            <option value="empty">Empty</option>
+                            <option value="link">Link</option>
+                        </select>
+                        <input type="text" id="input-${activity._id}" value="${activity.input || ''}" ${inputDisabled}>  <!-- //getValue(activity._id, activity.input) -->
+
+                        <button class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInput('${activity._id}')" ${insertDisabled}>Insert Input</button>
+                        Output: <input type="text" id="input-${activity._id}" value="${activity.output || ''}">
+                        `;
+                    // shows the buttons for accept/reject output only if the user is the owner
+                    if (isOwner) {
+                        content += `
+                            <button class="btn btn-outline-danger btn-sm" onclick="rejectOutput('${activity._id}')">Reject output</button>
+                            <button class="btn btn-outline-success btn-sm" onclick="acceptOutput('${activity._id}')">Accept output</button>
+                        `;
+                    }
+                    content += `
+                        <p>Activity Status: ${activity.status}<p>
+                        <p>Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
                         <button class="btn btn-success btn-sm" onclick="updateActivityStatus('${activity._id}', 'started')">Start</button>
                         <button class="btn btn-primary btn-sm" onclick="updateActivityStatus('${activity._id}', 'completed')">Complete</button>
                         <button class="btn btn-danger btn-sm" onclick="updateActivityStatus('${activity._id}', 'abandoned')">Abandon</button>
@@ -62,6 +85,102 @@ async function handleActivities(projectId) {
 
     } catch (error) {
         console.error("Error handling activities of the project:", error);
+    }
+}
+
+// Function to update the input type of an activity
+function updateInputType(activityId) {
+    let inputType = document.getElementById(`input-type-${activityId}`).value;
+    let inputField = document.getElementById(`input-${activityId}`);
+
+    if (inputType === "empty") {
+        inputField.value = "";
+        inputField.disabled = true;
+    } else {
+        inputField.disabled = false;
+    }
+}
+
+// Function to validate URL
+function isValidURL(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+// Function to insert an input for an activity and create a note
+async function insertActivityInput(activityId) {
+    let inputType = document.getElementById(`input-type-${activityId}`).value;
+    let inputValue = document.getElementById(`input-${activityId}`).value.trim();
+
+    if (inputType === "link" && !isValidURL(inputValue)) {
+        alert("Invalid link. Please enter a valid URL.");
+        return;
+    }
+
+    let noteContent = "";
+    if (inputType === "text" || inputType === "link") {
+        noteContent = inputValue;
+    }
+
+    let userLogged = await getLoggedUser();
+
+    try {
+        const response = await fetch("http://localhost:8000/api/activity/input", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                activityId: activityId,
+                content: noteContent,
+                userName: userLogged,
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to save activity input.");
+        }
+
+        // Disable the Insert Input button after successful submission
+        const insertButton = document.querySelector(`#insert-input-${activityId}`);
+        if (insertButton) {
+            insertButton.disabled = true;
+            insertButton.classList.add('disabled'); // Optionally add a disabled class for styling
+        }
+
+        alert("Activity input saved successfully!");
+    } catch (error) {
+        console.error("Error saving activity input:", error);
+    }
+}
+
+//TODO
+// Function to get the value of the input field (searching for the input note and returning the content)
+async function getValue(activityId, activityInput) {
+    console.log("activityId:", activityId);
+    console.log("activityInput:", activityInput);
+
+    //const inputField = document.getElementById(`input-${activityId}`);
+
+    //console.log("Input field:", inputField);
+
+    //if (!inputField) {
+    //    console.error("Input field not found.");
+    //    return;
+    //}
+
+    try {
+        const response = await fetch(`http://localhost:8000/api/note/${activityInput}`);
+
+        if (response.ok) {
+            const note = await response.json();
+            let value = note.content;
+            return value; // we can return the value of the input field
+        }
+    } catch (error) {
+        console.error("Error getting input value:", error);
     }
 }
 
