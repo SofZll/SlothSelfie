@@ -140,9 +140,19 @@ const deleteNote = async (req, res) => {
     }
 };
 
+//Get a note by id
+const getNoteById = async (noteId) => {
+    const note = await Note.findById(noteId);
+    if (!note) {
+        return null;
+    }
+    return note.populate('content');
+};
+
 module.exports = {
     createNote,
     getNotes,
     updateNote,
     deleteNote,
+    getNoteById
 };
