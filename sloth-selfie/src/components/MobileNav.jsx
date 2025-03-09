@@ -15,7 +15,7 @@ const MobileNav = () => {
     }, [location]);
 
     return (
-        <nav className='d-flex nav-mobile p-3 justify-content-between align-items-center position-fixed bottom-0 start-0 bg-light bg-gradient z-1'>
+        <nav className='d-flex nav-mobile p-3 justify-content-between align-items-center position-fixed bottom-0 start-0 bg-white shadow z-1'>
             <NavLink to='/home'  className={(isHomeActive ? 'active' : '')} alt='homepage'>
                 <House size={36} color="#555B6E" strokeWidth={1.75} />
             </NavLink>
