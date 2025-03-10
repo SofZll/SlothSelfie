@@ -15,8 +15,8 @@
 
 //TODO: gestione di handleActivities
 
-//TODO: iinput e output sono note (eventualmente un link ad un file online, es: https://example.com/files/note.txt)
-//aggiusta questione di testo input da mostrare corretto
+//aggiusta questione di testo e tipo di input/output da mostrare corretto
+//(es di link ad un file online, es: https://example.com/files/note.txt) V
 
 // Function to get the logged user
 async function getLoggedUser() {
