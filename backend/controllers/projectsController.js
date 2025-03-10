@@ -41,6 +41,8 @@ const getProjectById = async (req, res) => {
             phase.activities = await Activity.find({ phase: phase._id })
             .populate("description")
             .populate("sharedWith", "username")
+            .populate({ path: "input", select: "content" })
+            .populate({ path: "output", select: "content" })
             .sort({ createdAt: 1 });
         }
 
@@ -50,6 +52,8 @@ const getProjectById = async (req, res) => {
                 subphase.activities = await Activity.find({ subphase: subphase._id })
                 .populate("description")
                 .populate("sharedWith", "username")
+                .populate({ path: "input", select: "content" })
+                .populate({ path: "output", select: "content" })
                 .sort({ createdAt: 1 });
             }
         }
@@ -345,12 +349,22 @@ const deleteProject = async (req, res) => {
         // Collect all note IDs linked to these activities
         const noteIds = activities.map(activity => activity.description);
 
+        // Collect all input/output note IDs linked to these activities
+        const inputNoteIds = activities.map(activity => activity.input);
+        const outputNoteIds = activities.map(activity => activity.output);
+
          // Find the note id of the description of the project
         const projectNoteId = project.description;
 
         // Delete all notes
         if (noteIds.length > 0) {
             await Note.deleteMany({ _id: { $in: noteIds } });
+        }
+        if (inputNoteIds.length > 0) {
+            await Note.deleteMany({ _id: { $in: inputNoteIds } });
+        }
+        if (outputNoteIds.length > 0) {
+            await Note.deleteMany({ _id: { $in: outputNoteIds } });
         }
         //delete the description note of the project
         if (projectNoteId) {
@@ -409,9 +423,21 @@ const removePhaseFromBackend = async (req, res) => {
         // Collect all note IDs linked to these activities
         const noteIds = activities.map(activity => activity.description);
 
+        // Collect all input/output note IDs linked to these activities
+        const inputNoteIds = activities.map(activity => activity.input);
+        const outputNoteIds = activities.map(activity => activity.output);
+
         // Delete all the notes
         if (noteIds.length > 0) {
             await Note.deleteMany({ _id: { $in: noteIds } });
+        }
+
+        if (inputNoteIds.length > 0) {
+            await Note.deleteMany({ _id: { $in: inputNoteIds } });
+        }
+
+        if (outputNoteIds.length > 0) {
+            await Note.deleteMany({ _id: { $in: outputNoteIds } });
         }
 
         // Delete the activities of the phase and its subphases
@@ -474,9 +500,19 @@ const removeSubphaseFromBackend = async (req, res) => {
         // Collect all note IDs linked to these activities
         const noteIds = activities.map(activity => activity.description);
 
+        // Collect all input/output note IDs linked to these activities
+        const inputNoteIds = activities.map(activity => activity.input);
+        const outputNoteIds = activities.map(activity => activity.output);
+
         // Delete all the notes
         if (noteIds.length > 0) {
             await Note.deleteMany({ _id: { $in: noteIds } });
+        }
+        if (inputNoteIds.length > 0) {
+            await Note.deleteMany({ _id: { $in: inputNoteIds } });
+        }
+        if (outputNoteIds.length > 0) {
+            await Note.deleteMany({ _id: { $in: outputNoteIds } });
         }
 
         // Delete the activities
@@ -544,15 +580,25 @@ const removeActivityFromBackend = async (req, res) => {
 
         // if the activity is deleted from a phase or subphase, delete the activity
 
-        //we first save the id to delete the note description
+        //we first save the id to delete the note description, and the input/output notes
         const activity = await Activity.findById(activityId);
         const descriptionNoteId = activity.description;
+        const inputNoteId = activity.input;
+        const outputNoteId = activity.output;
 
         await Activity.findByIdAndDelete(activityId);
 
         //delete the description note
         if (descriptionNoteId) {
             await Note.findByIdAndDelete(descriptionNoteId);
+        }
+        //delete the input note
+        if (inputNoteId) {
+            await Note.findByIdAndDelete(inputNoteId);
+        }
+        //delete the output note
+        if (outputNoteId) {
+            await Note.findByIdAndDelete(outputNoteId);
         }
 
         return res.status(200).json({ success: true, message: "Activity deleted successfully" });
