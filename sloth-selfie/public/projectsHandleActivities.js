@@ -49,15 +49,22 @@ async function handleActivities(projectId) {
                         <strong>${star}${activity.title}</strong> - Status: ${activity.status}
                         <br>
                         Input type: 
-                        <select id="input-type-${activity._id}" onchange="updateInputType('${activity._id}')">
+                        <select id="input-type-${activity._id}" onchange="updateInputOutputType('${activity._id}', 'input')">
                             <option value="text">Text</option>
                             <option value="empty">Empty</option>
                             <option value="link">Link</option>
                         </select>
                         <input type="text" id="input-${activity._id}" value="${activity.input || ''}" ${inputDisabled}>  <!-- //getValue(activity._id, activity.input) -->
-
-                        <button class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInput('${activity._id}')" ${insertDisabled}>Insert Input</button>
-                        Output: <input type="text" id="input-${activity._id}" value="${activity.output || ''}">
+                        <button class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'input')" ${insertDisabled}>Insert Input</button>
+                        
+                        <label>Output type:</label>
+                        <select id="output-type-${activity._id}" onchange="updateInputOutputType('${activity._id}', 'output')">
+                            <option value="text">Text</option>
+                            <option value="link">Link</option>
+                            <option value="true">Completed</option>
+                        </select>
+                        <input type="text" id="field-output-${activity._id}" value="${activity.output || ''}" disabled>
+                        <button class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output')">Insert Output</button>
                         `;
                     // shows the buttons for accept/reject output only if the user is the owner
                     if (isOwner) {
@@ -88,16 +95,31 @@ async function handleActivities(projectId) {
     }
 }
 
-// Function to update the input type of an activity
-function updateInputType(activityId) {
-    let inputType = document.getElementById(`input-type-${activityId}`).value;
-    let inputField = document.getElementById(`input-${activityId}`);
+// Function to update the input/output type of an activity
+function updateInputOutputType(activityId, fieldType) {
 
-    if (inputType === "empty") {
-        inputField.value = "";
-        inputField.disabled = true;
-    } else {
-        inputField.disabled = false;
+    if (fieldType === "input") {
+        let inputType = document.getElementById(`input-type-${activityId}`).value;
+        let inputField = document.getElementById(`input-${activityId}`);
+
+        if (inputType === "empty") {
+            inputField.value = "";
+            inputField.disabled = true;
+        } else {
+            inputField.disabled = false;
+        }
+
+    } else if (fieldType === "output") {
+        let outputType = document.getElementById(`output-type-${activityId}`).value;
+        let outputField = document.getElementById(`field-output-${activityId}`);
+
+        if (outputType === "true") {
+            outputField.value = "Completed";
+            outputField.disabled = true;
+        } else {
+            outputField.disabled = false;
+            outputField.value = "";
+        }
     }
 }
 
@@ -111,48 +133,88 @@ function isValidURL(string) {
     }
 }
 
-// Function to insert an input for an activity and create a note
-async function insertActivityInput(activityId) {
-    let inputType = document.getElementById(`input-type-${activityId}`).value;
-    let inputValue = document.getElementById(`input-${activityId}`).value.trim();
+// Function to insert an input/output for an activity and create a note
+async function insertActivityInputOutput(activityId, fieldType) {
+    if (fieldType === "input") {
+    
+        let inputType = document.getElementById(`input-type-${activityId}`).value;
+        let inputValue = document.getElementById(`input-${activityId}`).value.trim();
 
-    if (inputType === "link" && !isValidURL(inputValue)) {
-        alert("Invalid link. Please enter a valid URL.");
-        return;
-    }
-
-    let noteContent = "";
-    if (inputType === "text" || inputType === "link") {
-        noteContent = inputValue;
-    }
-
-    let userLogged = await getLoggedUser();
-
-    try {
-        const response = await fetch("http://localhost:8000/api/activity/input", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                activityId: activityId,
-                content: noteContent,
-                userName: userLogged,
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to save activity input.");
+        if (inputType === "link" && !isValidURL(inputValue)) {
+            alert("Invalid link. Please enter a valid URL.");
+            return;
         }
 
-        // Disable the Insert Input button after successful submission
-        const insertButton = document.querySelector(`#insert-input-${activityId}`);
-        if (insertButton) {
-            insertButton.disabled = true;
-            insertButton.classList.add('disabled'); // Optionally add a disabled class for styling
+        let noteContent = "";
+        if (inputType === "text" || inputType === "link") {
+            noteContent = inputValue;
         }
 
-        alert("Activity input saved successfully!");
-    } catch (error) {
-        console.error("Error saving activity input:", error);
+        let userLogged = await getLoggedUser();
+
+        try {
+            const response = await fetch("http://localhost:8000/api/activity/input", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    activityId: activityId,
+                    content: noteContent,
+                    userName: userLogged,
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to save activity input.");
+            }
+
+            // Disable the Insert Input button after successful submission
+            const insertButton = document.querySelector(`#insert-input-${activityId}`);
+            if (insertButton) {
+                insertButton.disabled = true;
+                insertButton.classList.add('disabled');
+            }
+
+            alert("Activity input saved successfully!");
+        } catch (error) {
+            console.error("Error saving activity input:", error);
+        }
+    } else if (fieldType === "output") {
+        let outputType = document.getElementById(`output-type-${activityId}`).value;
+        let outputValue = document.getElementById(`field-output-${activityId}`).value.trim();
+
+        if (outputType === "link" && !isValidURL(outputValue)) {
+            alert("Invalid link. Please enter a valid URL.");
+            return;
+        }
+         noteContent = outputValue;
+        let userLogged = await getLoggedUser();
+
+        try {
+            const response = await fetch("http://localhost:8000/api/activity/output", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    activityId: activityId,
+                    content: noteContent,
+                    userName: userLogged,
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to save activity output.");
+            }
+
+            // Disable the Insert Output button after successful submission
+            const insertButton = document.querySelector(`#insert-output-${activityId}`);
+            if (insertButton) {
+                insertButton.disabled = true;
+                insertButton.classList.add('disabled');
+            }
+
+            alert("Activity output saved successfully!");
+        } catch (error) {
+            console.error("Error saving activity output:", error);
+        }
     }
 }
 

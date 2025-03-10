@@ -131,12 +131,7 @@ const deleteActivity = async (req, res) => {
 //Function to create a note associated to the input of the activity
 async function createInputAsNote(req, res) {
     try {
-
-        console.log("Received request body:", req.body);
-
         const { activityId, content, userName } = req.body;
-
-        console.log("userName:", userName);
 
         //find the user from the username:
         const user = await User.findOne({ username: userName });
@@ -176,11 +171,55 @@ async function createInputAsNote(req, res) {
     }
 }
 
+//Function to create a note associated to the output of the activity
+async function createOutputAsNote(req, res) {
+    try {
+        const { activityId, content, userName } = req.body;
+
+        //find the user from the username:
+        const user = await User.findOne({ username: userName });
+        console.log(userName);
+
+        //find the activity
+        const activity = await Activity.findById(activityId);
+        //get the sharedWith users field
+        const sharedWithUsers = activity.sharedWith;
+
+        // Create the note
+        const newNote = new Note({
+            title: "Activity Output",
+            category: "Activity Output",
+            content: content,
+            user: user,
+            noteAccess: "restricted", // only for members
+            allowedUsers: sharedWithUsers.map(u => u._id)
+        });
+        const savedNote = await newNote.save();
+
+        // Update the output field of the activity with the id of the note created
+        const updatedActivity = await Activity.findByIdAndUpdate(
+            activityId,
+            { output: savedNote._id },
+            { new: true }
+        );
+
+        if (!updatedActivity) {
+            return res.status(404).json({ message: "Activity not found" });
+        }
+
+        res.status(201).json({ message: "Note created and linked to activity", note: savedNote });
+    } catch (error) {
+        console.error("Error creating note:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
 
 module.exports = {
     createActivity,
     getActivities,
     updateActivity,
     deleteActivity,
-    createInputAsNote
+    createInputAsNote,
+    createOutputAsNote
 };
