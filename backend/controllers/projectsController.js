@@ -69,7 +69,6 @@ const createActivities = async (activities, projectId, phaseId, subphaseId, owne
         const sharedWithUserIds = await User.find({ username: { $in: activity.sharedWith } });
 
         //create the description note for the activity
-        console.log("activity.description QUA", activity.description);
         const descriptionNoteId = await createNoteDescription(activity.description, "activity", ownerId, sharedWithUserIds);
 
         // Create the activity
@@ -196,8 +195,6 @@ const updateExistingActivities = async (existingActivities, activities) => {
             if (existingActivity) {
 
                 //we update the note description
-                console.log("existingActivity.description", existingActivity.description);
-                console.log("activity.description", activity.description);
                 await updateNoteDescription(existingActivity.description, activity.description);
 
                 existingActivity.title = activity.title;
@@ -347,11 +344,9 @@ const deleteProject = async (req, res) => {
 
         // Collect all note IDs linked to these activities
         const noteIds = activities.map(activity => activity.description);
-        console.log("noteIds", noteIds);
 
          // Find the note id of the description of the project
         const projectNoteId = project.description;
-        console.log("projectNoteId", projectNoteId);
 
         // Delete all notes
         if (noteIds.length > 0) {

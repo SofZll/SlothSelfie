@@ -15,8 +15,8 @@
 
 //TODO: se cancello una attività devo cancellare anche le note di input e output se esistono
 //TODO: gestione di handleActivities
-//gestire rerender con nuovi stati -> riguarda e finisci Abandoned e Overdue
-//aggiusta questione di testo e tipo di input/output da mostrare corretto
+//gestire rerender con nuovi stati -> riguarda e finisci Abandoned e Overdue, se attività è abbandonata riguarda edit
+//aggiusta questione di testo e tipo di input/output da mostrare corretto, se riattivo output deve tornare disponibile
 
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
