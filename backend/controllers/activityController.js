@@ -67,13 +67,33 @@ const getActivities = async (req, res) => {
     }
 };
 
+// Fetching a single activity
+const getActivity = async (req, res) => {
+    const {activityId} = req.params;
+    try {
+        const activity = await Activity.findById(activityId).populate('sharedWith', '_id username');
+        if (!activity) {
+            return res.status(404).json({ message: "Activity not found" });
+        }
+        res.status(200).json({
+            ...activity.toObject(),
+            sharedWith: activity.sharedWith.map(user => user.username) //we include usernames
+        });
+    } catch (error) {
+        console.error('Error fetching activity:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // Updating an activity
 const updateActivity = async (req, res) => {
     const{activityId} = req.params;
     const {title, deadline, completed, sharedWith} = req.body;
     const userName = req.session.username;
-    // Log per verificare il nome utente
+    // Log to check the user in session
     console.log("User in session:", userName);
+
+    console.log("Shared with:", sharedWith);
 
     const user = await User.findOne({ username: userName });
 
@@ -90,7 +110,7 @@ const updateActivity = async (req, res) => {
             return res.status(404).json({ message: "Activity not found" });
         }
         //we find the current user and check if it is his activity, or if it is shared with him
-        if (activity.user.toString() !== user._id.toString()&& !activity.sharedWith.includes(user._id.toString())) {
+        if (activity.user.toString() !== user._id.toString() && !activity.sharedWith.includes(user._id.toString())) {
             return res.status(403).json({ message: "You are not allowed to update this activity" });
         }
 
@@ -214,12 +234,42 @@ async function createOutputAsNote(req, res) {
     }
 }
 
+//Function to update the status of an activity
+async function updateActivityStatus(req, res) {
+    try {
+        const { activityId } = req.params;
+        const { status } = req.body;
+
+        //find the activity
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            return res.status(404).json({ message: "Activity not found" });
+        }
+        
+        // Update the status of the activity only if it is different
+        if (activity.status === status) {
+            return res.status(200).json({ message: "Status already up to date", activity });
+        }
+
+        // Update the status of the activity
+        activity.status = status;
+        await activity.save();
+
+        res.status(200).json(activity);
+    }
+    catch (error) {
+        console.error("Error updating activity status:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+}
 
 module.exports = {
     createActivity,
     getActivities,
+    getActivity,
     updateActivity,
     deleteActivity,
     createInputAsNote,
-    createOutputAsNote
+    createOutputAsNote,
+    updateActivityStatus
 };
