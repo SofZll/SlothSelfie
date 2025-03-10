@@ -40,9 +40,27 @@ async function handleActivities(projectId) {
         } else {
             content += `<ul class="list-group">`;
             activities.forEach(activity => {
-                let star = activity.milestone ? "*" : "";
+                // Check if the activity has a deadline and if it is Overdue or Abandoned
+                let today = new Date();
+                let deadline = new Date(activity.deadline);
+
+                let isLate = today > deadline && !activity.output; // Overdue without output
+                let isAbandoned = today - deadline > 7 * 24 * 60 * 60 * 1000; // Overdue since last 7 days
+
+                console.log("Activity:", activity.title, "isLate:", isLate, "isAbandoned:", isAbandoned);
+
+                if (isLate) {
+                    updateActivityStatus(activity._id, "Overdue", projectId);
+                }
+                if (isAbandoned) {
+                    updateActivityStatus(activity._id, "Abandoned", projectId);
+                }
+
+                let star = activity.milestone ? "*" : ""; // milestone
                 let inputDisabled = activity.input ? 'disabled' : '';  // Check if input already exists
-                let insertDisabled = activity.input ? 'disabled' : ''; // Disable the button if input exists
+                let inputInsertDisabled = activity.input ? 'disabled' : ''; // Disable the button if input exists
+                let outputDisabled = activity.output ? 'disabled' : ''; // Check if output already exists
+                let outputInsertDisabled = activity.output ? 'disabled' : ''; // Disable the button if output exists
 
                 content += `
                     <li class="list-group-item">
@@ -55,7 +73,7 @@ async function handleActivities(projectId) {
                             <option value="link">Link</option>
                         </select>
                         <input type="text" id="input-${activity._id}" value="${activity.input || ''}" ${inputDisabled}>  <!-- //getValue(activity._id, activity.input) -->
-                        <button class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'input')" ${insertDisabled}>Insert Input</button>
+                        <button class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'input', '${projectId}')" ${inputInsertDisabled}>Insert Input</button>
                         
                         <label>Output type:</label>
                         <select id="output-type-${activity._id}" onchange="updateInputOutputType('${activity._id}', 'output')">
@@ -63,22 +81,21 @@ async function handleActivities(projectId) {
                             <option value="link">Link</option>
                             <option value="true">Completed</option>
                         </select>
-                        <input type="text" id="field-output-${activity._id}" value="${activity.output || ''}" disabled>
-                        <button class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output')">Insert Output</button>
+                        <input type="text" id="output-${activity._id}" value="${activity.output || ''}" ${outputDisabled}>
+                        <button class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output', '${projectId}')" ${outputInsertDisabled}>Insert Output</button>
                         `;
                     // shows the buttons for accept/reject output only if the user is the owner
                     if (isOwner) {
                         content += `
-                            <button class="btn btn-outline-danger btn-sm" onclick="rejectOutput('${activity._id}')">Reject output</button>
-                            <button class="btn btn-outline-success btn-sm" onclick="acceptOutput('${activity._id}')">Accept output</button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="updateActivityStatus('${activity._id}', 'Reactivated', '${projectId}')">Reject output</button>
                         `;
                     }
                     content += `
                         <p>Activity Status: ${activity.status}<p>
                         <p>Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
-                        <button class="btn btn-success btn-sm" onclick="updateActivityStatus('${activity._id}', 'started')">Start</button>
-                        <button class="btn btn-primary btn-sm" onclick="updateActivityStatus('${activity._id}', 'completed')">Complete</button>
-                        <button class="btn btn-danger btn-sm" onclick="updateActivityStatus('${activity._id}', 'abandoned')">Abandon</button>
+                        <button class="btn btn-success btn-sm" onclick="updateActivityStatus('${activity._id}', 'Active', '${projectId}')" ${!activity.input ? 'disabled' : ''}>Start</button>
+                        <button class="btn btn-primary btn-sm" onclick="updateActivityStatus('${activity._id}', 'Completed', '${projectId}')" ${!activity.output ? 'disabled' : ''}>Complete</button>
+                        <button class="btn btn-danger btn-sm" onclick="abandonActivity('${activity._id}', '${projectId}')">Abandon</button>
                     </li>
                 `;
             });
@@ -134,7 +151,7 @@ function isValidURL(string) {
 }
 
 // Function to insert an input/output for an activity and create a note
-async function insertActivityInputOutput(activityId, fieldType) {
+async function insertActivityInputOutput(activityId, fieldType, projectId) {
     if (fieldType === "input") {
     
         let inputType = document.getElementById(`input-type-${activityId}`).value;
@@ -174,7 +191,9 @@ async function insertActivityInputOutput(activityId, fieldType) {
                 insertButton.classList.add('disabled');
             }
 
-            alert("Activity input saved successfully!");
+             // Update activity status to Activatable
+            await updateActivityStatus(activityId, "Activatable", projectId);
+
         } catch (error) {
             console.error("Error saving activity input:", error);
         }
@@ -211,7 +230,6 @@ async function insertActivityInputOutput(activityId, fieldType) {
                 insertButton.classList.add('disabled');
             }
 
-            alert("Activity output saved successfully!");
         } catch (error) {
             console.error("Error saving activity output:", error);
         }
@@ -246,23 +264,73 @@ async function getValue(activityId, activityInput) {
     }
 }
 
-// Function to update activity status //TODO
-async function updateActivityStatus(activityId, status) {
+// Function to update activity status
+async function updateActivityStatus(activityId, newStatus, projectId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`, {
+        const response = await fetch(`http://localhost:8000/api/activity/status/${activityId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status })
+            body: JSON.stringify({ 
+                activityId: activityId,
+                status: newStatus,
+            })
         });
 
         if (response.ok) {
-            alert("Activity status updated!");
-            handleActivities(projectId); // Refresh activities
-        } else {
-            alert("Error updating activity status.");
+            // Aggiorna il testo dello stato nella UI
+            let statusElement = document.getElementById(`status-${activityId}`);
+            if (statusElement) {
+                statusElement.innerText = `Status: ${newStatus}`;
+                //reset the dom
+                document.getElementById("activity-container").innerHTML = "";
+                await handleActivities(projectId); // Refresh activities
+            }
         }
     } catch (error) {
         console.error("Error updating activity:", error);
+    }
+}
+
+// Function to abandon an activity if no more users are assigned   PROBELMA CON FORMATO USERS DENTRO A SHAREDWITH
+async function abandonActivity(activityId, projectId) {
+    try {
+        const userLogged = await getLoggedUser();
+
+        // Get the activity
+        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const activity = await response.json();
+
+        if (!activity) {
+            console.error("Activity is undefined:", activity);
+            return;
+        }
+
+        console.log("Activity to abandon:", activity);
+        console.log("User logged:", userLogged);
+        console.log("Activity shared with:", activity.sharedWith);
+        // Remove the logged user from sharedWith
+        let updatedSharedWith = activity.sharedWith.filter(user => user !== userLogged);
+        console.log("Updated shared with:", updatedSharedWith);
+        //let updatedSharedWith = activity.sharedWith.filter(user => user.username !== userLogged);
+
+        // Update the activity with the new sharedWith
+        await fetch(`http://localhost:8000/api/activity/${activityId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                sharedWith: updatedSharedWith.map(user => user._id),
+            })
+        });
+
+        // if there are no more users assigned, update the status to Abandoned
+        if (updatedSharedWith.length === 0) {
+            await updateActivityStatus(activityId, "Abandoned", projectId);
+            alert(`Activity ${activity.title} status updated to Abandoned.`);
+        }
+        await handleActivities(projectId);
+    } catch (error) {
+        console.error("Error abandoning activity:", error);
     }
 }
 

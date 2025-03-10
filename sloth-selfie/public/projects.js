@@ -13,9 +13,11 @@
 
 //TODO: AGGIUNGI CONTROLLI SE DESCRIZIONE DI INTERO PROGETTO SOLO OWNER PUò MODIFICARE
 
+//TODO: se cancello una attività devo cancellare anche le note di input e output se esistono
 //TODO: gestione di handleActivities
-
+//gestire rerender con nuovi stati -> riguarda e finisci Abandoned e Overdue
 //aggiusta questione di testo e tipo di input/output da mostrare corretto
+
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
 // Function to get the logged user
