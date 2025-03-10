@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { validateEmail, validatePhoneNumber } from '../utils/validation';
 import MainLayout from '../layouts/MainLayout';
@@ -13,6 +13,10 @@ const ProfilePage = ({ profileData }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
     const [currenteProfileData, setcurrenteProfileData] = useState(profileData);
+
+    useEffect(() => {
+        console.log(profileData);
+    }, [profileData]);
 
     const handleClickImage = () => {
         document.getElementById('file-input').click();
@@ -69,8 +73,8 @@ const ProfilePage = ({ profileData }) => {
 
     return (
         <MainLayout>
-            <div className="profile">
-                <div className="profile-container">
+            <div className="container profile">
+                <div className="col profile-container">
                     <h2>{currenteProfileData.username}</h2>
                     <div className="profile-image">
                         {currenteProfileData.profile_image && (
@@ -81,18 +85,18 @@ const ProfilePage = ({ profileData }) => {
                     <button className="btn button-info" onClick={() => setShowProfile(!showProfile)}>
                         {showProfile ? "Hide": "Expands"}
                     </button>
-                    <div className={`profile-info ${showProfile ? 'show' : ''}`}>
+                    <div className={`col profile-info ${showProfile ? 'show' : ''}`}>
                         {isEditing ? (
-                            <form className="profile-form">
-                                <div className="form-group profile-form-group">
-                                    <label htmlFor="name">Name:</label>
-                                    <input type="text" id="name" name="name" value={currenteProfileData.name} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, name: e.target.value })}/>
+                            <form className="profile-form col-12">
+                                <div className="row mb-3 profile-form-group">
+                                    <label htmlFor="name" className='col-sm-3 col-form-label'>Name:</label>
+                                    <input type="text" className='col-sm-9' id="name" name="name" value={currenteProfileData.name} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, name: e.target.value })}/>
                                 </div>
-                                <div className="form-group profile-form-group">
-                                    <label htmlFor="username">Username:</label>
-                                    <input type="text" id="username" value={currenteProfileData.username} readOnly/>
+                                <div className="row mb-3 profile-form-group">
+                                    <label htmlFor="username" className='col-sm-3 col-form-label'>Username:</label>
+                                    <input type="text" className='col-sm-9' id="username" value={currenteProfileData.username} readOnly/>
                                 </div>
-                                <div className="form-group profile-form-group">
+                                <div className="profile-form-group">
                                     <label htmlFor="email">Email:</label>
                                     <input type="email" id="email" name="email" value={currenteProfileData.email} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, email: e.target.value })}/>
                                 </div>
@@ -126,15 +130,15 @@ const ProfilePage = ({ profileData }) => {
                         )}
                     </div>
                     {isEditing ? (
-                        <>
+                        <div className='profile-buttons'>
                             <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={handleSaveChanges}>Save changes</button>
                             <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(false)}>Cancel</button>
-                        </>
+                        </div>
                     ):(
-                        <>
+                        <div className='profile-buttons'>
                             <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(true)}>Edit profile</button>
                             <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={handleLogout}>Log out</button>
-                        </>
+                        </div>
                     )}
                 </div>
                 <div className="mini-forum">
