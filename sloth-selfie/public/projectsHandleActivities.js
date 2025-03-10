@@ -69,7 +69,7 @@ async function handleActivities(projectId) {
                             <option value="empty">Empty</option>
                             <option value="link">Link</option>
                         </select>
-                        <input type="text" id="input-${activity._id}" value="${activity.input || ''}" ${inputDisabled}>  <!-- //getValue(activity._id, activity.input) -->
+                        <input type="text" id="input-${activity._id}" value="${activity.input?.content || ''}" ${inputDisabled}>
                         <button class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'input', '${projectId}')" ${inputInsertDisabled}>Insert Input</button>
                         
                         <label>Output type:</label>
@@ -78,7 +78,7 @@ async function handleActivities(projectId) {
                             <option value="link">Link</option>
                             <option value="true">Completed</option>
                         </select>
-                        <input type="text" id="output-${activity._id}" value="${activity.output || ''}" ${outputDisabled}>
+                        <input type="text" id="output-${activity._id}" value="${activity.output?.content || ''}" ${outputDisabled}>
                         <button class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output', '${projectId}')" ${outputInsertDisabled}>Insert Output</button>
                         `;
                     // shows the buttons for accept/reject output only if the user is the owner
@@ -355,34 +355,6 @@ async function abandonActivity(activityId, projectId) {
         }
     } catch (error) {
         console.error("Error abandoning activity:", error);
-    }
-}
-
-//TODO
-// Function to get the value of the input field (searching for the input note and returning the content)
-async function getValue(activityId, activityInput) {
-    console.log("activityId:", activityId);
-    console.log("activityInput:", activityInput);
-
-    //const inputField = document.getElementById(`input-${activityId}`);
-
-    //console.log("Input field:", inputField);
-
-    //if (!inputField) {
-    //    console.error("Input field not found.");
-    //    return;
-    //}
-
-    try {
-        const response = await fetch(`http://localhost:8000/api/note/${activityInput}`);
-
-        if (response.ok) {
-            const note = await response.json();
-            let value = note.content;
-            return value; // we can return the value of the input field
-        }
-    } catch (error) {
-        console.error("Error getting input value:", error);
     }
 }
 

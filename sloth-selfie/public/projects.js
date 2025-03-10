@@ -2,6 +2,7 @@
 //TODO: controlla le date, deve essere range fine >= inizio
 //TODO: quando clicco salva si deve chiudere la visualizzazione a lista/gannt
 
+//TODO: gestire sincronizzazione tra attività, se una attività è in ritardo, le altre sincronizzate devono essere traslate o contratte (se milestone contrai solo)
 //TODO: in edit di progetto: owner può raggruppare attività e cambiare le sincronizzazioni tra le attività,
 // in caso di ritardi può decidere se traslare o contrarre le attività sincronizzate a quella in ritardo
 //TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto.
@@ -13,10 +14,9 @@
 
 //TODO: AGGIUNGI CONTROLLI SE DESCRIZIONE DI INTERO PROGETTO SOLO OWNER PUò MODIFICARE
 
-//TODO: se cancello una attività devo cancellare anche le note di input e output se esistono
 //TODO: gestione di handleActivities
-//gestire rerender con nuovi stati -> riguarda e finisci Abandoned e Overdue, se attività è abbandonata riguarda edit
-//aggiusta questione di testo e tipo di input/output da mostrare corretto, se riattivo output deve tornare disponibile
+//se attività è abbandonata riguarda edit, rimane senza membri e non fa fare edit se non li aggiungo
+//aggiusta questione di tipo di input/output da mostrare corretto, se riattivo output deve tornare disponibile (ripreno la nota di output precedente, fare edit lato backend)
 
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
