@@ -75,6 +75,12 @@ const createActivities = async (activities, projectId, phaseId, subphaseId, owne
         //create the description note for the activity
         const descriptionNoteId = await createNoteDescription(activity.description, "activity", ownerId, sharedWithUserIds);
 
+        // get the dependencies of the activity if any
+        let dependenciesIds = [];
+        if (activity.dependencies && activity.dependencies.length > 0) {
+            dependenciesIds = await Activity.find({ _id: { $in: activity.dependencies } }).select('_id');
+        }
+
         // Create the activity
         const newActivity = new Activity({
             title: activity.title,
@@ -86,7 +92,8 @@ const createActivities = async (activities, projectId, phaseId, subphaseId, owne
             startDate: activity.startDate,
             deadline: activity.deadline,
             user: ownerId,
-            milestone: activity.milestone
+            milestone: activity.milestone,
+            dependencies: dependenciesIds
         });
 
         const savedActivity = await newActivity.save();
@@ -201,11 +208,18 @@ const updateExistingActivities = async (existingActivities, activities) => {
                 //we update the note description
                 await updateNoteDescription(existingActivity.description, activity.description);
 
+                //get the dependencies of the activity if any
+                let dependenciesIds = [];
+                if (activity.dependencies && activity.dependencies.length > 0) {
+                    dependenciesIds = await Activity.find({ _id: { $in: activity.dependencies } }).select('_id');
+                }
+
                 existingActivity.title = activity.title;
                 existingActivity.sharedWith = await User.find({ username: { $in: activity.sharedWith } });
                 existingActivity.startDate = activity.startDate;
                 existingActivity.deadline = activity.deadline;
                 existingActivity.milestone = activity.milestone;
+                existingActivity.dependencies = dependenciesIds;
                 await existingActivity.save();
             }
         }
