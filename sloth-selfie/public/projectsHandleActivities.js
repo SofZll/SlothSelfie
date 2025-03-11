@@ -44,11 +44,16 @@ async function handleActivities(projectId) {
 
                 let isLate = today > deadline && !activity.output; // Overdue without output
                 let isAbandoned = today - deadline > 7 * 24 * 60 * 60 * 1000; // Overdue since last 7 days
+                //if the activity has no members assigned, it is abandoned
+                let isAbandonedNoParticipants = false;
+                if (activity.sharedWith.length === 0) {
+                    isAbandonedNoParticipants = true;
+                }
 
-                if (isLate && !isAbandoned) {
+                if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
                     updateActivityStatus(activity._id, "Overdue");
                 }
-                if (isAbandoned) {
+                if (isAbandoned || isAbandonedNoParticipants) {
                     updateActivityStatus(activity._id, "Abandoned");
                 }
 

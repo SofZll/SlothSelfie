@@ -10,16 +10,11 @@
 
 //TODO: aggiungi loading al caricamento di pagina
 
-//il campo membri di progetto deve essere obbligatorio
 //nelle note create si visualizza sharedwith con objid e non con usernames
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
-//TODO: AGGIUNGI CONTROLLI SE DESCRIZIONE DI INTERO PROGETTO SOLO OWNER PUò MODIFICARE
-
-//TODO: gestione di handleActivities
-//se attività è abbandonata riguarda edit, rimane senza membri e non fa fare edit se non li aggiungo
-//aggiusta questione di tipo di input/output da mostrare corretto
+//TODO: non evidenzia più di una dipendenza per attività, e se non si riselezionano, si perdono le dipendenze
 
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
@@ -116,6 +111,11 @@ async function saveOrUpdateProject(event) {
 
         phaseDiv.querySelectorAll(".activities > .border").forEach(activityDiv => {
             const activityId = activityDiv.getAttribute("data-activity-id");
+
+            // get the dependencies of the activity
+            const dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
+            const dependencies = Array.from(dependenciesSelect.selectedOptions).map(option => option.value);
+
             phase.activities.push({
                 _id: activityId ? activityId : undefined,
                 title: activityDiv.querySelector(".activity-name").value,
@@ -123,7 +123,8 @@ async function saveOrUpdateProject(event) {
                 sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                 startDate: activityDiv.querySelector(".activity-start").value,
                 deadline: activityDiv.querySelector(".activity-end").value,
-                milestone: activityDiv.querySelector(".activity-milestone").checked
+                milestone: activityDiv.querySelector(".activity-milestone").checked,
+                dependencies: dependencies
             });
         });
 
@@ -138,6 +139,11 @@ async function saveOrUpdateProject(event) {
 
             subPhaseDiv.querySelectorAll(".subphase-activities > .border").forEach(activityDiv => {
                 const activityId = activityDiv.getAttribute("data-activity-id");
+
+                // get the dependencies of the activity
+                const dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
+                const dependencies = Array.from(dependenciesSelect.selectedOptions).map(option => option.value);
+
                 subphase.activities.push({
                     _id: activityId ? activityId : undefined,
                     title: activityDiv.querySelector(".activity-name").value,
@@ -145,7 +151,8 @@ async function saveOrUpdateProject(event) {
                     sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
                     startDate: activityDiv.querySelector(".activity-start").value,
                     deadline: activityDiv.querySelector(".activity-end").value,
-                    milestone: activityDiv.querySelector(".activity-milestone").checked
+                    milestone: activityDiv.querySelector(".activity-milestone").checked,
+                    dependencies: dependencies
                 });
             });
 
@@ -192,6 +199,12 @@ async function saveOrUpdateProject(event) {
 
     } catch (error) {
         console.error("Error saving/updating project:", error);
+    }
+
+    // Remove the warning message after saving
+    const warningMessage = document.getElementById("dependencyWarning");
+    if (warningMessage) {
+        warningMessage.remove();
     }
 
     document.getElementById("phasesContainer").innerHTML = "";//we remove the phase and subphase empty form after saving
@@ -252,6 +265,16 @@ function addActivity(button, type) {
         activityContainer = button.parentElement.querySelector(".subphase-activities");
     }
 
+    // Gets all project activities for selecting dependencies, we only show the ones that are already saved with an id from the backend
+    const allActivities = Array.from(document.querySelectorAll(".border[data-activity-id]")) 
+        .filter(activityDiv => activityDiv.getAttribute("data-activity-id"));
+
+    let dependencyOptions = allActivities.map(activity => {
+        let activityId = activity.getAttribute("data-activity-id");
+        let activityName = activity.querySelector(".activity-name").value;
+        return `<option value="${activityId}">${activityName}</option>`;
+    }).join("");
+
     const activityDiv = document.createElement("div");
     activityDiv.classList.add("border", "p-2", "mt-2");
     activityDiv.innerHTML = `
@@ -260,13 +283,19 @@ function addActivity(button, type) {
         <label>Activity description (optional):</label>
         <textarea class="form-control activity-description"></textarea>
         <label>Members (comma separated):</label>
-        <input type="text" class="form-control activity-actors" required>
+        <input type="text" class="form-control activity-actors">
         <label>Start date:</label>
         <input type="date" class="form-control activity-start" required>
         <label>Deadline:</label>
         <input type="date" class="form-control activity-end" required>
         <label>Is a milestone:</label>
         <input type="checkbox" class="activity-milestone">
+        </br>
+        <label>Dependencies:</label>
+        <select class="form-control activity-dependencies" multiple>
+            ${dependencyOptions}
+        </select>
+
         </br>
         <button type="button" class="btn btn-danger mt-2" onclick="closeActivityForm(this)">Remove Activity</button>
     `;
@@ -459,6 +488,19 @@ async function editProject(projectId) {
         }
         
         // fill the form with the project data
+        
+        //adding a note for the user
+        const projectForm = document.getElementById("projectForm");
+
+        let existingNote = document.getElementById("dependencyWarning");
+        if (!existingNote) {
+            const warningMessage = document.createElement("p");
+            warningMessage.id = "dependencyWarning";
+            warningMessage.textContent = "Note: New activities will only be available as dependencies after saving them with the project.";
+            warningMessage.style.color = "blue";
+            projectForm.parentNode.insertBefore(warningMessage, projectForm);
+        }
+
         //we set the project ID in the form with the attribute data-project-id
         document.getElementById("projectForm").setAttribute("data-project-id", projectId);
         document.getElementById("projectName").value = project.title;
@@ -493,6 +535,7 @@ async function editProject(projectId) {
                 activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
                 activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
                 activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
+                activityDiv.querySelector(".activity-dependencies").value =  activity.dependencies.join(", ");
             });
 
             //fill the subphases of each phase
@@ -520,6 +563,7 @@ async function editProject(projectId) {
                     activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
                     activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
                     activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
+                    activityDiv.querySelector(".activity-dependencies").value = activity.dependencies;
                 });
             }
             );
@@ -596,6 +640,18 @@ async function toggleProjectForm() {
         content.style.display = "block";
         document.getElementById("ToggleFormBtn").textContent = "Close";
 
+         //adding a note for the user
+        const projectForm = document.getElementById("projectForm");
+
+        let existingNote = document.getElementById("dependencyWarning");
+        if (!existingNote) {
+            const warningMessage = document.createElement("p");
+            warningMessage.id = "dependencyWarning";
+            warningMessage.textContent = "Note: New activities will only be available as dependencies after saving them with the project.";
+            warningMessage.style.color = "blue";
+            projectForm.parentNode.insertBefore(warningMessage, projectForm);
+        }
+
         //fill the owner with the user logged: 
         try {
             const loggedUser = await getLoggedUser();
@@ -615,6 +671,13 @@ async function toggleProjectForm() {
         
         //reset the form
         resetForm();
+
+        // remove the warning message when closing the form
+        let warningMessage = document.getElementById("dependencyWarning");
+        if (warningMessage) {
+            warningMessage.remove();
+        }
+
     }
 }
 
