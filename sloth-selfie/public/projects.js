@@ -10,13 +10,16 @@
 
 //TODO: aggiungi loading al caricamento di pagina
 
+//il campo membri di progetto deve essere obbligatorio
+//nelle note create si visualizza sharedwith con objid e non con usernames
+
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
 //TODO: AGGIUNGI CONTROLLI SE DESCRIZIONE DI INTERO PROGETTO SOLO OWNER PUò MODIFICARE
 
 //TODO: gestione di handleActivities
 //se attività è abbandonata riguarda edit, rimane senza membri e non fa fare edit se non li aggiungo
-//aggiusta questione di tipo di input/output da mostrare corretto, se riattivo output deve tornare disponibile (ripreno la nota di output precedente, fare edit lato backend)
+//aggiusta questione di tipo di input/output da mostrare corretto
 
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 

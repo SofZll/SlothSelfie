@@ -234,6 +234,35 @@ async function createOutputAsNote(req, res) {
     }
 }
 
+//Function to update the output note of an activity
+async function updateOutputAsNote(req, res) {
+    try {
+        const { activityId, content, userName } = req.body;
+
+        //find the user from the username:
+        const user = await User.findOne({ username: userName });
+        console.log(userName);
+
+        //find the activity
+        const activity = await Activity.findById(activityId);
+        
+        //find the note associated to the output of the activity
+        const noteId = activity.output;
+        const note = await Note.findById(noteId);
+
+        //we update the content and the user of the note
+        note.content = content;
+        note.user = user;
+
+        const savedNote = await note.save();
+
+        res.status(201).json({ message: "Note created and linked to activity", note: savedNote });
+    } catch (error) {
+        console.error("Error updating note:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
 //Function to update the status of an activity
 async function updateActivityStatus(req, res) {
     try {
@@ -271,5 +300,6 @@ module.exports = {
     deleteActivity,
     createInputAsNote,
     createOutputAsNote,
+    updateOutputAsNote,
     updateActivityStatus
 };
