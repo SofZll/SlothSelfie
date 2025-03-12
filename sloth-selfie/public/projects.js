@@ -1,4 +1,3 @@
-//TODO: GLI USERNAME ELENCATI IN SHAREDWITH DEVONO ESSERE TRA I MEMBERS DEL PROGETTO, aggiungi controlli relativi
 //TODO: controlla le date, deve essere range fine >= inizio
 //TODO: quando clicco salva si deve chiudere la visualizzazione a lista/gannt
 
@@ -14,7 +13,7 @@
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
-//TODO: non evidenzia più di una dipendenza per attività, e se non si riselezionano, si perdono le dipendenze
+//se abbandono attività e poi riaggiungo i membri, resta abbandonata
 
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
@@ -85,6 +84,30 @@ async function loadProjects() {
     }
 }
 
+//Function to extract activity data from the form, used in saveOrUpdateProject
+function extractActivityData(activityDiv) {
+    const activityId = activityDiv.getAttribute("data-activity-id");
+
+    // Get the members of the activity
+    const membersSelect = activityDiv.querySelector(".activity-actors");
+    const members = Array.from(membersSelect.selectedOptions).map(option => option.value);
+
+    // Get the dependencies of the activity
+    const dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
+    const dependencies = Array.from(dependenciesSelect.selectedOptions).map(option => option.value);
+
+    return {
+        _id: activityId ? activityId : undefined,
+        title: activityDiv.querySelector(".activity-name").value,
+        description: activityDiv.querySelector(".activity-description").value,
+        sharedWith: members,
+        startDate: activityDiv.querySelector(".activity-start").value,
+        deadline: activityDiv.querySelector(".activity-end").value,
+        milestone: activityDiv.querySelector(".activity-milestone").checked,
+        dependencies: dependencies
+    };
+}
+
 //Function to save a new or edited project
 async function saveOrUpdateProject(event) {
     event.preventDefault();
@@ -110,22 +133,7 @@ async function saveOrUpdateProject(event) {
         };
 
         phaseDiv.querySelectorAll(".activities > .border").forEach(activityDiv => {
-            const activityId = activityDiv.getAttribute("data-activity-id");
-
-            // get the dependencies of the activity
-            const dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
-            const dependencies = Array.from(dependenciesSelect.selectedOptions).map(option => option.value);
-
-            phase.activities.push({
-                _id: activityId ? activityId : undefined,
-                title: activityDiv.querySelector(".activity-name").value,
-                description: activityDiv.querySelector(".activity-description").value,
-                sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
-                startDate: activityDiv.querySelector(".activity-start").value,
-                deadline: activityDiv.querySelector(".activity-end").value,
-                milestone: activityDiv.querySelector(".activity-milestone").checked,
-                dependencies: dependencies
-            });
+            phase.activities.push(extractActivityData(activityDiv)); 
         });
 
         phaseDiv.querySelectorAll(".subphases > .border").forEach(subPhaseDiv => {
@@ -138,22 +146,7 @@ async function saveOrUpdateProject(event) {
             };
 
             subPhaseDiv.querySelectorAll(".subphase-activities > .border").forEach(activityDiv => {
-                const activityId = activityDiv.getAttribute("data-activity-id");
-
-                // get the dependencies of the activity
-                const dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
-                const dependencies = Array.from(dependenciesSelect.selectedOptions).map(option => option.value);
-
-                subphase.activities.push({
-                    _id: activityId ? activityId : undefined,
-                    title: activityDiv.querySelector(".activity-name").value,
-                    description: activityDiv.querySelector(".activity-description").value,
-                    sharedWith: activityDiv.querySelector(".activity-actors").value.split(",").map(a => a.trim()),
-                    startDate: activityDiv.querySelector(".activity-start").value,
-                    deadline: activityDiv.querySelector(".activity-end").value,
-                    milestone: activityDiv.querySelector(".activity-milestone").checked,
-                    dependencies: dependencies
-                });
+                subphase.activities.push(extractActivityData(activityDiv));
             });
 
             phase.subphases.push(subphase);
@@ -265,6 +258,15 @@ function addActivity(button, type) {
         activityContainer = button.parentElement.querySelector(".subphase-activities");
     }
 
+    // Gets all project actors to fill the members field
+    let projectActorsInput = document.querySelector("#projectActors").value.trim();
+    let projectActors = projectActorsInput ? projectActorsInput.split(",").map(actor => actor.trim()) : [];
+
+    // Creates the options for the select element with the members of the activity
+    let membersOptions = projectActors.map(actor => 
+        `<option value="${actor}">${actor}</option>`
+    ).join("");
+
     // Gets all project activities for selecting dependencies, we only show the ones that are already saved with an id from the backend
     const allActivities = Array.from(document.querySelectorAll(".border[data-activity-id]")) 
         .filter(activityDiv => activityDiv.getAttribute("data-activity-id"));
@@ -282,8 +284,10 @@ function addActivity(button, type) {
         <input type="text" class="form-control activity-name" required>
         <label>Activity description (optional):</label>
         <textarea class="form-control activity-description"></textarea>
-        <label>Members (comma separated):</label>
-        <input type="text" class="form-control activity-actors">
+        <label>Members:</label>
+        <select class="form-control activity-actors" multiple>
+            ${membersOptions}
+        </select>
         <label>Start date:</label>
         <input type="date" class="form-control activity-start" required>
         <label>Deadline:</label>
@@ -464,6 +468,49 @@ async function deleteProject(projectId) {
     }
 }
 
+//Function to fill the activities of a project while editing it
+function fillActivityFields(activityDiv, activity, projectActors, parentId, parentType) {
+    //Adds the activity ID directly to the div
+    activityDiv.setAttribute("data-activity-id", activity._id);
+    //we also add the parent phase ID to the activity div
+    activityDiv.setAttribute(`data-parent-${parentType}-id`, parentId);
+
+    activityDiv.querySelector(".activity-name").value = activity.title;
+    activityDiv.querySelector(".activity-description").value = activity.description.content;
+
+    //Fill the select element with the members of the project
+    let membersSelect = document.createElement("select");
+    membersSelect.classList.add("form-control", "activity-actors");
+    membersSelect.multiple = true;
+
+    projectActors.forEach(actor => {
+        let option = document.createElement("option");
+        option.value = actor;
+        option.textContent = actor;
+        if (activity.sharedWith.some(a => a.username === actor)) {
+            option.selected = true;
+        }
+        membersSelect.appendChild(option);
+    });
+
+    let oldInput = activityDiv.querySelector(".activity-actors");
+    oldInput.replaceWith(membersSelect);
+
+    activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
+    activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
+    activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
+
+    // We need to select the saved dependencies in the select element
+    let dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
+    let savedDependencies = activity.dependencies;
+
+    Array.from(dependenciesSelect.options).forEach(option => {
+        if (savedDependencies.includes(option.value)) {
+            option.selected = true;
+        }
+    });
+}
+
 //function to fill the form and edit a project
 async function editProject(projectId) {
 
@@ -506,7 +553,9 @@ async function editProject(projectId) {
         document.getElementById("projectName").value = project.title;
         document.getElementById("projectOwner").value = project.owner.username;
         document.getElementById("projectDesc").value = project.description.content;
-        document.getElementById("projectActors").value = project.members.map(m => m.username).join(", ");
+        // Save the project members in the form
+        const projectActors = project.members.map(m => m.username);
+        document.getElementById("projectActors").value = projectActors.join(", ");
 
         // reset the phases container and reload the phases
         const phasesContainer = document.getElementById("phasesContainer");
@@ -524,18 +573,7 @@ async function editProject(projectId) {
                 addActivity(phaseElement.querySelector(".btn-warning"), "phase");
                 const activityDiv = phaseElement.querySelector(".activities").lastElementChild;
 
-                //Adds the activity ID directly to the div
-                activityDiv.setAttribute("data-activity-id", activity._id);
-                //we also add the parent phase ID to the activity div
-                activityDiv.setAttribute("data-parent-phase-id", phase._id);
-
-                activityDiv.querySelector(".activity-name").value = activity.title;
-                activityDiv.querySelector(".activity-description").value = activity.description.content;
-                activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
-                activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
-                activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
-                activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
-                activityDiv.querySelector(".activity-dependencies").value =  activity.dependencies.join(", ");
+                fillActivityFields(activityDiv, activity, projectActors, phase._id, "phase");         
             });
 
             //fill the subphases of each phase
@@ -553,17 +591,7 @@ async function editProject(projectId) {
                     addActivity(subphaseDiv.querySelector(".btn-warning"), "subphase");
                     const activityDiv = subphaseDiv.querySelector(".subphase-activities").lastElementChild;
 
-                    //Adds the activity ID directly to the div
-                    activityDiv.setAttribute("data-activity-id", activity._id);
-                    //we also add the parent subphase ID to the activity div
-                    activityDiv.setAttribute("data-parent-subphase-id", subphase._id);
-                    activityDiv.querySelector(".activity-name").value = activity.title;
-                    activityDiv.querySelector(".activity-description").value = activity.description.content;
-                    activityDiv.querySelector(".activity-actors").value = activity.sharedWith.map(a => a.username).join(", ");
-                    activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
-                    activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
-                    activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
-                    activityDiv.querySelector(".activity-dependencies").value = activity.dependencies;
+                    fillActivityFields(activityDiv, activity, projectActors, subphase._id, "subphase");
                 });
             }
             );
