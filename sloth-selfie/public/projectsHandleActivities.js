@@ -57,6 +57,15 @@ async function handleActivities(projectId) {
                     updateActivityStatus(activity._id, "Abandoned");
                 }
 
+                //if members are re-added, the activity will be Not_Activatable in case of no input, and Activatable otherwise
+                if (activity.sharedWith.length > 0 && activity.status === "Abandoned") {
+                    if (!activity.input) {
+                        updateActivityStatus(activity._id, "Not_Activatable");
+                    } else {
+                        activatableActivity(activity._id, "Activatable");
+                    }
+                }
+
                 //if the activity is reactivated, the output note can be updated and the output field is enabled, we also show the save button
                 if (activity.status === "Reactivated") {
                     reactivateActivity(activity._id, "Reactivated");
@@ -270,15 +279,8 @@ async function insertActivityInputOutput(activityId, fieldType) {
                 inputSelect.disabled = true;
             }
 
-             // Update activity status to Activatable
-            await updateActivityStatus(activityId, "Activatable");
-
-            //set the start button to be not disabled
-            let startButton = document.getElementById(`start-${activityId}`);
-            if (startButton) {
-                startButton.disabled = false;
-                startButton.classList.remove('disabled');
-            }
+            //change status and start button
+            activatableActivity(activityId, "Activatable");
 
         } catch (error) {
             console.error("Error saving activity input:", error);
@@ -360,6 +362,33 @@ async function updateActivityStatus(activityId, newStatus) {
                 statusElement.innerText = `Status: ${newStatus}`;
             }
         }
+    } catch (error) {
+        console.error("Error updating activity:", error);
+    }
+}
+
+//Function to set the activity as activable
+async function activatableActivity(activityId, newStatus) {
+    try {
+        //get the activity
+        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const activity = await response.json();
+
+        if (!activity) {
+            console.error("Activity is undefined:", activity);
+            return;
+        }
+
+        // Update the activity status
+        await updateActivityStatus(activityId, newStatus);
+
+         //set the start button to be not disabled
+         let startButton = document.getElementById(`start-${activityId}`);
+         if (startButton) {
+             startButton.disabled = false;
+             startButton.classList.remove('disabled');
+         }
+        
     } catch (error) {
         console.error("Error updating activity:", error);
     }

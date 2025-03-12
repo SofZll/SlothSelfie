@@ -1,4 +1,3 @@
-//TODO: controlla le date, deve essere range fine >= inizio
 //TODO: quando clicco salva si deve chiudere la visualizzazione a lista/gannt
 
 //TODO: gestire sincronizzazione tra attività, se una attività è in ritardo, le altre sincronizzate devono essere traslate o contratte (se milestone contrai solo)
@@ -12,8 +11,6 @@
 //nelle note create si visualizza sharedwith con objid e non con usernames
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
-
-//se abbandono attività e poi riaggiungo i membri, resta abbandonata
 
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
@@ -96,13 +93,22 @@ function extractActivityData(activityDiv) {
     const dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
     const dependencies = Array.from(dependenciesSelect.selectedOptions).map(option => option.value);
 
+    // Get start and end date values
+    const startDate = activityDiv.querySelector(".activity-start").value;
+    let deadline = activityDiv.querySelector(".activity-end").value;
+
+    // If the deadline is before the start date, set it equal to the start date
+    if (startDate && deadline && new Date(deadline) < new Date(startDate)) {
+        deadline = startDate; // Set deadline to the same as start date
+    }
+
     return {
         _id: activityId ? activityId : undefined,
         title: activityDiv.querySelector(".activity-name").value,
         description: activityDiv.querySelector(".activity-description").value,
         sharedWith: members,
-        startDate: activityDiv.querySelector(".activity-start").value,
-        deadline: activityDiv.querySelector(".activity-end").value,
+        startDate: startDate,
+        deadline: deadline,
         milestone: activityDiv.querySelector(".activity-milestone").checked,
         dependencies: dependencies
     };
