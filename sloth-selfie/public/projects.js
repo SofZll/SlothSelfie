@@ -8,8 +8,6 @@
 
 //TODO: aggiungi loading al caricamento di pagina
 
-//nelle note create si visualizza sharedwith con objid e non con usernames
-
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
@@ -510,8 +508,10 @@ function fillActivityFields(activityDiv, activity, projectActors, parentId, pare
     let dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
     let savedDependencies = activity.dependencies;
 
+    let savedDependencyIds = savedDependencies.map(dep => dep._id);
+
     Array.from(dependenciesSelect.options).forEach(option => {
-        if (savedDependencies.includes(option.value)) {
+        if (savedDependencyIds.includes(option.value)) {
             option.selected = true;
         }
     });

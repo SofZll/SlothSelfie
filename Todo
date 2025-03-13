@@ -1,6 +1,9 @@
 TODO:
     // Projects
-    - Projects
+    - Inizio e fine attività sono eventi che finiscono sul calendario con modalità di visualizzazione separate
+    - sincronizzazione attività dipendenti tramite input-output (traslazione o contrazione), gesire milestones. La decisione spetta al capoprogetto. 
+    - Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto.
+    - Preview progetti
 
     // Time machine
     - Back time machine
@@ -20,6 +23,7 @@ TODO:
     // Pomodoro
     - Linking pomodoro to calendar - cicles not done should be added to the next day
     - Add pomodoro notification
+    - Backend pomodoro
 
     // Note
     - If an item has a deadline, it should automatically be added to the calendar
@@ -33,6 +37,7 @@ TODO:
     - Google login
     - Sincronizza note e calendario in preview
     - nel forum quando clicchi l'immagine si ingrandisce
+    - preview settings
 FIX:
     - Time machine ON events and activities popup
 

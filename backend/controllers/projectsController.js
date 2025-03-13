@@ -43,6 +43,7 @@ const getProjectById = async (req, res) => {
             .populate("sharedWith", "username")
             .populate({ path: "input", select: "content" })
             .populate({ path: "output", select: "content" })
+            .populate({ path: "dependencies", select: "title" }) 
             .sort({ createdAt: 1 });
         }
 
@@ -54,6 +55,7 @@ const getProjectById = async (req, res) => {
                 .populate("sharedWith", "username")
                 .populate({ path: "input", select: "content" })
                 .populate({ path: "output", select: "content" })
+                .populate({ path: "dependencies", select: "title" }) 
                 .sort({ createdAt: 1 });
             }
         }
@@ -137,7 +139,7 @@ const createNoteDescription = async (description, type, owner, members) => {
         user: owner, // User is the logged user
         type: type,
         noteAccess: "restricted", // only for members
-        allowedUsers: members.map(member => member.id) // Set the allowed users to the members
+        allowedUsers: members.map(member => member.username) // Set the allowed users to the members
     });
     await newNote.save();
     return newNote._id;

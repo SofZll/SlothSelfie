@@ -159,8 +159,14 @@ async function createInputAsNote(req, res) {
 
         //find the activity
         const activity = await Activity.findById(activityId);
-        //get the sharedWith users field
+        //get the sharedWith users field (it contains ObjectIds)
         const sharedWithUsers = activity.sharedWith;
+
+        // Find the users from the sharedWithUsers array
+        const allowedUsers = await User.find({ _id: { $in: sharedWithUsers } }).select("username");
+
+        // Get the usernames of the allowed users
+        const allowedUsernames = allowedUsers.map(user => user.username);
 
         // Create the note
         const newNote = new Note({
@@ -169,7 +175,7 @@ async function createInputAsNote(req, res) {
             content: content,
             user: user,
             noteAccess: "restricted", // only for members
-            allowedUsers: sharedWithUsers.map(u => u._id)
+            allowedUsers: allowedUsernames
         });
         const savedNote = await newNote.save();
 
@@ -205,6 +211,12 @@ async function createOutputAsNote(req, res) {
         //get the sharedWith users field
         const sharedWithUsers = activity.sharedWith;
 
+        // Find the users from the sharedWithUsers array
+        const allowedUsers = await User.find({ _id: { $in: sharedWithUsers } }).select("username");
+
+        // Get the usernames of the allowed users
+        const allowedUsernames = allowedUsers.map(user => user.username);
+
         // Create the note
         const newNote = new Note({
             title: "Activity Output",
@@ -212,7 +224,7 @@ async function createOutputAsNote(req, res) {
             content: content,
             user: user,
             noteAccess: "restricted", // only for members
-            allowedUsers: sharedWithUsers.map(u => u._id)
+            allowedUsers: allowedUsernames
         });
         const savedNote = await newNote.save();
 

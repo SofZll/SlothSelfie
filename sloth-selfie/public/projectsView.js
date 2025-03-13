@@ -38,7 +38,7 @@ function sortActivities(phase_subphase, criteria) {
         const description = activity.description.content;
         //if the activity is a milestone, we add a star to the title
         const title = activity.milestone ? `*${activity.title}` : activity.title;
-        activityItem.innerHTML = `<strong>${title}</strong> - ${description} - Start date: ${startDate} - Deadline: ${deadline} - Members: ${sharedWithUsernames}`;
+        activityItem.innerHTML = `<strong>${title}</strong> - ${description} - Start date: ${startDate} - Deadline: ${deadline} - Members: ${sharedWithUsernames} - Dependencies: ${activity.dependencies.map(dep => dep.title).join(", ")}`;
         activitiesList.appendChild(activityItem);
     });
 }
