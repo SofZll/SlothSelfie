@@ -80,7 +80,12 @@ const activitySchema = new mongoose.Schema({
 
     milestone: {
         type: Boolean, default: false 
-    } 
+    },
+
+    events: [{  // Events related to the activity startDate and deadline
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Event'
+    }]
 
 }, { timestamps: true });
 
