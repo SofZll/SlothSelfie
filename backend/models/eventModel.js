@@ -58,7 +58,12 @@ const eventSchema = new mongoose.Schema({
     sharedWith: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-    }]
+    }],
+    isInProject: {  //used to differentiate between normal events and project-activity events
+        type: Boolean,
+        default: false,
+    }
+
 }, { timestamps: true });
 
 const Event = mongoose.model('Event', eventSchema);

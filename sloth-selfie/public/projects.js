@@ -4,7 +4,8 @@
 //TODO: in edit di progetto: owner può raggruppare attività e cambiare le sincronizzazioni tra le attività,
 // in caso di ritardi può decidere se traslare o contrarre le attività sincronizzate a quella in ritardo
 //TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto.
-//TODO: Inizio e fine attività sono eventi che finiscono sul calendario con modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo.
+
+//TODO: modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) 
 
 //TODO: aggiungi loading al caricamento di pagina
 

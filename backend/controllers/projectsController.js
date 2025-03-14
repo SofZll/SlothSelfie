@@ -4,6 +4,7 @@ const Subphase = require("../models/subphaseModel");
 const Activity = require("../models/activityModel");
 const User = require("../models/userModel");
 const Note = require("../models/noteModel");
+const Event = require("../models/eventModel");
 
 //GET all projects
 const getAllProjects = async (req, res) => {
@@ -68,14 +69,18 @@ const getProjectById = async (req, res) => {
 }
 
 // Create the activities for the phase/subphase
-const createActivities = async (activities, projectId, phaseId, subphaseId, ownerId) => {
+const createActivities = async (activities, projectId, phaseId, subphaseId, ownerId, projectTitle) => {
     return await Promise.all(activities.map(async (activity) => {
 
         // Find the users to share the activity with
         const sharedWithUserIds = await User.find({ username: { $in: activity.sharedWith } });
 
         //create the description note for the activity
-        const descriptionNoteId = await createNoteDescription(activity.description, "activity", ownerId, sharedWithUserIds);
+        const descriptionNoteId = await createNoteDescription(activity.description, "activity", ownerId, sharedWithUserIds, projectTitle);
+
+        // Create events for the activity start date and deadline
+        const eventStartId = await createEvent(activity.startDate, ownerId, sharedWithUserIds, projectTitle, activity.title, "StartDate");
+        const eventDeadlineId = await createEvent(activity.deadline, ownerId, sharedWithUserIds, projectTitle, activity.title, "Deadline");
 
         // get the dependencies of the activity if any
         let dependenciesIds = [];
@@ -95,7 +100,8 @@ const createActivities = async (activities, projectId, phaseId, subphaseId, owne
             deadline: activity.deadline,
             user: ownerId,
             milestone: activity.milestone,
-            dependencies: dependenciesIds
+            dependencies: dependenciesIds,
+            events: [eventStartId, eventDeadlineId]
         });
 
         const savedActivity = await newActivity.save();
@@ -104,7 +110,7 @@ const createActivities = async (activities, projectId, phaseId, subphaseId, owne
 };
 
 //POST create a phase or subphase and return its id
-const createPhaseSubphase = async (type, phase, projectId, ownerId) => {
+const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle) => {
     let newPhase;
 
     if (type === "phase") {
@@ -117,7 +123,7 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId) => {
 
     await newPhase.save(); // we save the new phase/subphase and we get its _id
 
-    const activityIds = await createActivities(phase.activities, projectId, type === "phase" ? newPhase._id : undefined, type === "subphase" ? newPhase._id : undefined, ownerId);
+    const activityIds = await createActivities(phase.activities, projectId, type === "phase" ? newPhase._id : undefined, type === "subphase" ? newPhase._id : undefined, ownerId, projectTitle);
 
     // We update the phase/subphase with the activities
     await newPhase.updateOne({ $push: { activities: { $each: activityIds } } });
@@ -126,9 +132,12 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId) => {
 };
 
 //create the descriptions as notes and return their ids
-const createNoteDescription = async (description, type, owner, members) => {
-    //if type = project, we create a note with title and category:  "Project Description"
-    const title = type === "project" ? "Project Description" : "Activity Description";
+const createNoteDescription = async (description, type, owner, members, projectTitle) => {
+    //if type = project, we create a note with title and category:  "Project Description", in the title we put the project title
+    const title = type === "project" 
+        ? `Project Description of Project ${projectTitle}` 
+        : `Activity Description of Project ${projectTitle}`;
+
     const category = type === "project" ? "Project Description" : "Activity Description";
     
     // Create the note for the description
@@ -144,6 +153,54 @@ const createNoteDescription = async (description, type, owner, members) => {
     await newNote.save();
     return newNote._id;
 }
+
+//updates the description of a note
+const updateNoteDescription = async (noteId, description, projectTitle, type) => {
+    const note = await Note.findById (noteId);
+    if (note) {
+        note.content = description;
+
+        // Update the title of the note
+        note.title = type === "project" 
+            ? `Project Description of Project ${projectTitle}` 
+            : `Activity Description of Project ${projectTitle}`;
+    
+        await note.save();
+    }
+};
+
+//create the events for the activity start date and deadline
+const createEvent = async (date, userId, sharedWith, projectTitle, activityTitle, eventType) => {
+    const eventTitle = `${activityTitle} - ${eventType} of Project ${projectTitle}`;
+
+    const newEvent = new Event({
+        title: eventTitle,
+        date: date,
+        time: "00:00", //default time
+        isPreciseTime: false,
+        duration: 1, // default duration
+        allDay: true,
+        user: userId,
+        sharedWith: sharedWith.map(user => user._id),
+        notify: true,
+        notificationTime: 30,
+        isInProject: true
+    });
+
+    const savedEvent = await newEvent.save();
+    return savedEvent._id; // Ritorna l'ID dell'evento creato
+};
+
+//updates the events for the activity start date and deadline
+const updateEvent = async (eventId, date, sharedWith, projectTitle, activityTitle, type) => {
+    const event = await Event.findById(eventId);
+    if (event) {
+        event.date = date; //event.date = new Date(event.date);
+        event.title = `${activityTitle} - ${type} of Project ${projectTitle}`;
+        event.sharedWith = sharedWith.map(user => user._id);
+        await event.save();
+    }
+};
 
 //POST create a project
 const createProject = async (req, res) => {
@@ -161,7 +218,7 @@ const createProject = async (req, res) => {
         const memberIds = memberUsers.map(user => user._id);
 
         // Create the note
-        const newNoteId = await createNoteDescription(description, "project", ownerUser, memberUsers);
+        const newNoteId = await createNoteDescription(description, "project", ownerUser, memberUsers, title);
 
         // Create the project
         const newProject = new Project({ title, owner: ownerUser._id, description: newNoteId, members: memberIds });
@@ -170,12 +227,12 @@ const createProject = async (req, res) => {
         // Create the phases and subphases with their activities
         const phaseIds = [];
         for (const phase of phases) {
-            const phaseId = await createPhaseSubphase("phase", phase, newProject._id, ownerUser._id);
+            const phaseId = await createPhaseSubphase("phase", phase, newProject._id, ownerUser._id, title);
             phaseIds.push(phaseId);
 
             const subphaseIds = [];
             for (const subphase of phase.subphases) {
-                const subphaseId = await createPhaseSubphase("subphase", subphase, newProject._id, ownerUser._id);
+                const subphaseId = await createPhaseSubphase("subphase", subphase, newProject._id, ownerUser._id, title);
                 subphaseIds.push(subphaseId);
             }
 
@@ -194,7 +251,7 @@ const createProject = async (req, res) => {
 };
 
 //updates the existing activities of a phase/subphase
-const updateExistingActivities = async (existingActivities, activities) => {
+const updateExistingActivities = async (existingActivities, activities, projectTitle) => {
 
     // finds the exisiting activities
     const existingActivityIds = existingActivities
@@ -208,7 +265,12 @@ const updateExistingActivities = async (existingActivities, activities) => {
             if (existingActivity) {
 
                 //we update the note description
-                await updateNoteDescription(existingActivity.description, activity.description);
+                await updateNoteDescription(existingActivity.description, activity.description, projectTitle, "activity");
+
+                //we update the event start date
+                await updateEvent(existingActivity.events[0], activity.startDate, existingActivity.sharedWith, projectTitle, activity.title, "StartDate");
+                //we update the event deadline
+                await updateEvent(existingActivity.events[1], activity.deadline, existingActivity.sharedWith, projectTitle, activity.title, "Deadline");
 
                 //get the dependencies of the activity if any
                 let dependenciesIds = [];
@@ -227,15 +289,6 @@ const updateExistingActivities = async (existingActivities, activities) => {
         }
     }
     return existingActivityIds;
-};
-
-//updates the description of a note
-const updateNoteDescription = async (noteId, description) => {
-    const note = await Note.findById (noteId);
-    if (note) {
-        note.content = description;
-        await note.save();
-    }
 };
 
 //PUT update a project
@@ -265,7 +318,7 @@ const updateProject = async (req, res) => {
         project.members = memberIds;
 
         // Update the description note of the project
-        await updateNoteDescription(project.description, description);
+        await updateNoteDescription(project.description, description, project.title, "project");
 
         // Update the phases and subphases
         const updatedPhaseIds = [];
@@ -279,11 +332,11 @@ const updateProject = async (req, res) => {
                 existingPhase.title = phase.title;
 
                 // Update the existing activities of the phase
-                const existingActivityIds = await updateExistingActivities(existingPhase.activities, phase.activities);
+                const existingActivityIds = await updateExistingActivities(existingPhase.activities, phase.activities, project.title);
                 // finds the new activities (without an ID)
                 const newActivities = phase.activities.filter(activity => !activity._id);
                 // creates the new activities and returns their IDs
-                const newActivityIds = await createActivities(newActivities, project._id, existingPhase._id, undefined, ownerUser._id);
+                const newActivityIds = await createActivities(newActivities, project._id, existingPhase._id, undefined, ownerUser._id, project.title);
                 // Adds the new activities to the existing ones (without duplicates)
                 existingPhase.activities = Array.from(new Set([...existingActivityIds, ...newActivityIds]));
 
@@ -291,7 +344,7 @@ const updateProject = async (req, res) => {
 
             } else {
                 // if the phase does not exist, create it
-                const newPhaseId = await createPhaseSubphase("phase", phase, project._id, ownerUser._id);
+                const newPhaseId = await createPhaseSubphase("phase", phase, project._id, ownerUser._id, project.title);
                 existingPhase = await Phase.findById(newPhaseId);
             }
 
@@ -305,18 +358,18 @@ const updateProject = async (req, res) => {
                     existingSubphase.title = subphase.title;
 
                     // Update the existing activities of the subphase
-                    const existingActivityIds = await updateExistingActivities(existingSubphase.activities, subphase.activities);
+                    const existingActivityIds = await updateExistingActivities(existingSubphase.activities, subphase.activities, project.title);
                     // finds the new activities (without an ID)
                     const newActivities = subphase.activities.filter(activity => !activity._id);
                     // creates the new activities and returns their IDs
-                    const newActivityIds = await createActivities(newActivities, project._id, undefined, existingSubphase._id, ownerUser._id);
+                    const newActivityIds = await createActivities(newActivities, project._id, undefined, existingSubphase._id, ownerUser._id, project.title);
                     // Adds the new activities to the existing ones (without duplicates)
                     existingSubphase.activities = Array.from(new Set([...existingActivityIds, ...newActivityIds]));
 
                     await existingSubphase.save();
 
                 } else {
-                    const newSubphaseId = await createPhaseSubphase("subphase", subphase, project._id, ownerUser._id);
+                    const newSubphaseId = await createPhaseSubphase("subphase", subphase, project._id, ownerUser._id, project.title);
                     existingSubphase = await Subphase.findById(newSubphaseId);
                 }
                 updatedSubphaseIds.add(existingSubphase._id.toString()); // we avoid duplicates
@@ -338,6 +391,35 @@ const updateProject = async (req, res) => {
         console.error('Error updating project:', error);
         res.status(500).json({ message: "Server error while updating project" });
     }
+};
+
+//DELETE notes and events related to the activities of a project
+const deleteRelatedNotesAndEvents = async (activities) => {
+    if (!activities || activities.length === 0) return;
+
+    // Collect all note IDs linked to these activities
+    const noteIds = activities.map(activity => activity.description);
+    // Collect all input/output note IDs linked to these activities
+    const inputNoteIds = activities.map(activity => activity.input);
+    const outputNoteIds = activities.map(activity => activity.output);
+
+    //find the events linked to these activities and delete them
+    const eventIds = activities.flatMap(activity => activity.events);
+    if (eventIds.length > 0) {
+        await Event.deleteMany({ _id: { $in: eventIds } });
+    }
+
+    // Delete all notes
+    if (noteIds.length > 0) {
+        await Note.deleteMany({ _id: { $in: noteIds } });
+    }
+    if (inputNoteIds.length > 0) {
+        await Note.deleteMany({ _id: { $in: inputNoteIds } });
+    }
+    if (outputNoteIds.length > 0) {
+        await Note.deleteMany({ _id: { $in: outputNoteIds } });
+    }
+
 };
 
 //DELETE a project
@@ -362,26 +444,12 @@ const deleteProject = async (req, res) => {
             $or: [{ phase: { $in: phaseIds } }, { subphase: { $in: subphaseIds } }]
         });
 
-        // Collect all note IDs linked to these activities
-        const noteIds = activities.map(activity => activity.description);
+        // Delete notes and events related to the activities
+        await deleteRelatedNotesAndEvents(activities);
 
-        // Collect all input/output note IDs linked to these activities
-        const inputNoteIds = activities.map(activity => activity.input);
-        const outputNoteIds = activities.map(activity => activity.output);
+        // Find the note id of the description of the project
+        const projectNoteId = project.description;s
 
-         // Find the note id of the description of the project
-        const projectNoteId = project.description;
-
-        // Delete all notes
-        if (noteIds.length > 0) {
-            await Note.deleteMany({ _id: { $in: noteIds } });
-        }
-        if (inputNoteIds.length > 0) {
-            await Note.deleteMany({ _id: { $in: inputNoteIds } });
-        }
-        if (outputNoteIds.length > 0) {
-            await Note.deleteMany({ _id: { $in: outputNoteIds } });
-        }
         //delete the description note of the project
         if (projectNoteId) {
             await Note.findByIdAndDelete(projectNoteId);
@@ -436,25 +504,8 @@ const removePhaseFromBackend = async (req, res) => {
             $or: [{ phase: phaseId }, { subphase: { $in: subphaseIds } }]
         });
 
-        // Collect all note IDs linked to these activities
-        const noteIds = activities.map(activity => activity.description);
-
-        // Collect all input/output note IDs linked to these activities
-        const inputNoteIds = activities.map(activity => activity.input);
-        const outputNoteIds = activities.map(activity => activity.output);
-
-        // Delete all the notes
-        if (noteIds.length > 0) {
-            await Note.deleteMany({ _id: { $in: noteIds } });
-        }
-
-        if (inputNoteIds.length > 0) {
-            await Note.deleteMany({ _id: { $in: inputNoteIds } });
-        }
-
-        if (outputNoteIds.length > 0) {
-            await Note.deleteMany({ _id: { $in: outputNoteIds } });
-        }
+        // Delete notes and events related to the activities
+        await deleteRelatedNotesAndEvents(activities);
 
         // Delete the activities of the phase and its subphases
         await Activity.deleteMany({ _id: { $in: activities.map(a => a._id) } });
@@ -513,23 +564,8 @@ const removeSubphaseFromBackend = async (req, res) => {
         // delete the subphase and its activities
         const activities = await Activity.find({ subphase: subphaseId });
 
-        // Collect all note IDs linked to these activities
-        const noteIds = activities.map(activity => activity.description);
-
-        // Collect all input/output note IDs linked to these activities
-        const inputNoteIds = activities.map(activity => activity.input);
-        const outputNoteIds = activities.map(activity => activity.output);
-
-        // Delete all the notes
-        if (noteIds.length > 0) {
-            await Note.deleteMany({ _id: { $in: noteIds } });
-        }
-        if (inputNoteIds.length > 0) {
-            await Note.deleteMany({ _id: { $in: inputNoteIds } });
-        }
-        if (outputNoteIds.length > 0) {
-            await Note.deleteMany({ _id: { $in: outputNoteIds } });
-        }
+        // Delete notes and events related to the activities
+        await deleteRelatedNotesAndEvents(activities);
 
         // Delete the activities
         await Activity.deleteMany({ subphase: subphaseId });
@@ -601,6 +637,12 @@ const removeActivityFromBackend = async (req, res) => {
         const descriptionNoteId = activity.description;
         const inputNoteId = activity.input;
         const outputNoteId = activity.output;
+
+        //we first find the events linked to the activity and delete them
+        const eventIds = activity.events;
+        if (eventIds.length > 0) {
+            await Event.deleteMany({ _id: { $in: eventIds } });
+        }
 
         await Activity.findByIdAndDelete(activityId);
 
