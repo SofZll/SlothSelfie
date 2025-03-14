@@ -17,6 +17,17 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     text-align: center;
     max-width: 380px;
+    max-height: 800px;
+    overflow: hidden;
+    transition: max-height 1s ease-in-out;
+}
+
+.login-form {
+    max-height: 350px;
+}
+
+.registration-form {
+    max-height: 500px;
 }
 
 .form-group {

@@ -73,16 +73,16 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
                 <div class="eye-cover2">
                     <div id="eyes2"></div>
                 </div>
-                <div className='col-auto login-box'>
+                <div className={`col login-box ${currentFormType === 'register' ? 'registration-form' : 'login-form'}`}>
                     <h1 className='login-title'>{currentFormType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
                     <form className='row g-3' onSubmit={handleSubmit}>
                         {currentFormType === 'register' && (
-                            <div className={`form-floating form-group ${currentFormType === 'register' ? 'col-md-6' : 'col-12'}`}>
+                            <div className={`form-floating form-group ${currentFormType === 'register' ? 'col-6' : 'col-12'}`}>
                                 <input type='text' id='name' className='form-control' placeholder='name' value={userInfo.name} onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })} required />
                                 <label htmlFor='name'>Name</label>
                             </div>
                         )}
-                        <div className={`form-floating form-group ${currentFormType === 'register' ? 'col-md-6' : 'col-16'}`}>
+                        <div className={`form-floating form-group ${currentFormType === 'register' ? 'col-6' : 'col-12'}`}>
                             <input type='text' id='username' className='form-control' placeholder='username' value={userInfo.username} onChange={(e) => setUserInfo({ ...userInfo, username: e.target.value })} required />
                             <label htmlFor='username'>Username</label>
                         </div>
