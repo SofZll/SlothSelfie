@@ -37,7 +37,14 @@ async function handleActivities(projectId) {
             content += `<p>No activities assigned to you.</p>`;
         } else {
             content += `<ul class="list-group">`;
+            
             activities.forEach(activity => {
+
+                //if the activity is completed, we check if it has dependencies and updates them
+                if (activity.status === "Completed") {
+                    updateDependentActivities(activity._id, activity);
+                }
+
                 // Check if the activity has a deadline and if it is Overdue or Abandoned
                 let today = new Date();
                 let deadline = new Date(activity.deadline);
@@ -66,15 +73,17 @@ async function handleActivities(projectId) {
                     }
                 }
 
-                //if the activity is reactivated, the output note can be updated and the output field is enabled, we also show the save button
+                //if the activity is reactivated, the output note can be updated and the output field is enabled, we also show the save button and adjust dependencies input
                 if (activity.status === "Reactivated") {
                     reactivateActivity(activity._id, "Reactivated");
                 }
 
                 let star = activity.milestone ? "*" : ""; // milestone
-                let inputDisabled = activity.input ? 'disabled' : '';  // Check if input already exists
-                let inputSelectDisabled = activity.input ? 'disabled' : ''; // Disable the select if input exists
-                let inputInsertDisabled = activity.input ? 'disabled' : ''; // Disable the button if input exists
+
+                //if the activity ha dependencies, or if input already exists, the input field is disabled
+                let inputDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input ? 'disabled' : '';
+                let inputSelectDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input ? 'disabled' : ''; // Disable the select
+                let inputInsertDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input ? 'disabled' : ''; // Disable the button
 
                 let outputDisabled = activity.output ? 'disabled' : ''; // Check if output already exists
                 let outputSelectDisabled = activity.output ? 'disabled' : ''; // Disable the select if output exists
@@ -226,12 +235,25 @@ function isValidURL(string) {
     }
 }
 
-// Function to insert an input/output for an activity and create a note
-async function insertActivityInputOutput(activityId, fieldType) {
+// Function to insert an input/output for an activity and create a note, the field  value = "" is optional for the dependency input case
+async function insertActivityInputOutput(activityId, fieldType, isDependency = false, value = "") {
     if (fieldType === "input") {
-    
-        let inputType = document.getElementById(`input-type-${activityId}`).value;
-        let inputValue = document.getElementById(`input-${activityId}`).value.trim();
+
+        let inputType, inputValue; 
+
+        if (!isDependency) {
+            inputType = document.getElementById(`input-type-${activityId}`).value;
+            inputValue = document.getElementById(`input-${activityId}`).value.trim();
+        }else{
+            inputType = "text";
+            inputValue = value;
+
+            // We put the input value in the DOM input field
+            let inputField = document.getElementById(`input-${activityId}`);
+            if (inputField) {
+                inputField.value = inputValue;
+            }
+        }
 
         if (inputType === "link" && !isValidURL(inputValue)) {
             alert("Invalid link. Please enter a valid URL.");
@@ -442,31 +464,24 @@ async function completeActivity(activityId, newStatus) {
         // Update the activity status
         await updateActivityStatus(activityId, newStatus);
 
-        //button abandon, start and complete are disabled
-        let abandonButton = document.getElementById(`abandon-${activityId}`);
-        if (abandonButton) {
-            abandonButton.disabled = true;
-            abandonButton.classList.add('disabled');
-        }
+        // Disable buttons
+        ["abandon", "start", "complete"].forEach(action => {
+            let button = document.getElementById(`${action}-${activityId}`);
+            if (button) {
+                button.disabled = true;
+                button.classList.add('disabled');
+            }
+        });
 
-        let startButton = document.getElementById(`start-${activityId}`);
-        if (startButton) {
-            startButton.disabled = true;
-            startButton.classList.add('disabled');
-        }
-
-        let completeButton = document.getElementById(`complete-${activityId}`);
-        if (completeButton) {
-            completeButton.disabled = true;
-            completeButton.classList.add('disabled');
-        }
+       // If the activity has dependencies, update them:
+        await updateDependentActivities(activityId, activity);
 
     } catch (error) {
         console.error("Error completing activity:", error);
     }
 }
 
-//Function to reactivate an activity
+//Function to reactivate an activity, when we reject the output
 async function reactivateActivity(activityId, newStatus) {
     try {
         //get the activity
@@ -481,6 +496,32 @@ async function reactivateActivity(activityId, newStatus) {
         if(activity.status !== "Reactivated"){
         // Update the activity status
         await updateActivityStatus(activityId, newStatus);
+        }
+
+        // if there are dependencies, we set the input as empty and the status as not activatable
+        // Get the dependencies of the activity
+        let { dependentActivities, activities } = await getDependentActivities(activityId);
+
+        for (let dependent of dependentActivities) {
+
+            // remove the input from the dependent activity if it exists
+            let inputField = document.getElementById(`input-${dependent._id}`);
+            let inputValue = document.getElementById(`input-${dependent._id}`).value.trim();
+
+            if (inputField && (inputValue !== "")) {
+                inputField.disabled = true;
+                inputField.value = "";
+
+                //we get the dependent activity
+                const response = await fetch(`http://localhost:8000/api/activity/${dependent._id}`);
+                const dependentActivity = await response.json();
+
+                //delete the input note
+                await deleteNoteById(dependentActivity.input);
+            }
+
+            // We update the status of the dependent activity to Not_Activatable
+            await updateActivityStatus(dependent._id, "Not_Activatable");
         }
 
         //reactivates the button abandon
@@ -512,6 +553,60 @@ async function reactivateActivity(activityId, newStatus) {
 
     } catch (error) {
         console.error("Error reactivating activity:", error);
+    }
+}
+
+// Function to get the dependent activities of an activity
+async function getDependentActivities(activityId) {
+    // Get the activity
+    const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+    const activity = await response.json();
+
+    // Get the entire project to find all activities
+    const projectResponse = await fetch(`http://localhost:8000/api/project/${activity.project}`);
+    const project = await projectResponse.json();
+    let activities = project.phases.flatMap(phase => phase.activities)
+                    .concat(project.phases.flatMap(phase => phase.subphases.flatMap(sub => sub.activities)));
+    
+    // Find activities that depend on the completed one
+    const dependentActivities = activities.filter(a => a.dependencies.some(dep => dep._id === activityId));
+    return { dependentActivities, activities };
+}
+
+// Function to update the dependent activities of a completed activity
+async function updateDependentActivities(activityId, activity) {
+    try {
+        let { dependentActivities, activities } = await getDependentActivities(activityId);
+        
+        for (let dependent of dependentActivities) {
+            // Verify if all dependencies are completed
+            let dependenciesCompleted = dependent.dependencies.every(dep => {
+                let dependency = activities.find(a => a._id.toString() === dep._id.toString());
+                return dependency && dependency.status === "Completed";
+            });
+
+            if (dependenciesCompleted) {
+                await activatableActivity(dependent._id, "Activatable");
+
+                // We set the output of the previous activity as the input of the next one, only if it exists
+                if (activity.output) {
+
+                    let outputId = typeof activity.output === "object" ? activity.output._id : activity.output;
+
+                    // we get the output content from the output note
+                    let outputContent = await getOutputContent(outputId);
+
+                    await insertActivityInputOutput(dependent._id, 'input',true, outputContent);
+                }
+            }
+            // If the completed activity was overdue, propagate the delay
+            if (activity.status === "Overdue") {
+                //await adjustActivitySchedule(dependent._id, "delay");  //TODO
+            }
+            
+        }
+    } catch (error) {
+        console.error("Error updating dependent activities:", error);
     }
 }
 
@@ -573,6 +668,33 @@ async function updateOutputNote(activityId) {
 
     } catch (error) {
         console.error("Error updating output note:", error);
+    }
+}
+
+//Function to get the content of the output note
+async function getOutputContent(noteId) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/note/${noteId}`);
+        const output = await response.json();
+        return output.content;
+    } catch (error) {
+        console.error("Error getting output content:", error);
+    }
+}
+
+//Function to delete a note by its id (used for input dependency if the output is rejected)
+async function deleteNoteById(noteId) {
+    try {
+        const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
+            method: "DELETE",
+            credentials: "include",
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to delete note.");
+        }
+    } catch (error) {
+        console.error("Error deleting note:", error);
     }
 }
 

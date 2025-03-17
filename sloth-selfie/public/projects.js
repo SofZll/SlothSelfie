@@ -11,6 +11,10 @@
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
+//gestire ritardi con contrazioni o dilatazioni
+
+//in fill form di edit le attività a volte non sono nell'ordine giusto
+
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
 // Function to get the logged user

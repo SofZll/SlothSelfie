@@ -448,7 +448,7 @@ const deleteProject = async (req, res) => {
         await deleteRelatedNotesAndEvents(activities);
 
         // Find the note id of the description of the project
-        const projectNoteId = project.description;s
+        const projectNoteId = project.description;
 
         //delete the description note of the project
         if (projectNoteId) {
