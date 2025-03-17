@@ -141,12 +141,17 @@ const deleteNote = async (req, res) => {
 };
 
 //Get a note by id
-const getNoteById = async (noteId) => {
-    const note = await Note.findById(noteId);
-    if (!note) {
-        return null;
+const getNoteById = async (req, res) => {
+    try {
+        const note = await Note.findById(req.params.noteId);
+        if (!note) {
+            return res.status(404).json({ error: "Nota non trovata" });
+        }
+        res.json(note);
+    } catch (error) {
+        console.error("Errore nel recuperare la nota:", error);
+        res.status(500).json({ error: "Errore del server" });
     }
-    return note.populate('content');
 };
 
 module.exports = {
