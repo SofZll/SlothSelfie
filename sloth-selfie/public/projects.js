@@ -1,4 +1,4 @@
-//TODO: quando clicco salva si deve chiudere la visualizzazione a lista/gannt
+//TODO: quando clicco salva in edit o elimina progetto si deve chiudere la visualizzazione a lista/gannt e anche il form di handle activities
 
 //TODO: gestire sincronizzazione tra attività, se una attività è in ritardo, le altre sincronizzate devono essere traslate o contratte (se milestone contrai solo)
 //TODO: in edit di progetto: owner può raggruppare attività e cambiare le sincronizzazioni tra le attività,
@@ -11,7 +11,7 @@
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
-//gestire ritardi con contrazioni o dilatazioni
+//gestire ritardi con contrazioni o dilatazioni, se c'è ritardo, finchè owner non sceglie, non si può attivare nessuna dipendenza
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto
 
@@ -189,7 +189,6 @@ async function saveOrUpdateProject(event) {
         }
 
         const data = await response.json();
-        console.log("Server response:", data);
 
         if (response.ok) {
             alert(projectId ? "Project updated successfully!" : "Project saved successfully!");
@@ -677,7 +676,7 @@ async function toggleProjectForm() {
 
     if (content.style.display === "none" || content.style.display === "") {
         content.style.display = "block";
-        document.getElementById("ToggleFormBtn").textContent = "Close";
+        document.getElementById("ToggleFormBtn").textContent = "Close Form";
 
          //adding a note for the user
         const projectForm = document.getElementById("projectForm");

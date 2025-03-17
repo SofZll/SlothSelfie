@@ -113,11 +113,18 @@ async function handleActivities(projectId) {
                         <button class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output')" ${outputInsertDisabled}>Insert Output</button>
                         <button class="btn btn-outline-success btn-sm" id="save-output-${activity._id}" onclick="updateOutputNote('${activity._id}', 'output')" style="display: none;">Save updated output</button>
                         `;
-                    // shows the buttons for accept/reject output only if the user is the owner
+                    // shows the buttons for reject output only if the user is the owner
                     if (isOwner) {
                         content += `
                             <button class="btn btn-outline-danger btn-sm" id="reactivate-${activity._id}" onclick="reactivateActivity('${activity._id}', 'Reactivated')">Reject output</button>
-                        `;
+                        
+                            <div id="delayContractOptions-${activity._id}" style="margin-top: 10px;">     <!-- style="display: none  -->
+                                <p>Activity Overdue: do you want to adjust or contract dependencies?</p>
+                                <button class="btn btn-outline-warning btn-sm" id="delayBtn" onclick="adjustActivitySchedule('${activity._id}', 'delay')">Adjust</button>
+                                <button class="btn btn-outline-warning btn-sm" id="contractBtn" onclick="contractActivitySchedule('${activity._id}')">Contract</button>
+                            </div>
+                        
+                         `;
                     }
                     content += `
                         <p>Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
@@ -498,7 +505,7 @@ async function reactivateActivity(activityId, newStatus) {
         await updateActivityStatus(activityId, newStatus);
         }
 
-        // if there are dependencies, we set the input as empty and the status as not activatable
+        // if there are dependencies, we set the input as empty and the status as not activatable, the output of the dependency is deleted, if any
         // Get the dependencies of the activity
         let { dependentActivities, activities } = await getDependentActivities(activityId);
 
@@ -518,6 +525,13 @@ async function reactivateActivity(activityId, newStatus) {
 
                 //delete the input note
                 await deleteNoteById(dependentActivity.input);
+                //delete the output note, if any, and we clear the output field in the DOM
+
+                let outputField = document.getElementById(`output-${dependent._id}`);
+                if (outputField.value !== "") {
+                    await deleteNoteById(dependentActivity.output);
+                    outputField.value = "";
+                }
             }
 
             // We update the status of the dependent activity to Not_Activatable
@@ -599,15 +613,83 @@ async function updateDependentActivities(activityId, activity) {
                     await insertActivityInputOutput(dependent._id, 'input',true, outputContent);
                 }
             }
-            // If the completed activity was overdue, propagate the delay
+            //QUESTA LOGICA ANDRà MESSA SOPRA, NON ATTIVO NULLA FINCHè OWNER NON SCEGLIE
+            // If the completed activity was overdue, propagate the delay or adjust the schedule, owner decides, if it is a milestone we adjust the schedule
             if (activity.status === "Overdue") {
-                //await adjustActivitySchedule(dependent._id, "delay");  //TODO
+                if (dependent.milestone) {
+                    console.log(`Activity ${dependent._id} is a milestone. Adjusting schedule to meet deadline.`);
+                    //await contractActivitySchedule(dependent._id); //TODO
+                } else {
+                    // Check if the logged user is the owner
+                    const userLogged = await getLoggedUser();
+
+                    const projectResponse = await fetch(`http://localhost:8000/api/project/${activity.project}`);
+                    const project = await projectResponse.json();
+                    const isOwner = project.owner.username === userLogged;
+
+                    if (isOwner) {
+                        let decision = await askOwnerDecision(activityId); //TODO
+                        if (decision === "delay") {
+                            //await adjustActivitySchedule(dependent._id, "delay"); //TODO
+                        } else if (decision === "contract") {
+                            //await contractActivitySchedule(dependent._id);
+                        }
+                    } else {
+                        console.log("Only the project owner can decide whether to delay or contract activities.");
+                    }
+                }
             }
             
         }
     } catch (error) {
         console.error("Error updating dependent activities:", error);
     }
+}
+
+// Function to ask the owner if the activity should be delayed or contracted  //TODO
+async function checkAndShowDecisionButtons(activityId) {
+//we get the activity data and check if the user is the owner
+    const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+    const activity = await response.json();
+
+    const projectResponse = await fetch(`http://localhost:8000/api/project/${activity.project}`);
+    const project = await projectResponse.json();
+    const userLogged = await getLoggedUser();
+    const isOwner = project.owner.username === userLogged;
+
+    if (activity.status === "Overdue" && isOwner) {
+        document.getElementById("delayContractOptions").style.display = "block";
+    }
+}
+
+// If the owner decides to delay or contract the activity, we adjust the schedule
+document.getElementById("delayBtn").addEventListener("click", async () => {
+    //await adjustActivitySchedule(activityId, "delay");
+    document.getElementById("delayContractOptions").style.display = "none";
+});
+
+document.getElementById("contractBtn").addEventListener("click", async () => {
+    //await contractActivitySchedule(activityId);
+    document.getElementById("delayContractOptions").style.display = "none";
+});
+
+//Function to adjust the schedule of an activity    //TODO
+async function adjustActivitySchedule(activityId, mode) {
+    console.log(`Adjusting schedule for ${activityId}: mode = ${mode}`);
+    await fetch(`http://localhost:8000/api/activity/${activityId}/schedule`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode })
+    });
+}
+
+//Function to contract the schedule of an activity   //TODO
+async function contractActivitySchedule(activityId) {
+    console.log(`Contracting schedule for ${activityId}`);
+    await fetch(`http://localhost:8000/api/activity/${activityId}/contract`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    });
 }
 
 // Function to update the output note if the activity was reactivated and output was rejected
@@ -682,7 +764,7 @@ async function getOutputContent(noteId) {
     }
 }
 
-//Function to delete a note by its id (used for input dependency if the output is rejected)
+//Function to delete a note by its id (used for input/output dependency if the output is rejected)
 async function deleteNoteById(noteId) {
     try {
         const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
