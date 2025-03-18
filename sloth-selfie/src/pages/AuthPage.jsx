@@ -77,29 +77,29 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
                     <h1 className='login-title'>{currentFormType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
                     <form className='row g-3' onSubmit={handleSubmit}>
                         {currentFormType === 'register' && (
-                            <div className={`form-floating form-group ${currentFormType === 'register' ? 'col-6' : 'col-12'}`}>
+                            <div className={`form-floating form-group-auth ${currentFormType === 'register' ? 'col-6' : 'col-12'}`}>
                                 <input type='text' id='name' className='form-control' placeholder='name' value={userInfo.name} onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })} required />
                                 <label htmlFor='name'>Name</label>
                             </div>
                         )}
-                        <div className={`form-floating form-group ${currentFormType === 'register' ? 'col-6' : 'col-12'}`}>
+                        <div className={`form-floating form-group-auth ${currentFormType === 'register' ? 'col-6' : 'col-12'}`}>
                             <input type='text' id='username' className='form-control' placeholder='username' value={userInfo.username} onChange={(e) => setUserInfo({ ...userInfo, username: e.target.value })} required />
                             <label htmlFor='username'>Username</label>
                         </div>
                         {currentFormType === 'register' && (
-                            <div className='form-floating form-group col-16'>
+                            <div className='form-floating form-group-auth col-16'>
                                 <input type='email' id='email' className='form-control' placeholder='Email' value={userInfo.email} onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })} required />
                                 <label htmlFor='email'>Email</label>
                             </div>
                         )}
-                        <div className='form-floating form-group col-16'>
+                        <div className='form-floating form-group-auth col-16'>
                             <input type={showPassword ? 'text' : 'password'} id='password' className='form-control' placeholder='Password' value={userInfo.password} onChange={(e) => setUserInfo({ ...userInfo, password: e.target.value })} required />
                             <span className='toggle-password' onClick={() => setShowPassword(!showPassword)}>
                                 <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                             </span>
                             <label htmlFor='password'>Password</label>
                         </div>
-                        <div className='form-group col-16'>
+                        <div className='form-group-auth col-16'>
                             <button type='submit' className='login-button'>
                                 {currentFormType === 'login' ? 'LOGIN' : 'REGISTER'}
                             </button>

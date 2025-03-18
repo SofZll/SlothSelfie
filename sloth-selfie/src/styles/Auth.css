@@ -30,11 +30,11 @@
     max-height: 500px;
 }
 
-.form-group {
+.form-group-auth {
     margin-bottom: 0;
 }
 
-.form-group input {
+.form-group-auth input {
     width: 100%;
     padding: 20px 10px 2px 10px !important;
     border: 1px solid #ddd;
@@ -45,12 +45,12 @@
     font-size: 15px;
 }
 
-.form-group input:focus {
+.form-group-auth input:focus {
     box-shadow: 0 0 1px 1px #FFD6BA;
     outline: none;
 }
 
-.form-group label {
+.form-group-auth label {
     left: 5px;
     font-size: 14px;
     padding: 6px 13px;
@@ -58,7 +58,7 @@
     align-items: center;
 }
 
-.form-group label::after {
+.form-group-auth label::after {
     background-color: transparent !important;
 }
   

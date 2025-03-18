@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/auth.css';
+import '../styles/Auth.css';
 import Header from '../components/Header';
 
 const AuthLayout = ({ children }) => {
