@@ -66,12 +66,11 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
         <AuthLayout>
             <div className='container' onMouseMove={(e) => getCursorPosition(e)}>
                 <img src={authSloth} alt='authSloth' className='auth-sloth' />
-                <div class="eye-cover1">
-                    <div id="eyes1"></div>
+                <div class='eye-cover1'>
+                    <div id='eyes1'></div>
                 </div>
-
-                <div class="eye-cover2">
-                    <div id="eyes2"></div>
+                <div class='eye-cover2'>
+                    <div id='eyes2'></div>
                 </div>
                 <div className={`col login-box ${currentFormType === 'register' ? 'registration-form' : 'login-form'}`}>
                     <h1 className='login-title'>{currentFormType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>

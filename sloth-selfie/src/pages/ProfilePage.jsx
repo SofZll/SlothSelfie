@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { validateEmail, validatePhoneNumber } from '../utils/validation';
 import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
-import { useIsDesktop } from '../utils/utils';
+//import { useIsDesktop } from '../utils/utils';
 import Swal from 'sweetalert2';
 import '../styles/Profile.css';
 
 const ProfilePage = ({ profileData }) => {
-    const isDesktop = useIsDesktop();
+    //const isDesktop = useIsDesktop();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [showProfile, setShowProfile] = useState(false);

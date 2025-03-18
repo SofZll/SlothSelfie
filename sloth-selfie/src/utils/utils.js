@@ -7,4 +7,12 @@ const useIsDesktop = () => {
     return isMinWidth768 && !isPhoneLandscape;
 };
 
-export { useIsDesktop };
+const useIsMobileLandscape = () => {
+    const isMobileWidth = useMediaQuery({ maxWidth: 700 });
+    const isLandscapeHeight = useMediaQuery({ maxHeight: 700, orientation: "landscape" });
+    const isLandscapeWidth = useMediaQuery({ maxWidth: 1000, orientation: "landscape" });
+
+    return isMobileWidth || (isLandscapeHeight && isLandscapeWidth);
+}
+
+export { useIsDesktop, useIsMobileLandscape };
