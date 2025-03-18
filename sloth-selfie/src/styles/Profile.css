@@ -138,6 +138,7 @@
     width: 100%;
 }
 
+/* TODO: cambiare*/
 @media screen and (min-width: 700px){
     .profile-container {
         max-width: 450px;
@@ -146,13 +147,5 @@
 
     .button-forum {
         max-width: 480px;
-    }
-}
-
-
-@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
-    .profile {
-        align-items: start;
-        margin-top: 3vh;
     }
 }
