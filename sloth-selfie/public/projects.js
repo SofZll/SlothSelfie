@@ -13,7 +13,15 @@
 
 //gestire ritardi con contrazioni o dilatazioni, se c'è ritardo, finchè owner non sceglie, non si può attivare nessuna dipendenza
 
+//aggiusta start e complete, finchè non clicco start output deve essere disattivato
+
+//quando riattivo una attività, lo stato passa ad activatable se faccio refresh ... problemi nel fetch
+
+//mi da ritardo anche se scadenza coinicde con data di oggi
+
 //in fill form di edit le attività a volte non sono nell'ordine giusto
+
+//TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
