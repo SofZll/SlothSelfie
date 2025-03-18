@@ -1,0 +1,17 @@
+/* css form */
+
+.form-group input, 
+.form-group select {
+  margin: 0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.form-group label {
+  text-align: right;
+  font-size: 1rem;
+}
+
+.form-group input:read-only {
+  background-color: #e7e7e7;
+}
