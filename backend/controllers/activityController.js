@@ -1,6 +1,8 @@
+const mongoose = require("mongoose");
 const Activity = require('../models/activityModel');
 const User = require('../models/userModel');
 const Note = require('../models/noteModel');
+const Event = require('../models/eventModel');
 const { createNotification } = require('../controllers/notificationController');
 const { calculateDate } = require('../utils/utils');
 
@@ -304,6 +306,85 @@ async function updateActivityStatus(req, res) {
     }
 }
 
+//Function to adjust the schedule of an activity
+async function adjustActivitySchedule(req, res) {
+    try {
+        const { dependentActivitiesIds, delay } = req.body;
+
+        //we convert the delay in a number
+        const delayDays = parseInt(delay, 10);
+
+        // Update the startDate and deadline of the dependentActivities by adding the delay (shift), we update also the events connected to each startDate and deadline
+        
+        //convert the dependentActivitiesIds to an array of ObjectIds
+        const activityIdsArray = Array.isArray(dependentActivitiesIds)
+        ? dependentActivitiesIds
+        : dependentActivitiesIds.split(',').map(id => id.trim());
+
+        // Find the dependent activities and populate the events
+        const activities = await Activity.find({ _id: { $in: activityIdsArray } }).populate("events");
+
+        // Update the startDate and deadline of the activities
+        const updatePromises = activities.map(async (activity) => {
+
+            console.log("Activity startDate and deadLine:", activity.startDate, activity.deadline);
+
+            const newStartDate = new Date(activity.startDate);
+            newStartDate.setUTCDate(newStartDate.getUTCDate() + delayDays);
+
+            const newDeadline = new Date(activity.deadline);
+            newDeadline.setUTCDate(newDeadline.getUTCDate() + delayDays);
+
+            activity.startDate = newStartDate;
+            activity.deadline = newDeadline;
+
+            console.log("Activity shifted startDate and deadLine:", activity.startDate, activity.deadline);
+
+            // Update the events connected to the startDate and deadline of the activity
+            const eventUpdates = activity.events.map(async (eventId, index) => {
+                const event = await Event.findById(eventId);
+                console.log("Event:", event);
+                if (event) {
+                    // if index 0, it is a startDate, if index 1, it is a deadLine
+                    if (index === 0) {
+                        event.date = newStartDate;
+                    } else if (index === 1) {
+                        event.date = newDeadline;
+                    }
+                    await event.save();
+                }
+            });
+
+            await Promise.all(eventUpdates);
+            return activity.save();
+        });
+
+        await Promise.all(updatePromises);
+
+        res.status(200).json({ message: "Schedule adjusted successfully" });
+    }
+    catch (error) {
+        console.error("Error adjusting activity schedule:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
+//Function to contract the schedule of an activity  //TODO calcola il ritardo, contrai startDate e deadline di tutte le attività dipendenti in base al ritardo e fa update di eventi corrispondenti
+async function contractActivitySchedule(req, res) {
+    try {
+        const { dependentActivitiesIds, delay } = req.body;
+
+        console.log("dependentActivities:", dependentActivitiesIds);
+        console.log("delay:", delay);
+
+        res.status(200).json({ message: "Schedule contracted successfully" });
+    }
+    catch (error) {
+        console.error("Error contracting activity schedule:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
 module.exports = {
     createActivity,
     getActivities,
@@ -313,5 +394,7 @@ module.exports = {
     createInputAsNote,
     createOutputAsNote,
     updateOutputAsNote,
-    updateActivityStatus
+    updateActivityStatus,
+    adjustActivitySchedule,
+    contractActivitySchedule
 };

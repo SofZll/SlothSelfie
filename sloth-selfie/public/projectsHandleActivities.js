@@ -501,9 +501,13 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
         }
 
         let { dependentActivities, activities } = await getDependentActivities(activityId);
+        //get the ids of the dependent activities
+        let dependentActivitiesIds = dependentActivities.map(dep => dep._id);
 
         // Filter the dependent activities that are Not_Activatable
         let blockedDependencies = dependentActivities.filter(dep => dep.status === "Not_Activatable");
+        //get the ids of the blocked dependent activities
+        let blockedDependenciesIds = blockedDependencies.map(dep => dep._id);
 
         // Check if the activity is overdue, comparing with today's date
         let today = new Date();         //TODO, TIME MACHINE DATE
@@ -511,6 +515,8 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
         let deadlineDate = new Date(activity.deadline);
 
         let isOverdue = deadlineDate < today;  // the completed activity has delay?
+        //we calculate the days of delay
+        let delay = Math.ceil((today - deadlineDate) / (1000 * 60 * 60 * 24));
         let hasBlockedDependencies = blockedDependencies.length > 0;  // Are there blocked dependencies? (in case they were added in edit after complete)
 
         if(dependentActivities && dependentActivities.length > 0){
@@ -520,11 +526,11 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
                 if (isOverdue) {
                     // If it is a milestone, contract the schedule first
                     if (activity.milestone) {
-                        await contractActivitySchedule(activityId);
+                        await contractActivitySchedule(activityId, dependentActivitiesIds, delay);
                         await updateDependentActivities(activityId, activity);
                     } else {
                         // We ask the owner if the activity should be delayed or contracted, until the owner decides, the dependencies are not activated
-                        createAndShowDependencyButtons(activityId); //We show the buttons for the owner to decide
+                        createAndShowDependencyButtons(activityId, dependentActivitiesIds, delay); //We show the buttons for the owner to decide
                     }
                 } else {
                     // If the activity is not overdue, update the dependent activities:
@@ -535,10 +541,10 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
                 if (hasBlockedDependencies) {
                      if(isOverdue){
                         if(activity.milestone){
-                            await contractActivitySchedule(activityId);
+                            await contractActivitySchedule(activityId, blockedDependenciesIds, delay);
                             await updateDependentActivities(activityId, activity, true);
                         }else{
-                            createAndShowDependencyButtons(activityId, true);
+                            createAndShowDependencyButtons(activityId, blockedDependenciesIds, delay, true);
                         }
                     }else{
                         await updateDependentActivities(activityId, activity, true);
@@ -641,14 +647,15 @@ async function reactivateActivity(activityId, newStatus) {
 }
 
 // Function to handle the owner decision
-async function handleOwnerDecision(activityId, decision, onlyBlocked = false) {
+async function handleOwnerDecision(activityId, decision, dependentActivitiesIds, delay, onlyBlocked = false) {
     try {
         if (decision === "delay") {
-            await adjustActivitySchedule(activityId, 'delay');
+            await adjustActivitySchedule(activityId, dependentActivitiesIds, delay);
         } else if (decision === "contract") {
-            await contractActivitySchedule(activityId);
+            await contractActivitySchedule(activityId, dependentActivitiesIds, delay);
         }
 
+        console.log(`Owner has decided, now we update the dependent activities`);
         // Update the dependent activities
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
         const activity = await response.json();
@@ -667,13 +674,13 @@ async function handleOwnerDecision(activityId, decision, onlyBlocked = false) {
 }
 
 // Function to create and show the buttons for the owner to decide
-function createAndShowDependencyButtons(activityId, onlyBlocked = false) {
+function createAndShowDependencyButtons(activityId, dependentActivitiesIds, delay, onlyBlocked = false) {
 
     const container = document.getElementById(`activity-${activityId}-buttons-container`);
     if (container) {
         container.innerHTML = `
-            <button class="btn btn-outline-warning btn-sm" id="delayBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'delay','${onlyBlocked}')">Adjust dependencies</button>
-            <button class="btn btn-outline-warning btn-sm" id="contractBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'contract', '${onlyBlocked}')" >Contract dependencies</button>
+            <button class="btn btn-outline-warning btn-sm" id="delayBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'delay', '${dependentActivitiesIds}', '${delay}', '${onlyBlocked}')">Adjust dependencies</button>
+            <button class="btn btn-outline-warning btn-sm" id="contractBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'contract', '${dependentActivitiesIds}', '${delay}', '${onlyBlocked}')" >Contract dependencies</button>
         `;
     } else {
         console.error('Container not found for activity buttons');
@@ -732,22 +739,22 @@ async function updateDependentActivities(activityId, activity, onlyBlocked = fal
     }
 }
 
-//Function to adjust the schedule of an activity    //TODO
-async function adjustActivitySchedule(activityId, mode) {
-    console.log(`Adjusting schedule for ${activityId}: mode = ${mode}`);
-    await fetch(`http://localhost:8000/api/activity/${activityId}/schedule`, {
-        method: "POST",
+//Function to adjust the schedule of an activity
+async function adjustActivitySchedule(activityId, dependentActivitiesIds, delay) {
+    await fetch(`http://localhost:8000/api/activity/${activityId}/adjustSchedule`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode })
+        body: JSON.stringify({ dependentActivitiesIds, delay })
     });
 }
 
 //Function to contract the schedule of an activity   //TODO
-async function contractActivitySchedule(activityId) {
-    console.log(`Contracting schedule for ${activityId}`);
-    await fetch(`http://localhost:8000/api/activity/${activityId}/contract`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
+async function contractActivitySchedule(activityId, dependentActivitiesIds, delay) {
+    console.log(`Contracting schedule for ${activityId} with delay of ${delay} days`);
+    await fetch(`http://localhost:8000/api/activity/${activityId}/contractSchedule`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dependentActivitiesIds, delay })
     });
 }
 
