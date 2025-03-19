@@ -1,6 +1,6 @@
 TODO:
     // Projects
-    - Inizio e fine attività sono eventi che finiscono sul calendario con modalità di visualizzazione separate
+    - per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) sul calendario fare modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo
     - sincronizzazione attività dipendenti tramite input-output (traslazione o contrazione), gesire milestones. La decisione spetta al capoprogetto. 
     - Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto.
     - Preview progetti

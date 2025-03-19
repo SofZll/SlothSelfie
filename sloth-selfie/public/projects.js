@@ -1,9 +1,7 @@
 //TODO: quando clicco salva in edit o elimina progetto si deve chiudere la visualizzazione a lista/gannt e anche il form di handle activities
 
-//TODO: gestire sincronizzazione tra attività, se una attività è in ritardo, le altre sincronizzate devono essere traslate o contratte (se milestone contrai solo)
-//TODO: in edit di progetto: owner può raggruppare attività e cambiare le sincronizzazioni tra le attività,
-// in caso di ritardi può decidere se traslare o contrarre le attività sincronizzate a quella in ritardo
-//TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto.
+//TODO: in edit di progetto: owner può raggruppare attività
+//TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto (trasla o contrae le attività sincronizzate a quella in ritardo).
 
 //TODO: modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) 
 
@@ -11,15 +9,14 @@
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
-//gestire ritardi con contrazioni o dilatazioni, se c'è ritardo, finchè owner non sceglie, non si può attivare nessuna dipendenza
+//gestire ritardi con contrazioni o dilatazioni lato backend:
+//TODO: gestire sincronizzazione tra attività, se una attività è in ritardo, le altre sincronizzate devono essere traslate o contratte (se milestone contrai solo)
 
 //aggiusta start e complete, finchè non clicco start output deve essere disattivato
 
-//quando riattivo una attività, lo stato passa ad activatable se faccio refresh ... problemi nel fetch
+//Reject output va attivato solo quando esiste un output e l'attività è completata
 
-//mi da ritardo anche se scadenza coinicde con data di oggi
-
-//in fill form di edit le attività a volte non sono nell'ordine giusto
+//in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 
