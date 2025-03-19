@@ -1,4 +1,4 @@
-/* time machine button */
+/* time machine button
 
 .time-machine-container {
     position: fixed;
@@ -26,10 +26,49 @@
     transform: scale(1.1);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
 }
+*/
+
+/* time machine button */
+
+.time-machine {
+    z-index: 1000;
+}
+
+.time-machine p {
+    text-align: center;
+    margin: 0;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+}
+
+.time-machine-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: fixed;
+    top: 0.8rem;
+    right: 0.5rem;
+    width: 5rem;
+    height: 3rem;
+    background-color: transparent;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: move;
+}
+
+.time {
+    font-size: 1.2rem;
+}
+
+.date {
+    font-size: 0.7rem;
+}
 
 /* time machine popup */
 
-.time-machine {
+.time-machine-popup {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -68,7 +107,7 @@
 
 .close:hover,
 .close:focus {
-    color: #FFF;
+    color: #474c5c;
     text-decoration: none;
     cursor: pointer;
 }
@@ -93,5 +132,13 @@
     to {
         transform: scale(1);
         opacity: 1;
+    }
+}
+
+/* TODO: da cambiare ? */
+@media screen and (min-width: 769px) {
+    .time-machine-button {
+        top: 2rem;
+        right: 2rem;
     }
 }

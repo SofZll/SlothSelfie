@@ -1,83 +1,42 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/TimeMachine.css';
-import iconTimeMachine from '../assets/icons/time-machine.svg';
-import { useIsDesktop, useIsMobileLandscape } from '../utils/utils';
+import { Clock10 } from 'lucide-react';
 
 import TimeMachinePopup from './TimeMachinePopup';
 
 const TimeMachineButton = () => {
-    const isDesktop = useIsDesktop();
-    const isMobileLandscape = useIsMobileLandscape();
-    
     const [machineOpen, setMachineOpen] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
+    const [currentTime, setCurrentTime] = useState('');
+    const [currentDate, setCurrentDate] = useState('');
 
-    const updatePosition = useCallback(() => {
-        if (!isDesktop) {
-            const initialX = window.innerWidth * 0.8;
-            const initialY = window.innerHeight * 0.8;
-            setPosition({ x: initialX, y: initialY });
-        } else {
-            setPosition({ x: window.innerWidth * 0.9, y: window.innerHeight * 0.03 });
-        }
-    }, [isDesktop]);
+    /* TODO: da cambiare con la chiamata in back */
+    const setTime = () => {
+        const now = new Date();
+        const time = now.toTimeString().split(' ')[0].slice(0, 5);
 
-    const toggleTimeMachine = () => {
-        setMachineOpen(prevState => !prevState);
-    };
-
-    const handleTouchStart = (e) => {
-        const touch = e.touches[0];
-        setStartPosition({ x: touch.clientX, y: touch.clientY });
-        setIsDragging(false);
-    };
-
-    const handleTouchMove = (e) => {
-        const touch = e.touches[0];
+        const formattedDate = now.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        }).replace(',', '').replace(/\b[a-z]/g, char => char.toUpperCase());
         
-        // Calculate delta for better performance
-        const deltaX = touch.clientX - startPosition.x;
-        const deltaY = touch.clientY - startPosition.y;
-
-        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-            setIsDragging(true);
-
-            setPosition(prevPos => ({
-                x: prevPos.x + deltaX,
-                y: prevPos.y + deltaY,
-            }));
-
-            setStartPosition({ x: touch.clientX, y: touch.clientY });
-        }
-    };
-
-    const handleTouchEnd = (e) => {
-        if (!isDragging) toggleTimeMachine();
-    };
+        setCurrentDate(formattedDate);
+        setCurrentTime(time);
+    }
 
     useEffect(() => {
-        updatePosition();
-        window.addEventListener('resize', updatePosition);
-        return () => window.removeEventListener('resize', updatePosition);
-    }, [updatePosition]);
+        setTime();
+    }, []);
 
     return (
         <>
-            <div className='time-machine-container' style={{ left: `${position.x}px` , top: `${position.y}px`}}>
-                <button
-                    className="time-machine-button"
-                    onTouchStart={isMobileLandscape ? handleTouchStart : null}
-                    onTouchMove={isMobileLandscape ? handleTouchMove : null}
-                    onTouchEnd={isMobileLandscape ? handleTouchEnd : null}
-                    onClick={!isMobileLandscape ? toggleTimeMachine : null} // Enable click on desktop
-                    style={{ touchAction: 'none' }}
-                >
-                <img src={iconTimeMachine} alt="icon" className="icon" />
+            <div className='time-machine'>
+                <button className='time-machine-button' onClick={() => setMachineOpen(true)}>
+                    <p className='time'>{currentTime}</p>
+                    <p className='date'>{currentDate}</p>
                 </button>
             </div>
-            {machineOpen && <TimeMachinePopup />}
+            {machineOpen && <TimeMachinePopup setMachineOpen={setMachineOpen} setCurrentTime={setCurrentTime} currentTime={currentTime} setCurrentDate={setCurrentDate} currentDate={currentDate} />}
         </>
     );
 };
