@@ -5,7 +5,7 @@ import { useIsDesktop } from '../utils/utils';
 import { StyleProvider } from '../components/StyleContext';
 
 
-import Calendar from '../pages/Calendar';
+import Calendar from '../pages/Calendar/Calendar';
 import Home from '../pages/Home'
 import Profile from '../pages/ProfilePage';
 //TODO: chambiare gli import
