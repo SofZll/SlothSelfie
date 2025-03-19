@@ -2,6 +2,8 @@ import React, { useState }  from 'react';
 
 import SelectionCalendarLayout from '../../layouts/SelectionCalendarLayout';
 import FormActivity from './FormActivity';
+import FormEvent from './FormEvent';
+import FormNoAvailability from './FormNoAvailability';
 import Button from '../../components/Button';
 
 const FormCalendar = () => {
@@ -23,6 +25,13 @@ const FormCalendar = () => {
                 <FormActivity edit={edit} setEdit={setEdit} />
             )}
 
+            {selection === 'event' && (
+                <FormEvent edit={edit} setEdit={setEdit} />
+            )}
+
+            {selection === 'no availability' && (
+                <FormNoAvailability />
+            )}
 
         </SelectionCalendarLayout>
     )
