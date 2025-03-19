@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { validateEmail, validatePhoneNumber } from '../utils/validation';
 import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
-import { useIsDesktop } from '../utils/utils';
+//import { useIsDesktop } from '../utils/utils';
 import Swal from 'sweetalert2';
 import '../styles/Profile.css';
 
 const ProfilePage = ({ profileData }) => {
-    const isDesktop = useIsDesktop();
+    //const isDesktop = useIsDesktop();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
@@ -73,49 +73,61 @@ const ProfilePage = ({ profileData }) => {
 
     return (
         <MainLayout>
-            <div className="container profile">
-                <div className="col profile-container">
+            <div className='container profile'>
+                <div className='col profile-container'>
                     <h2>{currenteProfileData.username}</h2>
-                    <div className="profile-image">
+                    <div className='profile-image'>
                         {currenteProfileData.profile_image && (
-                            <img src={currenteProfileData.profile_image} alt="profile-img" onClick={handleClickImage}/>
+                            <img src={currenteProfileData.profile_image} alt='profile-img' onClick={handleClickImage}/>
                         )}
-                        <input type="file" id="file-input" style={{display: 'none'}} onChange={handleEditImage}/>
+                        <input type='file' id='file-input' style={{display: 'none'}} onChange={handleEditImage}/>
                     </div>
-                    <button className="btn button-info" onClick={() => setShowProfile(!showProfile)}>
-                        {showProfile ? "Hide": "Expands"}
+                    <button className='btn button-info' onClick={() => setShowProfile(!showProfile)}>
+                        {showProfile ? 'Hide': 'Expands'}
                     </button>
                     <div className={`col profile-info ${showProfile ? 'show' : ''}`}>
                         {isEditing ? (
-                            <form className="profile-form col-12">
-                                <div className="row mb-3 profile-form-group">
-                                    <label htmlFor="name" className='col-sm-3 col-form-label'>Name:</label>
-                                    <input type="text" className='col-sm-9' id="name" name="name" value={currenteProfileData.name} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, name: e.target.value })}/>
+                            <form className='profile-form col-12'>
+                                <div className='row mb-3 form-group'>
+                                    <label htmlFor='name' className='col-4 col-form-label'>Name:</label>
+                                    <div className='col-8'>
+                                        <input type='text' className='form-control' id='name' name='name' value={currenteProfileData.name} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, name: e.target.value })}/>
+                                    </div>
                                 </div>
-                                <div className="row mb-3 profile-form-group">
-                                    <label htmlFor="username" className='col-sm-3 col-form-label'>Username:</label>
-                                    <input type="text" className='col-sm-9' id="username" value={currenteProfileData.username} readOnly/>
+                                <div className='row mb-3 form-group'>
+                                    <label htmlFor='username' className='col-4 col-form-label'>Username:</label>
+                                    <div className='col-8'>
+                                        <input type='text' className='form-control' id='username' value={currenteProfileData.username} readOnly/>
+                                    </div>
                                 </div>
-                                <div className="profile-form-group">
-                                    <label htmlFor="email">Email:</label>
-                                    <input type="email" id="email" name="email" value={currenteProfileData.email} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, email: e.target.value })}/>
+                                <div className='row mb-3 form-group'>
+                                    <label htmlFor='email' className='col-4 col-form-label'>Email:</label>
+                                    <div className='col-8'>
+                                        <input type='email' className='form-control' id='email' name='email' value={currenteProfileData.email} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, email: e.target.value })}/>
+                                    </div>
                                 </div>
-                                <div className="form-group profile-form-group">
-                                    <label htmlFor="birthday">Birthday:</label>
-                                    <input type="date" id="birthday" name="birthday" value={currenteProfileData.birthday} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, birthday: e.target.value })}/>
+                                <div className='row mb-3 form-group'>
+                                    <label htmlFor='birthday' className='col-4 col-form-label'>Birthday:</label>
+                                    <div className='col-8'>
+                                        <input type='date' className='form-control' id='birthday' name='birthday' value={currenteProfileData.birthday} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, birthday: e.target.value })}/>
+                                    </div>
                                 </div>
-                                <div className="form-group profile-form-group">
-                                    <label htmlFor="phoneNumber">Phone number:</label>
-                                    <input type="tel" id="phoneNumber" name="phoneNumber" value={currenteProfileData.phoneNumber} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, phoneNumber: e.target.value })}/>
+                                <div className='row mb-3 form-group'>
+                                    <label htmlFor='phoneNumber' className='col-4 col-form-label'>Phone number:</label>
+                                    <div className='col-8'>
+                                        <input type='tel' className='form-control' id='phoneNumber' name='phoneNumber' value={currenteProfileData.phoneNumber} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, phoneNumber: e.target.value })}/>
+                                    </div>
                                 </div>
-                                <div className="form-group profile-form-group">
-                                    <label htmlFor="gender">Gender:</label>
-                                    <select id="gender" name="gender" value={currenteProfileData.gender} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, gender: e.target.value })}>
-                                        <option value="">Select Gender</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                        <option value="other">Other</option>
-                                    </select>
+                                <div className='row mb-3 form-group'>
+                                    <label htmlFor='gender' className='col-4 col-form-label'>Gender:</label>
+                                    <div className='col-8'>
+                                        <select id='gender' className='form-control' name='gender' value={currenteProfileData.gender} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, gender: e.target.value })}>
+                                            <option value=''>Select Gender</option>
+                                            <option value='male'>Male</option>
+                                            <option value='female'>Female</option>
+                                            <option value='other'>Other</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </form>
                         ):(
@@ -141,8 +153,8 @@ const ProfilePage = ({ profileData }) => {
                         </div>
                     )}
                 </div>
-                <div className="mini-forum">
-                    <button className="button-forum" onClick={handleClickForum}>FORUM</button>
+                <div className='mini-forum'>
+                    <button className='button-forum' onClick={handleClickForum}>FORUM</button>
                 </div>
                 {/*!isDesktop && (
                     <NotificationFunction /> 
