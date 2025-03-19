@@ -11,10 +11,13 @@
 
 //gestire ritardi con contrazioni o dilatazioni lato backend:
 //TODO: gestire sincronizzazione tra attività, se una attività è in ritardo, le altre sincronizzate devono essere traslate o contratte (se milestone contrai solo)
+//getire l'aggiornamento lato frontend delle nuove deadline in handleActivities
 
 //aggiusta start e complete, finchè non clicco start output deve essere disattivato
 
 //Reject output va attivato solo quando esiste un output e l'attività è completata
+
+//TODO: se lo user non è l'owner del progetto, non deve visualizzare il bottone per l'edit del progetto
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 
