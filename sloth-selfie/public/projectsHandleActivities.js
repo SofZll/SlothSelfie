@@ -40,13 +40,14 @@ async function handleActivities(projectId) {
             
             activities.forEach(activity => {
 
-                //if the activity is completed, we check if it has dependencies and updates them                
+                //if the activity is completed, we check if it has dependencies and show the buttons for the owner to decide in case of delay              
                 if (activity.status === "Completed") {
-                    checkOptionsForCompleteActivityDep(activity._id);
+                    checkOptionsForCompleteActivityDep(activity._id, false);
                 }
 
                 // Check if the activity has a deadline and if it is Overdue or Abandoned
                 let today = new Date();       //TODO, TIME MACHINE DATE
+                today.setHours(0, 0, 0, 0);    //we only compare the day, not the hours
                 let deadline = new Date(activity.deadline);
 
                 let isLate = today > deadline && !activity.output; // Overdue without output
@@ -479,7 +480,7 @@ async function completeActivity(activityId, newStatus) {
         });
 
         // If the activity has dependencies, update them:
-        await checkOptionsForCompleteActivityDep(activityId);
+        await checkOptionsForCompleteActivityDep(activityId, true);
 
     } catch (error) {
         console.error("Error completing activity:", error);
@@ -487,7 +488,8 @@ async function completeActivity(activityId, newStatus) {
 }
 
 //Function to check what to do with dependencies when we complete an activity
-async function checkOptionsForCompleteActivityDep(activityId) {
+//(in case of userDecision=false, no button completed was pressed and we are in the fetch case)
+async function checkOptionsForCompleteActivityDep(activityId, userDecision = false) {
     try {
         // Get the activity
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
@@ -500,23 +502,48 @@ async function checkOptionsForCompleteActivityDep(activityId) {
 
         let { dependentActivities, activities } = await getDependentActivities(activityId);
 
-        if(dependentActivities && dependentActivities.length > 0){
-            // Check if the activity is overdue, comparing with today's date
-            let today = new Date();         //TODO, TIME MACHINE DATE
-            let deadlineDate = new Date(activity.deadline);
+        // Filter the dependent activities that are Not_Activatable
+        let blockedDependencies = dependentActivities.filter(dep => dep.status === "Not_Activatable");
 
-            if (deadlineDate < today) {
-                // If it is a milestone, contract the schedule first
-                if (activity.milestone) {
-                    await contractActivitySchedule(activityId);
-                    await updateDependentActivities(activityId, activity);
+        // Check if the activity is overdue, comparing with today's date
+        let today = new Date();         //TODO, TIME MACHINE DATE
+        today.setHours(0, 0, 0, 0);    //we only compare the day, not the hours
+        let deadlineDate = new Date(activity.deadline);
+
+        let isOverdue = deadlineDate < today;  // the completed activity has delay?
+        let hasBlockedDependencies = blockedDependencies.length > 0;  // Are there blocked dependencies? (in case they were added in edit after complete)
+
+        if(dependentActivities && dependentActivities.length > 0){
+
+            //the owner has clicked "complete"
+            if(userDecision){
+                if (isOverdue) {
+                    // If it is a milestone, contract the schedule first
+                    if (activity.milestone) {
+                        await contractActivitySchedule(activityId);
+                        await updateDependentActivities(activityId, activity);
+                    } else {
+                        // We ask the owner if the activity should be delayed or contracted, until the owner decides, the dependencies are not activated
+                        createAndShowDependencyButtons(activityId); //We show the buttons for the owner to decide
+                    }
                 } else {
-                    // We ask the owner if the activity should be delayed or contracted, until the owner decides, the dependencies are not activated
-                    createAndShowDependencyButtons(activityId); //We show the buttons for the owner to decide
+                    // If the activity is not overdue, update the dependent activities:
+                    await updateDependentActivities(activityId, activity);
                 }
-            } else {
-                // If the activity is not overdue, update the dependent activities:
-                await updateDependentActivities(activityId, activity);
+            }else{
+                //we are in the fetch case, if there are blocked dependencies, we update them in each case, or show the buttons for the owner to decide
+                if (hasBlockedDependencies) {
+                     if(isOverdue){
+                        if(activity.milestone){
+                            await contractActivitySchedule(activityId);
+                            await updateDependentActivities(activityId, activity, true);
+                        }else{
+                            createAndShowDependencyButtons(activityId, true);
+                        }
+                    }else{
+                        await updateDependentActivities(activityId, activity, true);
+                    }
+                }
             }
         }
 
@@ -614,7 +641,7 @@ async function reactivateActivity(activityId, newStatus) {
 }
 
 // Function to handle the owner decision
-async function handleOwnerDecision(activityId, decision) {
+async function handleOwnerDecision(activityId, decision, onlyBlocked = false) {
     try {
         if (decision === "delay") {
             await adjustActivitySchedule(activityId, 'delay');
@@ -625,7 +652,8 @@ async function handleOwnerDecision(activityId, decision) {
         // Update the dependent activities
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
         const activity = await response.json();
-        await updateDependentActivities(activityId, activity);
+
+        await updateDependentActivities(activityId, activity, onlyBlocked);
 
         // disable the buttons
         document.getElementById(`delayBtn-${activityId}`).disabled = true;
@@ -639,13 +667,13 @@ async function handleOwnerDecision(activityId, decision) {
 }
 
 // Function to create and show the buttons for the owner to decide
-function createAndShowDependencyButtons(activityId) {
+function createAndShowDependencyButtons(activityId, onlyBlocked = false) {
 
     const container = document.getElementById(`activity-${activityId}-buttons-container`);
     if (container) {
         container.innerHTML = `
-            <button class="btn btn-outline-warning btn-sm" id="delayBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'delay')">Adjust dependencies</button>
-            <button class="btn btn-outline-warning btn-sm" id="contractBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'contract')" >Contract dependencies</button>
+            <button class="btn btn-outline-warning btn-sm" id="delayBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'delay','${onlyBlocked}')">Adjust dependencies</button>
+            <button class="btn btn-outline-warning btn-sm" id="contractBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'contract', '${onlyBlocked}')" >Contract dependencies</button>
         `;
     } else {
         console.error('Container not found for activity buttons');
@@ -669,32 +697,35 @@ async function getDependentActivities(activityId) {
     return { dependentActivities, activities };
 }
 
-// Function to update the dependent activities of a completed activity
-async function updateDependentActivities(activityId, activity) {
+// Function to update the dependent activities of a completed activity, with option to update only blocked ones
+async function updateDependentActivities(activityId, activity, onlyBlocked = false) {
     try {
         let { dependentActivities, activities } = await getDependentActivities(activityId);
         
         for (let dependent of dependentActivities) {
-            // Verify if all dependencies are completed
-            let dependenciesCompleted = dependent.dependencies.every(dep => {
-                let dependency = activities.find(a => a._id.toString() === dep._id.toString());
-                return dependency && dependency.status === "Completed";
-            });
+             // if onlyBlocked is true, we update only the blocked activities
+            if (!onlyBlocked || (onlyBlocked && dependent.status === "Not_Activatable")) {
+                // Verify if all dependencies are completed
+                let dependenciesCompleted = dependent.dependencies.every(dep => {
+                    let dependency = activities.find(a => a._id.toString() === dep._id.toString());
+                    return dependency && dependency.status === "Completed";
+                });
 
-            if (dependenciesCompleted) {
-                await activatableActivity(dependent._id, "Activatable");
+                if (dependenciesCompleted) {
+                    await activatableActivity(dependent._id, "Activatable");
 
-                // We set the output of the previous activity as the input of the next one, only if it exists
-                if (activity.output) {
+                    // We set the output of the previous activity as the input of the next one, only if it exists
+                    if (activity.output) {
 
-                    let outputId = typeof activity.output === "object" ? activity.output._id : activity.output;
+                        let outputId = typeof activity.output === "object" ? activity.output._id : activity.output;
 
-                    // we get the output content from the output note
-                    let outputContent = await getOutputContent(outputId);
+                        // we get the output content from the output note
+                        let outputContent = await getOutputContent(outputId);
 
-                    await insertActivityInputOutput(dependent._id, 'input',true, outputContent);
-                }
-            }            
+                        await insertActivityInputOutput(dependent._id, 'input',true, outputContent);
+                    }
+                }            
+            }
         }
     } catch (error) {
         console.error("Error updating dependent activities:", error);
