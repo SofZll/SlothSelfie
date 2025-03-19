@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Swal from 'sweetalert2';
 import { apiService } from '../services/apiService';
+import { TimeMachineContext } from '../contexts/TimeMachineContext';
 
-const TimeMachinePopup = ({ setMachineOpen, setCurrentTime, currentTime, setCurrentDate, currentDate }) => {
+const TimeMachinePopup = () => {
+    const { setMachineOpen, currentTime, setCurrentTime, currentDate, setCurrentDate } = useContext(TimeMachineContext);
+
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');
 
@@ -40,37 +43,42 @@ const TimeMachinePopup = ({ setMachineOpen, setCurrentTime, currentTime, setCurr
     }
 
     return (
-        <div className='time-machine-popup'>
-            <div className='time-machine-content'>
-                <span className='close' onClick={() => setMachineOpen(false)}>&times;</span>
-                <h2>Hi! &#128527;<br/> Do you wish to travel in time?</h2>
-                <p>Right now the time is set on: </p>
-                <p className="current-time">
-                    <span>Date: {currentDate}</span>
-                    <span>Time: {currentTime}</span>
-                </p>
-                <form onSubmit={handleSetTime}>
-                    <label htmlFor="date">Enter a date:</label>
-                    <input
-                        className="time-input"
-                        type="date"
-                        id="date"
-                        value={inputDate}
-                        onChange={(e) => setInputDate(e.target.value)}
-                        required
-                    /><br/>
-                    <label htmlFor="time">Enter a time:</label>
-                    <input
-                        className="time-input"
-                        type="time"
-                        id="time"
-                        value={inputTime}
-                        onChange={(e) => setInputTime(e.target.value)}
-                        required
-                    /><br/><br/>
-                    <button type="submit" className="btn btn-main" value="set-time">Go back in time!</button>
-                </form>
-                <button onClick={handleResetTime} className="btn btn-main" value="reset-time">Reset time</button>
+        <div className="modal fade show time-machine-popup">
+            <div className="modal-dialog modal-dialog-centered custom-modal">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Time Machine</h5>
+                        <button type="button" className="close" onClick={() => setMachineOpen(false)}>
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div className="modal-body">
+                        <p>Right now the time is set on:</p>
+                        <div className="d-flex justify-content-center gap-3 mb-3">
+                            <span>Date: {currentDate}</span>
+                            <span>Time: {currentTime}</span>
+                        </div>
+                        <form onSubmit={handleSetTime}>
+                            <div className="form-group">
+                                <label htmlFor="date">Enter a date:</label>
+                                <input type="date" className="form-control" id="date" value={inputDate} onChange={(e) => setInputDate(e.target.value)} required />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="time">Enter a time:</label>
+                                <input
+                                    type="time"
+                                    className="form-control"
+                                    id="time"
+                                    value={inputTime}
+                                    onChange={(e) => setInputTime(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="btn btn-primary mt-3">Go back in time!</button>
+                        </form>
+                        <button onClick={handleResetTime} className="btn btn-secondary mt-2">Reset time</button>
+                    </div>
+                </div>
             </div>
         </div>
     );
