@@ -4,84 +4,10 @@ import iconTimeMachine from './media/time-machine.svg';
 import Swal from "sweetalert2";
 
 const TimeMachine = () => {
-    const [machineOpen, setMachineOpen] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
-
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
-      
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
-
-    const isMobileLandscape = () => {
-        const isMobileWidth = window.matchMedia('(max-width: 700px)').matches; // Soglia di 500px per modalità cellulare
-        const isLandscapeHeight = window.matchMedia('(max-height: 700px').matches;
-        const isLandscapeWidth = window.matchMedia('(max-width: 1000px').matches;
-        return isMobileWidth || (isLandscapeHeight && isLandscapeWidth);
-    };
-
-    const isMobile = () => {
-        return window.matchMedia('(max-width: 700px)').matches;
-    };
-
-    // Functions to update time machine position based on screen size
-    const updatePosition = () => {
-        if (isMobile()) {
-        const initialX = window.innerWidth * 0.8;
-        const initialY = window.innerHeight * 0.8;
-        setPosition({ x: initialX, y: initialY });
-        } else {
-        setPosition({ x: window.innerWidth * 0.9, y: window.innerHeight * 0.03 });
-        }
-    };
-
-    useEffect(() => {
-        updatePosition();
-        window.addEventListener('resize', updatePosition);
-
-        return () => {
-        window.removeEventListener('resize', updatePosition);
-        }
-    }, []);
-
-    // Function to show and close the time machine
-    const toggleTimeMachine = () => {
-        setMachineOpen(prevState => !prevState);
-    };
-
-    // Touch events for time machine
-    const handleTouchStart = (e) => {
-        const touch = e.touches[0];
-        setStartPosition({ x: touch.clientX, y: touch.clientY });
-        setIsDragging(false);
-    };
-
-    const handleTouchMove = (e) => {
-        const touch = e.touches[0];
-        
-        // Calculate delta for better performance
-        const deltaX = touch.clientX - startPosition.x;
-        const deltaY = touch.clientY - startPosition.y;
-
-        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-        setIsDragging(true);
-
-        setPosition(prevPos => ({
-            x: prevPos.x + deltaX,
-            y: prevPos.y + deltaY,
-        }));
-
-        setStartPosition({ x: touch.clientX, y: touch.clientY });
-        }
-    };
-
-    const handleTouchEnd = (e) => {
-        if (!isDragging) {
-        toggleTimeMachine();
-        }
-    };
 
 
     //TODO: trova un modo per sincronizzare eventi, attività note ecc ecc con time machine
@@ -183,69 +109,6 @@ const TimeMachine = () => {
         }
     }
     */
-
-    // Function to set the time
-    const handleSetTime = async (e) => {
-        e.preventDefault();
-
-        if (!inputDate || !inputTime) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Please enter a date and time',
-            });
-            return;
-        }
-
-        try {
-            const response = await fetch("http://localhost:8000/api/time/set-time", {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ date: inputDate, time: inputTime }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Time set successfully:', data);
-                setCurrentDate(inputDate);
-                setCurrentTime(inputTime);
-                setMachineOpen(false);
-            } else {
-                console.error('Error setting time');
-            }
-        } catch (error) {
-            console.error('Error setting time:', error);
-        }
-    };
-
-    // Function to reset the time
-    const handleResetTime = async () => {
-        try {
-            const response = await fetch("http://localhost:8000/api/time/reset-time", {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Time reset successfully:', data);
-                setCurrentDate(data.timeEntry.date);
-                setCurrentTime(data.timeEntry.time);
-                setInputDate('');
-                setInputTime('');
-            } else {
-                console.error('Error resetting time');
-            }
-        } catch (error) {
-            console.error('Error resetting time:', error);
-        }
-    };
 
     return (
         <>
