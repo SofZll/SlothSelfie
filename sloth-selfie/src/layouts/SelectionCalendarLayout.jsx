@@ -8,7 +8,7 @@ const SelectionCalendarLayout = ({selection, setSelection, setPopUp, children}) 
     const isDesktop = useIsDesktop();
         
     return (
-        <div className="d-flex flex-column w-100">
+        <div className="d-flex flex-column w-100 h-100">
 
             <div className="row d-flex justify-content-between my-3">
                 <div className="col fs-5">
@@ -32,7 +32,7 @@ const SelectionCalendarLayout = ({selection, setSelection, setPopUp, children}) 
                 </div>
             </div>
 
-            <main className="d-flex w-100 justify-content-center">{children}</main>
+            <main className="d-flex justify-content-center form-popup">{children}</main>
 
             
 
