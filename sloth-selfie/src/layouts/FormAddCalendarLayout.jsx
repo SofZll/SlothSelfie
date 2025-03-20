@@ -5,7 +5,7 @@ import { changeReceivers } from './globalFunctions';
 
 const FormAddCalendarLayout = ({ selection, children, data, setData }) => {
     return (
-        <form className='d-flex flex-column w-100'>
+        <form className='d-flex flex-column w-100 h-100'>
             <div className='row'>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>

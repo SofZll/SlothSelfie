@@ -6,13 +6,13 @@ import FormEvent from './FormEvent';
 import FormNoAvailability from './FormNoAvailability';
 import Button from '../../components/Button';
 
-const FormCalendar = () => {
+const FormCalendar = ({ setPopUp }) => {
 
     const [selection, setSelection] = useState('...');
     const [edit, setEdit] = useState(false);
     
     return (
-        <SelectionCalendarLayout selection={selection} setSelection={setSelection}>
+        <SelectionCalendarLayout selection={selection} setSelection={setSelection} setPopUp={setPopUp}>
             {selection === '...' && (
                 <div className='d-flex flex-column col-11 col-lg-7 align-items-center py-3'>
                     <Button text='Activity' alt='new activity' onClick={() => setSelection('activity')} />

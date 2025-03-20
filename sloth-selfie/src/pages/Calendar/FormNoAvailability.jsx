@@ -46,8 +46,8 @@ const FormNoAvailability = (props) => {
                 )}
             </div>
 
-            <div className='row py-2 d-flex align-items-center'>
-                <div className='col col-auto form-check form-switch'>
+            <div className='row py-2'>
+                <div className='col col-auto form-check form-switch ms-2'>
                     <input className='form-check-input' type='checkbox' id='days'
                         checked={!availability.days}
                         onChange={(e) => setAvailability({ ...availability, days: !e.target.checked })} />
