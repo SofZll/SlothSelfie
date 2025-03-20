@@ -40,6 +40,7 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                         <Route path='/calendar' element={<Calendar />} />
                                         <Route path='/home' element={<Home />} />
                                         <Route path='/home/settings' element={<Home settings={true} />} />
+                                        {/*<Route path='/home/timemachine' element={<Home machineOpen={true} />} />*/}
                                         <Route path='/profile' element={<Profile profileData={profileData}/>} />
                                     </Routes>
                                     {/*
