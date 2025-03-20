@@ -37,7 +37,6 @@ const FormEvent = (props) => {
 
     return (
         <form className='d-flex flex-column w-100' onSubmit={() => handleSubmit()}>
-
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -105,7 +104,7 @@ const FormEvent = (props) => {
                         
                     </div>
 
-                    <div className='col col-auto form-check form-switch'>
+                    <div className='col col-6 form-check form-switch'>
                         <input
                             className='form-check-input' type='checkbox' id='isPreciseTime'
                             checked={event.isPreciseTime}

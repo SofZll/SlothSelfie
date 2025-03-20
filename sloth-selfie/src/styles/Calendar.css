@@ -2,3 +2,25 @@
 .btn-plus {
   bottom: 11vh;
 }
+
+.pop-up {
+  z-index: 5;
+  max-height: 75vh;
+}
+
+.form-popup {
+  max-height: 63vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media screen and (min-width: 768px) {
+  .pop-up {
+    max-height: none;
+  }
+
+  .form-popup {
+    max-height: none;
+  }
+  
+}

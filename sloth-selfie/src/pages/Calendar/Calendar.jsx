@@ -3,7 +3,6 @@ import { useIsDesktop } from '../../utils/utils';
 
 import MainLayout from '../../layouts/MainLayout';
 import Planner from './Planner';
-import ScrollListLayout from '../../components/ScrollList';
 import FormCalendar from './FormCalendar';
 
 import '../../styles/Calendar.css';
@@ -20,9 +19,6 @@ const Calendar = () => {
     const isDesktop = useIsDesktop();
     const [isAdding, setIsAdding] = useState(false);
 
-    const [activities, setActivities] = useState([]);
-    const [events, setEvents] = useState([]);
-
     return (
         <MainLayout>
             <ActivityProvider>
@@ -32,10 +28,6 @@ const Calendar = () => {
 
                             <div className='d-flex flex-column flex-grow-1 justify-content-center align-items-center'>
                                 <Planner />
-
-                                {!isDesktop && (
-                                    <ScrollListLayout CardList={activities} smallView={false} />
-                                )}
                             </div>
                             
                             {isDesktop ? (
@@ -44,13 +36,13 @@ const Calendar = () => {
                                 </div>
                             ) : (
                                 <>
-                                    <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-plus' alt='add'>
+                                    <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-plus' alt='add' onClick={() => setIsAdding(!isAdding)}>
                                         <Plus size={36} color="#fafafa" strokeWidth={1.75} />
                                     </button>
 
                                     {isAdding && (
-                                        <div className='d-flex flex-column w-50 h-50 bg-white rounded p-3 position-fixed top-50 start-50 translate-middle'>
-                                            <FormCalendar />
+                                        <div className='d-flex flex-column w-75 bg-white rounded p-3 position-fixed top-50 start-50 translate-middle pop-up shadow-lg'>
+                                            <FormCalendar setPopUp={setIsAdding}/>
                                         </div>
                                     )}
                                 </>
