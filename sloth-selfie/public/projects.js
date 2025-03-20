@@ -9,11 +9,8 @@
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
-//aggiusta start e complete, finchè non clicco start output deve essere disattivato
-
-//Reject output va attivato solo quando esiste un output e l'attività è completata
-
-//TODO: se lo user non è l'owner del progetto, non deve visualizzare il bottone per l'edit del progetto
+//ottimizza codici per attivare/disattivare bottoni + condizioni in fetch forse si può fare meglio
+//Aggiusta bottone abbandon, si devono disattivare gli input e gli output sia per bottone sia con fetch, se riaggiungo membri si riattiva input e bottoni vari
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 
@@ -73,8 +70,12 @@ async function loadProjects() {
             li.className = "list-group-item";
             li.innerHTML = `
                 <strong>${project.title}</strong> - Owner: ${project.owner.username} - Members: ${project.members.map(m => m.username).join(", ")}<br>
-                <button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
-                <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>
+                 ${
+                    project.owner.username === userLogged // Only the owner can edit or delete the project
+                    ? `<button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
+                       <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>` 
+                    : ''
+                }
                 <button class="btn btn-warning btn-sm ml-2" onclick="handleActivities('${project._id}')">Handle Activities</button>
                 <button class="btn btn-outline-primary btn-sm view-list" onclick="viewAsList('${project._id}')">View as List</button>
                 <button class="btn btn-outline-secondary btn-sm view-gantt" onclick="viewAsGantt('${project._id}')">View as Gantt</button>
@@ -527,27 +528,10 @@ function fillActivityFields(activityDiv, activity, projectActors, parentId, pare
 
 //function to fill the form and edit a project
 async function editProject(projectId) {
-
     try {
-        // Get the logged user
-        const userLogged = await getLoggedUser();
-        
-        if (!userLogged) {
-            alert("No user is logged in!");
-            return;
-        }
-        
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
         const project = await response.json();
 
-        // check if the logged user is the owner of the project
-        const owner = project.owner.username;
-
-        if (owner !== userLogged) {
-            alert("You can't edit this project, you are not the owner.");
-            return; // exit the function if the user is not the owner
-        }
-        
         // fill the form with the project data
         
         //adding a note for the user
