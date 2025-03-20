@@ -15,4 +15,16 @@ const useIsMobileLandscape = () => {
     return isMobileWidth || (isLandscapeHeight && isLandscapeWidth);
 }
 
-export { useIsDesktop, useIsMobileLandscape };
+const generateTimeOptions = () => {
+    const options = [];
+    for (let hour = 0; hour < 24; hour++) {
+    for (let minutes of [0, 15, 30, 45]) {
+        const formattedHour = hour < 10 ? `0${hour}` : hour;
+        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+        options.push({ value: `${formattedHour}:${formattedMinutes}`, label: `${formattedHour}:${formattedMinutes}` });
+    }
+    }
+    return options;
+};
+
+export { useIsDesktop, useIsMobileLandscape, generateTimeOptions };
