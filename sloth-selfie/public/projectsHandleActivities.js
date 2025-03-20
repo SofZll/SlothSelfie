@@ -65,15 +65,20 @@ async function handleActivities(projectId) {
                     asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
                 }
                 if (isAbandoned || isAbandonedNoParticipants) {
-                    asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
+                    if (activity.status !== "Abandoned") {
+                        asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
+                    }
                 }
 
-                //if members are re-added, the activity will be Not_Activatable in case of no input, and Activatable otherwise
+                //if members are re-added, and the activity is not overdue since last 7 days, the activity will be Not_Activatable in case of no input, and Activatable otherwise
                 if (activity.sharedWith.length > 0 && activity.status === "Abandoned") {
-                    if (!activity.input) {
-                        asyncOperations.push(updateActivityStatus(activity._id, "Not_Activatable"));
-                    } else {
-                        asyncOperations.push(activatableActivity(activity._id, "Activatable"));
+                    console.log("Activity shared with members again", activity.sharedWith);
+                    if(!isAbandoned){
+                        if (!activity.input  && activity.status !== "Not_Activatable") {
+                            asyncOperations.push(updateActivityStatus(activity._id, "Not_Activatable"));
+                        } else if (activity.input && activity.status !== "Activatable")  {
+                            asyncOperations.push(activatableActivity(activity._id, "Activatable"));
+                        }
                     }
                 }
 
@@ -89,9 +94,9 @@ async function handleActivities(projectId) {
                 let inputSelectDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input ? 'disabled' : ''; // Disable the select
                 let inputInsertDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input ? 'disabled' : ''; // Disable the button
 
-                let outputDisabled = activity.output ? 'disabled' : ''; // Check if output already exists
-                let outputSelectDisabled = activity.output ? 'disabled' : ''; // Disable the select if output exists
-                let outputInsertDisabled = activity.output ? 'disabled' : ''; // Disable the button if output exists
+                let outputDisabled = activity.output || activity.status !== "Active" ? 'disabled' : ''; // Check if output already exists or if we are not in the "Active" case
+                let outputSelectDisabled = activity.output || activity.status !== "Active" ? 'disabled' : ''; // Disable the select if output exists
+                let outputInsertDisabled = activity.output || activity.status !== "Active" ? 'disabled' : ''; // Disable the button if output exists
 
                 content += `
                     <li class="list-group-item">
@@ -119,8 +124,10 @@ async function handleActivities(projectId) {
                         `;
                     // shows the buttons for reject output only if the user is the owner
                     if (isOwner) {
+                        // Disable the button if the activity is not Completed
+                        let rejectDisabled = activity.status !== "Completed" ? 'disabled' : '';
                         content += `
-                            <button class="btn btn-outline-danger btn-sm" id="reactivate-${activity._id}" onclick="reactivateActivity('${activity._id}', 'Reactivated')">Reject output</button>
+                            <button class="btn btn-outline-danger btn-sm" id="reactivate-${activity._id}" onclick="reactivateActivity('${activity._id}', 'Reactivated')" ${rejectDisabled}>Reject output</button>
                          `;
                          
                          //div for the buttons for the owner to decide if the next activities should be delayed or contracted in case of delay
@@ -128,12 +135,15 @@ async function handleActivities(projectId) {
                          <div id="activity-${activity._id}-buttons-container"></div>
                         `;
                     }
+
+                    let abandonDisabled = !activity.sharedWith.some(user => user.username === userLogged) ? 'disabled' : '';
+
                     content += `
                         <p id="startDate-${activity._id}">Start Date: ${new Date(activity.startDate).toLocaleDateString()}<p>
                         <p id="deadline-${activity._id}">Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
                         <button class="btn btn-success btn-sm" id="start-${activity._id}" onclick="startActivity('${activity._id}', 'Active')" ${!activity.input ? 'disabled' : ''}>Start</button>
                         <button class="btn btn-primary btn-sm" id="complete-${activity._id}" onclick="completeActivity('${activity._id}', 'Completed')" ${!activity.output ? 'disabled' : ''}>Complete</button>
-                        <button class="btn btn-danger btn-sm" id="abandon-${activity._id}" onclick="abandonActivity('${activity._id}')">Abandon</button>
+                        <button class="btn btn-danger btn-sm" id="abandon-${activity._id}" onclick="abandonActivity('${activity._id}')" ${abandonDisabled}>Abandon</button>
                     </li>
                     `;                
             }
@@ -456,6 +466,25 @@ async function startActivity(activityId, newStatus) {
             startButton.disabled = true;
             startButton.classList.add('disabled');
         }
+
+        //the output field is enabled
+        let outputField = document.getElementById(`output-${activityId}`);
+        if (outputField) {
+            outputField.disabled = false;
+        }
+
+        //the output select is enabled
+        let outputSelect = document.getElementById(`output-type-${activityId}`);
+        if (outputSelect) {
+            outputSelect.disabled = false;
+        }
+
+        //the insert output button is enabled
+        let insertOutputButton = document.getElementById(`insert-output-${activityId}`);
+        if(insertOutputButton){
+            insertOutputButton.disabled = false;
+            insertOutputButton.classList.remove('disabled');
+        }
     }
     catch (error) {
         console.error("Error starting activity:", error);
@@ -485,6 +514,13 @@ async function completeActivity(activityId, newStatus) {
                 button.classList.add('disabled');
             }
         });
+
+        //enable the reject output button
+        let rejectButton = document.getElementById(`reactivate-${activityId}`);
+        if (rejectButton) {
+            rejectButton.disabled = false;
+            rejectButton.classList.remove('disabled');
+        }
 
         // If the activity has dependencies, update them:
         await checkOptionsForCompleteActivityDep(activityId, true);
@@ -640,6 +676,13 @@ async function reactivateActivity(activityId, newStatus) {
         let outputField = document.getElementById(`output-${activityId}`);
         if (outputField) {
             outputField.disabled = false;
+        }
+
+        //disable the reject output button
+        let rejectButton = document.getElementById(`reactivate-${activityId}`);
+        if (rejectButton) {
+            rejectButton.disabled = true;
+            rejectButton.classList.add('disabled');
         }
 
         //hides the two buttons for the owner to decide if present
@@ -817,29 +860,14 @@ async function updateOutputNote(activityId) {
         if (response.ok) {
             // After updating the output note, disable the output fields and the save button
 
-            //disable the output field
-            let outputField = document.getElementById(`output-${activityId}`);
-            if (outputField) {
-                outputField.disabled = true;
-            }
-            //disable the output select
-            let outputSelect = document.getElementById(`output-type-${activityId}`);
-            if (outputSelect) {
-                outputSelect.disabled = true;
-            }
-            //disable the save button
-            let saveOutputButton = document.getElementById(`save-output-${activityId}`);
-            if (saveOutputButton) {
-                saveOutputButton.disabled = true;
-                saveOutputButton.classList.add("disabled");
-            }
+            toggleElements([
+                `output-${activityId}`,
+                `output-type-${activityId}`,
+                `save-output-${activityId}`
+                ], true);
 
-            //unable the complete button
-            let completeButton = document.getElementById(`complete-${activityId}`);
-            if (completeButton) {
-                completeButton.disabled = false;
-                completeButton.classList.remove('disabled');
-            }
+            toggleElements([`complete-${activityId}`], false);
+
         }
 
     } catch (error) {
@@ -901,25 +929,43 @@ async function abandonActivity(activityId) {
             })
         });
 
-        // if there are no more users assigned, update the status to Abandoned and disable the abandon button, and the reject output button
+        //send an alert to the logged user
+        alert("You have abandoned this activity.");
+
+        //disable the abandon button for the user
+        toggleElements([`abandon-${activityId}`], true);
+
+        // if there are no more users assigned, update the status to Abandoned and disable the abandon button, the reject output button, the input/output elements
         if (updatedSharedWith.length === 0) {
             await updateActivityStatus(activityId, "Abandoned");
 
-            let abandonButton = document.getElementById(`abandon-${activityId}`);
-            if (abandonButton) {
-                abandonButton.disabled = true;
-                abandonButton.classList.add('disabled');
-            }
+            toggleElements([
+                `abandon-${activityId}`,
+                `reactivate-${activityId}`,
+                `input-${activityId}`,
+                `output-${activityId}`,
+                `input-type-${activityId}`,
+                `output-type-${activityId}`,
+                `insert-input-${activityId}`
+            ], true);
 
-            let reactivateButton = document.getElementById(`reactivate-${activityId}`);
-            if (reactivateButton) {
-                reactivateButton.disabled = true;
-                reactivateButton.classList.add('disabled');
-            }
         }
     } catch (error) {
         console.error("Error abandoning activity:", error);
     }
+}
+
+// Function to disable/enable elements by their ids: true if we disable, false if we enable
+function toggleElements(elementIds, disable = true, toggleClass = true) {
+    elementIds.forEach(id => {
+        let element = document.getElementById(id);
+        if (element) {
+            element.disabled = disable;
+            if (toggleClass) {
+                element.classList.toggle("disabled", disable);
+            }
+        }
+    });
 }
 
 // listener for the close button of handle activities
