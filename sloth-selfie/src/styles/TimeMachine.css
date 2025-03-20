@@ -88,28 +88,22 @@
 
 .btn-submit {
     background-color: #f7dc6f;
-    border: none;
 }
 
 .btn-submit:hover,
 .btn-submit:active,
 .btn-submit:focus {
-    background-color: #f7dc6f !important;
-    outline: none !important;
-    border: none !important;
+    background-color: #f3d24e !important;
 }
 
 .btn-reset {
     color: #909497;
-    border: none;
 }
 
 .btn-reset:hover,
 .btn-reset:active,
 .btn-reset:focus {
     color: #000 !important;
-    outline: none !important;
-    border: none !important;
 }
 
 @keyframes zoomIn {

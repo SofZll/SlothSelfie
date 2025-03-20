@@ -71,9 +71,9 @@ const TimeMachinePopup = () => {
                                     <input type='time' className='form-control' id='time' value={inputTime} onChange={(e) => setInputTime(e.target.value)} required />
                                 </div>
                             </div>
-                            <button type='submit' className='btn btn-submit d-block mx-auto mt-2'>Go back in time!</button>
+                            <button type='submit' className='btn btn-submit btn-clean d-block mx-auto mt-2'>Go back in time!</button>
                         </form>
-                        <button onClick={handleResetTime} className='btn btn-reset d-block mx-auto mt-2'>Reset time</button>
+                        <button onClick={handleResetTime} className='btn btn-reset btn-clean d-block mx-auto mt-2'>Reset time</button>
                     </div>
                 </div>
             </div>
