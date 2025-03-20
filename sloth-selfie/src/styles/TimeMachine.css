@@ -31,7 +31,7 @@
 /* time machine button */
 
 .time-machine {
-    z-index: 1000;
+    z-index: 1056;
 }
 
 .time-machine p {
@@ -39,7 +39,7 @@
     margin: 0;
     color: #fff;
     font-weight: bold;
-    text-shadow: 1px 1px 2px black;
+    /*text-shadow: 1px 1px 2px black;*/
 }
 
 .time-machine-button {
@@ -85,6 +85,32 @@
 
 .modal-content {
     animation: zoomIn 0.3s forwards;
+}
+
+.btn-submit {
+    background-color: #f7dc6f;
+    border: none;
+}
+
+.btn-submit:hover,
+.btn-submit:active,
+.btn-submit:focus {
+    background-color: #f7dc6f !important;
+    outline: none !important;
+    border: none !important;
+}
+
+.btn-reset {
+    color: #909497;
+    border: none;
+}
+
+.btn-reset:hover,
+.btn-reset:active,
+.btn-reset:focus {
+    color: #000 !important;
+    outline: none !important;
+    border: none !important;
 }
 
 @keyframes zoomIn {

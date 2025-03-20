@@ -3,6 +3,8 @@ import Swal from 'sweetalert2';
 import { apiService } from '../services/apiService';
 import { TimeMachineContext } from '../contexts/TimeMachineContext';
 
+// TODO: il resto delle funzioni
+
 const TimeMachinePopup = () => {
     const { setMachineOpen, currentTime, setCurrentTime, currentDate, setCurrentDate } = useContext(TimeMachineContext);
 
@@ -43,40 +45,35 @@ const TimeMachinePopup = () => {
     }
 
     return (
-        <div className="modal fade show time-machine-popup">
-            <div className="modal-dialog modal-dialog-centered custom-modal">
-                <div className="modal-content">
-                    <div className="modal-header">
-                        <h5 className="modal-title">Time Machine</h5>
-                        <button type="button" className="close" onClick={() => setMachineOpen(false)}>
+        <div className='modal fade show time-machine-popup'>
+            <div className='modal-dialog modal-dialog-centered custom-modal'>
+                <div className='modal-content'>
+                    <div className='modal-header'>
+                        <h5 className='modal-title'>Time Machine</h5>
+                        <button type='button' className='close' onClick={() => setMachineOpen(false)}>
                             <span>&times;</span>
                         </button>
                     </div>
-                    <div className="modal-body">
+                    <div className='modal-body col-12'>
                         <p>Right now the time is set on:</p>
-                        <div className="d-flex justify-content-center gap-3 mb-3">
+                        <div className='d-flex justify-content-center gap-3 mb-3'>
                             <span>Date: {currentDate}</span>
                             <span>Time: {currentTime}</span>
                         </div>
                         <form onSubmit={handleSetTime}>
-                            <div className="form-group">
-                                <label htmlFor="date">Enter a date:</label>
-                                <input type="date" className="form-control" id="date" value={inputDate} onChange={(e) => setInputDate(e.target.value)} required />
+                            <div className='row'>
+                                <div className='form-group col-6'>
+                                    <label htmlFor='date'>Enter a date:</label>
+                                    <input type='date' className='form-control' id='date' value={inputDate} onChange={(e) => setInputDate(e.target.value)} required />
+                                </div>
+                                <div className='form-group col-6'>
+                                    <label htmlFor='time'>Enter a time:</label>
+                                    <input type='time' className='form-control' id='time' value={inputTime} onChange={(e) => setInputTime(e.target.value)} required />
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="time">Enter a time:</label>
-                                <input
-                                    type="time"
-                                    className="form-control"
-                                    id="time"
-                                    value={inputTime}
-                                    onChange={(e) => setInputTime(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <button type="submit" className="btn btn-primary mt-3">Go back in time!</button>
+                            <button type='submit' className='btn btn-submit d-block mx-auto mt-2'>Go back in time!</button>
                         </form>
-                        <button onClick={handleResetTime} className="btn btn-secondary mt-2">Reset time</button>
+                        <button onClick={handleResetTime} className='btn btn-reset d-block mx-auto mt-2'>Reset time</button>
                     </div>
                 </div>
             </div>

@@ -4,12 +4,12 @@ import { TimeMachineContext } from '../contexts/TimeMachineContext';
 import TimeMachinePopup from './TimeMachinePopup';
 
 const TimeMachineButton = () => {
-    const { machineOpen, setMachineOpen, currentTime, setCurrentTime, currentDate, setCurrentDate } = useContext(TimeMachineContext);
+    const { machineOpen, setMachineOpen, currentTime, currentDate } = useContext(TimeMachineContext);
 
     return (
         <>
             <div className='time-machine'>
-                <button className='time-machine-button' onClick={() => setMachineOpen(true)}>
+                <button className='time-machine-button' onClick={() => setMachineOpen(prevState => !prevState)}>
                     <p className='time'>{currentTime}</p>
                     <p className='date'>{currentDate}</p>
                 </button>
