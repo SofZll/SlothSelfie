@@ -62,7 +62,7 @@ const FormActivity = (props) => {
                     <input className='form-check-input' type='checkbox' role='switch' id='done'
                     value={activity.done}
                     onChange={(e) => setActivity({...activity, ['done']: e.target.checked})} />
-                    <label className='form-check-label' htmlFor='done'>Compleded</label>
+                    <label className='form-check-label' htmlFor='done'>Completed</label>
                 </div>
             </div>
             
