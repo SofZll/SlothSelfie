@@ -28,6 +28,9 @@ async function handleActivities(projectId) {
             activities = activities.filter(activity => activity.sharedWith.some(user => user.username === userLogged));
         }
 
+        // Async operations to resolve
+        let asyncOperations = [];
+
         // Show the activities
         let activityContainer = document.getElementById("activity-container");
         let closeBtn = document.getElementById("closeActivityViewBtn");
@@ -38,11 +41,11 @@ async function handleActivities(projectId) {
         } else {
             content += `<ul class="list-group">`;
             
-            activities.forEach(activity => {
+            for (const activity of activities) {
 
                 //if the activity is completed, we check if it has dependencies and show the buttons for the owner to decide in case of delay              
                 if (activity.status === "Completed") {
-                    checkOptionsForCompleteActivityDep(activity._id, false);
+                    asyncOperations.push(checkOptionsForCompleteActivityDep(activity._id, false));
                 }
 
                 // Check if the activity has a deadline and if it is Overdue or Abandoned
@@ -59,24 +62,24 @@ async function handleActivities(projectId) {
                 }
 
                 if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
-                    updateActivityStatus(activity._id, "Overdue");
+                    asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
                 }
                 if (isAbandoned || isAbandonedNoParticipants) {
-                    updateActivityStatus(activity._id, "Abandoned");
+                    asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
                 }
 
                 //if members are re-added, the activity will be Not_Activatable in case of no input, and Activatable otherwise
                 if (activity.sharedWith.length > 0 && activity.status === "Abandoned") {
                     if (!activity.input) {
-                        updateActivityStatus(activity._id, "Not_Activatable");
+                        asyncOperations.push(updateActivityStatus(activity._id, "Not_Activatable"));
                     } else {
-                        activatableActivity(activity._id, "Activatable");
+                        asyncOperations.push(activatableActivity(activity._id, "Activatable"));
                     }
                 }
 
                 //if the activity is reactivated, the output note can be updated and the output field is enabled, we also show the save button and adjust dependencies input
                 if (activity.status === "Reactivated") {
-                    reactivateActivity(activity._id, "Reactivated");
+                    asyncOperations.push(reactivateActivity(activity._id, "Reactivated"));
                 }
 
                 let star = activity.milestone ? "*" : ""; // milestone
@@ -126,13 +129,14 @@ async function handleActivities(projectId) {
                         `;
                     }
                     content += `
-                        <p>Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
+                        <p id="startDate-${activity._id}">Start Date: ${new Date(activity.startDate).toLocaleDateString()}<p>
+                        <p id="deadline-${activity._id}">Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
                         <button class="btn btn-success btn-sm" id="start-${activity._id}" onclick="startActivity('${activity._id}', 'Active')" ${!activity.input ? 'disabled' : ''}>Start</button>
                         <button class="btn btn-primary btn-sm" id="complete-${activity._id}" onclick="completeActivity('${activity._id}', 'Completed')" ${!activity.output ? 'disabled' : ''}>Complete</button>
                         <button class="btn btn-danger btn-sm" id="abandon-${activity._id}" onclick="abandonActivity('${activity._id}')">Abandon</button>
                     </li>
                     `;                
-            });
+            }
             content += `</ul>`;
         }
 
@@ -140,6 +144,9 @@ async function handleActivities(projectId) {
         activityContainer.innerHTML = content;
         activityContainer.style.display = "block";
         closeBtn.style.display = "block";
+
+        // Wait for all async operations to finish
+        await Promise.all(asyncOperations);
 
         //Function to disable/enable the buttons depending on the status of the activity
         activities.forEach(activity => {
@@ -526,7 +533,8 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
                 if (isOverdue) {
                     // If it is a milestone, contract the schedule first
                     if (activity.milestone) {
-                        await contractActivitySchedule(activityId, dependentActivitiesIds, delay);
+                        //await contractActivitySchedule(activityId, dependentActivitiesIds, delay);
+                        await adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, "contract");
                         await updateDependentActivities(activityId, activity);
                     } else {
                         // We ask the owner if the activity should be delayed or contracted, until the owner decides, the dependencies are not activated
@@ -541,7 +549,8 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
                 if (hasBlockedDependencies) {
                      if(isOverdue){
                         if(activity.milestone){
-                            await contractActivitySchedule(activityId, blockedDependenciesIds, delay);
+                            //await contractActivitySchedule(activityId, blockedDependenciesIds, delay);
+                            await adjustOrContractActivitySchedule(activityId, blockedDependenciesIds, delay, "contract");
                             await updateDependentActivities(activityId, activity, true);
                         }else{
                             createAndShowDependencyButtons(activityId, blockedDependenciesIds, delay, true);
@@ -650,12 +659,12 @@ async function reactivateActivity(activityId, newStatus) {
 async function handleOwnerDecision(activityId, decision, dependentActivitiesIds, delay, onlyBlocked = false) {
     try {
         if (decision === "delay") {
-            await adjustActivitySchedule(activityId, dependentActivitiesIds, delay);
+            //await adjustActivitySchedule(activityId, dependentActivitiesIds, delay);
+            await adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, decision);
         } else if (decision === "contract") {
-            await contractActivitySchedule(activityId, dependentActivitiesIds, delay);
+            //await contractActivitySchedule(activityId, dependentActivitiesIds, delay);
+            await adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, decision);
         }
-
-        console.log(`Owner has decided, now we update the dependent activities`);
         // Update the dependent activities
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
         const activity = await response.json();
@@ -739,6 +748,20 @@ async function updateDependentActivities(activityId, activity, onlyBlocked = fal
     }
 }
 
+// Function to adjust or contract the schedule of an activity
+async function adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, action) {
+    await fetch(`http://localhost:8000/api/activity/${activityId}/schedule`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dependentActivitiesIds, delay, action }) // action is "contract" or "delay"
+    });
+
+    // Update the dependent activities with the new startDate and/or deadline
+    adjustDatesOfDependentActivities(dependentActivitiesIds);
+}
+
+/* */
+/*
 //Function to adjust the schedule of an activity
 async function adjustActivitySchedule(activityId, dependentActivitiesIds, delay) {
     await fetch(`http://localhost:8000/api/activity/${activityId}/adjustSchedule`, {
@@ -746,16 +769,57 @@ async function adjustActivitySchedule(activityId, dependentActivitiesIds, delay)
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dependentActivitiesIds, delay })
     });
-}
 
-//Function to contract the schedule of an activity   //TODO
+    // Update the dependent activities with the new deadline
+    adjustDatesOfDependentActivities(dependentActivitiesIds);
+}
+*/
+/* */
+/*
+//Function to contract the schedule of an activity
 async function contractActivitySchedule(activityId, dependentActivitiesIds, delay) {
-    console.log(`Contracting schedule for ${activityId} with delay of ${delay} days`);
     await fetch(`http://localhost:8000/api/activity/${activityId}/contractSchedule`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dependentActivitiesIds, delay })
     });
+
+    // Update the dependent activities with the new deadline
+    adjustDatesOfDependentActivities(dependentActivitiesIds);
+}
+*/
+
+//Function to adjust the deadline of the dependent activities in the DOM
+async function adjustDatesOfDependentActivities(dependentActivitiesIds) {
+    //convert the dependentActivitiesIds to an array of ObjectIds
+    const activityIdsArray = Array.isArray(dependentActivitiesIds)
+    ? dependentActivitiesIds
+    : dependentActivitiesIds.split(',').map(id => id.trim());
+
+    for (const depId of activityIdsArray) {
+        try {
+            // Get the activity
+            let response = await fetch(`http://localhost:8000/api/activity/${depId}`);
+            let activity = await response.json();
+            
+            let newStartDate = new Date(activity.startDate);
+            let newDeadline = new Date(activity.deadline);
+
+            // Update the startDate in the DOM
+            let startDateElement = document.getElementById(`startDate-${depId}`);
+            if (startDateElement) {
+                startDateElement.innerText = `Start Date: ${newStartDate.toLocaleDateString()}`;
+            }
+
+            // Update the deadline in the DOM
+            let deadlineElement = document.getElementById(`deadline-${depId}`);
+            if (deadlineElement) {
+                deadlineElement.innerText = `Deadline: ${newDeadline.toLocaleDateString()}`;
+            }
+        } catch (error) {
+            console.error(`Error updating the activity ${depId}:`, error);
+        }
+    }
 }
 
 // Function to update the output note if the activity was reactivated and output was rejected

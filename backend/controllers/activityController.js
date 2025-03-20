@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const Activity = require('../models/activityModel');
 const User = require('../models/userModel');
 const Note = require('../models/noteModel');
@@ -306,15 +305,95 @@ async function updateActivityStatus(req, res) {
     }
 }
 
+/*  TODO: GENERALIZZA IN UNA UNICA QUESTE DUE SOTTO*/
+//Function to adjust or contract the schedule of an activity, options are 'delay' or 'contract'
+//if delay, we adjust both startDate and deadline (shift)
+//if contract, we contract only startDate (reduce), deadline remains the same
+//we also update the events connected to startDate and/or deadline
+async function adjustOrContractActivitySchedule(req, res) {
+    try {
+        const { dependentActivitiesIds, delay, action } = req.body;
+
+        // Convert the delay in an integer number
+        const delayDays = parseInt(delay, 10);
+
+        // Convert the dependentActivitiesIds to an array of ObjectIds
+        const activityIdsArray = Array.isArray(dependentActivitiesIds)
+            ? dependentActivitiesIds
+            : dependentActivitiesIds.split(',').map(id => id.trim());
+
+        // Find the dependent activities and populate the events
+        const activities = await Activity.find({ _id: { $in: activityIdsArray } }).populate("events");
+
+        const updatePromises = activities.map(async (activity) => {
+            console.log("Activity startDate and deadline:", activity.startDate, activity.deadline);
+
+            const originalStartDate = new Date(activity.startDate);
+            const originalDeadline = new Date(activity.deadline);
+
+            if (action === 'delay') {
+                // Adjust both startDate and deadline (shift)
+                const newStartDate = new Date(originalStartDate);
+                newStartDate.setUTCDate(newStartDate.getUTCDate() + delayDays);
+
+                const newDeadline = new Date(originalDeadline);
+                newDeadline.setUTCDate(newDeadline.getUTCDate() + delayDays);
+
+                activity.startDate = newStartDate;
+                activity.deadline = newDeadline;
+                console.log("Activity adjusted startDate and deadline:", activity.startDate, activity.deadline);
+            } else if (action === 'contract') {
+                // Contract only startDate (reduce), deadline remains the same
+                const originalDuration = Math.ceil((originalDeadline - originalStartDate) / (1000 * 60 * 60 * 24));
+                let newDuration = originalDuration - delayDays;
+
+                if (newDuration <= 0) {
+                    activity.startDate = new Date(originalDeadline);
+                } else {
+                    let newStartDate = new Date(originalDeadline);
+                    newStartDate.setUTCDate(newStartDate.getUTCDate() - newDuration);
+                    activity.startDate = newStartDate;
+                }
+                console.log("Contracted activity startDate:", activity.startDate, "Deadline:", activity.deadline);
+            }
+
+            // Update the events connected to startDate and/or deadline
+            const eventUpdates = activity.events.map(async (eventId, index) => {
+                const event = await Event.findById(eventId);
+                if (event) {
+                    if (index === 0) {
+                        event.date = activity.startDate;
+                    } else if (index === 1 && action === 'delay') {
+                        event.date = activity.deadline;
+                    }
+                    await event.save();
+                }
+            });
+
+            await Promise.all(eventUpdates);
+            return activity.save();
+        });
+
+        await Promise.all(updatePromises);
+
+        res.status(200).json({ message: "Schedule adjusted/contracted successfully" });
+    }
+    catch (error) {
+        console.error("Error adjusting/contracting activity schedule:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
+/* */
 //Function to adjust the schedule of an activity
 async function adjustActivitySchedule(req, res) {
     try {
         const { dependentActivitiesIds, delay } = req.body;
 
-        //we convert the delay in a number
-        const delayDays = parseInt(delay, 10);
-
         // Update the startDate and deadline of the dependentActivities by adding the delay (shift), we update also the events connected to each startDate and deadline
+
+        //we convert the delay in an integer number
+        const delayDays = parseInt(delay, 10);
         
         //convert the dependentActivitiesIds to an array of ObjectIds
         const activityIdsArray = Array.isArray(dependentActivitiesIds)
@@ -369,13 +448,65 @@ async function adjustActivitySchedule(req, res) {
     }
 }
 
-//Function to contract the schedule of an activity  //TODO calcola il ritardo, contrai startDate e deadline di tutte le attività dipendenti in base al ritardo e fa update di eventi corrispondenti
+/* */
+//Function to contract the schedule of an activity
 async function contractActivitySchedule(req, res) {
     try {
         const { dependentActivitiesIds, delay } = req.body;
 
-        console.log("dependentActivities:", dependentActivitiesIds);
-        console.log("delay:", delay);
+        //Update the startDate of the dependentActivities by subtracting the delay (contraction), we update also the events connected to each startDate (deadline stays the same)
+
+        // we convert the delay in an integer number
+        const delayDays = parseInt(delay, 10);
+
+        // convert the dependentActivitiesIds to an array of ObjectIds
+        const activityIdsArray = Array.isArray(dependentActivitiesIds)
+            ? dependentActivitiesIds
+            : dependentActivitiesIds.split(',').map(id => id.trim());
+
+        // Find the dependent activities and populate the events
+        const activities = await Activity.find({ _id: { $in: activityIdsArray } }).populate("events");
+
+        const updatePromises = activities.map(async (activity) => {
+            console.log("Activity startDate and deadline:", activity.startDate, activity.deadline);
+
+            const originalStartDate = new Date(activity.startDate);
+            const originalDeadline = new Date(activity.deadline);
+
+            // Calculate the original duration of the activity
+            const originalDuration = Math.ceil((originalDeadline - originalStartDate) / (1000 * 60 * 60 * 24));
+
+            // Calculate the new startDate of the activity
+            let newDuration = originalDuration - delayDays;
+
+            // If the new startDate is <=0, we set startDate = deadline
+            if (newDuration <= 0) {
+                activity.startDate = new Date(originalDeadline);
+            } else {
+                // Else we set the new startDate
+                let newStartDate = new Date(originalDeadline);
+                newStartDate.setUTCDate(newStartDate.getUTCDate() - newDuration);
+                activity.startDate = newStartDate;
+            }
+
+            console.log("Contracted activity startDate:", activity.startDate, "Deadline:", activity.deadline);
+
+            // Update the events connected to startDate
+            const eventUpdates = activity.events.map(async (eventId, index) => {
+                const event = await Event.findById(eventId);
+                if (event) {
+                    if (index === 0) {
+                        event.date = activity.startDate;
+                    }
+                    await event.save();
+                }
+            });
+
+            await Promise.all(eventUpdates);
+            return activity.save();
+        });
+
+        await Promise.all(updatePromises);
 
         res.status(200).json({ message: "Schedule contracted successfully" });
     }
@@ -396,5 +527,6 @@ module.exports = {
     updateOutputAsNote,
     updateActivityStatus,
     adjustActivitySchedule,
-    contractActivitySchedule
+    contractActivitySchedule,
+    adjustOrContractActivitySchedule
 };
