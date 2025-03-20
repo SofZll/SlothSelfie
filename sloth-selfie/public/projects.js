@@ -11,7 +11,6 @@
 
 //gestire ritardi con contrazioni o dilatazioni lato backend:
 //TODO: gestire sincronizzazione tra attività, se una attività è in ritardo, le altre sincronizzate devono essere traslate o contratte (se milestone contrai solo)
-//getire l'aggiornamento lato frontend delle nuove deadline in handleActivities
 
 //aggiusta start e complete, finchè non clicco start output deve essere disattivato
 

@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { createActivity, getActivities, getActivity, updateActivity, deleteActivity, createInputAsNote, createOutputAsNote, updateOutputAsNote, updateActivityStatus, adjustActivitySchedule, contractActivitySchedule } = require('../controllers/activityController');
+const { createActivity, getActivities, getActivity, updateActivity, deleteActivity, createInputAsNote, createOutputAsNote, updateOutputAsNote, updateActivityStatus, adjustActivitySchedule, contractActivitySchedule, adjustOrContractActivitySchedule } = require('../controllers/activityController');
 
 const router = express.Router();
 
@@ -16,5 +16,6 @@ router.put('/activity/output/update', updateOutputAsNote);
 router.put('/activity/status/:activityId', updateActivityStatus);
 router.put('/activity/:activityId/adjustSchedule', adjustActivitySchedule);
 router.put('/activity/:activityId/contractSchedule', contractActivitySchedule);
+router.put('/activity/:activityId/schedule', adjustOrContractActivitySchedule);
 
 module.exports = router;
