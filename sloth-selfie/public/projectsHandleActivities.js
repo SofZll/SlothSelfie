@@ -533,7 +533,6 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
                 if (isOverdue) {
                     // If it is a milestone, contract the schedule first
                     if (activity.milestone) {
-                        //await contractActivitySchedule(activityId, dependentActivitiesIds, delay);
                         await adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, "contract");
                         await updateDependentActivities(activityId, activity);
                     } else {
@@ -549,7 +548,6 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
                 if (hasBlockedDependencies) {
                      if(isOverdue){
                         if(activity.milestone){
-                            //await contractActivitySchedule(activityId, blockedDependenciesIds, delay);
                             await adjustOrContractActivitySchedule(activityId, blockedDependenciesIds, delay, "contract");
                             await updateDependentActivities(activityId, activity, true);
                         }else{
@@ -658,13 +656,8 @@ async function reactivateActivity(activityId, newStatus) {
 // Function to handle the owner decision
 async function handleOwnerDecision(activityId, decision, dependentActivitiesIds, delay, onlyBlocked = false) {
     try {
-        if (decision === "delay") {
-            //await adjustActivitySchedule(activityId, dependentActivitiesIds, delay);
-            await adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, decision);
-        } else if (decision === "contract") {
-            //await contractActivitySchedule(activityId, dependentActivitiesIds, delay);
-            await adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, decision);
-        }
+        await adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, decision);
+
         // Update the dependent activities
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
         const activity = await response.json();
@@ -759,35 +752,6 @@ async function adjustOrContractActivitySchedule(activityId, dependentActivitiesI
     // Update the dependent activities with the new startDate and/or deadline
     adjustDatesOfDependentActivities(dependentActivitiesIds);
 }
-
-/* */
-/*
-//Function to adjust the schedule of an activity
-async function adjustActivitySchedule(activityId, dependentActivitiesIds, delay) {
-    await fetch(`http://localhost:8000/api/activity/${activityId}/adjustSchedule`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dependentActivitiesIds, delay })
-    });
-
-    // Update the dependent activities with the new deadline
-    adjustDatesOfDependentActivities(dependentActivitiesIds);
-}
-*/
-/* */
-/*
-//Function to contract the schedule of an activity
-async function contractActivitySchedule(activityId, dependentActivitiesIds, delay) {
-    await fetch(`http://localhost:8000/api/activity/${activityId}/contractSchedule`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dependentActivitiesIds, delay })
-    });
-
-    // Update the dependent activities with the new deadline
-    adjustDatesOfDependentActivities(dependentActivitiesIds);
-}
-*/
 
 //Function to adjust the deadline of the dependent activities in the DOM
 async function adjustDatesOfDependentActivities(dependentActivitiesIds) {

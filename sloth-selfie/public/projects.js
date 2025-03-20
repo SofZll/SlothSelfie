@@ -9,9 +9,6 @@
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
-//gestire ritardi con contrazioni o dilatazioni lato backend:
-//TODO: gestire sincronizzazione tra attività, se una attività è in ritardo, le altre sincronizzate devono essere traslate o contratte (se milestone contrai solo)
-
 //aggiusta start e complete, finchè non clicco start output deve essere disattivato
 
 //Reject output va attivato solo quando esiste un output e l'attività è completata
