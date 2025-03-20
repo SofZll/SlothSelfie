@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 // TODO: choose a library for icons react-icons or lucide-rect
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import ShareInput from '../components/ShareInput.jsx';
 
 function getCursorPosition(event) {
     const x = (event.clientX * 100) / window.innerWidth + "%";
@@ -91,6 +92,7 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
                                 <label htmlFor='email'>Email</label>
                             </div>
                         )}
+                        <ShareInput />
                         <div className='form-floating form-group-auth col-16'>
                             <input type={showPassword ? 'text' : 'password'} id='password' className='form-control' placeholder='Password' value={userInfo.password} onChange={(e) => setUserInfo({ ...userInfo, password: e.target.value })} required />
                             <span className='toggle-password' onClick={() => setShowPassword(!showPassword)}>
