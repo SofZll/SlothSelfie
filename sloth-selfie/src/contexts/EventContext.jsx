@@ -6,6 +6,7 @@ export const EventProvider = ({ children }) => {
 
     const [event, setEvent] = useState({
         title: '',
+        type: 'personal',
         date: new Date(),
         time: '',
         isPreciseTime: false,
@@ -26,6 +27,7 @@ export const EventProvider = ({ children }) => {
     const resetEvent = () => {
         setEvent({
             title: '',
+            type: 'personal',
             date: new Date(),
             time: '',
             isPreciseTime: false,

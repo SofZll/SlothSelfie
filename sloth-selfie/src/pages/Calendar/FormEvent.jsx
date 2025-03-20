@@ -4,22 +4,11 @@ import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
 import { useEvent } from '../../contexts/EventContext';
+import { generateTimeOptions } from '../../utils/utils';
 
 const FormEvent = (props) => {
     
     const { event, setEvent, events, setEvents, resetEvent } = useEvent();
-
-    const generateTimeOptions = () => {
-        const options = [];
-        for (let hour = 0; hour < 24; hour++) {
-        for (let minutes of [0, 15, 30, 45]) {
-            const formattedHour = hour < 10 ? `0${hour}` : hour;
-            const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-            options.push({ value: `${formattedHour}:${formattedMinutes}`, label: `${formattedHour}:${formattedMinutes}` });
-        }
-        }
-        return options;
-    };
 
     const handleSubmit = async () => {
         if (props.edit) {
@@ -48,6 +37,7 @@ const FormEvent = (props) => {
 
     return (
         <form className='d-flex flex-column w-100' onSubmit={() => handleSubmit()}>
+
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -55,20 +45,34 @@ const FormEvent = (props) => {
                         type='text' className='form-control' id='title'
                         placeholder='Event title'
                         value={event.title}
-                        onChange={(e) => setEvent({...event, ['title']: e.target.value})} />
+                        onChange={(e) => setEvent({...event, ['title']: e.target.value})} 
+                        required />
                 </div>
 
+                <div className='col-6'>
+                    <label htmlFor='type' className='form-label'>Event Type</label>
+                    <select className='form-select' id='type'
+                    value={event.type}
+                    onChange={(e) => setEvent({...event, ['type']: e.target.value})}>
+                        <option value='personal'>Personal</option>
+                        <option value='work'>Work</option>
+                        <option value='social'>Social</option>
+                        <option value='other'>Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div className='row py-2 d-flex align-items-end'>
                 <div className='col-6'>
                     <label htmlFor='date' className='form-label'>Date</label>
                     <input type='Date' className='form-control' id='date'
                     placeholder={new Date(event.date)} 
                     value={event.date}
-                    onChange={(e) => setEvent({...event, ['date']: e.target.value})} />
+                    onChange={(e) => setEvent({...event, ['date']: e.target.value})} 
+                    required />
                 </div>
-            </div>
 
-            <div className='row d-flex justify-content-center py-2'>
-                <div className='col col-auto form-check form-switch'>
+                <div className='col col-6 form-check form-switch'>
                     <input
                         className='form-check-input' type='checkbox' id='allDay'
                         checked={event.allDay}
@@ -87,11 +91,12 @@ const FormEvent = (props) => {
                             <input type='time' className='form-control' id='time'
                             placeholder='Event time'
                             value={event.time}
-                            onChange={(e) => setEvent({...event, ['time']: e.target.value})} />
+                            onChange={(e) => setEvent({...event, ['time']: e.target.value})}
+                            required />
                         ) : (
                             <select className='form-select' id='time'
                             value={event.time}
-                            onChange={(e) => setEvent({...event, ['time']: e.target.value})}>
+                            onChange={(e) => setEvent({...event, ['time']: e.target.value})} required>
                                 {generateTimeOptions().map(option => (
                                     <option key={option.value} value={option.value}>{option.label}</option>
                                 ))}
@@ -100,7 +105,7 @@ const FormEvent = (props) => {
                         
                     </div>
 
-                    <div className='col col-6 form-check form-switch'>
+                    <div className='col col-auto form-check form-switch'>
                         <input
                             className='form-check-input' type='checkbox' id='isPreciseTime'
                             checked={event.isPreciseTime}
@@ -118,7 +123,8 @@ const FormEvent = (props) => {
                     placeholder={event.allDay ? 'Duration in days' : 'Duration in hours'}
                     min={0}
                     value={event.duration}
-                    onChange={(e) => setEvent({...event, ['duration']: e.target.value})} />
+                    onChange={(e) => setEvent({...event, ['duration']: e.target.value})} 
+                    required />
                 </div>
             </div>
 
@@ -156,7 +162,8 @@ const FormEvent = (props) => {
                             placeholder='Number of repetitions'
                             min={0}
                             value={event.repeatTimes}
-                            onChange={(e) => setEvent({...event, ['repeatTimes']: e.target.value})} />
+                            onChange={(e) => setEvent({...event, ['repeatTimes']: e.target.value})} 
+                            required />
                         </div>
                     ) : (
                         <div className='col col-6'>
@@ -164,7 +171,8 @@ const FormEvent = (props) => {
                             <input type='Date' className='form-control' id='repeatEndDate'
                             placeholder={new Date()}
                             value={event.repeatEndDate}
-                            onChange={(e) => setEvent({...event, ['repeatEndDate']: e.target.value})} />
+                            onChange={(e) => setEvent({...event, ['repeatEndDate']: e.target.value})}
+                            required />
                         </div>
                     )}
                 </div>
@@ -191,8 +199,9 @@ const FormEvent = (props) => {
                     {/* Field for share TODO */}
                 </div>
             </div>
-
-            <button type='submit' className='btn-main rounded shadow-sm'>{props.edit ? 'edit' : 'save'}</button>
+            
+            
+            <button type='submit' className='btn-main rounded shadow-sm mt-4'>{props.edit ? 'edit' : 'save'}</button>
         </form>
     )
 }

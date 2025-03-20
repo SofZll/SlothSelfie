@@ -44,7 +44,8 @@ const FormActivity = (props) => {
                         type='text' className='form-control' id='title'
                         placeholder='Activity title'
                         value={activity.title}
-                        onChange={(e) => setActivity({...activity, ['title']: e.target.value})} />
+                        onChange={(e) => setActivity({...activity, ['title']: e.target.value})}
+                        required />
                 </div>
 
                 <div className='col-6'>
@@ -75,7 +76,7 @@ const FormActivity = (props) => {
                 </div>
             </div>
 
-            <button type='submit' className='btn-main rounded shadow-sm'>{props.edit ? 'edit' : 'save'}</button>
+            <button type='submit' className='btn-main rounded shadow-sm mt-4'>{props.edit ? 'edit' : 'save'}</button>
         </form>
     )
 }
