@@ -8,6 +8,7 @@ const TimeMachineProvider = ({ children }) => {
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
 
+    /*  TODO: fai in modo che il tempo scorra in tempo reale */
     const setTime = () => {
             const now = new Date();
             const time = now.toTimeString().split(' ')[0].slice(0, 5);
