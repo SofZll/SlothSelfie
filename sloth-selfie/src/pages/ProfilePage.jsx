@@ -1,22 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../styles/Profile.css';
+//import { useIsDesktop } from '../utils/utils';
+import Swal from 'sweetalert2';
+
 import { validateEmail, validatePhoneNumber } from '../utils/validation';
 import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
-//import { useIsDesktop } from '../utils/utils';
-import Swal from 'sweetalert2';
-import '../styles/Profile.css';
+import { UserContext } from '../contexts/UserContext';
 
-const ProfilePage = ({ profileData }) => {
+const ProfilePage = () => {
+    const { user, setUser  } = useContext(UserContext);
+
     //const isDesktop = useIsDesktop();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
-    const [currenteProfileData, setcurrenteProfileData] = useState(profileData);
 
     useEffect(() => {
-        console.log(profileData);
-    }, [profileData]);
+        console.log(user);
+    }, [user]);
 
     const handleClickImage = () => {
         document.getElementById('file-input').click();
@@ -27,7 +30,7 @@ const ProfilePage = ({ profileData }) => {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setcurrenteProfileData({ ...currenteProfileData, profile_image: reader.result });
+                setUser({ ...setUser, profile_image: reader.result });
             }
             reader.readAsDataURL(file);
 
@@ -46,13 +49,13 @@ const ProfilePage = ({ profileData }) => {
 
     const handleSaveChanges = async (e) => {
         e.preventDefault();
-        if (!validateEmail(currenteProfileData.email) || !validatePhoneNumber(currenteProfileData.phoneNumber)) {
+        if (!validateEmail(user.email) || !validatePhoneNumber(user.phoneNumber)) {
             console.log('Invalid input');
             Swal.fire({ title: 'Invalid input', icon: 'error', text: 'Please enter a valid email and phone number', customClass: { confirmButton: 'button-alert' } });
             return;
         }
 
-        const response = await apiService('/user/edit-profile', 'POST', currenteProfileData);
+        const response = await apiService('/user/edit-profile', 'POST', user);
         if (response) {
             console.log('Profile updated successfully');
             setIsEditing(false);
@@ -75,10 +78,10 @@ const ProfilePage = ({ profileData }) => {
         <MainLayout>
             <div className='container profile'>
                 <div className='col profile-container'>
-                    <h2>{currenteProfileData.username}</h2>
+                    <h2>{user.username}</h2>
                     <div className='profile-image'>
-                        {currenteProfileData.profile_image && (
-                            <img src={currenteProfileData.profile_image} alt='profile-img' onClick={handleClickImage}/>
+                        {user.profile_image && (
+                            <img src={user.profile_image} alt='profile-img' onClick={handleClickImage}/>
                         )}
                         <input type='file' id='file-input' style={{display: 'none'}} onChange={handleEditImage}/>
                     </div>
@@ -91,37 +94,37 @@ const ProfilePage = ({ profileData }) => {
                                 <div className='row mb-3 form-group'>
                                     <label htmlFor='name' className='col-4 col-form-label'>Name:</label>
                                     <div className='col-8'>
-                                        <input type='text' className='form-control' id='name' name='name' value={currenteProfileData.name} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, name: e.target.value })}/>
+                                        <input type='text' className='form-control' id='name' name='name' value={user.name} onChange={(e) => setUser({ ...user, name: e.target.value })}/>
                                     </div>
                                 </div>
                                 <div className='row mb-3 form-group'>
                                     <label htmlFor='username' className='col-4 col-form-label'>Username:</label>
                                     <div className='col-8'>
-                                        <input type='text' className='form-control' id='username' value={currenteProfileData.username} readOnly/>
+                                        <input type='text' className='form-control' id='username' value={user.username} readOnly/>
                                     </div>
                                 </div>
                                 <div className='row mb-3 form-group'>
                                     <label htmlFor='email' className='col-4 col-form-label'>Email:</label>
                                     <div className='col-8'>
-                                        <input type='email' className='form-control' id='email' name='email' value={currenteProfileData.email} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, email: e.target.value })}/>
+                                        <input type='email' className='form-control' id='email' name='email' value={user.email} onChange={(e) => setUser({ ...user, email: e.target.value })}/>
                                     </div>
                                 </div>
                                 <div className='row mb-3 form-group'>
                                     <label htmlFor='birthday' className='col-4 col-form-label'>Birthday:</label>
                                     <div className='col-8'>
-                                        <input type='date' className='form-control' id='birthday' name='birthday' value={currenteProfileData.birthday} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, birthday: e.target.value })}/>
+                                        <input type='date' className='form-control' id='birthday' name='birthday' value={user.birthday} onChange={(e) => setUser({ ...user, birthday: e.target.value })}/>
                                     </div>
                                 </div>
                                 <div className='row mb-3 form-group'>
                                     <label htmlFor='phoneNumber' className='col-4 col-form-label'>Phone number:</label>
                                     <div className='col-8'>
-                                        <input type='tel' className='form-control' id='phoneNumber' name='phoneNumber' value={currenteProfileData.phoneNumber} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, phoneNumber: e.target.value })}/>
+                                        <input type='tel' className='form-control' id='phoneNumber' name='phoneNumber' value={user.phoneNumber} onChange={(e) => setUser({ ...user, phoneNumber: e.target.value })}/>
                                     </div>
                                 </div>
                                 <div className='row mb-3 form-group'>
                                     <label htmlFor='gender' className='col-4 col-form-label'>Gender:</label>
                                     <div className='col-8'>
-                                        <select id='gender' className='form-control' name='gender' value={currenteProfileData.gender} onChange={(e) => setcurrenteProfileData({ ...currenteProfileData, gender: e.target.value })}>
+                                        <select id='gender' className='form-control' name='gender' value={user.gender} onChange={(e) => setUser({ ...user, gender: e.target.value })}>
                                             <option value=''>Select Gender</option>
                                             <option value='male'>Male</option>
                                             <option value='female'>Female</option>
@@ -132,12 +135,12 @@ const ProfilePage = ({ profileData }) => {
                             </form>
                         ):(
                             <>
-                                <p>Name: {profileData.name} </p>
-                                <p>Username: {profileData.username} </p>
-                                <p>Email: {profileData.email}</p>
-                                <p>Birthday: {profileData.birthday}</p>
-                                <p>Phone number: {profileData.phoneNumber}</p>
-                                <p>Gender: {profileData.gender} </p>
+                                <p>Name: {user.name} </p>
+                                <p>Username: {user.username} </p>
+                                <p>Email: {user.email}</p>
+                                <p>Birthday: {user.birthday}</p>
+                                <p>Phone number: {user.phoneNumber}</p>
+                                <p>Gender: {user.gender} </p>
                             </>
                         )}
                     </div>
