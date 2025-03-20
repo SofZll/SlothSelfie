@@ -1,43 +1,42 @@
-import React, { useState, useEffect }  from 'react';
+import React, { useEffect }  from 'react';
 
 import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
+import { useActivity } from '../../contexts/ActivityContext';
 
 const FormActivity = (props) => {
 
-    const [activity, setActivity] = useState({
-        title: '',
-        deadline: new Date(),
-        done: false
-    });
+    const { activity, setActivity, activities, setActivities, resetActivity } = useActivity();
 
     const handleSubmit = async () => {
         if (props.edit) {
             const response = await apiService('/activity/edit', 'POST', activity);
             if (response){
                 Swal.fire({ title: 'Activity edited', icon: 'success', text: 'Activity edited successfully', customClass: { confirmButton: 'button-alert' } });
-                props.setActivities(props.activities.map(act => act._id === activity._id ? activity : act));
+                setActivities(activities.map(act => act._id === activity._id ? activity : act));
+                resetActivity();
             } else Swal.fire({ title: 'Error editing activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
         } else {
             const response = await apiService('/activity/add', 'PUT', activity);
             if (response){
                 Swal.fire({ title: 'Activity added', icon: 'success', text: 'Activity added successfully', customClass: { confirmButton: 'button-alert' } });
-                props.setActivities([...props.activities, response]);
+                setActivities([...activities, response]);
+                resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
         }
     }
 
     useEffect(() => {
         if (props.edit) {
-            setActivity(props.activity);
+            setActivity(activity);
         }
     }, [props.edit]); 
 
 
     return (
-        <form className='d-flex flex-column w-100' onSubmit={handleSubmit()}>
+        <form className='d-flex flex-column w-100' onSubmit={() => handleSubmit()}>
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -45,7 +44,8 @@ const FormActivity = (props) => {
                         type='text' className='form-control' id='title'
                         placeholder='Activity title'
                         value={activity.title}
-                        onChange={(e) => setActivity({...activity, ['title']: e.target.value})} />
+                        onChange={(e) => setActivity({...activity, ['title']: e.target.value})}
+                        required />
                 </div>
 
                 <div className='col-6'>
@@ -76,7 +76,7 @@ const FormActivity = (props) => {
                 </div>
             </div>
 
-            <button type='submit' className='btn-main rounded shadow-sm'>{props.edit ? 'edit' : 'save'}</button>
+            <button type='submit' className='btn-main rounded shadow-sm mt-4'>{props.edit ? 'edit' : 'save'}</button>
         </form>
     )
 }
