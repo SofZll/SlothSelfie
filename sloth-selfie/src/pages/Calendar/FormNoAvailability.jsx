@@ -7,15 +7,20 @@ import { generateTimeOptions } from '../../utils/utils';
 
 import { useAvailability } from '../../contexts/AvailabilityContext';
 
-const FormNoAvailability = (props) => {
+const FormNoAvailability = () => {
 
-    const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability } = useAvailability();
+    const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected } = useAvailability();
 
     const handleSubmit = async () => {
+        
+    }
+
+    const deleteAvailability = async () => {
+        
     }
 
     return (
-        <form className='d-flex flex-column w-100' onSubmit={() => handleSubmit()}>
+        <form className='d-flex flex-column w-100'>
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='startDate' className='form-label'>Start Date</label>
@@ -83,7 +88,12 @@ const FormNoAvailability = (props) => {
                 </div>
             </div>
 
-            <button type='submit' className='btn-main rounded shadow-sm mt-4'>{props.edit ? 'edit' : 'save'}</button>
+            <div className='d-flex align-items-center justify-content-center'>
+                <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                {selected.edit && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteAvailability()}>delete</button>
+                )}
+            </div>
         </form>
     )
 }

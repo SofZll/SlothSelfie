@@ -9,48 +9,29 @@ import '../../styles/Calendar.css';
 
 import { Plus } from 'lucide-react';
 
-import { ActivityProvider } from '../../contexts/ActivityContext';
-import { EventProvider } from '../../contexts/EventContext';
-import { AvailabilityProvider } from '../../contexts/AvailabilityContext';
+import { CalendarProvider } from '../../contexts/CalendarContext';
 
 
 const Calendar = () => {
 
     const isDesktop = useIsDesktop();
-    const [isAdding, setIsAdding] = useState(false);
 
     return (
         <MainLayout>
-            <ActivityProvider>
-                <EventProvider>
-                    <AvailabilityProvider>
-                        <div className='d-flex w-100 h-100 py-5 position-relative'>
+            <CalendarProvider>
+                <div className='d-flex w-100 h-100'>
 
-                            <div className='d-flex flex-column flex-grow-1 justify-content-center align-items-center'>
-                                <Planner />
-                            </div>
-                            
-                            {isDesktop ? (
-                                <div className='d-flex w-25'>
-                                    <FormCalendar />
-                                </div>
-                            ) : (
-                                <>
-                                    <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-plus' alt='add' onClick={() => setIsAdding(!isAdding)}>
-                                        <Plus size={36} color="#fafafa" strokeWidth={1.75} />
-                                    </button>
-
-                                    {isAdding && (
-                                        <div className='d-flex flex-column w-75 bg-white rounded p-3 position-fixed top-50 start-50 translate-middle pop-up shadow-lg'>
-                                            <FormCalendar setPopUp={setIsAdding}/>
-                                        </div>
-                                    )}
-                                </>
-                            )}
+                    <div className='d-flex flex-column flex-grow-1 planner overflow-hidden'>
+                        <Planner />
+                    </div>
+                    
+                    {isDesktop && (
+                        <div className='d-flex w-25'>
+                            <FormCalendar />
                         </div>
-                    </AvailabilityProvider>
-                </EventProvider>
-            </ActivityProvider>
+                    )}
+                </div>
+            </CalendarProvider>
         </MainLayout>
     )
 }

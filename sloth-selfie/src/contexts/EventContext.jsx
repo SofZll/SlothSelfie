@@ -5,7 +5,9 @@ const EventContext = createContext();
 export const EventProvider = ({ children }) => {
 
     const [event, setEvent] = useState({
+        _id: '',
         title: '',
+        user: '',
         type: 'personal',
         date: new Date(),
         time: '',
@@ -26,7 +28,9 @@ export const EventProvider = ({ children }) => {
 
     const resetEvent = () => {
         setEvent({
+            _id: '',
             title: '',
+            user: '',
             type: 'personal',
             date: new Date(),
             time: '',

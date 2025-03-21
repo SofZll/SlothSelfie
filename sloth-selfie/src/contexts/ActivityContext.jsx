@@ -5,7 +5,9 @@ const ActivityContext = createContext();
 export const ActivityProvider = ({ children }) => {
 
     const [activity, setActivity] = useState({
+        _id: '',
         title: '',
+        user: '',
         deadline: new Date(),
         completed: false,
         sharedWith: [],
@@ -17,7 +19,9 @@ export const ActivityProvider = ({ children }) => {
 
     const resetActivity = () => {
         setActivity({
+            _id: '',
             title: '',
+            user: '',
             deadline: new Date(),
             completed: false,
             sharedWith: [],

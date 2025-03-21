@@ -3,15 +3,15 @@ import React, { useEffect }  from 'react';
 import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
-import { useActivity } from '../../contexts/ActivityContext';
+import { useCalendar } from '../../contexts/CalendarContext';
 
-const FormActivity = (props) => {
+const FormActivity = () => {
 
-    const { activity, setActivity, activities, setActivities, resetActivity } = useActivity();
+    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected } = useCalendar();
 
     const handleSubmit = async () => {
-        if (props.edit) {
-            const response = await apiService('/activity/edit', 'POST', activity);
+        if (selected.edit) {
+            const response = await apiService(`/activity/${activity._id}`, 'PUT', activity);
             if (response){
                 Swal.fire({ title: 'Activity edited', icon: 'success', text: 'Activity edited successfully', customClass: { confirmButton: 'button-alert' } });
                 setActivities(activities.map(act => act._id === activity._id ? activity : act));
@@ -19,24 +19,35 @@ const FormActivity = (props) => {
             } else Swal.fire({ title: 'Error editing activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
         } else {
-            const response = await apiService('/activity/add', 'PUT', activity);
+            const response = await apiService(`/activity`, 'POST', activity);
             if (response){
                 Swal.fire({ title: 'Activity added', icon: 'success', text: 'Activity added successfully', customClass: { confirmButton: 'button-alert' } });
                 setActivities([...activities, response]);
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
         }
+        resetSelected();
+    }
+
+    const deleteActivity = async () => {
+        const response = await apiService(`/activity/${activity._id}`, 'DELETE');
+        if (response){
+            Swal.fire({ title: 'Activity deleted', icon: 'success', text: 'Activity deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            setActivities(activities.filter(act => act._id !== activity._id));
+            resetActivity();
+        } else Swal.fire({ title: 'Error deleting activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        resetSelected();
     }
 
     useEffect(() => {
-        if (props.edit) {
+        if (selected.edit) {
             setActivity(activity);
         }
-    }, [props.edit]); 
+    }, [selected.edit]); 
 
 
     return (
-        <form className='d-flex flex-column w-100' onSubmit={() => handleSubmit()}>
+        <form className='d-flex flex-column w-100'>
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -50,7 +61,7 @@ const FormActivity = (props) => {
 
                 <div className='col-6'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
-                    <input type='Date' className='form-control' id='deadline'
+                    <input type='date' className='form-control' id='deadline'
                     placeholder={new Date()} 
                     value={activity.deadline}
                     onChange={(e) => setActivity({...activity, ['deadline']: e.target.value})} />
@@ -76,7 +87,14 @@ const FormActivity = (props) => {
                 </div>
             </div>
 
-            <button type='submit' className='btn-main rounded shadow-sm mt-4'>{props.edit ? 'edit' : 'save'}</button>
+            <div className='d-flex align-items-center justify-content-center'>
+                <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                {selected.edit && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteActivity()}>delete</button>
+                )}
+            </div>
+            
+
         </form>
     )
 }
