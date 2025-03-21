@@ -170,82 +170,50 @@ async function handleActivities(projectId) {
 
 // Function to update the buttons of an activity depending on its status
 function updateActivityButtons(activityId, status, isOwner) {
-    let startButton = document.getElementById(`start-${activityId}`);
-    let completeButton = document.getElementById(`complete-${activityId}`);
-    let abandonButton = document.getElementById(`abandon-${activityId}`);
-    let reactivateButton = document.getElementById(`reactivate-${activityId}`);
+    const startBtn = `start-${activityId}`;
+    const completeBtn = `complete-${activityId}`;
+    const abandonBtn = `abandon-${activityId}`;
+    const reactivateBtn = `reactivate-${activityId}`;
 
     switch (status) {
         case "Not_Activatable":
         case "Completed":
-            startButton.disabled = true;
-            startButton.classList.add('disabled');
-            completeButton.disabled = true;
-            completeButton.classList.add('disabled');
-            abandonButton.disabled = true;
-            abandonButton.classList.add('disabled');
+            toggleElements([startBtn, completeBtn, abandonBtn], true);
             break;
 
         case "Abandoned":
-            startButton.disabled = true;
-            startButton.classList.add('disabled');
-            completeButton.disabled = true;
-            completeButton.classList.add('disabled');
-            abandonButton.disabled = true;
-            abandonButton.classList.add('disabled');
-            if(isOwner){
-               reactivateButton.disabled = true;
-               reactivateButton.classList.add('disabled');
+            toggleElements([startBtn, completeBtn, abandonBtn], true);
+            if (isOwner) {
+                toggleElements([reactivateBtn], true);
             }
             break;
 
         case "Activatable":
-            abandonButton.disabled = true;
-            abandonButton.classList.add('disabled');
+            toggleElements([abandonBtn], true);
             break;
 
         case "Active":
-            startButton.disabled = true;
-            startButton.classList.add('disabled');
-            abandonButton.disabled = false;
-            abandonButton.classList.remove('disabled');
+            toggleElements([startBtn], true);
+            toggleElements([abandonBtn], false);
             break;
 
         case "Reactivated":
-            startButton.disabled = true;
-            startButton.classList.add('disabled');
-            completeButton.disabled = true;
-            completeButton.classList.add('disabled');
+            toggleElements([startBtn, completeBtn], true);
             break;
     }
 }
 
 // Function to update the input/output type of an activity
 function updateInputOutputType(activityId, fieldType) {
+    const typeField = document.getElementById(`${fieldType}-type-${activityId}`);
+    const field = document.getElementById(`${fieldType}-${activityId}`);
 
-    if (fieldType === "input") {
-        let inputType = document.getElementById(`input-type-${activityId}`).value;
-        let inputField = document.getElementById(`input-${activityId}`);
+    if (!typeField || !field) return;
 
-        if (inputType === "empty") {
-            inputField.value = "";
-            inputField.disabled = true;
-        } else {
-            inputField.disabled = false;
-        }
-
-    } else if (fieldType === "output") {
-        let outputType = document.getElementById(`output-type-${activityId}`).value;
-        let outputField = document.getElementById(`output-${activityId}`);
-
-        if (outputType === "true") {
-            outputField.value = "Completed";
-            outputField.disabled = true;
-        } else {
-            outputField.disabled = false;
-            outputField.value = "";
-        }
-    }
+    const isDisabled = fieldType === "input" ? typeField.value === "empty" : typeField.value === "true";
+    
+    field.disabled = isDisabled;
+    field.value = isDisabled ? (fieldType === "output" ? "Completed" : "") : "";
 }
 
 // Function to validate URL
@@ -305,24 +273,12 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
                 throw new Error("Failed to save activity input.");
             }
 
-            // Disable the Insert Input button after successful submission
-            const insertButton = document.querySelector(`#insert-input-${activityId}`);
-            if (insertButton) {
-                insertButton.disabled = true;
-                insertButton.classList.add('disabled');
-            }
-
-            //disable the input field
-            let inputField = document.getElementById(`input-${activityId}`);
-            if (inputField) {
-                inputField.disabled = true;
-            }
-
-            //disable the input select
-            let inputSelect = document.getElementById(`input-type-${activityId}`);
-            if (inputSelect) {
-                inputSelect.disabled = true;
-            }
+            // Disable the Insert Input button and fields after successful submission
+            toggleElements([
+                `insert-input-${activityId}`,
+                `input-${activityId}`,
+                `input-type-${activityId}`
+            ], true);
 
             //change status and start button
             activatableActivity(activityId, "Activatable");
@@ -356,31 +312,15 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
                 throw new Error("Failed to save activity output.");
             }
 
-            // Disable the Insert Output button after successful submission
-            const insertButton = document.querySelector(`#insert-output-${activityId}`);
-            if (insertButton) {
-                insertButton.disabled = true;
-                insertButton.classList.add('disabled');
-            }
+            // Disable the Insert Output button and fields after successful submission
+            toggleElements([
+                `insert-output-${activityId}`,
+                `output-${activityId}`,
+                `output-type-${activityId}`
+            ], true);
 
-            //disable the output field
-            let outputField = document.getElementById(`output-${activityId}`);
-            if (outputField) {
-                outputField.disabled = true;
-            }
-
-            //disable the output select
-            let outputSelect = document.getElementById(`output-type-${activityId}`);
-            if (outputSelect) {
-                outputSelect.disabled = true;
-            }
-
-            //set the complete button to be not disabled
-            let completeButton = document.getElementById(`complete-${activityId}`);
-            if (completeButton) {
-                completeButton.disabled = false;
-                completeButton.classList.remove('disabled');
-            }
+            //enable the complete button
+            toggleElements([`complete-${activityId}`], false);
 
         } catch (error) {
             console.error("Error saving activity output:", error);
@@ -427,12 +367,8 @@ async function activatableActivity(activityId, newStatus) {
         // Update the activity status
         await updateActivityStatus(activityId, newStatus);
 
-         //set the start button to be not disabled
-         let startButton = document.getElementById(`start-${activityId}`);
-         if (startButton) {
-             startButton.disabled = false;
-             startButton.classList.remove('disabled');
-         }
+        //enable the start button
+        toggleElements([`start-${activityId}`], false);
         
     } catch (error) {
         console.error("Error updating activity:", error);
@@ -454,37 +390,17 @@ async function startActivity(activityId, newStatus) {
         // Update the activity status
         await updateActivityStatus(activityId, newStatus);
 
-        //button abandon is activated and the start button is disabled
-        let abandonButton = document.getElementById(`abandon-${activityId}`);
-        if (abandonButton) {
-            abandonButton.disabled = false;
-            abandonButton.classList.remove('disabled');
-        }
+        //the start button is disabled
+        toggleElements([`start-${activityId}`], true);
 
-        let startButton = document.getElementById(`start-${activityId}`);
-        if (startButton) {
-            startButton.disabled = true;
-            startButton.classList.add('disabled');
-        }
+        //button abandon is activated and the output field is enabled
+        toggleElements([
+            `abandon-${activityId}`,
+            `output-${activityId}`,
+            `output-type-${activityId}`,
+            `insert-output-${activityId}`
+        ], false);
 
-        //the output field is enabled
-        let outputField = document.getElementById(`output-${activityId}`);
-        if (outputField) {
-            outputField.disabled = false;
-        }
-
-        //the output select is enabled
-        let outputSelect = document.getElementById(`output-type-${activityId}`);
-        if (outputSelect) {
-            outputSelect.disabled = false;
-        }
-
-        //the insert output button is enabled
-        let insertOutputButton = document.getElementById(`insert-output-${activityId}`);
-        if(insertOutputButton){
-            insertOutputButton.disabled = false;
-            insertOutputButton.classList.remove('disabled');
-        }
     }
     catch (error) {
         console.error("Error starting activity:", error);
@@ -506,21 +422,14 @@ async function completeActivity(activityId, newStatus) {
         // Update the activity status
         await updateActivityStatus(activityId, newStatus);
 
-        // Disable buttons
-        ["abandon", "start", "complete"].forEach(action => {
-            let button = document.getElementById(`${action}-${activityId}`);
-            if (button) {
-                button.disabled = true;
-                button.classList.add('disabled');
-            }
-        });
+        // Disable buttons "abandon" and "complete"
+        toggleElements([
+            `abandon-${activityId}`,
+            `complete-${activityId}`
+        ], true);
 
-        //enable the reject output button
-        let rejectButton = document.getElementById(`reactivate-${activityId}`);
-        if (rejectButton) {
-            rejectButton.disabled = false;
-            rejectButton.classList.remove('disabled');
-        }
+        //enable the reject output button for the owner
+        toggleElements([`reactivate-${activityId}`], false);
 
         // If the activity has dependencies, update them:
         await checkOptionsForCompleteActivityDep(activityId, true);
@@ -651,41 +560,24 @@ async function reactivateActivity(activityId, newStatus) {
             await updateActivityStatus(dependent._id, "Not_Activatable");
         }
 
-        //reactivates the button abandon
-        let abandonButton = document.getElementById(`abandon-${activityId}`);
-        if (abandonButton) {
-            abandonButton.disabled = false;
-            abandonButton.classList.remove('disabled');
-        }
+        // Reactivates the buttons and fields
+        toggleElements([
+            `abandon-${activityId}`,
+            `save-output-${activityId}`,
+            `output-type-${activityId}`,
+            `output-${activityId}`
+        ], false);
 
-        // Shows the "Save updated output" button and activates it
+        // Show the "Save updated output" button
         let saveOutputButton = document.getElementById(`save-output-${activityId}`);
         if (saveOutputButton) {
             saveOutputButton.style.display = "inline-block";
-            saveOutputButton.disabled = false;
-            saveOutputButton.classList.remove("disabled");
         }
 
-        // reactivates the output select
-        let outputSelect = document.getElementById(`output-type-${activityId}`);
-        if (outputSelect) {
-            outputSelect.disabled = false;
-        }
+        // Disables the reject button
+        toggleElements([`reactivate-${activityId}`], true);
 
-        // Reactivates the output field
-        let outputField = document.getElementById(`output-${activityId}`);
-        if (outputField) {
-            outputField.disabled = false;
-        }
-
-        //disable the reject output button
-        let rejectButton = document.getElementById(`reactivate-${activityId}`);
-        if (rejectButton) {
-            rejectButton.disabled = true;
-            rejectButton.classList.add('disabled');
-        }
-
-        //hides the two buttons for the owner to decide if present
+        // Hides the two buttons for the owner to decide if present
         let container = document.getElementById(`activity-${activityId}-buttons-container`);
         if (container) {
             container.innerHTML = "";
@@ -708,10 +600,10 @@ async function handleOwnerDecision(activityId, decision, dependentActivitiesIds,
         await updateDependentActivities(activityId, activity, onlyBlocked);
 
         // disable the buttons
-        document.getElementById(`delayBtn-${activityId}`).disabled = true;
-        document.getElementById(`delayBtn-${activityId}`).classList.add('disabled');
-        document.getElementById(`contractBtn-${activityId}`).disabled = true;
-        document.getElementById(`contractBtn-${activityId}`).classList.add('disabled');
+        toggleElements([
+            `delayBtn-${activityId}`, 
+            `contractBtn-${activityId}`
+        ], true);
 
     } catch (error) {
         console.error("Error handling owner decision:", error);
