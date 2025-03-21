@@ -13,7 +13,7 @@
 
 //anche projectsView da rivedere
 
-//Aggiusta bottone abbandon, si devono disattivare gli input e gli output sia per bottone sia con fetch, se riaggiungo membri si riattiva input e bottoni vari
+//Aggiusta bottone abbandon, se riaggiungo membri si riattiva input e bottoni vari
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 
