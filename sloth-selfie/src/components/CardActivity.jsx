@@ -23,7 +23,7 @@ const CardActivity = ({ Activity, smallView }) => {
 
             <div className="row">
                 <div className="col-6">
-                    <button type="button" class="btn active" data-bs-toggle="button" aria-pressed={Activity.completed}>
+                    <button type="button" className="btn active" data-bs-toggle="button" aria-pressed={Activity.completed}>
                         {Activity.completed ? "Completed" : "to Complete"}
                     </button>
                 </div>

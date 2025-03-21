@@ -3,24 +3,24 @@ import React, { useEffect }  from 'react';
 import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
-import { useEvent } from '../../contexts/EventContext';
+import { useCalendar } from '../../contexts/CalendarContext';
 import { generateTimeOptions } from '../../utils/utils';
 
-const FormEvent = (props) => {
+const FormEvent = () => {
     
-    const { event, setEvent, events, setEvents, resetEvent } = useEvent();
+    const { event, setEvent, events, setEvents, resetEvent, selected, setSelected } = useCalendar();
 
     const handleSubmit = async () => {
-        if (props.edit) {
-            const response = await apiService('/event/edit', 'POST', event);
+        if (selected.edit) {
+            const response = await apiService(`/event/${event._id}`, 'PUT', event);
             if (response){
                 Swal.fire({ title: 'Event edited', icon: 'success', text: 'Event edited successfully', customClass: { confirmButton: 'button-alert' } });
                 setEvents(events.map(evt => evt._id === event._id ? event : evt));
                 resetEvent();
             } else Swal.fire({ title: 'Error editing event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
-        } else {
-            const response = await apiService('/event/add', 'PUT', event);
+        } else if (selected.add) {
+            const response = await apiService('/event', 'POST', event);
             if (response){
                 Swal.fire({ title: 'Event added', icon: 'success', text: 'Event added successfully', customClass: { confirmButton: 'button-alert' } });
                 setEvents([...events, response]);
@@ -29,14 +29,17 @@ const FormEvent = (props) => {
         }
     }
 
-    useEffect(() => {
-        if (props.edit) {
-            setEvent(event);
-        }
-    }, [props.edit]);
+    const deleteEvent = async () => {
+        const response = await apiService(`/event/${event._id}`, 'DELETE', event);
+        if (response){
+            Swal.fire({ title: 'Event deleted', icon: 'success', text: 'Event deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            setEvents(events.filter(evt => evt._id !== event._id));
+            resetEvent();
+        } else Swal.fire({ title: 'Error deleting event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+    }
 
     return (
-        <form className='d-flex flex-column w-100' onSubmit={() => handleSubmit()}>
+        <form className='d-flex flex-column w-100'>
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -200,7 +203,12 @@ const FormEvent = (props) => {
             </div>
             
             
-            <button type='submit' className='btn-main rounded shadow-sm mt-4'>{props.edit ? 'edit' : 'save'}</button>
+            <div className='d-flex align-items-center justify-content-center'>
+                <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                {selected.edit && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteEvent()}>delete</button>
+                )}
+            </div>
         </form>
     )
 }

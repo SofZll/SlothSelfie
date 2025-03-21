@@ -1,48 +1,125 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
 
+import { Plus } from 'lucide-react';
+
 import { useIsDesktop } from '../../utils/utils';
 import ScrollListLayout from '../../components/ScrollList';
+import FormCalendar from './FormCalendar';
 
-import { useActivity } from '../../contexts/ActivityContext';
-import { useEvent } from '../../contexts/EventContext';
+import { UserContext } from '../../contexts/UserContext';
+import { useCalendar } from '../../contexts/CalendarContext';
+
+import { apiService } from '../../services/apiService';
 
 const Planner = () => {
 
 
     const isDesktop = useIsDesktop();
 
-    const { activity, setActivity, activities, setActivities } = useActivity();
-    const { event, setEvent, events, setEvents } = useEvent();
+    const { activity, setActivity, activities, setActivities, event, setEvent, events, setEvents, selected, select, setSelected } = useCalendar();
+    const { user } = useContext(UserContext);
+
 
     const localizer = momentLocalizer(moment);
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
+    const fetchActivities = async () => {
+        const response = await apiService('/activities', 'GET');
+        if (response) {
+            setActivities(response);
+        }
+    }
 
+    const fetchEvents = async () => {
+        const response = await apiService('/events', 'GET');
+        if (response) {
+            setEvents(response);
+        }
+    }
+
+    const normalizeData = (datas, type) => {
+        if (!Array.isArray(datas)) return [];
+
+        return (type === 'activity' ? datas.filter(data => !data.completed && data.deadline) : datas).map(data => {
+            return {
+                _id: data._id,
+                title: data.title,
+                user: data.user,
+                ...(type === "event" ? {
+                    start: new Date(data.start),
+                    end: new Date(data.end),
+                } : {
+                    start: new Date(data.deadline),
+                    end: new Date(data.deadline),
+                }),
+                type: type
+            };
+        });
+    }
+
+    const onItemSelect = (item) => {
+        if (item.type === 'activity') {
+            setActivity(activities.find(a => a._id === item._id));
+            console.log(activity, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+        }
+        else setEvent(events.find(event => event._id === item._id));
+        
+        setSelected({selection: item.type, edit: true, add: false, popUp: !isDesktop});
+    }
+
+    useEffect(() => {
+        if (user) {
+            fetchActivities();
+            fetchEvents();
+        }
+    }, [user]);
+
+    useEffect(() => {
+        console.log(activity, 'Updated Activity');
+    }, [activity]);
+    
         
 
     return (
-        <>
-            <DnDCalendar
-                localizer={localizer}
-                events={[]}
-                startAccessor="start"
-                endAccessor="end"
-                onSelectEvent={null}
-                titleAccessor="title"
-                className='calendar-main'
-                onEventDrop={null}
-                resizable
-            />
+        <div className='d-flex flex-column flex-grow-1 h-100 justify-content-center align-items-center'>
+
+            {!isDesktop && (
+                <>
+                    <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-plus pop-up' alt='add' onClick={() => setSelected({ ...selected, add: true, popUp: true })}>
+                        <Plus size={36} color="#fafafa" strokeWidth={1.75} />
+                    </button>
+
+                    {selected.popUp && (
+                        <div className='d-flex flex-column w-75 bg-white rounded p-3 position-fixed top-50 start-50 translate-middle pop-up shadow-lg'>
+                            <FormCalendar />
+                        </div>
+                    )}
+                </>
+            )}
+
+            <div className='d-flex justify-content-center align-items-center w-100 h-100 py-3'>
+                <DnDCalendar
+                    localizer={localizer}
+                    events={[...normalizeData(activities, 'activity'), ...normalizeData(events, 'event')]}
+                    startAccessor="start"
+                    endAccessor="end"
+                    onSelectEvent={onItemSelect}
+                    titleAccessor="title"
+                    className='calendar-main'
+                    onEventDrop={null}
+                    resizable
+                />
+            </div>
 
             {!isDesktop && (
                 <ScrollListLayout CardList={activities} smallView={false} />
             )}
-        </>
+        </div>
     )
 }
 
