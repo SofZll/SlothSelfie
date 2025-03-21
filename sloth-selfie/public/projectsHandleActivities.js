@@ -89,14 +89,19 @@ async function handleActivities(projectId) {
 
                 let star = activity.milestone ? "*" : ""; // milestone
 
-                //if the activity ha dependencies, or if input already exists, the input field is disabled
-                let inputDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input ? 'disabled' : '';
-                let inputSelectDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input ? 'disabled' : ''; // Disable the select
-                let inputInsertDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input ? 'disabled' : ''; // Disable the button
+                //If the owner of the project is not a member of the activity, we will show the activity fields but he will not be able to interact with them (only the reject output button will be enabled)
+                const isMember = activity.sharedWith.some(member => member.username === userLogged);
+                const OwnerNotMember = isOwner && !isMember;
+                console.log("Owner:", isOwner, "Member:", isMember);
 
-                let outputDisabled = activity.output || activity.status !== "Active" ? 'disabled' : ''; // Check if output already exists or if we are not in the "Active" case
-                let outputSelectDisabled = activity.output || activity.status !== "Active" ? 'disabled' : ''; // Disable the select if output exists
-                let outputInsertDisabled = activity.output || activity.status !== "Active" ? 'disabled' : ''; // Disable the button if output exists
+                //if the activity has dependencies, or if input already exists, or if if ownerNotMember, the input field is disabled
+                let inputDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember ? 'disabled' : '';
+                let inputSelectDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember ? 'disabled' : ''; // Disable the select
+                let inputInsertDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember ? 'disabled' : ''; // Disable the button
+
+                let outputDisabled = activity.output || activity.status !== "Active" || OwnerNotMember ? 'disabled' : ''; // Check if output already exists or if we are not in the "Active" case
+                let outputSelectDisabled = activity.output || activity.status !== "Active" || OwnerNotMember ? 'disabled' : ''; // Disable the select if output exists
+                let outputInsertDisabled = activity.output || activity.status !== "Active" || OwnerNotMember ? 'disabled' : ''; // Disable the button if output exists
 
                 content += `
                     <li class="list-group-item">
@@ -160,7 +165,9 @@ async function handleActivities(projectId) {
 
         //Function to disable/enable the buttons depending on the status of the activity
         activities.forEach(activity => {
-            updateActivityButtons(activity._id, activity.status, isOwner);
+            const isMember = activity.sharedWith.some(member => member.username === userLogged);
+            const OwnerNotMember = isOwner && !isMember;
+            updateActivityButtons(activity._id, activity.status, isOwner, OwnerNotMember);
         });
 
     } catch (error) {
@@ -169,11 +176,17 @@ async function handleActivities(projectId) {
 }
 
 // Function to update the buttons of an activity depending on its status
-function updateActivityButtons(activityId, status, isOwner) {
+function updateActivityButtons(activityId, status, isOwner, ownerNotMember) {
     const startBtn = `start-${activityId}`;
     const completeBtn = `complete-${activityId}`;
     const abandonBtn = `abandon-${activityId}`;
     const reactivateBtn = `reactivate-${activityId}`;
+
+    // If the owner of the project is not a member of the activity, we will not activate the buttons
+    if (ownerNotMember) {
+        toggleElements([startBtn, completeBtn, abandonBtn], true);
+        return;
+    }
 
     switch (status) {
         case "Not_Activatable":
@@ -560,13 +573,30 @@ async function reactivateActivity(activityId, newStatus) {
             await updateActivityStatus(dependent._id, "Not_Activatable");
         }
 
-        // Reactivates the buttons and fields
-        toggleElements([
-            `abandon-${activityId}`,
-            `save-output-${activityId}`,
-            `output-type-${activityId}`,
-            `output-${activityId}`
-        ], false);
+        //if the user is the owner of the project, but is not a member of the activity, we will not activate the saveUpdatedOutput nor the abandon button 
+        let userLogged = await getLoggedUser();
+        //get the project of the activity
+        const projectResponse = await fetch(`http://localhost:8000/api/project/${activity.project}`);
+        const project = await projectResponse.json();
+        //get the owner of the project
+        const isOwner = project.owner.username === userLogged;
+        const isMember = activity.sharedWith.some(member => member.username === userLogged);
+        console.log("Owner:", isOwner, "Member:", isMember);
+        
+        if(isOwner && !isMember){
+            //we will not activate the saveUpdatedOutput nor the abandon button
+            toggleElements([`save-output-${activityId}`,
+                            `abandon-${activityId}`
+                        ], true);
+        }else{
+            // Reactivates the buttons and fields
+            toggleElements([
+                `abandon-${activityId}`,
+                `save-output-${activityId}`,
+                `output-type-${activityId}`,
+                `output-${activityId}`
+            ], false);
+        }
 
         // Show the "Save updated output" button
         let saveOutputButton = document.getElementById(`save-output-${activityId}`);
@@ -827,21 +857,24 @@ async function abandonActivity(activityId) {
         //disable the abandon button for the user
         toggleElements([`abandon-${activityId}`], true);
 
-        // if there are no more users assigned, update the status to Abandoned and disable the abandon button, the reject output button, the input/output elements
+        // if there are no more users assigned, update the status to Abandoned
         if (updatedSharedWith.length === 0) {
             await updateActivityStatus(activityId, "Abandoned");
-
-            toggleElements([
-                `abandon-${activityId}`,
-                `reactivate-${activityId}`,
-                `input-${activityId}`,
-                `output-${activityId}`,
-                `input-type-${activityId}`,
-                `output-type-${activityId}`,
-                `insert-input-${activityId}`
-            ], true);
-
         }
+
+        //disable the abandon button, the reject output button, the input/output elements, the saveupdated output button and the complete button
+        toggleElements([
+            `abandon-${activityId}`,
+            `input-${activityId}`,
+            `output-${activityId}`,
+            `input-type-${activityId}`,
+            `output-type-${activityId}`,
+            `insert-input-${activityId}`,
+            `insert-output-${activityId}`,
+            `save-output-${activityId}`,
+            `complete-${activityId}`
+        ], true);
+
     } catch (error) {
         console.error("Error abandoning activity:", error);
     }
