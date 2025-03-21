@@ -9,7 +9,10 @@
 
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
-//ottimizza codici per attivare/disattivare bottoni + condizioni in fetch forse si può fare meglio
+//ottimizza condizioni in fetch forse si può fare meglio
+
+//anche projectsView da rivedere
+
 //Aggiusta bottone abbandon, si devono disattivare gli input e gli output sia per bottone sia con fetch, se riaggiungo membri si riattiva input e bottoni vari
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
