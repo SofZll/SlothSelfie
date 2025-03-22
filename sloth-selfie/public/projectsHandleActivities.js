@@ -69,15 +69,15 @@ async function handleActivities(projectId) {
                         asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
                     }
                 }
-
-                //if members are re-added, and the activity is not overdue since last 7 days, the activity will be Not_Activatable in case of no input, and Activatable otherwise
+                //if members are re-added, and the activity is not overdue since last 7 days, the activity will be Not_Activatable in case of no input, Activatable otherwise,  Active it has output also
                 if (activity.sharedWith.length > 0 && activity.status === "Abandoned") {
-                    console.log("Activity shared with members again", activity.sharedWith);
                     if(!isAbandoned){
                         if (!activity.input  && activity.status !== "Not_Activatable") {
                             asyncOperations.push(updateActivityStatus(activity._id, "Not_Activatable"));
-                        } else if (activity.input && activity.status !== "Activatable")  {
+                        } else if (activity.input && !activity.output &&  activity.status !== "Activatable")  {
                             asyncOperations.push(activatableActivity(activity._id, "Activatable"));
+                        } else if (activity.output && activity.status !== "Active") {
+                            asyncOperations.push(updateActivityStatus(activity._id, "Active"));
                         }
                     }
                 }
@@ -92,7 +92,6 @@ async function handleActivities(projectId) {
                 //If the owner of the project is not a member of the activity, we will show the activity fields but he will not be able to interact with them (only the reject output button will be enabled)
                 const isMember = activity.sharedWith.some(member => member.username === userLogged);
                 const OwnerNotMember = isOwner && !isMember;
-                console.log("Owner:", isOwner, "Member:", isMember);
 
                 //if the activity has dependencies, or if input already exists, or if if ownerNotMember, the input field is disabled
                 let inputDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember ? 'disabled' : '';
@@ -150,7 +149,7 @@ async function handleActivities(projectId) {
                         <button class="btn btn-primary btn-sm" id="complete-${activity._id}" onclick="completeActivity('${activity._id}', 'Completed')" ${!activity.output ? 'disabled' : ''}>Complete</button>
                         <button class="btn btn-danger btn-sm" id="abandon-${activity._id}" onclick="abandonActivity('${activity._id}')" ${abandonDisabled}>Abandon</button>
                     </li>
-                    `;                
+                    `;
             }
             content += `</ul>`;
         }
@@ -164,55 +163,63 @@ async function handleActivities(projectId) {
         await Promise.all(asyncOperations);
 
         //Function to disable/enable the buttons depending on the status of the activity
-        activities.forEach(activity => {
+        for (const activity of activities) {
             const isMember = activity.sharedWith.some(member => member.username === userLogged);
             const OwnerNotMember = isOwner && !isMember;
-            updateActivityButtons(activity._id, activity.status, isOwner, OwnerNotMember);
-        });
-
+            await updateActivityButtons(activity._id, isOwner, OwnerNotMember);
+        }
     } catch (error) {
         console.error("Error handling activities of the project:", error);
     }
 }
 
 // Function to update the buttons of an activity depending on its status
-function updateActivityButtons(activityId, status, isOwner, ownerNotMember) {
-    const startBtn = `start-${activityId}`;
-    const completeBtn = `complete-${activityId}`;
-    const abandonBtn = `abandon-${activityId}`;
-    const reactivateBtn = `reactivate-${activityId}`;
+async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
+    try{
 
-    // If the owner of the project is not a member of the activity, we will not activate the buttons
-    if (ownerNotMember) {
-        toggleElements([startBtn, completeBtn, abandonBtn], true);
-        return;
-    }
+        //get the activity
+        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const activity = await response.json();
 
-    switch (status) {
-        case "Not_Activatable":
-        case "Completed":
+        const startBtn = `start-${activityId}`;
+        const completeBtn = `complete-${activityId}`;
+        const abandonBtn = `abandon-${activityId}`;
+        const reactivateBtn = `reactivate-${activityId}`;
+
+        // If the owner of the project is not a member of the activity, we will not activate the buttons
+        if (ownerNotMember) {
             toggleElements([startBtn, completeBtn, abandonBtn], true);
-            break;
+            return;
+        }
 
-        case "Abandoned":
-            toggleElements([startBtn, completeBtn, abandonBtn], true);
-            if (isOwner) {
-                toggleElements([reactivateBtn], true);
-            }
-            break;
+        switch (activity.status) {
+            case "Not_Activatable":
+            case "Completed":
+                toggleElements([startBtn, completeBtn, abandonBtn], true);
+                break;
 
-        case "Activatable":
-            toggleElements([abandonBtn], true);
-            break;
+            case "Abandoned":
+                toggleElements([startBtn, completeBtn, abandonBtn], true);
+                if (isOwner) {
+                    toggleElements([reactivateBtn], true);
+                }
+                break;
 
-        case "Active":
-            toggleElements([startBtn], true);
-            toggleElements([abandonBtn], false);
-            break;
+            case "Activatable":
+                toggleElements([abandonBtn], true);
+                break;
 
-        case "Reactivated":
-            toggleElements([startBtn, completeBtn], true);
-            break;
+            case "Active":
+                toggleElements([startBtn], true);
+                toggleElements([abandonBtn], false);
+                break;
+
+            case "Reactivated":
+                toggleElements([startBtn, completeBtn], true);
+                break;
+        }
+    }catch(error){
+        console.error("Error updating activity buttons:", error);
     }
 }
 
@@ -580,8 +587,7 @@ async function reactivateActivity(activityId, newStatus) {
         const project = await projectResponse.json();
         //get the owner of the project
         const isOwner = project.owner.username === userLogged;
-        const isMember = activity.sharedWith.some(member => member.username === userLogged);
-        console.log("Owner:", isOwner, "Member:", isMember);
+        const isMember = activity.sharedWith.includes(userLogged);
         
         if(isOwner && !isMember){
             //we will not activate the saveUpdatedOutput nor the abandon button

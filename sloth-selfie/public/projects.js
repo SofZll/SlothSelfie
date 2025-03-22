@@ -13,7 +13,7 @@
 
 //anche projectsView da rivedere
 
-//Aggiusta bottone abbandon, se riaggiungo membri si riattiva input e bottoni vari
+//Aggiusta casi overdue e abandon perchè passa tanto tempo
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 
