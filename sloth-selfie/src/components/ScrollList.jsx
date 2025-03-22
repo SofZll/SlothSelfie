@@ -6,9 +6,9 @@ const ScrollList = ({ CardList, smallView }) => {
     return (
         <>
             {CardList.length > 0 && (
-                <div className='d-flex flex-column w-100 h-50 overflow-auto'>
+                <div className='d-flex flex-column m-md-3 m-2 overflow-y-auto overflow-x-hidden shadow rounded'>
                     {CardList.map((card, index) => (
-                        <div key={index} className='d-flex flex-column w-100 p-3'>
+                        <div key={index} className='d-flex flex-column w-100 p-md-3 p-2'>
                             <CardActivity Activity={card} smallView={smallView} />
                         </div>
                     ))}

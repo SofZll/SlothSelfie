@@ -68,8 +68,7 @@ const FormEvent = () => {
                 <div className='col-6'>
                     <label htmlFor='date' className='form-label'>Date</label>
                     <input type='Date' className='form-control' id='date'
-                    placeholder={new Date(event.date)} 
-                    value={event.date}
+                    value={new Date(event.date).toISOString().split('T')[0]}
                     onChange={(e) => setEvent({...event, ['date']: e.target.value})} 
                     required />
                 </div>
@@ -171,8 +170,7 @@ const FormEvent = () => {
                         <div className='col col-6'>
                             <label htmlFor='repeatEndDate' className='form-label'>End Date</label>
                             <input type='Date' className='form-control' id='repeatEndDate'
-                            placeholder={new Date()}
-                            value={event.repeatEndDate}
+                            value={new Date(event.repeatEndDate).toISOString().split('T')[0]}
                             onChange={(e) => setEvent({...event, ['repeatEndDate']: e.target.value})}
                             required />
                         </div>
