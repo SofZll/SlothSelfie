@@ -1,6 +1,6 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
-import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
@@ -21,7 +21,8 @@ const Planner = () => {
 
     const isDesktop = useIsDesktop();
 
-    const { activity, setActivity, activities, setActivities, event, setEvent, events, setEvents, selected, select, setSelected } = useCalendar();
+    const { activity, setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected } = useCalendar();
+    const [listNormal, setListNormal] = useState([]);
     const { user } = useContext(UserContext);
 
 
@@ -50,7 +51,7 @@ const Planner = () => {
                 _id: data._id,
                 title: data.title,
                 user: data.user,
-                ...(type === "event" ? {
+                ...(type === 'event' ? {
                     start: new Date(data.start),
                     end: new Date(data.end),
                 } : {
@@ -63,10 +64,7 @@ const Planner = () => {
     }
 
     const onItemSelect = (item) => {
-        if (item.type === 'activity') {
-            setActivity(activities.find(a => a._id === item._id));
-            console.log(activity, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
-        }
+        if (item.type === 'activity') setActivity(activities.find(a => a._id === item._id));
         else setEvent(events.find(event => event._id === item._id));
         
         setSelected({selection: item.type, edit: true, add: false, popUp: !isDesktop});
@@ -83,7 +81,10 @@ const Planner = () => {
         console.log(activity, 'Updated Activity');
     }, [activity]);
     
-        
+    useEffect(() => {
+        setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event')]);
+        console.log(listNormal);
+    }, [activities, events]);
 
     return (
         <div className='d-flex flex-column flex-grow-1 h-100 justify-content-center align-items-center'>
@@ -91,7 +92,7 @@ const Planner = () => {
             {!isDesktop && (
                 <>
                     <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-plus pop-up' alt='add' onClick={() => setSelected({ ...selected, add: true, popUp: true })}>
-                        <Plus size={36} color="#fafafa" strokeWidth={1.75} />
+                        <Plus size={36} color='#fafafa' strokeWidth={1.75} />
                     </button>
 
                     {selected.popUp && (
@@ -102,14 +103,14 @@ const Planner = () => {
                 </>
             )}
 
-            <div className='d-flex justify-content-center align-items-center w-100 h-100 py-3'>
+            <div className='d-flex justify-content-center align-items-center w-100 h-75 py-3'>
                 <DnDCalendar
                     localizer={localizer}
-                    events={[...normalizeData(activities, 'activity'), ...normalizeData(events, 'event')]}
-                    startAccessor="start"
-                    endAccessor="end"
+                    events={listNormal}
+                    startAccessor='start'
+                    endAccessor='end'
                     onSelectEvent={onItemSelect}
-                    titleAccessor="title"
+                    titleAccessor='title'
                     className='calendar-main'
                     onEventDrop={null}
                     resizable
@@ -117,7 +118,7 @@ const Planner = () => {
             </div>
 
             {!isDesktop && (
-                <ScrollListLayout CardList={activities} smallView={false} />
+                <ScrollListLayout CardList={activities} smallView={true} />
             )}
         </div>
     )

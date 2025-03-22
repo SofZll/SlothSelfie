@@ -48,7 +48,7 @@ const FormActivity = () => {
 
     return (
         <form className='d-flex flex-column w-100'>
-            <div className='row py-2'>
+            <div className='row py-2 '>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
                     <input
@@ -62,8 +62,7 @@ const FormActivity = () => {
                 <div className='col-6'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
                     <input type='date' className='form-control' id='deadline'
-                    placeholder={new Date()} 
-                    value={activity.deadline}
+                    value={new Date(activity.deadline).toISOString().split('T')[0]}
                     onChange={(e) => setActivity({...activity, ['deadline']: e.target.value})} />
                 </div>
             </div>
@@ -71,9 +70,9 @@ const FormActivity = () => {
             <div className='row d-flex justify-content-center py-2'>
                 <div className='col col-auto form-check'>
                     <input className='form-check-input' type='checkbox' role='switch' id='done'
-                    value={activity.done}
-                    onChange={(e) => setActivity({...activity, ['done']: e.target.checked})} />
-                    <label className='form-check-label' htmlFor='done'>Completed</label>
+                    value={activity.completed}
+                    onChange={(e) => setActivity({...activity, ['completed']: e.target.checked})} />
+                    <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>
             
