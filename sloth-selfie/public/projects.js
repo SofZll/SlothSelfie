@@ -13,7 +13,7 @@
 
 //anche projectsView da rivedere
 
-//aggiusta tutti e 3 i bottoni start, complete e abandon nei vari casi, anche se devono stare disattivati nel fetch si riattivano, BOH ... problemi di fetch
+//Aggiusta bottone abbandon, se riaggiungo membri si riattiva input e bottoni vari
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 
