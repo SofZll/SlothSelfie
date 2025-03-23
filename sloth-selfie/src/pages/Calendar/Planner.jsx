@@ -33,6 +33,7 @@ const Planner = () => {
         const response = await apiService('/activities', 'GET');
         if (response) {
             setActivities(response);
+            console.log(response, 'Activitiesssssssssssssssssssssssss');
         }
     }
 

@@ -22,23 +22,19 @@ const CardActivity = ({ Activity, smallView }) => {
     return (
         <div className='d-flex flex-column w-100 align-items-center border rounded shadow-sm p-md-3 p-1 position-relative'>
 
-            <button className='btn position-absolute bottom-0 end-0' onClick={() => selectActivity()}>
-                <Pen size={20} color='#244476' strokeWidth={1.25} />
-            </button>
-
             <div className='row w-100'>
                 <div className='col col-6 text-break activity-title fw-bold text-center'>
                     {Activity.title}
                 </div>
                 <div className='col col-6 activity-title text-break activity-title fst-italic'>
-                    {Activity.user}
+                    {Activity.user.username}
                 </div>
             </div>
 
-            {!smallView && (
-                <div className='row w-100'>
-                    <div className='col col-12'>
-                        {Activity.description}
+            {!smallView && Activity.description && (
+                <div className='row w-100 p-2'>
+                    <div className='col col-12 text-center'>
+                        {Activity.description.content.length > 100 ? Activity.description.content.slice(0, 100) + '...' : Activity.description.content}
                     </div>
                 </div>
             )}
@@ -56,6 +52,9 @@ const CardActivity = ({ Activity, smallView }) => {
                 )}
             </div>
             
+            <button className='btn position-absolute top-0 end-0 p-0 p-md-2' onClick={() => selectActivity()}>
+                <Pen size={20} color='#244476' strokeWidth={1.25} />
+            </button>
         </div>
     )
 }
