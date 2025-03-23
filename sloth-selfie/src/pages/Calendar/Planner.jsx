@@ -70,6 +70,32 @@ const Planner = () => {
         setSelected({selection: item.type, edit: true, add: false, popUp: !isDesktop});
     }
 
+    //event and activity are the same
+    const onEventDrop = async ({ event, start }) => {
+        let deadline, date;
+
+        if (event.type === 'activity') {
+            deadline = new Date(start);
+            deadline.setHours(0, 0, 0, 0);
+        }
+        else date = new Date(start);
+
+        if (event.type === 'activity') {
+            const a = activities.find(a => a._id === event._id);
+            const response = await apiService(`/activity/${a._id}`, 'PUT', { ...a, deadline });
+            if (response) {
+                setActivities(activities.map(a => a._id === event._id ? response : a));
+            }
+        } else {
+            const e = events.find(e => e._id === event._id);
+            const response = await apiService(`/event/${e._id}`, 'PUT', { ...e, date });
+            if (response) {
+                setEvents(events.map(e => e._id === event._id ? response : e));
+            }
+        }
+    }
+        
+
     useEffect(() => {
         if (user) {
             fetchActivities();
@@ -112,7 +138,7 @@ const Planner = () => {
                     onSelectEvent={onItemSelect}
                     titleAccessor='title'
                     className='calendar-main'
-                    onEventDrop={null}
+                    onEventDrop={onEventDrop}
                     resizable
                 />
             </div>
