@@ -1,22 +1,15 @@
-//TODO: quando clicco salva in edit o elimina progetto si deve chiudere la visualizzazione a lista/gannt e anche il form di handle activities
-
 //TODO: in edit di progetto: owner può raggruppare attività
 //TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto (trasla o contrae le attività sincronizzate a quella in ritardo).
-
 //TODO: modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) 
 
 //TODO: aggiungi loading al caricamento di pagina
-
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
 //ottimizza condizioni in fetch forse si può fare meglio
-
 //anche projectsView da rivedere
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
-
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
-
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
 // Function to get the logged user
@@ -200,6 +193,12 @@ async function saveOrUpdateProject(event) {
             alert(projectId ? "Project updated successfully!" : "Project saved successfully!");
             resetForm();
             await loadProjects();
+            //eventually close the list/gantt view and the handle activities form
+            document.getElementById("project-view-container").style.display = "none";
+            document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close view button
+            document.getElementById("activity-container").style.display = "none";
+            document.getElementById("closeActivityViewBtn").style.display = "none"; // Hides the close view button
+
         } else {
             console.error("Error saving/updating project:", data.message);
         }
@@ -473,6 +472,20 @@ async function deleteProject(projectId) {
                 document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close button
                 
                 await loadProjects(); // Reload the projects list after deletion
+                //eventually close the list/gantt view, the handle activities and the edit form
+                document.getElementById("project-view-container").style.display = "none";
+                document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close view button
+                document.getElementById("activity-container").style.display = "none";
+                document.getElementById("closeActivityViewBtn").style.display = "none"; // Hides the close view button
+                document.getElementById("phasesContainer").innerHTML = "";//we remove the phase and subphase empty form after saving
+                document.getElementById("projectForm").style.display = "none";
+                document.getElementById("ToggleFormBtn").textContent = "+ Add a Project";
+                //we also remove the warning message if it is there
+                let warningMessage = document.getElementById("dependencyWarning");
+                if (warningMessage) {
+                    warningMessage.remove();
+                }
+                resetForm();
             } else {
                 alert("Error while deleting the project.");
             }
@@ -731,7 +744,7 @@ document.getElementById("projectForm").addEventListener("submit", saveOrUpdatePr
 //button to close the project view
 document.getElementById("closeProjectViewBtn").addEventListener("click", async function () {
     document.getElementById("project-view-container").style.display = "none";
-    this.style.display = "none"; // Hides the close button
+    this.style.display = "none"; // Hides the close view button
 });
 
  // button to go back to home (React)
