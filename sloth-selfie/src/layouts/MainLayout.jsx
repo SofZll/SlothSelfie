@@ -8,6 +8,7 @@ import MobileNav from '../components/MobileNav'
 import Header from '../components/Header'
 import TimeMachineButton from '../components/TimeMachineButton';
 import { TimeMachineProvider } from '../contexts/TimeMachineContext';
+import ChatBox from '../components/ChatBox';
 
 const MainLayout = ({ children }) => {
     const isDesktop = useIsDesktop();
@@ -23,6 +24,7 @@ const MainLayout = ({ children }) => {
             <TimeMachineProvider>
                 <TimeMachineButton />
             </TimeMachineProvider>
+            <ChatBox />
             <main className='d-flex h-100 w-100 align-items-center justify-content-center'>{children}</main>
         </div>
     );

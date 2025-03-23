@@ -8,6 +8,7 @@ import { StyleProvider } from '../components/StyleContext';
 import Calendar from '../pages/Calendar/Calendar';
 import Home from '../pages/Home'
 import Profile from '../pages/ProfilePage';
+import ChatBox from '../components/ChatBox';
 //TODO: chambiare gli import
 /*
 
@@ -15,7 +16,6 @@ import Pomodoro from '../Pomodoro';
 import Notes from '../Notes';
 import Notifications from '../Notifications';
 import Forum from '../Forum';
-import ChatBox from '../ChatBox';
 */
 import AuthPage from '../pages/AuthPage';
 import { LoadingPageLight } from '../pages/LoadingPage';
@@ -48,14 +48,13 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                     <Route path='/pomodoro' element={<Pomodoro />} />
                                     <Route path='/notes' element={<Notes />} />
                                     <Route path='/calendar' element={<Calendar />} />
-                                    <Route path='/forum' element={<Forum />} />
+                                    <Route path='/forum' element={<Forum />} />*/}
                                     {!isDesktop && (
                                         <>
                                         <Route path='/chat' element={<ChatBox username={profileData.username} chatId={null} />} />
                                         <Route path='/chat/:chatId' element={<ChatBox username={profileData.username} />} />
                                         </>
                                     )}
-                                    */}
                                 </ProtectedRoute>
                             }
                         />
