@@ -94,13 +94,13 @@ async function handleActivities(projectId) {
                 const OwnerNotMember = isOwner && !isMember;
 
                 //if the activity has dependencies, or if input already exists, or if if ownerNotMember, the input field is disabled
-                let inputDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember ? 'disabled' : '';
-                let inputSelectDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember ? 'disabled' : ''; // Disable the select
-                let inputInsertDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember ? 'disabled' : ''; // Disable the button
+                let inputDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember || isAbandoned ? 'disabled' : '';
+                let inputSelectDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the select
+                let inputInsertDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the button
 
-                let outputDisabled = activity.output || activity.status !== "Active" || OwnerNotMember ? 'disabled' : ''; // Check if output already exists or if we are not in the "Active" case
-                let outputSelectDisabled = activity.output || activity.status !== "Active" || OwnerNotMember ? 'disabled' : ''; // Disable the select if output exists
-                let outputInsertDisabled = activity.output || activity.status !== "Active" || OwnerNotMember ? 'disabled' : ''; // Disable the button if output exists
+                let outputDisabled = activity.output || activity.status !== "Active" || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Check if output already exists or if we are not in the "Active" case
+                let outputSelectDisabled = activity.output || activity.status !== "Active" || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the select if output exists
+                let outputInsertDisabled = activity.output || activity.status !== "Active" || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the button if output exists
 
                 content += `
                     <li class="list-group-item">
@@ -216,6 +216,15 @@ async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
 
             case "Reactivated":
                 toggleElements([startBtn, completeBtn], true);
+                break;
+            
+            case "Overdue":
+                if(!activity.input){
+                    toggleElements([abandonBtn], true);
+                }
+                else if(activity.output){
+                    toggleElements([startBtn], true);
+                }
                 break;
         }
     }catch(error){

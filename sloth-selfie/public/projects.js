@@ -13,8 +13,6 @@
 
 //anche projectsView da rivedere
 
-//Aggiusta casi overdue e abandon perchè passa tanto tempo
-
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
