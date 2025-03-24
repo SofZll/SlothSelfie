@@ -28,7 +28,7 @@
     top: 0;
     left: 0;
     height: 100%;
-    width: 300px;
+    width: 19rem;
     background: #1c2135;
     padding: 2.5em 1.5em 0;
     font-size: 1.5em;
@@ -90,62 +90,34 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 50%;
 }
 
 .menu-profile {
-    display: flex !important;
-    position: fixed;
-    flex-direction: column;
-    bottom: 0;
-    align-items: center;
-    justify-content: center;
-    width: 228px;
-    border-top: #F9FAFA 1.5px solid;
-    border-radius: 0;
+    height: 9rem;
+    width: 16rem;
+    margin: 0 1.5rem;
 }
 
 .bm-item.menu-profile:hover {
     background-color: transparent;
 }
 
-.menu-profile-link {
-    display: flex !important;
-    position: relative;
-    align-items: center;
-    flex-direction: row;
-    justify-content: space-around;
-    width: 228px;
-}
-
-.menu-profile-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.profile-username {
+    font-size: 1.4rem;
+    font-weight: bold;
     color: #FAF9F9;
 }
 
-.menu-profile-info a:hover {
-    text-decoration: none;
-}
-
-.menu-profile-username {
-    font-size: 24px;
-    font-weight: 600;
-}
-
-.menu-profile-small {
-    font-size: 18px;
-    font-weight: 400;
+.profile-link {
     color: #c9c9c9;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.2s;
 }
 
-.menu-profile-small:hover {
-    color: #F9FAFA !important;
-    font-size: 19px;
+.profile-link:hover {
+    color: #FAF9F9;
     text-decoration: underline;
-    text-decoration-color: #FAF9F9;
 }
 
 /* navbar mobile*/
@@ -154,7 +126,6 @@
     flex-direction: row;
     width: 100%;
 }
-
 
 @media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
     .bm-menu {

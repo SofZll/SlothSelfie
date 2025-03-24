@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { slide as Hamburger } from 'react-burger-menu';
 import { Link } from 'react-router-dom';
 import { StyleContext } from './StyleContext';
+import { UserContext } from '../contexts/UserContext';
 
 //TODO: va messo abbosto l'iconna del panino
 const DesktopNav = () => {
-
+    const { user } = useContext(UserContext);
+    console.log(user);
     const [isOpen, setIsOpen] = useState(false);
 
     const handleStateChange = (state) => {
@@ -26,23 +28,22 @@ const DesktopNav = () => {
                 <Link to='/notifications' onClick={closeMenu}>Notifications</Link>
                 <Link to='/forum' onClick={closeMenu}>Forum</Link>
                 <a href='/projects.html' onClick={closeMenu}>Projects</a>
-{/*
-                <div className='menu-profile'>
-                    <div className='menu-profile-link'>
-                        {profileData.profile_image && (
+
+                <div className='fixed-bottom menu-profile d-flex flex-column align-items-center justify-content-center'>
+                    <hr className='w-100' />
+                    <div className='d-flex w-100 ps-2 align-items-center gap-4'>
+                        {user.profile_image && (
                             <div className='img-wrap'>
-                                <img src={profileData.profile_image} alt='img-profile'/>
+                                <img src={user.profile_image} alt={`Profilo di ${user.username}`} loading='lazy' />
                             </div>
                         )}
-                        <div className='menu-profile-info'>
-                            <span className='menu-profile-username'>{profileData.username}</span>
-                            <Link to='/profile' onClick={closeMenu}>
-                                <span className='menu-profile-small'>Profile</span>
-                            </Link>
+                        <div className='d-flex flex-column'>
+                            <span className='profile-username'>{user.username}</span>
+                            <Link to='/profile' onClick={closeMenu} className='profile-link'>Profile</Link>
                         </div>
                     </div>
                 </div>
-*/}
+
             </Hamburger>
 
             <StyleContext.Consumer>

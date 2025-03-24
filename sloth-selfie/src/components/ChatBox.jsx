@@ -175,11 +175,7 @@ const ChatBox = () => {
 
     const handleSendMessage = () => {
         if (!newMessage.trim()) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Errore',
-                text: 'Inserisci un messaggio'
-            });
+            Swal.fire({ icon: 'error', title: 'Errore', text: 'Inserisci un messaggio' });
         } else {
             const updateChat = {
                 ...selectedChat,
@@ -188,13 +184,13 @@ const ChatBox = () => {
                     { 
                         author: username, 
                         text: newMessage, 
-                        date: new Date()
+                        date: new Date().toLocaleTimeString()
                     }
                 ],
                 lastMessage: {
                     author: username,
                     text: newMessage,
-                    date: new Date()
+                    date: new Date().toLocaleTimeString()
                 }
             };
 
@@ -214,11 +210,7 @@ const ChatBox = () => {
     }
 
     const handleNewChat = () => {
-        Swal.fire({
-            icon: 'info',
-            title: 'Nuovo messaggio',
-            text: 'Funzionalità non ancora implementata'
-        });
+        Swal.fire({ icon: 'info', title: 'Nuovo messaggio', text: 'Funzionalità non ancora implementata' });
     }
 
     useEffect(() => {
