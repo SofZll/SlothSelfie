@@ -18,13 +18,13 @@
         <h1 class="mb-3">Your Projects:</h1>
         <ul id="projects-list" class="list-group mt-3"></ul>
 
-    <button id="closeProjectViewBtn" class="btn btn-danger" style="display: none;">Close View</button>
+    <button id="closeProjectViewBtn" class="btn btn-primary btn-view" style="display: none;">Close View</button>
     <div id="project-view-container" class="mt-4"></div>
 
-    <button id="closeActivityViewBtn" class="btn btn-danger" style="display: none;">Close Activities</button>
+    <button id="closeActivityViewBtn" class="btn btn-warning btn-form-3" style="display: none;">Close Activities</button>
     <div id="activity-container"></div>
     
-    <button id="ToggleFormBtn" class="btn btn-primary"> + Add a Project</button>
+    <button id="ToggleFormBtn" class="btn"> + Add a Project</button>
     <form id="projectForm" style="display: none;">
         <h2 class="mb-3" id="formTitle">Create a new project:</h2>
 
@@ -51,9 +51,9 @@
         <div id="phasesContainer">
             <h4>Phases</h4>
         </div>
-        <button type="button" class="btn btn-secondary mt-2" onclick="addPhase()">Add a phase</button>
+        <button type="button" class="btn btn-primary mt-2 btn-form" onclick="addPhase()">Add a phase</button>
 
-        <button type="submit" class="btn btn-primary mt-2" id="createSave">Create project</button>
+        <button type="submit" class="btn btn-primary mt-2 btn-form" id="createSave">Create project</button>
     </form>
 
     </div>

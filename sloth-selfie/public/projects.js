@@ -65,13 +65,13 @@ async function loadProjects() {
                 <strong>${project.title}</strong> - Owner: ${project.owner.username} - Members: ${project.members.map(m => m.username).join(", ")}<br>
                  ${
                     project.owner.username === userLogged // Only the owner can edit or delete the project
-                    ? `<button class="btn btn-danger btn-sm ml-2" onclick="deleteProject('${project._id}')">Delete Project</button>
-                       <button class="btn btn-info btn-sm ml-2" onclick="editProject('${project._id}')">Edit Project</button>` 
+                    ? `<button class="btn btn-info btn-sm ml-2 btn-form-1" onclick="deleteProject('${project._id}')">Delete Project</button>
+                       <button class="btn btn-info btn-sm ml-2 btn-form-1" onclick="editProject('${project._id}')">Edit Project</button>` 
                     : ''
                 }
-                <button class="btn btn-warning btn-sm ml-2" onclick="handleActivities('${project._id}')">Handle Activities</button>
-                <button class="btn btn-outline-primary btn-sm view-list" onclick="viewAsList('${project._id}')">View as List</button>
-                <button class="btn btn-outline-secondary btn-sm view-gantt" onclick="viewAsGantt('${project._id}')">View as Gantt</button>
+                <button class="btn btn-warning btn-sm ml-2 btn-form-3" onclick="handleActivities('${project._id}')">Handle Activities</button>
+                <button class="btn btn-outline-primary btn-sm btn-view view-list" onclick="viewAsList('${project._id}')">View as List</button>
+                <button class="btn btn-outline-primary btn-sm btn-view view-gantt" onclick="viewAsGantt('${project._id}')">View as Gantt</button>
             `;
             list.appendChild(li);
         });
@@ -232,11 +232,11 @@ function addPhase() {
         <h5>Phase ${phaseNumber}</h5>
         <label>Phase name:</label>
         <input type="text" class="form-control phase-name" required>
-        <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'phase')">Add activity</button>
+        <button type="button" class="btn btn-warning mt-2 btn-form-3" onclick="addActivity(this, 'phase')">Add activity</button>
         <div class="activities mt-2"></div> <!-- container activities of the phase -->
-        <button type="button" class="btn btn-info mt-2" onclick="addSubPhase(this)">Add subphase</button>
+        <button type="button" class="btn btn-info mt-2 btn-form-2" onclick="addSubPhase(this)">Add subphase</button>
         <div class="subphases mt-2"></div> <!-- Container subphases -->
-        <button type="button" class="btn btn-danger mt-2" onclick="removeElement(this)">Remove Fase</button>
+        <button type="button" class="btn btn-danger mt-2 btn-form-1" onclick="removeElement(this)">Remove Phase</button>
     `;
     document.getElementById("phasesContainer").appendChild(phaseDiv);
 
@@ -251,9 +251,9 @@ function addSubPhase(button) {
     subPhaseDiv.innerHTML = `
         <label>Subphase name:</label>
         <input type="text" class="form-control subphase-name" required>
-        <button type="button" class="btn btn-warning mt-2" onclick="addActivity(this, 'subphase')">Add activity</button>
+        <button type="button" class="btn btn-warning mt-2 btn-form-3" onclick="addActivity(this, 'subphase')">Add activity</button>
         <div class="subphase-activities mt-2"></div> <!-- Container activities of the subphase -->
-        <button type="button" class="btn btn-danger mt-2" onclick="removeElement(this)">Remove Subphase</button>
+        <button type="button" class="btn btn-danger mt-2 btn-form-2" onclick="removeElement(this)">Remove Subphase</button>
     `;
     subPhaseContainer.appendChild(subPhaseDiv);
 }
@@ -313,7 +313,7 @@ function addActivity(button, type) {
         </select>
 
         </br>
-        <button type="button" class="btn btn-danger mt-2" onclick="closeActivityForm(this)">Remove Activity</button>
+        <button type="button" class="btn btn-danger mt-2 btn-form-3" onclick="closeActivityForm(this)">Remove Activity</button>
     `;
     activityContainer.appendChild(activityDiv);
 }

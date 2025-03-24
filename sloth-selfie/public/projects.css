@@ -5,3 +5,44 @@ button.disabled {
     pointer-events: none;
     opacity: 0.7;
 }
+
+#ToggleFormBtn {
+    display: block;
+    margin: 20px auto;
+    text-align: center;
+    width: fit-content;
+    background-color: #2b59b6;
+    color: white; 
+}
+
+.btn-form {
+    display: block;
+    text-align: center;
+    width: fit-content;
+    background-color: #2b59b6;
+    color: white; 
+}
+
+.btn-view {
+    background-color: white;
+    color: #2b59b6; 
+    border: 1px solid #2b59b6;
+}
+
+.btn-form-1 {
+    background-color: #2b59b6;
+    color: white;
+    border: none;
+}
+
+.btn-form-2 {
+    background-color: #2b98b6;
+    color: white;
+    border: none;
+}
+
+.btn-form-3 {
+    background-color: #ffA500;
+    color: white;
+    border: none;
+}
