@@ -1,4 +1,4 @@
-import React, { useEffect }  from 'react';
+import React  from 'react';
 
 import Swal from 'sweetalert2';
 
@@ -39,13 +39,6 @@ const FormActivity = () => {
         resetSelected();
     }
 
-    useEffect(() => {
-        if (selected.edit) {
-            setActivity(activity);
-        }
-    }, [selected.edit]); 
-
-
     return (
         <form className='d-flex flex-column w-100'>
             <div className='row py-2 '>
@@ -69,9 +62,9 @@ const FormActivity = () => {
 
             <div className='row d-flex justify-content-center py-2'>
                 <div className='col col-auto form-check'>
-                    <input className='form-check-input' type='checkbox' role='switch' id='done'
-                    value={activity.completed}
-                    onChange={(e) => setActivity({...activity, ['completed']: e.target.checked})} />
+                    <input className='form-check-input' type='checkbox' role='switch' id='completed'
+                        value={activity.completed}
+                        onChange={(e) => setActivity({...activity, ['completed']: e.target.checked})} />
                     <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>

@@ -8,46 +8,49 @@ import moment from 'moment';
 import { Plus } from 'lucide-react';
 
 import { useIsDesktop } from '../../utils/utils';
-import ScrollListLayout from '../../components/ScrollList';
+import ScrollList from '../../components/ScrollList';
 import FormCalendar from './FormCalendar';
 
 import { UserContext } from '../../contexts/UserContext';
 import { useCalendar } from '../../contexts/CalendarContext';
+import { useTask } from '../../contexts/TaskContext';
 
 import { apiService } from '../../services/apiService';
 
 const Planner = () => {
 
-
     const isDesktop = useIsDesktop();
-
-    const { activity, setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected } = useCalendar();
-    const [listNormal, setListNormal] = useState([]);
-    const { user } = useContext(UserContext);
-
 
     const localizer = momentLocalizer(moment);
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
+    const { user } = useContext(UserContext);
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected } = useCalendar();
+    const { setTask, tasks, setTasks } = useTask();
+
+    const [listNormal, setListNormal] = useState([]);
+
+
     const fetchActivities = async () => {
         const response = await apiService('/activities', 'GET');
-        if (response) {
-            setActivities(response);
-            console.log(response, 'Activitiesssssssssssssssssssssssss');
-        }
+        if (response) setActivities(response);
     }
 
     const fetchEvents = async () => {
         const response = await apiService('/events', 'GET');
-        if (response) {
-            setEvents(response);
-        }
+        if (response) setEvents(response);
+    }
+
+    const fetchTasks = async () => {
+        const response = await apiService('/tasks', 'GET');
+        if (response) setTasks(response.filter(task => task.deadline));
     }
 
     const normalizeData = (datas, type) => {
         if (!Array.isArray(datas)) return [];
 
-        return (type === 'activity' ? datas.filter(data => !data.completed && data.deadline) : datas).map(data => {
+        return (type === 'activity' ? datas.filter(data => !data.completed && data.deadline)
+            :  (type === 'task' ? datas.filter(data => !data.completed) : datas)).map(data => {
             return {
                 _id: data._id,
                 title: data.title,
@@ -66,7 +69,8 @@ const Planner = () => {
 
     const onItemSelect = (item) => {
         if (item.type === 'activity') setActivity(activities.find(a => a._id === item._id));
-        else setEvent(events.find(event => event._id === item._id));
+        else if (item.type === 'event') setEvent(events.find(event => event._id === item._id));
+        else setTask(tasks.find(task => task._id === item._id));
         
         setSelected({selection: item.type, edit: true, add: false, popUp: !isDesktop});
     }
@@ -87,34 +91,35 @@ const Planner = () => {
             if (response) {
                 setActivities(activities.map(a => a._id === event._id ? response : a));
             }
-        } else {
+        } else if (event.type === 'event') {
             const e = events.find(e => e._id === event._id);
             const response = await apiService(`/event/${e._id}`, 'PUT', { ...e, date });
             if (response) {
                 setEvents(events.map(e => e._id === event._id ? response : e));
             }
+        } else {
+            const t = tasks.find(t => t._id === event._id);
+            const response = await apiService(`/task/${t._id}`, 'PUT', { ...t, deadline });
+            if (response) {
+                setTasks(tasks.map(t => t._id === event._id ? response : t));
+            }
         }
     }
-        
 
     useEffect(() => {
         if (user) {
             fetchActivities();
             fetchEvents();
+            fetchTasks();
         }
     }, [user]);
-
-    useEffect(() => {
-        console.log(activity, 'Updated Activity');
-    }, [activity]);
     
     useEffect(() => {
-        setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event')]);
-        console.log(listNormal);
-    }, [activities, events]);
+        setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
+    }, [activities, events, tasks]);
 
     return (
-        <div className='d-flex flex-column flex-grow-1 h-100 justify-content-center align-items-center'>
+        <div className='d-flex flex-column w-100 h-100 justify-content-center align-items-center'>
 
             {!isDesktop && (
                 <>
@@ -142,10 +147,12 @@ const Planner = () => {
                     onEventDrop={onEventDrop}
                     resizable
                 />
+
+                
             </div>
 
             {!isDesktop && (
-                <ScrollListLayout CardList={activities} smallView={true} />
+                <ScrollList CardList={activities} smallView={true} />
             )}
         </div>
     )

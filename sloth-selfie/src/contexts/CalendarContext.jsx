@@ -117,9 +117,6 @@ export const CalendarProvider = ({ children }) => {
     }
 
     const back = () => {
-        resetActivity();
-        resetEvent();
-        resetAvailability();
         setSelected({
             ...selected,
             selection: '...',
@@ -129,9 +126,6 @@ export const CalendarProvider = ({ children }) => {
     }
 
     const resetSelected = () => {
-        resetActivity();
-        resetEvent();
-        resetAvailability();
         setSelected({
             selection: '...',
             edit: false,
@@ -141,8 +135,14 @@ export const CalendarProvider = ({ children }) => {
     }
 
     return (
-        <CalendarContext.Provider value={{ activity, setActivity, activities, setActivities, resetActivity, event, setEvent, events, setEvents, resetEvent, availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, setSelected, select, back, resetSelected }}>
+        <CalendarContext.Provider 
+            value={{ activity, setActivity, activities, setActivities, resetActivity,
+                event, setEvent, events, setEvents, resetEvent,
+                availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
+                selected, setSelected, select, back, resetSelected }}>
+
             {children}
+            
         </CalendarContext.Provider>
     )
 }

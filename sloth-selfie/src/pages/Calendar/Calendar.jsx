@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useIsDesktop } from '../../utils/utils';
 
 import MainLayout from '../../layouts/MainLayout';
@@ -6,8 +6,6 @@ import Planner from './Planner';
 import FormCalendar from './FormCalendar';
 
 import '../../styles/Calendar.css';
-
-import { Plus } from 'lucide-react';
 
 import { CalendarProvider } from '../../contexts/CalendarContext';
 
