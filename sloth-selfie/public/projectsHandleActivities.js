@@ -8,7 +8,6 @@ async function handleActivities(projectId) {
             alert("No user is logged in!");
             return;
         }
-        
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
         const project = await response.json();
 
@@ -48,18 +47,8 @@ async function handleActivities(projectId) {
                     asyncOperations.push(checkOptionsForCompleteActivityDep(activity._id, false));
                 }
 
-                // Check if the activity has a deadline and if it is Overdue or Abandoned
-                let today = new Date();       //TODO, TIME MACHINE DATE
-                today.setHours(0, 0, 0, 0);    //we only compare the day, not the hours
-                let deadline = new Date(activity.deadline);
-
-                let isLate = today > deadline && !activity.output; // Overdue without output
-                let isAbandoned = today - deadline > 7 * 24 * 60 * 60 * 1000; // Overdue since last 7 days
-                //if the activity has no members assigned, it is abandoned
-                let isAbandonedNoParticipants = false;
-                if (activity.sharedWith.length === 0) {
-                    isAbandonedNoParticipants = true;
-                }
+                // Check the activity deadline and if it is Overdue or Abandoned
+                [isLate, isAbandoned, isAbandonedNoParticipants] = checkOverdueAbandoned(activity);
 
                 if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
                     asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
@@ -69,7 +58,7 @@ async function handleActivities(projectId) {
                         asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
                     }
                 }
-                //if members are re-added, and the activity is not overdue since last 7 days, the activity will be Not_Activatable in case of no input, Activatable otherwise,  Active it has output also
+                //if members are re-added, and the activity is not overdue since last 7 days, the activity will be Not_Activatable in case of no input, Activatable otherwise, Active if it has output also
                 if (activity.sharedWith.length > 0 && activity.status === "Abandoned") {
                     if(!isAbandoned){
                         if (!activity.input  && activity.status !== "Not_Activatable") {
@@ -89,67 +78,11 @@ async function handleActivities(projectId) {
 
                 let star = activity.milestone ? "*" : ""; // milestone
 
-                //If the owner of the project is not a member of the activity, we will show the activity fields but he will not be able to interact with them (only the reject output button will be enabled)
-                const isMember = activity.sharedWith.some(member => member.username === userLogged);
-                const OwnerNotMember = isOwner && !isMember;
+                // Check the status of the input/output fields
+                const [ inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled ] = getActivityInputOutputStatus(activity, userLogged, isOwner, isAbandoned);
 
-                //if the activity has dependencies, or if input already exists, or if if ownerNotMember, the input field is disabled
-                let inputDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember || isAbandoned ? 'disabled' : '';
-                let inputSelectDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the select
-                let inputInsertDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the button
-
-                let outputDisabled = activity.output || activity.status !== "Active" || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Check if output already exists or if we are not in the "Active" case
-                let outputSelectDisabled = activity.output || activity.status !== "Active" || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the select if output exists
-                let outputInsertDisabled = activity.output || activity.status !== "Active" || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the button if output exists
-
-                content += `
-                    <li class="list-group-item">
-                        <strong>${star}${activity.title}</strong>
-                        <p id="status-${activity._id}">Status: ${activity.status}</p>
-                        <br>
-                        Input type: 
-                        <select id="input-type-${activity._id}" ${inputSelectDisabled} onchange="updateInputOutputType('${activity._id}', 'input')">
-                            <option value="text">Text</option>
-                            <option value="empty">Empty</option>
-                            <option value="link">Link</option>
-                        </select>
-                        <input type="text" id="input-${activity._id}" value="${activity.input?.content || ''}" ${inputDisabled}>
-                        <button class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'input')" ${inputInsertDisabled}>Insert Input</button>
-                        
-                        <label>Output type:</label>
-                        <select id="output-type-${activity._id}" ${outputSelectDisabled} onchange="updateInputOutputType('${activity._id}', 'output')">
-                            <option value="text">Text</option>
-                            <option value="link">Link</option>
-                            <option value="true">Completed</option>
-                        </select>
-                        <input type="text" id="output-${activity._id}" value="${activity.output?.content || ''}" ${outputDisabled}>
-                        <button class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output')" ${outputInsertDisabled}>Insert Output</button>
-                        <button class="btn btn-outline-success btn-sm" id="save-output-${activity._id}" onclick="updateOutputNote('${activity._id}', 'output')" style="display: none;">Save updated output</button>
-                        `;
-                    // shows the buttons for reject output only if the user is the owner
-                    if (isOwner) {
-                        // Disable the button if the activity is not Completed
-                        let rejectDisabled = activity.status !== "Completed" ? 'disabled' : '';
-                        content += `
-                            <button class="btn btn-outline-danger btn-sm" id="reactivate-${activity._id}" onclick="reactivateActivity('${activity._id}', 'Reactivated')" ${rejectDisabled}>Reject output</button>
-                         `;
-                         
-                         //div for the buttons for the owner to decide if the next activities should be delayed or contracted in case of delay
-                         content += `
-                         <div id="activity-${activity._id}-buttons-container"></div>
-                        `;
-                    }
-
-                    let abandonDisabled = !activity.sharedWith.some(user => user.username === userLogged) ? 'disabled' : '';
-
-                    content += `
-                        <p id="startDate-${activity._id}">Start Date: ${new Date(activity.startDate).toLocaleDateString()}<p>
-                        <p id="deadline-${activity._id}">Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
-                        <button class="btn btn-success btn-sm" id="start-${activity._id}" onclick="startActivity('${activity._id}', 'Active')" ${!activity.input ? 'disabled' : ''}>Start</button>
-                        <button class="btn btn-primary btn-sm" id="complete-${activity._id}" onclick="completeActivity('${activity._id}', 'Completed')" ${!activity.output ? 'disabled' : ''}>Complete</button>
-                        <button class="btn btn-danger btn-sm" id="abandon-${activity._id}" onclick="abandonActivity('${activity._id}')" ${abandonDisabled}>Abandon</button>
-                    </li>
-                    `;
+                // Show the activity
+                content += generateContent(activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged);
             }
             content += `</ul>`;
         }
@@ -171,6 +104,93 @@ async function handleActivities(projectId) {
     } catch (error) {
         console.error("Error handling activities of the project:", error);
     }
+}
+
+// Function to check if the activity is overdue or abandoned in handleActivities
+function checkOverdueAbandoned(activity) {
+    let today = new Date();       //TODO, TIME MACHINE DATE
+                today.setHours(0, 0, 0, 0);    //we only compare the day, not the hours
+                let deadline = new Date(activity.deadline);
+
+                let isLate = today > deadline && !activity.output; // Overdue without output
+                let isAbandoned = today - deadline > 7 * 24 * 60 * 60 * 1000; // Overdue since last 7 days
+                //if the activity has no members assigned, it is abandoned
+                let isAbandonedNoParticipants = false;
+                if (activity.sharedWith.length === 0) {
+                    isAbandonedNoParticipants = true;
+                }
+    return [ isLate, isAbandoned, isAbandonedNoParticipants ];
+}
+
+// Function to get the status of the input/output fields in handleActivities
+function getActivityInputOutputStatus(activity, userLogged, isOwner, isAbandoned) {
+    //If the owner of the project is not a member of the activity, we will show the activity fields but he will not be able to interact with them (only the reject output button will be enabled)
+    const isMember = activity.sharedWith.some(member => member.username === userLogged);
+    const OwnerNotMember = isOwner && !isMember;
+
+    //if the activity has dependencies, or if input already exists, or if if ownerNotMember, the input field is disabled
+    let inputDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember || isAbandoned ? 'disabled' : '';
+    let inputSelectDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the select
+    let inputInsertDisabled = (activity.dependencies && activity.dependencies.length > 0) || activity.input || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the button
+
+    let outputDisabled = activity.output || activity.status !== "Active" || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Check if output already exists or if we are not in the "Active" case
+    let outputSelectDisabled = activity.output || activity.status !== "Active" || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the select if output exists
+    let outputInsertDisabled = activity.output || activity.status !== "Active" || OwnerNotMember || isAbandoned ? 'disabled' : ''; // Disable the button if output exists
+
+    return [ inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled ];
+}
+
+// Function to generate the content of the activities in handleActivities
+function generateContent(activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged) {
+    let content = `
+    <li class="list-group-item">
+        <strong>${star}${activity.title}</strong>
+        <p id="status-${activity._id}">Status: ${activity.status}</p>
+        <br>
+        Input type: 
+        <select id="input-type-${activity._id}" ${inputSelectDisabled} onchange="updateInputOutputType('${activity._id}', 'input')">
+            <option value="text">Text</option>
+            <option value="empty">Empty</option>
+            <option value="link">Link</option>
+        </select>
+        <input type="text" id="input-${activity._id}" value="${activity.input?.content || ''}" ${inputDisabled}>
+        <button class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'input')" ${inputInsertDisabled}>Insert Input</button>
+        
+        <label>Output type:</label>
+        <select id="output-type-${activity._id}" ${outputSelectDisabled} onchange="updateInputOutputType('${activity._id}', 'output')">
+            <option value="text">Text</option>
+            <option value="link">Link</option>
+            <option value="true">Completed</option>
+        </select>
+        <input type="text" id="output-${activity._id}" value="${activity.output?.content || ''}" ${outputDisabled}>
+        <button class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output')" ${outputInsertDisabled}>Insert Output</button>
+        <button class="btn btn-outline-success btn-sm" id="save-output-${activity._id}" onclick="updateOutputNote('${activity._id}', 'output')" style="display: none;">Save updated output</button>
+        `;
+        
+    // shows the buttons for reject output only if the user is the owner
+    if (isOwner) {
+        // Disable the button if the activity is not Completed
+        let rejectDisabled = activity.status !== "Completed" ? 'disabled' : '';
+        content += `
+            <button class="btn btn-outline-danger btn-sm" id="reactivate-${activity._id}" onclick="reactivateActivity('${activity._id}', 'Reactivated')" ${rejectDisabled}>Reject output</button>
+         `;
+         
+         //div for the buttons for the owner to decide if the next activities should be delayed or contracted in case of delay
+         content += `
+         <div id="activity-${activity._id}-buttons-container"></div>
+        `;
+    }
+    let abandonDisabled = !activity.sharedWith.some(user => user.username === userLogged) ? 'disabled' : '';
+
+    content += `
+        <p id="startDate-${activity._id}">Start Date: ${new Date(activity.startDate).toLocaleDateString()}<p>
+        <p id="deadline-${activity._id}">Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
+        <button class="btn btn-success btn-sm" id="start-${activity._id}" onclick="startActivity('${activity._id}', 'Active')" ${!activity.input ? 'disabled' : ''}>Start</button>
+        <button class="btn btn-primary btn-sm" id="complete-${activity._id}" onclick="completeActivity('${activity._id}', 'Completed')" ${!activity.output ? 'disabled' : ''}>Complete</button>
+        <button class="btn btn-danger btn-sm" id="abandon-${activity._id}" onclick="abandonActivity('${activity._id}')" ${abandonDisabled}>Abandon</button>
+    </li>
+    `;
+    return content;
 }
 
 // Function to update the buttons of an activity depending on its status

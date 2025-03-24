@@ -5,8 +5,7 @@
 //TODO: aggiungi loading al caricamento di pagina
 //TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
 
-//ottimizza condizioni in fetch forse si può fare meglio
-//anche projectsView da rivedere
+//projectsView da rivedere
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
