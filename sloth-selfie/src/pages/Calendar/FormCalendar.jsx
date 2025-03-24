@@ -4,6 +4,7 @@ import SelectionCalendarLayout from '../../layouts/SelectionCalendarLayout';
 import FormActivity from './FormActivity';
 import FormEvent from './FormEvent';
 import FormNoAvailability from './FormNoAvailability';
+import FormTask from './FormTask';
 import Button from '../../components/Button';
 import ScrollListLayout from '../../components/ScrollList';
 
@@ -36,6 +37,10 @@ const FormCalendar = () => {
 
                 {selected.selection === 'no availability' && (
                     <FormNoAvailability />
+                )}
+
+                {selected.selection === 'task' && (
+                    <FormTask />
                 )}
 
             </SelectionCalendarLayout>

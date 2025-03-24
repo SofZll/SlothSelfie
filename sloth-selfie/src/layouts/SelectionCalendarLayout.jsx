@@ -1,14 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useIsDesktop } from '../utils/utils';
 
 import { X, MoveLeft } from 'lucide-react';
 
 import { useCalendar } from '../contexts/CalendarContext';
+import { useTask } from '../contexts/TaskContext';
 
 const SelectionCalendarLayout = ({children}) => {
 
     const isDesktop = useIsDesktop();
-    const { selected, resetSelected, back } = useCalendar();
+    const { selected, resetSelected, back, resetActivity, resetEvent, resetAvailability } = useCalendar();
+    const { resetTask } = useTask();
+
+    useEffect(() => {
+        if (selected.selection === '...') {
+            resetActivity();
+            resetEvent();
+            resetAvailability();
+            resetTask();
+        }
+    }, [selected.selection]);
 
     return (
         <div className="d-flex flex-column w-100 h-100 my-md-3">
