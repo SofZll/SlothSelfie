@@ -2,9 +2,6 @@
 //TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto (trasla o contrae le attività sincronizzate a quella in ritardo).
 //TODO: modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) 
 
-//TODO: aggiungi loading al caricamento di pagina
-
-//in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
@@ -33,6 +30,13 @@ async function getLoggedUser() {
 
 //GET, function to load projects from the server
 async function loadProjects() {
+
+    //adds loading message and spinner
+    const list = document.getElementById("projects-list");
+    list.innerHTML = `<div class="loading-container">
+                        <div class="spinner"></div>
+                        <p>Loading, please wait...</p>
+                    </div>`;
     try {
         const response = await fetch(`http://localhost:8000/api/projects`);
         
@@ -115,6 +119,11 @@ function extractActivityData(activityDiv) {
 //Function to save a new or edited project
 async function saveOrUpdateProject(event) {
     event.preventDefault();
+
+    //disable the button while saving
+    document.getElementById("createSave").disabled = true;
+    // Show a saving message
+    document.getElementById("alertMessage").style.display = "block";
      // Get the project id if we are editing a project
     const projectId = document.getElementById("projectForm").getAttribute("data-project-id");
 
@@ -202,6 +211,12 @@ async function saveOrUpdateProject(event) {
     } catch (error) {
         console.error("Error saving/updating project:", error);
     }
+
+    // hide the saving message
+    document.getElementById("alertMessage").style.display = "none";
+
+    //enable the button after saving
+    document.getElementById("createSave").disabled = false;
 
     // Remove the warning message after saving
     const warningMessage = document.getElementById("dependencyWarning");
