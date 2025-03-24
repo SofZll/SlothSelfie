@@ -3,9 +3,6 @@
 //TODO: modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) 
 
 //TODO: aggiungi loading al caricamento di pagina
-//TODO: /* Mobile First: Hide the sidebar and show only the Gantt chart */ ->NON VA
-
-//projectsView da rivedere
 
 //in fill form di edit le attività a volte non sono nell'ordine giusto, e a volte ci mette un po' a salvare la struttura
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE

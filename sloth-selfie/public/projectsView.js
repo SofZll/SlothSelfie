@@ -197,21 +197,11 @@ async function viewAsGantt(projectId) {
         // Create sidebar for hierarchy
         const sidebar = document.createElement("div");
         sidebar.id = "gantt-sidebar";
-        sidebar.style.width = "50vh";
-        sidebar.style.padding = "15px";
-        sidebar.style.borderRight = "2px solid #ccc";
-        sidebar.style.overflowY = "auto";
-        sidebar.style.maxHeight = "80vh";
-        sidebar.style.background = "#f8f8f8";
-        sidebar.style.fontSize = "14px";
-        sidebar.style.resize = "horizontal";
-        sidebar.style.overflow = "auto";
         container.appendChild(sidebar);
 
         // Container for the Gantt chart
         const ganttContainer = document.createElement("div");
         ganttContainer.id = "gantt-container";
-        ganttContainer.style.width = "calc(100% - 90vh)";
         container.appendChild(ganttContainer);
 
         // Generate Gantt tasks
@@ -275,20 +265,18 @@ function createHierarchy(sidebar, project) {
 
     // Create a table for the hierarchy
     const table = document.createElement("table");
-    table.style.width = "100%";
-    table.style.borderCollapse = "collapse";
-    table.style.tableLayout = "auto"; // Allow column resizing
+    table.id = "gantt-sidebar-table";
 
     // Table header
     const thead = document.createElement("thead");
     thead.innerHTML = `
         <tr>
-            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 150px;">Phase/Subphase</th>
-            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Activity</th>
-            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Actor/s</th>
-            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Start</th>
-            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Deadline</th>
-            <th style="border-bottom: 2px solid #ccc; padding: 5px; min-width: 100px;">Days</th>
+            <th>Phase/Subphase</th>
+            <th>Activity</th>
+            <th>Actor/s</th>
+            <th>Start</th>
+            <th>Deadline</th>
+            <th>Days</th>
         </tr>
     `;
     table.appendChild(thead);
@@ -301,8 +289,7 @@ function createHierarchy(sidebar, project) {
         const phaseRow = document.createElement("tr");
         const phaseCell = document.createElement("td");
         phaseCell.textContent = phase.title;
-        phaseCell.style.fontWeight = "bold";
-        phaseCell.style.paddingLeft = "10px";
+        phaseCell.classList.add("phase-cell");
         phaseCell.setAttribute("colspan", 1); // Make phase row span both columns
         phaseRow.appendChild(phaseCell);
         tbody.appendChild(phaseRow);
@@ -317,8 +304,7 @@ function createHierarchy(sidebar, project) {
             const subphaseRow = document.createElement("tr");
             const subphaseCell = document.createElement("td");
             subphaseCell.textContent = `> ${subphase.title}`;
-            subphaseCell.style.fontWeight = "bold";
-            subphaseCell.style.paddingLeft = "20px"; // Indent for subphases
+            subphaseCell.classList.add("subphase-cell");
             subphaseCell.setAttribute("colspan", 1); // Make subphase row span both columns
             subphaseRow.appendChild(subphaseCell);
             tbody.appendChild(subphaseRow);
@@ -336,20 +322,14 @@ function createHierarchy(sidebar, project) {
 function addActivityRow(tbody, activity) {
     const row = document.createElement("tr");
             const phaseCell = document.createElement("td");
-            phaseCell.style.paddingLeft = "15px"; // Indent to differentiate
             phaseCell.textContent = "";
+            phaseCell.classList.add("activity-phase-cell");
             row.appendChild(phaseCell);
 
             const activityCell = document.createElement("td");
             //if it is a milestone we add a star to the title
-            if (activity.milestone) {
-                activityCell.textContent = `*${activity.title}`;
-            }
-            else {
-                activityCell.textContent = activity.title;
-            }
-            activityCell.style.cursor = "pointer";
-            activityCell.style.paddingLeft = "10px";
+            activityCell.textContent = activity.milestone ? `*${activity.title}` : activity.title;
+            activityCell.classList.add("activity-title-cell");
             activityCell.onclick = () => highlightTask(activity._id);
             row.appendChild(activityCell);
 
