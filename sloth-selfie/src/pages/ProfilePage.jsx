@@ -73,7 +73,7 @@ const ProfilePage = () => {
     return (
         <MainLayout>
             <div className='profile d-flex align-items-center justify-content-center flex-column w-100 p-0'>
-                <div className='profile-container d-flex align-items-center justify-content-center flex-column  m-2 p-4'>
+                <div className='profile-container d-flex align-items-center justify-content-center flex-column m-2 p-3'>
                     <h2>{user.username}</h2>
                     <div className='profile-image d-flex align-items-center justify-content-center m-auto overflow-hidden'>
                         {user.profile_image && (
@@ -81,7 +81,7 @@ const ProfilePage = () => {
                         )}
                         <input type='file' id='file-input' style={{display: 'none'}} onChange={handleEditImage}/>
                     </div>
-                    <button className='btn button-info' onClick={() => setShowProfile(!showProfile)}>
+                    <button className='button-clean white mt-3' onClick={() => setShowProfile(!showProfile)}>
                         {showProfile ? 'Hide': 'Expands'}
                     </button>
                     <div className={`col profile-info ${showProfile ? 'show' : ''}`}>
@@ -141,24 +141,24 @@ const ProfilePage = () => {
                         )}
                     </div>
                     {isEditing ? (
-                        <div className='profile-buttons'>
-                            <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={handleSaveChanges}>Save changes</button>
-                            <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(false)}>Cancel</button>
+                        <div className='d-flex justify-content-center gap-3 w-100'>
+                            <button className={`button-clean button-edit green ${showProfile ? 'show' : ''}`} onClick={handleSaveChanges}>Save changes</button>
+                            <button className={`button-clean button-edit red ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(false)}>Cancel</button>
                         </div>
                     ):(
-                        <div className='profile-buttons'>
-                            <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(true)}>Edit profile</button>
-                            <button className={`btn btn-main button-edit ${showProfile ? 'show' : ''}`} onClick={handleLogout}>Log out</button>
+                        <div className='d-flex justify-content-center gap-3 w-100'>
+                            <button className={`button-clean button-edit green ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(true)}>Edit profile</button>
+                            <button className={`button-clean button-edit red ${showProfile ? 'show' : ''}`} onClick={handleLogout}>Log out</button>
                         </div>
                     )}
                 </div>
                 {!isDesktop && (
                     <>
-                        <div className='d-flex justify-content-center flex-shrink-0 w-100 mt-3 mb-1'>
-                            <button className='button-large' onClick={() => navigate('/forum')}>FORUM</button>
+                        <div className='d-flex justify-content-center flex-shrink-0 w-100 mt-4 mb-1'>
+                            <button className='button-large teal w-100' onClick={() => navigate('/forum')}>FORUM</button>
                         </div>
-                        <div className='div-button-large mb-3 mt-1'>
-                            <button className='button-large' onClick={() => navigate('/chat')}>CHAT</button>
+                        <div className='d-flex justify-content-center flex-shrink-0 w-100 mt-2 mb-1'>
+                            <button className='button-large blue w-100' onClick={() => navigate('/chat')}>CHAT</button>
                         </div>
                     </>
                 )}
