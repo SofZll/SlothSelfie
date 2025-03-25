@@ -6,8 +6,7 @@
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
-//se clicco adjust/contract chiudere view
-//se quella dopo è in ritardo e dipende da quella completata, dopo aver contratto/aggiustato non mi riempie l'input
+//problema in adjust/contract: se quella dopo è in ritardo e dipende da quella completata, dopo aver contratto/aggiustato non mi riempie l'input
 
 // Function to get the logged user
 async function getLoggedUser() {
@@ -52,11 +51,7 @@ async function loadProjects() {
         //we get the logged user and load only the projects where he is the owner or a member
         const userLogged = await getLoggedUser();
         if (!userLogged) {
-            Swal.fire({
-                title: "Error",
-                text: "No user is logged in!",
-                icon: "error"
-              });
+            Swal.fire({title: "Error", text: "No user is logged in!", icon: "error"});
             return;
         }
 
@@ -202,11 +197,7 @@ async function saveOrUpdateProject(event) {
         const data = await response.json();
 
         if (response.ok) {
-            Swal.fire({
-                title: "Success!",
-                text: projectId ? "Project updated successfully!" : "Project saved successfully!",
-                icon: "success"
-              });
+            Swal.fire({title: "Success!", text: projectId ? "Project updated successfully!" : "Project saved successfully!", icon: "success"});
             resetForm();
             await loadProjects();
             //eventually close the list/gantt view and the handle activities form
@@ -440,11 +431,7 @@ async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
         if (data.success) {
             console.log('Subphase deleted with success!');
         } else {
-            Swal.fire({
-                title: "Error",
-                text: "Error while deleting subphase",
-                icon: "error"
-              });
+            Swal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
             
         }
     } catch (error) {
@@ -466,11 +453,7 @@ async function removeActivityFromBackend(projectId, phaseId, subphaseId, activit
         if (data.success) {
             console.log('Activity deleted with success!');
         } else {
-            Swal.fire({
-                title: "Error",
-                text: "Error while deleting the activity",
-                icon: "error"
-              });
+            Swal.fire({title: "Error", text: "Error while deleting the activity", icon: "error"});
 
         }
     } catch (error) {
@@ -498,11 +481,7 @@ async function deleteProject(projectId) {
             });
 
             if (response.ok) {
-                Swal.fire({
-                    title: "Success!",
-                    text: "Project deleted successfully!",
-                    icon: "success"
-                  });
+                Swal.fire({title: "Success!", text: "Project deleted successfully!", icon: "success"});
                 
                 // Close the project view if the project is deleted
                 document.getElementById("project-view-container").style.display = "none";
@@ -524,11 +503,7 @@ async function deleteProject(projectId) {
                 }
                 resetForm();
             } else {
-                Swal.fire({
-                    title: "Error",
-                    text: "Error while deleting the project.",
-                    icon: "error"
-                  });
+                Swal.fire({title: "Error", text: "Error while deleting the project.", icon: "error"});
             }
         } catch (error) {
             console.error("Error deleting project:", error);
