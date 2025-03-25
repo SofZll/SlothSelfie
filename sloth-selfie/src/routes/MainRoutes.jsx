@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import ProtectedRoute from './ProtectedRoute';
 import { useIsDesktop } from '../utils/utils';
 import { StyleProvider } from '../components/StyleContext';
-import { TaskProvider } from '../contexts/TaskContext';
 
 
 import Note from '../pages/Note/Note';
@@ -37,28 +36,26 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                             path='/*'
                             element={
                                 <ProtectedRoute authenticated={authenticated}>
-                                    <TaskProvider>
-                                        <Routes>
-                                            <Route path='/calendar' element={<Calendar />} />
-                                            <Route path='/notes' element={<Note />} />
-                                            <Route path='/home' element={<Home />} />
-                                            <Route path='/home/settings' element={<Home settings={true} />} />
-                                            {/*<Route path='/home/timemachine' element={<Home machineOpen={true} />} />*/}
-                                            <Route path='/profile' element={<Profile profileData={profileData}/>} />
-                                        </Routes>
-                                        {/*
-                                        <Route path='/notifications' element={<Notifications />} />
-                                        <Route path='/pomodoro' element={<Pomodoro />} />
+                                    <Routes>
                                         <Route path='/calendar' element={<Calendar />} />
-                                        <Route path='/forum' element={<Forum />} />
-                                        {!isDesktop && (
-                                            <>
-                                            <Route path='/chat' element={<ChatBox username={profileData.username} chatId={null} />} />
-                                            <Route path='/chat/:chatId' element={<ChatBox username={profileData.username} />} />
-                                            </>
-                                        )}
-                                        */}
-                                    </TaskProvider>
+                                        <Route path='/notes' element={<Note />} />
+                                        <Route path='/home' element={<Home />} />
+                                        <Route path='/home/settings' element={<Home settings={true} />} />
+                                        {/*<Route path='/home/timemachine' element={<Home machineOpen={true} />} />*/}
+                                        <Route path='/profile' element={<Profile profileData={profileData}/>} />
+                                    </Routes>
+                                    {/*
+                                    <Route path='/notifications' element={<Notifications />} />
+                                    <Route path='/pomodoro' element={<Pomodoro />} />
+                                    <Route path='/calendar' element={<Calendar />} />
+                                    <Route path='/forum' element={<Forum />} />
+                                    {!isDesktop && (
+                                        <>
+                                        <Route path='/chat' element={<ChatBox username={profileData.username} chatId={null} />} />
+                                        <Route path='/chat/:chatId' element={<ChatBox username={profileData.username} />} />
+                                        </>
+                                    )}
+                                    */}
                                 </ProtectedRoute>
                             }
                         />
