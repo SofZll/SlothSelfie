@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Profile.css';
-//import { useIsDesktop } from '../utils/utils';
+import { useIsDesktop } from '../utils/utils';
 import Swal from 'sweetalert2';
 
 import { validateEmail, validatePhoneNumber } from '../utils/validation';
@@ -12,7 +12,7 @@ import { UserContext } from '../contexts/UserContext';
 const ProfilePage = () => {
     const { user, setUser  } = useContext(UserContext);
 
-    //const isDesktop = useIsDesktop();
+    const isDesktop = useIsDesktop();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
@@ -70,16 +70,12 @@ const ProfilePage = () => {
         navigate('/login');
     }
 
-    const handleClickForum = () => {
-        navigate('/forum');
-    }
-
     return (
         <MainLayout>
-            <div className='container profile'>
-                <div className='col profile-container'>
+            <div className='profile d-flex align-items-center justify-content-center flex-column w-100 p-0'>
+                <div className='profile-container d-flex align-items-center justify-content-center flex-column  m-2 p-4'>
                     <h2>{user.username}</h2>
-                    <div className='profile-image'>
+                    <div className='profile-image d-flex align-items-center justify-content-center m-auto overflow-hidden'>
                         {user.profile_image && (
                             <img src={user.profile_image} alt='profile-img' onClick={handleClickImage}/>
                         )}
@@ -90,7 +86,7 @@ const ProfilePage = () => {
                     </button>
                     <div className={`col profile-info ${showProfile ? 'show' : ''}`}>
                         {isEditing ? (
-                            <form className='profile-form col-12'>
+                            <form className='col-12'>
                                 <div className='row mb-3 form-group'>
                                     <label htmlFor='name' className='col-4 col-form-label'>Name:</label>
                                     <div className='col-8'>
@@ -156,12 +152,16 @@ const ProfilePage = () => {
                         </div>
                     )}
                 </div>
-                <div className='mini-forum'>
-                    <button className='button-forum' onClick={handleClickForum}>FORUM</button>
-                </div>
-                {/*!isDesktop && (
-                    <NotificationFunction /> 
-                )*/}
+                {!isDesktop && (
+                    <>
+                        <div className='d-flex justify-content-center flex-shrink-0 w-100 mt-3 mb-1'>
+                            <button className='button-large' onClick={() => navigate('/forum')}>FORUM</button>
+                        </div>
+                        <div className='div-button-large mb-3 mt-1'>
+                            <button className='button-large' onClick={() => navigate('/chat')}>CHAT</button>
+                        </div>
+                    </>
+                )}
             </div>
         </MainLayout>
     );

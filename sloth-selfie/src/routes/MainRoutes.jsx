@@ -40,7 +40,6 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                         <Route path='/calendar' element={<Calendar />} />
                                         <Route path='/home' element={<Home />} />
                                         <Route path='/home/settings' element={<Home settings={true} />} />
-                                        {/*<Route path='/home/timemachine' element={<Home machineOpen={true} />} />*/}
                                         <Route path='/profile' element={<Profile profileData={profileData}/>} />
                                     </Routes>
                                     {/*
@@ -50,10 +49,10 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                     <Route path='/calendar' element={<Calendar />} />
                                     <Route path='/forum' element={<Forum />} />*/}
                                     {!isDesktop && (
-                                        <>
-                                        <Route path='/chat' element={<ChatBox username={profileData.username} chatId={null} />} />
-                                        <Route path='/chat/:chatId' element={<ChatBox username={profileData.username} />} />
-                                        </>
+                                        <Routes>
+                                            <Route path='/chat' element={<ChatBox chatId={null} />} />
+                                            <Route path='/chat/:chatId' element={<ChatBox />} />
+                                        </Routes>
                                     )}
                                 </ProtectedRoute>
                             }

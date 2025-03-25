@@ -7,10 +7,11 @@ import Swal from 'sweetalert2';
 import { apiService } from '../services/apiService';
 import { useIsDesktop } from '../utils/utils';
 import { UserContext } from '../contexts/UserContext';
+import MainLayout from '../layouts/MainLayout';
 
 const ChatBox = () => {
     const { username } = useContext(UserContext);
-    const {chatId} = useParams();
+    const { chatId } = useParams();
     const navigate = useNavigate();
     const messagesEndRef = useRef(null);
     const isDesktop = useIsDesktop();
@@ -229,7 +230,7 @@ const ChatBox = () => {
         }
     }, [selectedChat]);
 
-    const ChatHeader = () => (
+    const chatHeader = (
         <>
             {selectedChat ? (
                 <>
@@ -252,14 +253,14 @@ const ChatBox = () => {
         </>
     );
 
-    return (
+    const chatContent = (
         <div className='d-relative flex-column message-container'>
             {isDesktop ? (
                 <button className='pe-auto message-button' onClick={() => setIsOpen(prevState => !prevState)}>
-                    <ChatHeader />
+                    {chatHeader}
                 </button>
             ) : (
-                <ChatHeader />
+                chatHeader
             )}
             <div className={`message-box ${isOpen ? 'open' : ''}`}>
                 {selectedChat ? (
@@ -309,7 +310,15 @@ const ChatBox = () => {
                 )}
             </div>
         </div>
-    )
+    );
+
+    return !isDesktop ? (
+        <MainLayout>
+            {chatContent}
+        </MainLayout>
+    ) : (
+        chatContent
+    );
 };
 
 export default ChatBox;
