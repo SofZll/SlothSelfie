@@ -5,11 +5,10 @@ import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
 
-import { Plus } from 'lucide-react';
-
 import { useIsDesktop } from '../../utils/utils';
 import ScrollList from '../../components/ScrollList';
 import FormCalendar from './FormCalendar';
+import PlusLayout from '../../layouts/PlusLayout';
 
 import { UserContext } from '../../contexts/UserContext';
 import { useCalendar } from '../../contexts/CalendarContext';
@@ -119,22 +118,7 @@ const Planner = () => {
     }, [activities, events, tasks]);
 
     return (
-        <div className='d-flex flex-column w-100 h-100 justify-content-center align-items-center'>
-
-            {!isDesktop && (
-                <>
-                    <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-plus pop-up' alt='add' onClick={() => setSelected({ ...selected, add: true, popUp: true })}>
-                        <Plus size={36} color='#fafafa' strokeWidth={1.75} />
-                    </button>
-
-                    {selected.popUp && (
-                        <div className='d-flex flex-column w-75 bg-white rounded p-3 position-fixed top-50 start-50 translate-middle pop-up shadow-lg'>
-                            <FormCalendar />
-                        </div>
-                    )}
-                </>
-            )}
-
+        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popUp: true })} selected={selected.popUp} popUp={<FormCalendar />}>
             <div className='d-flex justify-content-center align-items-center w-100 h-75 py-3'>
                 <DnDCalendar
                     localizer={localizer}
@@ -154,7 +138,7 @@ const Planner = () => {
             {!isDesktop && (
                 <ScrollList CardList={activities} smallView={true} />
             )}
-        </div>
+        </PlusLayout>
     )
 }
 
