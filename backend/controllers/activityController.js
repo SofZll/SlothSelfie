@@ -149,10 +149,10 @@ const deleteActivity = async (req, res) => {
 };
 
 /* Project functions */
-//Function to create a note associated to the input of the activity
-async function createInputAsNote(req, res) {
+//Function to create a note associated to the input/output of the activity
+async function createNoteAsInputOrOutput(req, res) {
     try {
-        const { activityId, content, userName } = req.body;
+        const { activityId, content, userName, type } = req.body;
 
         //find the user from the username:
         const user = await User.findOne({ username: userName });
@@ -171,8 +171,8 @@ async function createInputAsNote(req, res) {
 
         // Create the note
         const newNote = new Note({
-            title: "Activity Input",
-            category: "Activity Input",
+            title: type === 'input' ? "Activity Input" : "Activity Output",
+            category: type === 'input' ? "Activity Input" : "Activity Output",
             content: content,
             user: user,
             noteAccess: "restricted", // only for members
@@ -180,59 +180,10 @@ async function createInputAsNote(req, res) {
         });
         const savedNote = await newNote.save();
 
-        // Update the input field of the activity with the id of the note created
+        // Update the input or output field of the activity with the id of the note created
         const updatedActivity = await Activity.findByIdAndUpdate(
             activityId,
-            { input: savedNote._id },
-            { new: true }
-        );
-
-        if (!updatedActivity) {
-            return res.status(404).json({ message: "Activity not found" });
-        }
-
-        res.status(201).json({ message: "Note created and linked to activity", note: savedNote });
-    } catch (error) {
-        console.error("Error creating note:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-}
-
-//Function to create a note associated to the output of the activity
-async function createOutputAsNote(req, res) {
-    try {
-        const { activityId, content, userName } = req.body;
-
-        //find the user from the username:
-        const user = await User.findOne({ username: userName });
-        console.log(userName);
-
-        //find the activity
-        const activity = await Activity.findById(activityId);
-        //get the sharedWith users field
-        const sharedWithUsers = activity.sharedWith;
-
-        // Find the users from the sharedWithUsers array
-        const allowedUsers = await User.find({ _id: { $in: sharedWithUsers } }).select("username");
-
-        // Get the usernames of the allowed users
-        const allowedUsernames = allowedUsers.map(user => user.username);
-
-        // Create the note
-        const newNote = new Note({
-            title: "Activity Output",
-            category: "Activity Output",
-            content: content,
-            user: user,
-            noteAccess: "restricted", // only for members
-            allowedUsers: allowedUsernames
-        });
-        const savedNote = await newNote.save();
-
-        // Update the output field of the activity with the id of the note created
-        const updatedActivity = await Activity.findByIdAndUpdate(
-            activityId,
-            { output: savedNote._id },
+            { [type]: savedNote._id },
             { new: true }
         );
 
@@ -395,8 +346,7 @@ module.exports = {
     getActivity,
     updateActivity,
     deleteActivity,
-    createInputAsNote,
-    createOutputAsNote,
+    createNoteAsInputOrOutput,
     updateOutputAsNote,
     updateActivityStatus,
     adjustOrContractActivitySchedule
