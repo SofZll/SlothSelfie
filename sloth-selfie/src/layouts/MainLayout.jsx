@@ -16,7 +16,10 @@ const MainLayout = ({ children }) => {
     return (
         <div className='d-flex h-100 w-100'>
             {isDesktop ? (
-                <DesktopNav />
+                <>
+                    <DesktopNav />
+                    <ChatBox />
+                </>
             ) : (
                 <MobileNav />
             )}
@@ -24,7 +27,6 @@ const MainLayout = ({ children }) => {
             <TimeMachineProvider>
                 <TimeMachineButton />
             </TimeMachineProvider>
-            <ChatBox />
             <main className='d-flex h-100 w-100 align-items-center justify-content-center'>{children}</main>
         </div>
     );
