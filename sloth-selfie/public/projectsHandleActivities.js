@@ -5,11 +5,7 @@ async function handleActivities(projectId) {
         const userLogged = await getLoggedUser();
         
         if (!userLogged) {
-            Swal.fire({
-                title: "Error",
-                text: "No user is logged in!",
-                icon: "error"
-              });
+            Swal.fire({title: "Error", text: "No user is logged in!",icon: "error"});
             return;
         }
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
@@ -19,11 +15,7 @@ async function handleActivities(projectId) {
         const isOwner = project.owner.username === userLogged;
         const isMember = project.members.some(member => member.username === userLogged);
         if (!isOwner && !isMember) {
-            Swal.fire({
-                title: "Error",
-                text: "You can't handle the activities of this project, you are not the owner nor a member.",
-                icon: "error"
-              });
+            Swal.fire({title: "Error", text: "You can't handle the activities of this project, you are not the owner nor a member.", icon: "error"});
             return;
         }
 
@@ -304,12 +296,7 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         }
 
         if (inputType === "link" && !isValidURL(inputValue)) {
-            Swal.fire({
-                title: "Error",
-                text: "Invalid link. Please enter a valid URL.",
-                icon: "error"
-              });
-            
+            Swal.fire({title: "Error", text: "Invalid link. Please enter a valid URL.", icon: "error"});
             return;
         }
 
@@ -354,11 +341,7 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         let outputValue = document.getElementById(`output-${activityId}`).value.trim();
 
         if (outputType === "link" && !isValidURL(outputValue)) {
-            Swal.fire({
-                title: "Error",
-                text: "Invalid link. Please enter a valid URL.",
-                icon: "error"
-              });
+            Swal.fire({title: "Error", text: "Invalid link. Please enter a valid URL.", icon: "error"});
             return;
         }
          noteContent = outputValue;
@@ -689,6 +672,17 @@ async function handleOwnerDecision(activityId, decision, dependentActivitiesIds,
             `contractBtn-${activityId}`
         ], true);
 
+        //eventually close the list/gantt view and the edit view
+        document.getElementById("project-view-container").style.display = "none";
+        document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close view button
+        document.getElementById("projectForm").style.display = "none";
+        document.getElementById("ToggleFormBtn").textContent = "+ Add a Project";
+        //remove the warning message
+        let warningMessage = document.getElementById("dependencyWarning");
+        if (warningMessage) {
+            warningMessage.remove();
+        }
+
     } catch (error) {
         console.error("Error handling owner decision:", error);
     }
@@ -814,11 +808,7 @@ async function updateOutputNote(activityId) {
         let outputValue = document.getElementById(`output-${activityId}`).value.trim();
 
         if (outputType === "link" && !isValidURL(outputValue)) {
-            Swal.fire({
-                title: "Error",
-                text: "Invalid link. Please enter a valid URL.",
-                icon: "error"
-              });
+            Swal.fire({title: "Error", text: "Invalid link. Please enter a valid URL.", icon: "error"});
             return;
         }
         noteContent = outputValue;
@@ -910,11 +900,7 @@ async function abandonActivity(activityId) {
         });
 
         //send an alert to the logged user
-        Swal.fire({
-            title: "Success!",
-            text: "You have abandoned this activity.",
-            icon: "success"
-          });
+        Swal.fire({title: "Success!", text: "You have abandoned this activity.", icon: "success"});
 
         //disable the abandon button for the user
         toggleElements([`abandon-${activityId}`], true);
