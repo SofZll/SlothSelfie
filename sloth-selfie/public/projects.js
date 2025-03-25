@@ -1,9 +1,14 @@
 //TODO: in edit di progetto: owner può raggruppare attività
 //TODO: Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto (trasla o contrae le attività sincronizzate a quella in ritardo).
+//domanda: se rimuovo l'attività va rimossa la notifica? come funziona? e che data bisogna mettere?
 //TODO: modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) 
 
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
+
+//se clicco adjust/contract chiudere view
+//se quella dopo è in ritardo e dipende da quella completata, dopo aver contratto/aggiustato non mi riempie l'input
+//generalizza create input/output as note in backend
 
 // Function to get the logged user
 async function getLoggedUser() {
