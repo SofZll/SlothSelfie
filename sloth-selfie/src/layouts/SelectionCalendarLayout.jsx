@@ -1,29 +1,43 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useIsDesktop } from '../utils/utils';
 
 import { X, MoveLeft } from 'lucide-react';
 
-const SelectionCalendarLayout = ({selection, setSelection, setPopUp, children}) => {
+import { useCalendar } from '../contexts/CalendarContext';
+import { useTask } from '../contexts/TaskContext';
+
+const SelectionCalendarLayout = ({children}) => {
 
     const isDesktop = useIsDesktop();
-        
+    const { selected, resetSelected, back, resetActivity, resetEvent, resetAvailability } = useCalendar();
+    const { resetTask } = useTask();
+
+    useEffect(() => {
+        if (selected.selection === '...') {
+            resetActivity();
+            resetEvent();
+            resetAvailability();
+            resetTask();
+        }
+    }, [selected.selection]);
+
     return (
-        <div className="d-flex flex-column w-100 h-100">
+        <div className="d-flex flex-column w-100 h-100 my-md-3">
 
             <div className="row d-flex justify-content-between my-3">
                 <div className="col fs-5">
-                    Add a new {selection}
+                    Add a new {selected.selection}
                 </div>
 
                 <div className="col col-auto">
-                    {selection !== '...' ? (
-                        <button className='btn py-0 m-0' onClick={() => setSelection('...')} alt='back'>
+                    {selected.selection !== '...' ? (
+                        <button className='btn py-0 m-0' onClick={() => back()} alt='back'>
                             <MoveLeft size={25} color='#555B6E' strokeWidth={1.75} />
                         </button>
                     ) : (
                         <>
                             {!isDesktop && (
-                                <button className='btn' onClick={() => setPopUp(false)} alt='exit'>
+                                <button className='btn' onClick={() => resetSelected()} alt='exit'>
                                     <X size={25} color='#555B6E' strokeWidth={1.75} />
                                 </button>
                             )}

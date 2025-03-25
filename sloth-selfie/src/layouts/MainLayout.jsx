@@ -14,7 +14,7 @@ const MainLayout = ({ children }) => {
     const isDesktop = useIsDesktop();
 
     return (
-        <div className='d-flex h-100 w-100'>
+        <div className='d-flex h-100 w-100 align-items-center justify-content-center overflow-hidden'>
             {isDesktop ? (
                 <>
                     <DesktopNav />

@@ -19,19 +19,19 @@ const MobileNav = () => {
             <NavLink to='/home'  className={(isHomeActive ? 'active' : '')} alt='homepage'>
                 <House size={36} color="#555B6E" strokeWidth={1.75} />
             </NavLink>
-            <NavLink to='/calendar' activeClassName='active' alt='calendar'>
+            <NavLink to='/calendar' activeclassname='active' alt='calendar'>
                 <Calendar1 size={36} color="#555B6E" strokeWidth={1.75} />
             </NavLink>
-            <NavLink to='/notes' activeClassName='active' alt='notes'>
+            <NavLink to='/notes' activeclassname='active' alt='notes'>
                 <NotebookPen size={36} color="#555B6E" strokeWidth={1.75} />
             </NavLink>
-            <NavLink to='/pomodoro' activeClassName='active' alt='pomodoro'>
+            <NavLink to='/pomodoro' activeclassname='active' alt='pomodoro'>
                 <img src={iconTomato} alt='Pomodoro' style={{ width: '36px' }}/>
             </NavLink>
             <a href='/projects.html' alt='projects'>
             <Presentation size={36} color="#555B6E" strokeWidth={1.75} />
             </a>
-            <NavLink to='/profile' activeClassName='active' alt='profile'>
+            <NavLink to='/profile' activeclassname='active' alt='profile'>
                 <User size={36} color="#555B6E" strokeWidth={1.75} />
             </NavLink>
         </nav>

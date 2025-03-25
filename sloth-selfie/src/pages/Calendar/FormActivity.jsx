@@ -1,17 +1,17 @@
-import React, { useEffect }  from 'react';
+import React  from 'react';
 
 import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
-import { useActivity } from '../../contexts/ActivityContext';
+import { useCalendar } from '../../contexts/CalendarContext';
 
-const FormActivity = (props) => {
+const FormActivity = () => {
 
-    const { activity, setActivity, activities, setActivities, resetActivity } = useActivity();
+    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected } = useCalendar();
 
     const handleSubmit = async () => {
-        if (props.edit) {
-            const response = await apiService('/activity/edit', 'POST', activity);
+        if (selected.edit) {
+            const response = await apiService(`/activity/${activity._id}`, 'PUT', activity);
             if (response){
                 Swal.fire({ title: 'Activity edited', icon: 'success', text: 'Activity edited successfully', customClass: { confirmButton: 'button-alert' } });
                 setActivities(activities.map(act => act._id === activity._id ? activity : act));
@@ -19,25 +19,29 @@ const FormActivity = (props) => {
             } else Swal.fire({ title: 'Error editing activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
         } else {
-            const response = await apiService('/activity/add', 'PUT', activity);
+            const response = await apiService(`/activity`, 'POST', activity);
             if (response){
                 Swal.fire({ title: 'Activity added', icon: 'success', text: 'Activity added successfully', customClass: { confirmButton: 'button-alert' } });
                 setActivities([...activities, response]);
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
         }
+        resetSelected();
     }
 
-    useEffect(() => {
-        if (props.edit) {
-            setActivity(activity);
-        }
-    }, [props.edit]); 
-
+    const deleteActivity = async () => {
+        const response = await apiService(`/activity/${activity._id}`, 'DELETE');
+        if (response){
+            Swal.fire({ title: 'Activity deleted', icon: 'success', text: 'Activity deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            setActivities(activities.filter(act => act._id !== activity._id));
+            resetActivity();
+        } else Swal.fire({ title: 'Error deleting activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        resetSelected();
+    }
 
     return (
-        <form className='d-flex flex-column w-100' onSubmit={() => handleSubmit()}>
-            <div className='row py-2'>
+        <form className='d-flex flex-column w-100'>
+            <div className='row py-2 '>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
                     <input
@@ -50,19 +54,18 @@ const FormActivity = (props) => {
 
                 <div className='col-6'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
-                    <input type='Date' className='form-control' id='deadline'
-                    placeholder={new Date()} 
-                    value={activity.deadline}
+                    <input type='date' className='form-control' id='deadline'
+                    value={new Date(activity.deadline).toISOString().split('T')[0]}
                     onChange={(e) => setActivity({...activity, ['deadline']: e.target.value})} />
                 </div>
             </div>
 
             <div className='row d-flex justify-content-center py-2'>
                 <div className='col col-auto form-check'>
-                    <input className='form-check-input' type='checkbox' role='switch' id='done'
-                    value={activity.done}
-                    onChange={(e) => setActivity({...activity, ['done']: e.target.checked})} />
-                    <label className='form-check-label' htmlFor='done'>Completed</label>
+                    <input className='form-check-input' type='checkbox' role='switch' id='completed'
+                        value={activity.completed}
+                        onChange={(e) => setActivity({...activity, ['completed']: e.target.checked})} />
+                    <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>
             
@@ -76,7 +79,14 @@ const FormActivity = (props) => {
                 </div>
             </div>
 
-            <button type='submit' className='btn-main rounded shadow-sm mt-4'>{props.edit ? 'edit' : 'save'}</button>
+            <div className='d-flex align-items-center justify-content-center'>
+                <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                {selected.edit && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteActivity()}>delete</button>
+                )}
+            </div>
+            
+
         </form>
     )
 }
