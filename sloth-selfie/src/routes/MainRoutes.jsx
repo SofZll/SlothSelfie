@@ -5,6 +5,7 @@ import { useIsDesktop } from '../utils/utils';
 import { StyleProvider } from '../components/StyleContext';
 
 
+import Note from '../pages/Note/Note';
 import Calendar from '../pages/Calendar/Calendar';
 import Home from '../pages/Home'
 import Profile from '../pages/ProfilePage';
@@ -13,7 +14,6 @@ import ChatBox from '../components/ChatBox';
 /*
 
 import Pomodoro from '../Pomodoro';
-import Notes from '../Notes';
 import Notifications from '../Notifications';
 import Forum from '../Forum';
 */
@@ -38,6 +38,7 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                 <ProtectedRoute authenticated={authenticated}>
                                     <Routes>
                                         <Route path='/calendar' element={<Calendar />} />
+                                        <Route path='/notes' element={<Note />} />
                                         <Route path='/home' element={<Home />} />
                                         <Route path='/home/settings' element={<Home settings={true} />} />
                                         <Route path='/profile' element={<Profile profileData={profileData}/>} />
@@ -45,7 +46,6 @@ const MainRoutes = ({ profileData, authenticated, setAuthenticated }) => {
                                     {/*
                                     <Route path='/notifications' element={<Notifications />} />
                                     <Route path='/pomodoro' element={<Pomodoro />} />
-                                    <Route path='/notes' element={<Notes />} />
                                     <Route path='/calendar' element={<Calendar />} />
                                     <Route path='/forum' element={<Forum />} />*/}
                                     {!isDesktop && (

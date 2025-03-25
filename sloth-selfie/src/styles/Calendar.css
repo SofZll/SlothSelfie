@@ -14,6 +14,20 @@
   overflow-x: hidden;
 }
 
+.planner {
+  margin-top: 9vh;
+  height: 80%;
+}
+
+.activity-title {
+  color: #244476;
+}
+
+.btn-active {
+  background-color: #244476;
+  color: white;
+}
+
 @media screen and (min-width: 768px) {
   .pop-up {
     max-height: none;
@@ -21,6 +35,10 @@
 
   .form-popup {
     max-height: none;
+  }
+  .planner {
+    height: 100%;
+    margin: 0;
   }
   
 }

@@ -19,7 +19,7 @@ const createActivity = async (req, res) => {
         const savedActivity = await activity.save();
 
         // Populate the sharedWith field with the username of the users
-        const populatedActivity = await Activity.findById(savedActivity._id).populate('sharedWith', 'username');
+        const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
 
         // Calculate the date of the notification
         let dateNotif;
@@ -49,16 +49,19 @@ const getActivities = async (req, res) => {
     try {
         const activities = await Activity.find({
             $or: [
-              { user: user._id }, // activities created by the user
-              { sharedWith: user._id } // activities shared with the user
+                { user: user._id },
+                { sharedWith: user._id }
             ]
-          })
-        .populate('sharedWith', 'username');// Populates the sharedWith field with the username of the users
-        //we only need the username on the frontend
+        })
+        .populate('user', 'username')
+        .populate('description', 'content' )
+        .populate('sharedWith', 'username');
+        
         const activitiesWithUsernames = activities.map(activities => ({
             ...activities.toObject(),
             sharedWith: activities.sharedWith.map(user => user.username)
-          }));
+        }));
+
         res.status(200).json(activitiesWithUsernames);
     } catch (error) {
         console.error('Error fetching activities:', error);
@@ -98,7 +101,9 @@ const updateActivity = async (req, res) => {
             activityId,
             { title, deadline, completed, sharedWith: sharedWithUsers.map(u => u._id) },
             { new: true }
-        ).populate('sharedWith', 'username');
+        ).populate('user', 'username')
+        .populate('description', 'content')
+        .populate('sharedWith', 'username');
 
         res.status(200).json({
             ...updatedActivity.toObject(),
