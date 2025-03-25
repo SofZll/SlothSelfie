@@ -31,20 +31,6 @@
     border-radius: 50%;
 }
 
-.button-info {
-    color:#555B6E;
-    background-color: #FAF9F9;
-    margin: 20px 20px 0 20px;
-}
-
-.button-info:hover,
-.button-info:focus,
-.button-info:active  {
-    color: #000;
-    background-color: #FAF9F9;
-    border: none;
-}
-
 .profile-info {
     display: flex;
     flex-direction: column;
@@ -72,19 +58,12 @@
 }
 
 .button-large {
-    height: 3.5rem;
+    height: 4rem;
     font-size: 1.3rem;
-    background-color: #5f9ea0;
     color: #FFF;
     font-weight: bold;
-    border: 0;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.button-large:hover {
-    background-color: #555b6e;
-    font-size: 1.5rem;
-    transition: all 0.3s;
+    border: 0;
 }
 
 .button-edit {
@@ -101,13 +80,8 @@
     visibility: visible;
     display: inline-block;
     transition: opacity 0.5s ease, max-height 0.5s ease;
-}
-
-.profile-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
+    border: none;
+    color: #fff;
 }
 
 /* TODO: cambiare*/
