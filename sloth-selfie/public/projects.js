@@ -8,7 +8,6 @@
 
 //se clicco adjust/contract chiudere view
 //se quella dopo è in ritardo e dipende da quella completata, dopo aver contratto/aggiustato non mi riempie l'input
-//generalizza create input/output as note in backend
 
 // Function to get the logged user
 async function getLoggedUser() {

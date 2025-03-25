@@ -321,13 +321,14 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         let userLogged = await getLoggedUser();
 
         try {
-            const response = await fetch("http://localhost:8000/api/activity/input", {
+            const response = await fetch("http://localhost:8000/api/activity/inputOutput", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     activityId: activityId,
                     content: noteContent,
                     userName: userLogged,
+                    type: fieldType
                 })
             });
 
@@ -364,13 +365,14 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         let userLogged = await getLoggedUser();
 
         try {
-            const response = await fetch("http://localhost:8000/api/activity/output", {
+            const response = await fetch("http://localhost:8000/api/activity/inputOutput", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     activityId: activityId,
                     content: noteContent,
                     userName: userLogged,
+                    type: fieldType
                 })
             });
 
