@@ -16,7 +16,6 @@ async function getLoggedUser() {
         const data = await response.json();
 
         if (data.success && data.user) {
-            console.log("Logged user:", data.user.username);
             return data.user.username; // resolve with the username of the logged user
         } else {
             console.warn("No user logged in.");
@@ -49,7 +48,11 @@ async function loadProjects() {
         //we get the logged user and load only the projects where he is the owner or a member
         const userLogged = await getLoggedUser();
         if (!userLogged) {
-            alert("No user is logged in!");
+            Swal.fire({
+                title: "Error",
+                text: "No user is logged in!",
+                icon: "error"
+              });
             return;
         }
 
@@ -195,7 +198,11 @@ async function saveOrUpdateProject(event) {
         const data = await response.json();
 
         if (response.ok) {
-            alert(projectId ? "Project updated successfully!" : "Project saved successfully!");
+            Swal.fire({
+                title: "Success!",
+                text: projectId ? "Project updated successfully!" : "Project saved successfully!",
+                icon: "success"
+              });
             resetForm();
             await loadProjects();
             //eventually close the list/gantt view and the handle activities form
@@ -429,7 +436,12 @@ async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
         if (data.success) {
             console.log('Subphase deleted with success!');
         } else {
-            alert('EError while deleting subphase');
+            Swal.fire({
+                title: "Error",
+                text: "Error while deleting subphase",
+                icon: "error"
+              });
+            
         }
     } catch (error) {
         console.error('Errore:', error);
@@ -450,7 +462,12 @@ async function removeActivityFromBackend(projectId, phaseId, subphaseId, activit
         if (data.success) {
             console.log('Activity deleted with success!');
         } else {
-            alert('Error while deleting the activity');
+            Swal.fire({
+                title: "Error",
+                text: "Error while deleting the activity",
+                icon: "error"
+              });
+
         }
     } catch (error) {
         console.error('Errore:', error);
@@ -477,7 +494,12 @@ async function deleteProject(projectId) {
             });
 
             if (response.ok) {
-                alert("Project deleted successfully!");
+                Swal.fire({
+                    title: "Success!",
+                    text: "Project deleted successfully!",
+                    icon: "success"
+                  });
+                
                 // Close the project view if the project is deleted
                 document.getElementById("project-view-container").style.display = "none";
                 document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close button
@@ -498,7 +520,11 @@ async function deleteProject(projectId) {
                 }
                 resetForm();
             } else {
-                alert("Error while deleting the project.");
+                Swal.fire({
+                    title: "Error",
+                    text: "Error while deleting the project.",
+                    icon: "error"
+                  });
             }
         } catch (error) {
             console.error("Error deleting project:", error);
