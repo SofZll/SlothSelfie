@@ -507,8 +507,8 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
         //get the ids of the dependent activities
         let dependentActivitiesIds = dependentActivities.map(dep => dep._id);
 
-        // Filter the dependent activities that are Not_Activatable
-        let blockedDependencies = dependentActivities.filter(dep => dep.status === "Not_Activatable");
+        // Filter the dependent activities that are Not_Activatable, or Overdue without input
+        let blockedDependencies = dependentActivities.filter(dep => dep.status === "Not_Activatable" || (dep.status === "Overdue" && !dep.input));
         //get the ids of the blocked dependent activities
         let blockedDependenciesIds = blockedDependencies.map(dep => dep._id);
 
@@ -726,7 +726,7 @@ async function updateDependentActivities(activityId, activity, onlyBlocked = fal
         
         for (let dependent of dependentActivities) {
              // if onlyBlocked is true, we update only the blocked activities
-            if (!onlyBlocked || (onlyBlocked && dependent.status === "Not_Activatable")) {
+            if (!onlyBlocked || (onlyBlocked && dependent.status === "Not_Activatable" || dependent.status === "Overdue")) {
                 // Verify if all dependencies are completed
                 let dependenciesCompleted = dependent.dependencies.every(dep => {
                     let dependency = activities.find(a => a._id.toString() === dep._id.toString());
@@ -738,12 +738,9 @@ async function updateDependentActivities(activityId, activity, onlyBlocked = fal
 
                     // We set the output of the previous activity as the input of the next one, only if it exists
                     if (activity.output) {
-
                         let outputId = typeof activity.output === "object" ? activity.output._id : activity.output;
-
                         // we get the output content from the output note
                         let outputContent = await getOutputContent(outputId);
-
                         await insertActivityInputOutput(dependent._id, 'input',true, outputContent);
                     }
                 }            
