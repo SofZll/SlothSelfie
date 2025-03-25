@@ -309,6 +309,7 @@ async function updateActivityStatus(req, res) {
 //if delay, we adjust both startDate and deadline (shift)
 //if contract, we contract only startDate (reduce), deadline remains the same
 //we also update the events connected to startDate and/or deadline
+//we finally send a notification to the users involved in the activity
 async function adjustOrContractActivitySchedule(req, res) {
     try {
         const { dependentActivitiesIds, delay, action } = req.body;
@@ -371,6 +372,14 @@ async function adjustOrContractActivitySchedule(req, res) {
         });
 
         await Promise.all(updatePromises);
+
+        // Create notifications to send to the users involved in the dependent activities about the schedule change
+        const notificationPromises = activities.map(async (activity) => {
+            const dateNotif = new Date().toISOString(); //TODO: TIME MACHINE DATE ?
+            return createNotification({ elementId: activity._id, dateNotif, frequencyNotif: 'none', type: 'activity' }, res, true);
+        });
+
+        await Promise.all(notificationPromises);
 
         res.status(200).json({ message: "Schedule adjusted/contracted successfully" });
     }
