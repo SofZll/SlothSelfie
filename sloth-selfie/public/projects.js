@@ -6,8 +6,6 @@
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
-//problema in adjust/contract: se quella dopo è in ritardo e dipende da quella completata, dopo aver contratto/aggiustato non mi riempie l'input
-
 // Function to get the logged user
 async function getLoggedUser() {
     try {
