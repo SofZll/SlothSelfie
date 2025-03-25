@@ -33,21 +33,34 @@ const getProjectById = async (req, res) => {
             return res.status(404).json({ message: 'Project not found' });
         }
 
-        //now we get the phases of the project, the subphases of each phase, and the ordered activities of each phase and subphase
+        //now we get the phases of the project
         project.phases = await Phase.find({ project: id })
-        .populate({ 
-            path: "subphases",
-            populate: { 
-                path: "activities", 
-                options: { sort: { createdAt: 1 } } // Sort the activities of the subphases
-            } 
-        })
-        .populate({ 
-            path: "activities",
-            options: { sort: { createdAt: 1 } } // Sort the activities of the phases
-        })
-        .sort({ createdAt: 1 }); // Sort the phases
+        .populate("subphases") // Populate subphases of the phase
+        .sort({ createdAt: 1 }); // Sort phases by creation order
 
+        //now we populate the activities of each phase
+        for (const phase of project.phases) {
+            phase.activities = await Activity.find({ phase: phase._id })
+            .populate("description")
+            .populate("sharedWith", "username")
+            .populate({ path: "input", select: "content" })
+            .populate({ path: "output", select: "content" })
+            .populate({ path: "dependencies", select: "title" }) 
+            .sort({ createdAt: 1 });
+        }
+
+         // Populates activities of each subphase
+        for (const phase of project.phases) {
+            for (const subphase of phase.subphases) {
+                subphase.activities = await Activity.find({ subphase: subphase._id })
+                .populate("description")
+                .populate("sharedWith", "username")
+                .populate({ path: "input", select: "content" })
+                .populate({ path: "output", select: "content" })
+                .populate({ path: "dependencies", select: "title" }) 
+                .sort({ createdAt: 1 });
+            }
+        }
         res.status(200).json(project);
     } catch (error) {
         console.error('Error fetching project by id:', error);

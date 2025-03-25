@@ -5,7 +5,11 @@ async function handleActivities(projectId) {
         const userLogged = await getLoggedUser();
         
         if (!userLogged) {
-            alert("No user is logged in!");
+            Swal.fire({
+                title: "Error",
+                text: "No user is logged in!",
+                icon: "error"
+              });
             return;
         }
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
@@ -15,7 +19,11 @@ async function handleActivities(projectId) {
         const isOwner = project.owner.username === userLogged;
         const isMember = project.members.some(member => member.username === userLogged);
         if (!isOwner && !isMember) {
-            alert("You can't handle the activities of this project, you are not the owner nor a member.");
+            Swal.fire({
+                title: "Error",
+                text: "You can't handle the activities of this project, you are not the owner nor a member.",
+                icon: "error"
+              });
             return;
         }
 
@@ -296,7 +304,12 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         }
 
         if (inputType === "link" && !isValidURL(inputValue)) {
-            alert("Invalid link. Please enter a valid URL.");
+            Swal.fire({
+                title: "Error",
+                text: "Invalid link. Please enter a valid URL.",
+                icon: "error"
+              });
+            
             return;
         }
 
@@ -340,7 +353,11 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         let outputValue = document.getElementById(`output-${activityId}`).value.trim();
 
         if (outputType === "link" && !isValidURL(outputValue)) {
-            alert("Invalid link. Please enter a valid URL.");
+            Swal.fire({
+                title: "Error",
+                text: "Invalid link. Please enter a valid URL.",
+                icon: "error"
+              });
             return;
         }
          noteContent = outputValue;
@@ -795,7 +812,11 @@ async function updateOutputNote(activityId) {
         let outputValue = document.getElementById(`output-${activityId}`).value.trim();
 
         if (outputType === "link" && !isValidURL(outputValue)) {
-            alert("Invalid link. Please enter a valid URL.");
+            Swal.fire({
+                title: "Error",
+                text: "Invalid link. Please enter a valid URL.",
+                icon: "error"
+              });
             return;
         }
         noteContent = outputValue;
@@ -887,7 +908,11 @@ async function abandonActivity(activityId) {
         });
 
         //send an alert to the logged user
-        alert("You have abandoned this activity.");
+        Swal.fire({
+            title: "Success!",
+            text: "You have abandoned this activity.",
+            icon: "success"
+          });
 
         //disable the abandon button for the user
         toggleElements([`abandon-${activityId}`], true);
