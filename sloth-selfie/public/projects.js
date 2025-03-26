@@ -6,6 +6,8 @@
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
+//todo: refactor di edit e di delete progetti
+
 // Function to get the logged user
 async function getLoggedUser() {
     try {

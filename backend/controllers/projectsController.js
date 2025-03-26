@@ -22,7 +22,7 @@ const getAllProjects = async (req, res) => {
 }
 
 //GET project by id
-/*NEW VERSION
+/*NEW VERSION*/
 const getProjectById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -43,7 +43,7 @@ const getProjectById = async (req, res) => {
             phase.subphases = await PhaseSubphase.find({ parentPhase: phase._id, type: "subphase" }).sort({ createdAt: 1 });
 
             //now we populate the activities of each phase
-            phase.activities = await Activity.find({ phase: phase._id })
+            phase.activities = await Activity.find({ phaseSubphase: phase._id })
                 .populate("description")
                 .populate("sharedWith", "username")
                 .populate({ path: "input", select: "content" })
@@ -53,7 +53,7 @@ const getProjectById = async (req, res) => {
 
             for (const subphase of phase.subphases) {
                 // Populates activities of each subphase
-                subphase.activities = await Activity.find({ subphase: subphase._id })
+                subphase.activities = await Activity.find({ phaseSubphase: subphase._id })
                     .populate("description")
                     .populate("sharedWith", "username")
                     .populate({ path: "input", select: "content" })
@@ -70,8 +70,8 @@ const getProjectById = async (req, res) => {
         console.error('Error fetching project by id:', error);
         res.status(500).json({ message: error.message });
     }
-};*/
-/*OLD VERSION*/
+};
+/*OLD VERSION
 const getProjectById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -117,10 +117,10 @@ const getProjectById = async (req, res) => {
         console.error('Error fetching project by id:', error);
         res.status(500).json({ message: error.message });
     }
-};
+};*/
 
 // Create the activities for the phase/subphase
-/*NEW VERSION
+/*NEW VERSION*/
 const createActivities = async (activities, projectId, phaseSubphaseId, ownerId, projectTitle) => {
     return await Promise.all(activities.map(async (activity) => {
         // Find the users to share the activity with
@@ -157,9 +157,9 @@ const createActivities = async (activities, projectId, phaseSubphaseId, ownerId,
         const savedActivity = await newActivity.save();
         return savedActivity._id;
     }));
-};*/
+};
 
-/*OLD VERSION*/
+/*OLD VERSION
 const createActivities = async (activities, projectId, phaseId, subphaseId, ownerId, projectTitle) => {
     return await Promise.all(activities.map(async (activity) => {
 
@@ -198,12 +198,12 @@ const createActivities = async (activities, projectId, phaseId, subphaseId, owne
         const savedActivity = await newActivity.save();
         return savedActivity._id;
     }));
-};
+};*/
 
 //POST create a phase or subphase and return its id
-/*NEW VERSION
-const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle) => {
-    // Crea una nuova fase o sottofase in base al tipo
+/*NEW VERSION*/
+const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle, parentPhaseId = null) => {
+    // Creates a new phase or subphase based on the type
     let newPhaseSubphase;
 
     if (type === "phase") {
@@ -217,7 +217,7 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle
             title: phase.title,
             project: projectId,
             type: "subphase",
-            parentPhase: phase.parentPhase,
+            parentPhase: parentPhaseId, // Reference to the parent phase
         });
     } else {
         throw new Error("Invalid type: must be 'phase' or 'subphase'");
@@ -234,30 +234,10 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle
         $push: { activities: { $each: activityIds } },
     });
 
-    // If it is a phase and it has subphases, creates the subphases
-    if (type === "phase" && phase.subphases && phase.subphases.length > 0) {
-        const subphaseIds = [];
-        for (const subphase of phase.subphases) {
-            const subphaseId = await createPhaseSubphase(
-                "subphase",
-                subphase,
-                projectId,
-                ownerId,
-                projectTitle
-            );
-            subphaseIds.push(subphaseId);
-        }
-
-        // Adds the subphases to the phase
-        await newPhaseSubphase.updateOne({
-            $push: { subphases: { $each: subphaseIds } },
-        });
-    }
-
     // Returns the _id of the phase/subphase
     return newPhaseSubphase._id;
-};*/
-/* OLD VERSION*/
+};
+/* OLD VERSION
 const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle) => {
     let newPhase;
 
@@ -277,7 +257,7 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle
     await newPhase.updateOne({ $push: { activities: { $each: activityIds } } });
 
     return newPhase._id;
-};
+};*/
 
 //create the descriptions as notes and return their ids
 const createNoteDescription = async (description, type, owner, members, projectTitle) => {
@@ -351,7 +331,7 @@ const updateEvent = async (eventId, date, sharedWith, projectTitle, activityTitl
 };
 
 //POST create a project
-/*NEW VERSION
+/*NEW VERSION*/
 const createProject = async (req, res) => {
     try {
         const { title, owner, description, members, phases } = req.body;
@@ -381,12 +361,13 @@ const createProject = async (req, res) => {
 
             const subphaseIds = [];
             for (const subphase of phase.subphases) {
-                const subphaseId = await createPhaseSubphase("subphase", subphase, newProject._id, ownerUser._id, title);
+                //we create the subphases and we connect them to the parent phase
+                const subphaseId = await createPhaseSubphase("subphase", subphase, newProject._id, ownerUser._id, title, phaseId);
                 subphaseIds.push(subphaseId);
             }
 
             // Update the phase with the subphases
-            await Phase.updateOne({ _id: phaseId }, { $set: { subphases: subphaseIds } });
+            await PhaseSubphase.updateOne({ _id: phaseId }, { $set: { subphases: subphaseIds } });
         }
 
         // Update the project with the phases
@@ -398,8 +379,8 @@ const createProject = async (req, res) => {
         console.error("Error saving project:", error);
         res.status(500).json({ message: "Server error while saving project" });
     }
-};*/
-/*OLD VERSION*/
+};
+/*OLD VERSION
 const createProject = async (req, res) => {
     try {
         const { title, owner, description, members, phases } = req.body;
@@ -445,10 +426,10 @@ const createProject = async (req, res) => {
         console.error("Error saving project:", error);
         res.status(500).json({ message: "Server error while saving project" });
     }
-};
+};*/
 
 //updates the existing activities of a phase/subphase
-/*NEW VERSION
+/*NEW VERSION*/
 const updateExistingActivities = async (existingActivities, activities, projectTitle) => {
     const existingActivityIds = existingActivities
         .filter(activity => activity._id)  
@@ -484,8 +465,8 @@ const updateExistingActivities = async (existingActivities, activities, projectT
         }
     }
     return existingActivityIds;
-};*/
-/*OLD VERSION*/
+};
+/*OLD VERSION
 const updateExistingActivities = async (existingActivities, activities, projectTitle) => {
 
     // finds the exisiting activities
@@ -524,10 +505,10 @@ const updateExistingActivities = async (existingActivities, activities, projectT
         }
     }
     return existingActivityIds;
-};
+};*/
 
 //PUT update a project
-/*NEW VERSION
+/*NEW VERSION*/
 const updateProject = async (req, res) => {
     try {
         const { id } = req.params;
@@ -632,8 +613,8 @@ const updateProject = async (req, res) => {
         console.error('Error updating project:', error);
         res.status(500).json({ message: "Server error while updating project" });
     }
-};*/
-/*OLD VERSION*/
+};
+/*OLD VERSION
 const updateProject = async (req, res) => {
     try {
         const { id } = req.params;
@@ -733,7 +714,7 @@ const updateProject = async (req, res) => {
         console.error('Error updating project:', error);
         res.status(500).json({ message: "Server error while updating project" });
     }
-};
+};*/
 
 //DELETE notes and events related to the activities of a project
 const deleteRelatedNotesAndEvents = async (activities) => {
