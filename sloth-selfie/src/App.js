@@ -1,42 +1,35 @@
-import React, {useEffect, useState} from 'react';
+
+import React, { useEffect, useState } from 'react';
 import './css/App.css';
-import { BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
-import Calendar from './Calendar';
-import PomodoroFunction from './Pomodoro';
-import NotesFunction from './Notes';
-import Settings from './previewSetUp';
-import NotificationFunction from './Notifications';
-import Form from './Login';
-import Card from "./cardCarosel";
-import Carousel from "./CarouselHome";
+
 import iconDark from './media/SlothDark.svg';
-import { v4 as uuidv4 } from "uuid";
-import { StyleContext, StyleProvider } from './StyleContext';
+import { StyleContext, StyleProvider } from '../StyleContext';
 import Menu from './Menu';
-import ProfileFunction from './Profile';
-import ForumFunction from './Forum';
 import TimeMachine from './TimeMachine';
 import socket from './socket';
 import 'leaflet/dist/leaflet.css';
 import Swal from 'sweetalert2';
 import { ActivityProvider } from './ActivityContext';
-import ChatBox from './ChatBox';
 import { useMediaQuery } from 'react-responsive';
+import MainRoutes from './routes/MainRoutes';
+import ChatBox from './ChatBox';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function App() {
-  const [loading, setLoading] = useState(true);
-
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [formType, setFormType] = useState('login');
-
-  const [inSettings, setInSettings] = useState(false);
-
+  //const [authenticated, setAuthenticated] = useState(isAuthenticated());
+  //const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState({
     username: '',
     profile_image: ''
   });
-
   const isDesktop = useMediaQuery({ minWidth: 769 });
+
+  /*
+  useEffect(() => {
+    setAuthenticated(isAuthenticated());
+  }, []);
+  */
 
   // Check if the user is authenticated
   const checkAuth = async () => {
@@ -47,18 +40,18 @@ function App() {
       });
     
       if (response.ok) {
-        setIsAuthenticated(true);
+        setAuthenticated(true);
         socket.emit('authenticated', true);
         console.log('User authenticated');
         // registerServiceWorker();
-      } else setIsAuthenticated(false);
+      } else setAuthenticated(false);
     } catch (error) {
       console.error('Error checking authentication:', error);
-      setIsAuthenticated(false);
+      setAuthenticated(false);
     } finally {
       setLoading(false);
     }
-    console.log("isAuthenticated: ", isAuthenticated);
+    console.log("authenticated: ", authenticated);
   };
 
   useEffect(() => {
@@ -131,35 +124,8 @@ function App() {
   
   const handleLogin = (status) => {
     console.log("Login status:", status);
-    setIsAuthenticated(status);
+    setAuthenticated(status);
   };
-
-  let cards = [
-    {
-      key: uuidv4(),
-      content: (
-        <Card title="Calendar" caseShow="1" />
-      )
-    },
-    {
-      key: uuidv4(),
-      content: (
-        <Card title="Notes" caseShow="2" />
-      )
-    },
-    {
-      key: uuidv4(),
-      content: (
-        <Card title="Pomodoro" caseShow="3" />
-      )
-    },
-    {
-      key: uuidv4(),
-      content: (
-        <Card title="Projects" caseShow="4" />
-      )
-    }
-  ];
 
   /* RICORDATI DI RIGUARDARE CHECK-AUTH NON FUNZIONA 
   if ("Notification" in window && navigator.serviceWorker) {
@@ -203,88 +169,44 @@ function App() {
   */
 
   return (
-    <Router>
-      <StyleProvider>
-        <ActivityProvider>
-          { loading ? (
-            <div className="loading-page loading-page-light">
-              <div className="spinner"></div>
-              <p>Loading, please wait...</p>
-            </div>
-          ) : (
-            <div className="App">
-              <Menu profileData={profileData}/>
-              <TimeMachine />
-              {isDesktop && <ChatBox username={profileData.username} /> }
-              <header className="App-header">
-                  <div className="title">
-                  <StyleContext.Consumer>
-                    {({ icon }) => (
-                      <h1 style={{ color: icon === iconDark ? '#222D52' : '#FAF9F9' }}>
-                        Sloth Selfie
-                      </h1>
-                    )}
-                  </StyleContext.Consumer>
-                  </div>
-                  <StyleContext.Consumer>
-                    {({ icon }) => <img src={icon} className="App-logo" alt="logo" />}
-                  </StyleContext.Consumer>
-              </header>
-              <div className="App-body">
-                <Routes>
-                  <Route
-                      path="/"
-                      element={<Navigate to={checkAuth ? "/home" : "/login"} />}
-                  />
-                  <Route 
-                    path="/login" 
-                    element={<Form formType={formType} setFormType={setFormType} handleLogin={handleLogin}/>}
-                  />
-                  <Route 
-                    path="/register" 
-                    element={<Form formType="register" setFormType={setFormType}/>}
-                  />
-                  <Route path="home"
-                    element={ 
-                    isAuthenticated ? ( 
-                      inSettings ? (
-                        <Settings
-                          setUp={inSettings}
-                          setSetUp={setInSettings}
-                        />
-                      ) : (
-                        <Carousel
-                            cards={cards}
-                            offset={2}
-                            showArrows={false}
-                            setUp={inSettings}
-                            setSetUp={setInSettings}
-                        />)
-                    ) : (
-                      <Navigate to="/login" />
-                    )
-                    }
-                  />
-                  <Route path="/profile" element={<ProfileFunction setLoading={setLoading}/>} />
-                  <Route path="/notifications" element={<NotificationFunction />} />
-                  <Route path="/pomodoro" element={<PomodoroFunction />} />
-                  <Route path="/notes" element={<NotesFunction />} />
-                  <Route path="/calendar" element={<Calendar />} />
-                  <Route path="/forum" element={<ForumFunction />} />
-                  {!isDesktop && (
-                    <>
-                      <Route path="/chat" element={<ChatBox username={profileData.username} chatId={null} />} />
-                      <Route path="/chat/:chatId" element={<ChatBox username={profileData.username} />} />
-                    </>
+    <>
+        { loading ? (
+          <div className="loading-page loading-page-light">
+            <div className="spinner"></div>
+            <p>Loading, please wait...</p>
+          </div>
+        ) : (
+          <div className="App">
+            <Menu profileData={profileData}/>
+            <TimeMachine />
+            {isDesktop && <ChatBox username={profileData.username} /> }
+            <header className="App-header">
+                <div className="title">
+                <StyleContext.Consumer>
+                  {({ icon }) => (
+                    <h1 style={{ color: icon === iconDark ? '#222D52' : '#FAF9F9' }}>
+                      Sloth Selfie
+                    </h1>
                   )}
-                </Routes>
-              </div>
+                </StyleContext.Consumer>
+                </div>
+                <StyleContext.Consumer>
+                  {({ icon }) => <img src={icon} className="App-logo" alt="logo" />}
+                </StyleContext.Consumer>
+            </header>
+            <div className="App-body">
+              <MainRoutes
+                profileData={profileData} 
+                isDesktop={isDesktop} 
+                authenticated={authenticated} 
+                setAuthenticated={setAuthenticated}
+              />
             </div>
-          )}
-        </ActivityProvider>
-      </StyleProvider>
-    </Router>
+          </div>
+        )}
+    </>
   );
 }
 
 export default App;
+

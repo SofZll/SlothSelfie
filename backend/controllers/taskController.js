@@ -4,16 +4,16 @@ const User = require('../models/userModel');
 
 // Creating a task
 const createTask = async (req, res) => {
-    const { text, deadline, completed } = req.body;
+    const { title, deadline, completed } = req.body;
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
 
     try {
         let task;
         if (deadline) {
-            task = new Task({ text, deadline, completed, user: user._id });
+            task = new Task({ title, deadline, completed, user: user._id });
         } else {
-            task = new Task({ text, completed, user: user._id });
+            task = new Task({ title, completed, user: user._id });
         }
         const savedTask = await task.save();
         console.log(savedTask);
@@ -88,9 +88,9 @@ const addTasks = async (req, res) => {
         for (let i = 0; i < tasks.length; i++) {
             let task;
             if (tasks[i].deadline) {
-                task = new Task({ text: tasks[i].text, deadline: tasks[i].deadline, completed: tasks[i].completed, user: user._id });
+                task = new Task({ title: tasks[i].title, deadline: tasks[i].deadline, completed: tasks[i].completed, user: user._id });
             } else {
-                task = new Task({ text: tasks[i].text, completed: tasks[i].completed, user: user._id });
+                task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id });
             }
             const savedTask = await task.save();
             taskIds.push(savedTask._id);

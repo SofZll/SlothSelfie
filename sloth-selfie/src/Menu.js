@@ -67,6 +67,7 @@ const Menu = ({ profileData }) => {
                     </style>
                 )}
             </StyleContext.Consumer>
+            
             <nav className="mobile-nav">
                 <NavLink to="/home"  className={(isHomeActive ? "active" : "")} >
                     <img src={iconHome} alt="Home" />
