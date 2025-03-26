@@ -11,12 +11,12 @@ const PlusSidebarLayout = ({ childrenMain, childrenSide }) => {
     return (
         <MainLayout>
             <div className='d-flex w-100 h-100'>
-                <div className='d-flex flex-column flex-grow-1 planner overflow-hidden'>
+                <div className='col planner overflow-hidden'>
                     {childrenMain}
                 </div>
 
                 {isDesktop && (
-                    <div className='d-flex w-25'>
+                    <div className='col col-lg-3 col-4 p-0'>
                         {childrenSide}
                     </div>
                 )}

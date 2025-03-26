@@ -20,7 +20,7 @@ const FormCalendar = () => {
         <div className='d-flex flex-column w-100 h-100'>
             <SelectionCalendarLayout>
                 {selected.selection === '...' && (
-                    <div className='d-flex flex-column col-11 col-lg-7 align-items-center py-3'>
+                    <div className='d-flex flex-column col-11 col-lg-8 align-items-center py-3'>
                         <Button text='Activity' alt='new activity' onClick={() => select('activity', false)} />
                         <Button text='Event' alt='new event' onClick={() => select('event', false)} />
                         <Button text='no Availability' alt='no availability' onClick={() => select('no availability', false)} />

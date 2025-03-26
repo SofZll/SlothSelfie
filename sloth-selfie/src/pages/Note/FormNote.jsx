@@ -2,29 +2,127 @@ import React from 'react';
 
 import { useNote } from '../../contexts/NoteContext';
 import { useIsDesktop } from '../../utils/utils';
+import { apiService } from '../../services/apiService';
+
+import Swal from 'sweetalert2';
 
 import { X } from 'lucide-react';
 
 const FormNote = () => {
 
-    const { selected, setSelected, resetSelected } = useNote();
+    const { selected, setSelected, resetSelected, note, setNote, notes, setNotes } = useNote();
     const isDesktop = useIsDesktop();
 
+    const handleSubmit = async () => {
+        if (selected.add) {
+            const response = await apiService('/note', 'POST', note);
+            if (response) {
+                Swal.fire({ title: 'Note added', icon: 'success', text: 'Note added successfully', customClass: { confirmButton: 'button-alert' } });
+                setNotes([...notes, response]);
+            }
+        } else {
+            const response = await apiService(`/note/${note._id}`, 'PUT', note);
+            if (response) {
+                Swal.fire({ title: 'Note edited', icon: 'success', text: 'Note edited successfully', customClass: { confirmButton: 'button-alert' } });
+                setNotes(notes.map(n => n._id === note._id ? note : n));
+            }
+        }
+        resetSelected();
+    }
+
+    const deleteNote = async () => {
+        const response = await apiService(`/note/${note._id}`, 'DELETE');
+        if (response) {
+            Swal.fire({ title: 'Note deleted', icon: 'success', text: 'Note deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            setNotes(notes.filter(n => n._id !== note._id));
+        }
+    }
+
     return (
-        <div className='d-flex flex-column w-100 h-100'>
+        <div className='d-flex flex-column w-100 h-100 p-md-2 p-0 position-relative'>
             
 
-            <div className="row">
-                <div className="col fs-5">
+            <div className='d-flex w-100 position-absolute top-0 start-0 z-1'>
+                <div className='d-flex fs-5 fw-bold flex-grow-1 align-items-center p-0 py-md-3'>
                     {selected.add ? 'New note' : 'Note'}
                 </div>
+
+                {!isDesktop && (
+                    <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                        <X size={25} color='#555B6E' strokeWidth={1.75} />
+                    </button>
+                )}
             </div>
 
-            {!isDesktop && (
-                <button className='btn position-fixed top-0 end-0' onClick={() => resetSelected()} alt='exit'>
-                    <X size={25} color='#555B6E' strokeWidth={1.75} />
-                </button>
-            )}
+            <form className='d-flex flex-column w-100 pt-5'>
+                <div className='row py-2 '>
+                    <div className='col-6'>
+                        <label htmlFor='title' className='form-label'>Title</label>
+                        <input type='text' className='form-control' id='title'
+                        placeholder='Note title'
+                        value={note.title}
+                        onChange={(e) => setNote({...note, ['title']: e.target.value})}
+                        required />
+                    </div>
+
+                    <div className='col-6'>
+                        <label htmlFor='category' className='form-label'>Category</label>
+                        <select className='form-select' id='category'
+                        value={note.category}
+                        onChange={(e) => setNote({...note, ['category']: e.target.value})}>
+                            <option value=''>Select category</option>
+                            <option value='personal'>Personal</option>
+                            <option value='work'>Work</option>
+                            <option value='study'>Study</option>
+                            <option value='other'>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className='row py-2'>
+                    <div className='col-12'>
+                        <label htmlFor='textarea' className='form-label'>Content</label>
+                        <textarea className='form-control' id='textarea'
+                        placeholder='Type here the note content'
+                        value={note.content}
+                        onChange={(e) => setNote({...note, ['content']: e.target.value})}
+                        required />
+                    </div>
+                </div>
+
+                <div className='row py-2'>
+                    <div className='col-12'>
+                        {/*TODO: todo list*/}
+                    </div>
+                </div>
+
+                <div className='row py-2'>
+                    <div className='col-10'>
+                        <label htmlFor='noteAccess' className='form-label'>Note access</label>
+                        <select className='form-select' id='noteAccess'
+                        value={note.noteAccess}
+                        onChange={(e) => setNote({...note, ['noteAccess']: e.target.value})}>
+                            <option value='private'>Private</option>
+                            <option value='public'>Public</option>
+                            <option value='shared'>Shared</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className='row py-2'>
+                    <div className='col-12'>
+                        {/*TODO: share with */}
+                    </div>
+                </div>
+
+                <div className='d-flex align-items-center justify-content-center'>
+                    <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                    {selected.edit && (
+                        <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteNote()}>delete</button>
+                    )}
+                </div>
+
+            </form>
         </div>
     );
 }
