@@ -1,6 +1,19 @@
 .message-container {
     width: 95%;
     height: 100%;
+    margin-top: 10rem;
+}
+
+.message-container.desktop {
+    position: fixed;
+    bottom: 0;
+    right: 30px;
+    width: 20rem;
+    height: auto;
+    max-height: 20rem;
+    transition: max-height 0.4s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 800;
 }
 
 .message-button {
@@ -155,18 +168,6 @@
 
 @media screen and (min-width: 769px) {
     
-    .message-container {
-        position: fixed;
-        bottom: 0;
-        right: 30px;
-        width: 20rem;
-        height: auto;
-        max-height: 20rem;
-        transition: max-height 0.4s ease-in-out;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        z-index: 800;
-    }
-
     .message-box {
         width: 20rem;
         display: none;
