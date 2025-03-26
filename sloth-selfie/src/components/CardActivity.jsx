@@ -52,7 +52,7 @@ const CardActivity = ({ Activity, smallView }) => {
                 )}
             </div>
             
-            <button className='btn position-absolute top-0 end-0 p-0 p-md-2' onClick={() => selectActivity()}>
+            <button className='btn position-absolute top-0 end-0 p-0' onClick={() => selectActivity()}>
                 <Pen size={20} color='#244476' strokeWidth={1.25} />
             </button>
         </div>

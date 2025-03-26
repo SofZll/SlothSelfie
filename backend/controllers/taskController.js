@@ -11,9 +11,9 @@ const createTask = async (req, res) => {
     try {
         let task;
         if (deadline) {
-            task = new Task({ text: title, deadline, completed, user: user._id });
+            task = new Task({ title, deadline, completed, user: user._id });
         } else {
-            task = new Task({ text: title, completed, user: user._id });
+            task = new Task({ title, completed, user: user._id });
         }
         const savedTask = await task.save();
         console.log(savedTask);
@@ -88,9 +88,9 @@ const addTasks = async (req, res) => {
         for (let i = 0; i < tasks.length; i++) {
             let task;
             if (tasks[i].deadline) {
-                task = new Task({ text: tasks[i].title, deadline: tasks[i].deadline, completed: tasks[i].completed, user: user._id });
+                task = new Task({ title: tasks[i].title, deadline: tasks[i].deadline, completed: tasks[i].completed, user: user._id });
             } else {
-                task = new Task({ text: tasks[i].title, completed: tasks[i].completed, user: user._id });
+                task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id });
             }
             const savedTask = await task.save();
             taskIds.push(savedTask._id);
