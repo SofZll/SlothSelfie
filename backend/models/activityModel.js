@@ -37,6 +37,13 @@ const activitySchema = new mongoose.Schema({
         ref: 'Project',
         default: null }, // if this field is null, this is a normal activivty
 
+    phaseSubphase: {
+        type: mongoose.Schema.Types.ObjectId,
+         ref: 'PhaseSubphase',
+        default: null
+    },
+
+    /*
      phase: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Phase',
@@ -48,6 +55,7 @@ const activitySchema = new mongoose.Schema({
         ref: 'Subphase', 
         default: null 
     }, // if null, the activity has a phase
+    */
 
     dependencies: [{
         type: mongoose.Schema.Types.ObjectId,

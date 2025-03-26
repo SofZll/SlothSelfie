@@ -1,6 +1,7 @@
 const Project = require("../models/projectModel");
 const Phase = require("../models/phaseModel");
 const Subphase = require("../models/subphaseModel");
+const PhaseSubphase = require("../models/phaseSubphaseModel");
 const Activity = require("../models/activityModel");
 const User = require("../models/userModel");
 const Note = require("../models/noteModel");
@@ -21,6 +22,56 @@ const getAllProjects = async (req, res) => {
 }
 
 //GET project by id
+/*NEW VERSION
+const getProjectById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const project = await Project.findById(id)
+            .populate("owner", "username")
+            .populate("members", "username")
+            .populate("description");
+
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        //now we get the phases of the project (type "phase")
+        const phases = await PhaseSubphase.find({ project: id, type: "phase" }).sort({ createdAt: 1 });
+
+        for (const phase of phases) {
+            // we get the subphases of the phase
+            phase.subphases = await PhaseSubphase.find({ parentPhase: phase._id, type: "subphase" }).sort({ createdAt: 1 });
+
+            //now we populate the activities of each phase
+            phase.activities = await Activity.find({ phase: phase._id })
+                .populate("description")
+                .populate("sharedWith", "username")
+                .populate({ path: "input", select: "content" })
+                .populate({ path: "output", select: "content" })
+                .populate({ path: "dependencies", select: "title" })
+                .sort({ createdAt: 1 });
+
+            for (const subphase of phase.subphases) {
+                // Populates activities of each subphase
+                subphase.activities = await Activity.find({ subphase: subphase._id })
+                    .populate("description")
+                    .populate("sharedWith", "username")
+                    .populate({ path: "input", select: "content" })
+                    .populate({ path: "output", select: "content" })
+                    .populate({ path: "dependencies", select: "title" })
+                    .sort({ createdAt: 1 });
+            }
+        }
+
+        project.phases = phases;
+
+        res.status(200).json(project);
+    } catch (error) {
+        console.error('Error fetching project by id:', error);
+        res.status(500).json({ message: error.message });
+    }
+};*/
+/*OLD VERSION*/
 const getProjectById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -69,6 +120,46 @@ const getProjectById = async (req, res) => {
 };
 
 // Create the activities for the phase/subphase
+/*NEW VERSION
+const createActivities = async (activities, projectId, phaseSubphaseId, ownerId, projectTitle) => {
+    return await Promise.all(activities.map(async (activity) => {
+        // Find the users to share the activity with
+        const sharedWithUserIds = await User.find({ username: { $in: activity.sharedWith } });
+
+        // Create the description note for the activity
+        const descriptionNoteId = await createNoteDescription(activity.description, "activity", ownerId, sharedWithUserIds, projectTitle);
+        
+        // Create events for the activity start date and deadline
+        const eventStartId = await createEvent(activity.startDate, ownerId, sharedWithUserIds, projectTitle, activity.title, "StartDate");
+        const eventDeadlineId = await createEvent(activity.deadline, ownerId, sharedWithUserIds, projectTitle, activity.title, "Deadline");
+
+        // get the dependencies of the activity if any
+        let dependenciesIds = [];
+        if (activity.dependencies && activity.dependencies.length > 0) {
+            dependenciesIds = await Activity.find({ _id: { $in: activity.dependencies } }).select('_id');
+        }
+
+        // Create the activity
+        const newActivity = new Activity({
+            title: activity.title,
+            description: descriptionNoteId,
+            project: projectId,
+            sharedWith: sharedWithUserIds,
+            startDate: activity.startDate,
+            deadline: activity.deadline,
+            user: ownerId,
+            milestone: activity.milestone,
+            dependencies: dependenciesIds,
+            phaseSubphase: phaseSubphaseId,
+            events: [eventStartId, eventDeadlineId]
+        });
+
+        const savedActivity = await newActivity.save();
+        return savedActivity._id;
+    }));
+};*/
+
+/*OLD VERSION*/
 const createActivities = async (activities, projectId, phaseId, subphaseId, ownerId, projectTitle) => {
     return await Promise.all(activities.map(async (activity) => {
 
@@ -110,6 +201,63 @@ const createActivities = async (activities, projectId, phaseId, subphaseId, owne
 };
 
 //POST create a phase or subphase and return its id
+/*NEW VERSION
+const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle) => {
+    // Crea una nuova fase o sottofase in base al tipo
+    let newPhaseSubphase;
+
+    if (type === "phase") {
+        newPhaseSubphase = new PhaseSubphase({
+            title: phase.title,
+            project: projectId,
+            type: "phase",
+        });
+    } else if (type === "subphase") {
+        newPhaseSubphase = new PhaseSubphase({
+            title: phase.title,
+            project: projectId,
+            type: "subphase",
+            parentPhase: phase.parentPhase,
+        });
+    } else {
+        throw new Error("Invalid type: must be 'phase' or 'subphase'");
+    }
+
+    // Save the new phase/subphase and get its _id
+    await newPhaseSubphase.save();
+
+    //Creates the activities for the phase/subphase
+    const activityIds = await createActivities(phase.activities, projectId, newPhaseSubphase._id, ownerId, projectTitle);
+
+    // Adds the activities to the phase/subphase
+    await newPhaseSubphase.updateOne({
+        $push: { activities: { $each: activityIds } },
+    });
+
+    // If it is a phase and it has subphases, creates the subphases
+    if (type === "phase" && phase.subphases && phase.subphases.length > 0) {
+        const subphaseIds = [];
+        for (const subphase of phase.subphases) {
+            const subphaseId = await createPhaseSubphase(
+                "subphase",
+                subphase,
+                projectId,
+                ownerId,
+                projectTitle
+            );
+            subphaseIds.push(subphaseId);
+        }
+
+        // Adds the subphases to the phase
+        await newPhaseSubphase.updateOne({
+            $push: { subphases: { $each: subphaseIds } },
+        });
+    }
+
+    // Returns the _id of the phase/subphase
+    return newPhaseSubphase._id;
+};*/
+/* OLD VERSION*/
 const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle) => {
     let newPhase;
 
@@ -203,6 +351,55 @@ const updateEvent = async (eventId, date, sharedWith, projectTitle, activityTitl
 };
 
 //POST create a project
+/*NEW VERSION
+const createProject = async (req, res) => {
+    try {
+        const { title, owner, description, members, phases } = req.body;
+
+        // finds the owner ID from the username
+        const ownerUser = await User.findOne({ username: owner });
+        if (!ownerUser) {
+            return res.status(404).json({ message: "Owner not found" });
+        }
+
+        // finds the members IDs from the usernames
+        const memberUsers = await User.find({ username: { $in: members } });
+        const memberIds = memberUsers.map(user => user._id);
+
+        // Create the note
+        const newNoteId = await createNoteDescription(description, "project", ownerUser, memberUsers, title);
+
+        // Create the project
+        const newProject = new Project({ title, owner: ownerUser._id, description: newNoteId, members: memberIds });
+        await newProject.save();
+
+        // Create the phases and subphases with their activities
+        const phaseIds = [];
+        for (const phase of phases) {
+            const phaseId = await createPhaseSubphase("phase", phase, newProject._id, ownerUser._id, title);
+            phaseIds.push(phaseId);
+
+            const subphaseIds = [];
+            for (const subphase of phase.subphases) {
+                const subphaseId = await createPhaseSubphase("subphase", subphase, newProject._id, ownerUser._id, title);
+                subphaseIds.push(subphaseId);
+            }
+
+            // Update the phase with the subphases
+            await Phase.updateOne({ _id: phaseId }, { $set: { subphases: subphaseIds } });
+        }
+
+        // Update the project with the phases
+        await newProject.updateOne({ $set: { phases: phaseIds } });
+
+
+        res.status(201).json({ message: "Project, phases, subphases, and activities saved successfully" });
+    } catch (error) {
+        console.error("Error saving project:", error);
+        res.status(500).json({ message: "Server error while saving project" });
+    }
+};*/
+/*OLD VERSION*/
 const createProject = async (req, res) => {
     try {
         const { title, owner, description, members, phases } = req.body;
@@ -251,6 +448,44 @@ const createProject = async (req, res) => {
 };
 
 //updates the existing activities of a phase/subphase
+/*NEW VERSION
+const updateExistingActivities = async (existingActivities, activities, projectTitle) => {
+    const existingActivityIds = existingActivities
+        .filter(activity => activity._id)  
+        .map(activity => activity._id.toString());
+
+    for (const activity of activities) {
+        if (activity._id) {
+            const existingActivity = await Activity.findById(activity._id);
+            if (existingActivity) {
+
+                //we update the note description
+                await updateNoteDescription(existingActivity.description, activity.description, projectTitle, "activity");
+                //we update the event start date
+                await updateEvent(existingActivity.events[0], activity.startDate, existingActivity.sharedWith, projectTitle, activity.title, "StartDate");
+                //we update the event deadline
+                await updateEvent(existingActivity.events[1], activity.deadline, existingActivity.sharedWith, projectTitle, activity.title, "Deadline");
+
+                //get the dependencies of the activity if any
+                let dependenciesIds = [];
+                if (activity.dependencies && activity.dependencies.length > 0) {
+                    dependenciesIds = await Activity.find({ _id: { $in: activity.dependencies } }).select('_id');
+                }
+
+                existingActivity.title = activity.title;
+                existingActivity.sharedWith = await User.find({ username: { $in: activity.sharedWith } });
+                existingActivity.startDate = activity.startDate;
+                existingActivity.deadline = activity.deadline;
+                existingActivity.milestone = activity.milestone;
+                existingActivity.dependencies = dependenciesIds;
+                existingActivity.phaseSubphase = activity.phaseSubphase;
+                await existingActivity.save();
+            }
+        }
+    }
+    return existingActivityIds;
+};*/
+/*OLD VERSION*/
 const updateExistingActivities = async (existingActivities, activities, projectTitle) => {
 
     // finds the exisiting activities
@@ -292,6 +527,113 @@ const updateExistingActivities = async (existingActivities, activities, projectT
 };
 
 //PUT update a project
+/*NEW VERSION
+const updateProject = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, owner, members, phases } = req.body;
+
+        // Find the project
+        let project = await Project.findById(id);
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        // Find the owner id
+        const ownerUser = await User.findOne({ username: owner });
+        if (!ownerUser) {
+            return res.status(404).json({ message: "Owner not found" });
+        }
+
+        // Find the members ids
+        const memberUsers = await User.find({ username: { $in: members } });
+        const memberIds = memberUsers.map(user => user._id);
+
+        // Update the project
+        project.title = title;
+        project.members = memberIds;
+
+        // Update the description note of the project
+        await updateNoteDescription(project.description, description, project.title, "project");
+
+        // Update the phases and subphases
+        const updatedPhaseIds = [];
+
+        for (const phase of phases) {
+            let existingPhase = await PhaseSubphase.findOne({ _id: phase._id, project: project._id, type: 'phase' });
+
+            if (existingPhase) {
+                // if the phase exists, update it
+                existingPhase.title = phase.title;
+
+                // Update the existing activities of the phase
+                const existingActivityIds = await updateExistingActivities(existingPhase.activities, phase.activities, project.title);
+                const newActivities = phase.activities.filter(activity => !activity._id);
+                const newActivityIds = await createActivities(newActivities, project._id, existingPhase._id, ownerUser._id, project.title);
+                existingPhase.activities = Array.from(new Set([...existingActivityIds, ...newActivityIds]));
+
+                await existingPhase.save();
+            } else {
+                // if the phase does not exist, create it
+                const newPhase = new PhaseSubphase({
+                    title: phase.title,
+                    project: project._id,
+                    type: 'phase',
+                    activities: phase.activities.map(activity => activity._id),
+                });
+                await newPhase.save();
+                existingPhase = newPhase;
+            }
+
+            // Now handle subphases within the phase
+            const updatedSubphaseIds = new Set(existingPhase.subphases.map(id => id.toString()));
+
+            for (const subphase of phase.subphases) {
+                let existingSubphase = await PhaseSubphase.findOne({ _id: subphase._id, project: project._id, type: 'subphase' });
+
+                if (existingSubphase) {
+                    existingSubphase.title = subphase.title;
+
+                    // Update activities of the subphase
+                    const existingActivityIds = await updateExistingActivities(existingSubphase.activities, subphase.activities, project.title);
+                    const newActivities = subphase.activities.filter(activity => !activity._id);
+                    const newActivityIds = await createActivities(newActivities, project._id, existingSubphase._id, ownerUser._id, project.title);
+                    existingSubphase.activities = Array.from(new Set([...existingActivityIds, ...newActivityIds]));
+
+                    await existingSubphase.save();
+                } else {
+                    // if subphase does not exist, create it
+                    const newSubphase = new PhaseSubphase({
+                        title: subphase.title,
+                        project: project._id,
+                        type: 'subphase',
+                        parentPhase: existingPhase._id, // Reference to the parent phase
+                        activities: subphase.activities.map(activity => activity._id),
+                    });
+                    await newSubphase.save();
+                    existingSubphase = newSubphase;
+                }
+                updatedSubphaseIds.add(existingSubphase._id.toString());
+            }
+
+            existingPhase.subphases = Array.from(updatedSubphaseIds);
+            await existingPhase.save();
+
+            updatedPhaseIds.push(existingPhase._id);
+        }
+
+        // Update the project with the updated phases
+        project.phases = updatedPhaseIds;
+        await project.save();
+
+        res.status(200).json({ message: 'Project updated successfully', project });
+
+    } catch (error) {
+        console.error('Error updating project:', error);
+        res.status(500).json({ message: "Server error while updating project" });
+    }
+};*/
+/*OLD VERSION*/
 const updateProject = async (req, res) => {
     try {
         const { id } = req.params;
