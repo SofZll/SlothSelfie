@@ -42,14 +42,13 @@ const Planner = () => {
 
     const fetchTasks = async () => {
         const response = await apiService('/tasks', 'GET');
-        if (response) setTasks(response.filter(task => task.deadline));
+        if (response) setTasks(response);
     }
 
     const normalizeData = (datas, type) => {
         if (!Array.isArray(datas)) return [];
 
-        return (type === 'activity' ? datas.filter(data => !data.completed && data.deadline)
-            :  (type === 'task' ? datas.filter(data => !data.completed) : datas)).map(data => {
+        return (type === 'event' ? datas : datas.filter(data => !data.completed && data.deadline)).map(data => {
             return {
                 _id: data._id,
                 title: data.title,

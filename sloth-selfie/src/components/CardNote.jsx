@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import { useNote } from '../contexts/NoteContext';
+import { marked } from 'marked';
 
 const CardNote = ({ Note }) => {
+
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    marked.setOptions({
+        breaks: true,
+    });
 
     return (
         <div className='d-flex flex-column w-100 align-items-center border rounded shadow-sm p-md-3 p-1 position-relative'>
@@ -20,7 +26,11 @@ const CardNote = ({ Note }) => {
             {Note.content.length > 0 && (
                 <div className='row'>
                     <div className='col col-12 border'>
-                        {Note.content.length > 100 ? Note.content.slice(0, 100) + '...' : Note.content}
+                        {isExpanded ? (
+                            marked(Note.content)
+                        ) : (
+                            marked(Note.content.length > 100 ? Note.content.substring(0, 100) + <button className='btn' onClick={() => setIsExpanded(true)}>...more</button> : Note.content)
+                        )}
                     </div>
                 </div>
             )}
@@ -45,8 +55,16 @@ const CardNote = ({ Note }) => {
                 </div>
             )}
 
-            
-                
+            <div className='row'>
+                <div className='col'>
+                    <small>
+                        Created: {new Date(Note.createDate).toLocaleDateString()}
+                    </small>
+                    <small>
+                        Last Modified: {new Date(Note.updateDate).toLocaleDateString()}
+                    </small>
+                </div>
+            </div> 
 
         </div>
     );
