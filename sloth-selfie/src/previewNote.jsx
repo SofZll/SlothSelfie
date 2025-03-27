@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { fetchNotes } from "./NotesUtils";
 import noteImage from './media/note.png';
 import NoteCard from './NoteCard';
-import './css/Notes.css';
+import './styles/Notes.css';
 
 function PreviewNote() {
     const navigate = useNavigate();
