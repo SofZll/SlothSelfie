@@ -53,13 +53,18 @@ const CardCarosel = ({ title, settingKey }) => {
             onMouseLeave={() => setShown(false)}
         >   
             <h2>{title}</h2>
-            <h2>{currentTitle}</h2>
-            {/*
-            {customizations[settingKey] === 'showCalendar' && <PreviewCalendar />}
+            <h5>{currentTitle}</h5>
+            
+            {customizations[settingKey] === 'showCalendar' && <PreviewCalendar viewType="calendar" />}
+            {customizations[settingKey] === 'showEventsList' && <PreviewCalendar viewType="events" />}
+            {customizations[settingKey] === 'showActivitiesList' && <PreviewCalendar viewType="activities" />}
             {customizations[settingKey] === 'listOfNotes' && <PreviewNote />}
+            {customizations[settingKey] === 'lastNote' && <PreviewNote />}
             {customizations[settingKey] === 'listOfPomodoros' && <PreviewPomodoro />}
+            {customizations[settingKey] === 'lastPomodoro' && <PreviewPomodoro />}
             {customizations[settingKey] === 'listOfProjects' && <PreviewProjects />}
-            */}
+            {customizations[settingKey] === 'recentProjectsDeadlines' && <PreviewProjects />}
+            
             {/*
             {caseShow == 1 && <PreviewCalendar />}
             {caseShow == 2 && <PreviewNote />}

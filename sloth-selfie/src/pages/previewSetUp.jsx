@@ -39,15 +39,15 @@ function PreviewSetUp(props) {
                     <div className='customization-options'>
                         <h5>Customize Calendar</h5>
                         <Button 
-                            text='Show Calendar' 
+                            text="Show Calendar" 
                             onClick={() => handleCustomizationChange('calendar', 'showCalendar')} 
                         />
                         <Button 
-                            text='Show Events list'
+                            text="Today's Events list"
                             onClick={() => handleCustomizationChange('calendar', 'showEventsList')} 
                         />
                         <Button 
-                            text='Show Activities list'
+                            text="Today's Activities list"
                             onClick={() => handleCustomizationChange('calendar', 'showActivitiesList')}
                         />
                         {/* other calendar personalizations */}
@@ -58,11 +58,11 @@ function PreviewSetUp(props) {
                     <div className='customization-options'>
                         <h5>Customize Notes</h5>
                         <Button 
-                            text='Show Notes list'
+                            text="Notes list"
                             onClick={() => handleCustomizationChange('notes', 'listOfNotes')} 
                         />
                         <Button 
-                            text='Show last Note' 
+                            text="Last Note"
                             onClick={() => handleCustomizationChange('notes', 'lastNote')} 
                         />
                         {/* other notes personalizations */}
@@ -73,11 +73,11 @@ function PreviewSetUp(props) {
                     <div className='customization-options'>
                         <h5>Customize Pomodoro</h5>
                         <Button 
-                            text='Show Pomodoros list'
+                            text="Pomodoros list"
                             onClick={() => handleCustomizationChange('pomodoro', 'listOfPomodoros')} 
                         />
                         <Button 
-                            text='Show last Pomodoro'
+                            text="Last Pomodoro"
                             onClick={() => handleCustomizationChange('pomodoro', 'lastPomodoro')} 
                         />
                         {/* other pomodoro personalizations */}
@@ -88,11 +88,11 @@ function PreviewSetUp(props) {
                     <div className='customization-options'>
                         <h5>Customize Projects</h5>
                         <Button 
-                            text='Show Projects list'
+                            text="Projects list"
                             onClick={() => handleCustomizationChange('projects', 'listOfProjects')} 
                         />
                         <Button 
-                            text='Show recent Projects deadlines'
+                            text="Recent Projects deadlines"
                             onClick={() => handleCustomizationChange('projects', 'recentProjectsDeadlines')}
                         />
                         {/* other projects personalizations */}

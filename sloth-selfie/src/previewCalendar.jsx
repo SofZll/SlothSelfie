@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchData } from "./CalendarUtils";
 import Calendar from 'react-calendar';
-import './css/Calendar.css';
+import './styles/Calendar.css';
 
-function PreviewCalendar() {
+const PreviewCalendar = ({ viewType }) => {
     const navigate = useNavigate();
     const [activities, setActivities] = useState([]);
     const [event, setEvent] = useState([]);
@@ -57,7 +57,7 @@ function PreviewCalendar() {
         // Get today's events
         useEffect(() => {
             if (event.length > 0) {
-                const today = new Date();
+                const today = new Date(); // TIME MACHINE DATE  
                 const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
         
                 const todayFilteredEvents = event.filter(ev => {
@@ -72,7 +72,7 @@ function PreviewCalendar() {
         // Get today's activities
         useEffect(() => {
             if (activities.length > 0) {
-                const today = new Date();
+                const today = new Date(); // TIME MACHINE DATE
                 const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
         
                 const todayFilteredActivities = activities.filter(act => {
@@ -83,57 +83,61 @@ function PreviewCalendar() {
                 setTodayActivities(todayFilteredActivities);
             }
         }, [activities]);
-    
 
-    return (
-        <div className="inCard">
-
-                    <Calendar  tileContent={tileContent}/>
-                    <div className="divBtn">
-                        
-                    </div>
-            <div className="events-section">
-            <p>Today's <span className="event-color">Events</span> and <span className="activity-color">Activities</span>:</p>
-                <div className="parallel-lists">
-                    <div className="scrollableCalendar-list EventShow">
-                        {todayEvents.length > 0 ? (
-                            todayEvents.map((event) => (
-                                <div key={event._id} className="event-card">
-                                    <p>{event.title}</p>
-                                    <p>{event.time}</p>
+        const renderContent = () => {
+            switch (viewType) {
+                case "calendar":
+                    return <Calendar tileContent={tileContent} />;
+                case "events":
+                    return (
+                        <div className="scrollableCalendar-list EventShow">
+                            {todayEvents.length > 0 ? (
+                                todayEvents.map((event) => (
+                                    <div key={event._id} className="event-card">
+                                        <p>{event.title}</p>
+                                        <p>{event.time}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="div-postit">
+                                    <h2>No events today!</h2>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="div-postit">
-                                <h2>No events today!</h2>
-                            </div>
-                        )}
-                    </div>
-                        
-                    <div className="scrollableCalendar-list ActivityShow">
-                    {todayActivities.length > 0 ? (
-                        todayActivities.map((activity) => (
-                            <div key={activity._id} className="event-card">
-                                <p>{activity.title}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="div-postit">
-                            <h2>No activities deadlines today!</h2>
+                            )}
                         </div>
-                    )}
-                </div>
+                    );
+                case "activities":
+                    return (
+                        <div className="scrollableCalendar-list ActivityShow">
+                            {todayActivities.length > 0 ? (
+                                todayActivities.map((activity) => (
+                                    <div key={activity._id} className="event-card">
+                                        <p>{activity.title}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="div-postit">
+                                    <h2>No activities deadlines today!</h2>
+                                </div>
+                            )}
+                        </div>
+                    );
+                default:
+                    return null;
+            }
+        };
 
-                </div>
+        return (
 
+            <div className="inCard">
+                {renderContent()}
                 <div className="divBtn">
                     <Link to="/calendar" onClick={handleLinkClick('/calendar')}>
                         <button className="btn btn-main" >Manage Calendar</button>
                     </Link>
                 </div>
-            </div> 
-        </div>
-    );
+            </div>
+        );
+    
 };
 
 export default PreviewCalendar;
