@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import CardCarosel from '../components/CardCarosel';
 
 import { Calendar1, NotebookPen, Presentation, MoveLeft, MoveRight, Settings } from 'lucide-react';
-import iconTomato from '../media/tomato.svg';
+import TomatoIcon from '../assets/icons/TomatoIcon';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -72,7 +72,7 @@ const CarouselHome = (props) => {
             <NotebookPen size={36} color='#ffffff' strokeWidth={1.75} />
           </button>
           <button onClick={() => handleGoToSlide(2)} className={`btn-preview  ${goToSlide === 2 ? 'active' : ''}`} alt='pomodoro'>
-            <img src={iconTomato} alt='icon' className='icon-up'/>
+            <TomatoIcon size={36} color='#ffffff' strokeWidth={1.75} />
           </button>
           <button onClick={() => handleGoToSlide(3)} className={`btn-preview  ${goToSlide === 3 ? 'active' : ''}`} alt='projects'>
             <Presentation size={36} color='#ffffff' strokeWidth={1.75} />

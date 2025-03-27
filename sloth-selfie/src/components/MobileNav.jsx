@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 import { Calendar1, NotebookPen, Presentation, House, User } from 'lucide-react';
-import iconTomato from '../media/tomatoDark.svg';
+import TomatoIcon from '../assets/icons/TomatoIcon';
 
 const MobileNav = () => {
 
@@ -26,7 +26,7 @@ const MobileNav = () => {
                 <NotebookPen size={36} color="#555B6E" strokeWidth={1.75} />
             </NavLink>
             <NavLink to='/pomodoro' activeclassname='active' alt='pomodoro'>
-                <img src={iconTomato} alt='Pomodoro' style={{ width: '36px' }}/>
+                <TomatoIcon size={36} color="#555B6E" strokeWidth={1.75} />
             </NavLink>
             <a href='/projects.html' alt='projects'>
             <Presentation size={36} color="#555B6E" strokeWidth={1.75} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchNotes } from "./NotesUtils";
-import noteImage from './media/note.png';
+//import noteImage from './media/note.png';
 import NoteCard from './NoteCard';
 import './css/Notes.css';
 
@@ -43,7 +43,7 @@ function PreviewNote() {
                     ) : (
                         <div className="div-postit">
                             <h2>No notes yet!</h2>
-                            <img src={noteImage} alt="Note illustration" className="note-image" />
+                            {/*<img src={noteImage} alt="Note illustration" className="note-image" />*/}
                         </div>
                     )}
                 </div>
