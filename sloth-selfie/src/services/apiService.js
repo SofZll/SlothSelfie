@@ -14,12 +14,16 @@ const apiService = async (endpoint, method = 'GET', body = null) => {
 
     try {
         const response = await fetch(url, options);
-        if (!response.ok) console.error('API Service Error:', response);
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('API Error:', errorData);
+            return { success: false, message: errorData.message };
+        }
 
-        return response.json();
+        return await response.json();
     } catch (error) {
         console.error('API Service Error:', error);
-        return null;
+        return { success: false, message: error.message };
     }
 };
 

@@ -1,40 +1,35 @@
+const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
 
-// TODO: implement a hashing function to store passwords securely
 // TODO: implement the possibility to change the password
 
 // Log in a user: FUNZIONA
 const loginUser = async (req, res) => {
     const { username, password } = req.body;
     try {
-
-        // Check if the user exists
         const user = await User.findOne({ username });
+
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(401).json({ message: 'User not found' });
         }
 
-        // Compare the stored password with the input password
-        console.log(`Stored password: ${user.password}`);
-        if (password !== user.password) {
-            return res.status(400).json({ success: false, message: 'Invalid password' });
+        const isMatch = await bcrypt.compare(password, user.password);
+        console.log('isMatch:', isMatch);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Incorrect password' });
         }
 
-        req.session.userId = user._id.toString();
-        console.log('Session UserId:', req.session.userId);
+        req.session.userId = user._id;
         req.session.username = user.username;
-        console.log('Session Username:', req.session.username);
 
-        await req.session.save((err) => {
-            if (err) {
-                console.error('Error saving session:', err);
-            }
-        });
+        const userData = {
+            _id: user._id,
+            name: user.name,
+            username: user.username,
+            email: user.email
+        };
 
-        console.log('Session ID after login:', req.sessionID); // Debugging line
-        console.log('Session after login:', req.session); // Debugging line
-
-        res.status(200).json({ success: true, user });
+        res.status(200).json({ success: true, user: userData });
     } catch (error) {
         console.error('Error logging in user:', error);
         res.status(500).json({ success: false, message: 'Error logging in user' });
@@ -51,8 +46,10 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: 'User already exists' });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         // Create a new user
-        const newUser = new User({ name, username, email, password });
+        const newUser = new User({ name, username, email, password: hashedPassword });
         await newUser.save();
         
         res.status(201).json({ success: true, user: newUser });

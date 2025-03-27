@@ -2,11 +2,11 @@ import React, { useState, useContext } from 'react';
 import { slide as Hamburger } from 'react-burger-menu';
 import { Link } from 'react-router-dom';
 import { StyleContext } from './StyleContext';
-import { UserContext } from '../contexts/UserContext';
+import { AuthContext } from '../contexts/AuthContext';
 
 //TODO: va messo abbosto l'iconna del panino
 const DesktopNav = () => {
-    const { user } = useContext(UserContext);
+    const { user } = useContext(AuthContext);
     console.log(user);
     const [isOpen, setIsOpen] = useState(false);
 

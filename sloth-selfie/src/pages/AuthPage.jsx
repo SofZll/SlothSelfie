@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import authSloth from '../assets/icons/authSloth.png';
+import Swal from 'sweetalert2';
+
 import { validateLogin, validateRegistration } from '../utils/validation.js'
 import AuthLayout from '../layouts/AuthLayout';
 import { apiService } from '../services/apiService';
-import authSloth from '../assets/icons/authSloth.png';
-import Swal from 'sweetalert2';
+import { AuthContext } from '../contexts/AuthContext';
 
 // TODO: choose a library for icons react-icons or lucide-rect
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -27,8 +29,10 @@ function getCursorPosition(event) {
     eyes2.style.transform = `translate(-${x}, -${y})`;
 }
 
-const AuthPage = ({ formType = 'login', setAuthenticated }) => {
+const AuthPage = ({ formType = 'login' }) => {
+    const { user, fetchUserData } = useContext(AuthContext);
     const navigate = useNavigate();
+
     const [currentFormType, setcurrentFormType] = useState(formType);
     const [showPassword, setShowPassword] = useState(false);
     const [userInfo, setUserInfo] = useState({
@@ -42,10 +46,9 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
         e.preventDefault();
         if (currentFormType === 'login' && validateLogin(userInfo.username, userInfo.password)) {
             const response = await apiService('/user/login', 'POST', { username: userInfo.username, password: userInfo.password });
-            if (response) {
+            if (response && response.success) {
                 console.log('User logged in');
-                localStorage.setItem('authToken', response.token);
-                setAuthenticated(true);
+                await fetchUserData();
                 navigate('/home');
             } else {
                 console.error('Error logging in:', response);
@@ -53,9 +56,10 @@ const AuthPage = ({ formType = 'login', setAuthenticated }) => {
             }
         } else if (currentFormType === 'register' && validateRegistration(userInfo.name, userInfo.username, userInfo.email, userInfo.password)) {
             const response = await apiService('/user/register', 'POST', userInfo);
-            if (response) {
+            if (response && response.success) {
                 console.log('User registered');
-                // TODO: logic after registering user
+                setcurrentFormType('login');
+                navigate('/login');
             } else {
                 console.error('Error registering:', response);
                 Swal.fire({ title: 'Registration failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });

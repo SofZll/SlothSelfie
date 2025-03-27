@@ -10,7 +10,7 @@ import ScrollList from '../../components/ScrollList';
 import FormCalendar from './FormCalendar';
 import PlusLayout from '../../layouts/PlusLayout';
 
-import { UserContext } from '../../contexts/UserContext';
+import { AuthContext } from '../../contexts/AuthContext';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
 
@@ -23,7 +23,7 @@ const Planner = () => {
     const localizer = momentLocalizer(moment);
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
-    const { user } = useContext(UserContext);
+    const { user } = useContext(AuthContext);
     const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
 

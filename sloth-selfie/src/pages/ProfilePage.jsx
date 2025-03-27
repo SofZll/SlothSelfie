@@ -7,10 +7,10 @@ import Swal from 'sweetalert2';
 import { validateEmail, validatePhoneNumber } from '../utils/validation';
 import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
-import { UserContext } from '../contexts/UserContext';
+import { AuthContext } from '../contexts/AuthContext';
 
 const ProfilePage = () => {
-    const { user, setUser  } = useContext(UserContext);
+    const { user, setUser  } = useContext(AuthContext);
 
     const isDesktop = useIsDesktop();
     const navigate = useNavigate();
@@ -65,8 +65,14 @@ const ProfilePage = () => {
         }
     }
 
-    const handleLogout = () => {
-        localStorage.removeItem('authToken');
+    const handleLogout = async () => {
+        const response = await apiService('/user/logout', 'POST');
+        if (response) {
+            setUser(null);
+        } else {
+            console.error('Error logging out:', response);
+            Swal.fire({ title: 'Error logging out', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        }
         navigate('/login');
     }
 

@@ -6,11 +6,11 @@ import Swal from 'sweetalert2';
 
 import { apiService } from '../services/apiService';
 import { useIsDesktop } from '../utils/utils';
-import { UserContext } from '../contexts/UserContext';
+import { AuthContext } from '../contexts/AuthContext';
 import MainLayout from '../layouts/MainLayout';
 
 const ChatBox = () => {
-    const { username } = useContext(UserContext);
+    const { username } = useContext(AuthContext);
     const { chatId } = useParams();
     const navigate = useNavigate();
     const messagesEndRef = useRef(null);
