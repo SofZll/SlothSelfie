@@ -1,10 +1,7 @@
-//TODO: in edit di progetto: owner può raggruppare attività
 //TODO: modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) 
 
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
-
-//todo: refactor di delete progetti
 
 // Function to get the logged user
 async function getLoggedUser() {

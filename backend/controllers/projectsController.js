@@ -1,6 +1,4 @@
 const Project = require("../models/projectModel");
-const Phase = require("../models/phaseModel");//
-const Subphase = require("../models/subphaseModel");//
 const PhaseSubphase = require("../models/phaseSubphaseModel");
 const Activity = require("../models/activityModel");
 const User = require("../models/userModel");
@@ -443,47 +441,35 @@ const deleteProject = async (req, res) => {
         }
 
         // Find all phases and subphases of the project
-        const phases = await Phase.find({ project: id });
-        const phaseIds = phases.map(phase => phase._id);
-
-        const subphases = await Subphase.find({ project: id });
-        const subphaseIds = subphases.map(subphase => subphase._id);
+        const phaseSubphases = await PhaseSubphase.find({ project: id });
+        const phaseSubphasesIds = phaseSubphases.map(ps => ps._id);
 
         // Find all activities linked to this project, its phases, and subphases
-        const activities = await Activity.find({
-            $or: [{ phase: { $in: phaseIds } }, { subphase: { $in: subphaseIds } }]
-        });
-
+        const activities = await Activity.find({ phaseSubphase: { $in: phaseSubphasesIds } });
+        
         // Delete notes and events related to the activities
         await deleteRelatedNotesAndEvents(activities);
 
-        // Find the note id of the description of the project
-        const projectNoteId = project.description;
-
         //delete the description note of the project
-        if (projectNoteId) {
-            await Note.findByIdAndDelete(projectNoteId);
+        if (project.description) {
+            await Note.findByIdAndDelete(project.description);
         }
 
-        // Delete all activities
+        /// Delete all activities
         await Activity.deleteMany({ _id: { $in: activities.map(a => a._id) } });
 
-        // Delete all subphases
-        await Subphase.deleteMany({ _id: { $in: subphaseIds } });
-
-        // Delete all phases
-        await Phase.deleteMany({ _id: { $in: phaseIds } });
+        // Delete all phases and subphases
+        await PhaseSubphase.deleteMany({ _id: { $in: phaseSubphasesIds } });
 
         // Delete the project
         await Project.findByIdAndDelete(id);
 
         res.status(200).send("Project and associated data deleted successfully.");
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error deleting project:', error);
         res.status(500).json({ message: error.message });
     }
-}
+};
 
 //Delete a phase from the project, with its subphases and activities
 const removePhaseFromBackend = async (req, res) => {
@@ -497,21 +483,21 @@ const removePhaseFromBackend = async (req, res) => {
         }
 
         // Find the phase
-        const phase = await Phase.findById(phaseId);
-        if (!phase) {
-            return res.status(404).json({ message: 'Phase not found' });
+        const phase = await PhaseSubphase.findById(phaseId);
+        if (!phase || phase.type !== 'phase') {
+            return res.status(404).json({ message: 'Phase not found or invalid type' });
         }
 
         // Remove the phase from the project's phases array
         project.phases = project.phases.filter(p => p.toString() !== phaseId);
         await project.save();
 
-        // Gets the ids of the subphases of the phase
-        const subphaseIds = phase.subphases.map(sp => sp._id);
+        // Get the ids of the subphases
+        const subphaseIds = phase.subphases;
 
         // Get all activities belonging to the phase and its subphases
         const activities = await Activity.find({
-            $or: [{ phase: phaseId }, { subphase: { $in: subphaseIds } }]
+            phaseSubphase: { $in: [phaseId, ...subphaseIds] }
         });
 
         // Delete notes and events related to the activities
@@ -520,11 +506,11 @@ const removePhaseFromBackend = async (req, res) => {
         // Delete the activities of the phase and its subphases
         await Activity.deleteMany({ _id: { $in: activities.map(a => a._id) } });
 
-        // Delete the subphases of the phase
-        await Subphase.deleteMany({ _id: { $in: subphaseIds } });
+        // Delete the subphases
+        await PhaseSubphase.deleteMany({ _id: { $in: subphaseIds } });
 
         // Delete the phase
-        await Phase.findByIdAndDelete(phaseId);
+        await PhaseSubphase.findByIdAndDelete(phaseId);
 
         res.status(200).json({ 
             success: true, 
@@ -543,7 +529,7 @@ const removeSubphaseFromBackend = async (req, res) => {
     const { projectId, phaseId, subphaseId } = req.body;
 
     try {
-        // find the project
+        // Find the project
         const project = await Project.findById(projectId);
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });
@@ -551,11 +537,11 @@ const removeSubphaseFromBackend = async (req, res) => {
 
         let subphaseDeleted = false;
 
-        // if the subphase is in a phase
+        // Check if the subphase is inside the given phase
         if (phaseId) {
-            const phase = await Phase.findById(phaseId);
-            if (!phase) {
-                return res.status(404).json({ message: 'Phase not found' });
+            const phase = await PhaseSubphase.findById(phaseId);
+            if (!phase || phase.type !== 'phase') {
+                return res.status(404).json({ message: 'Phase not found or invalid type' });
             }
 
             const initialLength = phase.subphases.length;
@@ -571,19 +557,22 @@ const removeSubphaseFromBackend = async (req, res) => {
             return res.status(404).json({ message: 'Subphase not found in project or phase' });
         }
 
-        // delete the subphase and its activities
-        const activities = await Activity.find({ subphase: subphaseId });
+        // Delete the subphase and its activities
+        const activities = await Activity.find({ phaseSubphase: subphaseId });
 
         // Delete notes and events related to the activities
         await deleteRelatedNotesAndEvents(activities);
 
         // Delete the activities
-        await Activity.deleteMany({ subphase: subphaseId });
+        await Activity.deleteMany({ phaseSubphase: subphaseId });
 
         // Delete the subphase
-        await Subphase.findByIdAndDelete(subphaseId);
+        await PhaseSubphase.findByIdAndDelete(subphaseId);
 
-        return res.status(200).json({ success: true, message: "Subphase and its activities deleted successfully." });
+        return res.status(200).json({ 
+            success: true, 
+            message: "Subphase and its activities deleted successfully." 
+        });
 
     } catch (error) {
         console.error('Error deleting subphase:', error);
@@ -604,34 +593,20 @@ const removeActivityFromBackend = async (req, res) => {
 
         let activityDeleted = false;
 
-        // if the activity is in a phase
-        if (phaseId) {
-            const phase = await Phase.findById(phaseId);
-            if (!phase) {
-                return res.status(404).json({ message: 'Phase not found' });
+        // Find the phase or subphase containing the activity, if one of them is null, the activity is in th other
+        const phaseSubphaseId = phaseId || subphaseId;
+        
+        if (phaseSubphaseId) {
+            const phaseSubphase = await PhaseSubphase.findById(phaseSubphaseId);
+            if (!phaseSubphase) {
+                return res.status(404).json({ message: 'Phase or Subphase not found' });
             }
 
-            const initialLength = phase.activities.length;
-            phase.activities = phase.activities.filter(activity => activity.toString() !== activityId);
+            const initialLength = phaseSubphase.activities.length;
+            phaseSubphase.activities = phaseSubphase.activities.filter(activity => activity.toString() !== activityId);
             
-            if (phase.activities.length !== initialLength) {
-                await phase.save();
-                activityDeleted = true;
-            }
-        }
-
-        // if the activity is in a subphase
-        if (subphaseId) {
-            const subphase = await Subphase.findById(subphaseId);
-            if (!subphase) {
-                return res.status(404).json({ message: 'Subphase not found' });
-            }
-
-            const initialLength = subphase.activities.length;
-            subphase.activities = subphase.activities.filter(activity => activity.toString() !== activityId);
-
-            if (subphase.activities.length !== initialLength) {
-                await subphase.save();
+            if (phaseSubphase.activities.length !== initialLength) {
+                await phaseSubphase.save();
                 activityDeleted = true;
             }
         }
@@ -640,34 +615,27 @@ const removeActivityFromBackend = async (req, res) => {
             return res.status(404).json({ message: 'Activity not found in phase or subphase' });
         }
 
-        // if the activity is deleted from a phase or subphase, delete the activity
-
-        //we first save the id to delete the note description, and the input/output notes
+        // Retrieve the activity to delete notes and events linked to it
         const activity = await Activity.findById(activityId);
-        const descriptionNoteId = activity.description;
-        const inputNoteId = activity.input;
-        const outputNoteId = activity.output;
-
-        //we first find the events linked to the activity and delete them
-        const eventIds = activity.events;
-        if (eventIds.length > 0) {
-            await Event.deleteMany({ _id: { $in: eventIds } });
+        if (!activity) {
+            return res.status(404).json({ message: 'Activity not found' });
         }
 
+        //get the ids of the notes and events linked to the activity
+        const { description, input, output, events } = activity;
+
+        // Delete linked events
+        if (events.length > 0) {
+            await Event.deleteMany({ _id: { $in: events } });
+        }
+
+        // Delete the activity
         await Activity.findByIdAndDelete(activityId);
 
-        //delete the description note
-        if (descriptionNoteId) {
-            await Note.findByIdAndDelete(descriptionNoteId);
-        }
-        //delete the input note
-        if (inputNoteId) {
-            await Note.findByIdAndDelete(inputNoteId);
-        }
-        //delete the output note
-        if (outputNoteId) {
-            await Note.findByIdAndDelete(outputNoteId);
-        }
+        // Delete linked notes
+        if (description) await Note.findByIdAndDelete(description);
+        if (input) await Note.findByIdAndDelete(input);
+        if (output) await Note.findByIdAndDelete(output);
 
         return res.status(200).json({ success: true, message: "Activity deleted successfully" });
 
