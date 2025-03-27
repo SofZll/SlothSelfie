@@ -20,8 +20,13 @@ async function handleActivities(projectId) {
         }
 
         // Get activities: all if owner, only assigned if member
-        let activities = project.phases.flatMap(phase => phase.activities);
-        activities = activities.concat(project.phases.flatMap(phase => phase.subphases.flatMap(subphase => subphase.activities)));
+        let activities = [];
+        for (const phase of project.phases) {
+            activities = activities.concat(phase.activities);
+            for (const subphase of phase.subphases) {
+                activities = activities.concat(subphase.activities);
+            }
+        }
 
         if (!isOwner) {
             activities = activities.filter(activity => activity.sharedWith.some(user => user.username === userLogged));
@@ -244,6 +249,12 @@ async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
                 }
                 else if(activity.output){
                     toggleElements([startBtn], true);
+                }else{
+                    //check if output field is enabled, we will not activate the start button in that case
+                    let outputField = document.getElementById(`output-${activityId}`);
+                    if(outputField && !outputField.disabled){
+                    toggleElements([startBtn], true);
+                    }
                 }
                 break;
         }
