@@ -26,8 +26,10 @@ export const TaskProvider = ({ children }) => {
         });
     }
 
+    const [localTask, setLocalTask] = useState([]);
+
     return (
-        <TaskContext.Provider value={{ task, setTask, resetTask, tasks, setTasks }}>
+        <TaskContext.Provider value={{ task, setTask, resetTask, tasks, setTasks, localTask, setLocalTask }}>
             {children}
         </TaskContext.Provider>
     );

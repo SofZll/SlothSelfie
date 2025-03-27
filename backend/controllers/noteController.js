@@ -4,31 +4,30 @@ const  { deleteTasks } = require('./taskController');
 
 // Create a new note
 const createNote = async (req, res) => {
-    const {title, category, content, noteAccess, allowedUsers, isTodo, tasks, C } = req.body;
+    const { title, category, content, tasks, noteAccess, sharedWith } = req.body;
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
 
 
     try {
-
         const note = new Note({
             title,
+            user: user._id,
             category,
-            content,
+            content: content || '',
+            tasks: tasks || [],
             noteAccess,
-            allowedUsers: noteAccess === 'restricted' ? allowedUsers : [],
-            isTodo,
-            tasks: isTodo ? tasks : [],
+            sharedWith: noteAccess === 'shared' ? sharedWith : [],
             createDate: new Date(),
             updateDate: new Date(),
-            user: user._id,
         });
 
-        await note.save();
-        const savedNote = await Note.findById(note._id)
-        .populate('user', '_id username')
+        const savedNote = await note.save();
+        const newNote = await Note.findById(savedNote._id)
+        .populate('user', '_username')
         .populate('tasks');
-        res.status(201).json({ success: true, note: savedNote });
+
+        res.status(201).json(newNote);
     } catch (error) {
         console.error('Error creating note:', error);
         res.status(500).json({ success: false, message: 'Error creating note' });
@@ -37,25 +36,23 @@ const createNote = async (req, res) => {
 
 // Fetch all notes
 const getNotes = async (req, res) => {
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
 
     try {
-        const userName = req.session.username;
-        const user = await User.findOne({ username: userName });
-
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
         
         const notes = await Note.find({
             $or: [
-                { user: user._id },
+                { user: userName },
                 { noteAccess: 'public' },
-                { noteAccess: 'restricted', allowedUsers: user.username },
+                { noteAccess: 'shared', allowedUsers: user.username },
             ]
-        }).populate('tasks').populate('user', 'username').populate('sharedWith', 'username');
+        })
+        .populate('tasks')
+        .populate('user', 'username')
 
 
-        res.status(200).json({ success: true, notes });
+        res.status(200).json(notes);
 
     } catch (error) {
         console.error('Error fetching notes:', error);

@@ -9,14 +9,10 @@ const createTask = async (req, res) => {
     const user = await User.findOne({ username: userName });
 
     try {
-        let task;
-        if (deadline) {
-            task = new Task({ title, deadline, completed, user: user._id });
-        } else {
-            task = new Task({ title, completed, user: user._id });
-        }
+        const task = new Task({ title, completed, user: user._id });
+        if (deadline) task.deadline = deadline;
+
         const savedTask = await task.save();
-        console.log(savedTask);
         res.status(200).json(savedTask);
     } catch (error) {
         console.error('Error creating task:', error);
@@ -27,16 +23,11 @@ const createTask = async (req, res) => {
 // change task completed value
 const markTaskCompleted = async (req, res) => {
     const { taskId } = req.params;
-    const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
 
     try {
         const task = await Task.findById(taskId);
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
-        }
-        if (task.user.toString() !== user._id.toString()) {
-            return res.status(403).json({ message: 'You are not authorized to update this task' });
         }
 
         task.completed = !task.completed;
@@ -54,7 +45,15 @@ const getTasks = async (req, res) => {
     const user = await User.findOne({ username: userName });
     
     try {
-        const tasks = await Task.find({ username: user._id });
+        const tasks = await Task.find({
+            $or: [
+                { user: user._id },
+                { sharedWith: user._id }
+            ]
+        })
+        .populate('user', 'username')
+        .populate('sharedWith', 'username');
+        
         res.status(200).json(tasks);
     } catch (error) {
         console.error('Error fetching tasks:', error);

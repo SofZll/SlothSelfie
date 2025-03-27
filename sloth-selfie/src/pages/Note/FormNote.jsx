@@ -4,6 +4,8 @@ import { useNote } from '../../contexts/NoteContext';
 import { useIsDesktop } from '../../utils/utils';
 import { apiService } from '../../services/apiService';
 
+import FormTask from './FormTask';
+
 import Swal from 'sweetalert2';
 
 import { X } from 'lucide-react';
@@ -90,9 +92,10 @@ const FormNote = () => {
                     </div>
                 </div>
 
-                <div className='row py-2'>
+                <div className='row'>
                     <div className='col-12'>
-                        {/*TODO: todo list*/}
+                        <div>Tasks</div>
+                        <FormTask />
                     </div>
                 </div>
 
