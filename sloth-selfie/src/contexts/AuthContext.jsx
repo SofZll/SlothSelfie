@@ -2,10 +2,10 @@ import React, { useState, createContext, useEffect } from 'react';
 
 import { apiService } from '../services/apiService';
 
-const UserContext = createContext();
+const AuthContext = createContext();
 
-const UserProvider = ({ children }) => {
-    const [user, setUser] = useState([]);
+const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
 
     const fetchUserData = async () => {
         // Since the image is stored a Buffer we need to convert it to base64
@@ -15,7 +15,7 @@ const UserProvider = ({ children }) => {
             return btoa(binary);
         };
         const response = await apiService('/user/profile');
-        if (response) {
+        if (response && response.success) {
             if (response.user.image?.data?.data) {
                 const buffer = response.user.image.data.data;
                 base64Image = `data:${response.user.image.contentType};base64,${bufferToBase64(buffer)}`;
@@ -37,13 +37,29 @@ const UserProvider = ({ children }) => {
         }
     };
 
-    useEffect(() => { fetchUserData(); }, []);
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const response = await apiService('/user/check-auth');
+                if (response && response.success) {
+                    await fetchUserData();
+                } else {
+                    console.error('Error checking auth:', response);
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+                setUser(null);
+            }
+        };
+        checkAuth();
+    }, []);
 
     return (
-        <UserContext.Provider value={{ user, setUser }}>
+        <AuthContext.Provider value={{ user, setUser, fetchUserData }}>
             {children}
-        </UserContext.Provider>
+        </AuthContext.Provider>
     );
 }
 
-export { UserContext, UserProvider };
+export { AuthContext, AuthProvider };
