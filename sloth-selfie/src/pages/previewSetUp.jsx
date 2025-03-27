@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext  } from 'react';
 import '../styles/setting.css';
 import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
+import { CustomizationContext } from '../contexts/PreviewContext';
 
 
 import { X } from 'lucide-react';
 
 function PreviewSetUp(props) {
-
     const [isSetting, setIsSetting] = useState('calendar');
+    const { customizations, setCustomizations } = useContext(CustomizationContext);
     const navigate = useNavigate();
 
     const handleSetUp = () => {
@@ -18,6 +19,88 @@ function PreviewSetUp(props) {
 
     const handleSetting = (setting) => {
         setIsSetting(setting);
+    };
+
+    const handleCustomizationChange = (setting, option) => {
+        setCustomizations(prev => {
+            const newCustomizations = { ...prev, [setting]: option };
+            console.log("Updated Customizations inside setCustomizations:", newCustomizations);
+
+            // Save the personalizations to local storage
+            localStorage.setItem('customizations', JSON.stringify(newCustomizations));
+            return newCustomizations;
+        });
+    };
+
+    const renderCustomizationOptions = () => {
+        switch (isSetting) {
+            case 'calendar':
+                return (
+                    <div className='customization-options'>
+                        <h5>Customize Calendar</h5>
+                        <Button 
+                            text='Show Calendar' 
+                            onClick={() => handleCustomizationChange('calendar', 'showCalendar')} 
+                        />
+                        <Button 
+                            text='Show Events list'
+                            onClick={() => handleCustomizationChange('calendar', 'showEventsList')} 
+                        />
+                        <Button 
+                            text='Show Activities list'
+                            onClick={() => handleCustomizationChange('calendar', 'showActivitiesList')}
+                        />
+                        {/* other calendar personalizations */}
+                    </div>
+                );
+            case 'notes':
+                return (
+                    <div className='customization-options'>
+                        <h5>Customize Notes</h5>
+                        <Button 
+                            text='Show Notes list'
+                            onClick={() => handleCustomizationChange('notes', 'listOfNotes')} 
+                        />
+                        <Button 
+                            text='Show last Note' 
+                            onClick={() => handleCustomizationChange('notes', 'lastNote')} 
+                        />
+                        {/* other notes personalizations */}
+                    </div>
+                );
+            case 'pomodoro':
+                return (
+                    <div className='customization-options'>
+                        <h5>Customize Pomodoro</h5>
+                        <Button 
+                            text='Show Pomodoros list'
+                            onClick={() => handleCustomizationChange('pomodoro', 'listOfPomodoros')} 
+                        />
+                        <Button 
+                            text='Show last Pomodoro'
+                            onClick={() => handleCustomizationChange('pomodoro', 'lastPomodoro')} 
+                        />
+                        {/* other pomodoro personalizations */}
+                    </div>
+                );
+            case 'projects':
+                return (
+                    <div className='customization-options'>
+                        <h5>Customize Projects</h5>
+                        <Button 
+                            text='Show Projects list'
+                            onClick={() => handleCustomizationChange('projects', 'listOfProjects')} 
+                        />
+                        <Button 
+                            text='Show recent Projects deadlines'
+                            onClick={() => handleCustomizationChange('projects', 'recentProjectsDeadlines')}
+                        />
+                        {/* other projects personalizations */}
+                    </div>
+                );
+            default:
+                return null;
+        }
     };
 
     return (
@@ -35,6 +118,7 @@ function PreviewSetUp(props) {
                 </div>
 
                 <div className='cd-flex flex-column l-col'>
+                    {renderCustomizationOptions()}
                 </div>
             </div>
             
