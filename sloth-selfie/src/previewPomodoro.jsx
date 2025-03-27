@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import "./css/App.css";
 import "./css/Pomodoro.css";
-import iconYellowTomato from './media/yellowTomato.svg';
-import iconRedTomato from './media/redTomato.svg';
+import iconYellowTomato from './assets/icons/yellowTomato.svg';
+import iconRedTomato from './assets/icons/redTomato.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { stringTime, tomatoPlay, passingTime } from './pomodoroUtils';
 

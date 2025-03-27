@@ -28,7 +28,7 @@ export function pomodoroPlay (setPlayTomato, playTomato, dataPomodoro, setDataPo
 
 function soundFinish() {
   return new Howl({
-    src: [require('./media/meow.mp3')],
+    src: [require('./assets/audios/meow.mp3')],
     volume: 1.0,
   });
 }
