@@ -9,7 +9,7 @@ const PreviewProjects = () => {
     return (
         <div className="inCard">
             <p>Preview of all your projects!</p>
-            <button className="btn btn-main" onClick={manageProjects}>Manage Projects</button>
+            <button className="btn btn-main blue" onClick={manageProjects}>Manage Projects</button>
         </div>
     );
 };
