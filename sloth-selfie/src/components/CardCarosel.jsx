@@ -30,7 +30,7 @@ const CardCarosel = ({ title, settingKey }) => {
      //Map the setting key to the personalized title
      const titleMap = {
         showEventsList: "Today's Events List",
-        showActivitiesList: "Today's Activities List",
+        showActivitiesList: "This week's Activities List",
         listOfNotes: "Notes List",
         lastNote: "Last Note",
         listOfPomodoros: "Pomodoros",

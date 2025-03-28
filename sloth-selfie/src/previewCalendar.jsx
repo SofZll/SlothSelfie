@@ -12,50 +12,55 @@ const PreviewCalendar = ({ viewType }) => {
     const [todayActivities, setTodayActivities] = useState([]);
     const [todayEvents, setTodayEvents] = useState([]);
 
-    // animation page
-    const handleLinkClick = (path) => (event) => {
-        event.preventDefault();
-        document.body.classList.add('zoom-in');
-        setTimeout(() => {
-            navigate(path);
-            document.body.classList.remove('zoom-in');
-        }, 300);
-    };
+// animation page
+const handleLinkClick = (path) => (event) => {
+     event.preventDefault();
+    document.body.classList.add('zoom-in');
+    setTimeout(() => {
+        navigate(path);
+        document.body.classList.remove('zoom-in');
+    }, 300);
+};
 
-    useEffect(() => {
-        fetchData('activities', setActivities);
-        fetchData('events', setEvent);
-    } , []);
+useEffect(() => {
+    fetchData('activities', setActivities);
+    fetchData('events', setEvent);
+} , []);
 
-    // Get today's events
-    useEffect(() => {
-        if (event.length > 0) {
-            const today = new Date(); // TODO: TIME MACHINE DATE  
-            const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+// Get today's events
+useEffect(() => {
+    if (event.length > 0) {
+        const today = new Date(); // TODO: TIME MACHINE DATE  
+        const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
     
-            const todayFilteredEvents = event.filter(ev => {
-                const eventDate = new Date(ev.date).toISOString().split('T')[0]; // "YYYY-MM-DD"
-                return eventDate === formattedToday;
-            });
+        const todayFilteredEvents = event.filter(ev => {
+            const eventDate = new Date(ev.date).toISOString().split('T')[0]; // "YYYY-MM-DD"
+            return eventDate === formattedToday;
+        });
     
-            setTodayEvents(todayFilteredEvents);
-        }
-    }, [event]);
+        setTodayEvents(todayFilteredEvents);
+    }
+}, [event]);
 
-    // Get today's activities
-    useEffect(() => {
-        if (activities.length > 0) {
-            const today = new Date(); // TIME MACHINE DATE
-            const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
-    
-            const todayFilteredActivities = activities.filter(act => {
-                const activityDate = new Date(act.deadline).toISOString().split('T')[0]; // "YYYY-MM-DD"
-                return activityDate === formattedToday;
-            });
-    
-            setTodayActivities(todayFilteredActivities);
-        }
-    }, [activities]);
+// Get upcoming week's activities
+useEffect(() => {
+    if (activities.length > 0) {
+        const today = new Date(); // TIME MACHINE DATE
+        today.setHours(0, 0, 0, 0); //we compare days only
+        const nextWeek = new Date();
+        nextWeek.setDate(today.getDate() + 7); //limit to 7 days from today
+
+        const upcomingActivities = activities.filter(act => {
+            const activityDate = new Date(act.deadline);
+            return activityDate >= today && activityDate <= nextWeek;
+        });
+
+        // Order activities by deadline
+        upcomingActivities.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+        setTodayActivities(upcomingActivities);
+    }
+}, [activities]);
 
     // Check if there is an event or an activity on the date
     const getEventOrActivityOnDate = (date, items, dateKey) => {
@@ -118,6 +123,7 @@ const PreviewCalendar = ({ viewType }) => {
                             todayActivities.map((activity) => (
                                 <div key={activity._id} className={`event-card ${getActivityBorderClass()}`}>
                                     <p>{activity.title}</p>
+                                    <p>{new Date(activity.deadline).toISOString().split('T')[0]}</p>
                                 </div>
                             ))
                         ) : (
