@@ -1,48 +1,52 @@
 import React, { useState } from 'react';
 
-import { marked } from 'marked';
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+
+import CopyButton from './CopyButton';
+import { Copy } from 'lucide-react';
 
 const CardNote = ({ Note }) => {
 
     const [isExpanded, setIsExpanded] = useState(false);
-
-    marked.setOptions({
-        breaks: true,
-    });
+    const previewContent = Note.content.length > 100 ? Note.content.substring(0, 100) : Note.content;
 
     return (
-        <div className='d-flex flex-column w-100 align-items-center border rounded shadow-sm p-md-3 p-1 position-relative'>
-            <div className='row'>
-                <div className='col text-break fw-bold'>
-                    {Note.title}
+        <div className='d-flex flex-column w-100 h-100 align-items-center border rounded shadow-sm p-md-3 p-1'>
+            <div className='row w-100'>
+                <div className='col'>
+                    <CopyButton Note={Note} />
                 </div>
             </div>
-            <div className='row'>
+            <div className='row w-100'>
                 <div className='col fst-italic'>
                     {Note.user.username}
                 </div>
             </div>
 
             {Note.content.length > 0 && (
-                <div className='row'>
-                    <div className='col col-12 border'>
-                        {isExpanded ? (
-                            marked(Note.content)
-                        ) : (
-                            marked(Note.content.length > 100 ? Note.content.substring(0, 100) + <button className='btn' onClick={() => setIsExpanded(true)}>...more</button> : Note.content)
+                <div className='row w-100 mt-3'>
+                    <div className='col col-12 border rounded p-2'>
+                        <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                            {isExpanded ? Note.content : previewContent}
+                        </ReactMarkdown>
+                        {isExpanded && (
+                            <button className="btn" onClick={() => setIsExpanded(false)}>
+                                ...
+                            </button>
                         )}
                     </div>
                 </div>
             )}
             
             {Note.tasks.length > 0 && (
-                <div className='row'>
-                    <div className='col col-12 border'>
+                <div className='row w-100 mt-3'>
+                    <div className='col border'>
                         {Note.tasks.map((task, index) => (
-                            <div key={index} className='d-flex flex-row justify-content-between shadow-sm'>
-                                <div className='fst-italic'>
+                            <div key={index} className='d-flex flex-row justify-content-between my-1'>
+                                <div className='d-flex align-items-center fst-italic'>
                                     <input type='checkbox' checked={task.completed} />
-                                    {task.title}
+                                    <div className='ps-1'>{task.title}</div>
                                 </div>
                                 {task.deadline && (
                                     <div>
@@ -55,14 +59,14 @@ const CardNote = ({ Note }) => {
                 </div>
             )}
 
-            <div className='row'>
-                <div className='col'>
-                    <small>
+            <div className='row w-100 mt-2'>
+                <div className='col opacity-50 fs-6'>
+                    <div>
                         Created: {new Date(Note.createDate).toLocaleDateString()}
-                    </small>
-                    <small>
+                    </div>
+                    <div>
                         Last Modified: {new Date(Note.updateDate).toLocaleDateString()}
-                    </small>
+                    </div>
                 </div>
             </div> 
 

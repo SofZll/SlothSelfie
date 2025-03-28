@@ -2,8 +2,8 @@ const Note = require('../models/noteModel');
 const User = require('../models/userModel');
 const  { deleteTasks } = require('./taskController');
 
-import { addTasks } from './taskController';
-import { findUserId } from '../utils/utils';
+const { addTasks } = require('./taskController');
+const { findUserId } = require('../utils/utils');
 
 // Create a new note
 const createNote = async (req, res) => {
@@ -12,9 +12,7 @@ const createNote = async (req, res) => {
     const user = await User.findOne({ username: userName });
 
     try {
-
         const users = await findUserId(sharedWith);
-        console.log('usersssssssssssss:', users);
 
         const note = new Note({
             title,
@@ -29,13 +27,14 @@ const createNote = async (req, res) => {
         
         if (tasks) note.tasks = await addTasks(tasks, user, users);
 
-
         const savedNote = await note.save()
+
+        const populatedNote = await Note.findById(savedNote._id)
         .populate('user', 'username')
         .populate('tasks')
         .populate('sharedWith', 'username');
-
-        res.status(201).json(savedNote);
+        
+        res.status(201).json(populatedNote);
     } catch (error) {
         console.error('Error creating note:', error);
         res.status(500).json({ success: false, message: 'Error creating note' });
@@ -51,9 +50,9 @@ const getNotes = async (req, res) => {
         
         const notes = await Note.find({
             $or: [
-                { user: userName },
+                { user: user._id },
                 { noteAccess: 'public' },
-                { noteAccess: 'shared', allowedUsers: user.username },
+                { noteAccess: 'shared', sharedWith: user._id }
             ]
         })
         .populate('tasks')

@@ -78,6 +78,7 @@ const deleteTask = async (req, res) => {
 };
 
 const addTasks = async (tasks, user, sharedWith) => {
+    const tasksArray = [];
 
     try {
         for (let i = 0; i < tasks.length; i++) {
@@ -86,11 +87,11 @@ const addTasks = async (tasks, user, sharedWith) => {
             if (tasks[i].sharedWith) task.sharedWith = sharedWith;
 
             const savedTask = await task.save();
-            if (!savedTask) {
-                return false;
-            }
+            if (savedTask) tasksArray.push(savedTask._id);
         }
-        return true;
+
+        console.log('Tasksssssssssssssss created:', tasksArray);
+        return tasksArray;
     } catch (error) {
         console.error('Error creating tasks:', error);
         return false;

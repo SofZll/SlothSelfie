@@ -13,18 +13,22 @@ import { X } from 'lucide-react';
 
 const FormNote = () => {
 
-    const { selected, setSelected, resetSelected, note, setNote, notes, setNotes } = useNote();
-    const { tasks, setTasks, localTask, setLocalTask } = useTask();
+    const { selected, resetSelected, note, setNote, resetNote, notes, setNotes } = useNote();
+    const { localTask, setLocalTask } = useTask();
     const isDesktop = useIsDesktop();
 
     const handleSubmit = async () => {
-        setNote({...note, tasks: localTask});
+        console.log('taaaaaaaaask:', localTask);
+        setNote({...note, ['tasks']: localTask});
+        console.log('noteeeeeeeee:', note);
 
         if (selected.add) {
             const response = await apiService('/note', 'POST', note);
             if (response) {
                 Swal.fire({ title: 'Note added', icon: 'success', text: 'Note added successfully', customClass: { confirmButton: 'button-alert' } });
+                console.log("notes prima dell'update:", notes);
                 setNotes([...notes, response]);
+                console.log('notes:', notes);
             }
         } else {
             const response = await apiService(`/note/${note._id}`, 'PUT', note);
@@ -34,7 +38,9 @@ const FormNote = () => {
             }
         }
         setLocalTask([]);
+        resetNote();
         resetSelected();
+        
     }
 
     const deleteNote = async () => {
