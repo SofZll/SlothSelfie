@@ -66,76 +66,83 @@ const PreviewCalendar = ({ viewType }) => {
         });
     };
 
-        // Adding a dot to the date if there is an event, project event, or an activity on that date
-        const tileContent = ({ date, view }) => {
-            if (view === 'month') {
-                const eventFound = getEventOrActivityOnDate(date, event, 'date');
-                const activityFound = getEventOrActivityOnDate(date, activities, 'deadline');
+    // Adding a dot to the date if there is an event, project event, or an activity on that date
+    const tileContent = ({ date, view }) => {
+        if (view === 'month') {
+            const eventFound = getEventOrActivityOnDate(date, event, 'date');
+            const activityFound = getEventOrActivityOnDate(date, activities, 'deadline');
 
+            return (
+                <>
+                    {eventFound && (
+                        <span className={`event-indicator ${eventFound.isInProject ? 'event-dot-aqua' : 'event-dot-blue'}`}></span>
+                    )}
+                    {activityFound && <span className="event-indicator event-dot-orange"></span>}
+                </>
+            );
+        }
+    };
+
+    const getEventBorderClass = (event) => {
+        if (event.isInProject) return "event-border-aqua";
+        return "event-border-blue";
+    };
+    
+    const getActivityBorderClass = () => "event-border-orange";
+
+    const renderContent = () => {
+        switch (viewType) {
+            case "calendar":
+                return <Calendar tileContent={tileContent} />;
+            case "events":
                 return (
-                    <>
-                        {eventFound && (
-                            <span className={`event-indicator ${eventFound.isInProject ? 'event-dot-aqua' : 'event-dot-blue'}`}></span>
+                    <div className="scrollableCalendar-list EventShow">
+                        {todayEvents.length > 0 ? (
+                            todayEvents.map((event) => (
+                                <div key={event._id} className={`event-card ${getEventBorderClass(event)}`}>
+                                    <p>{event.title}</p>
+                                    <p>{event.time}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="div-postit">
+                                 <h2>No events today!</h2>
+                            </div>
                         )}
-                        {activityFound && <span className="event-indicator event-dot-orange"></span>}
-                    </>
+                    </div>
                 );
-            }
-        };
-
-        const renderContent = () => {
-            switch (viewType) {
-                case "calendar":
-                    return <Calendar tileContent={tileContent} />;
-                case "events":
-                    return (
-                        <div className="scrollableCalendar-list EventShow">
-                            {todayEvents.length > 0 ? (
-                                todayEvents.map((event) => (
-                                    <div key={event._id} className="event-card">
-                                        <p>{event.title}</p>
-                                        <p>{event.time}</p>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="div-postit">
-                                    <h2>No events today!</h2>
+            case "activities":
+                return (
+                    <div className="scrollableCalendar-list ActivityShow">
+                        {todayActivities.length > 0 ? (
+                            todayActivities.map((activity) => (
+                                <div key={activity._id} className={`event-card ${getActivityBorderClass()}`}>
+                                    <p>{activity.title}</p>
                                 </div>
-                            )}
-                        </div>
-                    );
-                case "activities":
-                    return (
-                        <div className="scrollableCalendar-list ActivityShow">
-                            {todayActivities.length > 0 ? (
-                                todayActivities.map((activity) => (
-                                    <div key={activity._id} className="event-card">
-                                        <p>{activity.title}</p>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="div-postit">
-                                    <h2>No activities deadlines today!</h2>
-                                </div>
-                            )}
-                        </div>
-                    );
-                default:
-                    return null;
-            }
-        };
+                            ))
+                        ) : (
+                            <div className="div-postit">
+                                <h2>No activities deadlines today!</h2>
+                            </div>
+                        )}
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
 
-        return (
+    return (
 
-            <div className="inCard">
-                {renderContent()}
-                <div className="divBtn">
-                    <Link to="/calendar" onClick={handleLinkClick('/calendar')}>
-                        <button className="btn btn-main blue" >Manage Calendar</button>
-                    </Link>
-                </div>
+        <div className="inCard">
+            {renderContent()}
+            <div className="divBtn">
+                <Link to="/calendar" onClick={handleLinkClick('/calendar')}>
+                    <button className="btn btn-main blue" >Manage Calendar</button>
+                </Link>
             </div>
-        );
+        </div>
+    );
     
 };
 
