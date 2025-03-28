@@ -38,6 +38,8 @@ const GridNotes = () => {
             default:
                 break;
         }
+
+        setFilteredNotes(n);
     }
 
     useEffect(() => {

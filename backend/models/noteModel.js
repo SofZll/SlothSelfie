@@ -43,7 +43,7 @@ const noteSchema = new mongoose.Schema({
         type: Date,
         required: true,
         default: Date.now
-    },
+    }
 }, { timestamps: true });
 
 const Note = mongoose.model('Note', noteSchema);

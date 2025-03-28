@@ -26,7 +26,7 @@ const SelectionCalendarLayout = ({children}) => {
 
             <div className="row d-flex justify-content-between my-3">
                 <div className="col fs-5">
-                    Add a new {selected.selection}
+                    {selected.add ? 'Add a new' : 'Edit the selected '} {selected.selection}
                 </div>
 
                 <div className="col col-auto">

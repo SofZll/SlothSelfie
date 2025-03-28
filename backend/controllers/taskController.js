@@ -53,7 +53,7 @@ const getTasks = async (req, res) => {
         })
         .populate('user', 'username')
         .populate('sharedWith', 'username');
-        
+
         res.status(200).json(tasks);
     } catch (error) {
         console.error('Error fetching tasks:', error);
@@ -77,27 +77,23 @@ const deleteTask = async (req, res) => {
     }
 };
 
-const addTasks = async (req, res) => {
-    const { tasks } = req.body;
-    const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
-    const taskIds = [];
-    console.log(tasks, 'taskssssssssssssssssss');
+const addTasks = async (tasks, user, sharedWith) => {
+
     try {
         for (let i = 0; i < tasks.length; i++) {
-            let task;
-            if (tasks[i].deadline) {
-                task = new Task({ title: tasks[i].title, deadline: tasks[i].deadline, completed: tasks[i].completed, user: user._id });
-            } else {
-                task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id });
-            }
+            const task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id });
+            if (tasks[i].deadline) task.deadline = tasks[i].deadline;
+            if (tasks[i].sharedWith) task.sharedWith = sharedWith;
+
             const savedTask = await task.save();
-            taskIds.push(savedTask._id);
+            if (!savedTask) {
+                return false;
+            }
         }
-        res.status(200).json(taskIds);
+        return true;
     } catch (error) {
-        console.error('Error adding tasks:', error);
-        res.status(500).json({ message: error.message });
+        console.error('Error creating tasks:', error);
+        return false;
     }
 }
 

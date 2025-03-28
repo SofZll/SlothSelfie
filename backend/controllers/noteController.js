@@ -2,32 +2,40 @@ const Note = require('../models/noteModel');
 const User = require('../models/userModel');
 const  { deleteTasks } = require('./taskController');
 
+import { addTasks } from './taskController';
+import { findUserId } from '../utils/utils';
+
 // Create a new note
 const createNote = async (req, res) => {
     const { title, category, content, tasks, noteAccess, sharedWith } = req.body;
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
 
-
     try {
+
+        const users = await findUserId(sharedWith);
+        console.log('usersssssssssssss:', users);
+
         const note = new Note({
             title,
             user: user._id,
             category,
             content: content || '',
-            tasks: tasks || [],
             noteAccess,
-            sharedWith: noteAccess === 'shared' ? sharedWith : [],
+            sharedWith: noteAccess === 'shared' ? users : [],
             createDate: new Date(),
             updateDate: new Date(),
         });
+        
+        if (tasks) note.tasks = await addTasks(tasks, user, users);
 
-        const savedNote = await note.save();
-        const newNote = await Note.findById(savedNote._id)
-        .populate('user', '_username')
-        .populate('tasks');
 
-        res.status(201).json(newNote);
+        const savedNote = await note.save()
+        .populate('user', 'username')
+        .populate('tasks')
+        .populate('sharedWith', 'username');
+
+        res.status(201).json(savedNote);
     } catch (error) {
         console.error('Error creating note:', error);
         res.status(500).json({ success: false, message: 'Error creating note' });
@@ -50,7 +58,7 @@ const getNotes = async (req, res) => {
         })
         .populate('tasks')
         .populate('user', 'username')
-
+        .populate('sharedWith', 'username');
 
         res.status(200).json(notes);
 
