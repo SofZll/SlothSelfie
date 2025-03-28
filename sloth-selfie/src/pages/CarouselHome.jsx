@@ -11,10 +11,12 @@ import iconTomato from '../media/tomato.svg';
 import { useNavigate } from 'react-router-dom';
 
 import { CustomizationContext } from '../contexts/PreviewContext';
+import {UserContext} from '../contexts/UserContext';
 
 const CarouselHome = (props) => {
 
   const { customizations } = useContext(CustomizationContext);
+  const { user } = useContext(UserContext);
   const [goToSlide, setGoToSlide] = useState(0);
   const navigate = useNavigate();
 
@@ -33,7 +35,7 @@ const CarouselHome = (props) => {
     },
     {
       key: uuidv4(),
-      content: (<CardCarosel title='Projects' settingKey="projects" caseShow={customizations.projects} />)
+      content: (<CardCarosel title='Projects' settingKey="projects" caseShow={customizations.projects} userLogged={user} />)
     }
   ], [customizations]);
 

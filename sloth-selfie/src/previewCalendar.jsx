@@ -95,7 +95,7 @@ const PreviewCalendar = ({ viewType }) => {
     
     const getActivityBorderClass = () => "event-border-orange";
 
-    const renderContent = () => {
+    const renderCalendar = () => {
         switch (viewType) {
             case "calendar":
                 return <Calendar tileContent={tileContent} />;
@@ -141,7 +141,7 @@ const PreviewCalendar = ({ viewType }) => {
     return (
 
         <div className="inCard">
-            {renderContent()}
+            {renderCalendar()}
             <div className="divBtn">
                 <Link to="/calendar" onClick={handleLinkClick('/calendar')}>
                     <button className="btn btn-main blue" >Manage Calendar</button>

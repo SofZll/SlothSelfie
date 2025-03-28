@@ -3,6 +3,7 @@ import { useSpring, animated } from 'react-spring';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import { CustomizationContext } from '../contexts/PreviewContext';
+import {UserContext} from '../contexts/UserContext';
 
 //TODO: modifica gli import
 import PreviewPomodoro from '../previewPomodoro';
@@ -13,6 +14,7 @@ import PreviewProjects from '../previewProjects';
 
 const CardCarosel = ({ title, settingKey }) => {
     const { customizations } = useContext(CustomizationContext);
+    const { user } = useContext(UserContext);
     console.log("CardCarosel state:", customizations);
     const [show, setShown] = useState(false);
 
@@ -60,9 +62,9 @@ const CardCarosel = ({ title, settingKey }) => {
             case 'lastPomodoro':
                 return <PreviewPomodoro />;
             case 'listOfProjects':
-                return <PreviewProjects />;
+                return <PreviewProjects viewType="list" userLogged={user}/>;
             case 'recentProjectsDeadlines':
-                return <PreviewProjects />;
+                return <PreviewProjects viewType="recentDeadlines" userLogged={user}/>;
             default:
                 return null;
         }
