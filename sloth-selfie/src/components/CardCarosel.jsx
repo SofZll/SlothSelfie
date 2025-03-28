@@ -29,9 +29,8 @@ const CardCarosel = ({ title, settingKey }) => {
 
      //Map the setting key to the personalized title
      const titleMap = {
-        showCalendar: "Calendar View",
-        showEventsList: "Events List",
-        showActivitiesList: "Activities List",
+        showEventsList: "Today's Events List",
+        showActivitiesList: "Today's Activities List",
         listOfNotes: "Notes List",
         lastNote: "Last Note",
         listOfPomodoros: "Pomodoros",
@@ -43,7 +42,49 @@ const CardCarosel = ({ title, settingKey }) => {
     //Get the personalized title
     const currentTitle = titleMap[customizations[settingKey]] || title;
 
-    console.log("Rendering CardCarosel - Title:", title, "Setting Key:", settingKey, "Customization Value:", customizations[settingKey]);
+    //Function to render the content based on the setting key
+    const renderContent = () => {
+        switch (customizations[settingKey]) {
+            case 'showCalendar':
+                return <PreviewCalendar viewType="calendar" />;
+            case 'showEventsList':
+                return <PreviewCalendar viewType="events" />;
+            case 'showActivitiesList':
+                return <PreviewCalendar viewType="activities" />;
+            case 'listOfNotes':
+                return <PreviewNote />;
+            case 'lastNote':
+                return <PreviewNote />;
+            case 'listOfPomodoros':
+                return <PreviewPomodoro />;
+            case 'lastPomodoro':
+                return <PreviewPomodoro />;
+            case 'listOfProjects':
+                return <PreviewProjects />;
+            case 'recentProjectsDeadlines':
+                return <PreviewProjects />;
+            default:
+                return null;
+        }
+    };
+
+        // Rendering the legend when in 'calendar' view
+        const renderLegend = () => (
+            <div className="legend">
+                <div className="legend-item">
+                    <span className="event-dot-blue"></span>
+                    <span>Event</span>
+                </div>
+                <div className="legend-item">
+                    <span className="event-dot-aqua"></span>
+                    <span>Project Event</span>
+                </div>
+                <div className="legend-item">
+                    <span className="event-dot-orange"></span>
+                    <span>Activity</span>
+                </div>
+            </div>
+        );
     
     return (
         <animated.div
@@ -53,24 +94,16 @@ const CardCarosel = ({ title, settingKey }) => {
             onMouseLeave={() => setShown(false)}
         >   
             <h2>{title}</h2>
-            <h5>{currentTitle}</h5>
+            {customizations[settingKey] === 'showCalendar' ? (
+                    renderLegend()
+            ) : (
+                <>
+                    <p>{currentTitle}</p>
+                </>
+            )}
             
-            {customizations[settingKey] === 'showCalendar' && <PreviewCalendar viewType="calendar" />}
-            {customizations[settingKey] === 'showEventsList' && <PreviewCalendar viewType="events" />}
-            {customizations[settingKey] === 'showActivitiesList' && <PreviewCalendar viewType="activities" />}
-            {customizations[settingKey] === 'listOfNotes' && <PreviewNote />}
-            {customizations[settingKey] === 'lastNote' && <PreviewNote />}
-            {customizations[settingKey] === 'listOfPomodoros' && <PreviewPomodoro />}
-            {customizations[settingKey] === 'lastPomodoro' && <PreviewPomodoro />}
-            {customizations[settingKey] === 'listOfProjects' && <PreviewProjects />}
-            {customizations[settingKey] === 'recentProjectsDeadlines' && <PreviewProjects />}
-            
-            {/*
-            {caseShow == 1 && <PreviewCalendar />}
-            {caseShow == 2 && <PreviewNote />}
-            {caseShow == 3 && <PreviewPomodoro />}
-            {caseShow == 4 && <PreviewProjects />}
-            */}
+            {/* Render the content */}
+            {renderContent()}
         </animated.div>
     );
 }

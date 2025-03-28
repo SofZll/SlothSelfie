@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { fetchData } from "./CalendarUtils";
 import Calendar from 'react-calendar';
 import './styles/Calendar.css';
+import './styles/App.css';
 
 const PreviewCalendar = ({ viewType }) => {
     const navigate = useNavigate();
@@ -21,68 +22,66 @@ const PreviewCalendar = ({ viewType }) => {
         }, 300);
     };
 
-    // Check if there is an event on the date
-        const hasEventOnDate = (date) => {
-            const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
-            return event.some(ev => {
-                const eventDate = new Date(ev.date).toISOString().split('T')[0]; // format the date
-                return eventDate === formattedDate;
-            });
-        };
+    useEffect(() => {
+        fetchData('activities', setActivities);
+        fetchData('events', setEvent);
+    } , []);
+
+    // Get today's events
+    useEffect(() => {
+        if (event.length > 0) {
+            const today = new Date(); // TODO: TIME MACHINE DATE  
+            const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
     
-        // Check if there is an activity on the date
-        const hasActivityOnDate = (date) => {
-            const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
-            return activities.some(activity => {
-                const activityDate = new Date(activity.deadline).toISOString().split('T')[0]; // format the date
-                return activityDate === formattedDate;
+            const todayFilteredEvents = event.filter(ev => {
+                const eventDate = new Date(ev.date).toISOString().split('T')[0]; // "YYYY-MM-DD"
+                return eventDate === formattedToday;
             });
-        };
-        
-        //TODO: I PUNTINI SONO UN GIORNO AVANTI.. MAGARI CON TIMEMACHINE SI SISTEMA.. ?
-        // Adding a dot to the date if there is an event or an activity on that date
+    
+            setTodayEvents(todayFilteredEvents);
+        }
+    }, [event]);
+
+    // Get today's activities
+    useEffect(() => {
+        if (activities.length > 0) {
+            const today = new Date(); // TIME MACHINE DATE
+            const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    
+            const todayFilteredActivities = activities.filter(act => {
+                const activityDate = new Date(act.deadline).toISOString().split('T')[0]; // "YYYY-MM-DD"
+                return activityDate === formattedToday;
+            });
+    
+            setTodayActivities(todayFilteredActivities);
+        }
+    }, [activities]);
+
+    // Check if there is an event or an activity on the date
+    const getEventOrActivityOnDate = (date, items, dateKey) => {
+        const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+        return items.find(item => {
+            const itemDate = new Date(item[dateKey]).toLocaleDateString('en-CA');
+            return itemDate === formattedDate;
+        });
+    };
+
+        // Adding a dot to the date if there is an event, project event, or an activity on that date
         const tileContent = ({ date, view }) => {
-            if (view === 'month' && hasEventOnDate(date)) {
-                return <span className="event-indicator" style={{ backgroundColor: '#2b59b6', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
-            } else if (view === 'month' && hasActivityOnDate(date)) {
-                return <span className="event-indicator" style={{ backgroundColor: '#ffA500', borderRadius: '50%', width: '10px', height: '10px', display: 'inline-block' }}></span>;
+            if (view === 'month') {
+                const eventFound = getEventOrActivityOnDate(date, event, 'date');
+                const activityFound = getEventOrActivityOnDate(date, activities, 'deadline');
+
+                return (
+                    <>
+                        {eventFound && (
+                            <span className={`event-indicator ${eventFound.isInProject ? 'event-dot-aqua' : 'event-dot-blue'}`}></span>
+                        )}
+                        {activityFound && <span className="event-indicator event-dot-orange"></span>}
+                    </>
+                );
             }
         };
-    
-        useEffect(() => {
-            fetchData('activities', setActivities);
-            fetchData('events', setEvent);
-        } , []);
-
-        // Get today's events
-        useEffect(() => {
-            if (event.length > 0) {
-                const today = new Date(); // TIME MACHINE DATE  
-                const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
-        
-                const todayFilteredEvents = event.filter(ev => {
-                    const eventDate = new Date(ev.date).toISOString().split('T')[0]; // "YYYY-MM-DD"
-                    return eventDate === formattedToday;
-                });
-        
-                setTodayEvents(todayFilteredEvents);
-            }
-        }, [event]);
-
-        // Get today's activities
-        useEffect(() => {
-            if (activities.length > 0) {
-                const today = new Date(); // TIME MACHINE DATE
-                const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
-        
-                const todayFilteredActivities = activities.filter(act => {
-                    const activityDate = new Date(act.deadline).toISOString().split('T')[0]; // "YYYY-MM-DD"
-                    return activityDate === formattedToday;
-                });
-        
-                setTodayActivities(todayFilteredActivities);
-            }
-        }, [activities]);
 
         const renderContent = () => {
             switch (viewType) {
@@ -132,7 +131,7 @@ const PreviewCalendar = ({ viewType }) => {
                 {renderContent()}
                 <div className="divBtn">
                     <Link to="/calendar" onClick={handleLinkClick('/calendar')}>
-                        <button className="btn btn-main" >Manage Calendar</button>
+                        <button className="btn btn-main blue" >Manage Calendar</button>
                     </Link>
                 </div>
             </div>
