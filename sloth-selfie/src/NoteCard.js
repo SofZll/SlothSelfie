@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { marked } from 'marked';
 import { toggleTaskCompletion } from './NotesUtils';
+import './styles/Notes.css';
 
 function NoteCard({ note, setNotes, isPreview, onEdit, onDelete, onDuplicate, onCopy, index, clickedButton }) {
 
@@ -118,7 +119,7 @@ function NoteCard({ note, setNotes, isPreview, onEdit, onDelete, onDuplicate, on
           </div>
         </div>
       ) : (
-        <button className="btn btn-main" onClick={() => onCopy(note.content)}>Copy</button>
+        <button className="btn btn-main btn-copy" onClick={() => onCopy(note.content)}>Copy</button>
       )}
     </div>
   );
