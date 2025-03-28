@@ -62,7 +62,7 @@ function PreviewSetUp(props) {
                             onClick={() => handleCustomizationChange('notes', 'listOfNotes')} 
                         />
                         <Button 
-                            text="Last Note"
+                            text="Most recent Note"
                             onClick={() => handleCustomizationChange('notes', 'lastNote')} 
                         />
                         {/* other notes personalizations */}

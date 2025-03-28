@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchNotes } from "./NotesUtils";
-import noteImage from './media/note.png';
 import NoteCard from './NoteCard';
-import './styles/Notes.css';
+import './styles/Previews.css';
 
-function PreviewNote() {
+const  PreviewNote = ({ viewType }) => {
     const navigate = useNavigate();
     const [initialNotes, setInitialNotes] = useState([]);
 
@@ -24,32 +23,42 @@ function PreviewNote() {
         });
     }, []);
 
+    const sortedNotes = [...initialNotes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const latestNote = sortedNotes.length > 0 ? [sortedNotes[0]] : [];
+
     return (
         <div className="inCard">
             <div className="notes-section">
-                <p>Your Notes:</p>
                 <div className="scrollable-list">
-                    {Array.isArray(initialNotes) && initialNotes.length > 0 ? (
-                        initialNotes.map((note) => {
-                            return (
-                                <NoteCard
-                                    key={note._id}
-                                    note={note}
-                                    setNotes={setInitialNotes}
-                                    isPreview={true}
-                                />
-                            );
-                        })
+                {viewType === "latest" ? (
+                        latestNote.length > 0 ? (
+                            latestNote.map((note) => (
+                                <div key={note._id} className="event-card note-border-yellow">
+                                    <NoteCard note={note} setNotes={setInitialNotes} isPreview={true} />
+                                </div>
+                            ))
+                        ) : (
+                            <div className="div-postit">
+                                <h2>No notes yet!</h2>
+                            </div>
+                        )
                     ) : (
-                        <div className="div-postit">
-                            <h2>No notes yet!</h2>
-                            <img src={noteImage} alt="Note illustration" className="note-image" />
-                        </div>
+                        sortedNotes.length > 0 ? (
+                            sortedNotes.map((note) => (
+                                <div key={note._id} className="event-card note-border-yellow">
+                                    <NoteCard note={note} setNotes={setInitialNotes} isPreview={true} />
+                                </div>
+                            ))
+                        ) : (
+                            <div className="div-postit">
+                                <h2>No notes yet!</h2>
+                            </div>
+                        )
                     )}
                 </div>
                 <div className="divBtn">
                     <Link to="/notes" onClick={handleLinkClick('/notes')}>
-                        <button className="btn btn-main">Manage Notes</button> {/* Bootstrap button */}
+                        <button className="btn btn-main blue">Manage Notes</button> {/* Bootstrap button */}
                     </Link>
                 </div>
             </div>
