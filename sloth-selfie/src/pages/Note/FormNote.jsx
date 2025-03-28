@@ -1,10 +1,11 @@
 import React from 'react';
 
 import { useNote } from '../../contexts/NoteContext';
+import { useTask } from '../../contexts/TaskContext';
 import { useIsDesktop } from '../../utils/utils';
 import { apiService } from '../../services/apiService';
 
-import FormTask from './FormTask';
+import ListTask from './ListTask';
 
 import Swal from 'sweetalert2';
 
@@ -13,9 +14,12 @@ import { X } from 'lucide-react';
 const FormNote = () => {
 
     const { selected, setSelected, resetSelected, note, setNote, notes, setNotes } = useNote();
+    const { tasks, setTasks, localTask, setLocalTask } = useTask();
     const isDesktop = useIsDesktop();
 
     const handleSubmit = async () => {
+        setNote({...note, tasks: localTask});
+
         if (selected.add) {
             const response = await apiService('/note', 'POST', note);
             if (response) {
@@ -29,6 +33,7 @@ const FormNote = () => {
                 setNotes(notes.map(n => n._id === note._id ? note : n));
             }
         }
+        setLocalTask([]);
         resetSelected();
     }
 
@@ -95,7 +100,7 @@ const FormNote = () => {
                 <div className='row'>
                     <div className='col-12'>
                         <div>Tasks</div>
-                        <FormTask />
+                        <ListTask />
                     </div>
                 </div>
 
