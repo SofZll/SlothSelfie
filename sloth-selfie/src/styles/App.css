@@ -66,6 +66,15 @@
     background-color: #4caf50;
 }
 
+.button-clean.yellow {
+    background-color: #f4d03f;
+    color: white;
+}
+
+.button-clean.yellow:hover {
+    background-color: #efc725;
+}
+
 .button-clean.white {
     background-color: #ffffff;
     border: 1px solid #e0e0e0;

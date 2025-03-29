@@ -15,7 +15,7 @@ const AuthProvider = ({ children }) => {
             return btoa(binary);
         };
         const response = await apiService('/user/profile');
-        if (response && response.success) {
+        if (response) {
             if (response.user.image?.data?.data) {
                 const buffer = response.user.image.data.data;
                 base64Image = `data:${response.user.image.contentType};base64,${bufferToBase64(buffer)}`;
@@ -24,6 +24,7 @@ const AuthProvider = ({ children }) => {
             const formattedBirthday = response.user.birthday ? new Date(response.user.birthday).toISOString().split('T')[0] : '';
             
             setUser({
+                _id: response.user._id || '',
                 name: response.user.name || '',
                 username: response.user.username || '',
                 email: response.user.email || '',
@@ -41,7 +42,7 @@ const AuthProvider = ({ children }) => {
         const checkAuth = async () => {
             try {
                 const response = await apiService('/user/check-auth');
-                if (response && response.success) {
+                if (response) {
                     await fetchUserData();
                 } else {
                     console.error('Error checking auth:', response);
