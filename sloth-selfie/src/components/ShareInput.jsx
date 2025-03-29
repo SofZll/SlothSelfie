@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import '../styles/ShareInput.css';
 import Swal from 'sweetalert2';
 
-const ShareInput = () => {
+const ShareInput = ({ receivers, setReceivers }) => {
     const [receiverInput, setReceiverInput] = useState('');
-    const [receivers, setReceivers] = useState([]);
     const [removingIndex, setRemovingIndex] = useState(null);
 
     const addReceiver = () => {
@@ -33,11 +32,11 @@ const ShareInput = () => {
     };
 
     return (
-        <div className='container my-3'>
+        <div className='container my-2 px-2'>
             <div className='d-flex flex-column align-items-center'>
                 <div className='d-flex w-100 justify-content-between align-items-center mb-3'>
                     <input type='text' className='form-control me-2 input-receiver' id='receivers' placeholder='Enter receivers username' value={receiverInput} onChange={(e) => setReceiverInput(e.target.value)} onKeyDown={enterKey} />
-                    <button type='button' className='btn btn-add btn-clean' onClick={addReceiver}>
+                    <button type='button' className='button-clean yellow' onClick={addReceiver}>
                         Add
                     </button>
                 </div>
