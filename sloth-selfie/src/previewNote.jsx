@@ -4,7 +4,7 @@ import { fetchNotes } from "./NotesUtils";
 import NoteCard from './NoteCard';
 import './styles/Previews.css';
 
-//TODO: CONTROLLA LO USER LOGGATO PER FARE FETCH CORRETTI
+//TODO: Controlla ordine su last modified non solo su createdAt
 
 const  PreviewNote = ({ viewType }) => {
     const navigate = useNavigate();

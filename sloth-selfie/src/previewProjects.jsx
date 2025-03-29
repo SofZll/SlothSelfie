@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 
 const PreviewProjects= ({ viewType, userLogged }) => {
     const [projects, setProjects] = useState([]);
     const user = userLogged;
     console.log(user);
+    const navigate = useNavigate();
     
     //TODO SPOSTA LA FETCH IN UN ALTRO FILE ES projectsUtils.js
+    //fetch non mantiene la localstorage quando entro in projests e torno in home (o per lo meno non lo fetcha subito, solo scorrendo il carousel)
+    //mi fa vedere tutti i progetti (non va il filtro del logged in user)? testalo
+
+    // function to navigate to the projects page, we use window.location.href to navigate without using react-router (pure JS)
+    const manageProjects = (event) => {
+        event.preventDefault();
+        document.body.classList.add('zoom-in');
+        setTimeout(() => {
+            navigate(window.location.href = "/projects.html");
+            document.body.classList.remove('zoom-in');
+        }, 300);
+    };
+
     useEffect(() => {
         const loadProjects = async () => {
             try {
@@ -32,11 +47,6 @@ const PreviewProjects= ({ viewType, userLogged }) => {
         
         loadProjects();
     }, []);
-
-     // function to navigate to the projects page, we use window.location.href to navigate without using react-router (pure JS)
-    const manageProjects = () => {
-        window.location.href = "/projects.html";
-    };
     
 //TODO AGGIUSTA
     const renderProjects = () => {
@@ -68,14 +78,18 @@ const PreviewProjects= ({ viewType, userLogged }) => {
                 );
 
             default:
-                return <p>No projects available.</p>;
+                return (<div className="div-postit">
+                            <h2>No projects available.</h2>
+                        </div>);
         }
     };
 
     return (
         <div className="inCard">
             {renderProjects()}
-            <button className="btn btn-main blue" onClick={manageProjects}>Manage Projects</button>
+                <div className="divBtn">
+                    <button className="btn btn-main blue" onClick={manageProjects}>Manage Projects</button>
+                </div>
         </div>
     );
 };
