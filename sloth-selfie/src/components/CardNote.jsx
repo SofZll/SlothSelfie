@@ -99,7 +99,7 @@ const CardNote = ({ Note }) => {
                 </div>
             )}
 
-            <div className='row w-100 mt-2 mb-4'>
+            <div className='row w-100 mt-2 mb-5'>
                 <div className='col opacity-50 fs-6'>
                     <div>
                         Created: {new Date(Note.createDate).toLocaleDateString()}
