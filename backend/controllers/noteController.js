@@ -149,6 +149,7 @@ const deleteNote = async (req, res) => {
 };
 
 //Get a note by id
+//TODO: forse è da eliminare non so se viene usato nei progetti
 const getNoteById = async (req, res) => {
     try {
         const note = await Note.findById(req.params.noteId);

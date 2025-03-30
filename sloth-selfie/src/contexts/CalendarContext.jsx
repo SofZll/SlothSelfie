@@ -84,6 +84,7 @@ export const CalendarProvider = ({ children }) => {
         days: true,
         duration: 0,
         repeatFrequency: 'none',
+        numberOfOccurrences: 0,
     });
 
     const [availabilities, setAvailabilities] = useState([]);
@@ -96,6 +97,7 @@ export const CalendarProvider = ({ children }) => {
             days: true,
             duration: 0,
             repeatFrequency: 'none',
+            numberOfOccurrences: 0,
         });
     }
 

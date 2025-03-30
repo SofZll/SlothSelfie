@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 
 import CopyButton from './CopyButton';
-import { Pen, Trash2, Layers2 } from 'lucide-react';
+import { Pen, Trash2, Layers2, ChevronDown, ChevronUp } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 import { useNote } from '../contexts/NoteContext';
@@ -66,15 +66,26 @@ const CardNote = ({ Note }) => {
 
             {Note.content.length > 0 && (
                 <div className='row w-100 mt-3'>
-                    <div className='col col-12 border rounded p-2'>
-                        <ReactMarkdown rehypePlugins={[rehypeRaw]}>
-                            {isExpanded ? Note.content : previewContent}
-                        </ReactMarkdown>
-                        {isExpanded && (
-                            <button className="btn" onClick={() => setIsExpanded(false)}>
-                                ...
-                            </button>
+                    <div className='col col-12 border rounded p-2 position-relative' style={{ maxHeight: '300px' }}>
+                        {Note.content.length > 100 && (
+                            <div className='d-flex justify-content-end w-100 bg-light position-absolute bottom-0 end-0'>
+                            {isExpanded ? (
+                                <button className='btn btn-link p-0' onClick={() => setIsExpanded(false)}>
+                                    <ChevronUp size={20} color='#244476' strokeWidth={1.5} />
+                                </button>
+                            ) : (
+                                <button className='btn btn-link p-0' onClick={() => setIsExpanded(true)}>
+                                    <ChevronDown size={20} color='#244476' strokeWidth={1.5} />
+                                </button>
+                            )}
+                            </div>
                         )}
+
+                        <div className='d-flex flex-column h-100 w-100 overflow-y-auto pb-3'>
+                            <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                                {isExpanded ? Note.content : previewContent}
+                            </ReactMarkdown>
+                        </div>
                     </div>
                 </div>
             )}
