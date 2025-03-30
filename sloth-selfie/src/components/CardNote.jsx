@@ -4,7 +4,8 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 
 import CopyButton from './CopyButton';
-import { Pen } from 'lucide-react';
+import { Pen, Trash2, Layers2 } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 import { useNote } from '../contexts/NoteContext';
 import { apiService } from '../services/apiService';
@@ -25,6 +26,29 @@ const CardNote = ({ Note }) => {
     const completeTask = async (task) => {
         const response = await apiService(`/task/complete/${task._id}`, 'PUT');
         if (response) setNotes(notes.map(n => n._id === Note._id ? { ...Note, tasks: Note.tasks.map(t => t._id === task._id ? response : t) } : n));
+    }
+
+    const deleteNote = async () => {
+        const response = await apiService(`/note/${Note._id}`, 'DELETE');
+        if (response) {
+            Swal.fire({ title: 'Note deleted', icon: 'success', text: 'Note deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            setNotes(notes.filter(n => n._id !== Note._id));
+        } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error deleting note', customClass: { confirmButton: 'button-alert' } });
+    }
+
+    const duplicateNote = async () => {
+        const copyTasks = [];
+        if (Note.tasks) {
+            for (const task of Note.tasks) {
+                copyTasks.push({ ...task, _id: null, 'completed': false });
+            }
+        }
+        const copyNote = { ...Note, _id: null, title: `${Note.title} (copy)`, tasks: copyTasks };
+        const response = await apiService('/note', 'POST', copyNote);
+        if (response) {
+            Swal.fire({ title: 'Note duplicated', icon: 'success', text: 'Note duplicated successfully', customClass: { confirmButton: 'button-alert' } });
+            setNotes([...notes, response]);
+        } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error duplicating note', customClass: { confirmButton: 'button-alert' } });
     }
 
     return (
@@ -75,7 +99,7 @@ const CardNote = ({ Note }) => {
                 </div>
             )}
 
-            <div className='row w-100 mt-2'>
+            <div className='row w-100 mt-2 mb-4'>
                 <div className='col opacity-50 fs-6'>
                     <div>
                         Created: {new Date(Note.createDate).toLocaleDateString()}
@@ -87,7 +111,15 @@ const CardNote = ({ Note }) => {
             </div> 
 
             <button className='btn position-absolute top-0 end-0' onClick={() => selectNote()}>
-                <Pen size={20} color='#244476' strokeWidth={1.25} />
+                <Pen size={20} color='#244476' strokeWidth={1.5} />
+            </button>
+
+            <button className='btn position-absolute bottom-0 end-0' onClick={() => deleteNote()}>
+                <Trash2 size={23} color='#244476' strokeWidth={1.5} />
+            </button>
+
+            <button className='btn position-absolute bottom-0 start-0' onClick={() => duplicateNote()}>
+                <Layers2 size={23} color='#244476' strokeWidth={1.6} />
             </button>
 
         </div>

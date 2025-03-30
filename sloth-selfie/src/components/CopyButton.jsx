@@ -32,8 +32,8 @@ const CopyButton = ({ Note }) => {
     }
 
     return (
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}>
-            <div className='text-break fw-bold fs-4' style={{ color: '#244476' }}>
+        <div className='d-flex w-100 align-items-start'>
+            <div className='d-inline-flex text-break fw-bold fs-4 w-auto' style={{ color: '#244476' }}>
                 {Note.title}
             </div>
             <button
