@@ -23,7 +23,7 @@ const ChatBox = () => {
     const [selectedChat, setSelectedChat] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const [searchChat, setSearchChat] = useState([]);
-    const [partecipants, setPartecipants] = useState([]);
+    const [participants, setParticipants] = useState([]);
     const [chats, setChats] = useState([]);
 
     const fetchChats = async () => {
@@ -87,9 +87,8 @@ const ChatBox = () => {
         }
     }
 
-    const handleNewChat = () => {
-        console.log('Creating new chat with:', partecipants[0]);
-        const response = apiService('/chat/new-chat', 'POST', {username2: partecipants[0] });
+    const handleNewChat = async () => {
+        const response = await apiService('/chat/new-chat', 'POST', {username2: participants[0] });
         if (response) {
             console.log('Chat created');
             fetchChats();
@@ -175,8 +174,8 @@ const ChatBox = () => {
                             </div>
                         ) : (
                             <div className='d-flex flex-row'>
-                                <ShareInput receivers={partecipants} setReceivers={setPartecipants} />
-                                {partecipants.length > 0 ? <button className='button-clean green my-2 ' onClick={handleNewChat}>Create</button> : <button className='new-chat-button d-flex align-items-start mt-3' onClick={() => setShowShareInput (!showShareInput)}><Undo2 /></button>}
+                                <ShareInput receivers={participants} setReceivers={setParticipants} />
+                                {participants.length > 0 ? <button className='button-clean green my-2 ' onClick={handleNewChat}>Create</button> : <button className='new-chat-button d-flex align-items-start mt-3' onClick={() => setShowShareInput (!showShareInput)}><Undo2 /></button>}
                             </div>
                         )}
                         {searchChat && searchChat.length > 0 ? (

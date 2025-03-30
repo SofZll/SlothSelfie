@@ -18,11 +18,24 @@ const createChat = async (req, res) => {
             return;
         }
 
-        const chat = await Chat.findOrCreateDirectChat(user._id, user2._id);
-        res.status(201).json(chat);
+        const existingChat = await Chat.findOne({
+            participants: { $all: [user._id, user2._id] }
+        });
+
+        if (existingChat) {
+            res.status(400).json({ success: false, message: 'Chat already exists', chat: existingChat });
+            return;
+        }
+
+        const newChat = await Chat.create({
+            isDirectMessage: true,
+            participants: [user._id, user2._id]
+        });
+
+        res.status(201).json({ success: true, newChat });
     } catch (error) {
         console.error('Error creating chat:', error);
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ success: false, message: error.message });
     }
 };
 
@@ -64,14 +77,14 @@ const getChats = async (req, res) => {
         const chats = await Chat.find({ participants: user._id }).populate('participants lastMessage');
 
         if (!chats) {
-            res.status(400).json({ message: 'Chats not found' });
+            res.status(400).json({ success: false, message: 'Chats not found' });
             return;
         }
 
         res.status(200).json({ success: true, chats: chats });
     } catch (error) {
         console.error('Error fetching chats:', error);
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ success: false, message: error.message });
     }
 }
 
