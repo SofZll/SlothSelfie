@@ -1,43 +1,7 @@
 
 const Task = require('../models/taskModel');
 const User = require('../models/userModel');
-
-// Creating a task
-const createTask = async (req, res) => {
-    const { title, deadline, completed } = req.body;
-    const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
-
-    try {   
-        const task = new Task({ title, completed, user: user._id });
-        if (deadline) task.deadline = deadline;
-
-        const savedTask = await task.save();
-        res.status(200).json(savedTask);
-    } catch (error) {
-        console.error('Error creating task:', error);
-        res.status(500).json({ message: error.message });
-    }
-};
-
-// change task completed value
-const markTaskCompleted = async (req, res) => {
-    const { taskId } = req.params;
-
-    try {
-        const task = await Task.findById(taskId);
-        if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
-        }
-
-        task.completed = !task.completed;
-        const updatedTask = await task.save();
-        res.status(200).json(updatedTask);
-    } catch (error) {
-        console.error('Error updating task:', error);
-        res.status(500).json({ message: error.message });
-    }
-};
+const Note = require('../models/noteModel');
 
 // fetch all tasks
 const getTasks = async (req, res) => {
@@ -61,6 +25,48 @@ const getTasks = async (req, res) => {
     }
 };
 
+//edit a given task
+const editTask = async (req, res) => {
+    const { taskId } = req.params;
+    const { title, deadline, completed } = req.body;
+
+    try {
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        task.title = title;
+        task.deadline = deadline;
+        task.completed = completed;
+
+        const updatedTask = await task.save();
+        res.status(200).json(updatedTask);
+    } catch (error) {
+        console.error('Error updating task:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+// change task completed value
+const markTaskCompleted = async (req, res) => {
+    const { taskId } = req.params;
+
+    try {
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        task.completed = !task.completed;
+        const updatedTask = await task.save();
+        res.status(200).json(updatedTask);
+    } catch (error) {
+        console.error('Error updating task:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // Delete a task
 const deleteTask = async (req, res) => {
     const { taskId } = req.params;
@@ -69,6 +75,13 @@ const deleteTask = async (req, res) => {
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
+        
+        const note = await Note.findOne({ tasks: taskId });
+        if (note) {
+            note.tasks = note.tasks.filter(task => task._id !== taskId);
+            await note.save();
+        }
+
         res.status(200).json({ message: 'Task deleted successfully' });
     } catch (error) {
         console.error('Error deleting task:', error);
@@ -76,6 +89,7 @@ const deleteTask = async (req, res) => {
     }
 };
 
+//function called from note to add tasks
 const addTasks = async (tasks, user, sharedWith) => {
     const tasksArray = [];
 
@@ -96,7 +110,7 @@ const addTasks = async (tasks, user, sharedWith) => {
     }
 }
 
-
+//function called from note to delete tasks
 const deleteTasks = async (tasks) => {
     try {
         for (let i = 0; i < tasks.length; i++) {
@@ -112,6 +126,7 @@ const deleteTasks = async (tasks) => {
     }
 }
 
+//function called from note to edit tasks
 const editTasks = async (tasks) => {
     const updatedTasks = [];
     try {
@@ -136,8 +151,8 @@ const editTasks = async (tasks) => {
 }
 
 module.exports = {
-    createTask,
     getTasks,
+    editTask,
     deleteTask,
     markTaskCompleted,
     deleteTasks,
