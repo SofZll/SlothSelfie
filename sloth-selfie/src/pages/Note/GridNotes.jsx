@@ -19,8 +19,9 @@ const GridNotes = () => {
 
     const filterNotes = () => {
 
-        let n = [...notes];
-        if (filters.date) n = n.filter(note => new Date(note.createDate).toLocaleDateString() === filters.date);
+        let n = [];
+        if (filters.date === '') n = [...notes];
+        else n = notes.filter(nt => new Date(nt.createDate).toLocaleDateString() === new Date(filters.date).toLocaleDateString());
 
         switch (filters.order) {
             case 'title':
@@ -47,6 +48,7 @@ const GridNotes = () => {
     }, []);
 
     useEffect(() => {
+        console.log(filters);
         if (notes.length > 0) filterNotes();
     }, [notes, filters]);
 

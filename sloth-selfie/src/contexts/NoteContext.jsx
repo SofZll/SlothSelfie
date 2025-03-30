@@ -54,18 +54,11 @@ export const NoteProvider = ({ children }) => {
 
     const [filters, setFilters] = useState({
         order: 'title',
-        date: null
+        date: ''
     });
 
-    const resetDate = () => {
-        setFilters({
-            ...filters,
-            date: null
-        });
-    }
-
     return (
-        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters, resetDate }}>
+        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters }}>
             {children}
         </NoteContext.Provider>
     );

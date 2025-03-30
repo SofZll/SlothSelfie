@@ -52,7 +52,7 @@ const FormNoAvailability = () => {
             </div>
 
             <div className='row py-2'>
-                <div className='col col-auto form-check form-switch ms-2'>
+                <div className='col col-auto form-check form-switch ms-3'>
                     <input className='form-check-input' type='checkbox' id='days'
                         checked={!availability.days}
                         onChange={(e) => setAvailability({ ...availability, days: !e.target.checked })} />
@@ -75,7 +75,7 @@ const FormNoAvailability = () => {
             )}
 
             <div className='row py-2'>
-                <div className='col col-10'>
+                <div className='col col-6'>
                     <label htmlFor='repeatFrequency' className='form-label'>Repeat Frequency</label>
                     <select className='form-select' name='repeatFrequency'
                     value={availability.repeatFrequency}
@@ -86,6 +86,17 @@ const FormNoAvailability = () => {
                         <option value='yearly'>Yearly</option>
                     </select>
                 </div>
+                {availability.repeatFrequency !== 'none' && (
+                    <div className='col col-6'>
+                        <label htmlFor='numberOfOccurrences' className='form-label'>Number of Occurrences</label>
+                        <input type='number' className='form-control' id='numberOfOccurrences'
+                        placeholder='Number of occurrences'
+                        value={availability.numberOfOccurrences}
+                        onChange={(e) => setAvailability({ ...availability, numberOfOccurrences: e.target.value })}
+                        min={1}
+                        required />
+                    </div>
+                )}
             </div>
 
             <div className='d-flex align-items-center justify-content-center'>

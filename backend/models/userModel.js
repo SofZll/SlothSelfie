@@ -41,17 +41,30 @@ const userSchema = new mongoose.Schema({
             default: 'image/jpeg',
         },
     },
-    noAvailability: [
-        {
-            startDate: { type: Date, required: true },
-            endDate: { type: Date, required: true },
-            repeatFrequency: { 
-                type: String, 
-                enum: ['none', 'daily', 'weekly', 'monthly', 'yearly'], 
-                default: 'none' 
-            },
+    noAvailability: [{
+        startDate: {
+            type: Date,
+            required: true,
         },
-    ],
+        endDate: {
+            type: Date,
+        },
+        startTime: {
+            type: String,
+        },
+        duration: {
+            type: Number,
+        },
+        repeatFrequency: { 
+            type: String, 
+            enum: ['none', 'daily', 'weekly', 'monthly', 'yearly'], 
+            default: 'none',
+            required: true,
+        },
+        numberOfOccurrences: {
+            type: Number,
+        }
+    }]
 }, {
     timestamps: true,
 });
