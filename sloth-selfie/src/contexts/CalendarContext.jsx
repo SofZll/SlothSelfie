@@ -117,12 +117,14 @@ export const CalendarProvider = ({ children }) => {
     }
 
     const back = () => {
-        setSelected({
-            ...selected,
-            selection: '...',
-            edit: false,
-            add: false
-        });
+        if (selected.edit) resetSelected();
+        else {
+            setSelected({
+                ...selected,
+                selection: '...',
+                add: false
+            });
+        }
     }
 
     const resetSelected = () => {

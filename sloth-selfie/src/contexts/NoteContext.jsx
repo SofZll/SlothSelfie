@@ -14,6 +14,8 @@ export const NoteProvider = ({ children }) => {
         createDate: new Date(),
         updateDate: new Date(),
         tasks: [],
+        addedTasks: [],
+        deletedTasks: []
     });
 
     const [notes, setNotes] = useState([]);
@@ -29,6 +31,8 @@ export const NoteProvider = ({ children }) => {
             createDate: new Date(),
             updateDate: new Date(),
             tasks: [],
+            addedTasks: [],
+            deletedTasks: []
         });
     }
 

@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useNote } from '../../contexts/NoteContext';
-import { useTask } from '../../contexts/TaskContext';
 import { useIsDesktop } from '../../utils/utils';
 import { apiService } from '../../services/apiService';
 
@@ -14,30 +13,23 @@ import { X } from 'lucide-react';
 const FormNote = () => {
 
     const { selected, resetSelected, note, setNote, resetNote, notes, setNotes } = useNote();
-    const { localTask, setLocalTask } = useTask();
     const isDesktop = useIsDesktop();
 
     const handleSubmit = async () => {
-        console.log('taaaaaaaaask:', localTask);
-        setNote({...note, ['tasks']: localTask});
-        console.log('noteeeeeeeee:', note);
 
         if (selected.add) {
             const response = await apiService('/note', 'POST', note);
             if (response) {
                 Swal.fire({ title: 'Note added', icon: 'success', text: 'Note added successfully', customClass: { confirmButton: 'button-alert' } });
-                console.log("notes prima dell'update:", notes);
                 setNotes([...notes, response]);
-                console.log('notes:', notes);
-            }
+            } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error adding note', customClass: { confirmButton: 'button-alert' } });
         } else {
             const response = await apiService(`/note/${note._id}`, 'PUT', note);
             if (response) {
                 Swal.fire({ title: 'Note edited', icon: 'success', text: 'Note edited successfully', customClass: { confirmButton: 'button-alert' } });
-                setNotes(notes.map(n => n._id === note._id ? note : n));
-            }
+                setNotes(notes.map(n => n._id === note._id ? response : n));
+            } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error editing note', customClass: { confirmButton: 'button-alert' } });
         }
-        setLocalTask([]);
         resetNote();
         resetSelected();
         
@@ -48,8 +40,18 @@ const FormNote = () => {
         if (response) {
             Swal.fire({ title: 'Note deleted', icon: 'success', text: 'Note deleted successfully', customClass: { confirmButton: 'button-alert' } });
             setNotes(notes.filter(n => n._id !== note._id));
+            resetNote();
+            resetSelected();
+        } else {
+            Swal.fire({ title: 'Error', icon: 'error', text: 'Error deleting note', customClass: { confirmButton: 'button-alert' } });
         }
     }
+
+    useEffect(() => {
+        if (!selected.edit) {
+            resetNote();
+        }
+    }, [selected]);
 
     return (
         <div className='d-flex flex-column w-100 h-100 p-md-2 p-0 position-relative'>
@@ -57,10 +59,18 @@ const FormNote = () => {
 
             <div className='d-flex w-100 position-absolute top-0 start-0 z-1'>
                 <div className='d-flex fs-5 fw-bold flex-grow-1 align-items-center p-0 py-md-3'>
-                    {selected.add ? 'New note' : 'Note'}
+                    {selected.add ? 'Add a new note' : 'Edit the selected note'}
                 </div>
 
-                {!isDesktop && (
+                {isDesktop ? (
+                    <>
+                    {selected.edit && 
+                        <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                            <X size={25} color='#555B6E' strokeWidth={1.75} />
+                        </button>
+                    }
+                    </>
+                ) : (
                     <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
                         <X size={25} color='#555B6E' strokeWidth={1.75} />
                     </button>

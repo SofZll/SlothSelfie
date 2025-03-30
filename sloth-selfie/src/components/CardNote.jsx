@@ -4,17 +4,33 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 
 import CopyButton from './CopyButton';
-import { Copy } from 'lucide-react';
+import { Pen } from 'lucide-react';
+
+import { useNote } from '../contexts/NoteContext';
+import { apiService } from '../services/apiService';
 
 const CardNote = ({ Note }) => {
 
     const [isExpanded, setIsExpanded] = useState(false);
     const previewContent = Note.content.length > 100 ? Note.content.substring(0, 100) : Note.content;
 
+    const { selected, setSelected, setNote, notes, setNotes } = useNote();
+
+    const selectNote = () => {
+        setNote(Note);
+        if (Note.tasks) setNote({ ...Note, tasks: Note.tasks.map(t => ({ ...t, deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null })), addedTasks: [], deletedTasks: [] });
+        setSelected({ ...selected, edit: true, add: false, popUp: true });
+    }
+
+    const completeTask = async (task) => {
+        const response = await apiService(`/task/complete/${task._id}`, 'PUT');
+        if (response) setNotes(notes.map(n => n._id === Note._id ? { ...Note, tasks: Note.tasks.map(t => t._id === task._id ? response : t) } : n));
+    }
+
     return (
-        <div className='d-flex flex-column w-100 h-100 align-items-center border rounded shadow-sm p-md-3 p-1'>
+        <div className='d-flex flex-column w-100 h-100 align-items-center border rounded shadow-sm p-md-3 p-1 position-relative'>
             <div className='row w-100'>
-                <div className='col'>
+                <div className='col-10'>
                     <CopyButton Note={Note} />
                 </div>
             </div>
@@ -45,7 +61,7 @@ const CardNote = ({ Note }) => {
                         {Note.tasks.map((task, index) => (
                             <div key={index} className='d-flex flex-row justify-content-between my-1'>
                                 <div className='d-flex align-items-center fst-italic'>
-                                    <input type='checkbox' checked={task.completed} />
+                                    <input type='checkbox' checked={task.completed} onChange={() => completeTask(task)} />
                                     <div className='ps-1'>{task.title}</div>
                                 </div>
                                 {task.deadline && (
@@ -69,6 +85,10 @@ const CardNote = ({ Note }) => {
                     </div>
                 </div>
             </div> 
+
+            <button className='btn position-absolute top-0 end-0' onClick={() => selectNote()}>
+                <Pen size={20} color='#244476' strokeWidth={1.25} />
+            </button>
 
         </div>
     );

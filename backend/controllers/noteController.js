@@ -1,8 +1,7 @@
 const Note = require('../models/noteModel');
 const User = require('../models/userModel');
-const  { deleteTasks } = require('./taskController');
 
-const { addTasks } = require('./taskController');
+const { addTasks, editTasks, deleteTasks } = require('./taskController');
 const { findUserId } = require('../utils/utils');
 
 // Create a new note
@@ -70,69 +69,74 @@ const getNotes = async (req, res) => {
 // Update a note
 const updateNote = async (req, res) => {
     const { noteId } = req.params;
-    const { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline } = req.body;
+    const { title, user, category, content, tasks, addedTasks, deletedTasks, noteAccess, sharedWith } = req.body;
 
+    try {
+        const note = await Note.findById(noteId);
 
-    const note = await Note.findById(noteId);
-    if (!note) {
-        return res.status(404).json({ success: false, message: 'Note not found' });
-    }
+        if (!note) {
+            return res.status(404).json({ success: false, message: 'Note not found' });
+        }
 
-    if (isTodo) {
-        for (let i = 0; i < note.tasks.length; i++) {
-            const task = await getTaskById(note.tasks[i]);
-            if (!task) {
-                //create a new task
-                const newTask = await createTask(tasks[i]);
-                tasks[i] = newTask._id;
-                note.tasks.push(newTask._id);
-            } else {
-                //update the task
-                await updateTask(note.tasks[i], tasks[i]);
+        if (deletedTasks) {
+            const response = await deleteTasks(deletedTasks);
+            if (!response) return res.status(500).json({ success: false, message: 'Error deleting tasks' });
+        }
+
+        if (addedTasks) {
+            const users = [];
+            for (let i = 0; i < sharedWith.length; i++) {
+                users.push(sharedWith[i]._id);
             }
-        }
-    }
 
-    try{
-        //we find the current user and check if it is the author of the note
-        const currentUser = await User.findById(req.session.userId);
-        if (!currentUser) {
-            return res.status(401).json({ success: false, message: 'User not found' });
+            const response = await addTasks(addedTasks, user, users);
+            if (!response) return res.status(500).json({ success: false, message: 'Error adding tasks' });
+            else note.tasks = response;
         }
-        if (note.user.toString() !== currentUser._id.toString()) {
-            return res.status(403).json({ success: false, message: 'You are not authorized to edit this note' });
+        
+
+        if (tasks) {
+            const response = await editTasks(tasks);
+            if (!response) return res.status(500).json({ success: false, message: 'Error editing tasks' });
+            else note.tasks.push(...response);
         }
 
-        // Update the note
-        const updatedNote = await Note.findByIdAndUpdate(
-            noteId,
-            { title, category, content, noteAccess, allowedUsers, isTodo, tasks, taskDeadline },
-            { new: true }
-        ).populate('user', '_id username').populate('tasks');
+        note.title = title;
+        note.category = category;
+        note.content = content;
+        note.noteAccess = noteAccess;
+        note.updateDate = new Date();
 
-        res.status(200).json({ success: true, note: updatedNote });
+        const updatedNote = await note.save();
+
+        const populatedNote = await Note.findById(updatedNote._id)
+        .populate('user', 'username')
+        .populate('tasks')
+        .populate('sharedWith', 'username');
+
+        res.status(200).json(populatedNote);
+
     } catch (error) {
         console.error('Error updating note:', error);
         res.status(500).json({ success: false, message: 'Error updating note' });
     }
+
+
 };
 
 // Delete a note
 const deleteNote = async (req, res) => {
     const { noteId } = req.params;
-    const note = await Note.findById(noteId);
         
     try {
+        const note = await Note.findById(noteId);
         if (!note) {
             return res.status(404).json({ success: false, message: 'Note not found' });
         }
 
-        // Delete all tasks associated with the note
-        if (note.isTodo) {
-            const tasksDeleted = await deleteTasks(note.tasks);
-            if (!tasksDeleted) {
-                return res.status(500).json({ success: false, message: 'Error deleting tasks' });
-            }
+        if (note.tasks.length > 0) {
+            const response = await deleteTasks(note.tasks);
+            if (!response) return res.status(500).json({ success: false, message: 'Error deleting tasks' });
         }
 
         await Note.findByIdAndDelete(noteId);

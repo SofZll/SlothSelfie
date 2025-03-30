@@ -1,16 +1,35 @@
 import React from "react";
 
 import { useTask } from '../../contexts/TaskContext';
+import { useNote } from '../../contexts/NoteContext';
 
 import { X, Plus } from 'lucide-react';
 
 const ListTask = () => {
 
-    const { task, setTask, resetTask, localTask, setLocalTask } = useTask();
+    const { task, setTask, resetTask } = useTask();
+    const { note, setNote, selected } = useNote();
 
     const addTask = async () => {
-        setLocalTask([...localTask, task]);
+        if (selected.add) setNote({...note, tasks: [...note.tasks, task]});
+        else setNote({...note, addedTasks: [...note.addedTasks, task]});
         resetTask();
+    }
+
+    const deleteExistingTask = (t) => {
+        setNote({ ...note, deletedTasks: [...note.deletedTasks, t], tasks: note.tasks.filter(tk => tk._id !== t._id) });
+    }
+
+    const deleteLocalTask = (t) => {
+        setNote({ ...note, addedTasks: note.addedTasks.filter(tk => tk._id !== t._id) });
+    }
+
+    const completeLocalTask = (t) => {
+        setNote({...note, addedTasks: note.addedTasks.map(tk => tk._id === t._id ? { ...t, completed: !t.completed } : tk )});
+    }
+
+    const completeExistingTask = (t) => {
+        setNote({...note, tasks: note.tasks.map(tk => tk._id === t._id ? { ...t, completed: !t.completed } : tk )});
     }
 
     const handleKeyDown = (e) => {
@@ -18,7 +37,7 @@ const ListTask = () => {
     }
 
     return (
-        <div className='d-flex flex-column w-100 p-md-2 p-0 border rounded mt-2'>
+        <div className='d-flex flex-column w-100 p-2 p-0 border rounded mt-2'>
             <form className='row d-flex align-items-center' onKeyDown={handleKeyDown}>
                 <div className='col-6'>
                     <label htmlFor='tasks' className='form-label'>Title</label>
@@ -31,7 +50,7 @@ const ListTask = () => {
                 <div className='col-4'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
                     <input type='date' className='form-control' id='deadline'
-                    value={task.deadline}
+                    value={task.deadline ?? ''}
                     onChange={(e) => setTask({...task, ['deadline']: e.target.value})} />
                 </div>
                 <div className='col-2'>
@@ -40,21 +59,45 @@ const ListTask = () => {
                     </button>
                 </div>
             </form>
-            {localTask.length > 0 && (
+
+            {note.addedTasks.length > 0 && (
                 <div className='d-flex flex-column w-100'>
-                    {localTask.map((task, index) => (
+                    {note.addedTasks.map((t, index) => (
                         <div key={index} className='d-flex flex-row w-100 p-1 align-items-center justify-content-between shadow-sm'>
                             <div className='d-flex align-items-center fst-italic'>
-                                <input type='checkbox' checked={task.completed} onChange={() => setLocalTask(localTask.map(t => t._id === task._id ? {...t, ['completed']: !t.completed} : t))} />
-                                <div className='p-1'>{task.title}</div>
+                                <input type='checkbox' checked={t.completed} onChange={() => completeLocalTask(t)} />
+                                <div className='p-1'>{t.title}</div>
                             </div>
-                            {task.deadline && (
+                            {t.deadline && (
                                 <div>
-                                    {new Date(task.deadline).toLocaleDateString()}
+                                    {new Date(t.deadline).toLocaleDateString()}
                                 </div>
                             )}
                             <div>
-                                <button type='button' className='btn p-0' onClick={() => setLocalTask(localTask.filter(t => t._id !== task._id))}>
+                                <button type='button' className='btn p-0' onClick={() => deleteLocalTask(t)}>
+                                    <X size={20} color='#555B6E' strokeWidth={1.75} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {note.tasks.length > 0 && (
+                <div className='d-flex flex-column w-100'>
+                    {note.tasks.map((t, index) => (
+                        <div key={index} className='d-flex flex-row w-100 p-1 align-items-center justify-content-between shadow-sm'>
+                            <div className='d-flex align-items-center fst-italic'>
+                                <input type='checkbox' checked={t.completed} onChange={() => completeExistingTask(t)} />
+                                <div className='p-1'>{t.title}</div>
+                            </div>
+                            {t.deadline && (
+                                <div>
+                                    {new Date(t.deadline).toLocaleDateString()}
+                                </div>
+                            )}
+                            <div>
+                                <button type='button' className='btn p-0' onClick={() => deleteExistingTask(t)}>
                                     <X size={20} color='#555B6E' strokeWidth={1.75} />
                                 </button>
                             </div>
