@@ -8,7 +8,7 @@ const createTask = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
 
-    try {
+    try {   
         const task = new Task({ title, completed, user: user._id });
         if (deadline) task.deadline = deadline;
 
@@ -65,11 +65,10 @@ const getTasks = async (req, res) => {
 const deleteTask = async (req, res) => {
     const { taskId } = req.params;
     try {
-        const task = await Task.findById(taskId);
+        const task = await Task.findByIdAndDelete(taskId);
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
-        await Task.findByIdAndDelete(taskId);
         res.status(200).json({ message: 'Task deleted successfully' });
     } catch (error) {
         console.error('Error deleting task:', error);
@@ -84,13 +83,12 @@ const addTasks = async (tasks, user, sharedWith) => {
         for (let i = 0; i < tasks.length; i++) {
             const task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id });
             if (tasks[i].deadline) task.deadline = tasks[i].deadline;
-            if (tasks[i].sharedWith) task.sharedWith = sharedWith;
+            if (sharedWith.length > 0) task.sharedWith = sharedWith;
 
             const savedTask = await task.save();
             if (savedTask) tasksArray.push(savedTask._id);
         }
 
-        console.log('Tasksssssssssssssss created:', tasksArray);
         return tasksArray;
     } catch (error) {
         console.error('Error creating tasks:', error);
@@ -99,10 +97,10 @@ const addTasks = async (tasks, user, sharedWith) => {
 }
 
 
-const deleteTasks = async (idTasks) => {
+const deleteTasks = async (tasks) => {
     try {
-        for (let i = 0; i < idTasks.length; i++) {
-            const deletedTask = await Task.findByIdAndDelete(idTasks[i]);
+        for (let i = 0; i < tasks.length; i++) {
+            const deletedTask = await Task.findByIdAndDelete(tasks[i]._id);
             if (!deletedTask) {
                 return false;
             }
@@ -114,6 +112,29 @@ const deleteTasks = async (idTasks) => {
     }
 }
 
+const editTasks = async (tasks) => {
+    const updatedTasks = [];
+    try {
+        for (let i = 0; i < tasks.length; i++) {
+            const task = await Task.findById(tasks[i]._id);
+            if (!task) return false;
+
+            task.title = tasks[i].title;
+            task.deadline = tasks[i].deadline;
+            task.completed = tasks[i].completed;
+
+            const updatedTask = await task.save();
+            if (!updatedTask) return false;
+            else updatedTasks.push(updatedTask._id);
+        }
+
+        return updatedTasks;
+    } catch (error) {
+        console.error('Error updating tasks:', error);
+        return false;
+    }
+}
+
 module.exports = {
     createTask,
     getTasks,
@@ -121,4 +142,5 @@ module.exports = {
     markTaskCompleted,
     deleteTasks,
     addTasks,
+    editTasks
 };

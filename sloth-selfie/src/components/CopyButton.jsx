@@ -1,53 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import React, { useState } from 'react';
 import { FaCopy, FaCheck } from 'react-icons/fa';
+import { htmlToText } from 'html-to-text';
 
 const CopyButton = ({ Note }) => {
     const [copied, setCopied] = useState(false);
-    const [text, setText] = useState('');
 
     const handleCopy = () => {
+        copyText();
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000); // Resetta lo stato "copiato" dopo 2 secondi
+        setTimeout(() => setCopied(false), 2000);
     };
 
-    useEffect(() => {
+    const copyText = () => {
         let copiedContent = Note.title;
 
         if (Note.content.length > 0) {
-            copiedContent += '\n\n' + Note.content;
+            copiedContent += '\n\nContent:\n' + htmlToText(Note.content, { wordwrap: false });
         }
 
         if (Note.tasks.length > 0) {
             copiedContent += '\n\nTasks:';
             Note.tasks.forEach((task, i) => {
-                copiedContent += `\n${i + 1}. ${task.text} ${task.completed ? '(completed)' : ''}`;
+                copiedContent += `\n${i + 1}. ${task.title} ${task.completed ? '(completed)' : ''}`;
                 if (task.deadline) {
                     copiedContent += ` (${new Date(task.deadline).toLocaleDateString()})`;
                 }
             });
         }
 
-        setText(copiedContent);
-    }, [Note]);
+        navigator.clipboard.writeText(copiedContent);
+    }
 
     return (
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5em' }}>
-            <div className='text-break fw-bold fs-4'>
+            <div className='text-break fw-bold fs-4' style={{ color: '#244476' }}>
                 {Note.title}
             </div>
-            <CopyToClipboard text={text} onCopy={handleCopy}>
-                <button
-                style={{
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                }}
+            <button
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
                 aria-label="Copy text"
-                >
-                {copied ? <FaCheck color="#555B6E" /> : <FaCopy color="#555B6E" />}
-                </button>
-            </CopyToClipboard>
+                onClick={() => handleCopy()}
+            >
+                {copied ? <FaCheck color="#244476" /> : <FaCopy color="#244476" />}
+            </button>
         </div>
     );
 };

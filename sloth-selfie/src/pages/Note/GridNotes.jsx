@@ -9,7 +9,7 @@ import { useNote } from '../../contexts/NoteContext';
 
 const GridNotes = () => {
 
-    const { selected, setSelected, notes, setNotes, filters, setFilters, resetDate } = useNote();
+    const { selected, setSelected, notes, setNotes, filters, setFilters } = useNote();
     const [filtedNotes, setFilteredNotes] = useState([]);
 
     const fetchNotes = async () => {
@@ -44,12 +44,12 @@ const GridNotes = () => {
 
     useEffect(() => {
         fetchNotes();
-        console.log(notes, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     }, []);
 
     useEffect(() => {
         if (notes.length > 0) filterNotes();
     }, [notes, filters]);
+
 
     return (
         <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popUp: true })} selected={selected.popUp} popUp={<FormNote />}>
