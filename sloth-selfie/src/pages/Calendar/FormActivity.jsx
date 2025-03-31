@@ -9,6 +9,12 @@ const FormActivity = () => {
 
     const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected } = useCalendar();
 
+    const setDeadline = (date) => {
+        const newDate = new Date(date);
+        newDate.setHours(23, 59, 59);
+        setActivity({...activity, ['deadline']: newDate});
+    }
+
     const handleSubmit = async () => {
         if (!activity.title) {
             Swal.fire({ title: 'Warning', icon: 'warning', text: 'Title is required', customClass: { confirmButton: 'button-alert' } });
@@ -60,7 +66,7 @@ const FormActivity = () => {
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
                     <input type='date' className='form-control' id='deadline'
                     value={activity.deadline ? (new Date(activity.deadline)).toISOString().split('T')[0] : ''}
-                    onChange={(e) => setActivity({...activity, ['deadline']: e.target.value})} />
+                    onChange={(e) => setDeadline(e.target.value)} />
                 </div>
             </div>
 

@@ -10,6 +10,12 @@ const ListTask = () => {
     const { task, setTask, resetTask } = useTask();
     const { note, setNote, selected } = useNote();
 
+    const setDeadline = (date) => {
+        const d = new Date(date);
+        d.setHours(23, 59, 59);
+        setTask({...task, ['deadline']: d});
+    }
+
     const addTask = async () => {
         if (!task.title) return;
 
@@ -52,7 +58,7 @@ const ListTask = () => {
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
                     <input type='date' className='form-control' id='deadline'
                     value={task.deadline ?? ''}
-                    onChange={(e) => setTask({...task, ['deadline']: e.target.value})} />
+                    onChange={(e) => setDeadline(e.target.value)} />
                 </div>
                 <div className='col-2'>
                     <button type='button' className='btn p-0' onClick={() => addTask()}>

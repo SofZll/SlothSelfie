@@ -38,6 +38,7 @@ const FormNote = () => {
             if (response) {
                 Swal.fire({ title: 'Note edited', icon: 'success', text: 'Note edited successfully', customClass: { confirmButton: 'button-alert' } });
                 setNotes(notes.map(n => n._id === note._id ? response : n));
+
             } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error editing note', customClass: { confirmButton: 'button-alert' } });
         }
         resetNote();
