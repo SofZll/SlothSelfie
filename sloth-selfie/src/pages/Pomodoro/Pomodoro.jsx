@@ -9,8 +9,15 @@ const Pomodoro = () => {
     return (
         <PomodoroProvider>
             <MainLayout>
-                <h1>Pomodoro</h1>
-                <TimerPomodoro />
+                <div className='row w-100 h-75'>
+                    <div className='col-3'>
+                    </div>
+                    <div className='col-6'>
+                        <TimerPomodoro />
+                    </div>
+                    <div className='col-3'>
+                    </div>
+                </div>
             </MainLayout>
         </PomodoroProvider>
     );
