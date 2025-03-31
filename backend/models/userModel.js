@@ -41,6 +41,29 @@ const userSchema = new mongoose.Schema({
             default: 'image/jpeg',
         },
     },
+    timeSchedule: {
+        weekendTimeout: {
+            type: String,
+            enum: ['none', 'Saturday', 'Sunday', 'both'],
+            default: 'both',
+            required: true,
+        },
+        startDayTime: {
+            type: String,
+        },
+        endDayTime: {
+            type: String,
+        },
+        startShiftTime: {
+            type: String,
+        },
+        endShiftTime: {
+            type: String,
+        },
+        standingAppointments: [{
+            
+        }],
+    },
     noAvailability: [{
         startDate: {
             type: Date,
@@ -48,12 +71,6 @@ const userSchema = new mongoose.Schema({
         },
         endDate: {
             type: Date,
-        },
-        startTime: {
-            type: String,
-        },
-        duration: {
-            type: Number,
         },
         repeatFrequency: { 
             type: String, 

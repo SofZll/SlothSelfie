@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import SelectionCalendarLayout from '../../layouts/SelectionCalendarLayout';
 import FormActivity from './FormActivity';

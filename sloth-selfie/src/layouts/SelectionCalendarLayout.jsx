@@ -22,7 +22,7 @@ const SelectionCalendarLayout = ({children}) => {
     }, [selected.selection]);
 
     return (
-        <div className="d-flex flex-column w-100 h-100 my-md-3">
+        <div className="d-flex flex-column w-100 my-md-3">
 
             <div className="row d-flex justify-content-between my-3">
                 <div className="col fs-5">
