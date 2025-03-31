@@ -38,6 +38,7 @@ TODO:
     - preview settings
 FIX:
     - Time machine ON events and activities popup
+    - Aggiustare cambio di user logout/login (a votle rimane lo user vecchio)
 
 DONE:
     - Hub back

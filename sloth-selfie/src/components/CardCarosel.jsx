@@ -48,15 +48,15 @@ const CardCarosel = ({ title, settingKey }) => {
     const renderContent = () => {
         switch (customizations[settingKey]) {
             case 'showCalendar':
-                return <PreviewCalendar viewType="calendar" />;
+                return <PreviewCalendar viewType="calendar" userLogged={user} />;
             case 'showEventsList':
-                return <PreviewCalendar viewType="events" />;
+                return <PreviewCalendar viewType="events" userLogged={user} />;
             case 'showActivitiesList':
-                return <PreviewCalendar viewType="activities" />;
+                return <PreviewCalendar viewType="activities" userLogged={user} />;
             case 'listOfNotes':
-                return <PreviewNote viewType="list"/>;
+                return <PreviewNote viewType="list" userLogged={user} />;
             case 'lastNote':
-                return <PreviewNote viewType="latest"/>;
+                return <PreviewNote viewType="latest" userLogged={user} />;
             case 'listOfPomodoros':
                 return <PreviewPomodoro />;
             case 'lastPomodoro':
