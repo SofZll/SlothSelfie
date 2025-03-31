@@ -54,10 +54,10 @@ const userSchema = new mongoose.Schema({
         endDayTime: {
             type: String,
         },
-        startShiftTime: {
+        startJobTime: {
             type: String,
         },
-        endShiftTime: {
+        endJobTime: {
             type: String,
         },
         standingAppointments: [{
