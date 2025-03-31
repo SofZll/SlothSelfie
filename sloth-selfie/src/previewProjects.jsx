@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
+import './styles/Previews.css';
+import './styles/App.css';
 
 const PreviewProjects= ({ viewType, userLogged }) => {
     const [projects, setProjects] = useState([]);
+    const [activities, setActivities] = useState([]);
     const user = userLogged;
     console.log(user);
-    const navigate = useNavigate();
-    
-    //TODO SPOSTA LA FETCH IN UN ALTRO FILE ES projectsUtils.js
-    //fetch non mantiene la localstorage quando entro in projests e torno in home (o per lo meno non lo fetcha subito, solo scorrendo il carousel)
-    //mi fa vedere tutti i progetti (non va il filtro del logged in user)? testalo
+    const navigate = useNavigate();    
+
 
     // function to navigate to the projects page, we use window.location.href to navigate without using react-router (pure JS)
     const manageProjects = (event) => {
@@ -39,6 +39,8 @@ const PreviewProjects= ({ viewType, userLogged }) => {
                 );
                 
                 setProjects(userProjects);
+                //now we fill the  activities of the projects
+                fetchProjectActivities(userProjects);
             }
             catch (error) {
                 console.error("Error loading projects:", error);
@@ -46,41 +48,82 @@ const PreviewProjects= ({ viewType, userLogged }) => {
         };
         
         loadProjects();
-    }, []);
-    
-//TODO AGGIUSTA
+    }, [viewType, user]);
+
+
+    const fetchProjectActivities = async (projects) => {
+        try {
+            const updatedProjects = await Promise.all(
+                projects.map(async (project) => {
+                    const response = await fetch(`http://localhost:8000/api/project/${project._id}`);
+                    if (!response.ok) {
+                        throw new Error("Error fetching project details");
+                    }
+                    const projectDetails = await response.json();
+                    return { ...project, ...projectDetails }; // Merge project details with the original project object
+                })
+            );
+            setProjects(updatedProjects);
+        //We order the activities by deadline and limit to 10
+        const allActivities = updatedProjects.flatMap((project) =>
+            project.phases.flatMap((phase) =>
+                [
+                    ...phase.activities.map(activity => ({ ...activity, projectTitle: project.title })),
+                    ...phase.subphases.flatMap((subphase) =>
+                        subphase.activities.map(activity => ({ ...activity, projectTitle: project.title }))
+                    )
+                ]
+            )
+        )
+        .sort((a, b) => new Date(a.deadline) - new Date(b.deadline)) // Order activities by deadline
+        .slice(0, 10); // Limit to 10 activities
+
+        setActivities(allActivities);
+    } catch (error) {
+        console.error("Error fetching project activities:", error);
+    }
+};
+
+
     const renderProjects = () => {
+        if (projects.length === 0) {
+            return (
+                <div className="scrollable-list">
+                    <div className="div-postit">
+                        <h2>No projects available.</h2>
+                    </div>
+                </div>
+            );
+        }
         switch (viewType) {
             case "list":
+                default:
                 return (
-                    <ul>
+                    <div className="scrollable-list">
                         {projects.map((project, index) => (
-                            <li key={index}>
-                                <strong>{project.title}</strong>
-                            </li>
-                        ))}
-                    </ul>
+                            <div key={project._id} className={`event-card event-border-aqua`}>
+                            <strong>{project.title}</strong> - Owner: {project.owner.username}, Members: {project.members.map(m => m.username).join(", ")}
+                        </div>
+                            ))}
+                    </div>
                 );
 
             case "recentDeadlines":
                 return (
-                    <ul>
-                        {projects
-                            .filter((project) => project.deadline)
-                            .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-                            .slice(0, 3)
-                            .map((project, index) => (
-                                <li key={index}>
-                                    <strong>{project.title}</strong> - Due: {new Date(project.deadline).toLocaleDateString()}
-                                </li>
-                            ))}
-                    </ul>
+                    <div className="scrollable-list">
+                        {activities.length > 0 ? (
+                            activities.map((activity, index) => (
+                                <div key={index} className="event-card event-border-orange">
+                                    <strong>{activity.title}</strong> (Project: {activity.projectTitle}) - Due: {new Date(activity.deadline).toLocaleDateString()} - Members: {activity.sharedWith.map(m => m.username).join(", ")}
+                                </div>
+                            ))
+                        ) : (
+                            <div className="div-postit">
+                                <h2>No upcoming deadlines.</h2>
+                            </div>
+                        )}
+                    </div>
                 );
-
-            default:
-                return (<div className="div-postit">
-                            <h2>No projects available.</h2>
-                        </div>);
         }
     };
 
