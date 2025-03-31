@@ -35,9 +35,10 @@ const CardCarosel = ({ title, settingKey }) => {
         showActivitiesList: "This week's Activities List",
         listOfNotes: "Notes List",
         lastNote: "Most recent Note",
-        listOfPomodoros: "Pomodoros",
+        quickStart: "Quick Start",
+        listOfPomodoros: "Pomodoros List",
         lastPomodoro: "Last Pomodoro",
-        listOfProjects: "Projects",
+        listOfProjects: "Projects List",
         recentProjectsDeadlines: "Upcoming Deadlines"
     };
 
@@ -57,10 +58,12 @@ const CardCarosel = ({ title, settingKey }) => {
                 return <PreviewNote viewType="list" userLogged={user} />;
             case 'lastNote':
                 return <PreviewNote viewType="latest" userLogged={user} />;
+            case 'quickStart':
+                return <PreviewPomodoro viewType="quickStart" userLogged={user} />;
             case 'listOfPomodoros':
-                return <PreviewPomodoro />;
+                return <PreviewPomodoro viewType="list" userLogged={user} />;
             case 'lastPomodoro':
-                return <PreviewPomodoro />;
+                return <PreviewPomodoro viewType="latest" userLogged={user} />;
             case 'listOfProjects':
                 return <PreviewProjects viewType="list" userLogged={user}/>;
             case 'recentProjectsDeadlines':

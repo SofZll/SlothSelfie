@@ -73,6 +73,10 @@ function PreviewSetUp(props) {
                     <div className='customization-options'>
                         <h5>Customize Pomodoro</h5>
                         <Button 
+                            text="Quick Start"
+                            onClick={() => handleCustomizationChange('pomodoro', 'quickStart')} 
+                        />
+                        <Button 
                             text="Pomodoros list"
                             onClick={() => handleCustomizationChange('pomodoro', 'listOfPomodoros')} 
                         />

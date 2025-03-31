@@ -7,20 +7,18 @@ const PreviewProjects= ({ viewType, userLogged }) => {
     const [projects, setProjects] = useState([]);
     const [activities, setActivities] = useState([]);
     const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-    const user = userLogged;
-    console.log(user);
     const navigate = useNavigate();  
     
     // Function to handle login/logout state
     useEffect(() => {
-        if (user) {
+        if (userLogged) {
             setIsUserLoggedIn(true);
         } else {
             setIsUserLoggedIn(false);
             setProjects([]); // Reset projects if the user is logged out
             setActivities([]); // Reset activities if the user is logged out
         }
-    }, [user]);
+    }, [userLogged]);
 
 
     // function to navigate to the projects page, we use window.location.href to navigate without using react-router (pure JS)
@@ -47,8 +45,8 @@ const PreviewProjects= ({ viewType, userLogged }) => {
                     // Filter projects based on the logged-in user
                     const userProjects = projects.filter(
                         (project) =>
-                            project.owner.username === user.username ||
-                            project.members.some((m) => m.username === user.username)
+                            project.owner.username === userLogged.username ||
+                            project.members.some((m) => m.username === userLogged.username)
                     );
                     
                     setProjects(userProjects);
@@ -62,7 +60,7 @@ const PreviewProjects= ({ viewType, userLogged }) => {
             
             loadProjects();
         }
-    }, [isUserLoggedIn, user]);
+    }, [isUserLoggedIn, userLogged]);
 
 
     const fetchProjectActivities = async (projects) => {
