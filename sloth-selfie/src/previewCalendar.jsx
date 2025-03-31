@@ -5,12 +5,13 @@ import Calendar from 'react-calendar';
 import './styles/Previews.css';
 import './styles/App.css';
 
-const PreviewCalendar = ({ viewType }) => {
+const PreviewCalendar = ({ viewType, userLogged}) => {
     const navigate = useNavigate();
     const [activities, setActivities] = useState([]);
     const [event, setEvent] = useState([]);
     const [todayActivities, setTodayActivities] = useState([]);
     const [todayEvents, setTodayEvents] = useState([]);
+    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
     // animation page
     const handleLinkClick = (path) => (event) => {
@@ -22,10 +23,21 @@ const PreviewCalendar = ({ viewType }) => {
         }, 300);
     };
 
+    // Function to handle login/logout state
+    useEffect(() => {
+            if (userLogged) {
+                setIsUserLoggedIn(true);
+            } else {
+                setIsUserLoggedIn(false);
+                setActivities([]); // Reset activities if the user is logged out
+                setEvent([]); // Reset events if the user is logged out
+            }
+        }, [userLogged]);
+
     useEffect(() => {
         fetchData('activities', setActivities);
         fetchData('events', setEvent);
-    } , []);
+    } , [ isUserLoggedIn ]);
 
     // Get today's events
     useEffect(() => {

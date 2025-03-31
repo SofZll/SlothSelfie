@@ -6,9 +6,21 @@ import './styles/App.css';
 const PreviewProjects= ({ viewType, userLogged }) => {
     const [projects, setProjects] = useState([]);
     const [activities, setActivities] = useState([]);
+    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
     const user = userLogged;
     console.log(user);
-    const navigate = useNavigate();    
+    const navigate = useNavigate();  
+    
+    // Function to handle login/logout state
+    useEffect(() => {
+        if (user) {
+            setIsUserLoggedIn(true);
+        } else {
+            setIsUserLoggedIn(false);
+            setProjects([]); // Reset projects if the user is logged out
+            setActivities([]); // Reset activities if the user is logged out
+        }
+    }, [user]);
 
 
     // function to navigate to the projects page, we use window.location.href to navigate without using react-router (pure JS)
@@ -22,33 +34,35 @@ const PreviewProjects= ({ viewType, userLogged }) => {
     };
 
     useEffect(() => {
-        const loadProjects = async () => {
-            try {
-                const response = await fetch("http://localhost:8000/api/projects");
-                if (!response.ok) {
-                    throw new Error("Error fetching projects");
+        if (isUserLoggedIn) {
+            const loadProjects = async () => {
+                try {
+                    const response = await fetch("http://localhost:8000/api/projects");
+                    if (!response.ok) {
+                        throw new Error("Error fetching projects");
+                    }
+                    
+                    const projects = await response.json();
+                    console.log("Fetched projects:", projects);
+                    // Filter projects based on the logged-in user
+                    const userProjects = projects.filter(
+                        (project) =>
+                            project.owner.username === user.username ||
+                            project.members.some((m) => m.username === user.username)
+                    );
+                    
+                    setProjects(userProjects);
+                    //now we fill the  activities of the projects
+                    fetchProjectActivities(userProjects);
                 }
-                
-                const projects = await response.json();
-                console.log("Fetched projects:", projects);
-                // Filter projects based on the logged-in user
-                const userProjects = projects.filter(
-                    (project) =>
-                        project.owner.username === user.username ||
-                        project.members.some((m) => m.username === user.username)
-                );
-                
-                setProjects(userProjects);
-                //now we fill the  activities of the projects
-                fetchProjectActivities(userProjects);
-            }
-            catch (error) {
-                console.error("Error loading projects:", error);
-            }
-        };
-        
-        loadProjects();
-    }, [viewType, user]);
+                catch (error) {
+                    console.error("Error loading projects:", error);
+                }
+            };
+            
+            loadProjects();
+        }
+    }, [isUserLoggedIn, user]);
 
 
     const fetchProjectActivities = async (projects) => {

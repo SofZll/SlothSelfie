@@ -5,9 +5,10 @@ import NoteCard from './NoteCard';
 import './styles/Previews.css';
 
 
-const  PreviewNote = ({ viewType }) => {
+const  PreviewNote = ({ viewType, userLogged }) => {
     const navigate = useNavigate();
     const [initialNotes, setInitialNotes] = useState([]);
+    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
     const handleLinkClick = (path) => (event) => {
         event.preventDefault();
@@ -18,11 +19,21 @@ const  PreviewNote = ({ viewType }) => {
         }, 300);
     };
 
+    // Function to handle login/logout state
+    useEffect(() => {
+        if (userLogged) {
+            setIsUserLoggedIn(true);
+        } else {
+            setIsUserLoggedIn(false);
+            setInitialNotes([]); // Reset notes if the user is logged out
+        }
+    }, [userLogged]);
+
     useEffect(() => {
         fetchNotes().then((notes) => {
             setInitialNotes(notes);
         });
-    }, []);
+    }, [isUserLoggedIn]);
 
     const sortedNotes = [...initialNotes]
     .sort((a, b) => new Date(b.lastModified || b.createdAt) - new Date(a.lastModified || a.createdAt))
