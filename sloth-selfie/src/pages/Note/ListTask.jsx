@@ -11,6 +11,8 @@ const ListTask = () => {
     const { note, setNote, selected } = useNote();
 
     const addTask = async () => {
+        if (!task.title) return;
+
         if (selected.add) setNote({...note, tasks: [...note.tasks, task]});
         else setNote({...note, addedTasks: [...note.addedTasks, task]});
         resetTask();
@@ -44,8 +46,7 @@ const ListTask = () => {
                     <input type='text' className='form-control' id='tasks'
                     placeholder='Task Title'
                     value={task.title}
-                    onChange={(e) => setTask({...task, ['title']: e.target.value})}
-                    required />
+                    onChange={(e) => setTask({...task, ['title']: e.target.value})}/>
                 </div>
                 <div className='col-4'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>

@@ -17,6 +17,16 @@ const FormNote = () => {
 
     const handleSubmit = async () => {
 
+        if (!note.title) {
+            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Title is required', customClass: { confirmButton: 'button-alert' } });
+            return;
+        }
+
+        if (!note.content && note.tasks.length === 0) {
+            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Content or tasks are required', customClass: { confirmButton: 'button-alert' } });
+            return;
+        }
+
         if (selected.add) {
             const response = await apiService('/note', 'POST', note);
             if (response) {
@@ -84,8 +94,7 @@ const FormNote = () => {
                         <input type='text' className='form-control' id='title'
                         placeholder='Note title'
                         value={note.title}
-                        onChange={(e) => setNote({...note, ['title']: e.target.value})}
-                        required />
+                        onChange={(e) => setNote({...note, ['title']: e.target.value})} />
                     </div>
 
                     <div className='col-6'>
