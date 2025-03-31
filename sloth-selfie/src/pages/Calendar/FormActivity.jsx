@@ -10,6 +10,11 @@ const FormActivity = () => {
     const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected } = useCalendar();
 
     const handleSubmit = async () => {
+        if (!activity.title) {
+            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Title is required', customClass: { confirmButton: 'button-alert' } });
+            return;
+        }
+
         if (selected.edit) {
             const response = await apiService(`/activity/${activity._id}`, 'PUT', activity);
             if (response){
@@ -48,14 +53,13 @@ const FormActivity = () => {
                         type='text' className='form-control' id='title'
                         placeholder='Activity title'
                         value={activity.title}
-                        onChange={(e) => setActivity({...activity, ['title']: e.target.value})}
-                        required />
+                        onChange={(e) => setActivity({...activity, ['title']: e.target.value})} />
                 </div>
 
                 <div className='col-6'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
                     <input type='date' className='form-control' id='deadline'
-                    value={new Date(activity.deadline).toISOString().split('T')[0]}
+                    value={activity.deadline ? (new Date(activity.deadline)).toISOString().split('T')[0] : ''}
                     onChange={(e) => setActivity({...activity, ['deadline']: e.target.value})} />
                 </div>
             </div>
