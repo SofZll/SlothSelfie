@@ -62,14 +62,14 @@ const PreviewCalendar = ({ viewType }) => {
         }
     }, [activities]);
 
-        // Check if there is an event or an activity on the date
-        const getEventOrActivityOnDate = (date, items, dateKey) => {
-            const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
-            return items.find(item => {
-                const itemDate = new Date(item[dateKey]).toLocaleDateString('en-CA');
-                return itemDate === formattedDate;
-            });
-        };
+    // Check if there is an event or an activity on the date
+    const getEventOrActivityOnDate = (date, items, dateKey) => {
+        const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+        return items.find(item => {
+            const itemDate = new Date(item[dateKey]).toLocaleDateString('en-CA');
+            return itemDate === formattedDate;
+        });
+    };
 
     // Adding a dot to the date if there is an event, project event, or an activity on that date
     const tileContent = ({ date, view }) => {
@@ -92,8 +92,6 @@ const PreviewCalendar = ({ viewType }) => {
         if (event.isInProject) return "event-border-aqua";
         return "event-border-blue";
     };
-    
-    const getActivityBorderClass = () => "event-border-orange";
 
     const renderCalendar = () => {
         switch (viewType) {
@@ -105,8 +103,8 @@ const PreviewCalendar = ({ viewType }) => {
                         {todayEvents.length > 0 ? (
                             todayEvents.map((event) => (
                                 <div key={event._id} className={`event-card ${getEventBorderClass(event)}`}>
-                                    <p>{event.title}</p>
-                                    <p>{event.time}</p>
+                                    <b>{event.title}</b>
+                                    <p>Time: {event.time}</p>
                                 </div>
                             ))
                         ) : (
@@ -121,9 +119,9 @@ const PreviewCalendar = ({ viewType }) => {
                     <div className="scrollable-list ActivityShow">
                         {todayActivities.length > 0 ? (
                             todayActivities.map((activity) => (
-                                <div key={activity._id} className={`event-card ${getActivityBorderClass()}`}>
-                                    <p>{activity.title}</p>
-                                    <p>{new Date(activity.deadline).toISOString().split('T')[0]}</p>
+                                <div key={activity._id} className={`event-card event-border-orange`}>
+                                    <b>{activity.title}</b>
+                                    <p>Due: {new Date(activity.deadline).toLocaleDateString()}</p>
                                 </div>
                             ))
                         ) : (

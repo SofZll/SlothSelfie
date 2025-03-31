@@ -58,7 +58,7 @@ function PreviewSetUp(props) {
                     <div className='customization-options'>
                         <h5>Customize Notes</h5>
                         <Button 
-                            text="Notes list"
+                            text="Notes list (10 most recent)"
                             onClick={() => handleCustomizationChange('notes', 'listOfNotes')} 
                         />
                         <Button 

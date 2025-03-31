@@ -4,7 +4,6 @@ import { fetchNotes } from "./NotesUtils";
 import NoteCard from './NoteCard';
 import './styles/Previews.css';
 
-//TODO: Controlla ordine su last modified non solo su createdAt
 
 const  PreviewNote = ({ viewType }) => {
     const navigate = useNavigate();
@@ -25,7 +24,9 @@ const  PreviewNote = ({ viewType }) => {
         });
     }, []);
 
-    const sortedNotes = [...initialNotes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const sortedNotes = [...initialNotes]
+    .sort((a, b) => new Date(b.lastModified || b.createdAt) - new Date(a.lastModified || a.createdAt))
+    .slice(0, 10); // Get the latest 10 notes
     const latestNote = sortedNotes.length > 0 ? [sortedNotes[0]] : [];
 
     const renderNotes = () => {
