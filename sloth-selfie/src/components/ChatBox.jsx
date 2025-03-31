@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import { Plus, Undo2 } from 'lucide-react'
 
 import { apiService } from '../services/apiService';
-import { useIsDesktop } from '../utils/utils';
+import { useIsDesktop, bufferToBase64 } from '../utils/utils';
 import { AuthContext } from '../contexts/AuthContext';
 import MainLayout from '../layouts/MainLayout';
 import ShareInput from './ShareInput';
@@ -27,60 +27,122 @@ const ChatBox = () => {
     const [chats, setChats] = useState([]);
 
     const fetchChats = async () => {
-        const response = await apiService('/chat/chats', 'GET');
+        const response = await apiService('/chat', 'GET');
         if (response) {
-            const chats = response.chats;
-            const tranformedData = chats.map(chat => ({
-                ...chat,
-                otherParticipant: chat.participants.find(p => p._id !== user._id)
-            }));
-            setChats(tranformedData)
-            setSearchChat(tranformedData);
-            console.log(tranformedData);
+            let base64Image = '';
+            console.log('Fetched chats:', response);
+            const transformedData = response.chats.map(chat => {
+                const otherParticipant = chat.participants.find(p => p._id !== user._id);
+    
+                if (otherParticipant?.image?.data?.data) {
+                    base64Image = `data:${otherParticipant.image.contentType};base64,${bufferToBase64(otherParticipant.image.data.data)}`;
+                }
+    
+                const transformedChat = {
+                    ...chat,
+                    otherParticipant: {
+                        ...otherParticipant,
+                        image: base64Image
+                    },
+                    createdAt: chat.createdAt ? new Date(chat.createdAt).toLocaleDateString() : '',
+                };
+    
+                if (chat.lastMessage) {
+                    transformedChat.lastMessage = {
+                        ...chat.lastMessage,
+                        createdAt: chat.lastMessage.createdAt ? new Date(chat.lastMessage.createdAt).toLocaleDateString() : '',
+                    };
+                }
+    
+                return transformedChat;
+            });
+
+            setChats(transformedData)
+            setSearchChat(transformedData);
+            console.log(transformedData);
         } else {
             console.error('Error fetching chats:', response);
         }
     }
 
-    const handleChatClick = (chat) => {
-        setSelectedChat(chat);
-        if (!isDesktop && chat) {
-            navigate(`/chat/${chat.author.username}`);
+    const handleChatClick = async (chatId) => {
+        console.log('click rilevato');
+        const response = await apiService(`/chat/${chatId}`, 'GET');
+        if (response) {
+            const existingChat = chats.find(chat => chat._id === chatId);
+            let messages = response.messages || [];
+            if (messages.length > 0) {
+                const transformedMessages = messages.map(message => {
+                    return {
+                        ...message,
+                        createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
+                    };
+                });
+                messages = transformedMessages;
+            }
+
+            setSelectedChat({
+                ...existingChat,
+                messages: messages,
+            });
+
+            setIsOpen(true);
+            setNewMessage('');
+            setShowShareInput(false);
+            setParticipants([]);
+        } else {
+            console.error('Error fetching chat:', response);
+            Swal.fire({ icon: 'error', title: 'Errore', text: response.message });
+        }
+        if (!isDesktop && chats) {
+            navigate(`/chat/${selectedChat.otherParticipant.username}`);
         }
     }
-
  
-    const handleSendMessage = () => {   /*
+    const handleSendMessage = () => {
         if (!newMessage.trim()) {
             Swal.fire({ icon: 'error', title: 'Errore', text: 'Inserisci un messaggio' });
         } else {
             const updateChat = {
                 ...selectedChat,
                 messages: [
-                    ...selectedChat.messages,
-                    { 
-                        author: username, 
-                        text: newMessage, 
-                        date: new Date().toLocaleTimeString()
+                    ...(selectedChat.messages || []),
+                    {
+                        sender: {
+                            username: user.username, 
+                        },
+                        content: {
+                            text: newMessage,
+                        },
+                        createdAt: new Date().toLocaleTimeString()
                     }
                 ],
                 lastMessage: {
-                    author: username,
-                    text: newMessage,
-                    date: new Date().toLocaleTimeString()
+                    sender: {
+                        username: user.username, 
+                    },
+                    content: {
+                        text: newMessage,
+                    },
+                    createdAt: new Date().toLocaleTimeString(),
                 }
             };
-
-            setChats(chats.map(chat => chat === selectedChat ? updateChat : chat));
-            setSelectedChat(updateChat);
-            setNewMessage('');
-        }  */
+            console.log('NewMessage:', newMessage);
+            const response = apiService(`/chat/${selectedChat._id}/message`, 'POST', { message: newMessage });
+            if (response) {
+                console.log('Message sent:', response);
+                setSelectedChat(updateChat);
+                setNewMessage('');
+            } else {
+                console.error('Error sending message:', response);
+                Swal.fire({ icon: 'error', title: 'Errore', text: response.message });
+            }
+        }
     }
-      
 
     const handleSearch = (e) => {
         const search = e.target.value.toLowerCase();
-        const filteredChat = chats.filter(chat => chat.author.username.toLowerCase().includes(search));
+        const filteredChat = chats.filter(chat => chat.otherParticipant.username.toLowerCase().includes(search));
         setSearchChat(filteredChat);
         if (search === '') {
             setSearchChat(chats);
@@ -101,13 +163,11 @@ const ChatBox = () => {
 
     useEffect(() => {
         if (chatId) {
-            const matchedChat = chats.find(chat => chat.author.username === chatId);
+            const matchedChat = chats.find(chat => chat.otherParticipant.username === chatId);
             if (matchedChat) {
                 setSelectedChat(matchedChat);
             }
-        } else {
-            fetchChats();
-        }
+        } else fetchChats();
     }, [chatId]);
 
     useEffect(() => {
@@ -123,11 +183,11 @@ const ChatBox = () => {
                     <div className='d-flex align-items-center gap-3 justify-content-start ps-3 chat-selected-header'>
                         <span onClick={(e) => { e.stopPropagation(); setSelectedChat(null); }}>Back</span>
                         <div className='d-flex align-items-center position-relative'>
-                            <img src={selectedChat.author.image} alt='profile' className='rounded-circle me-2'/>
+                            <img src={selectedChat.otherParticipant.image} alt='profile' className='rounded-circle me-2'/>
                             <div className='d-inline-block position-absolute bottom-0 online-status'></div>
                         </div>
                         <div className='d-flex w-100 flex-column align-items-start chat-content'>
-                            <h6>{selectedChat.author.username}</h6>
+                            <h6>{selectedChat.otherParticipant.username}</h6>
                             <span>status</span>
                         </div>
                     </div>
@@ -151,17 +211,25 @@ const ChatBox = () => {
             <div className={`message-box ${isOpen ? 'open' : ''}`}>
                 {selectedChat ? (
                     <div className='d-flex h-100 flex-column'>
-                        <div className='d-flex flex-column h-auto overflow-y-auto p-1 chat-selected-messages'>
-                            {selectedChat.messages.map((message, index) => (
-                                <div key={index} className={`message ${message.author === user.username ? 'sent' : 'received'}`}>
-                                    <p>{message.text}</p>
-                                    <span>{message.date}</span>
+                        <div className='d-flex flex-column overflow-y-auto p-1 chat-selected-messages'>
+                            {selectedChat.messages?.length > 0 ? (
+                                <>
+                                    {selectedChat.messages.map((message, index) => (
+                                        <div key={index} className={`message ${message.sender.username === user.username ? 'sent' : 'received'}`}>
+                                            <p>{message.content.text}</p>
+                                            <span>{message.createdAt}</span>
+                                        </div>
+                                    ))}
+                                    <div ref={messagesEndRef}></div>
+                                </>
+                            ) : (
+                                <div className='no-messages-placeholder'>
+                                    <p>Nessun messaggio</p>
                                 </div>
-                            ))}
-                            <div ref={messagesEndRef}></div>
+                            )}
                         </div>
                         <div className='d-flex gap-2 p-2 chat-input'>
-                            <input type='text' className='form-control p-1' placeholder='Scrivi un messaggio' value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
+                            <input type='text' className='form-control p-2' placeholder='Scrivi un messaggio' value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
                             <button className='chat-input-button' onClick={handleSendMessage}>Invia</button>
                         </div>
                     </div>
@@ -180,7 +248,7 @@ const ChatBox = () => {
                         )}
                         {searchChat && searchChat.length > 0 ? (
                             searchChat.map((chat, index) => (
-                                <div key={index} className='mx-1 px-3 py-2 chat' onClick={() => handleChatClick(chat)}>
+                                <div key={index} className='mx-1 px-3 py-2 chat' onClick={() => handleChatClick(chat._id)}>
                                     <div className='d-flex align-items-center flex-row chat-container'>
                                         <div className='d-flex align-items-center position-relative'>
                                             <img src={chat.otherParticipant.image} alt='profile' className='rounded-circle me-2'/>
@@ -191,13 +259,15 @@ const ChatBox = () => {
                                                 <span className='chat-username'>{chat.otherParticipant.username}</span>
                                                 {chat.lastMessage ? <span className='chat-date'>{chat.lastMessage.createdAt}</span> : <span className='chat-date'>{chat.createdAt}</span>}
                                             </div>
-                                            {chat.lastMessage ? <p>{chat.lastMessage.content}</p> : <p>New chat</p> }
+                                            {chat.lastMessage ? <p>{chat.lastMessage.content.text}</p> : <p>New chat</p> }
                                         </div>
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <p>Nessun messaggio</p>
+                            <div className='no-messages-placeholder'>
+                                <p>Nessuna chat</p>
+                            </div>
                         )}
                     </div>
                 )}

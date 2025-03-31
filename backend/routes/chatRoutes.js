@@ -5,9 +5,9 @@ const { createChat, createMessage, getMessages, getChats} = require('../controll
 const router = express.Router();
 
 // chat endpoint
-router.post('/chat/new-chat', createChat);
-router.post('/chat/new-message', createMessage);
-router.get('/chat/messages', getMessages);
-router.get('/chat/chats', getChats);
+router.post('/chat/:chatId/message', createMessage);
+router.get('/chat/:chatId', getMessages);
+router.get('/chat', getChats);
+router.post('/chat', createChat);
 
 module.exports = router;

@@ -27,4 +27,13 @@ const generateTimeOptions = () => {
     return options;
 };
 
-export { useIsDesktop, useIsMobileLandscape, generateTimeOptions };
+// function for date chatbox and forum
+
+// Function to convert buffer to base64 string
+// Since the image is stored a Buffer we need to convert it to base64
+const bufferToBase64 = (buffer) => {
+    const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
+    return btoa(binary);
+};
+
+export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64 };

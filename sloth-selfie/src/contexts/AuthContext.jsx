@@ -1,24 +1,20 @@
 import React, { useState, createContext, useEffect } from 'react';
 
 import { apiService } from '../services/apiService';
+import { bufferToBase64 } from '../utils/utils';
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const fetchUserData = async () => {
-        // Since the image is stored a Buffer we need to convert it to base64
         let base64Image = '';
-        const bufferToBase64 = (buffer) => {
-            const binary = Array.from(new Uint8Array(buffer), (byte) => String.fromCharCode(byte)).join('');
-            return btoa(binary);
-        };
         const response = await apiService('/user/profile');
         if (response) {
             if (response.user.image?.data?.data) {
-                const buffer = response.user.image.data.data;
-                base64Image = `data:${response.user.image.contentType};base64,${bufferToBase64(buffer)}`;
+                base64Image = `data:${response.user.image.contentType};base64,${bufferToBase64(response.user.image.data.data)}`;
             }
 
             const formattedBirthday = response.user.birthday ? new Date(response.user.birthday).toISOString().split('T')[0] : '';
@@ -51,14 +47,16 @@ const AuthProvider = ({ children }) => {
             } catch (error) {
                 console.error('Error checking auth:', error);
                 setUser(null);
+            } finally {
+                setLoading(false);
             }
         };
         checkAuth();
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, fetchUserData }}>
-            {children}
+        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading }}>
+            {!loading && children}
         </AuthContext.Provider>
     );
 }
