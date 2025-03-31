@@ -16,6 +16,7 @@ const messageSchema = new Schema({
 
     content: {
         text: String,
+        /*
         media: [{
             url: String,
             type: {
@@ -26,6 +27,7 @@ const messageSchema = new Schema({
             filename: String,
             size: Number
         }]
+            */
     },
 
     status: [{
