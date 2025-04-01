@@ -52,21 +52,21 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background-color:  #2b59b6;
+    background-color:  blue;
   }
   
   .event-dot-aqua {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background-color: #42E2B8;
+    background-color: lightblue;
   }
   
   .event-dot-orange {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background-color: #ffA500;
+    background-color: orange;
   }
   
   /* List used for preview events/activities/notes/projects/pomodoro */

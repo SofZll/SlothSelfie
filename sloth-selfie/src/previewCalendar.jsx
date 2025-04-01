@@ -98,9 +98,9 @@ const PreviewCalendar = ({ viewType, userLogged}) => {
             return (
                 <>
                     {eventFound && (
-                        <span className={`event-indicator ${eventFound.isInProject ? 'event-dot-aqua' : 'event-dot-blue'}`}></span>
+                        <span className={`event-indicator ${eventFound.isInProject ? 'event-dot-orange' : 'event-dot-blue'}`}></span>
                     )}
-                    {activityFound && <span className="event-indicator event-dot-orange"></span>}
+                    {activityFound && <span className="event-indicator event-dot-aqua"></span>}
                 </>
             );
         }
