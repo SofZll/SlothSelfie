@@ -81,11 +81,11 @@ const CardCarosel = ({ title, settingKey }) => {
                     <span>Event</span>
                 </div>
                 <div className="legend-item">
-                    <span className="event-dot-aqua"></span>
+                    <span className="event-dot-orange"></span>
                     <span>Project Event</span>
                 </div>
                 <div className="legend-item">
-                    <span className="event-dot-orange"></span>
+                    <span className="event-dot-aqua"></span>
                     <span>Activity</span>
                 </div>
             </div>
