@@ -113,7 +113,7 @@ const PreviewProjects= ({ viewType, userLogged }) => {
                 return (
                     <div className="scrollable-list">
                         {projects.map((project, index) => (
-                            <div key={project._id} className={`event-card event-border-aqua`}>
+                            <div key={project._id} className={`event-card event-border-orange`}>
                             <strong>{project.title}</strong> - Owner: {project.owner.username}, Members: {project.members.map(m => m.username).join(", ")}
                         </div>
                             ))}
@@ -124,11 +124,23 @@ const PreviewProjects= ({ viewType, userLogged }) => {
                 return (
                     <div className="scrollable-list">
                         {activities.length > 0 ? (
-                            activities.map((activity, index) => (
-                                <div key={index} className="event-card event-border-orange">
-                                    <strong>{activity.title}</strong> (Project: {activity.projectTitle}) - Due: {new Date(activity.deadline).toLocaleDateString()} - Members: {activity.sharedWith.map(m => m.username).join(", ")}
+                           activities.map((activity, index) => {
+                            const deadlineDate = new Date(activity.deadline);
+                            const today = new Date();   //TODO: TIMEMACHINE DATE
+                            today.setHours(0, 0, 0, 0); // reset time, we compare only the date
+        
+                            // Check if the activity is overdue
+                            const isOverdue = deadlineDate < today;
+                            const borderColorClass = isOverdue ? "event-border-red" : "event-border-aqua";
+        
+                            return (
+                                <div key={index} className={`event-card ${borderColorClass}`}>
+                                    <strong>{activity.title}</strong> 
+                                    (Project: {activity.projectTitle}) - Due: {deadlineDate.toLocaleDateString()} 
+                                    - Members: {activity.sharedWith.map(m => m.username).join(", ")}
                                 </div>
-                            ))
+                            );
+                        })
                         ) : (
                             <div className="div-postit">
                                 <h2>No upcoming deadlines.</h2>
