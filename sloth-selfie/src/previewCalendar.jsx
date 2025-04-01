@@ -67,10 +67,16 @@ const PreviewCalendar = ({ viewType, userLogged}) => {
                 return activityDate >= today && activityDate <= nextWeek;
             });
 
+            const overdueActivities = activities.filter(act => {
+                const activityDate = new Date(act.deadline);
+                return activityDate < today; // overdue activities
+            });
+
             // Order activities by deadline
             upcomingActivities.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+            overdueActivities.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
 
-            setTodayActivities(upcomingActivities);
+            setTodayActivities([...overdueActivities, ...upcomingActivities]);
         }
     }, [activities]);
 
@@ -101,7 +107,7 @@ const PreviewCalendar = ({ viewType, userLogged}) => {
     };
 
     const getEventBorderClass = (event) => {
-        if (event.isInProject) return "event-border-aqua";
+        if (event.isInProject) return "event-border-orange";
         return "event-border-blue";
     };
 
@@ -130,12 +136,16 @@ const PreviewCalendar = ({ viewType, userLogged}) => {
                 return (
                     <div className="scrollable-list ActivityShow">
                         {todayActivities.length > 0 ? (
-                            todayActivities.map((activity) => (
-                                <div key={activity._id} className={`event-card event-border-orange`}>
-                                    <b>{activity.title}</b>
-                                    <p>Due: {new Date(activity.deadline).toLocaleDateString()}</p>
-                                </div>
-                            ))
+                            todayActivities.map((activity) => {
+                                const activityDate = new Date(activity.deadline);
+                                const isOverdue = activityDate < new Date().setHours(0, 0, 0, 0); // Verifica se è scaduta
+                                return (
+                                    <div key={activity._id} className={`event-card ${isOverdue ? "event-border-red" : "event-border-aqua"}`}>
+                                        <b>{activity.title}</b>
+                                        <p>Due: {activityDate.toLocaleDateString()}</p>
+                                    </div>
+                                );
+                            })
                         ) : (
                             <div className="div-postit">
                                 <h2>No activities deadlines today!</h2>
