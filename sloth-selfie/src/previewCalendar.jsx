@@ -5,6 +5,8 @@ import Calendar from 'react-calendar';
 import './styles/Previews.css';
 import './styles/App.css';
 
+//TODO: FARE IL FETCH DEI TASK NELLE VARIE VIEWS
+
 const PreviewCalendar = ({ viewType, userLogged}) => {
     const navigate = useNavigate();
     const [activities, setActivities] = useState([]);

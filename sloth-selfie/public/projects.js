@@ -1,5 +1,7 @@
 //TODO: modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) 
 
+//TODO: QUANDO TRASFERISCI SUL SERVER CAMBIA I PATH DEI FETCH nei file projects.js, projectsView.js, projectsHandleActivities.js
+
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 

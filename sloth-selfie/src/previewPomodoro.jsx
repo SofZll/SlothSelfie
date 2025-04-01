@@ -6,7 +6,6 @@ import iconRedTomato from './media/redTomato.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { stringTime, tomatoPlay, passingTime } from './pomodoroUtils';
 import './styles/Previews.css';
-import './styles/App.css';
 //import './css/Pomodoro.css'; old css pomodoro
 
 //TODO COLLEGA IL BACKEND
@@ -120,7 +119,7 @@ const renderPomodoroPreview = () => {
               <p>Previous Pomodoro sessions:</p><br />
               <div className="scrollable-list">
                 {pomodoroList.map((pomodoro, index) => (
-                  <div key={index} className={`event-card event-border-red`} ><b>Pomodoro</b> {index + 1} - {pomodoro.time}</div>
+                  <div key={index} className={`event-card event-border-yellow`} ><b>Pomodoro</b> {index + 1} - {pomodoro.time}</div>
                 ))}
               </div>
               <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
