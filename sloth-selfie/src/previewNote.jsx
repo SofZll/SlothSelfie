@@ -4,6 +4,7 @@ import { fetchNotes } from "./NotesUtils";
 import NoteCard from './NoteCard';
 import './styles/Previews.css';
 
+//TODO METTI COLORI DI NOTE IN BASE A CATEGORIE
 
 const  PreviewNote = ({ viewType, userLogged }) => {
     const navigate = useNavigate();

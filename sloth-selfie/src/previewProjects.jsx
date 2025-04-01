@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './styles/Previews.css';
 import './styles/App.css';
 
+//TODO CAMBIARE PATH DEL FETCH SUL SERVER
+
 const PreviewProjects= ({ viewType, userLogged }) => {
     const [projects, setProjects] = useState([]);
     const [activities, setActivities] = useState([]);
@@ -67,7 +69,7 @@ const PreviewProjects= ({ viewType, userLogged }) => {
         try {
             const updatedProjects = await Promise.all(
                 projects.map(async (project) => {
-                    const response = await fetch(`http://localhost:8000/api/project/${project._id}`);
+                    const response = await fetch(`http://localhost:8000/api/project/${project._id}`); //TODO CAMBIARE PATH SUL SERVER
                     if (!response.ok) {
                         throw new Error("Error fetching project details");
                     }
