@@ -52,6 +52,18 @@ const userSchema = new mongoose.Schema({
             },
         },
     ],
+
+    workingHours: {
+        start: { type: String, required: true, default: '09:00' }, // HH:MM
+        end: { type: String, required: true, default: '17:00' }, // HH:MM
+    },
+
+    freeDays: {
+        type: [String], // Array of strings declaring free days in the week
+        default: ['Saturday', 'Sunday'],
+    },
+
+
 }, {
     timestamps: true,
 });

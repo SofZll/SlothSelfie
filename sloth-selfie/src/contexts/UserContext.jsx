@@ -24,13 +24,19 @@ const UserProvider = ({ children }) => {
             const formattedBirthday = response.user.birthday ? new Date(response.user.birthday).toISOString().split('T')[0] : '';
             
             setUser({
+                _id: response.user._id,
                 name: response.user.name || '',
                 username: response.user.username || '',
                 email: response.user.email || '',
                 birthday: formattedBirthday,
                 phoneNumber: response.user.phoneNumber || '',
                 gender: response.user.gender || '',
-                profile_image: base64Image
+                profile_image: base64Image,
+                workingHours: {
+                    start: response.user.workingHours.start || '',
+                    end: response.user.workingHours.end || '',
+                },
+                freeDays: response.user.freeDays || [''],
             });
         } else {
             console.error('Error fetching profile data:', response);
