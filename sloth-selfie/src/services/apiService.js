@@ -17,7 +17,8 @@ const apiService = async (endpoint, method = 'GET', body = null) => {
         const response = await fetch(url, options);
 
         if (!response.ok) {
-            throw new Error(response.data.message || 'API request failed');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'API request failed');
         }
 
         return await response.json();

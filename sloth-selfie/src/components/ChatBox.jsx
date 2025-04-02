@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import avatar from '../assets/icons/avatar.svg';
 import '../styles/ChatBox.css';
 import Swal from 'sweetalert2';
 import { Plus, Undo2 } from 'lucide-react'
+import socket from '../services/socket';
 
 import { apiService } from '../services/apiService';
 import { useIsDesktop, bufferToBase64 } from '../utils/utils';
@@ -42,7 +42,8 @@ const ChatBox = () => {
                     ...chat,
                     otherParticipant: {
                         ...otherParticipant,
-                        image: base64Image
+                        image: base64Image,
+                        isOnline: false
                     },
                     createdAt: chat.createdAt ? new Date(chat.createdAt).toLocaleDateString() : '',
                 };
@@ -150,7 +151,7 @@ const ChatBox = () => {
     }
 
     const handleNewChat = async () => {
-        const response = await apiService('/chat/new-chat', 'POST', {username2: participants[0] });
+        const response = await apiService('/chat/', 'POST', {username2: participants[0] });
         if (response) {
             console.log('Chat created');
             fetchChats();
@@ -173,6 +174,86 @@ const ChatBox = () => {
     useEffect(() => {
         if (selectedChat) {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [selectedChat]);
+
+    useEffect(() => {
+        socket.connect();
+        socket.on('online-users-list', (users) => {
+            console.log('Online users:', users);
+            setChats(prevChats => prevChats.map(chat => ({
+                ...chat,
+                otherParticipant: {
+                    ...chat.otherParticipant,
+                    isOnline: users[chat.otherParticipant._id] || false
+                }
+            })));
+            setSelectedChat(prev => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    otherParticipant: {
+                        ...prev.otherParticipant,
+                        isOnline: users[prev.otherParticipant._id] || false
+                    }
+                };
+            });
+        });
+
+        if (!user?._id) return;
+
+        const handleStatusChange = ({ userId, isOnline }) => {
+            console.log(`Received status update - User: ${userId}, Status: ${isOnline}`);
+            
+            setChats(prevChats => prevChats.map(chat => ({
+                ...chat,
+                otherParticipant: {
+                    ...chat.otherParticipant,
+                    isOnline: chat.otherParticipant._id === userId ? isOnline : chat.otherParticipant.isOnline
+                }
+            })));
+    
+            setSelectedChat(prev => {
+                if (!prev || prev.otherParticipant._id !== userId) return prev;
+                return {
+                    ...prev,
+                    otherParticipant: {
+                        ...prev.otherParticipant,
+                        isOnline
+                    }
+                };
+            });
+        };
+    
+        socket.on('status-change', handleStatusChange);
+        socket.emit('online-user', user._id);
+    
+        return () => {
+            socket.off('online-users-list');
+            socket.off('status-change');
+            if (user?._id) {
+                socket.emit('offline-user', user._id);
+            }
+            socket.disconnect();
+        };
+    }, [user?._id]);
+
+    useEffect(() => {
+        console.log("Current chats status:", 
+            chats.map(c => ({
+                user: c.otherParticipant.username, 
+                online: c.otherParticipant.isOnline
+            }))
+        );
+    }, [chats]);
+    
+    // Debug per selectedChat
+    useEffect(() => {
+        if (selectedChat) {
+            console.log("Selected chat status:", {
+                user: selectedChat.otherParticipant.username,
+                online: selectedChat.otherParticipant.isOnline
+            });
         }
     }, [selectedChat]);
 
@@ -252,7 +333,9 @@ const ChatBox = () => {
                                     <div className='d-flex align-items-center flex-row chat-container'>
                                         <div className='d-flex align-items-center position-relative'>
                                             <img src={chat.otherParticipant.image} alt='profile' className='rounded-circle me-2'/>
-                                            <div className='d-inline-block position-absolute bottom-0 online-status online-status-big'></div>
+                                            {chat.otherParticipant.isOnline && (
+                                                <div className="online-status online-status-big"></div>
+                                            )}
                                         </div>
                                         <div className='d-flex w-100 flex-column align-items-start chat-content'>
                                             <div className='d-flex w-100 align-items-center flex-row justify-content-between'>
