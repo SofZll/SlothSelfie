@@ -9,7 +9,9 @@ export const CalendarProvider = ({ children }) => {
         _id: '',
         title: '',
         user: '',
-        deadline: new Date(),
+        deadline: '',
+        late: false,
+        date: '',
         completed: false,
         sharedWith: [],
         notify: false,
@@ -23,7 +25,9 @@ export const CalendarProvider = ({ children }) => {
             _id: '',
             title: '',
             user: '',
-            deadline: new Date(),
+            deadline: '',
+            late: false,
+            date: '',
             completed: false,
             sharedWith: [],
             notify: false,
@@ -84,6 +88,7 @@ export const CalendarProvider = ({ children }) => {
         days: true,
         duration: 0,
         repeatFrequency: 'none',
+        numberOfOccurrences: 0,
     });
 
     const [availabilities, setAvailabilities] = useState([]);
@@ -96,6 +101,7 @@ export const CalendarProvider = ({ children }) => {
             days: true,
             duration: 0,
             repeatFrequency: 'none',
+            numberOfOccurrences: 0,
         });
     }
 
@@ -117,12 +123,14 @@ export const CalendarProvider = ({ children }) => {
     }
 
     const back = () => {
-        setSelected({
-            ...selected,
-            selection: '...',
-            edit: false,
-            add: false
-        });
+        if (selected.edit) resetSelected();
+        else {
+            setSelected({
+                ...selected,
+                selection: '...',
+                add: false
+            });
+        }
     }
 
     const resetSelected = () => {

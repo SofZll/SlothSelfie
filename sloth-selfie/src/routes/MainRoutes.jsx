@@ -4,6 +4,7 @@ import ProtectedRoute from './ProtectedRoute';
 import { useIsDesktop } from '../utils/utils';
 import { StyleProvider } from '../components/StyleContext';
 import { AuthContext } from '../contexts/AuthContext';
+import Pomodoro from '../pages/Pomodoro/Pomodoro';
 
 import Note from '../pages/Note/Note';
 import Calendar from '../pages/Calendar/Calendar';
@@ -13,7 +14,6 @@ import ChatBox from '../components/ChatBox';
 //TODO: chambiare gli import
 /*
 
-import Pomodoro from '../Pomodoro';
 import Notifications from '../Notifications';
 import Forum from '../Forum';
 */
@@ -38,6 +38,7 @@ const MainRoutes = () => {
                             element={
                                 <ProtectedRoute >
                                     <Routes>
+                                        <Route path='/pomodoro' element={<Pomodoro />} />
                                         <Route path='/calendar' element={<Calendar />} />
                                         <Route path='/notes' element={<Note />} />
                                         <Route path='/home' element={<Home />} />
@@ -46,7 +47,6 @@ const MainRoutes = () => {
                                     </Routes>
                                     {/*
                                     <Route path='/notifications' element={<Notifications />} />
-                                    <Route path='/pomodoro' element={<Pomodoro />} />
                                     <Route path='/calendar' element={<Calendar />} />
                                     <Route path='/forum' element={<Forum />} />*/}
                                     {!isDesktop && (

@@ -16,10 +16,12 @@ router.get('/user/profile', getUserProfile);
 router.get('/user/username', getUsername);
 router.get('/user/userId', getUserId);
 router.get('/user/check-auth', checkAuth);
+
 router.get('/user/no-availability', getNoAvailability);
 router.post('/user/add-no-availability', addNoAvailability);
 router.delete('/user/remove-no-availability/:noAvailabilityId', removeNoAvailability);
-router.get('/user/:username', getUserIdFromUsername);
 router.get('/user/no-availability/:userId', getUserNoAvailabilityWithId);
+
+router.get('/user/:username', getUserIdFromUsername);
 
 module.exports = router;

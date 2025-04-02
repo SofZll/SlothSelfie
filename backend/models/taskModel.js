@@ -5,6 +5,11 @@ const taskSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     deadline: {
         type: Date,
         default: null
@@ -16,12 +21,7 @@ const taskSchema = new mongoose.Schema({
     sharedWith: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-    }],
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    }
+    }]
 }, { timestamps: true });
 
 const Task = mongoose.model('Task', taskSchema);

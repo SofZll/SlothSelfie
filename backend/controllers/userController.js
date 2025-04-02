@@ -184,18 +184,13 @@ const checkAuth = async (req, res) => {
  const getNoAvailability = async (req, res) => {
     try {
         const userId = req.session.userId;
-        if (!userId) {
-            return res.status(400).json({ success: false, message: 'User not logged in' });
-        }
+        if (!userId) return res.status(400).json({ success: false, message: 'User not logged in' });
 
         const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         res.status(200).json({ success: true, noAvailability: user.noAvailability });
-    } 
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching no availability:', error);
         res.status(500).json({ success: false, message: 'Error fetching no availability' });
     }
@@ -205,13 +200,20 @@ const checkAuth = async (req, res) => {
  const addNoAvailability = async (req, res) => {
     try {
         const userId = req.session.userId;
-        const { startDate, endDate, repeatFrequency } = req.body;
-        const newNoAvailability = { startDate, endDate, repeatFrequency };
+        const { startDate, endDate, startTime, duration, repeatFrequency, numberOfOccurrences } = req.body;
+
         const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const newNoAvailability = { startDate, repeatFrequency };
+
+        if ( startTime) {
+            newNoAvailability.startTime = startTime;
+            newNoAvailability.duration = duration;
+        } else newNoAvailability.endDate = endDate;
+        
         console.log('Received data:', req.body);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
+        
         user.noAvailability.push({ startDate, endDate, repeatFrequency });
         await user.save();
         res.status(200).json({ success: true, noAvailability: newNoAvailability, message: 'No availability added successfully' });
