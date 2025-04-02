@@ -17,6 +17,8 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
+    const [showSettingsOptions, setShowSettingsOptions] = useState(false);
+    const [selectedSetting, setSelectedSetting] = useState(null);
     const [showSettings, setShowSettings] = useState(false);
     const [workHours, setWorkHours] = useState({ start: '', end: '', daysOff: [] });
 
@@ -36,11 +38,20 @@ const ProfilePage = () => {
     }, [user]);
 
     const handleSettingsClick = () => {
-        setShowSettings(true);
+        //setShowSettings(true);
+        setShowSettingsOptions(true);
+    };
+
+    const handleSelectSetting = (setting) => {
+        setSelectedSetting(setting);
+        if (setting === 'workHours') {
+            setShowSettings(true);
+        }
     };
 
     const handleCloseSettings = () => {
         setShowSettings(false);
+        setShowSettingsOptions(false);
     };
 
     const validateWorkHours = () => {
@@ -95,6 +106,7 @@ const ProfilePage = () => {
                         freeDays: updatedData.freeDays
                     });
                     setShowSettings(false);
+                    setShowSettingsOptions(false);
                 } else {
                     console.error('Failed to update profile:', response);
                     Swal.fire({
@@ -264,8 +276,22 @@ const ProfilePage = () => {
                     </>
                 )}
             </div>
+            {showSettingsOptions && !showSettings && (
+                <div className="settings-options">
+                    <div className='modal-overlay'>
+                        <div className='modal-content'>
+                        <button className='button-clean white mt-3 ' onClick={handleCloseSettings}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                                <path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                            <button className='button-clean white mt-3 ' onClick={() => handleSelectSetting('workHours')}>Work schedule settings</button>
+                            <button className='button-clean white mt-3 ' onClick={() => handleSelectSetting('notifications')}>Notification Settings</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-            {showSettings && (
+            {showSettings && selectedSetting === 'workHours' && (
                 <div className='modal-overlay'>
                     <div className='modal-content'>
                         <button className='button-clean white mt-3 ' onClick={handleCloseSettings}>
