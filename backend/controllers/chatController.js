@@ -11,7 +11,6 @@ const createChat = async (req, res) => {
     try {
         const user = await User.findOne({ username: req.session.username });
         const user2 = await User.findOne({ username: username2 });
-        console.log("user2: ", user2);
 
         if ((!user) || (!user2)) {
             res.status(400).json({ message: 'User not found' });
@@ -43,8 +42,7 @@ const createChat = async (req, res) => {
 const createMessage = async (req, res) => {
     const { message } = req.body;
     const { chatId } = req.params;
-    console.log("chatId: ", chatId);
-    console.log("message: ", message);
+
     try {
         const user = await User.findOne({ username: req.session.username });
         const chat = await Chat.findById(chatId);
@@ -84,7 +82,7 @@ const getChats = async (req, res) => {
             res.status(400).json({ success: false, message: 'Chats not found' });
             return;
         }
-        console.log("chats: ", chats);
+        
         res.status(200).json({ success: true, chats: chats });
     } catch (error) {
         console.error('Error fetching chats:', error);

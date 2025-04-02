@@ -42,8 +42,8 @@ app.use(bodyParser.json());
 app.use(session);
 
 app.use((req, res, next) => {
-    console.log('Session ID:', req.sessionID);
-    console.log('Session:', req.session);
+    //console.log('Session ID:', req.sessionID);
+    //console.log('Session:', req.session);
     req.io = io;
     next();
 });
