@@ -116,7 +116,7 @@ const renderPomodoroPreview = () => {
         if (pomodoroList.length > 0) {
           return (
             <div className="container">
-              <p>Previous Pomodoro sessions:</p><br />
+              <p>Next Pomodoro sessions:</p><br />
               <div className="scrollable-list">
                 {pomodoroList.map((pomodoro, index) => (
                   <div key={index} className={`event-card event-border-yellow`} ><b>Pomodoro</b> {index + 1} - {pomodoro.time}</div>
