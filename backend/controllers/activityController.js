@@ -59,12 +59,7 @@ const getActivities = async (req, res) => {
         .populate('description', 'content' )
         .populate('sharedWith', 'username');
         
-        const activitiesWithUsernames = activities.map(activities => ({
-            ...activities.toObject(),
-            sharedWith: activities.sharedWith.map(user => user.username)
-        }));
-
-        res.status(200).json(activitiesWithUsernames);
+        res.status(200).json(activities);
     } catch (error) {
         console.error('Error fetching activities:', error);
         res.status(500).json({ message: error.message });

@@ -29,27 +29,25 @@ const Planner = () => {
 
     const [listNormal, setListNormal] = useState([]);
 
+    const fetchEvents = async () => {
+        const response = await apiService('/events', 'GET');
+        if (response) setEvents(response);
+    }
 
     const fetchActivities = async () => {
         const response = await apiService('/activities', 'GET');
         if (response) setActivities(response);
     }
 
-    const fetchEvents = async () => {
-        const response = await apiService('/events', 'GET');
-        if (response) setEvents(response);
-    }
-
     const fetchTasks = async () => {
         const response = await apiService('/tasks', 'GET');
-        if (response) setTasks(response.filter(task => task.deadline));
+        if (response) setTasks(response);
     }
 
     const normalizeData = (datas, type) => {
         if (!Array.isArray(datas)) return [];
 
-        return (type === 'activity' ? datas.filter(data => !data.completed && data.deadline)
-            :  (type === 'task' ? datas.filter(data => !data.completed) : datas)).map(data => {
+        return (type === 'event' ? datas : datas.filter(data => !data.completed && data.deadline)).map(data => {
             return {
                 _id: data._id,
                 title: data.title,
@@ -58,8 +56,15 @@ const Planner = () => {
                     start: new Date(data.start),
                     end: new Date(data.end),
                 } : {
-                    start: new Date(data.deadline),
-                    end: new Date(data.deadline),
+                    ...(new Date(data.deadline) < new Date() ? { 
+                        late: true,
+                        start: new Date(),
+                        end: new Date(),
+                    } : {
+                        late: false,
+                        start: new Date(data.deadline),
+                        end: new Date(data.deadline),
+                    }),
                 }),
                 type: type
             };
@@ -105,6 +110,22 @@ const Planner = () => {
         }
     }
 
+    const eventStyleGetter = (event) => {
+        if (event.type === 'activity') {
+            return {
+                style: {
+                    backgroundColor: event.late ? 'red' : 'lightblue',
+                }
+            }
+        } else if (event.type === 'task') {
+            return {
+                style: {
+                    backgroundColor: event.late ? 'red' : 'lightgreen',
+                }
+            }
+        }
+    }
+
     useEffect(() => {
         if (user) {
             fetchActivities();
@@ -112,6 +133,7 @@ const Planner = () => {
             fetchTasks();
         }
     }, [user]);
+
     
     useEffect(() => {
         setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
@@ -129,10 +151,9 @@ const Planner = () => {
                     titleAccessor='title'
                     className='calendar-main'
                     onEventDrop={onEventDrop}
+                    eventPropGetter={eventStyleGetter}
                     resizable
                 />
-
-                
             </div>
 
             {!isDesktop && (

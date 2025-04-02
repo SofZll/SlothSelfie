@@ -1,13 +1,15 @@
-import React, { useEffect }  from 'react';
+import React  from 'react';
 
 import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
+import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
 
 const FormTask = () => {
 
-    const { task, setTask, tasks, setTasks, resetTask, resetSelected } = useTask();
+    const { task, setTask, tasks, setTasks, resetTask } = useTask();
+    const { resetSelected } = useCalendar();
 
     const handleSubmit = async () => {
         const response = await apiService(`/task/${task._id}`, 'PUT', task);

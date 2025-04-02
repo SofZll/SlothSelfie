@@ -7,15 +7,15 @@ export const NoteProvider = ({ children }) => {
     const [note, setNote] = useState({
         _id: '',
         title: '',
-        user: '',
         category: '',
         content: '',
         noteAccess: 'private',
         sharedWith: [],
-        isTodo: false,
         createDate: new Date(),
         updateDate: new Date(),
         tasks: [],
+        addedTasks: [],
+        deletedTasks: []
     });
 
     const [notes, setNotes] = useState([]);
@@ -24,15 +24,15 @@ export const NoteProvider = ({ children }) => {
         setNote({
             _id: '',
             title: '',
-            user: '',
             category: '',
             content: '',
             noteAccess: 'private',
             sharedWith: [],
-            isTodo: false,
             createDate: new Date(),
             updateDate: new Date(),
             tasks: [],
+            addedTasks: [],
+            deletedTasks: []
         });
     }
 
@@ -54,18 +54,11 @@ export const NoteProvider = ({ children }) => {
 
     const [filters, setFilters] = useState({
         order: 'title',
-        date: null
+        date: ''
     });
 
-    const resetDate = () => {
-        setFilters({
-            ...filters,
-            date: null
-        });
-    }
-
     return (
-        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters, resetDate }}>
+        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters }}>
             {children}
         </NoteContext.Provider>
     );

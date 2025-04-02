@@ -135,4 +135,21 @@ const sendEmail = async (receiver, notification) => {
     });
 }
 
-module.exports = { calculateDate, emitNotification };
+const findUserId = async (usernames) => {
+    if (!usernames || usernames.length === 0) return [];
+
+    const userIds = [];
+    
+    for (let i = 0; i < usernames.length; i++) {
+        let user = await User.findOne({ username: usernames[i] });
+        if (!user) {
+            throw new Error(`User ${usernames[i]} not found`);
+        }
+
+        userIds.push(user._id);
+    }
+
+    return userIds;
+}
+
+module.exports = { calculateDate, emitNotification, findUserId };
