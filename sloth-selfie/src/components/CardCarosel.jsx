@@ -5,7 +5,6 @@ import 'react-calendar/dist/Calendar.css';
 import { CustomizationContext } from '../contexts/PreviewContext';
 import {UserContext} from '../contexts/UserContext';
 
-//TODO: modifica gli import
 import PreviewPomodoro from '../previewPomodoro';
 import PreviewNote from '../previewNote';
 import PreviewCalendar from '../previewCalendar';
