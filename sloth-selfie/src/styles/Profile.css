@@ -5,6 +5,7 @@
 }
 
 .profile-container {
+    position: relative;
     background-color: #e7e7e7;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -88,17 +89,20 @@
 
 .settings-button {
     position: absolute;
+    top: 0;
+    right: 35px;
     background: none;
     border: none;
+    border-radius: 50%;
     cursor: pointer;
-    padding: 0;
+    padding: 10px;
     display: flex;
     align-items: center;
 }
 
 .settings-button svg {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px; 
     transition: transform 0.3s ease-in-out;
 }
 

@@ -8,6 +8,7 @@ import { validateEmail, validatePhoneNumber } from '../utils/validation';
 import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
 import { AuthContext } from '../contexts/AuthContext';
+import { generateTimeOptions } from '../utils/utils';
 
 const ProfilePage = () => {
     const { user, setUser  } = useContext(AuthContext);

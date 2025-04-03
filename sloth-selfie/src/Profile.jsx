@@ -55,13 +55,20 @@ function Profile() {
                     const formattedBirthday = data.user.birthday ? new Date(data.user.birthday).toISOString().split('T')[0] : '';
                     
                     setProfileData({
+                        _id: data.user._id,
                         name: data.user.name || '',
                         username: data.user.username || '',
                         email: data.user.email || '',
                         birthday: formattedBirthday,
                         phoneNumber: data.user.phoneNumber || '',
                         gender: data.user.gender || '',
-                        profile_image: base64Image
+                        profile_image: base64Image,
+                        noAvailability: data.user.noAvailability || [],
+                        workingHours: {
+                            start: data.user.workingHours.start || '',
+                            end: data.user.workingHours.end || '',
+                        },
+                        freeDays: data.user.freeDays || [''],
                     });
 
                     console.log('Profile data:', data.user);
