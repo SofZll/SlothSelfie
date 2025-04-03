@@ -148,25 +148,9 @@ const deleteNote = async (req, res) => {
     }
 };
 
-//Get a note by id
-//TODO: forse è da eliminare non so se viene usato nei progetti
-const getNoteById = async (req, res) => {
-    try {
-        const note = await Note.findById(req.params.noteId);
-        if (!note) {
-            return res.status(404).json({ error: "Nota non trovata" });
-        }
-        res.json(note);
-    } catch (error) {
-        console.error("Errore nel recuperare la nota:", error);
-        res.status(500).json({ error: "Errore del server" });
-    }
-};
-
 module.exports = {
     createNote,
     getNotes,
     updateNote,
-    deleteNote,
-    getNoteById
+    deleteNote
 };

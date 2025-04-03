@@ -31,6 +31,12 @@ const activitySchema = new mongoose.Schema({
         ref: 'User',
     }],
 
+    fatherId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Activity',
+        default: null
+    },
+
     // New fields only for Project-activities 
     project: {
         type: mongoose.Schema.Types.ObjectId,
