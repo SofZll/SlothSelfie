@@ -11,12 +11,12 @@ import iconTomato from '../assets/icons/tomato.svg';
 import { useNavigate } from 'react-router-dom';
 
 import { CustomizationContext } from '../contexts/PreviewContext';
-import {UserContext} from '../contexts/UserContext';
+import {AuthContext} from '../contexts/AuthContext';
 
 const CarouselHome = (props) => {
 
   const { customizations } = useContext(CustomizationContext);
-  const { user } = useContext(UserContext);
+  const { user } = useContext(AuthContext);
   const [goToSlide, setGoToSlide] = useState(0);
   const navigate = useNavigate();
 
