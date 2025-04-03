@@ -28,7 +28,13 @@ const AuthProvider = ({ children }) => {
                 birthday: formattedBirthday,
                 phoneNumber: response.user.phoneNumber || '',
                 gender: response.user.gender || '',
-                profile_image: base64Image
+                profile_image: base64Image,
+                workingHours: {
+                    start: response.user.workingHours.start || '',
+                    end: response.user.workingHours.end || '',
+                },
+                freeDays: response.user.freeDays || [''],
+                noAvailability: response.user.noAvailability || [],
             };
             
             // Only update if ID changed or user was null

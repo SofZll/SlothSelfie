@@ -20,8 +20,8 @@ export async function fetchNotes() {
     }
 
     const data = await response.json();
-    if (Array.isArray(data.notes)) {
-      return data.notes;
+    if (Array.isArray(data)) {
+      return data;
     } else {
       console.error('La risposta non contiene un array di note:', data);
       return [];
