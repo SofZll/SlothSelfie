@@ -98,17 +98,17 @@
 }
 
 .online-status {
-    width: 0.5rem;
-    height: 0.5rem;
+    width: 0.6rem;
+    height: 0.6rem;
     border-radius: 50%;
     background-color: #2ECC71;
-    right: 0.6rem;
+    right: 0.5rem;
 }
 
 .online-status-big {
     width: 0.7rem;
     height: 0.7rem;
-    right: 0.7rem;
+    right: 0.5rem;
 }
 
 .chat-selected-messages {
