@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "agenda": "^5.0.0",
+    "bcrypt": "^5.1.1",
     "bootstrap": "^5.3.3",
     "frappe-gantt": "^1.0.3",
     "html-to-text": "^9.0.5",
