@@ -3,7 +3,7 @@ import { useSpring, animated } from 'react-spring';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 import { CustomizationContext } from '../contexts/PreviewContext';
-import {UserContext} from '../contexts/UserContext';
+import {AuthContext} from '../contexts/AuthContext';
 
 import PreviewPomodoro from '../previewPomodoro';
 import PreviewNote from '../previewNote';
@@ -13,7 +13,7 @@ import PreviewProjects from '../previewProjects';
 
 const CardCarosel = ({ title, settingKey }) => {
     const { customizations } = useContext(CustomizationContext);
-    const { user } = useContext(UserContext);
+    const { user } = useContext(AuthContext);
     console.log("CardCarosel state:", customizations);
     const [show, setShown] = useState(false);
 
