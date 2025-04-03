@@ -8,9 +8,24 @@ const Event = require("../models/eventModel");
 //GET all projects
 const getAllProjects = async (req, res) => {
     try {
-        const projects = await Project.find()
+        const userName = req.session.username;
+        const user = await User.findOne({ username: userName });
+        const userId = user._id;
+        console.log("User ID:", userId);
+        console.log("User Name:", userName);
+        
+        
+
+        const projects = await Project.find({
+            $or: [
+                { owner: userId },
+                { members: userId }
+            ]
+        })
         .populate("owner", "username")
-        .populate("members", "username"); 
+        .populate("members", "username");
+
+        console.log("Projectssssssssssss:", projects);
 
         res.status(200).json(projects);
     } catch (error) {
