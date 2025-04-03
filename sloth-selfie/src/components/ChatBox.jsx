@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/ChatBox.css';
 import Swal from 'sweetalert2';
@@ -25,6 +25,7 @@ const ChatBox = () => {
     const [searchChat, setSearchChat] = useState([]);
     const [participants, setParticipants] = useState([]);
     const [chats, setChats] = useState([]);
+    const [onlineUsers, setOnlineUsers] = useState({});
 
     const fetchChats = async () => {
         const response = await apiService('/chat', 'GET');
@@ -43,7 +44,6 @@ const ChatBox = () => {
                     otherParticipant: {
                         ...otherParticipant,
                         image: base64Image,
-                        isOnline: false
                     },
                     createdAt: chat.createdAt ? new Date(chat.createdAt).toLocaleDateString() : '',
                 };
@@ -61,6 +61,21 @@ const ChatBox = () => {
             setChats(transformedData)
             setSearchChat(transformedData);
             console.log(transformedData);
+
+            //get status of users
+            const onlineUsers = {};
+            await Promise.all(transformedData.map(async (chat) => {
+                const response2 = await apiService(`/user/profile/${chat.otherParticipant._id}`);
+                if (response2) {
+                    console.log('response2:', response2);
+                    onlineUsers[chat.otherParticipant._id] = response2.user.isOnline;
+                    console.log('Online users:', onlineUsers);
+                } else {
+                    console.error('Error fetching user status:', response2);
+                }
+            }));
+
+            setOnlineUsers(onlineUsers);
         } else {
             console.error('Error fetching chats:', response);
         }
@@ -68,7 +83,7 @@ const ChatBox = () => {
 
     const handleChatClick = async (chatId) => {
         console.log('click rilevato');
-        const response = await apiService(`/chat/${chatId}`, 'GET');
+        const response = await apiService(`/chat/${chatId}`);
         if (response) {
             const existingChat = chats.find(chat => chat._id === chatId);
             let messages = response.messages || [];
@@ -80,6 +95,10 @@ const ChatBox = () => {
                     };
                 });
                 messages = transformedMessages;
+            }
+
+            if (chatId && user?._id) {
+                socket.emit('join-chatroom', chatId);
             }
 
             setSelectedChat({
@@ -132,6 +151,14 @@ const ChatBox = () => {
             const response = apiService(`/chat/${selectedChat._id}/message`, 'POST', { message: newMessage });
             if (response) {
                 console.log('Message sent:', response);
+                socket.emit('message', {
+                    chatId: selectedChat._id,
+                    sender: user._id,
+                    content: {
+                        text: newMessage,
+                    },
+                    createdAt: new Date().toLocaleTimeString(),
+                });
                 setSelectedChat(updateChat);
                 setNewMessage('');
             } else {
@@ -168,8 +195,10 @@ const ChatBox = () => {
             if (matchedChat) {
                 setSelectedChat(matchedChat);
             }
-        } else fetchChats();
-    }, [chatId]);
+        } else {
+            if (user?._id) fetchChats();
+        }
+    }, [chatId, user?._id]);
 
     useEffect(() => {
         if (selectedChat) {
@@ -178,85 +207,52 @@ const ChatBox = () => {
     }, [selectedChat]);
 
     useEffect(() => {
+        if (!user?._id) return;
         socket.connect();
-        socket.on('online-users-list', (users) => {
-            console.log('Online users:', users);
-            setChats(prevChats => prevChats.map(chat => ({
-                ...chat,
-                otherParticipant: {
-                    ...chat.otherParticipant,
-                    isOnline: users[chat.otherParticipant._id] || false
-                }
-            })));
-            setSelectedChat(prev => {
-                if (!prev) return prev;
-                return {
-                    ...prev,
-                    otherParticipant: {
-                        ...prev.otherParticipant,
-                        isOnline: users[prev.otherParticipant._id] || false
-                    }
-                };
-            });
+        socket.emit('online-user', user._id);
+
+        socket.on('status-change', ({ userId, isOnline }) => {
+            console.log('User status changed:', userId, isOnline);
+            setOnlineUsers(prev => ({
+                ...prev,
+                [userId]: isOnline
+            }));
         });
 
-        if (!user?._id) return;
-
-        const handleStatusChange = ({ userId, isOnline }) => {
-            console.log(`Received status update - User: ${userId}, Status: ${isOnline}`);
-            
-            setChats(prevChats => prevChats.map(chat => ({
-                ...chat,
-                otherParticipant: {
-                    ...chat.otherParticipant,
-                    isOnline: chat.otherParticipant._id === userId ? isOnline : chat.otherParticipant.isOnline
-                }
-            })));
-    
-            setSelectedChat(prev => {
-                if (!prev || prev.otherParticipant._id !== userId) return prev;
-                return {
-                    ...prev,
-                    otherParticipant: {
-                        ...prev.otherParticipant,
-                        isOnline
+        socket.on('message', (message) => {
+            console.log('New message received:', message);
+            if (selectedChat && selectedChat._id === message.chatId) {
+                setSelectedChat((prevChat) => {
+                    const updatedMessages = [...prevChat.messages, newMessage];
+                    updatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    return { ...prevChat, messages: updatedMessages };
+                });
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                const updatedChats = chats.map(chat => {
+                    if (chat._id === message.chatId) {
+                        return {
+                            ...chat,
+                            lastMessage: message,
+                        };
                     }
-                };
-            });
-        };
-    
-        socket.on('status-change', handleStatusChange);
-        socket.emit('online-user', user._id);
-    
-        return () => {
-            socket.off('online-users-list');
-            socket.off('status-change');
-            if (user?._id) {
-                socket.emit('offline-user', user._id);
+                    return chat;
+                });
+                setChats(updatedChats);
             }
+        });
+
+        return () => {
+            socket.off('status-change');
+            socket.off('message');
             socket.disconnect();
-        };
-    }, [user?._id]);
-
-    useEffect(() => {
-        console.log("Current chats status:", 
-            chats.map(c => ({
-                user: c.otherParticipant.username, 
-                online: c.otherParticipant.isOnline
-            }))
-        );
-    }, [chats]);
-    
-    // Debug per selectedChat
-    useEffect(() => {
-        if (selectedChat) {
-            console.log("Selected chat status:", {
-                user: selectedChat.otherParticipant.username,
-                online: selectedChat.otherParticipant.isOnline
-            });
         }
-    }, [selectedChat]);
+    }, [user?._id, selectedChat, chats]);
 
+    useEffect(() => {
+        console.log("Current users status:", onlineUsers);
+    }, [onlineUsers]);
+    
     const chatHeader = (
         <>
             {selectedChat ? (
@@ -265,11 +261,13 @@ const ChatBox = () => {
                         <span onClick={(e) => { e.stopPropagation(); setSelectedChat(null); }}>Back</span>
                         <div className='d-flex align-items-center position-relative'>
                             <img src={selectedChat.otherParticipant.image} alt='profile' className='rounded-circle me-2'/>
-                            <div className='d-inline-block position-absolute bottom-0 online-status'></div>
+                            {onlineUsers[selectedChat.otherParticipant._id] && (
+                                <div className='d-inline-block position-absolute bottom-0 online-status'></div> 
+                            )}
                         </div>
                         <div className='d-flex w-100 flex-column align-items-start chat-content'>
                             <h6>{selectedChat.otherParticipant.username}</h6>
-                            <span>status</span>
+                            {onlineUsers[selectedChat.otherParticipant._id] && <span>Online</span> }
                         </div>
                     </div>
                 </>
@@ -333,8 +331,8 @@ const ChatBox = () => {
                                     <div className='d-flex align-items-center flex-row chat-container'>
                                         <div className='d-flex align-items-center position-relative'>
                                             <img src={chat.otherParticipant.image} alt='profile' className='rounded-circle me-2'/>
-                                            {chat.otherParticipant.isOnline && (
-                                                <div className="online-status online-status-big"></div>
+                                            {onlineUsers[chat.otherParticipant._id] && (
+                                                <div className="d-inline-block position-absolute bottom-0 online-status online-status online-status-big"></div>
                                             )}
                                         </div>
                                         <div className='d-flex w-100 flex-column align-items-start chat-content'>

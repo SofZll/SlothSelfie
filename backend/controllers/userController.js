@@ -122,10 +122,18 @@ const editProfile = async (req, res) => {
 // Get the profile info: FUNZIONA
 const getUserProfile = async (req, res) => {
     try {
-        const userId = req.session.userId;
+        const userId = req.params.userId || req.session.userId;
+        console.log('Requested URL:', req.originalUrl);
+        console.log('params:', req.params);
+        console.log("Requested userId:", req.params.userId);
+        console.log("Session userId:", req.session.userId);
+        console.log("Final userId to search:", userId);
+
+
         if (!userId) {
             return res.status(400).json({ success: false, message: 'UserId not found' });
         }
+        console.log('UserId:', userId);
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });

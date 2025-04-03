@@ -82,7 +82,7 @@ const getChats = async (req, res) => {
             res.status(400).json({ success: false, message: 'Chats not found' });
             return;
         }
-        
+
         res.status(200).json({ success: true, chats: chats });
     } catch (error) {
         console.error('Error fetching chats:', error);
@@ -95,7 +95,7 @@ const getMessages = async (req, res) => {
     const { chatId } = req.params;
 
     try {
-        const messages = await Message.find({ chat: chatId }).populate('sender');
+        const messages = await Message.find({ chat: chatId }).populate('sender').sort({ createdAt: 1 });
 
         if (!messages) {
             res.status(400).json({ success: false, message: 'Messages not found' });
