@@ -1,19 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
-import { fetchData } from "./CalendarUtils";
 import Calendar from 'react-calendar';
+
 import './styles/Previews.css';
 import './styles/App.css';
 
+import { AuthContext } from './contexts/AuthContext';
+import { useCalendar } from "./contexts/CalendarContext";
+
+import { apiService } from './services/apiService';
+
 //TODO: FARE IL FETCH DEI TASK NELLE VARIE VIEWS
 
-const PreviewCalendar = ({ viewType, userLogged}) => {
+const PreviewCalendar = ({ viewType }) => {
+    const { activities, setActivities, events, setEvents } = useCalendar();
+    const { user } = React.useContext(AuthContext);
+
     const navigate = useNavigate();
-    const [activities, setActivities] = useState([]);
-    const [event, setEvent] = useState([]);
     const [todayActivities, setTodayActivities] = useState([]);
     const [todayEvents, setTodayEvents] = useState([]);
-    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+
+
+    const fetchEvents = async () => {
+        const response = await apiService('/events', 'GET');
+        if (response) setEvents(response);
+    }
+
+    const fetchActivities = async () => {
+        const response = await apiService('/activities', 'GET');
+        if (response) setActivities(response);
+    }
 
     // animation page
     const handleLinkClick = (path) => (event) => {
@@ -25,36 +41,27 @@ const PreviewCalendar = ({ viewType, userLogged}) => {
         }, 300);
     };
 
-    // Function to handle login/logout state
     useEffect(() => {
-            if (userLogged) {
-                setIsUserLoggedIn(true);
-            } else {
-                setIsUserLoggedIn(false);
-                setActivities([]); // Reset activities if the user is logged out
-                setEvent([]); // Reset events if the user is logged out
-            }
-        }, [userLogged]);
-
-    useEffect(() => {
-        fetchData('activities', setActivities);
-        fetchData('events', setEvent);
-    } , [ isUserLoggedIn ]);
+        if (user) {
+            fetchEvents();
+            fetchActivities();
+        }
+    } , [ user ]);
 
     // Get today's events
     useEffect(() => {
-        if (event.length > 0) {
+        if (events.length > 0) {
             const today = new Date(); // TODO: TIME MACHINE DATE  
             const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
         
-            const todayFilteredEvents = event.filter(ev => {
+            const todayFilteredEvents = events.filter(ev => {
                 const eventDate = new Date(ev.date).toISOString().split('T')[0]; // "YYYY-MM-DD"
                 return eventDate === formattedToday;
             });
         
             setTodayEvents(todayFilteredEvents);
         }
-    }, [event]);
+    }, [events]);
 
     // Get upcoming week's activities
     useEffect(() => {
@@ -94,7 +101,7 @@ const PreviewCalendar = ({ viewType, userLogged}) => {
     // Adding a dot to the date if there is an event, project event, or an activity on that date
     const tileContent = ({ date, view }) => {
         if (view === 'month') {
-            const eventFound = getEventOrActivityOnDate(date, event, 'date');
+            const eventFound = getEventOrActivityOnDate(date, events, 'date');
             const activityFound = getEventOrActivityOnDate(date, activities, 'deadline');
 
             return (

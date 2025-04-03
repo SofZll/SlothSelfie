@@ -2,8 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useSpring, animated } from 'react-spring';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
+
 import { CustomizationContext } from '../contexts/PreviewContext';
 import {AuthContext} from '../contexts/AuthContext';
+import { CalendarProvider } from '../contexts/CalendarContext';
 
 import PreviewPomodoro from '../previewPomodoro';
 import PreviewNote from '../previewNote';
@@ -14,7 +16,6 @@ import PreviewProjects from '../previewProjects';
 const CardCarosel = ({ title, settingKey }) => {
     const { customizations } = useContext(CustomizationContext);
     const { user } = useContext(AuthContext);
-    console.log("CardCarosel state:", customizations);
     const [show, setShown] = useState(false);
 
     const props3 = useSpring({
@@ -23,10 +24,6 @@ const CardCarosel = ({ title, settingKey }) => {
         ? '0 20px 25px rgb(0 0 0 / 25%)'
         : '0 2px 10px rgb(0 0 0 / 8%)'
     });
-
-    useEffect(() => {
-        console.log("Customization state changed:", customizations);
-    }, [customizations]);
 
      //Map the setting key to the personalized title
      const titleMap = {
@@ -48,11 +45,11 @@ const CardCarosel = ({ title, settingKey }) => {
     const renderContent = () => {
         switch (customizations[settingKey]) {
             case 'showCalendar':
-                return <PreviewCalendar viewType="calendar" userLogged={user} />;
+                return <PreviewCalendar viewType="calendar" />;
             case 'showEventsList':
-                return <PreviewCalendar viewType="events" userLogged={user} />;
+                return <PreviewCalendar viewType="events" />;
             case 'showActivitiesList':
-                return <PreviewCalendar viewType="activities" userLogged={user} />;
+                return <PreviewCalendar viewType="activities" />;
             case 'listOfNotes':
                 return <PreviewNote viewType="list" userLogged={user} />;
             case 'lastNote':
@@ -64,9 +61,9 @@ const CardCarosel = ({ title, settingKey }) => {
             case 'lastPomodoro':
                 return <PreviewPomodoro viewType="latest" userLogged={user} />;
             case 'listOfProjects':
-                return <PreviewProjects viewType="list" userLogged={user}/>;
+                return <PreviewProjects viewType="list" />;
             case 'recentProjectsDeadlines':
-                return <PreviewProjects viewType="recentDeadlines" userLogged={user}/>;
+                return <PreviewProjects viewType="recentDeadlines" />;
             default:
                 return null;
         }
@@ -91,24 +88,26 @@ const CardCarosel = ({ title, settingKey }) => {
         );
     
     return (
-        <animated.div
-            className='card d-flex flex-column justify-content-evenly align-items-center'
-            style={props3}
-            onMouseEnter={() => setShown(true)}
-            onMouseLeave={() => setShown(false)}
-        >   
-            <h2>{title}</h2>
-            {customizations[settingKey] === 'showCalendar' ? (
-                    renderLegend()
-            ) : (
-                <>
-                    <p>{currentTitle}</p>
-                </>
-            )}
-            
-            {/* Render the content */}
-            {renderContent()}
-        </animated.div>
+        <CalendarProvider>
+            <animated.div
+                className='card d-flex flex-column justify-content-evenly align-items-center'
+                style={props3}
+                onMouseEnter={() => setShown(true)}
+                onMouseLeave={() => setShown(false)}
+            >   
+                <h2>{title}</h2>
+                {customizations[settingKey] === 'showCalendar' ? (
+                        renderLegend()
+                ) : (
+                    <>
+                        <p>{currentTitle}</p>
+                    </>
+                )}
+                
+                {/* Render the content */}
+                {renderContent()}
+            </animated.div>
+        </CalendarProvider>
     );
 }
 export default CardCarosel;

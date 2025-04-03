@@ -44,21 +44,11 @@ async function loadProjects() {
         }
 
         const projects = await response.json();
-
-        //we get the logged user and load only the projects where he is the owner or a member
-        const userLogged = await getLoggedUser();
-        if (!userLogged) {
-            Swal.fire({title: "Error", text: "No user is logged in!", icon: "error"});
-            return;
-        }
-
-        // Filter the projects where the logged user is the owner or a member
-        const userProjects = projects.filter(project => project.owner.username === userLogged || project.members.some(m => m.username === userLogged));
         
         const list = document.getElementById("projects-list");
         list.innerHTML = ""; // clear the list before loading the projects
 
-        userProjects.forEach(project => {
+        projects.forEach(project => {
             const li = document.createElement("li");
             li.className = "list-group-item";
             li.innerHTML = `

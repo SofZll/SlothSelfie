@@ -3,25 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import './styles/Previews.css';
 import './styles/App.css';
 
+import { AuthContext } from './contexts/AuthContext';
+import { useCalendar } from "./contexts/CalendarContext";
+import { apiService } from './services/apiService';
+
 //TODO CAMBIARE PATH DEL FETCH SUL SERVER
 
-const PreviewProjects= ({ viewType, userLogged }) => {
-    const [projects, setProjects] = useState([]);
-    const [activities, setActivities] = useState([]);
-    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-    const navigate = useNavigate();  
-    
-    // Function to handle login/logout state
-    useEffect(() => {
-        if (userLogged) {
-            setIsUserLoggedIn(true);
-        } else {
-            setIsUserLoggedIn(false);
-            setProjects([]); // Reset projects if the user is logged out
-            setActivities([]); // Reset activities if the user is logged out
-        }
-    }, [userLogged]);
+const PreviewProjects= ({ viewType }) => {
+    const { user } = React.useContext(AuthContext);
+    const { activities, setActivities } = useCalendar();
 
+    const [projects, setProjects] = useState([]);
+    const navigate = useNavigate();  
 
     // function to navigate to the projects page, we use window.location.href to navigate without using react-router (pure JS)
     const manageProjects = (event) => {
@@ -33,51 +26,19 @@ const PreviewProjects= ({ viewType, userLogged }) => {
         }, 300);
     };
 
-    useEffect(() => {
-        if (isUserLoggedIn) {
-            const loadProjects = async () => {
-                try {
-                    const response = await fetch("http://localhost:8000/api/projects");
-                    if (!response.ok) {
-                        throw new Error("Error fetching projects");
-                    }
-                    
-                    const projects = await response.json();
-                    console.log("Fetched projects:", projects);
-                    // Filter projects based on the logged-in user
-                    const userProjects = projects.filter(
-                        (project) =>
-                            project.owner.username === userLogged.username ||
-                            project.members.some((m) => m.username === userLogged.username)
-                    );
-                    
-                    setProjects(userProjects);
-                    //now we fill the  activities of the projects
-                    fetchProjectActivities(userProjects);
-                }
-                catch (error) {
-                    console.error("Error loading projects:", error);
-                }
-            };
-            
-            loadProjects();
-        }
-    }, [isUserLoggedIn, userLogged]);
+    const fetchProjectActivities = async (p) => {
 
+        const updatedProjects = await Promise.all(
+            p.map(async (pr) => {
+                const response = await apiService(`/project/${pr._id}`, 'GET');
+                if (response) {
+                    return { ...pr, ...response };
+                }
+            })
+        );
 
-    const fetchProjectActivities = async (projects) => {
-        try {
-            const updatedProjects = await Promise.all(
-                projects.map(async (project) => {
-                    const response = await fetch(`http://localhost:8000/api/project/${project._id}`); //TODO CAMBIARE PATH SUL SERVER
-                    if (!response.ok) {
-                        throw new Error("Error fetching project details");
-                    }
-                    const projectDetails = await response.json();
-                    return { ...project, ...projectDetails }; // Merge project details with the original project object
-                })
-            );
-            setProjects(updatedProjects);
+        setProjects(updatedProjects);
+
         //We order the activities by deadline and limit to 10
         const allActivities = updatedProjects.flatMap((project) =>
             project.phases.flatMap((phase) =>
@@ -93,10 +54,19 @@ const PreviewProjects= ({ viewType, userLogged }) => {
         .slice(0, 10); // Limit to 10 activities
 
         setActivities(allActivities);
-    } catch (error) {
-        console.error("Error fetching project activities:", error);
+    };
+
+    const fetchProjects = async () => {
+        const response = await apiService('/projects', 'GET');
+        if (response) {
+            setProjects(response);
+            fetchProjectActivities(response);
+        }
     }
-};
+
+    useEffect(() => {
+        if (user) fetchProjects();
+    }, [user]);
 
 
     const renderProjects = () => {
