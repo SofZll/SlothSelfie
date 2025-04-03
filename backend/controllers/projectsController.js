@@ -11,9 +11,7 @@ const getAllProjects = async (req, res) => {
         const userName = req.session.username;
         const user = await User.findOne({ username: userName });
         const userId = user._id;
-        console.log("User ID:", userId);
-        console.log("User Name:", userName);
-        
+
         
 
         const projects = await Project.find({
@@ -24,8 +22,6 @@ const getAllProjects = async (req, res) => {
         })
         .populate("owner", "username")
         .populate("members", "username");
-
-        console.log("Projectssssssssssss:", projects);
 
         res.status(200).json(projects);
     } catch (error) {

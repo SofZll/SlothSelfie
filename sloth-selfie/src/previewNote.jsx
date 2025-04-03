@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
-import { fetchNotes } from "./NotesUtils";
+
 import NoteCard from './NoteCard';
 import './styles/Previews.css';
 
+import { apiService } from './services/apiService';
+import { useNote } from "./contexts/NoteContext";
+import { AuthContext } from './contexts/AuthContext';
+
 //TODO METTI COLORI DI NOTE IN BASE A CATEGORIE
 
-const  PreviewNote = ({ viewType, userLogged }) => {
+const  PreviewNote = ({ viewType }) => {
     const navigate = useNavigate();
-    const [initialNotes, setInitialNotes] = useState([]);
-    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+    const { notes, setNotes } = useNote();
+    const { user } = React.useContext(AuthContext);
 
     const handleLinkClick = (path) => (event) => {
         event.preventDefault();
@@ -20,56 +24,44 @@ const  PreviewNote = ({ viewType, userLogged }) => {
         }, 300);
     };
 
-    // Function to handle login/logout state
-    useEffect(() => {
-        if (userLogged) {
-            setIsUserLoggedIn(true);
-        } else {
-            setIsUserLoggedIn(false);
-            setInitialNotes([]); // Reset notes if the user is logged out
-        }
-    }, [userLogged]);
+    const fetchNotes = async () => {
+        const response = await apiService('/notes', 'GET');
+        if (response) setNotes(response);
+    };
 
-    useEffect(() => {
-        fetchNotes().then((notes) => {
-            setInitialNotes(notes);
+    const sortNotes = (notes) => {
+        const sortedNotes = [...notes].sort((a, b) => {
+            const dateA = new Date(a.lastModified || a.createdAt);
+            const dateB = new Date(b.lastModified || b.createdAt);
+            return dateB - dateA;
         });
-    }, [isUserLoggedIn]);
 
-    const sortedNotes = [...initialNotes]
-    .sort((a, b) => new Date(b.lastModified || b.createdAt) - new Date(a.lastModified || a.createdAt))
-    .slice(0, 10); // Get the latest 10 notes
-    const latestNote = sortedNotes.length > 0 ? [sortedNotes[0]] : [];
+        if (viewType === "all") setNotes(sortedNotes);
+        else if (viewType === "latest") setNotes(sortedNotes.length > 0 ? [sortedNotes[0]] : []);
+    };
+
+
+
+
+    useEffect(() => {
+        if (user) {
+            fetchNotes();
+            sortNotes(notes);
+        }
+    }, [user]);
 
     const renderNotes = () => {
-        switch (viewType) {
-            case "latest":
-                return latestNote.length > 0 ? (
-                    latestNote.map((note) => (
-                        <div key={note._id} className="event-card note-border-yellow">
-                            <NoteCard note={note} setNotes={setInitialNotes} isPreview={true} />
-                        </div>
-                    ))
-                ) : (
-                    <div className="div-postit">
-                        <h2>No notes yet!</h2>
-                    </div>
-                );
-
-            case "all":
-            default:
-                return sortedNotes.length > 0 ? (
-                    sortedNotes.map((note) => (
-                        <div key={note._id} className="event-card note-border-yellow">
-                            <NoteCard note={note} setNotes={setInitialNotes} isPreview={true} />
-                        </div>
-                    ))
-                ) : (
-                    <div className="div-postit">
-                        <h2>No notes yet!</h2>
-                    </div>
-                );
-        }
+        return notes.length > 0 ? (
+            notes.map((note) => (
+                <div key={note._id} className="event-card note-border-yellow">
+                    <NoteCard note={note} setNotes={setNotes} isPreview={true} />
+                </div>
+            ))
+        ) : (
+            <div className="div-postit">
+                <h2>No notes yet!</h2>
+            </div>
+        );
     };
 
     return (

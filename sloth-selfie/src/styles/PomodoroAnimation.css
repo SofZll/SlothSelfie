@@ -109,14 +109,14 @@
 }
 
 .study-line {
-    width: 0%;
+    width: 0;
     animation: lineStudy var(--animation-duration-line) linear forwards;
     animation-delay: var(--animation-delay-go);
     animation-play-state: var(--animation-running);
 }
 
 .break-line {
-    width: 47%;
+    width: 162px;
     animation: lineBreak var(--animation-duration-line) linear forwards;
     animation-delay: var(--animation-delay-back);
     animation-play-state: var(--animation-running);
@@ -124,66 +124,36 @@
 
 @keyframes lineStudy {
     0% {width: 0}
-    100% {width: 47%}
+    100% {width: 162px}
 }
 
 @keyframes lineBreak {
-    0% {width: 47%}
-    100% {width: 0%}
+    0% {width: 162px}
+    100% {width: 0}
 }
 
-@media screen and (max-width: 769px) {
-    .study-pencil{
-        transform:rotate(20deg) translate(-3vw,-30px);
-    }
-
-    .break-pencil{
-        transform:rotate(20deg) translate(3vw,-30px);
-    }
-
-    @keyframes animationStudyPencil {
-        0%{transform:translatex(-3vw) rotate(20deg) translatey(-30px)}
-        10%{transform:translatex(-20vw) rotate(40deg) translatey(-2.5vh)}
-        20%{transform:translatex(-46vw) rotate(0deg) translatey(-2.5vh)}
-        90%{transform:translatex(4vw)  rotate(40deg) translatey(-1vh)}
-        100%{transform:translatex(5vw) rotate(30deg) translatey(-1.5vh)}
-    }
-
-    @keyframes animationBreakPencil {
-        0%{transform:translatex(5vw)  rotate(30deg) translatey(-1.5vh)}
-        5%{transform:rotate(30deg) translateY(-30%)}
-        8%{transform:translateX(60%) rotate(220deg) translateY(0%)}
-        10%{transform:translateX(6vw) rotate(220deg) translateY(-1vh)}
-        90%{transform:translateX(-37vw) rotate(220deg) translateY(-1vh)}
-        100%{transform:translatex(-3vw) rotate(20deg) translatey(-30px)}
-    }
+.study-pencil{
+    transform:rotate(20deg) translate(-3vw,-30px);
 }
 
-@media screen and (min-width: 769px) {
-    .study-pencil{
-        transform:rotate(20deg) translate(-30px,-3vw);
-    }
+.break-pencil{
+    transform:rotate(20deg) translate(3vw,-30px);
+}
 
-    .break-pencil{
-        transform:rotate(20deg) translate(30px,-3vw);
-    }
+@keyframes animationStudyPencil {
+    0%{transform:translatex(-6px) rotate(20deg) translatey(-30px)}
+    10%{transform:translatex(-150px) rotate(40deg) translatey(-50px)}
+    20%{transform:translatex(-175px) rotate(0deg) translatey(-17px)}
+    90%{transform:translatex(7px)  rotate(40deg) translatey(-6px)}
+    100%{transform:translatex(17px) rotate(30deg) translatey(-10px)}
+}
 
-    @keyframes animationStudyPencil {
-        0%{transform:translatex(-3vw) rotate(20deg) translatey(-30px)}
-        10%{transform:translatex(-10vw) rotate(40deg) translatey(-2.5vh)}
-        20%{transform:translatex(-21.5vw) rotate(0deg) translatey(-2.5vh)}
-        90%{transform:translatex(0vw)  rotate(40deg) translatey(-0.5vh)}
-        100%{transform:translatex(1.5vw) rotate(30deg) translatey(-1.5vh)}
-    }
-
-    @keyframes animationBreakPencil {
-        0%{transform:translatex(1.5vw)  rotate(30deg) translatey(-1.5vh)}
-        5%{transform:translateX(2vw) rotate(30deg) translateY(-30%)}
-        8%{transform:translateX(2vw) rotate(220deg) translateY(0%)}
-        10%{transform:translateX(2vw) rotate(220deg) translateY(-1vh)}
-        90%{transform:translateX(-19vw) rotate(220deg) translateY(-1vh)}
-        100%{transform:translatex(-3vw) rotate(20deg) translatey(-30px)}
-    }
+@keyframes animationBreakPencil {
+    0%{transform:translatex(17px)  rotate(30deg) translatey(-10px)}
+    5%{transform:rotate(30deg) translatey(-80px)}
+    10%{transform:translatex(17px) rotate(220deg) translatey(-10px)}
+    90%{transform:translatex(-145px) rotate(220deg) translatey(-10px)}
+    100%{transform:translatex(-6px) rotate(20deg) translatey(-30px)}
 }
 
 @keyframes inkStudy {

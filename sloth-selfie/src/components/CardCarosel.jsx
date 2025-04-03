@@ -6,6 +6,7 @@ import 'react-calendar/dist/Calendar.css';
 import { CustomizationContext } from '../contexts/PreviewContext';
 import {AuthContext} from '../contexts/AuthContext';
 import { CalendarProvider } from '../contexts/CalendarContext';
+import { NoteProvider } from '../contexts/NoteContext';
 
 import PreviewPomodoro from '../previewPomodoro';
 import PreviewNote from '../previewNote';
@@ -51,9 +52,9 @@ const CardCarosel = ({ title, settingKey }) => {
             case 'showActivitiesList':
                 return <PreviewCalendar viewType="activities" />;
             case 'listOfNotes':
-                return <PreviewNote viewType="list" userLogged={user} />;
+                return <PreviewNote viewType="list" />;
             case 'lastNote':
-                return <PreviewNote viewType="latest" userLogged={user} />;
+                return <PreviewNote viewType="latest" />;
             case 'quickStart':
                 return <PreviewPomodoro viewType="quickStart" userLogged={user} />;
             case 'listOfPomodoros':
@@ -89,24 +90,26 @@ const CardCarosel = ({ title, settingKey }) => {
     
     return (
         <CalendarProvider>
-            <animated.div
-                className='card d-flex flex-column justify-content-evenly align-items-center'
-                style={props3}
-                onMouseEnter={() => setShown(true)}
-                onMouseLeave={() => setShown(false)}
-            >   
-                <h2>{title}</h2>
-                {customizations[settingKey] === 'showCalendar' ? (
-                        renderLegend()
-                ) : (
-                    <>
-                        <p>{currentTitle}</p>
-                    </>
-                )}
-                
-                {/* Render the content */}
-                {renderContent()}
-            </animated.div>
+            <NoteProvider>
+                <animated.div
+                    className='card d-flex flex-column justify-content-evenly align-items-center'
+                    style={props3}
+                    onMouseEnter={() => setShown(true)}
+                    onMouseLeave={() => setShown(false)}
+                >   
+                    <h2>{title}</h2>
+                    {customizations[settingKey] === 'showCalendar' ? (
+                            renderLegend()
+                    ) : (
+                        <>
+                            <p>{currentTitle}</p>
+                        </>
+                    )}
+                    
+                    {/* Render the content */}
+                    {renderContent()}
+                </animated.div>
+            </NoteProvider>
         </CalendarProvider>
     );
 }

@@ -152,6 +152,7 @@ export const PomodoroProvider = ({ children }) => {
     }
 
     const [popUp, setPopUp] = useState({
+        open: false,
         share: false,
         edit: false,
         calendar: false,
@@ -159,7 +160,11 @@ export const PomodoroProvider = ({ children }) => {
     })
 
     return (
-        <PomodoroContext.Provider value={{ play, setPlay, pomodoro, setPomodoro, settingsPomodoro, setSettingsPomodoro, animation, setAnimation, increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, editSettingsPomodoro, skipTime, skipBack, popUp, setPopUp }}>
+        <PomodoroContext.Provider
+            value={{ play, setPlay, 
+            pomodoro, setPomodoro, settingsPomodoro, setSettingsPomodoro, increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, editSettingsPomodoro, skipTime, skipBack,
+            animation, setAnimation, 
+            popUp, setPopUp }}>
             {children}
         </PomodoroContext.Provider>
     );
