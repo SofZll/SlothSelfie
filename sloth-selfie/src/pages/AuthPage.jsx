@@ -11,7 +11,6 @@ import { AuthContext } from '../contexts/AuthContext';
 // TODO: choose a library for icons react-icons or lucide-rect
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import ShareInput from '../components/ShareInput.jsx';
 
 function getCursorPosition(event) {
     const x = (event.clientX * 100) / window.innerWidth + "%";
