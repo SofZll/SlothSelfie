@@ -305,6 +305,29 @@ const getUserNoAvailabilityWithId = async (req, res) => {
     }
 };
 
+// Function to update the user schedule settings preferences
+const updateUserPreferences = async (req, res) => {
+    const { workingHours, freeDays, userId } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Updates the preferences
+        user.workingHours.start = workingHours.start || user.workingHours.start;
+        user.workingHours.end = workingHours.end || user.workingHours.end;
+        user.freeDays = freeDays || user.freeDays;
+
+        await user.save();
+        res.json({ message: 'Preferences updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating user preferences' });
+    }
+};
+
+
 module.exports = {
     loginUser,
     registerUser,
@@ -320,4 +343,5 @@ module.exports = {
     removeNoAvailability,
     getUserIdFromUsername,
     getUserNoAvailabilityWithId,
+    updateUserPreferences,
 };

@@ -25,7 +25,6 @@ const projectSchema = new mongoose.Schema({
     phases: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "PhaseSubphase"
-        //ref: "Phase"
     }],
 
     createdAt: {

@@ -19,6 +19,8 @@ function Profile() {
         gender:'', 
         profile_image: '',
         noAvailability: [], // Array of objects containing the user's no availability for group events
+        workingHours: { start: '', end: '' },
+        freeDays: [],
     });
 
     const navigate = useNavigate();

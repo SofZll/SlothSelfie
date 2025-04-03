@@ -49,20 +49,6 @@ const activitySchema = new mongoose.Schema({
         default: null
     },
 
-    /*
-     phase: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Phase',
-        default: null
-    }, // if null, the activity has a subphase
-
-    subphase: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Subphase', 
-        default: null 
-    }, // if null, the activity has a phase
-    */
-
     dependencies: [{
         type: mongoose.Schema.Types.ObjectId,
          ref: 'Activity' 
