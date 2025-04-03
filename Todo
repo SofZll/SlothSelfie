@@ -1,7 +1,6 @@
 TODO:
     // Projects
     - per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) sul calendario fare modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo
-    - Gli attori coinvolti ricevono una notifica sulla decisione del capoprogetto.
     - Preview progetti
 
     // Time machine
@@ -39,6 +38,7 @@ TODO:
     - preview settings
 FIX:
     - Time machine ON events and activities popup
+    - Aggiustare cambio di user logout/login (a votle rimane lo user vecchio)
 
 DONE:
     - Hub back

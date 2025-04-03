@@ -45,29 +45,7 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    timeSchedule: {
-        weekendTimeout: {
-            type: String,
-            enum: ['none', 'Saturday', 'Sunday', 'both'],
-            default: 'both',
-            required: true,
-        },
-        startDayTime: {
-            type: String,
-        },
-        endDayTime: {
-            type: String,
-        },
-        startJobTime: {
-            type: String,
-        },
-        endJobTime: {
-            type: String,
-        },
-        standingAppointments: [{
-            
-        }],
-    },
+    
     noAvailability: [{
         startDate: {
             type: Date,
@@ -85,7 +63,18 @@ const userSchema = new mongoose.Schema({
         numberOfOccurrences: {
             type: Number,
         }
-    }]
+    }],
+
+    workingHours: {
+        start: { type: String, required: true, default: '09:00' }, // HH:MM
+        end: { type: String, required: true, default: '17:00' }, // HH:MM
+    },
+
+    freeDays: {
+        type: [String], // Array of strings declaring free days in the week
+        default: ['Saturday', 'Sunday'],
+    }
+
 }, {
     timestamps: true,
 });

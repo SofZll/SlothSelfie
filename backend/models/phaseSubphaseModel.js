@@ -24,7 +24,7 @@ const phaseSubphaseSchema = new mongoose.Schema({
 
     subphases: [{ // if it is a phase, this field will contain the subphases of the phase
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Subphase"
+            ref: "PhaseSubphase"
         }],
 
     activities: [{ 
