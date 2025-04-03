@@ -13,6 +13,7 @@ router.post('/user/logout', logoutUser);
 router.post('/user/edit-image', upload.single('image'), editImage);
 router.post('/user/edit-profile', editProfile);
 router.get('/user/profile', getUserProfile);
+router.get('/user/profile/:userId', getUserProfile);
 router.get('/user/username', getUsername);
 router.get('/user/userId', getUserId);
 router.get('/user/check-auth', checkAuth);

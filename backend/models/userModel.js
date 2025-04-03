@@ -41,6 +41,10 @@ const userSchema = new mongoose.Schema({
             default: 'image/jpeg',
         },
     },
+    isOnline: {
+        type: Boolean,
+        default: false,
+    },
     timeSchedule: {
         weekendTimeout: {
             type: String,
