@@ -45,14 +45,24 @@ const getProjectById = async (req, res) => {
         }
 
         //now we get the phases of the project (type "phase")
-        const phases = await PhaseSubphase.find({ project: id, type: "phase" }).sort({ createdAt: 1 });
+        const phases = await PhaseSubphase.find({ project: id, type: "phase" })
+        .populate({
+            path: "macroActivity",
+            populate: { path: "description" }
+        })
+        .sort({ createdAt: 1 });
 
         for (const phase of phases) {
             // we get the subphases of the phase
-            phase.subphases = await PhaseSubphase.find({ parentPhase: phase._id, type: "subphase" }).sort({ createdAt: 1 });
+            phase.subphases = await PhaseSubphase.find({ parentPhase: phase._id, type: "subphase" })
+            .populate({
+                path: "macroActivity",
+                populate: { path: "description" }
+            })
+            .sort({ createdAt: 1 });
 
             //now we populate the activities of each phase
-            phase.activities = await Activity.find({ phaseSubphase: phase._id })
+            phase.activities = await Activity.find({ phaseSubphase: phase._id, isMacroactivity: false })
                 .populate("description")
                 .populate("sharedWith", "username")
                 .populate({ path: "input", select: "content" })
@@ -62,7 +72,7 @@ const getProjectById = async (req, res) => {
 
             for (const subphase of phase.subphases) {
                 // Populates activities of each subphase
-                subphase.activities = await Activity.find({ phaseSubphase: subphase._id })
+                subphase.activities = await Activity.find({ phaseSubphase: subphase._id, isMacroactivity: false })
                     .populate("description")
                     .populate("sharedWith", "username")
                     .populate({ path: "input", select: "content" })
@@ -120,6 +130,38 @@ const createActivities = async (activities, projectId, phaseSubphaseId, ownerId,
     }));
 };
 
+// Create the macroactivity for the phase/subphase
+const createMacroActivity = async (macroActivity, projectId, phaseSubphaseId, ownerId, projectTitle) => {
+
+    //the sharedwithusers will be populated by the project owner only
+    const sharedWithUserIds = await User.find({ username: { $in: [ownerId] } });
+    // Create the description note for the activity
+    const descriptionNoteId = await createNoteDescription(macroActivity.description, "activity", ownerId, sharedWithUserIds, projectTitle);
+        
+    // Create events for the activity start date and deadline
+    const eventStartId = await createEvent(macroActivity.startDate, macroActivity.startDate, ownerId, sharedWithUserIds, projectTitle, macroActivity.title, "StartDate");
+    const eventDeadlineId = await createEvent(macroActivity.deadline, macroActivity.deadline, ownerId, sharedWithUserIds, projectTitle, macroActivity.title, "Deadline");
+
+    
+    // Create the macroactivity
+    const newMacroActivity = new Activity({
+        title: macroActivity.title,
+        description: descriptionNoteId,
+        project: projectId,
+        sharedWith: sharedWithUserIds,
+        startDate: macroActivity.startDate,
+        deadline: macroActivity.deadline,
+        user: ownerId,
+        isMacroactivity: true,
+        phaseSubphase: phaseSubphaseId,
+        events: [eventStartId, eventDeadlineId]
+    });
+
+    // Save the macroactivity and return its _id
+    const savedMacroActivity = await newMacroActivity.save();
+    return savedMacroActivity._id;
+}
+
 //POST create a phase or subphase and return its id
 const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle, parentPhaseId = null) => {
     // Creates a new phase or subphase based on the type
@@ -142,9 +184,13 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle
         throw new Error("Invalid type: must be 'phase' or 'subphase'");
     }
 
+    //Create the macroactivity for the phase/subphase
+    const macroActivityId = await createMacroActivity(phase.macroActivity, projectId, newPhaseSubphase._id, ownerId, projectTitle);
+    newPhaseSubphase.macroActivity = macroActivityId;
+
     // Save the new phase/subphase and get its _id
     await newPhaseSubphase.save();
-
+    
     //Creates the activities for the phase/subphase
     const activityIds = await createActivities(phase.activities, projectId, newPhaseSubphase._id, ownerId, projectTitle);
 
@@ -284,6 +330,28 @@ const createProject = async (req, res) => {
     }
 };
 
+//updates the macroactivity of a phase/subphase
+const updateExistingMacroActivity = async (existingMacroActivity, macroActivity, projectTitle) => {
+    //we find the macroactivity by id
+    const olMacroActivity = await Activity.findById(existingMacroActivity);
+
+    //we update the note description
+    await updateNoteDescription(olMacroActivity.description, macroActivity.description, projectTitle, "activity");
+
+    //we update the event start date and deadline
+    await updateEvent(olMacroActivity.events[0], macroActivity.startDate, olMacroActivity.sharedWith, projectTitle, macroActivity.title, "StartDate");
+    await updateEvent(olMacroActivity.events[1], macroActivity.deadline, olMacroActivity.sharedWith, projectTitle, macroActivity.title, "Deadline");
+
+    //we update the macroactivity fields title, startDate, deadline
+    olMacroActivity.title = macroActivity.title;
+    olMacroActivity.startDate = macroActivity.startDate;
+    olMacroActivity.deadline = macroActivity.deadline;
+
+    await olMacroActivity.save();
+
+    return olMacroActivity._id; // Return the updated macroactivity ID
+}
+
 //updates the existing activities of a phase/subphase
 const updateExistingActivities = async (existingActivities, activities, projectTitle) => {
 
@@ -364,6 +432,10 @@ const updateProject = async (req, res) => {
                 // if the phase exists, update it
                 existingPhase.title = phase.title;
 
+                // Update the macroactivity of the phase
+                const existingMacroActivity = await updateExistingMacroActivity(existingPhase.macroActivity, phase.macroActivity, project.title);
+                existingPhase.macroActivity = existingMacroActivity;
+
                 // Update the existing activities of the phase
                 const existingActivityIds = await updateExistingActivities(existingPhase.activities, phase.activities, project.title);
                 const newActivities = phase.activities.filter(activity => !activity._id);
@@ -385,6 +457,10 @@ const updateProject = async (req, res) => {
 
                 if (existingSubphase) {
                     existingSubphase.title = subphase.title;
+
+                    // Update the macroactivity of the subphase
+                    const existingMacroActivity = await updateExistingMacroActivity(existingSubphase.macroActivity, subphase.macroActivity, project.title);
+                    existingSubphase.macroActivity = existingMacroActivity;
 
                     // Update activities of the subphase
                     const existingActivityIds = await updateExistingActivities(existingSubphase.activities, subphase.activities, project.title);
