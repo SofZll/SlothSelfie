@@ -5,6 +5,9 @@
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
+//TODO: distinguere tra macroattività e sottoattività, cambiare front e back e gestire handleActivities
+//todo: gestire date di subattività nel range delle attività
+
 // Function to get the logged user username
 async function getLoggedUser() {
     try {
@@ -137,11 +140,25 @@ async function saveOrUpdateProject(event) {
         const phase = {
             _id: phaseId ? phaseId : undefined,
             title: phaseDiv.querySelector(".phase-name").value,
+            macroActivity: {},
             activities: [],
             subphases: []
         };
 
+        // Get the macroactivity id if we are editing a project
+        const macroActivityId = phaseDiv.querySelector(".macro-activities > .border").getAttribute("data-macroactivity-id");
+        const macroactivity = {
+            _id: macroActivityId ? macroActivityId : undefined,
+            title: phaseDiv.querySelector(".macro-activity-name").value,
+            description: phaseDiv.querySelector(".macro-activity-description").value,
+            startDate: phaseDiv.querySelector(".macro-activity-start").value,
+            deadline: phaseDiv.querySelector(".macro-activity-end").value,
+            activities: []
+        };
+        phase.macroActivity = macroactivity; // Assign the macroactivity to the phase
+
         phaseDiv.querySelectorAll(".activities > .border").forEach(activityDiv => {
+            console.log("Activity div:", activityDiv);
             phase.activities.push(extractActivityData(activityDiv)); 
         });
 
@@ -151,10 +168,25 @@ async function saveOrUpdateProject(event) {
             const subphase = {
                 _id: subPhaseId ? subPhaseId : undefined,
                 title: subPhaseDiv.querySelector(".subphase-name").value,
+                macroActivity: {},
                 activities: []
             };
 
+            // Get the macroactivity id if we are editing a project
+            const subMacroActivityId = subPhaseDiv.querySelector(".subphase-macro-activities > .border").getAttribute("data-macroactivity-id");
+
+            const submacroactivity = {
+                _id: subMacroActivityId ? subMacroActivityId : undefined,
+                title: subPhaseDiv.querySelector(".macro-activity-name").value,
+                description: subPhaseDiv.querySelector(".macro-activity-description").value,
+                startDate: subPhaseDiv.querySelector(".macro-activity-start").value,
+                deadline: subPhaseDiv.querySelector(".macro-activity-end").value,
+                activities: []
+            };
+            subphase.macroActivity = submacroactivity; // Assign the macroactivity to the subphase
+
             subPhaseDiv.querySelectorAll(".subphase-activities > .border").forEach(activityDiv => {
+                console.log("Activity sub div:", activityDiv);
                 subphase.activities.push(extractActivityData(activityDiv));
             });
 
@@ -163,6 +195,8 @@ async function saveOrUpdateProject(event) {
 
         project.phases.push(phase);
     });
+
+    console.log("Project data to save:", project);
 
     try {
         let response;
@@ -227,7 +261,7 @@ async function saveOrUpdateProject(event) {
     await loadProjects(); // Reload the projects list
 }
 
-//functions to add phases, subphases and activities to the project form for the frontend
+//functions to add phases, subphases, macroactivities and activities to the project form for the frontend
 
 let phaseCounter = 0; //local counter for the phases
 // Add a new phase to the project
@@ -240,6 +274,7 @@ function addPhase() {
         <h5>Phase ${phaseNumber}</h5>
         <label>Phase name:</label>
         <input type="text" class="form-control phase-name" required>
+        <div class="macro-activities mt-2"></div> <!-- container macro activities of the phase -->
         <button type="button" class="btn btn-warning mt-2 btn-form-3" onclick="addActivity(this, 'phase')">Add activity</button>
         <div class="activities mt-2"></div> <!-- container activities of the phase -->
         <button type="button" class="btn btn-info mt-2 btn-form-2" onclick="addSubPhase(this)">Add subphase</button>
@@ -247,6 +282,9 @@ function addPhase() {
         <button type="button" class="btn btn-danger mt-2 btn-form-1" onclick="removeElement(this)">Remove Phase</button>
     `;
     document.getElementById("phasesContainer").appendChild(phaseDiv);
+
+    //we create the associated macrophase for the phase
+    addMacroActivity(phaseDiv, "phase");
 
     return phaseDiv; //used for the edit function
 }
@@ -259,11 +297,42 @@ function addSubPhase(button) {
     subPhaseDiv.innerHTML = `
         <label>Subphase name:</label>
         <input type="text" class="form-control subphase-name" required>
+        <div class="subphase-macro-activities mt-2"></div> <!-- container macro activities of the subphase -->
         <button type="button" class="btn btn-warning mt-2 btn-form-3" onclick="addActivity(this, 'subphase')">Add activity</button>
         <div class="subphase-activities mt-2"></div> <!-- Container activities of the subphase -->
         <button type="button" class="btn btn-danger mt-2 btn-form-2" onclick="removeElement(this)">Remove Subphase</button>
     `;
     subPhaseContainer.appendChild(subPhaseDiv);
+
+    //we create the associated macrophase for the subphase
+    addMacroActivity(subPhaseDiv, "subphase");
+}
+
+// Add a new macro activity to the project
+function addMacroActivity(button, type) {
+    let activityContainer;
+
+    // if it is a phase, we find the container of the macro activities of the phase
+    if (type === "phase") {
+        activityContainer = button.querySelector(".macro-activities");
+    } else {// if it is a subphase, we find the container of the macro activities of the subphase
+        activityContainer = button.querySelector(".subphase-macro-activities");
+    }
+
+    const activityDiv = document.createElement("div");
+    activityDiv.classList.add("border", "p-2", "mt-2");
+    activityDiv.innerHTML = `
+        <label>Macro Activity name:</label>
+        <input type="text" class="form-control macro-activity-name" required>
+        <label>Macro Activity description (optional):</label>
+        <textarea class="form-control macro-activity-description"></textarea>
+        <label>Start date:</label>
+        <input type="date" class="form-control macro-activity-start" required>
+        <label>Deadline:</label>
+        <input type="date" class="form-control macro-activity-end" required>
+        </br>
+    `;
+    activityContainer.appendChild(activityDiv);
 }
 
 // Adds an activity to a phase or a subphase
@@ -288,6 +357,7 @@ function addActivity(button, type) {
     ).join("");
 
     // Gets all project activities for selecting dependencies, we only show the ones that are already saved with an id from the backend
+    //TODO GESTIRE LE DEPENDENZE DELLE MACROATTIVITA
     const allActivities = Array.from(document.querySelectorAll(".border[data-activity-id]")) 
         .filter(activityDiv => activityDiv.getAttribute("data-activity-id"));
 

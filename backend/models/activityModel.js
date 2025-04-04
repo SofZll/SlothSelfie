@@ -30,22 +30,21 @@ const activitySchema = new mongoose.Schema({
         ref: 'User',
     }],
 
-    fatherId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Activity',
-        default: null
-    },
-
     // New fields only for Project-activities 
     project: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Project',
         default: null }, // if this field is null, this is a normal activivty
-
+    
     phaseSubphase: {
         type: mongoose.Schema.Types.ObjectId,
          ref: 'PhaseSubphase',
         default: null
+    },
+
+    isMacroactivity: { // if this is a macroactivity, this field will be true
+        type: Boolean,
+        default: false
     },
 
     dependencies: [{
