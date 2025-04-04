@@ -8,6 +8,8 @@
 //TODO: distinguere tra macroattività e sottoattività, cambiare front e back e gestire handleActivities
 //todo: gestire date di subattività nel range delle attività
 
+//finire back e front: nel form mancano tutti i remove, fare le views con gerarchie, gestisci handleActivities
+
 // Function to get the logged user username
 async function getLoggedUser() {
     try {
@@ -146,19 +148,18 @@ async function saveOrUpdateProject(event) {
         };
 
         // Get the macroactivity id if we are editing a project
-        const macroActivityId = phaseDiv.querySelector(".macro-activities > .border").getAttribute("data-macroactivity-id");
+        const macroActivityId = phaseDiv.querySelector(".macro-activities").getAttribute("data-macroactivity-id");
+
         const macroactivity = {
             _id: macroActivityId ? macroActivityId : undefined,
             title: phaseDiv.querySelector(".macro-activity-name").value,
             description: phaseDiv.querySelector(".macro-activity-description").value,
             startDate: phaseDiv.querySelector(".macro-activity-start").value,
             deadline: phaseDiv.querySelector(".macro-activity-end").value,
-            activities: []
         };
         phase.macroActivity = macroactivity; // Assign the macroactivity to the phase
 
         phaseDiv.querySelectorAll(".activities > .border").forEach(activityDiv => {
-            console.log("Activity div:", activityDiv);
             phase.activities.push(extractActivityData(activityDiv)); 
         });
 
@@ -173,7 +174,7 @@ async function saveOrUpdateProject(event) {
             };
 
             // Get the macroactivity id if we are editing a project
-            const subMacroActivityId = subPhaseDiv.querySelector(".subphase-macro-activities > .border").getAttribute("data-macroactivity-id");
+            const subMacroActivityId = subPhaseDiv.querySelector(".subphase-macro-activities").getAttribute("data-macroactivity-id");
 
             const submacroactivity = {
                 _id: subMacroActivityId ? subMacroActivityId : undefined,
@@ -181,12 +182,10 @@ async function saveOrUpdateProject(event) {
                 description: subPhaseDiv.querySelector(".macro-activity-description").value,
                 startDate: subPhaseDiv.querySelector(".macro-activity-start").value,
                 deadline: subPhaseDiv.querySelector(".macro-activity-end").value,
-                activities: []
             };
             subphase.macroActivity = submacroactivity; // Assign the macroactivity to the subphase
 
             subPhaseDiv.querySelectorAll(".subphase-activities > .border").forEach(activityDiv => {
-                console.log("Activity sub div:", activityDiv);
                 subphase.activities.push(extractActivityData(activityDiv));
             });
 
@@ -575,6 +574,20 @@ async function deleteProject(projectId) {
     }
 }
 
+//function to fill the macroactivity of a project while editing it
+function fillMacroActivityFields(macroActivityDiv, macroActivity, parentId, parentType) {
+
+    //Adds the macroactivity ID directly to the div
+    macroActivityDiv.setAttribute("data-macroactivity-id", macroActivity._id);
+    //we also add the parent phase ID to the macroactivity div
+    macroActivityDiv.setAttribute(`data-parent-${parentType}-id`, parentId);
+
+    macroActivityDiv.querySelector(".macro-activity-name").value = macroActivity.title;
+    macroActivityDiv.querySelector(".macro-activity-description").value = macroActivity.description.content;
+    macroActivityDiv.querySelector(".macro-activity-start").value = formatDateForInput(macroActivity.startDate);
+    macroActivityDiv.querySelector(".macro-activity-end").value = formatDateForInput(macroActivity.deadline);
+}
+
 //Function to fill the activities of a project while editing it
 function fillActivityFields(activityDiv, activity, projectActors, parentId, parentType) {
     //Adds the activity ID directly to the div
@@ -660,6 +673,11 @@ async function editProject(projectId) {
 
             //fill the name of each phase
             phaseElement.querySelector(".phase-name").value = phase.title;
+
+            // fill the macroactivity of each phase
+            const macroActivityDiv = phaseElement.querySelector(".macro-activities");
+            fillMacroActivityFields(macroActivityDiv, phase.macroActivity, phase._id, "phase");
+
             //fill the activities of each phase
             phase.activities.forEach(activity => {
                 addActivity(phaseElement.querySelector(".btn-warning"), "phase");
@@ -679,6 +697,11 @@ async function editProject(projectId) {
                 subphaseDiv.setAttribute("data-parent-phase-id", phase._id);
 
                 subphaseDiv.querySelector(".subphase-name").value = subphase.title;
+
+                // fill the macroactivity of each subphase
+                const subMacroActivityDiv = subphaseDiv.querySelector(".subphase-macro-activities");
+                fillMacroActivityFields(subMacroActivityDiv, subphase.macroActivity, subphase._id, "subphase");
+
                 subphase.activities.forEach(activity => {
                     addActivity(subphaseDiv.querySelector(".btn-warning"), "subphase");
                     const activityDiv = subphaseDiv.querySelector(".subphase-activities").lastElementChild;

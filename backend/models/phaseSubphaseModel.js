@@ -27,7 +27,7 @@ const phaseSubphaseSchema = new mongoose.Schema({
             ref: "PhaseSubphase"
         }],
 
-    macroactivity: { // Every phase/subphase has a macroactivity, which is bonded to his subactivities
+    macroActivity: { // Every phase/subphase has a macroactivity, which is bonded to his subactivities
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Activity', // one macro only for each phase/subphase
         required: true
