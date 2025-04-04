@@ -8,7 +8,7 @@ import { apiService } from './services/apiService';
 import { useNote } from "./contexts/NoteContext";
 import { AuthContext } from './contexts/AuthContext';
 
-//TODO METTI COLORI DI NOTE IN BASE A CATEGORIE
+//TODO METTI COLORI DI NOTE IN BASE A CATEGORIE, Visualizza i task
 
 const  PreviewNote = ({ viewType }) => {
     const navigate = useNavigate();

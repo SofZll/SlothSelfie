@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Project = require("../models/projectModel");
 const PhaseSubphase = require("../models/phaseSubphaseModel");
 const Activity = require("../models/activityModel");
@@ -90,8 +91,8 @@ const createActivities = async (activities, projectId, phaseSubphaseId, ownerId,
         const descriptionNoteId = await createNoteDescription(activity.description, "activity", ownerId, sharedWithUserIds, projectTitle);
         
         // Create events for the activity start date and deadline
-        const eventStartId = await createEvent(activity.startDate, ownerId, sharedWithUserIds, projectTitle, activity.title, "StartDate");
-        const eventDeadlineId = await createEvent(activity.deadline, ownerId, sharedWithUserIds, projectTitle, activity.title, "Deadline");
+        const eventStartId = await createEvent(activity.startDate, activity.startDate, ownerId, sharedWithUserIds, projectTitle, activity.title, "StartDate");
+        const eventDeadlineId = await createEvent(activity.deadline, activity.deadline, ownerId, sharedWithUserIds, projectTitle, activity.title, "Deadline");
 
         // get the dependencies of the activity if any
         let dependenciesIds = [];
@@ -195,12 +196,13 @@ const updateNoteDescription = async (noteId, description, projectTitle, type) =>
 };
 
 //create the events for the activity start date and deadline
-const createEvent = async (date, userId, sharedWith, projectTitle, activityTitle, eventType) => {
+const createEvent = async (startDate, endDate, userId, sharedWith, projectTitle, activityTitle, eventType) => {
     const eventTitle = `${activityTitle} - ${eventType} of Project ${projectTitle}`;
 
     const newEvent = new Event({
         title: eventTitle,
-        date: date,
+        startDate: startDate,
+        endDate: endDate,
         time: "00:00", //default time
         isPreciseTime: false,
         duration: 1, // default duration
@@ -209,7 +211,9 @@ const createEvent = async (date, userId, sharedWith, projectTitle, activityTitle
         sharedWith: sharedWith.map(user => user._id),
         notify: true,
         notificationTime: 30,
-        isInProject: true
+        isInProject: true,
+        originalId: new mongoose.Types.ObjectId(), // Unic id
+        repeatFrequency: 'none' // Default
     });
 
     const savedEvent = await newEvent.save();
@@ -220,7 +224,10 @@ const createEvent = async (date, userId, sharedWith, projectTitle, activityTitle
 const updateEvent = async (eventId, date, sharedWith, projectTitle, activityTitle, type) => {
     const event = await Event.findById(eventId);
     if (event) {
-        event.date = date; //event.date = new Date(event.date);
+        // Update the event date and time
+        event.startDate = date;
+        event.endDate = date;
+        event.time = "00:00"; //default time
         event.title = `${activityTitle} - ${type} of Project ${projectTitle}`;
         event.sharedWith = sharedWith.map(user => user._id);
         await event.save();

@@ -30,6 +30,7 @@ const CardCarosel = ({ title, settingKey }) => {
      const titleMap = {
         showEventsList: "Today's Events List",
         showActivitiesList: "This week's Activities List",
+        showTasksList: "This week's Tasks List",
         listOfNotes: "Notes List",
         lastNote: "Most recent Note",
         quickStart: "Quick Start",
@@ -51,6 +52,8 @@ const CardCarosel = ({ title, settingKey }) => {
                 return <PreviewCalendar viewType="events" />;
             case 'showActivitiesList':
                 return <PreviewCalendar viewType="activities" />;
+            case 'showTasksList':
+                return <PreviewCalendar viewType="tasks" />;
             case 'listOfNotes':
                 return <PreviewNote viewType="list" />;
             case 'lastNote':
@@ -84,6 +87,10 @@ const CardCarosel = ({ title, settingKey }) => {
                 <div className="legend-item">
                     <span className="event-dot-aqua"></span>
                     <span>Activity</span>
+                </div>
+                <div className="legend-item">
+                    <span className="event-dot-lightgreen"></span>
+                    <span>Task</span>
                 </div>
             </div>
         );

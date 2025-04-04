@@ -5,7 +5,7 @@
 //TODO, TIME MACHINE DATE, in projectsHandleActivities utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
-// Function to get the logged user
+// Function to get the logged user username
 async function getLoggedUser() {
     try {
         const response = await fetch("http://localhost:8000/api/user/profile", {
@@ -30,6 +30,8 @@ async function getLoggedUser() {
 //GET, function to load projects from the server
 async function loadProjects() {
 
+    const userLogged = await getLoggedUser();
+
     //adds loading message and spinner
     const list = document.getElementById("projects-list");
     list.innerHTML = `<div class="loading-container">
@@ -37,8 +39,13 @@ async function loadProjects() {
                         <p>Loading, please wait...</p>
                     </div>`;
     try {
-        const response = await fetch(`http://localhost:8000/api/projects`);
-        
+        const response = await fetch(`http://localhost:8000/api/projects`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
         if (!response.ok) {
             throw new Error('Error fetching projects');
         }

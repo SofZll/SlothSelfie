@@ -50,6 +50,10 @@ function PreviewSetUp(props) {
                             text="This week's Activities List"
                             onClick={() => handleCustomizationChange('calendar', 'showActivitiesList')}
                         />
+                        <Button
+                            text="This week's Tasks List"
+                            onClick={() => handleCustomizationChange('calendar', 'showTasksList')}
+                        />
                         {/* other calendar personalizations */}
                     </div>
                 );

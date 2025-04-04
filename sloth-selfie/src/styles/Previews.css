@@ -28,6 +28,10 @@
   .event-dot-orange {
     background-color: orange;
   }
+
+  .event-dot-lightgreen {
+    background-color: lightgreen;
+  }  
   
   /* Legend */
   .legend {
@@ -68,8 +72,15 @@
     border-radius: 50%;
     background-color: orange;
   }
+
+  .event-dot-lightgreen {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: lightgreen;
+  }
   
-  /* List used for preview events/activities/notes/projects/pomodoro */
+  /* List used for preview events/activities/tasks/notes/projects/pomodoro */
   .scrollable-list {
     width: 100%;
     max-width: 600px;
