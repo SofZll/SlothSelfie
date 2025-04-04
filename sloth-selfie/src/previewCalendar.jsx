@@ -10,7 +10,7 @@ import { useCalendar } from "./contexts/CalendarContext";
 
 import { apiService } from './services/apiService';
 
-//TODO: FARE IL FETCH DEI TASK NELLE VARIE VIEWS
+//TODO: Riguarda campo time per eventi quando vanno
 
 const PreviewCalendar = ({ viewType }) => {
     const { activities, setActivities, events, setEvents } = useCalendar();
@@ -19,6 +19,8 @@ const PreviewCalendar = ({ viewType }) => {
     const navigate = useNavigate();
     const [todayActivities, setTodayActivities] = useState([]);
     const [todayEvents, setTodayEvents] = useState([]);
+    const [tasks, setTasks] = useState([]);
+    const [todayTasks, setTodayTasks] = useState([]);
 
 
     const fetchEvents = async () => {
@@ -29,6 +31,16 @@ const PreviewCalendar = ({ viewType }) => {
     const fetchActivities = async () => {
         const response = await apiService('/activities', 'GET');
         if (response) setActivities(response);
+    }
+
+    const fetchTasks = async () => {
+        const response = await apiService('/tasks', 'GET');
+        if (response){
+            //filter tasks that have no deadline
+            const filteredTasks = response.filter(task => task.deadline !== null && task.deadline !== undefined);
+            setTasks(filteredTasks);
+            console.log("Filtered tasks:", filteredTasks);
+        }
     }
 
     // animation page
@@ -45,6 +57,7 @@ const PreviewCalendar = ({ viewType }) => {
         if (user) {
             fetchEvents();
             fetchActivities();
+            fetchTasks();
         }
     } , [ user ]);
 
@@ -55,7 +68,9 @@ const PreviewCalendar = ({ viewType }) => {
             const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
         
             const todayFilteredEvents = events.filter(ev => {
-                const eventDate = new Date(ev.date).toISOString().split('T')[0]; // "YYYY-MM-DD"
+                console.log("Event date:", ev.startDate);
+                const eventDate = new Date(ev.startDate).toISOString().split('T')[0]; // "YYYY-MM-DD"
+                console.log("Formatted event date:", eventDate);
                 return eventDate === formattedToday;
             });
         
@@ -63,33 +78,43 @@ const PreviewCalendar = ({ viewType }) => {
         }
     }, [events]);
 
-    // Get upcoming week's activities
-    useEffect(() => {
-        if (activities.length > 0) {
-            const today = new Date(); // TIME MACHINE DATE
-            today.setHours(0, 0, 0, 0); //we compare days only
-            const nextWeek = new Date();
-            nextWeek.setDate(today.getDate() + 7); //limit to 7 days from today
 
-            const upcomingActivities = activities.filter(act => {
-                const activityDate = new Date(act.deadline);
-                return activityDate >= today && activityDate <= nextWeek;
-            });
+const getUpcomingItems = (items, dateKey, setItems) => {
+    if (items.length === 0) return;
 
-            const overdueActivities = activities.filter(act => {
-                const activityDate = new Date(act.deadline);
-                return activityDate < today; // overdue activities
-            });
+    const today = new Date(); // TIME MACHINE DATE
+    today.setHours(0, 0, 0, 0); // Compare only the days
 
-            // Order activities by deadline
-            upcomingActivities.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-            overdueActivities.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+    const nextWeek = new Date();
+    nextWeek.setDate(today.getDate() + 7); // Limit to 7 days from today
 
-            setTodayActivities([...overdueActivities, ...upcomingActivities]);
-        }
-    }, [activities]);
+    const upcoming = items.filter(item => {
+        const itemDate = new Date(item[dateKey]);
+        return itemDate >= today && itemDate <= nextWeek;
+    });
 
-    // Check if there is an event or an activity on the date
+    const overdue = items.filter(item => {
+        const itemDate = new Date(item[dateKey]);
+        return itemDate < today; // Overdue items
+    });
+
+    // Order items by deadline
+    upcoming.sort((a, b) => new Date(a[dateKey]) - new Date(b[dateKey]));
+    overdue.sort((a, b) => new Date(a[dateKey]) - new Date(b[dateKey]));
+
+    setItems([...overdue, ...upcoming]);
+};
+
+// Get upcoming week's activities and tasks
+useEffect(() => {
+    getUpcomingItems(activities, 'deadline', setTodayActivities);
+}, [activities]);
+
+useEffect(() => {
+    getUpcomingItems(tasks, 'deadline', setTodayTasks);
+}, [tasks]);
+
+    // Check if there is an event, an activity or a task on the date
     const getEventOrActivityOnDate = (date, items, dateKey) => {
         const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
         return items.find(item => {
@@ -98,11 +123,12 @@ const PreviewCalendar = ({ viewType }) => {
         });
     };
 
-    // Adding a dot to the date if there is an event, project event, or an activity on that date
+    // Adding a dot to the date if there is an event, project event, activity or a task on that date
     const tileContent = ({ date, view }) => {
         if (view === 'month') {
-            const eventFound = getEventOrActivityOnDate(date, events, 'date');
+            const eventFound = getEventOrActivityOnDate(date, events, 'startDate');
             const activityFound = getEventOrActivityOnDate(date, activities, 'deadline');
+            const taskFound = getEventOrActivityOnDate(date, tasks, 'deadline');
 
             return (
                 <>
@@ -110,6 +136,7 @@ const PreviewCalendar = ({ viewType }) => {
                         <span className={`event-indicator ${eventFound.isInProject ? 'event-dot-orange' : 'event-dot-blue'}`}></span>
                     )}
                     {activityFound && <span className="event-indicator event-dot-aqua"></span>}
+                    {taskFound && <span className="event-indicator event-dot-lightgreen"></span>}
                 </>
             );
         }
@@ -147,7 +174,7 @@ const PreviewCalendar = ({ viewType }) => {
                         {todayActivities.length > 0 ? (
                             todayActivities.map((activity) => {
                                 const activityDate = new Date(activity.deadline);
-                                const isOverdue = activityDate < new Date().setHours(0, 0, 0, 0); // Verifica se è scaduta
+                                const isOverdue = activityDate < new Date().setHours(0, 0, 0, 0); // check if overdue
                                 return (
                                     <div key={activity._id} className={`event-card ${isOverdue ? "event-border-red" : "event-border-aqua"}`}>
                                         <b>{activity.title}</b>
@@ -157,11 +184,33 @@ const PreviewCalendar = ({ viewType }) => {
                             })
                         ) : (
                             <div className="div-postit">
-                                <h2>No activities deadlines today!</h2>
+                                <h2>No activities deadlines this week!</h2>
                             </div>
                         )}
                     </div>
                 );
+            case "tasks":
+                return (
+                    <div className="scrollable-list TaskShow">
+                        {todayTasks.length > 0 ? (
+                            todayTasks.map((task) => {
+                                const taskDate = new Date(task.deadline);
+                                const isOverdue = taskDate < new Date().setHours(0, 0, 0, 0); // check if overdue
+                                return (
+                                    <div key={task._id} className={`event-card ${isOverdue ? "event-border-red" : "event-border-lightgreen"}`}>
+                                        <b>{task.title}</b>
+                                        <p>Due: {taskDate.toLocaleDateString()}</p>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className="div-postit">
+                                <h2>No tasks deadlines this week!</h2>
+                            </div>
+                        )}
+                    </div>
+                );
+
             default:
                 return null;
         }
