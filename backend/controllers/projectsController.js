@@ -538,6 +538,11 @@ const deleteProject = async (req, res) => {
         const phaseSubphases = await PhaseSubphase.find({ project: id });
         const phaseSubphasesIds = phaseSubphases.map(ps => ps._id);
 
+        // Delete the macroactivity of each phase/subphase
+        for (const phaseSubphase of phaseSubphases) {
+            deleteMacroActivity(phaseSubphase.macroActivity);
+        }
+
         // Find all activities linked to this project, its phases, and subphases
         const activities = await Activity.find({ phaseSubphase: { $in: phaseSubphasesIds } });
         
@@ -586,8 +591,16 @@ const removePhaseFromBackend = async (req, res) => {
         project.phases = project.phases.filter(p => p.toString() !== phaseId);
         await project.save();
 
+        //remove the macroactivity of the phase
+        await deleteMacroActivity(phase.macroActivity);
+
         // Get the ids of the subphases
         const subphaseIds = phase.subphases;
+
+        // remove the macroactivity of each subphase
+        for (const subphaseId of subphaseIds) {
+            await deleteMacroActivity(subphaseId.macroActivity);
+        }
 
         // Get all activities belonging to the phase and its subphases
         const activities = await Activity.find({
@@ -651,7 +664,12 @@ const removeSubphaseFromBackend = async (req, res) => {
             return res.status(404).json({ message: 'Subphase not found in project or phase' });
         }
 
-        // Delete the subphase and its activities
+        // Delete the subphase
+
+        //we first delete the macroactivity of the subphase
+        await deleteMacroActivity(subphaseId.macroActivity);
+
+        //and its activities
         const activities = await Activity.find({ phaseSubphase: subphaseId });
 
         // Delete notes and events related to the activities
@@ -670,7 +688,33 @@ const removeSubphaseFromBackend = async (req, res) => {
 
     } catch (error) {
         console.error('Error deleting subphase:', error);
-        return res.status(500).json({ message: error.message });
+    }
+};
+
+// Delete a macroactivity from the project
+const deleteMacroActivity = async (macroActivityId) => {
+    try {
+        // Find the macroactivity
+        const macroActivity = await Activity.findById(macroActivityId);
+        if (!macroActivity) {
+            return res.status(404).json({ message: 'Macroactivity not found' });
+        }
+
+        // Delete the events linked to the macroactivity
+        if (macroActivity.events.length > 0) {
+            await Event.deleteMany({ _id: { $in: macroActivity.events } });
+        }
+
+        // Delete the note linked to the macroactivity
+        if (macroActivity.description) {
+            await Note.findByIdAndDelete(macroActivity.description);
+        }
+
+        // Delete the macroactivity
+        await Activity.findByIdAndDelete(macroActivityId);
+
+    } catch (error) {
+        console.error('Error deleting macroactivity:', error);
     }
 };
 
