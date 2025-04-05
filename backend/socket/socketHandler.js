@@ -2,11 +2,10 @@ const pomodoroSocket = require('./pomodoroSocket');
 const notificationSocket = require('./notificationSocket');
 const chatSocket = require('./chatSocket');
 const userSocketMap = require('./userSocketMap');
+const pomodoroSessionMap = require('./pomodoroSessionMap');
 const User = require('../models/userModel');
 
 const socketHandler = (io) => {
-    const settingPomodoro = {};
-    let intervals = {};
 
     io.on('connection', (socket) => {
         console.log('A user connected:', socket.id);
@@ -26,8 +25,9 @@ const socketHandler = (io) => {
                 console.log('User disconnected:', userId);
             }
         });
+
         chatSocket.registerHandlers(socket, io);
-        pomodoroSocket.registerHandlers(socket, io, settingPomodoro, userSocketMap, intervals);
+        pomodoroSocket.registerHandlers(socket, io, pomodoroSessionMap);
         notificationSocket.registerHandlers(socket, io, userSocketMap);
     });
 };

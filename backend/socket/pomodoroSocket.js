@@ -1,172 +1,125 @@
-const { v4: uuidv4 } = require('uuid');
+
 
 const pomodoroSocket = {
-    registerHandlers: (socket, io, settingPomodoro, userSocketMap, intervals) => {
+    registerHandlers: (socket, io, pomodoroSessionMap) => {
         let sessionCode = '';
-        
-        socket.on('create session', (dataPomodoro, studying) => {
-            sessionCode = uuidv4().slice(0, 6);
-    
-            settingPomodoro[sessionCode] = {
-                timer: dataPomodoro.timeLeft,
-                cycles: dataPomodoro.cycles,
-                cyclesLeft: dataPomodoro.cyclesLeft,
-                breakTime: dataPomodoro.breakTime,
-                studyTime: dataPomodoro.studioTime,
-                people: 1,
-                isStudioTime: dataPomodoro.isStudioTime,
-                notStartedYet: dataPomodoro.notStartedYet,
-                done: dataPomodoro.done,
-                addedCycles: dataPomodoro.addedCycles,
-                studioTimeTotal: dataPomodoro.studioTimeTotal,
-                play: studying,
-            }
-    
-            socket.join(sessionCode);
-            console.log('Create session');
-            socket.emit('session code', sessionCode);
-            socket.emit('timerState', settingPomodoro[sessionCode]);
-    
-        });
-    
-        socket.on('join session', (sessionCode) => {
-            console.log('Join session');
-            if (settingPomodoro[sessionCode]) {
-                socket.join(sessionCode);
-                socket.emit('session joined', {success: true, sessionCode});
-                settingPomodoro[sessionCode].people++;
-                io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
-            } else {
-                socket.emit('session joined', {success: false});
-            }
-        });
-    
-        socket.on('stop', (sessionCode) => {
-            clearInterval(intervals[sessionCode]);
-            delete intervals[sessionCode];
-            settingPomodoro[sessionCode].play = false;
-            console.log('Stop timer');
-            io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
-        });
-    
-        const passingTime = (sessionCode) => {
-            if (intervals[sessionCode]) {
-                if (settingPomodoro[sessionCode].timer > 0) {
-                    settingPomodoro[sessionCode].timer--;
-                    settingPomodoro[sessionCode].studioTimeTotal++;
-                } else {
-                    if (settingPomodoro[sessionCode].isStudioTime) {
-                        if (settingPomodoro[sessionCode].cyclesLeft > 1) {
-                            settingPomodoro[sessionCode].timer = settingPomodoro[sessionCode].breakTime;
-                            settingPomodoro[sessionCode].isStudioTime = false;
-                        } else {
-                            settingPomodoro[sessionCode].timer = 0;
-                            settingPomodoro[sessionCode].done = true;
-                        }
-                    } else {
-                        settingPomodoro[sessionCode].timer = settingPomodoro[sessionCode].studyTime;
-                        settingPomodoro[sessionCode].isStudioTime = true;
-                        settingPomodoro[sessionCode].cyclesLeft--;
+
+        const generateSessionCode = async () => {
+            const { nanoid } = await import('nanoid');
+            return nanoid(10);
+        }
+
+        const passingTime = () => {
+            const session = pomodoroSessionMap.get(sessionCode);
+            if (!session) return;
+
+            const { settingsPomodoro, pomodoro } = session;
+            if (pomodoro.timeLeft <= 0) {
+                if (pomodoro.isStudyTime) {
+                    pomodoro.timeLeft = settingsPomodoro.breakTime;
+                    pomodoro.cyclesLeft -= 1;
+                    pomodoro.isStudyTime = false;
+                    if (pomodoro.cyclesLeft === 0) {
+                        pomodoro.finished = true;
                     }
+                    session.play = false;
+                } else {
+                    pomodoro.timeLeft = settingsPomodoro.studyTime;
+                    pomodoro.isStudyTime = true;
+                }
+                
+            } else {
+                pomodoro.timeLeft -= 1;
+                if (pomodoro.isStudyTime) pomodoro.studiedTime += 1;
+            }
+
+            socket.to(sessionCode).emit('passing time', { pomodoro, play });
+        }
+
+        socket.on('create session', async ({ settingsPomodoro, pomodoro, play }) => {
+            const code = await generateSessionCode();
+            sessionCode = code;
+            socket.join(sessionCode);
+            const peopleInSession = 1;
+
+            pomodoroSessionMap.set(sessionCode, {
+                settingsPomodoro,
+                pomodoro,
+                play,
+                peopleInSession,
+            });      
+
+            socket.emit('session created', { sessionCode });
+        });
+
+        socket.on('join session', ({ room }) => {
+            socket.join(room);
+
+            sessionCode = room;
+            const session = pomodoroSessionMap.get(sessionCode);
+
+            if (session) {
+                session.peopleInSession += 1;
+                const { settingsPomodoro, pomodoro, play, peopleInSession } = session;
+                socket.emit('session joined', { settingsPomodoro, pomodoro, play, peopleInSession });
+
+                socket.to(sessionCode).emit('number of people', { peopleInSession });
+            } else {
+                socket.emit('error', { message: 'Session not found' });
+            }
+        });
+
+        socket.on('play', ({ play }) => {
+            const session = pomodoroSessionMap.get(sessionCode);
+            if (session) {
+                session.play = play;
+                socket.to(sessionCode).emit('play', { play });
+            }
+
+            //Start the timer
+            if (play) {
+                const interval = setInterval(() => {
+                    passingTime();
+                }, 1000);
+
+                socket.on('disconnect', () => {
+                    clearInterval(interval);
+                });
+            }
+        });
+
+        socket.on('stop', ({ play }) => {
+            const session = pomodoroSessionMap.get(sessionCode);
+            if (session) {
+                session.play = play;
+                socket.to(sessionCode).emit('stop', { play });
+            }
+        });
+
+        socket.on('updated data session', ({ settingsPomodoro, pomodoro, play }) => {
+            const session = pomodoroSessionMap.get(sessionCode);
+            if (session) {
+                session.settingsPomodoro = settingsPomodoro;
+                session.pomodoro = pomodoro;
+                session.play = play;
+                socket.to(sessionCode).emit('updated data session', { settingsPomodoro, pomodoro, play });
+            }
+        });
+
+
+        socket.on('disconnect', () => {
+            const session = pomodoroSessionMap.get(sessionCode);
+            if (session) {
+                session.peopleInSession -= 1;
+                socket.to(sessionCode).emit('number of people', { peopleInSession: session.peopleInSession });
+
+                if (session.peopleInSession <= 0) {
+                    pomodoroSessionMap.delete(sessionCode);
                 }
             }
-        }
-        
-        socket.on('start', (sessionCode) => {
-            if(settingPomodoro[sessionCode].notStartedYet) {
-                settingPomodoro[sessionCode].notStartedYet = false;
-            }
-            
-    
-            if (!intervals[sessionCode]) {
-                settingPomodoro[sessionCode].play = true;
-                intervals[sessionCode] = setInterval(() => {
-                    passingTime(sessionCode);
-                    io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
-                    if (settingPomodoro[sessionCode].done) {
-                        clearInterval(intervals[sessionCode]);
-                        delete intervals[sessionCode];
-                        console.log('Stop timer');
-                        io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
-                    }
-                }, 1000);
-            }
-        });
-    
-        socket.on('reset', (sessionCode) => {
-            settingPomodoro[sessionCode].timer = settingPomodoro[sessionCode].studyTime;
-            settingPomodoro[sessionCode].cycles = settingPomodoro[sessionCode].cycles - settingPomodoro[sessionCode].addedCycles;
-            settingPomodoro[sessionCode].cyclesLeft = settingPomodoro[sessionCode].cycles;
-            settingPomodoro[sessionCode].isStudioTime = true;
-            settingPomodoro[sessionCode].notStartedYet = true;
-            settingPomodoro[sessionCode].done = false;
-            settingPomodoro[sessionCode].addedCycles = 0;
-            settingPomodoro[sessionCode].studioTimeTotal = 0;
-            clearInterval(intervals[sessionCode]);
-            delete intervals[sessionCode];
-            console.log('Reset timer');
-            io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
-        });
-    
-        socket.on('skip', (sessionCode) => {
-            if (settingPomodoro[sessionCode].isStudioTime) {
-                settingPomodoro[sessionCode].timer = settingPomodoro[sessionCode].breakTime;
-                settingPomodoro[sessionCode].isStudioTime = false;
-                settingPomodoro[sessionCode].cyclesLeft--;
-            } else {
-                settingPomodoro[sessionCode].timer = settingPomodoro[sessionCode].studyTime;
-                settingPomodoro[sessionCode].isStudioTime = true;
-            }
-    
-            console.log('Skip timer');
-            io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
-        });
-    
-        socket.on('add', (sessionCode) => {
-            settingPomodoro[sessionCode].cycles++;
-            settingPomodoro[sessionCode].cyclesLeft++;
-            settingPomodoro[settingPomodoro].addedCycles++;
-            console.log('Add cycle');
-            io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
-        });
-    
-        socket.on('exit', (sessionCode) => {
-            settingPomodoro[sessionCode].people--;
-            console.log('Leave session');
-            if (settingPomodoro[sessionCode].people === 0) {
-                clearInterval(intervals[sessionCode]);
-                delete intervals[sessionCode];
-                delete settingPomodoro[sessionCode];
-                console.log('Delete session');
-                socket.emit('session closed');
-            } else {
-                io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
-                socket.leave(sessionCode);
-            }
-        });
-    
-        socket.on('disconnect', () => {
-            console.log('Client disconnected', sessionCode);
-    
-        });
-    
-        socket.on('edit', (sessionCode, studying, dataPomodoro) => {
-            settingPomodoro[sessionCode] = {
-                timer: dataPomodoro.studioTime,
-                cycles: dataPomodoro.cycles,
-                cyclesLeft: dataPomodoro.cyclesLeft,
-                breakTime: dataPomodoro.breakTime,
-                studyTime: dataPomodoro.studioTime,
-                isStudioTime: dataPomodoro.isStudioTime,
-                notStartedYet: dataPomodoro.notStartedYet,
-                done: dataPomodoro.done,
-                addedCycles: dataPomodoro.addedCycles,
-                studioTimeTotal: dataPomodoro.studioTimeTotal,
-                play: studying,
-            }
-            console.log('Edit session');
-            io.to(sessionCode).emit('timerState', settingPomodoro[sessionCode]);
-        });
+            socket.emit('session closed');
+            socket.leave(sessionCode);
+        }); 
     }
 }
 
