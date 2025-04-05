@@ -6,9 +6,8 @@
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
 //TODO: distinguere tra macroattività e sottoattività, cambiare front e back e gestire handleActivities
-//todo: gestire date di subattività nel range delle attività
-
-//finire back e front: nel form mancano tutti i remove, fare le views con gerarchie, gestisci handleActivities
+//todo: gestire date di subattività nel range delle attività nel form
+//finire back e front: fare le views con gerarchie, gestisci handleActivities nel modo corretto
 
 // Function to get the logged user username
 async function getLoggedUser() {
