@@ -83,6 +83,16 @@ function renderPhase(phase, container, typeSelect) {
     phaseDiv.innerHTML = `<h4>Phase: ${phase.title}</h4>`;
     container.appendChild(phaseDiv);
 
+    //Shows the macroactivity of the phase
+    if (phase.macroActivity) {
+        const macroInfo = document.createElement("p");
+        macroInfo.innerHTML = `
+            <strong>Macroactivity: ${phase.macroActivity.title}</strong>
+            &nbsp; -${phase.macroActivity.description.content}- Start date: ${phase.macroActivity.startDate?.split("T")[0]} - Deadline: ${phase.macroActivity.deadline?.split("T")[0]}
+        `;
+        phaseDiv.appendChild(macroInfo);
+    }
+
     // List of activities for each phase (default: date sorting)
     const activitiesListPhase = document.createElement("ul");
     activitiesListPhase.id = `activities-${phase._id}`;
@@ -96,6 +106,16 @@ function renderPhase(phase, container, typeSelect) {
         const subphaseDiv = document.createElement("div");
         subphaseDiv.innerHTML = `<h5>Subphase: ${subphase.title}</h5>`;
         phaseDiv.appendChild(subphaseDiv);
+
+        // Shows the macroactivity of the subphase
+        if (subphase.macroActivity) {
+            const macroInfo = document.createElement("p");
+            macroInfo.innerHTML = `
+                <strong>Macroactivity: ${subphase.macroActivity.title}</strong>
+                &nbsp; -${subphase.macroActivity.description.content}- Start date: ${subphase.macroActivity.startDate?.split("T")[0]} - Deadline: ${subphase.macroActivity.deadline?.split("T")[0]}
+            `;
+            subphaseDiv.appendChild(macroInfo);
+        }
 
         // Container for activities of subphases
         const activitiesList = document.createElement("ul");
@@ -207,6 +227,16 @@ async function viewAsGantt(projectId) {
         // Generate Gantt tasks
         const tasks = [];
         project.phases.forEach(phase => {
+            //macroactivity of the phase
+            tasks.push({
+                id: `macro-${phase.macroActivity._id || phase._id}`, // unique ID
+                name: `Macro: ${phase.macroActivity.title}`,
+                start: new Date(phase.macroActivity.startDate),
+                end: new Date(phase.macroActivity.deadline),
+                progress: 0,
+                custom_class: "macro-task"
+            });
+            // Add activities of the phase
             phase.activities.forEach(activity => {
                 tasks.push({
                     id: activity._id,
@@ -219,6 +249,16 @@ async function viewAsGantt(projectId) {
             });
 
             phase.subphases.forEach(subphase => {
+                //macroactivity of the subphase
+                tasks.push({
+                    id: `macro-${subphase.macroActivity._id || subphase._id}`, // unique ID
+                    name: `Macro: ${subphase.macroActivity.title}`,
+                    start: new Date(subphase.macroActivity.startDate),
+                    end: new Date(subphase.macroActivity.deadline),
+                    progress: 0,
+                    custom_class: "macro-task"
+                });
+                // Add activities of the subphase
                 subphase.activities.forEach(activity => {
                     tasks.push({
                         id: activity._id,
@@ -294,6 +334,15 @@ function createHierarchy(sidebar, project) {
         phaseRow.appendChild(phaseCell);
         tbody.appendChild(phaseRow);
 
+        // Create row for the macroactivity of the phase
+        const macroRow = document.createElement("tr");
+        const macroCell = document.createElement("td");
+        macroCell.textContent = `↳ Macroactivity: ${phase.macroActivity.title}`;
+        macroCell.classList.add("macro-cell");
+        macroCell.setAttribute("colspan", 6);
+        macroRow.appendChild(macroCell);
+        tbody.appendChild(macroRow);
+
         // Create rows for each activity in the phase
         phase.activities.forEach(activity => {
             addActivityRow(tbody, activity);
@@ -303,11 +352,20 @@ function createHierarchy(sidebar, project) {
         phase.subphases.forEach(subphase => {
             const subphaseRow = document.createElement("tr");
             const subphaseCell = document.createElement("td");
-            subphaseCell.textContent = `> ${subphase.title}`;
+            subphaseCell.textContent = `↳ ${subphase.title}`;
             subphaseCell.classList.add("subphase-cell");
             subphaseCell.setAttribute("colspan", 1); // Make subphase row span both columns
             subphaseRow.appendChild(subphaseCell);
             tbody.appendChild(subphaseRow);
+
+            // Create row for the macroactivity of the subphase
+            const macroSubRow = document.createElement("tr");
+            const macroSubCell = document.createElement("td");
+            macroSubCell.textContent = `↳ Macroactivity: ${subphase.macroActivity.title}`;
+            macroSubCell.classList.add("macro-cell");
+            macroSubCell.setAttribute("colspan", 6);
+            macroSubRow.appendChild(macroSubCell);
+            tbody.appendChild(macroSubRow);
 
             subphase.activities.forEach(activity => {
                 addActivityRow(tbody, activity);

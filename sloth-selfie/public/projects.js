@@ -6,6 +6,8 @@
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
 //TODO: distinguere tra macroattività e sottoattività, cambiare front e back e gestire handleActivities
+//viewAslist: orderby solo con activities o anche con macroactivities? colori?
+//gantt: lista con info di macro? indenta meglio, colori?
 //finire back e front: fare le views con gerarchie e il bottone -+ in gantt, gestisci handleActivities nel modo corretto
 //TODO GESTIRE LE DEPENDENZE DELLE MACROATTIVITA
 
