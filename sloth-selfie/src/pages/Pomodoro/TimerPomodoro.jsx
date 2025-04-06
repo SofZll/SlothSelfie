@@ -7,7 +7,7 @@ import { usePomodoro } from '../../contexts/PomodoroContext';
 import { formatTime } from '../../utils/utils';
 import socket from '../../services/socket';
 
-import { Share, Pen, RotateCcw, SkipForward, SkipBack, CirclePlay, CirclePause, CircleStop, CirclePlus, CalendarPlus, Music } from 'lucide-react';
+import { Share, Pen, RotateCcw, SkipForward, SkipBack, CirclePlay, CirclePause, CircleStop, CirclePlus, CalendarPlus, ChartLine, Music } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 
@@ -114,6 +114,10 @@ const TimerPomodoro = () => {
                         <CalendarPlus size='30' color='#244476' strokeWidth='1.5' />
                     </button>
                     
+                    <button className='btn' onClick={() => setPopUp({ ...popUp, stats: !popUp.stats, open: !popUp.open })}>
+                        <ChartLine size='32' color='#244476' strokeWidth='1.6' />
+                    </button>
+
                     <button className='btn' onClick={() => setPopUp({ ...popUp, music: !popUp.music, open: !popUp.open })}>
                         <Music size='30' color='#244476' strokeWidth='1.5' />
                     </button>

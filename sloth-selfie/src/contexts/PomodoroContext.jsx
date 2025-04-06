@@ -5,8 +5,8 @@ const PomodoroContext = createContext();
 export const PomodoroProvider = ({ children }) => {
 
     const [settingsPomodoro, setSettingsPomodoro] = useState({
-        studyTime: 60*30,
-        breakTime: 60*5,
+        studyTime: 60,
+        breakTime: 60,
         cycles: 5,
         additionalCycles: 0
     });
@@ -27,10 +27,10 @@ export const PomodoroProvider = ({ children }) => {
 
     const [animation, setAnimation] = useState({
         reset: false,
-        pencilTime: `${60*30}s`,
-        lineTime: `${(60*30*0.8)}s`,
-        delayGo: `${(60*30*0.2)}s`,
-        delayBack: `${(60*30*0.1)}s`,
+        pencilTime: `${60}s`,
+        lineTime: `${(60*0.8)}s`,
+        delayGo: `${(60*0.2)}s`,
+        delayBack: `${(60*0.1)}s`,
     });
 
     const resetAnimation = (time) => {
@@ -170,6 +170,7 @@ export const PomodoroProvider = ({ children }) => {
             edit: false,
             calendar: false,
             music: false,
+            stats: false,
         })
     }
 

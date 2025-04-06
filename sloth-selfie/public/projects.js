@@ -37,7 +37,10 @@ async function loadProjects() {
                         <p>Loading, please wait...</p>
                     </div>`;
     try {
-        const response = await fetch(`http://localhost:8000/api/projects`);
+        const response = await fetch(`http://localhost:8000/api/projects`, {
+            method: "GET",
+            credentials: 'include',
+        });
         
         if (!response.ok) {
             throw new Error('Error fetching projects');
@@ -47,6 +50,8 @@ async function loadProjects() {
         
         const list = document.getElementById("projects-list");
         list.innerHTML = ""; // clear the list before loading the projects
+
+        const userLogged = await getLoggedUser();
 
         projects.forEach(project => {
             const li = document.createElement("li");

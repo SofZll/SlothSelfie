@@ -27,7 +27,7 @@ const DesktopNav = () => {
                 <Link to='/pomodoro' onClick={closeMenu}>Pomodoro</Link>
                 <Link to='/notifications' onClick={closeMenu}>Notifications</Link>
                 <Link to='/forum' onClick={closeMenu}>Forum</Link>
-                <a href='/projects.html' onClick={closeMenu}>Projects</a>
+                <Link to='/projects' onClick={closeMenu}>Projects</Link>
 
                 <div className='fixed-bottom menu-profile d-flex flex-column align-items-center justify-content-center'>
                     <hr className='w-100' />
