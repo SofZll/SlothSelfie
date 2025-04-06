@@ -1,21 +1,37 @@
 import React, { useEffect } from 'react';
 
-import { usePomodoro } from '../../contexts/PomodoroContext';
 import { AnimationPencil } from './AnimationPencil';
 import PopUpPomodoro from './PopUpPomodoro';
 
+import { usePomodoro } from '../../contexts/PomodoroContext';
+import { formatTime } from '../../utils/utils';
+import socket from '../../services/socket';
+
 import { Share, Pen, RotateCcw, SkipForward, SkipBack, CirclePlay, CirclePause, CircleStop, CirclePlus, CalendarPlus, Music } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 
 const TimerPomodoro = () => {
-    const { play, setPlay, pomodoro, settingsPomodoro, increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, skipTime, skipBack, popUp, setPopUp, socketData } = usePomodoro();
+    const { play, setPlay, pomodoro, setPomodoro, settingsPomodoro, setSettingsPomodoro,
+        increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, skipTime, skipBack,
+        popUp, setPopUp,
+        socketData, setSocketData, resetPopUp } = usePomodoro();
 
-    const formatTime = (time) => {
-        const minutes = Math.floor(time / 60);
-        const seconds = time % 60;
-        return `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+    const handlePlay = () => {
+        if (socketData.inShare) {
+            socket.emit('play', { play: !play });
+        } else setPlay(!play);
     }
 
+    const handleClick = async (call, message) => {
+        
+        if (socketData.inShare) socket.emit(message);
+        else {
+            call();
+            setPlay(false);
+        }
+    }
+    
     useEffect(() => {
         if (!socketData.inShare) {
             if (play) {
@@ -26,14 +42,68 @@ const TimerPomodoro = () => {
                 return () => clearInterval(interval);
             }
         }
-    }, [play, socketData.inShare, pomodoro, increasePomodoroTime]);
+    }, [play, socketData.inShare, increasePomodoroTime]);
+
+    useEffect(() => {
+
+        socket.on('session created', ({ sessionCode }) => {
+            setSocketData({ inShare: true, room: sessionCode, peopleInSession: 1 });
+        });
+
+        socket.on('session joined', (data) => {
+            setSocketData({ ...socketData, inShare: true, peopleInSession: data.peopleInSession });
+            setSettingsPomodoro(data.settingsPomodoro);
+            setPomodoro({...data.pomodoro});
+            setPlay(data.play);
+        });
+
+        socket.on('number of people', ({ peopleInSession }) => {
+            setSocketData({ ...socketData, peopleInSession });
+        });
+
+        socket.on('play', ({ play }) => {
+            setPlay(play);
+        });
+
+        socket.on('updated data session', (data) => {
+            setSettingsPomodoro({...data.settingsPomodoro});
+            setPomodoro({...data.pomodoro});
+            setPlay(false);
+        });
+
+        socket.on('session closed', () => {
+            Swal.fire({ icon: 'success', title: 'Session closed', text: 'You have exited the session.' });
+            setSocketData({ inShare: false, room: '', peopleInSession: 0 });
+            setPlay(false);
+            resetPopUp();
+        });
+
+        socket.on('error', ({ message }) => {
+            Swal.fire({ icon: 'error', title: 'Oops...', text: message });
+        });
+
+        socket.on('passing time', async (data) => {
+            setPomodoro({...data.pomodoro});
+        });
+
+        socket.on('end circle', async (data) => {
+            const newPomodoroData = await data.pomodoro;
+            setPomodoro({...newPomodoroData});
+            setPlay(false);
+        });
+    }, [socketData, setSocketData, setSettingsPomodoro, setPomodoro, setPlay, resetPopUp]);
 
 
     return (
-        <>
-        { popUp.open ? (
-            <PopUpPomodoro />
-        ) : (
+        <div className='d-flex flex-column w-100 h-100 justify-content-around align-items-center position-relative'>
+
+            { popUp.open && (
+                <div className='d-flex justify-content-center align-items-center position-absolute pop-up w-100 h-100 start-0 top-0 bg-light bg-opacity-75' style={{ zIndex: 1000 }}>
+                    <PopUpPomodoro />
+                </div>
+            )}
+        
+
             <div className='d-flex flex-column w-100 h-100 justify-content-around align-items-center'>
                 <div className='d-flex col-md-6 col-10 justify-content-between'>
                     <button className='btn' onClick={() => setPopUp({ ...popUp, share: !popUp.share, open: !popUp.open })}>
@@ -99,31 +169,31 @@ const TimerPomodoro = () => {
                     </button>
 
                     {pomodoro.finished ? (
-                        <button className='btn' onClick={() => resetPomodoro()}>
+                        <button className='btn' onClick={() => handleClick(resetPomodoro, 'reset pomodoro')}>
                             <RotateCcw size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     ) : (
-                        <button className='btn' onClick={() => skipBack()}>
+                        <button className='btn' onClick={() => handleClick(skipBack, 'skip back')}>
                             <SkipBack size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     )}
 
                     {pomodoro.finished ? (
-                        <button className='btn' onClick={() => newPomodoro()}>
+                        <button className='btn' onClick={() => handleClick(newPomodoro, 'new pomodoro')}>
                             <CircleStop size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     ) : (
-                        <button className='btn' onClick={() => setPlay(!play)}>
+                        <button className='btn' onClick={() => handlePlay()}>
                             {play ? <CirclePause size='30' color='#244476' strokeWidth='1.5' /> : <CirclePlay size='30' color='#244476' strokeWidth='1.5' />}
                         </button>
                     )}
 
                     {pomodoro.finished ? (
-                        <button className='btn' onClick={() => addCycle()}>
+                        <button className='btn' onClick={() => handleClick(addCycle, 'add cycle')}>
                             <CirclePlus size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     ) : (
-                        <button className='btn' onClick={() => skipTime()}>
+                        <button className='btn' onClick={() => handleClick(skipTime, 'skip time')}>
                             <SkipForward size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     )}
@@ -131,8 +201,7 @@ const TimerPomodoro = () => {
                 </div>
 
             </div>
-        )}
-        </>
+        </div>
         
     );
 }

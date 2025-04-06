@@ -1,11 +1,35 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import { usePomodoro } from '../../contexts/PomodoroContext';
 import { Users, MessageSquare, CircleFadingPlus, DoorOpen, SearchCheck } from 'lucide-react';
 import CopyButton from '../../components/CopyButton';
 
+import socket from '../../services/socket';
+import { usePomodoro } from '../../contexts/PomodoroContext';
+
 const PopUpShare = () => {
-    const { socketData, setSocketData } = usePomodoro();
+    const { socketData, setSocketData, settingsPomodoro, pomodoro, play, setPlay } = usePomodoro();
+
+    const newRoom = () => {
+        setPlay(false);
+        socket.connect();
+        socket.emit('create session', { settingsPomodoro, pomodoro, play });
+        return () => {
+            socket.disconnect();
+        }
+    }
+
+    const enterRoom = () => {
+        socket.connect();
+        socket.emit('join session', { room: socketData.room });
+        return () => {
+            socket.disconnect();
+        }
+    }
+
+    const exitRoom = () => {
+        socket.emit('exit session');
+    }
+
 
     return (
         <div className='d-flex flex-column w-100'>
@@ -34,7 +58,7 @@ const PopUpShare = () => {
 
                     <div className='border-top border-secondary d-flex w-100 mt-3'></div>
                     <div className='d-flex w-100 mt-3 justify-content-center'>
-                        <button className='btn btn-outline-light' style={{ backgroundColor: '#244476' }} onClick={() => setSocketData({ ...socketData, inShare: false })}>
+                        <button className='btn btn-outline-light' style={{ backgroundColor: '#244476' }} onClick={() => exitRoom()}>
                             Leave Room
                         </button>
                     </div>
@@ -42,7 +66,7 @@ const PopUpShare = () => {
             ) : (
                 <div className='d-flex flex-column w-100'>
                     <div className='d-flex w-100 mt-4'>Create a New Room</div>
-                    <button className='btn' onClick={() => setSocketData({ ...socketData, inShare: true })}>
+                    <button className='btn' onClick={() => newRoom()}>
                         <CircleFadingPlus size='30' color='#244476' strokeWidth='2' />
                     </button>
 
@@ -55,7 +79,7 @@ const PopUpShare = () => {
                             value={socketData.room}
                             onChange={(e) => setSocketData({ ...socketData, room: e.target.value })} />
 
-                        <button className='btn ms-0 ps-1' onClick={() => setSocketData({ ...socketData, inShare: true })}>
+                        <button className='btn ms-0 ps-1' onClick={() => enterRoom()}>
                             <SearchCheck size='30' color='#244476' strokeWidth='2' />
                         </button>
                     </div>

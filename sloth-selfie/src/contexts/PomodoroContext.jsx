@@ -24,7 +24,6 @@ export const PomodoroProvider = ({ children }) => {
     });
 
     const [play, setPlay] = useState(false);
-    const [toRefresh, setToRefresh] = useState(false);
 
     const [animation, setAnimation] = useState({
         reset: false,
@@ -44,7 +43,7 @@ export const PomodoroProvider = ({ children }) => {
         });
     }
 
-    const cycleTime = (time) => {
+    const editTimeAnimation = (time) => {
         setAnimation({
             reset: false,
             pencilTime: `${time}s`,
@@ -55,28 +54,24 @@ export const PomodoroProvider = ({ children }) => {
     }
 
     const increasePomodoroTime = () => {
-        if (pomodoro.isStudyTime) {
-            if (pomodoro.timeLeft <= 0) {
+        if (pomodoro.timeLeft <= 0) {
+            if (pomodoro.isStudyTime) {
                 setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.breakTime, cyclesLeft: pomodoro.cyclesLeft - 1, isStudyTime: false, studiedTime: pomodoro.studiedTime + 1, started: true });
-                cycleTime(settingsPomodoro.breakTime);
+                editTimeAnimation(settingsPomodoro.breakTime);
                 if(pomodoro.cyclesLeft === 0) setPomodoro({ ...pomodoro, finished: true });
-                setPlay(false);
-            }
-            else setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1, studiedTime: pomodoro.studiedTime + 1, started: true });
-        } else {
-            if (pomodoro.timeLeft <= 0) {
+
+            } else {
                 setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true });
-                cycleTime(settingsPomodoro.studyTime);
-                setPlay(false); 
+                editTimeAnimation(settingsPomodoro.studyTime);
             }
-            else setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1 });
-        }
+            setPlay(false);
+
+        } else setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1, studiedTime: pomodoro.studiedTime + 1, started: true });
     }
 
     const addCycle = () => {
         setSettingsPomodoro({ ...settingsPomodoro, additionalCycles: settingsPomodoro.additionalCycles + 1 });
         setPomodoro({ ...pomodoro, cyclesLeft: pomodoro.cyclesLeft + 1, finished: false });
-        setToRefresh(true);
     }
 
     const resetPomodoro = () => {
@@ -92,10 +87,11 @@ export const PomodoroProvider = ({ children }) => {
         });
 
         resetAnimation(studyTime);
-        setToRefresh(true);
     }
 
     const newPomodoro = () => {
+        setSettingsPomodoro({ studyTime: 60*30, breakTime: 60*5, cycles: 5, additionalCycles: 0 });
+
         setPomodoro({
             _id: '',
             user: '',
@@ -109,7 +105,6 @@ export const PomodoroProvider = ({ children }) => {
         });
 
         resetAnimation(settingsPomodoro.studyTime);
-        setToRefresh(true);
     }
 
     const editSettingsPomodoro = (studyTime, breakTime, cycles) => {
@@ -135,8 +130,7 @@ export const PomodoroProvider = ({ children }) => {
         }
 
         setSettingsPomodoro({ studyTime, breakTime, cycles, additionalCycles: 0 });
-        cycleTime( pomodoro.isStudyTime ? studyTime : breakTime );
-        setToRefresh(true);
+        editTimeAnimation( pomodoro.isStudyTime ? studyTime : breakTime );
     }
 
     const skipTime = () => {
@@ -145,9 +139,7 @@ export const PomodoroProvider = ({ children }) => {
             else setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.breakTime, cyclesLeft: pomodoro.cyclesLeft - 1, isStudyTime: false, started: true });
         } else setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true });
 
-        cycleTime(pomodoro.isStudyTime ? settingsPomodoro.studyTime : settingsPomodoro.breakTime);
-        setAnimation({ ...animation, reset: true });
-        setToRefresh(true);
+        resetAnimation(pomodoro.isStudyTime ? settingsPomodoro.studyTime : settingsPomodoro.breakTime);
     }
 
     const skipBack = () => {
@@ -160,9 +152,7 @@ export const PomodoroProvider = ({ children }) => {
             else setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true });
         }
 
-        cycleTime(pomodoro.isStudyTime ? settingsPomodoro.studyTime : settingsPomodoro.breakTime);
-        setAnimation({ ...animation, reset: true });
-        setToRefresh(true);
+        resetAnimation(pomodoro.isStudyTime ? settingsPomodoro.studyTime : settingsPomodoro.breakTime);
     }
 
     const [popUp, setPopUp] = useState({
@@ -193,10 +183,9 @@ export const PomodoroProvider = ({ children }) => {
         <PomodoroContext.Provider
             value={{ play, setPlay, 
             pomodoro, setPomodoro, settingsPomodoro, setSettingsPomodoro, increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, editSettingsPomodoro, skipTime, skipBack,
-            animation, setAnimation, cycleTime, 
+            animation, setAnimation, resetAnimation, editTimeAnimation,
             popUp, setPopUp, resetPopUp,
-            socketData, setSocketData,
-            toRefresh, setToRefresh }}>
+            socketData, setSocketData }}>
             {children}
         </PomodoroContext.Provider>
     );

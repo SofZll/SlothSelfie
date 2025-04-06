@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { usePomodoro } from '../../contexts/PomodoroContext';
 import Button from '../../components/Button';
 import Swal from 'sweetalert2';
+import socket from '../../services/socket';
 
 const EditPomodoro = () => {
 
-    const { editSettingsPomodoro, settingsPomodoro, resetPopUp } = usePomodoro();
+    const { editSettingsPomodoro, settingsPomodoro, resetPopUp, socketData } = usePomodoro();
     const [edit, setEdit] = useState({
         totalTime: (settingsPomodoro.cycles * settingsPomodoro.studyTime)/60 + ((settingsPomodoro.cycles - 1) * settingsPomodoro.breakTime)/60,
         cicles: settingsPomodoro.cycles,
@@ -35,8 +36,11 @@ const EditPomodoro = () => {
 
     const editPomodoto = () => {
         if (edit.study <= 1 || edit.break <= 1 || edit.cicles <= 1) Swal.fire({icon: 'error', title: 'Error', text: 'All fields must be greater than 1'});
-        else editSettingsPomodoro(edit.study*60, edit.break*60, edit.cicles);
-        resetPopUp();
+        else {
+            if (socketData.inShare) socket.emit('edit pomodoro', { study: edit.study*60, break: edit.break*60, cicles: edit.cicles });
+            else editSettingsPomodoro(edit.study*60, edit.break*60, edit.cicles);
+            resetPopUp();
+        }
     }
 
     return (
