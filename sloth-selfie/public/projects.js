@@ -6,8 +6,8 @@
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
 //TODO: distinguere tra macroattività e sottoattività, cambiare front e back e gestire handleActivities
-//todo: gestire date di subattività nel range delle attività nel form
-//finire back e front: fare le views con gerarchie, gestisci handleActivities nel modo corretto
+//finire back e front: fare le views con gerarchie e il bottone -+ in gantt, gestisci handleActivities nel modo corretto
+//TODO GESTIRE LE DEPENDENZE DELLE MACROATTIVITA
 
 // Function to get the logged user username
 async function getLoggedUser() {
@@ -310,11 +310,27 @@ function addSubPhase(button) {
 function addMacroActivity(button, type) {
     let activityContainer;
 
+    // Default min/max date values (only used for subphase macroactivities, they depend on macroactivity of the phase date range)
+    let minDate = "";
+    let maxDate = "";
+
     // if it is a phase, we find the container of the macro activities of the phase
     if (type === "phase") {
         activityContainer = button.querySelector(".macro-activities");
     } else {// if it is a subphase, we find the container of the macro activities of the subphase
         activityContainer = button.querySelector(".subphase-macro-activities");
+
+        // find the phase div of the subphase
+        const phaseDiv = button.closest(".card");
+
+        // find the start and end date of the macroactivity of the phase
+        const phaseStartInput = phaseDiv.querySelector(".macro-activity-start");
+        const phaseEndInput = phaseDiv.querySelector(".macro-activity-end");
+
+        if (phaseStartInput && phaseEndInput) {
+            minDate = phaseStartInput.value;
+            maxDate = phaseEndInput.value;
+        }
     }
 
     const activityDiv = document.createElement("div");
@@ -325,9 +341,9 @@ function addMacroActivity(button, type) {
         <label>Macro Activity description (optional):</label>
         <textarea class="form-control macro-activity-description"></textarea>
         <label>Start date:</label>
-        <input type="date" class="form-control macro-activity-start" required>
+        <input type="date" class="form-control macro-activity-start" required min="${minDate}" max="${maxDate}">
         <label>Deadline:</label>
-        <input type="date" class="form-control macro-activity-end" required>
+        <input type="date" class="form-control macro-activity-end" required min="${minDate}" max="${maxDate}">
         </br>
     `;
     activityContainer.appendChild(activityDiv);
@@ -335,14 +351,26 @@ function addMacroActivity(button, type) {
 
 // Adds an activity to a phase or a subphase
 function addActivity(button, type) {
+    let macroActivityContainer;
     let activityContainer;
 
     if (type === "phase") {
-        // finds the container of the activities of the phase
+        // finds the container of the activities of the phase and of the macroactivity
+        macroActivityContainer = button.parentElement.querySelector(".macro-activities");
         activityContainer = button.parentElement.querySelector(".activities");
     } else {
-        // finds the container of the activities of the subphase
+        // finds the container of the activities of the subphase and of the macroactivity
+        macroActivityContainer = button.parentElement.querySelector(".subphase-macro-activities");
         activityContainer = button.parentElement.querySelector(".subphase-activities");
+    }
+
+    // finds the macroactivity of the phase or subphase, the range of the activity is between the start and end date of the macroactivity
+    const macroActivity = macroActivityContainer?.querySelector("div");
+
+    let macroStart = "", macroEnd = "";
+    if (macroActivity) {
+        macroStart = macroActivity.querySelector(".macro-activity-start")?.value;
+        macroEnd = macroActivity.querySelector(".macro-activity-end")?.value;
     }
 
     // Gets all project actors to fill the members field
@@ -355,7 +383,6 @@ function addActivity(button, type) {
     ).join("");
 
     // Gets all project activities for selecting dependencies, we only show the ones that are already saved with an id from the backend
-    //TODO GESTIRE LE DEPENDENZE DELLE MACROATTIVITA
     const allActivities = Array.from(document.querySelectorAll(".border[data-activity-id]")) 
         .filter(activityDiv => activityDiv.getAttribute("data-activity-id"));
 
@@ -377,9 +404,9 @@ function addActivity(button, type) {
             ${membersOptions}
         </select>
         <label>Start date:</label>
-        <input type="date" class="form-control activity-start" required>
+        <input type="date" class="form-control activity-start" required min="${macroStart}" max="${macroEnd}">
         <label>Deadline:</label>
-        <input type="date" class="form-control activity-end" required>
+        <input type="date" class="form-control activity-end" required min="${macroStart}" max="${macroEnd}">
         <label>Is a milestone:</label>
         <input type="checkbox" class="activity-milestone">
         </br>
