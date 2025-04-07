@@ -2,8 +2,10 @@ import React, { useEffect } from 'react';
 
 import { AnimationPencil } from './AnimationPencil';
 import PopUpPomodoro from './PopUpPomodoro';
+import MusicPomodoro from './MusicPomodoro';
 
 import { usePomodoro } from '../../contexts/PomodoroContext';
+import { useMusic } from '../../contexts/MusicContext';
 import { formatTime } from '../../utils/utils';
 import socket from '../../services/socket';
 
@@ -102,7 +104,6 @@ const TimerPomodoro = () => {
                     <PopUpPomodoro />
                 </div>
             )}
-        
 
             <div className='d-flex flex-column w-100 h-100 justify-content-around align-items-center'>
                 <div className='d-flex col-md-6 col-10 justify-content-between'>
@@ -205,6 +206,8 @@ const TimerPomodoro = () => {
                 </div>
 
             </div>
+
+            <MusicPomodoro />
         </div>
         
     );
