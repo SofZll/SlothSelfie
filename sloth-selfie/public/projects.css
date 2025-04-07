@@ -124,9 +124,19 @@ button.disabled {
     padding-left: 10px;
 }
 
+.macro-cell {
+    padding-left: 10px;
+    font-style: italic;
+}
+
 .subphase-cell {
     font-weight: bold;
     padding-left: 20px;
+}
+
+.macro-sub-cell {
+    padding-left: 15px;
+    font-style: italic;
 }
 
 .activity-phase-cell {

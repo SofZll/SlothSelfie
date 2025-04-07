@@ -48,7 +48,10 @@ const getProjectById = async (req, res) => {
         const phases = await PhaseSubphase.find({ project: id, type: "phase" })
         .populate({
             path: "macroActivity",
-            populate: { path: "description" }
+            populate: [
+                { path: "description" },
+                { path: "sharedWith", select: "username" }
+            ]
         })
         .sort({ createdAt: 1 });
 
@@ -57,7 +60,10 @@ const getProjectById = async (req, res) => {
             phase.subphases = await PhaseSubphase.find({ parentPhase: phase._id, type: "subphase" })
             .populate({
                 path: "macroActivity",
-                populate: { path: "description" }
+                populate: [
+                    { path: "description" },
+                    { path: "sharedWith", select: "username" }
+                ]
             })
             .sort({ createdAt: 1 });
 
@@ -134,7 +140,7 @@ const createActivities = async (activities, projectId, phaseSubphaseId, ownerId,
 const createMacroActivity = async (macroActivity, projectId, phaseSubphaseId, ownerId, projectTitle) => {
 
     //the sharedwithusers will be populated by the project owner only
-    const sharedWithUserIds = await User.find({ username: { $in: [ownerId] } });
+    const sharedWithUserIds = await User.find({ _id: { $in: [ownerId] } });
     // Create the description note for the activity
     const descriptionNoteId = await createNoteDescription(macroActivity.description, "activity", ownerId, sharedWithUserIds, projectTitle);
         
