@@ -229,12 +229,10 @@ async function viewAsGantt(projectId) {
         project.phases.forEach(phase => {
             //macroactivity of the phase
             tasks.push({
-                id: `macro-${phase.macroActivity._id || phase._id}`, // unique ID
+                id: `macro-${phase.macroActivity._id}`,
                 name: `Macro: ${phase.macroActivity.title}`,
                 start: new Date(phase.macroActivity.startDate),
                 end: new Date(phase.macroActivity.deadline),
-                progress: 0,
-                custom_class: "macro-task"
             });
             // Add activities of the phase
             phase.activities.forEach(activity => {
@@ -251,12 +249,10 @@ async function viewAsGantt(projectId) {
             phase.subphases.forEach(subphase => {
                 //macroactivity of the subphase
                 tasks.push({
-                    id: `macro-${subphase.macroActivity._id || subphase._id}`, // unique ID
+                    id: `macro-${subphase.macroActivity._id}`,
                     name: `Macro: ${subphase.macroActivity.title}`,
                     start: new Date(subphase.macroActivity.startDate),
                     end: new Date(subphase.macroActivity.deadline),
-                    progress: 0,
-                    custom_class: "macro-task"
                 });
                 // Add activities of the subphase
                 subphase.activities.forEach(activity => {
@@ -335,13 +331,7 @@ function createHierarchy(sidebar, project) {
         tbody.appendChild(phaseRow);
 
         // Create row for the macroactivity of the phase
-        const macroRow = document.createElement("tr");
-        const macroCell = document.createElement("td");
-        macroCell.textContent = `↳ Macroactivity: ${phase.macroActivity.title}`;
-        macroCell.classList.add("macro-cell");
-        macroCell.setAttribute("colspan", 6);
-        macroRow.appendChild(macroCell);
-        tbody.appendChild(macroRow);
+        addMacroActivityRow(tbody, phase.macroActivity, "macro-cell");
 
         // Create rows for each activity in the phase
         phase.activities.forEach(activity => {
@@ -359,13 +349,7 @@ function createHierarchy(sidebar, project) {
             tbody.appendChild(subphaseRow);
 
             // Create row for the macroactivity of the subphase
-            const macroSubRow = document.createElement("tr");
-            const macroSubCell = document.createElement("td");
-            macroSubCell.textContent = `↳ Macroactivity: ${subphase.macroActivity.title}`;
-            macroSubCell.classList.add("macro-cell");
-            macroSubCell.setAttribute("colspan", 6);
-            macroSubRow.appendChild(macroSubCell);
-            tbody.appendChild(macroSubRow);
+            addMacroActivityRow(tbody, subphase.macroActivity, "macro-sub-cell");
 
             subphase.activities.forEach(activity => {
                 addActivityRow(tbody, activity);
@@ -410,4 +394,37 @@ function addActivityRow(tbody, activity) {
             row.appendChild(daysCell);
 
             tbody.appendChild(row);
+}
+
+function addMacroActivityRow(tbody, macroActivity, className = "") {
+    const row = document.createElement("tr");
+
+    const phaseCell = document.createElement("td");
+    phaseCell.textContent = "";
+    row.appendChild(phaseCell);
+
+    const titleCell = document.createElement("td");
+    titleCell.textContent = `↳ Macro: ${macroActivity.title}`;
+    titleCell.classList.add(className);
+    row.appendChild(titleCell);
+
+    const actorCell = document.createElement("td");
+    actorCell.textContent = macroActivity.sharedWith?.map(a => a.username).join(", ") || "-";
+    row.appendChild(actorCell);
+
+    const startDateCell = document.createElement("td");
+    startDateCell.textContent = new Date(macroActivity.startDate).toLocaleDateString();
+    row.appendChild(startDateCell);
+
+    const deadlineCell = document.createElement("td");
+    deadlineCell.textContent = new Date(macroActivity.deadline).toLocaleDateString();
+    row.appendChild(deadlineCell);
+
+    const daysCell = document.createElement("td");
+    const diffTime = Math.abs(new Date(macroActivity.deadline) - new Date(macroActivity.startDate));
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    daysCell.textContent = diffDays;
+    row.appendChild(daysCell);
+
+    tbody.appendChild(row);
 }
