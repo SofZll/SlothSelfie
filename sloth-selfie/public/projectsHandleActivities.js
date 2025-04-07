@@ -163,8 +163,10 @@ function generateContent(project, activity, star, inputDisabled, inputSelectDisa
     // Input & Output fields are disabled for macroactivities
     if (activity.isMacroactivity) {
         //TODO: sposta funzione di check quando clicco insertInputOutput, qui recuperare solo i valori
-        const firstActivityInput = findActivityInMacro(activity, type= 'first', project);
-        const lastActivityOutput = findActivityInMacro(activity, type= 'last', project);
+        //const firstActivityInput = findActivityInMacro(activity, type= 'first', project);
+        //const lastActivityOutput = findActivityInMacro(activity, type= 'last', project);
+
+        console.log("macrodata:", activity);
 
         content += `
             Input type: 
@@ -173,8 +175,7 @@ function generateContent(project, activity, star, inputDisabled, inputSelectDisa
                 <option value="empty">Empty</option>
                 <option value="link">Link</option>
             </select>
-            <!-- <input type="text" id="input-${activity._id}" value="${firstActivityInput? firstActivityInput : ''}" disabled> -->
-            <input type="text" id="input-${activity._id}" value="${activity.input?.content || ''}" disabled>
+            <input type="text" id="input-${activity._id}" value="${activity.input?.content || ''}" disabled> 
 
             
             <label>Output type:</label>
@@ -183,7 +184,6 @@ function generateContent(project, activity, star, inputDisabled, inputSelectDisa
                 <option value="link">Link</option>
                 <option value="true">Completed</option>
             </select>
-           <!-- <input type="text" id="output-${activity._id}" value="${lastActivityOutput? lastActivityOutput : ''}" disabled> -->
             <input type="text" id="output-${activity._id}" value="${activity.output?.content || ''}" disabled>
         `;
     } else {
@@ -237,7 +237,7 @@ function generateContent(project, activity, star, inputDisabled, inputSelectDisa
 }
 
 // Function to find if the activities of the macro have at least one input or everyone has output, if so, the input is set a "Empty", output as "Completed"
-function findActivityInMacro(activity, type, project) {
+function findActivityInMacro(activity, type, project) {  //TODO DELETE SE NON SERVE
     let activities = [];
     let isMacroInput = false;
     let isMacroOutput = true;
@@ -249,36 +249,38 @@ function findActivityInMacro(activity, type, project) {
             activities = phaseSubphase.activities;
         }
 
-                // Check the activities to determine the macro input and output status
-                activities.forEach((act) => {
-                    // If any activity has an input, set isMacroInput to true
-                    if (act.input && act.input !== "") {
-                        isMacroInput = true;
-                    }
-                    // If any activity doesn't have output, set isMacroOutput to false
-                    if (!act.output || act.output === "") {
-                        isMacroOutput = false;
-                    }
-                });
-        
-                // Now handle the type ('first' or 'last')
-                if (type === 'first') {
-                    //if isMacroInput, we return "Empty" as input, if not, we return ""
-                    //we also insertInput in the macroActivity input field
-                    if(isMacroInput){
-                        //insertActivityInputOutput(activity._id, 'input', true, "Empty"); // Insert the input in the macroactivity input field
-                    }
-                    return isMacroInput ? "Empty" : "";  // Return the first activity in the array
-                } else if (type === 'last') {
-                    //if isMacroOutput, we return "Completed" as output, if not, we return ""
-                    //we also insertOutput in the macroActivity output field
-                    if(isMacroOutput){
-                        //insertActivityInputOutput(activity._id, 'output', true, "Completed"); // Insert the output in the macroactivity output field
-                    }
-                    return isMacroOutput ? "Completed" : "";  // Return the last activity in the array
+            // Check the activities to determine the macro input and output status
+            activities.forEach((act) => {
+                // If any activity has an input, set isMacroInput to true
+                if (act.input && act.input !== "") {
+                    isMacroInput = true;
                 }
+                // If any activity doesn't have output, set isMacroOutput to false
+                if (!act.output || act.output === "") {
+                    isMacroOutput = false;
+                }
+            });
+        
+            // Now handle the type ('first' or 'last')
+            if (type === 'first') {
+                //if isMacroInput, we return "Empty" as input, if not, we return ""
+                //we also insertInput in the macroActivity input field
+                if(isMacroInput && !activity.input){
+                    console.log("add input");
+                    insertActivityInputOutput(activity._id, 'input', true, "Empty", isMacro = true); // Insert the input in the macroactivity input field
+                }
+                return isMacroInput ? "Empty" : "";  // Return the first activity in the array
+            } else if (type === 'last') {
+                //if isMacroOutput, we return "Completed" as output, if not, we return ""
+                //we also insertOutput in the macroActivity output field
+                if(isMacroOutput && !activity.output){
+                    console.log("add output");
+                    insertActivityInputOutput(activity._id, 'output', true, "Completed", isMacro = true); // Insert the output in the macroactivity output field
+                }
+                return isMacroOutput ? "Completed" : "";  // Return the last activity in the array
             }
         }
+    }
 
 // Function to update the buttons of an activity depending on its status
 async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
@@ -426,6 +428,9 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
             //change status and start button
             activatableActivity(activityId, "Activatable");
 
+            //we update the status of the activity to Active if it is a macroactivity
+            await checkAndUpdateMacroStatus(activityId, type= "input");
+
         } catch (error) {
             console.error("Error saving activity input:", error);
         }
@@ -466,9 +471,59 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
             //enable the complete button
             toggleElements([`complete-${activityId}`], false);
 
+            //we update the status of the activity to Completed if all the activities of the macro have output
+            await checkAndUpdateMacroStatus(activityId, type= "output");
+
         } catch (error) {
             console.error("Error saving activity output:", error);
         }
+    }
+}
+
+//Function to check if the macroactivity has all the activities with output, if so, we set the status as completed
+async function checkAndUpdateMacroStatus(activityId, type) {  //TODO FIX
+    //get the activity
+    const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+    const activity = await response.json();
+
+    if (!activity) {
+        console.error("Activity is undefined:", activity);
+        return;
+    }
+    console.log(activity);
+
+    //get the phaseSubphase of the activity
+    const responseData = await fetch(`http://localhost:8000/api/phaseSubphase/${activity.phaseSubphase}`);
+    const phaseSubphase = await responseData.json();
+    console.log("PhaseSubphase:", phaseSubphase);
+
+    //get the macroactivity of the phaseSubphase
+    const macroActivity = phaseSubphase.macroActivity;
+
+    //TODO RIGUARDA
+    if(type === "output"){
+        //check if the activities of the phasesubphase have all output
+        let allActivitiesHaveOutput = phaseSubphase.activities.every(act => act.output !== null && act.output !== "");
+        if (allActivitiesHaveOutput) {
+            //insert the output in the macroactivity output field
+            let outputField = document.getElementById(`output-${macroActivity._id}`);
+            if (outputField) {
+                outputField.value = "Completed";
+            }
+            // Update the status of the macroactivity to Completed
+            await updateActivityStatus(macroActivity._id, "Completed");
+            //insert the macroactivity output in the backend
+            //insertActivityInputOutput(activity._id, 'output', true, "Completed", isMacro = true); //LOOP E CREA ALL'INFINITO, chiama back senza funzione
+        }
+    }else if(type === "input"){
+        //at least one activity has input, so we change the macroactivity input and call the put request to update the macroactivity input
+        let inputField = document.getElementById(`input-${macroActivity._id}`);
+        if (inputField) {
+            inputField.value = "Empty";
+        }
+        await updateActivityStatus(macroActivity._id, "Active");
+        //insert the macroactivity input in the backend
+        //insertActivityInputOutput(activity._id, 'input', true, "Empty"); //LOOP E CREA ALL'INFINITO, chiama back senza funzione
     }
 }
 
