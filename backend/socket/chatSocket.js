@@ -1,4 +1,4 @@
-const { createMessage } = require('../services/messageServices');
+const { createMessage, markRead } = require('../services/messageServices');
 
 const chatSocket = {
     registerHandlers: (socket, io) => {
@@ -16,6 +16,15 @@ const chatSocket = {
                 });
             } catch (error) {
                 console.error('Error in socket message creation:', error);
+            }
+        });
+
+        socket.on('mark-read', async (data) => {
+            console.log('Marking message as read:', data.chatId, data.userId);
+            try {
+                await markRead(data.chatId, data.userId);
+            } catch (error) {
+                console.error('Error marking message as read:', error);
             }
         });
 
