@@ -12,7 +12,7 @@ const chatSocket = {
                 console.log('savedMessage.chat.id: ', savedMessage.chat.id);
                 savedMessage.chat.participants.forEach((participant) => {
                     console.log('Participant:', participant);
-                    socket.to(participant.id).emit('receive-message', savedMessage);
+                    io.to(participant.id).emit('receive-message', savedMessage);
                 });
             } catch (error) {
                 console.error('Error in socket message creation:', error);
