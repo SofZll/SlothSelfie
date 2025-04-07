@@ -11,6 +11,8 @@ async function handleActivities(projectId) {
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
         const project = await response.json();
 
+        console.log("Project:", project);
+
         // Check if the logged user is the owner or a member
         const isOwner = project.owner.username === userLogged;
         const isMember = project.members.some(member => member.username === userLogged);
@@ -19,11 +21,14 @@ async function handleActivities(projectId) {
             return;
         }
 
-        // Get activities: all if owner, only assigned if member
+        // Get activities: all if owner, only assigned if member, on top we show the macroactivity of the phase/subphase
+        // Get all activities from the project
         let activities = [];
         for (const phase of project.phases) {
+            activities = activities.concat(phase.macroActivity);
             activities = activities.concat(phase.activities);
             for (const subphase of phase.subphases) {
+                activities = activities.concat(subphase.macroActivity);
                 activities = activities.concat(subphase.activities);
             }
         }
@@ -87,7 +92,7 @@ async function handleActivities(projectId) {
                 const [ inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled ] = getActivityInputOutputStatus(activity, userLogged, isOwner, isAbandoned);
 
                 // Show the activity
-                content += generateContent(activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged);
+                content += generateContent(project, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged);
             }
             content += `</ul>`;
         }
@@ -146,12 +151,44 @@ function getActivityInputOutputStatus(activity, userLogged, isOwner, isAbandoned
 }
 
 // Function to generate the content of the activities in handleActivities
-function generateContent(activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged) {
+function generateContent(project, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged) {
+    
     let content = `
     <li class="list-group-item">
-        <strong>${star}${activity.title}</strong>
+        <strong> ${star}${activity.isMacroactivity ? `Macro: ${activity.title}` : activity.title}</strong>
         <p id="status-${activity._id}">Status: ${activity.status}</p>
         <br>
+        `;
+    
+    // Input & Output fields are disabled for macroactivities
+    if (activity.isMacroactivity) {
+        //TODO: sposta funzione di check quando clicco insertInputOutput, qui recuperare solo i valori
+        const firstActivityInput = findActivityInMacro(activity, type= 'first', project);
+        const lastActivityOutput = findActivityInMacro(activity, type= 'last', project);
+
+        content += `
+            Input type: 
+            <select id="input-type-${activity._id}" disabled>
+                <option value="text">Text</option>
+                <option value="empty">Empty</option>
+                <option value="link">Link</option>
+            </select>
+            <!-- <input type="text" id="input-${activity._id}" value="${firstActivityInput? firstActivityInput : ''}" disabled> -->
+            <input type="text" id="input-${activity._id}" value="${activity.input?.content || ''}" disabled>
+
+            
+            <label>Output type:</label>
+            <select id="output-type-${activity._id}" disabled>
+                <option value="text">Text</option>
+                <option value="link">Link</option>
+                <option value="true">Completed</option>
+            </select>
+           <!-- <input type="text" id="output-${activity._id}" value="${lastActivityOutput? lastActivityOutput : ''}" disabled> -->
+            <input type="text" id="output-${activity._id}" value="${activity.output?.content || ''}" disabled>
+        `;
+    } else {
+        // Normal activities logic here
+        content += `
         Input type: 
         <select id="input-type-${activity._id}" ${inputSelectDisabled} onchange="updateInputOutputType('${activity._id}', 'input')">
             <option value="text">Text</option>
@@ -171,7 +208,7 @@ function generateContent(activity, star, inputDisabled, inputSelectDisabled, inp
         <button class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output')" ${outputInsertDisabled}>Insert Output</button>
         <button class="btn btn-outline-success btn-sm" id="save-output-${activity._id}" onclick="updateOutputNote('${activity._id}', 'output')" style="display: none;">Save updated output</button>
         `;
-        
+
     // shows the buttons for reject output only if the user is the owner
     if (isOwner) {
         // Disable the button if the activity is not Completed
@@ -195,8 +232,53 @@ function generateContent(activity, star, inputDisabled, inputSelectDisabled, inp
         <button class="btn btn-danger btn-sm" id="abandon-${activity._id}" onclick="abandonActivity('${activity._id}')" ${abandonDisabled}>Abandon</button>
     </li>
     `;
+}
     return content;
 }
+
+// Function to find if the activities of the macro have at least one input or everyone has output, if so, the input is set a "Empty", output as "Completed"
+function findActivityInMacro(activity, type, project) {
+    let activities = [];
+    let isMacroInput = false;
+    let isMacroOutput = true;
+
+    //find the phaseSubphase of the macroactivity and its project, and get their activities
+    if (activity.phaseSubphase && activity.project) {
+        const phaseSubphase = project.phases.find(phase => phase._id === activity.phaseSubphase);
+        if (phaseSubphase) {
+            activities = phaseSubphase.activities;
+        }
+
+                // Check the activities to determine the macro input and output status
+                activities.forEach((act) => {
+                    // If any activity has an input, set isMacroInput to true
+                    if (act.input && act.input !== "") {
+                        isMacroInput = true;
+                    }
+                    // If any activity doesn't have output, set isMacroOutput to false
+                    if (!act.output || act.output === "") {
+                        isMacroOutput = false;
+                    }
+                });
+        
+                // Now handle the type ('first' or 'last')
+                if (type === 'first') {
+                    //if isMacroInput, we return "Empty" as input, if not, we return ""
+                    //we also insertInput in the macroActivity input field
+                    if(isMacroInput){
+                        //insertActivityInputOutput(activity._id, 'input', true, "Empty"); // Insert the input in the macroactivity input field
+                    }
+                    return isMacroInput ? "Empty" : "";  // Return the first activity in the array
+                } else if (type === 'last') {
+                    //if isMacroOutput, we return "Completed" as output, if not, we return ""
+                    //we also insertOutput in the macroActivity output field
+                    if(isMacroOutput){
+                        //insertActivityInputOutput(activity._id, 'output', true, "Completed"); // Insert the output in the macroactivity output field
+                    }
+                    return isMacroOutput ? "Completed" : "";  // Return the last activity in the array
+                }
+            }
+        }
 
 // Function to update the buttons of an activity depending on its status
 async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
