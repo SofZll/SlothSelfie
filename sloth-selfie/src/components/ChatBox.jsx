@@ -15,7 +15,6 @@ const ChatBox = () => {
     const { user } = useContext(AuthContext);
     const { chatId } = useParams();
     const navigate = useNavigate();
-    const hasJoinedRef = useRef(false);
     const messagesEndRef = useRef(null);
     const isDesktop = useIsDesktop();
     
@@ -100,6 +99,15 @@ const ChatBox = () => {
             setSelectedChat({
                 ...existingChat,
                 messages: messages,
+            });
+
+            chats.forEach(chat => {
+                if (chat._id === chatId) chat.unreadCount = 0;
+            });   
+
+            socket.emit('mark-read', {
+                chatId: chatId,
+                userId: user._id
             });
 
             setIsOpen(true);
@@ -219,6 +227,19 @@ const ChatBox = () => {
                     return { ...prevChat, messages: updatedMessages };
                 });
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                setChats((prevChats) => {
+                    const updatedChats = prevChats.map((chat) => {
+                        if (chat._id === message.chat._id) {
+                            return {
+                                ...chat,
+                                unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
+                            };
+                        }
+                        return chat;
+                    });
+                    return updatedChats;
+                });
             }
             setChats((prevChats) => {
                 let found = false;
@@ -347,7 +368,10 @@ const ChatBox = () => {
                                         </div>
                                         <div className='d-flex w-100 flex-column align-items-start chat-content'>
                                             <div className='d-flex w-100 align-items-center flex-row justify-content-between'>
-                                                <span className='chat-username'>{chat.otherParticipant.username}</span>
+                                                <div className='d-flex align-items-center gap-2'>
+                                                    <span className='chat-username'>{chat.otherParticipant.username}</span>
+                                                    {chat.unreadCount > 0 && <span className='chat-unread-count'>{chat.unreadCount}</span>}
+                                                </div>
                                                 {chat.lastMessage ? <span className='chat-date'>{chat.lastMessage.createdAt}</span> : <span className='chat-date'>{chat.createdAt}</span>}
                                             </div>
                                             {chat.lastMessage ? <p>{chat.lastMessage.content.text}</p> : <p>New chat</p> }

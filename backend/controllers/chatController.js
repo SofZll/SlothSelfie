@@ -49,6 +49,19 @@ const getChats = async (req, res) => {
             return;
         }
 
+        for (const chat of chats) {
+            const unreadCount = await Message.countDocuments({
+                chat: chat._id,
+                'status': {
+                    $elemMatch: {
+                        user: user._id,
+                        status: { $ne: 'read' }
+                    }
+                }
+            });
+            chat.unreadCount = unreadCount;
+        }
+
         res.status(200).json({ success: true, chats: chats });
     } catch (error) {
         console.error('Error fetching chats:', error);
@@ -67,7 +80,7 @@ const getMessages = async (req, res) => {
             res.status(400).json({ success: false, message: 'Messages not found' });
             return;
         }
-        
+
         res.status(200).json({ success: true, messages: messages });
     } catch (error) {
         console.error('Error fetching messages:', error);
