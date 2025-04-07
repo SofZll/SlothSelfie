@@ -10,7 +10,7 @@ import Note from '../pages/Note/Note';
 import Calendar from '../pages/Calendar/Calendar';
 import Home from '../pages/Home'
 import Profile from '../pages/ProfilePage';
-import ChatBox from '../components/ChatBox';
+import ChatBox from '../components/ChatBox/ChatBox';
 //TODO: chambiare gli import
 /*
 
@@ -19,6 +19,7 @@ import Forum from '../Forum';
 */
 import AuthPage from '../pages/AuthPage';
 import { LoadingPageLight } from '../pages/LoadingPage';
+import { ChatProvider } from '../contexts/ChatContext';
 
 // TODO: implement note id and calendar id */
 const MainRoutes = () => {
@@ -50,10 +51,12 @@ const MainRoutes = () => {
                                     <Route path='/calendar' element={<Calendar />} />
                                     <Route path='/forum' element={<Forum />} />*/}
                                     {!isDesktop && (
-                                        <Routes>
-                                            <Route path='/chat' element={<ChatBox chatId={null} />} />
-                                            <Route path='/chat/:chatId' element={<ChatBox />} />
-                                        </Routes>
+                                        <ChatProvider>
+                                            <Routes>
+                                                <Route path='/chat' element={<ChatBox chatId={null} />} />
+                                                <Route path='/chat/:chatId' element={<ChatBox />} />
+                                            </Routes>
+                                        </ChatProvider>
                                     )}
                                 </ProtectedRoute>
                             }
