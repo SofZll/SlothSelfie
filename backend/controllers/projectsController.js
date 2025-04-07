@@ -50,7 +50,9 @@ const getProjectById = async (req, res) => {
             path: "macroActivity",
             populate: [
                 { path: "description" },
-                { path: "sharedWith", select: "username" }
+                { path: "sharedWith", select: "username" },
+                { path: "input", select: "content" },
+                { path: "output", select: "content" }
             ]
         })
         .sort({ createdAt: 1 });
@@ -62,7 +64,9 @@ const getProjectById = async (req, res) => {
                 path: "macroActivity",
                 populate: [
                     { path: "description" },
-                    { path: "sharedWith", select: "username" }
+                    { path: "sharedWith", select: "username" },
+                    { path: "input", select: "content" },
+                    { path: "output", select: "content" }
                 ]
             })
             .sort({ createdAt: 1 });
@@ -94,6 +98,21 @@ const getProjectById = async (req, res) => {
     } catch (error) {
         console.error('Error fetching project by id:', error);
         res.status(500).json({ message: error.message });
+    }
+};
+
+//get the phase/subphase by id
+const getPhaseSubphaseById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const phaseSubphase = await PhaseSubphase.findById(id)
+            .populate("macroActivity")
+            .populate("activities");
+    
+            res.status(200).json(phaseSubphase);
+    }
+    catch (error) {
+        console.error('Error fetching phase/subphase by id:', error);
     }
 };
 
@@ -711,9 +730,15 @@ const deleteMacroActivity = async (macroActivityId) => {
             await Event.deleteMany({ _id: { $in: macroActivity.events } });
         }
 
-        // Delete the note linked to the macroactivity
+        // Delete the notes linked to the macroactivity
         if (macroActivity.description) {
             await Note.findByIdAndDelete(macroActivity.description);
+        }
+        if (macroActivity.input) {
+            await Note.findByIdAndDelete(macroActivity.input);
+        }
+        if (macroActivity.output) {
+            await Note.findByIdAndDelete(macroActivity.output);
         }
 
         // Delete the macroactivity
@@ -790,4 +815,4 @@ const removeActivityFromBackend = async (req, res) => {
 };
 
 
-module.exports = { getAllProjects, getProjectById, createProject, updateProject, deleteProject, removePhaseFromBackend, removeSubphaseFromBackend, removeActivityFromBackend };
+module.exports = { getAllProjects, getProjectById, getPhaseSubphaseById, createProject, updateProject, deleteProject, removePhaseFromBackend, removeSubphaseFromBackend, removeActivityFromBackend };
