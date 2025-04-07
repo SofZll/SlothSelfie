@@ -1,27 +1,32 @@
+const { createMessage } = require('../services/messageServices');
+
 const chatSocket = {
     registerHandlers: (socket, io) => {
-        socket.on('message', (message) => {
+
+        socket.on('send-message', async (message) => {
             console.log('Message received:', message);
-            const { chatId, sender, content } = message;
-            socket.to(chatId).emit('message', message);
+            try {
+                const savedMessage = await createMessage(message);
+                console.log('savedMessage: ', savedMessage);
+                console.log('savedMessage.chat: ', savedMessage.chat);
+                console.log('savedMessage.chat.id: ', savedMessage.chat.id);
+                savedMessage.chat.participants.forEach((participant) => {
+                    console.log('Participant:', participant);
+                    socket.to(participant.id).emit('receive-message', savedMessage);
+                });
+            } catch (error) {
+                console.error('Error in socket message creation:', error);
+            }
         });
 
-        socket.on('join-chatroom', (chatId) => {
-            console.log(`${socket.id} joined chat ${chatId}`);
-            socket.join(chatId);
+        socket.on('join-chatroom', (userId) => {
+            console.log(`${socket.id} joined chat ${userId}`);
+            socket.join(userId);
         });
         
-        socket.on('leave-chatroom', (chatId) => {
-            console.log(`${socket.id} left chat ${chatId}`);
-            socket.leave(chatId);
-        });
-
-        socket.on('typing', (chatId) => {
-            socket.to(chatId).emit('typing', { user: socket.id });
-        });
-
-        socket.on('stop-typing', (chatId) => {
-            socket.to(chatId).emit('stop-typing', { user: socket.id });
+        socket.on('leave-chatroom', (userId) => {
+            console.log(`${socket.id} left chat ${userId}`);
+            socket.leave(userId);
         });
     }
 }

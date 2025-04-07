@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/ChatBox.css';
 import Swal from 'sweetalert2';
@@ -15,6 +15,7 @@ const ChatBox = () => {
     const { user } = useContext(AuthContext);
     const { chatId } = useParams();
     const navigate = useNavigate();
+    const hasJoinedRef = useRef(false);
     const messagesEndRef = useRef(null);
     const isDesktop = useIsDesktop();
     
@@ -22,7 +23,7 @@ const ChatBox = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedChat, setSelectedChat] = useState(null);
     const [newMessage, setNewMessage] = useState('');
-    const [searchChat, setSearchChat] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [participants, setParticipants] = useState([]);
     const [chats, setChats] = useState([]);
     const [onlineUsers, setOnlineUsers] = useState({});
@@ -59,7 +60,6 @@ const ChatBox = () => {
             });
 
             setChats(transformedData)
-            setSearchChat(transformedData);
             console.log(transformedData);
 
             //get status of users
@@ -97,10 +97,6 @@ const ChatBox = () => {
                 messages = transformedMessages;
             }
 
-            if (chatId && user?._id) {
-                socket.emit('join-chatroom', chatId);
-            }
-
             setSelectedChat({
                 ...existingChat,
                 messages: messages,
@@ -118,64 +114,36 @@ const ChatBox = () => {
             navigate(`/chat/${selectedChat.otherParticipant.username}`);
         }
     }
- 
+
     const handleSendMessage = () => {
         if (!newMessage.trim()) {
             Swal.fire({ icon: 'error', title: 'Errore', text: 'Inserisci un messaggio' });
         } else {
-            const updateChat = {
-                ...selectedChat,
-                messages: [
-                    ...(selectedChat.messages || []),
-                    {
-                        sender: {
-                            username: user.username, 
-                        },
-                        content: {
-                            text: newMessage,
-                        },
-                        createdAt: new Date().toLocaleTimeString()
-                    }
-                ],
-                lastMessage: {
-                    sender: {
-                        username: user.username, 
-                    },
-                    content: {
-                        text: newMessage,
-                    },
-                    createdAt: new Date().toLocaleTimeString(),
+            const message = {
+                chat: {
+                    _id: selectedChat._id,
+                },
+                sender: {
+                    _id: user._id,
+                    username: user.username,
+                },
+                content: {
+                    text: newMessage,
                 }
             };
-            console.log('NewMessage:', newMessage);
-            const response = apiService(`/chat/${selectedChat._id}/message`, 'POST', { message: newMessage });
-            if (response) {
-                console.log('Message sent:', response);
-                socket.emit('message', {
-                    chatId: selectedChat._id,
-                    sender: user._id,
-                    content: {
-                        text: newMessage,
-                    },
-                    createdAt: new Date().toLocaleTimeString(),
-                });
-                setSelectedChat(updateChat);
-                setNewMessage('');
-            } else {
-                console.error('Error sending message:', response);
-                Swal.fire({ icon: 'error', title: 'Errore', text: response.message });
-            }
+            console.log('message:', message);
+            socket.emit('send-message', {
+                ...message,
+            });
+            setNewMessage('');
         }
     }
 
-    const handleSearch = (e) => {
-        const search = e.target.value.toLowerCase();
-        const filteredChat = chats.filter(chat => chat.otherParticipant.username.toLowerCase().includes(search));
-        setSearchChat(filteredChat);
-        if (search === '') {
-            setSearchChat(chats);
-        }
-    }
+    const filteredChats = useMemo(() => {
+        return chats.filter(chat => 
+            chat.otherParticipant.username.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [chats, searchTerm]);
 
     const handleNewChat = async () => {
         const response = await apiService('/chat/', 'POST', {username2: participants[0] });
@@ -188,6 +156,15 @@ const ChatBox = () => {
             Swal.fire({ icon: 'error', title: 'Errore', text: response.message });
         }
     }
+
+    useEffect(() => {
+        if (!socket.connected) {
+            socket.connect();
+        }
+        return () => {
+            socket.disconnect();
+        };
+    }, []);    
 
     useEffect(() => {
         if (chatId) {
@@ -206,9 +183,17 @@ const ChatBox = () => {
         }
     }, [selectedChat]);
 
+    
+    useEffect(() => {
+        if (user?._id) {
+            socket.emit('join-chatroom', user._id);
+            console.log('User joined chatroom:', user._id);
+            socket.emit('online-user', user._id);
+        }
+    }, [user?._id]);
+
     useEffect(() => {
         if (!user?._id) return;
-        socket.connect();
         socket.emit('online-user', user._id);
 
         socket.on('status-change', ({ userId, isOnline }) => {
@@ -219,33 +204,58 @@ const ChatBox = () => {
             }));
         });
 
-        socket.on('message', (message) => {
+        socket.on('receive-message', (message) => {
             console.log('New message received:', message);
-            if (selectedChat && selectedChat._id === message.chatId) {
+            if (selectedChat && selectedChat._id === message.chat._id) {
                 setSelectedChat((prevChat) => {
-                    const updatedMessages = [...prevChat.messages, newMessage];
+                    const updatedMessages = [...prevChat.messages,
+                        {
+                            ...message,
+                            createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
+                        }
+                    ];
+                    console.log('Updated messages:', updatedMessages);
                     updatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
                     return { ...prevChat, messages: updatedMessages };
                 });
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                const updatedChats = chats.map(chat => {
-                    if (chat._id === message.chatId) {
+            }
+            setChats((prevChats) => {
+                let found = false;
+                const updatedChats = prevChats.map((chat) => {
+                    if (chat._id === message.chat._id) {
+                        found = true;
                         return {
                             ...chat,
-                            lastMessage: message,
+                            lastMessage: {
+                                ...message,
+                                createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
+                            },
                         };
                     }
                     return chat;
                 });
-                setChats(updatedChats);
-            }
+                
+                if (!found) {
+                    const newChat = {
+                        _id: message.chat._id,
+                        otherParticipant: message.sender,
+                        lastMessage: {
+                            ...message,
+                            createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
+                        },
+                        createdAt: message.createdAt,
+                    };
+                    updatedChats.push(newChat);
+                }
+        
+                return updatedChats;
+            });
         });
 
         return () => {
             socket.off('status-change');
-            socket.off('message');
-            socket.disconnect();
+            socket.off('receive-message');
         }
     }, [user?._id, selectedChat, chats]);
 
@@ -316,7 +326,7 @@ const ChatBox = () => {
                     <div className='h-100 cursor-pointer'>
                         {!showShareInput ? (
                             <div className='d-flex flex-row p-2 gap-1'>
-                                <input type='text' className='form-control p-1' placeholder='Cerca' onChange={handleSearch}/>
+                                <input type='text' className='form-control p-1' placeholder='Cerca' onChange={(e) => setSearchTerm(e.target.value)}/>
                                 <button className='new-chat-button d-flex align-items-center' onClick={() => setShowShareInput (!showShareInput)}><Plus /></button>
                             </div>
                         ) : (
@@ -325,8 +335,8 @@ const ChatBox = () => {
                                 {participants.length > 0 ? <button className='button-clean green my-2 ' onClick={handleNewChat}>Create</button> : <button className='new-chat-button d-flex align-items-start mt-3' onClick={() => setShowShareInput (!showShareInput)}><Undo2 /></button>}
                             </div>
                         )}
-                        {searchChat && searchChat.length > 0 ? (
-                            searchChat.map((chat, index) => (
+                        {filteredChats && filteredChats.length > 0 ? (
+                            filteredChats.map((chat, index) => (
                                 <div key={index} className='mx-1 px-3 py-2 chat' onClick={() => handleChatClick(chat._id)}>
                                     <div className='d-flex align-items-center flex-row chat-container'>
                                         <div className='d-flex align-items-center position-relative'>
