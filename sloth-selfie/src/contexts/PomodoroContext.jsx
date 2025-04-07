@@ -14,7 +14,6 @@ export const PomodoroProvider = ({ children }) => {
     const [pomodoro, setPomodoro] = useState({
         _id: '',
         user: '',
-        sharedWith: [],
         timeLeft: 60,
         cyclesLeft: 5,
         isStudyTime: true,
@@ -95,7 +94,6 @@ export const PomodoroProvider = ({ children }) => {
         setPomodoro({
             _id: '',
             user: '',
-            sharedWith: [],
             timeLeft: settingsPomodoro.studyTime,
             cyclesLeft: settingsPomodoro.cycles,
             isStudyTime: true,

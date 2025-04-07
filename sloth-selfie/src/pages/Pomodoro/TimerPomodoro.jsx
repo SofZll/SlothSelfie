@@ -88,7 +88,7 @@ const TimerPomodoro = () => {
             setPomodoro({...data.pomodoro});
         });
 
-        socket.on('end circle', async (data) => {
+        socket.on('end cycle', async (data) => {
             const newPomodoroData = await data.pomodoro;
             setPomodoro({...newPomodoroData});
             setPlay(false);

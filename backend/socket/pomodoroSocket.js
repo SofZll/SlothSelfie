@@ -28,8 +28,8 @@ const pomodoroSocket = {
                     pomodoro.timeLeft = settingsPomodoro.studyTime;
                     pomodoro.isStudyTime = true;
                 }
-                socket.to(sessionCode).emit('end circle', { pomodoro, play: false });
-                socket.emit('end circle', { pomodoro, play: false });
+                socket.to(sessionCode).emit('end cycle', { pomodoro, play: false });
+                socket.emit('end cycle', { pomodoro, play: false });
             } else {
                 if (!pomodoro.started) pomodoro.started = true;
                 pomodoro.timeLeft -= 1;
