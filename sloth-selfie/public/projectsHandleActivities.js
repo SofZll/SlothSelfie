@@ -18,7 +18,6 @@ async function handleActivities(projectId) {
             Swal.fire({title: "Error", text: "You can't handle the activities of this project, you are not the owner nor a member.", icon: "error"});
             return;
         }
-
         // Get activities: all if owner, only assigned if member, on top we show the macroactivity of the phase/subphase (only to the owner)
         // Get all activities from the project
         let activities = [];
@@ -53,6 +52,15 @@ async function handleActivities(projectId) {
                 //if the activity is completed, we check if it has dependencies and show the buttons for the owner to decide in case of delay              
                 if (activity.status === "Completed") {
                     asyncOperations.push(checkOptionsForCompleteActivityDep(activity._id, false));
+
+                    if(activity.isMacroactivity){
+                        //we check if new children were added, if there are children with status !== "Completed", we set the status of the macro as Active
+                        let children = await checkChildren(activity.phaseSubphase);
+                        let allChildrenCompleted = children.every(child => child.status === "Completed" && child.output !== null && child.output !== "");
+                        if (!allChildrenCompleted) {
+                            asyncOperations.push(updateActivityStatus(activity._id, "Active"));
+                        }
+                    }
                 }
 
                 // Check the activity deadline and if it is Overdue or Abandoned
@@ -90,12 +98,12 @@ async function handleActivities(projectId) {
                 const [ inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled ] = getActivityInputOutputStatus(activity, userLogged, isOwner, isAbandoned);
 
                 //before showing, check if it is a macro, and if there are activities in the macro phase/subphase
-                let hasChildren = false;
+                let children = [];
                 if(activity.isMacroactivity){
-                    hasChildren = await checkChildren(activity.phaseSubphase);
+                    children = await checkChildren(activity.phaseSubphase);
                 }
                 // Show the activity
-                content += generateContent(hasChildren, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged);
+                content += generateContent(children, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged);
             }
             content += `</ul>`;
         }
@@ -161,18 +169,14 @@ async function checkChildren(phaseSubphase) {
         const phaseSubphaseData = await response.json();
         //get the activities of the phaseSubphase, they are the children of the macroactivity
         const children = phaseSubphaseData.activities;
-        if (children && children.length > 0) {
-            return true; // Macroactivity has children
-        } else {
-            return false; // No children found
-        }
+        return children;
     }catch(error){
         console.error("Error fetching phaseSubphase:", error);
     }
 }
 
 // Function to generate the content of the activities in handleActivities
-function generateContent(hasChildren, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged) {
+function generateContent(children, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged) {
     
     let content = `
     <li class="list-group-item">
@@ -182,10 +186,7 @@ function generateContent(hasChildren, activity, star, inputDisabled, inputSelect
         `;
     
     // Input & Output fields are disabled for macroactivities with children
-    if (activity.isMacroactivity && hasChildren) {
-
-        console.log("macrodata:", activity);
-
+    if (activity.isMacroactivity && children.length > 0) {
         content += `
             Input type: 
             <select id="input-type-${activity._id}" disabled>
@@ -193,7 +194,7 @@ function generateContent(hasChildren, activity, star, inputDisabled, inputSelect
                 <option value="empty">Empty</option>
                 <option value="link">Link</option>
             </select>
-            <input type="text" id="input-${activity._id}" value="${activity.status === 'Not_Activatable' ? '' :(activity.input?.content || '')}" disabled> 
+            <input type="text" id="input-${activity._id}" value="${(activity.status === 'Not_Activatable' || activity.status === 'Activatable') ? '' :(activity.input?.content || '')}" disabled> 
 
             
             <label>Output type:</label>
@@ -202,7 +203,7 @@ function generateContent(hasChildren, activity, star, inputDisabled, inputSelect
                 <option value="link">Link</option>
                 <option value="true">Completed</option>
             </select>
-            <input type="text" id="output-${activity._id}" value="${(activity.status === 'Reactivated') ? '' : (activity.output?.content || '')}" disabled>
+            <input type="text" id="output-${activity._id}" value="${(activity.status === 'Reactivated' || activity.status === 'Activatable'|| activity.status === 'Active' || activity.status === 'Not_Activatable') ? '' : (activity.output?.content || '')}" disabled>
             <p id="startDate-${activity._id}">Start Date: ${new Date(activity.startDate).toLocaleDateString()}<p>
             <p id="deadline-${activity._id}">Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
         `;
