@@ -11,8 +11,6 @@ async function handleActivities(projectId) {
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
         const project = await response.json();
 
-        console.log("Project:", project);
-
         // Check if the logged user is the owner or a member
         const isOwner = project.owner.username === userLogged;
         const isMember = project.members.some(member => member.username === userLogged);
@@ -21,7 +19,7 @@ async function handleActivities(projectId) {
             return;
         }
 
-        // Get activities: all if owner, only assigned if member, on top we show the macroactivity of the phase/subphase
+        // Get activities: all if owner, only assigned if member, on top we show the macroactivity of the phase/subphase (only to the owner)
         // Get all activities from the project
         let activities = [];
         for (const phase of project.phases) {
@@ -162,7 +160,7 @@ function generateContent(project, activity, star, inputDisabled, inputSelectDisa
     
     // Input & Output fields are disabled for macroactivities
     if (activity.isMacroactivity) {
-        //TODO: sposta funzione di check quando clicco insertInputOutput, qui recuperare solo i valori
+        //TODO: gestire input/output di macro in base a cambiamenti di edit
         //const firstActivityInput = findActivityInMacro(activity, type= 'first', project);
         //const lastActivityOutput = findActivityInMacro(activity, type= 'last', project);
 
@@ -471,17 +469,77 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
             //enable the complete button
             toggleElements([`complete-${activityId}`], false);
 
-            //we update the status of the activity to Completed if all the activities of the macro have output
-            await checkAndUpdateMacroStatus(activityId, type= "output");
-
         } catch (error) {
             console.error("Error saving activity output:", error);
         }
     }
 }
 
-//Function to check if the macroactivity has all the activities with output, if so, we set the status as completed
-async function checkAndUpdateMacroStatus(activityId, type) {  //TODO FIX
+//Function to check if input/output of macro is present, if not so insert it
+async function insertMacroInputOutput(activityId, fieldType, value = "") {
+    let userLogged = await getLoggedUser();
+    //get the activity
+    const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+    const activity = await response.json();
+
+    if (fieldType === "input") {
+        let inputType, inputValue;
+        inputType = "text";
+        inputValue = value;
+        //check if the activity has already an input
+        if(!activity.input){
+            try{
+            //insert the input in the macroactivity input field
+            const response = await fetch("http://localhost:8000/api/activity/inputOutput", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    activityId: activityId,
+                    content: inputValue,
+                    userName: userLogged,
+                    type: fieldType
+                })
+            });
+            if(!response.ok){
+                console.error("Failed to save activity output.");
+            }
+        }catch (error) {
+            console.error("Error saving activity input:", error);
+        }
+        }
+    } else if (fieldType === "output") {
+            let outputType, outputValue;
+            outputType = "text";
+            outputValue = value;
+            //check if the activity has already an output
+            if(!activity.output){
+                try{
+                    //insert the output in the macroactivity output field
+                    const response = await fetch("http://localhost:8000/api/activity/inputOutput", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            activityId: activityId,
+                            content: outputValue,
+                            userName: userLogged,
+                            type: fieldType
+                        })
+                    
+                    });
+                    if(!response.ok){
+                        console.error("Failed to save activity output.");
+                    }
+                }
+                catch (error) {
+                    console.error("Error saving activity output:", error);
+                }
+            }
+    }
+}
+
+//Function to check if the macroactivity has at least one activity with input, if so the status is set as Active, and we insert the input if not present
+//if the macroactivity has all the activities completed we set the status as completed, and we insert the mactoActivity output
+async function checkAndUpdateMacroStatus(activityId, type) {
     //get the activity
     const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
     const activity = await response.json();
@@ -500,11 +558,10 @@ async function checkAndUpdateMacroStatus(activityId, type) {  //TODO FIX
     //get the macroactivity of the phaseSubphase
     const macroActivity = phaseSubphase.macroActivity;
 
-    //TODO RIGUARDA
     if(type === "output"){
-        //check if the activities of the phasesubphase have all output
-        let allActivitiesHaveOutput = phaseSubphase.activities.every(act => act.output !== null && act.output !== "");
-        if (allActivitiesHaveOutput) {
+        //check if the activities of the phasesubphase are all with status = Completed
+        let allActivitiesAreCompleted = phaseSubphase.activities.every(act => act.status === "Completed" && act.output !== null && act.output !== "");
+        if (allActivitiesAreCompleted) {
             //insert the output in the macroactivity output field
             let outputField = document.getElementById(`output-${macroActivity._id}`);
             if (outputField) {
@@ -513,7 +570,7 @@ async function checkAndUpdateMacroStatus(activityId, type) {  //TODO FIX
             // Update the status of the macroactivity to Completed
             await updateActivityStatus(macroActivity._id, "Completed");
             //insert the macroactivity output in the backend
-            //insertActivityInputOutput(activity._id, 'output', true, "Completed", isMacro = true); //LOOP E CREA ALL'INFINITO, chiama back senza funzione
+            await insertMacroInputOutput(macroActivity._id, 'output', "Completed");
         }
     }else if(type === "input"){
         //at least one activity has input, so we change the macroactivity input and call the put request to update the macroactivity input
@@ -523,7 +580,7 @@ async function checkAndUpdateMacroStatus(activityId, type) {  //TODO FIX
         }
         await updateActivityStatus(macroActivity._id, "Active");
         //insert the macroactivity input in the backend
-        //insertActivityInputOutput(activity._id, 'input', true, "Empty"); //LOOP E CREA ALL'INFINITO, chiama back senza funzione
+        await insertMacroInputOutput(macroActivity._id, 'input', "Empty");
     }
 }
 
@@ -632,6 +689,9 @@ async function completeActivity(activityId, newStatus) {
 
         // If the activity has dependencies, update them:
         await checkOptionsForCompleteActivityDep(activityId, true);
+
+        //we update the status of the macroActivity to Completed if all the activities of the macro have output
+        await checkAndUpdateMacroStatus(activityId, type= "output");
 
     } catch (error) {
         console.error("Error completing activity:", error);
