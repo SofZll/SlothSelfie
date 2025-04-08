@@ -89,8 +89,13 @@ async function handleActivities(projectId) {
                 // Check the status of the input/output fields
                 const [ inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled ] = getActivityInputOutputStatus(activity, userLogged, isOwner, isAbandoned);
 
+                //before showing, check if it is a macro, and if there are activities in the macro phase/subphase
+                let hasChildren = false;
+                if(activity.isMacroactivity){
+                    hasChildren = await checkChildren(activity.phaseSubphase);
+                }
                 // Show the activity
-                content += generateContent(project, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged);
+                content += generateContent(hasChildren, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged);
             }
             content += `</ul>`;
         }
@@ -148,8 +153,26 @@ function getActivityInputOutputStatus(activity, userLogged, isOwner, isAbandoned
     return [ inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled ];
 }
 
+//Function to check if the macroActivity has children
+async function checkChildren(phaseSubphase) {
+    try{
+        //get the phaseSubphase of the activity
+        const response = await fetch(`http://localhost:8000/api/phaseSubphase/${phaseSubphase}`);
+        const phaseSubphaseData = await response.json();
+        //get the activities of the phaseSubphase, they are the children of the macroactivity
+        const children = phaseSubphaseData.activities;
+        if (children && children.length > 0) {
+            return true; // Macroactivity has children
+        } else {
+            return false; // No children found
+        }
+    }catch(error){
+        console.error("Error fetching phaseSubphase:", error);
+    }
+}
+
 // Function to generate the content of the activities in handleActivities
-function generateContent(project, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged) {
+function generateContent(hasChildren, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged) {
     
     let content = `
     <li class="list-group-item">
@@ -158,11 +181,8 @@ function generateContent(project, activity, star, inputDisabled, inputSelectDisa
         <br>
         `;
     
-    // Input & Output fields are disabled for macroactivities
-    if (activity.isMacroactivity) {
-        //TODO: gestire input/output di macro in base a cambiamenti di edit
-        //const firstActivityInput = findActivityInMacro(activity, type= 'first', project);
-        //const lastActivityOutput = findActivityInMacro(activity, type= 'last', project);
+    // Input & Output fields are disabled for macroactivities with children
+    if (activity.isMacroactivity && hasChildren) {
 
         console.log("macrodata:", activity);
 
@@ -235,52 +255,6 @@ function generateContent(project, activity, star, inputDisabled, inputSelectDisa
 }
     return content;
 }
-
-// Function to find if the activities of the macro have at least one input or everyone has output, if so, the input is set a "Empty", output as "Completed"
-function findActivityInMacro(activity, type, project) {  //TODO DELETE SE NON SERVE
-    let activities = [];
-    let isMacroInput = false;
-    let isMacroOutput = true;
-
-    //find the phaseSubphase of the macroactivity and its project, and get their activities
-    if (activity.phaseSubphase && activity.project) {
-        const phaseSubphase = project.phases.find(phase => phase._id === activity.phaseSubphase);
-        if (phaseSubphase) {
-            activities = phaseSubphase.activities;
-        }
-
-            // Check the activities to determine the macro input and output status
-            activities.forEach((act) => {
-                // If any activity has an input, set isMacroInput to true
-                if (act.input && act.input !== "") {
-                    isMacroInput = true;
-                }
-                // If any activity doesn't have output, set isMacroOutput to false
-                if (!act.output || act.output === "") {
-                    isMacroOutput = false;
-                }
-            });
-        
-            // Now handle the type ('first' or 'last')
-            if (type === 'first') {
-                //if isMacroInput, we return "Empty" as input, if not, we return ""
-                //we also insertInput in the macroActivity input field
-                if(isMacroInput && !activity.input){
-                    console.log("add input");
-                    insertActivityInputOutput(activity._id, 'input', true, "Empty", isMacro = true); // Insert the input in the macroactivity input field
-                }
-                return isMacroInput ? "Empty" : "";  // Return the first activity in the array
-            } else if (type === 'last') {
-                //if isMacroOutput, we return "Completed" as output, if not, we return ""
-                //we also insertOutput in the macroActivity output field
-                if(isMacroOutput && !activity.output){
-                    console.log("add output");
-                    insertActivityInputOutput(activity._id, 'output', true, "Completed", isMacro = true); // Insert the output in the macroactivity output field
-                }
-                return isMacroOutput ? "Completed" : "";  // Return the last activity in the array
-            }
-        }
-    }
 
 // Function to update the buttons of an activity depending on its status
 async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
