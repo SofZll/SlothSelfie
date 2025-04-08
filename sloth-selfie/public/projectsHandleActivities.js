@@ -80,7 +80,7 @@ async function handleActivities(projectId) {
                 }
 
                 //if the activity is reactivated, the output note can be updated and the output field is enabled, we also show the save button and adjust dependencies input
-                if (activity.status === "Reactivated") {
+                if (activity.status === "Reactivated" && !activity.isMacroactivity) {
                     asyncOperations.push(reactivateActivity(activity._id, "Reactivated"));
                 }
 
@@ -173,7 +173,7 @@ function generateContent(project, activity, star, inputDisabled, inputSelectDisa
                 <option value="empty">Empty</option>
                 <option value="link">Link</option>
             </select>
-            <input type="text" id="input-${activity._id}" value="${activity.input?.content || ''}" disabled> 
+            <input type="text" id="input-${activity._id}" value="${activity.status === 'Not_Activatable' ? '' :(activity.input?.content || '')}" disabled> 
 
             
             <label>Output type:</label>
@@ -182,7 +182,9 @@ function generateContent(project, activity, star, inputDisabled, inputSelectDisa
                 <option value="link">Link</option>
                 <option value="true">Completed</option>
             </select>
-            <input type="text" id="output-${activity._id}" value="${activity.output?.content || ''}" disabled>
+            <input type="text" id="output-${activity._id}" value="${(activity.status === 'Reactivated') ? '' : (activity.output?.content || '')}" disabled>
+            <p id="startDate-${activity._id}">Start Date: ${new Date(activity.startDate).toLocaleDateString()}<p>
+            <p id="deadline-${activity._id}">Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
         `;
     } else {
         // Normal activities logic here
@@ -512,7 +514,7 @@ async function insertMacroInputOutput(activityId, fieldType, value = "") {
             outputType = "text";
             outputValue = value;
             //check if the activity has already an output
-            if(!activity.output){
+            if(!activity.output || activity.output === null){
                 try{
                     //insert the output in the macroactivity output field
                     const response = await fetch("http://localhost:8000/api/activity/inputOutput", {
@@ -553,10 +555,11 @@ async function checkAndUpdateMacroStatus(activityId, type) {
     //get the phaseSubphase of the activity
     const responseData = await fetch(`http://localhost:8000/api/phaseSubphase/${activity.phaseSubphase}`);
     const phaseSubphase = await responseData.json();
-    console.log("PhaseSubphase:", phaseSubphase);
 
     //get the macroactivity of the phaseSubphase
     const macroActivity = phaseSubphase.macroActivity;
+
+    console.log("MacroActivity:", macroActivity);
 
     if(type === "output"){
         //check if the activities of the phasesubphase are all with status = Completed
@@ -581,6 +584,16 @@ async function checkAndUpdateMacroStatus(activityId, type) {
         await updateActivityStatus(macroActivity._id, "Active");
         //insert the macroactivity input in the backend
         await insertMacroInputOutput(macroActivity._id, 'input', "Empty");
+    }else if(type === "reactivate"){
+        //check if the macro was Completed, if so we set the status as Reactivated
+        if(macroActivity.status === "Completed"){
+            await updateActivityStatus(macroActivity._id, "Reactivated");
+            //we clear the output field in the DOM
+            let outputField = document.getElementById(`output-${macroActivity._id}`);
+            if (outputField.value !== "") {
+                outputField.value = "";
+            }
+        }
     }
 }
 
@@ -857,7 +870,8 @@ async function reactivateActivity(activityId, newStatus) {
         if (container) {
             container.innerHTML = "";
         }
-
+        //we update the status of the macroActivity to Reactivated if all the activities of the macro were completed
+        await checkAndUpdateMacroStatus(activityId, type= "reactivate");
     } catch (error) {
         console.error("Error reactivating activity:", error);
     }
@@ -1053,7 +1067,7 @@ async function updateOutputNote(activityId) {
 //Function to get the content of the output note
 async function getOutputContent(noteId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/note/${noteId}`);
+        const response = await fetch(`http://localhost:8000/api/note/get/${noteId}`);
         const output = await response.json();
         return output.content;
     } catch (error) {
