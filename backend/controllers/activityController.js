@@ -2,6 +2,7 @@ const Activity = require('../models/activityModel');
 const User = require('../models/userModel');
 const Note = require('../models/noteModel');
 const Event = require('../models/eventModel');
+const PhaseSubphase = require("../models/phaseSubphaseModel");
 const { createNotification } = require('../controllers/notificationController');
 const { calculateDate } = require('../utils/utils');
 
@@ -291,6 +292,27 @@ async function adjustOrContractActivitySchedule(req, res) {
 
                 activity.startDate = newStartDate;
                 activity.deadline = newDeadline;
+
+                //if the macro has a deadline < newDeadline, we set the deadline to the new deadline and update the deadline event
+                const phaseSubphase = await PhaseSubphase.findById(activity.phaseSubphase).populate("macroActivity");
+                console.log("PhaseSubphase:", phaseSubphase);
+                if (phaseSubphase) {
+                    const macro = phaseSubphase.macroActivity;
+                    console.log("Macroactivity:", macro);
+                    const macroDeadline = new Date(macro.deadline);
+                    if (macroDeadline < newDeadline) {
+                        macro.deadline = newDeadline;
+                        await macro.save();
+                        // Update the deadline event of the macroactivity
+                        const macroEvent = await Event.findById(macro.events[1]);
+                        if (macroEvent) {
+                            macroEvent.date = newDeadline;
+                            await macroEvent.save();
+                        }
+                    }
+                    console.log("Macroactivity updated:", macro); //TODO AGGIUSTA, SE NE HO PIU DI UNO MI METTE LA DEADLINE DELLA PRIMA, visualizza nel front la data di macro giusta
+                }
+
             } else if (action === 'contract') {
                 // Contract only startDate (reduce), deadline remains the same
                 const originalDuration = Math.ceil((originalDeadline - originalStartDate) / (1000 * 60 * 60 * 24));
