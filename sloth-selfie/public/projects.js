@@ -8,7 +8,8 @@
 //TODO: distinguere tra macroattività e sottoattività, cambiare front e back e gestire handleActivities
 //viewAslist: orderby solo con activities o anche con macroactivities? colori?
 //gantt: bottone -+ in gantt? colori?
-//finire back e front: gestisci handleActivities nel modo corretto -> manca la gestione di rimozione input/output macro se riattivo una sua sub o se al fetch non ci sono più attività on input
+//finire back e front: gestisci handleActivities nel modo corretto -> se al fetch non ci sono più attività con input, si deve nascondere l'input/output della macro
+//se macro senza attività come gestire?
 
 // Function to get the logged user username
 async function getLoggedUser() {

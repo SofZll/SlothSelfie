@@ -66,6 +66,24 @@ const getNotes = async (req, res) => {
     }
 };
 
+// Fetch a single note by ID
+const getNote = async (req, res) => {
+    const { noteId } = req.params;
+
+    try{
+        const note = await Note.findById(noteId)
+        .populate('user', 'username')
+        .populate('tasks')
+        .populate('sharedWith', 'username');
+
+        res.status(200).json(note);
+    }
+    catch (error) {
+        console.error('Error fetching note:', error);
+        return res.status(500).json({ success: false, message: 'Error fetching note' });
+    }
+}
+
 // Update a note
 const updateNote = async (req, res) => {
     const { noteId } = req.params;
@@ -151,6 +169,7 @@ const deleteNote = async (req, res) => {
 module.exports = {
     createNote,
     getNotes,
+    getNote,
     updateNote,
     deleteNote
 };
