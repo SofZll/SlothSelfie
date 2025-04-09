@@ -6,10 +6,10 @@
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
 //TODO: distinguere tra macroattività e sottoattività, cambiare front e back e gestire handleActivities
-//viewAslist: orderby solo con activities o anche con macroactivities? colori? -> aggiusta date di macro
+//viewAslist: orderby solo con activities o anche con macroactivities? colori?
 //gantt: bottone -+ in gantt? colori?
 //finire back e front: gestisci handleActivities nel modo corretto
-//se aggiusto/contraggo dipendenze e la macro ha data inferiore, devo aggiustarla-> back funziona, finire front
+//se macro non ha figlie ma ha sub, disattivarla in front
 
 // Function to get the logged user username
 async function getLoggedUser() {

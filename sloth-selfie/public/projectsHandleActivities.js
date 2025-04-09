@@ -950,14 +950,19 @@ async function updateDependentActivities(activityId, activity, onlyBlocked = fal
 
 // Function to adjust or contract the schedule of an activity
 async function adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, action) {
-    await fetch(`http://localhost:8000/api/activity/${activityId}/schedule`, {
+    const res = await fetch(`http://localhost:8000/api/activity/${activityId}/schedule`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dependentActivitiesIds, delay, action }) // action is "contract" or "delay"
     });
-
+    const data = await res.json();
     // Update the dependent activities with the new startDate and/or deadline
     adjustDatesOfDependentActivities(dependentActivitiesIds);
+
+    // update the deadlines of the macros in the DOM, if present
+    if (data.updatedMacros) {
+        updateMacroDeadlinesInDOM(data.updatedMacros);
+    }
 }
 
 //Function to adjust the deadline of the dependent activities in the DOM
@@ -991,6 +996,18 @@ async function adjustDatesOfDependentActivities(dependentActivitiesIds) {
             console.error(`Error updating the activity ${depId}:`, error);
         }
     }
+}
+
+//Function to update the deadline of the macros in the DOM
+function updateMacroDeadlinesInDOM(updatedMacros) {
+    updatedMacros.forEach(([macroId, newDeadlineStr]) => {
+        const newDeadline = new Date(newDeadlineStr);
+
+        const deadlineElement = document.getElementById(`deadline-${macroId}`);
+        if (deadlineElement) {
+            deadlineElement.innerText = `Deadline: ${newDeadline.toLocaleDateString()}`;
+        }
+    });
 }
 
 // Function to update the output note if the activity was reactivated and output was rejected
