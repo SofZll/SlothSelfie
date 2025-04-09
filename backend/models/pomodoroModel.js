@@ -22,9 +22,6 @@ const pomodoroSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    timeLeft: {
-        type: Number
-    },
     isStudyTime: {
         type: Boolean,
     },

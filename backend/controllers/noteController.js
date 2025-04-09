@@ -76,6 +76,7 @@ const updateNote = async (req, res) => {
     try {
         const note = await Note.findById(noteId);
         const users = await findUserId(sharedWith);
+        const userId = await User.findOne({ username: user});
 
         if (!note) {
             return res.status(404).json({ success: false, message: 'Note not found' });
@@ -87,7 +88,7 @@ const updateNote = async (req, res) => {
         }
 
         if (addedTasks) {
-            const response = await addTasks(addedTasks, user, users);
+            const response = await addTasks(addedTasks, userId, users);
             if (!response) return res.status(500).json({ success: false, message: 'Error adding tasks' });
             else note.tasks = response;
         }
