@@ -86,9 +86,11 @@ function renderPhase(phase, container, typeSelect) {
     //Shows the macroactivity of the phase
     if (phase.macroActivity) {
         const macroInfo = document.createElement("p");
+        const startDate = new Date(phase.macroActivity.startDate).toLocaleDateString();
+        const deadline = new Date(phase.macroActivity.deadline).toLocaleDateString();
         macroInfo.innerHTML = `
             <strong>Macroactivity: ${phase.macroActivity.title}</strong>
-            &nbsp; -${phase.macroActivity.description.content}- Start date: ${phase.macroActivity.startDate?.split("T")[0]} - Deadline: ${phase.macroActivity.deadline?.split("T")[0]}
+            &nbsp; -${phase.macroActivity.description.content}- Start date: ${startDate} - Deadline: ${deadline}
         `;
         phaseDiv.appendChild(macroInfo);
     }
@@ -110,9 +112,11 @@ function renderPhase(phase, container, typeSelect) {
         // Shows the macroactivity of the subphase
         if (subphase.macroActivity) {
             const macroInfo = document.createElement("p");
+            const startDate = new Date(subphase.macroActivity.startDate).toLocaleDateString();
+            const deadline = new Date(subphase.macroActivity.deadline).toLocaleDateString();
             macroInfo.innerHTML = `
                 <strong>Macroactivity: ${subphase.macroActivity.title}</strong>
-                &nbsp; -${subphase.macroActivity.description.content}- Start date: ${subphase.macroActivity.startDate?.split("T")[0]} - Deadline: ${subphase.macroActivity.deadline?.split("T")[0]}
+                &nbsp; -${subphase.macroActivity.description.content}- Start date: ${startDate} - Deadline: ${deadline}
             `;
             subphaseDiv.appendChild(macroInfo);
         }

@@ -364,7 +364,9 @@ async function adjustOrContractActivitySchedule(req, res) {
 
         await Promise.all(notificationPromises);
 
-        res.status(200).json({ message: "Schedule adjusted/contracted successfully" });
+        res.status(200).json({ message: "Schedule adjusted/contracted successfully" ,
+            updatedMacros: Array.from(macroDeadlinesMap.entries()) // [ [macroId, newDeadline], ... ]
+        });
     }
     catch (error) {
         console.error("Error adjusting/contracting activity schedule:", error);
