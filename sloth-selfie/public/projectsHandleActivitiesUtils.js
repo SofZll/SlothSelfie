@@ -182,14 +182,28 @@ async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
     }
 }
 
-//Function to check if the macroActivity has children
+//Function to check if the macroActivity has direct and indirect children (indirect if this is a macro of a phase that has subphases)
 async function checkChildren(phaseSubphase) {
     try{
         //get the phaseSubphase of the activity
         const response = await fetch(`http://localhost:8000/api/phaseSubphase/${phaseSubphase}`);
         const phaseSubphaseData = await response.json();
+        
         //get the activities of the phaseSubphase, they are the children of the macroactivity
         const children = phaseSubphaseData.activities;
+
+        //if the phaseSubphase is a phase, we need to get the activities of the subphases too
+        if (phaseSubphaseData.type === 'phase') {
+            //we get the subphases of the phase
+            for(const subphaseId of phaseSubphaseData.subphases) {
+                //get the subphase
+                const response = await fetch(`http://localhost:8000/api/phaseSubphase/${subphaseId}`);
+                const subphaseData = await response.json();
+                //get the activities of the subphase
+                children.push(...subphaseData.activities);
+            }
+        }
+        console.log("Children of the macroactivity:", children);
         return children;
     }catch(error){
         console.error("Error fetching phaseSubphase:", error);
