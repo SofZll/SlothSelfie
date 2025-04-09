@@ -13,7 +13,7 @@ import { X } from 'lucide-react';
 
 const FormNote = () => {
 
-    const { selected, resetSelected, note, setNote, resetNote, notes, setNotes } = useNote();
+    const { selected, resetSelected, note, setNote, resetNote, notes, setNotes, setDeletePopUp } = useNote();
     const isDesktop = useIsDesktop();
 
     const handleSubmit = async () => {
@@ -35,6 +35,7 @@ const FormNote = () => {
                 setNotes([...notes, response]);
             } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error adding note', customClass: { confirmButton: 'button-alert' } });
         } else {
+            console.log(note, 'noteeeeeeeee');
             const response = await apiService(`/note/${note._id}`, 'PUT', note);
             if (response) {
                 Swal.fire({ title: 'Note edited', icon: 'success', text: 'Note edited successfully', customClass: { confirmButton: 'button-alert' } });
@@ -45,18 +46,6 @@ const FormNote = () => {
         resetNote();
         resetSelected();
         
-    }
-
-    const deleteNote = async () => {
-        const response = await apiService(`/note/${note._id}`, 'DELETE');
-        if (response) {
-            Swal.fire({ title: 'Note deleted', icon: 'success', text: 'Note deleted successfully', customClass: { confirmButton: 'button-alert' } });
-            setNotes(notes.filter(n => n._id !== note._id));
-            resetNote();
-            resetSelected();
-        } else {
-            Swal.fire({ title: 'Error', icon: 'error', text: 'Error deleting note', customClass: { confirmButton: 'button-alert' } });
-        }
     }
 
     useEffect(() => {
@@ -135,7 +124,7 @@ const FormNote = () => {
                 <div className='d-flex align-items-center justify-content-center'>
                     <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                     {selected.edit && (
-                        <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteNote()}>delete</button>
+                        <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp({show: true, note: note})}>delete</button>
                     )}
                 </div>
 
