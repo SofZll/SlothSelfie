@@ -19,8 +19,10 @@ const CardNote = ({ Note }) => {
     const { selected, setSelected, setNote, notes, setNotes } = useNote();
 
     const selectNote = () => {
-        setNote(Note);
-        if (Note.tasks) setNote({ ...Note, tasks: Note.tasks.map(t => ({ ...t, deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null })), addedTasks: [], deletedTasks: [] });
+        console.log('selectNote', Note);
+        
+        if (Note.tasks) setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username ), tasks: Note.tasks.map(t => ({ ...t, deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null })), addedTasks: [], deletedTasks: [] });
+        else setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username) });
         setSelected({ ...selected, edit: true, add: false, popUp: true });
     }
 

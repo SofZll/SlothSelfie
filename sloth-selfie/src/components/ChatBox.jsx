@@ -320,7 +320,7 @@ const ChatBox = () => {
                                 <button className='new-chat-button d-flex align-items-center' onClick={() => setShowShareInput (!showShareInput)}><Plus /></button>
                             </div>
                         ) : (
-                            <div className='d-flex flex-row'>
+                            <div className='d-flex flex-row px-2'>
                                 <ShareInput receivers={participants} setReceivers={setParticipants} />
                                 {participants.length > 0 ? <button className='button-clean green my-2 ' onClick={handleNewChat}>Create</button> : <button className='new-chat-button d-flex align-items-start mt-3' onClick={() => setShowShareInput (!showShareInput)}><Undo2 /></button>}
                             </div>

@@ -63,8 +63,13 @@ const eventSchema = new mongoose.Schema({
     isInProject: {  //used to differentiate between normal events and project-activity events
         type: Boolean,
         default: false,
-    }
+    },
 
+    pomodoro: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Pomodoro',
+        default: null
+    }
 }, { timestamps: true });
 
 const Event = mongoose.model('Event', eventSchema);

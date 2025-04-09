@@ -57,7 +57,7 @@ const ListTask = () => {
                 <div className='col-4'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
                     <input type='date' className='form-control' id='deadline'
-                    value={task.deadline ?? ''}
+                    value={task.deadline ? (new Date(task.deadline)).toISOString().split('T')[0] : ''}
                     onChange={(e) => setDeadline(e.target.value)} />
                 </div>
                 <div className='col-2'>
