@@ -5,11 +5,10 @@
 //TODO, TIME MACHINE DATE, in projectsHandleActivities e projectsHandleActivitiesUtils.js utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
-//TODO: distinguere tra macroattività e sottoattività, cambiare front e back e gestire handleActivities
 //viewAslist: orderby solo con activities o anche con macroactivities? colori?
 //gantt: bottone -+ in gantt? colori?
-//finire back e front: gestisci handleActivities nel modo corretto
-//se macro non ha figlie ma ha sub, disattivarla in front, e gestire stato e i suoi input/output di conseguenza
+//finire back e front: gestisci handleActivities nel modo corretto con macroactivities
+//se aggiungo/tolgo attività con edit gestire le macro in handleactivities
 
 // Function to get the logged user username
 async function getLoggedUser() {
