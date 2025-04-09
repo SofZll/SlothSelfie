@@ -276,6 +276,8 @@ async function adjustOrContractActivitySchedule(req, res) {
 
         // Find the dependent activities and populate the events
         const activities = await Activity.find({ _id: { $in: activityIdsArray } }).populate("events");
+        //here we keep the macroactivity deadlines to update them later, if the deadline of the macroactivity is before the new deadline of the activities, we select the bigger one
+        const macroDeadlinesMap = new Map();
 
         const updatePromises = activities.map(async (activity) => {
 
@@ -295,22 +297,17 @@ async function adjustOrContractActivitySchedule(req, res) {
 
                 //if the macro has a deadline < newDeadline, we set the deadline to the new deadline and update the deadline event
                 const phaseSubphase = await PhaseSubphase.findById(activity.phaseSubphase).populate("macroActivity");
-                console.log("PhaseSubphase:", phaseSubphase);
-                if (phaseSubphase) {
-                    const macro = phaseSubphase.macroActivity;
-                    console.log("Macroactivity:", macro);
-                    const macroDeadline = new Date(macro.deadline);
-                    if (macroDeadline < newDeadline) {
-                        macro.deadline = newDeadline;
-                        await macro.save();
-                        // Update the deadline event of the macroactivity
-                        const macroEvent = await Event.findById(macro.events[1]);
-                        if (macroEvent) {
-                            macroEvent.date = newDeadline;
-                            await macroEvent.save();
-                        }
+                // Save the macroactivity deadline in the map
+                if (phaseSubphase && phaseSubphase.macroActivity) {
+                    updateMacroDeadlineMap(macroDeadlinesMap, phaseSubphase.macroActivity, newDeadline);
+                }
+
+                // if the macroactivity is in a subphase, we need to check the parent phase and update its macroActivity deadline too
+                if (phaseSubphase.type === 'subphase' && phaseSubphase.parentPhase) {
+                    const parentPhase = await PhaseSubphase.findById(phaseSubphase.parentPhase).populate("macroActivity");
+                    if (parentPhase && parentPhase.macroActivity) {
+                        updateMacroDeadlineMap(macroDeadlinesMap, parentPhase.macroActivity, newDeadline);
                     }
-                    console.log("Macroactivity updated:", macro); //TODO AGGIUSTA, SE NE HO PIU DI UNO MI METTE LA DEADLINE DELLA PRIMA, visualizza nel front la data di macro giusta
                 }
 
             } else if (action === 'contract') {
@@ -346,6 +343,19 @@ async function adjustOrContractActivitySchedule(req, res) {
 
         await Promise.all(updatePromises);
 
+        // Update the macroactivities deadlines once with the max deadline
+        for (const [macroId, maxDeadline] of macroDeadlinesMap.entries()) {
+            const macro = await Activity.findById(macroId);
+            if (macro && new Date(macro.deadline) < maxDeadline) {
+                macro.deadline = maxDeadline;
+                await macro.save();
+                const macroEvent = await Event.findById(macro.events[1]);
+                if (macroEvent) {
+                    macroEvent.date = maxDeadline;
+                    await macroEvent.save();
+                } 
+            }
+        }
         // Create notifications to send to the users involved in the dependent activities about the schedule change
         const notificationPromises = activities.map(async (activity) => {
             const dateNotif = new Date().toISOString(); //TODO: TIME MACHINE DATE ?
@@ -359,6 +369,16 @@ async function adjustOrContractActivitySchedule(req, res) {
     catch (error) {
         console.error("Error adjusting/contracting activity schedule:", error);
         res.status(500).json({ message: "Server error" });
+    }
+}
+
+// Function to update the macroactivity deadline map
+// This function updates the macro activity deadline map with the maximum deadline for each macro activity
+function updateMacroDeadlineMap(map, macro, deadline) {
+    const id = macro._id.toString();
+    const prev = map.get(id);
+    if (!prev || prev < deadline) {
+        map.set(id, deadline);
     }
 }
 
