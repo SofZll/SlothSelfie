@@ -210,6 +210,109 @@ async function checkChildren(phaseSubphase) {
     }
 }
 
+//called in checkAndUpdateMacroStatus, phase case
+async function handlePhaseMacro(macroActivity, phaseSubphase, type) {
+    if (type === "output") {  //needs the check of the children
+        //check if the activities of the phasesubphase + children are all with status = Completed
+        //get all direct and indirect children of the macroactivity (indirect if this is a macro of a phase that has subphases)
+        const allChildren = await checkChildren(phaseSubphase._id);
+        const allCompleted = allChildren.every(act => act.status === "Completed" && act.output !== null && act.output !== "");
+        
+        if (allCompleted) {
+            //insert the output in the macroactivity output field
+            let outputField = document.getElementById(`output-${macroActivity._id}`);
+            if (outputField) {
+                outputField.value = "Completed";
+            }
+            // Update the status of the macroactivity to Completed
+            await updateActivityStatus(macroActivity._id, "Completed");
+            //insert the macroactivity output in the backend
+            await insertMacroInputOutput(macroActivity._id, 'output', "Completed");
+        }
+    }else if(type === "input"){
+        //at least one activity has input, so we change the macroactivity input and call the put request to update the macroactivity input
+        let inputField = document.getElementById(`input-${macroActivity._id}`);
+        if (inputField) {
+            inputField.value = "Empty";
+        }
+        await updateActivityStatus(macroActivity._id, "Active");
+        //insert the macroactivity input in the backend
+        await insertMacroInputOutput(macroActivity._id, 'input', "Empty");
+    }else if(type === "reactivate"){
+        //check if the macro was Completed, if so we set the status as Reactivated
+        if(macroActivity.status === "Completed"){
+            await updateActivityStatus(macroActivity._id, "Reactivated");
+            //we clear the output field in the DOM
+                let outputField = document.getElementById(`output-${macroActivity._id}`);
+            if (outputField.value !== "") {
+                outputField.value = "";
+            }
+        }
+    }
+}
+
+//called in checkAndUpdateMacroStatus, subphase case
+async function handleSubphaseMacro(macroActivity, phaseSubphase, parentPhase, type) {
+    //collect the children of both subphase and parent phase
+    const subChildren = await checkChildren(phaseSubphase._id);
+    let parentChildren = [];
+    if (parentPhase) {
+        parentChildren = await checkChildren(parentPhase._id);
+    }
+
+    if (type === "input") {
+        // we set the input for the macroactivity of the subphase
+        let inputField = document.getElementById(`input-${macroActivity._id}`);
+        if (inputField) inputField.value = "Empty";
+        await updateActivityStatus(macroActivity._id, "Active");
+        await insertMacroInputOutput(macroActivity._id, 'input', "Empty");
+
+        // we set the input for the macroactivity of the parent phase
+        if (parentPhase && parentPhase.macroActivity) {
+            let parentInputField = document.getElementById(`input-${parentPhase.macroActivity._id}`);
+            if (parentInputField) parentInputField.value = "Empty";
+            await updateActivityStatus(parentPhase.macroActivity._id, "Active");
+            await insertMacroInputOutput(parentPhase.macroActivity._id, 'input', "Empty");
+        }
+    } else if (type === "output") {
+        //if EVERY activity of the subphase is completed and has output, we set the status of the macro as Completed
+        const subAllCompleted = subChildren.length > 0 && subChildren.every(act => act.status === "Completed" && act.output && act.output !== "");
+        if (subAllCompleted) {
+            let outputField = document.getElementById(`output-${macroActivity._id}`);
+            if (outputField) outputField.value = "Completed";
+            await updateActivityStatus(macroActivity._id, "Completed");
+            await insertMacroInputOutput(macroActivity._id, 'output', "Completed");
+        }
+        //for the parent phase, update the macro only if ALL its activities (direct and all subphases) are completed
+        if (parentPhase && parentPhase.macroActivity) {
+            const parentAllCompleted = parentChildren.length > 0 && parentChildren.every(act => act.status === "Completed" && act.output && act.output !== "");
+            if (parentAllCompleted) {
+                let parentOutputField = document.getElementById(`output-${parentPhase.macroActivity._id}`);
+                if (parentOutputField) parentOutputField.value = "Completed";
+                await updateActivityStatus(parentPhase.macroActivity._id, "Completed");
+                await insertMacroInputOutput(parentPhase.macroActivity._id, 'output', "Completed");
+            }
+        }
+    } else if (type === "reactivate") {
+        // we set the status as Reactivated for the macroactivity of the subphase
+        if (macroActivity.status === "Completed") {
+            await updateActivityStatus(macroActivity._id, "Reactivated");
+            let outputField = document.getElementById(`output-${macroActivity._id}`);
+            if (outputField && outputField.value !== "") {
+                outputField.value = "";
+            }
+        }
+        // and for the macroactivity of the parent phase
+        if (parentPhase && parentPhase.macroActivity && parentPhase.macroActivity.status === "Completed") {
+            await updateActivityStatus(parentPhase.macroActivity._id, "Reactivated");
+            let parentOutputField = document.getElementById(`output-${parentPhase.macroActivity._id}`);
+            if (parentOutputField && parentOutputField.value !== "") {
+                parentOutputField.value = "";
+            }
+        }
+    }
+}
+
 // Function to check if the activity is overdue or abandoned in handleActivities
 function checkOverdueAbandoned(activity) {
     let today = new Date();       //TODO, TIME MACHINE DATE

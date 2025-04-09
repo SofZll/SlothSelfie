@@ -330,8 +330,8 @@ async function insertMacroInputOutput(activityId, fieldType, value = "") {
 //Function to check if the macroactivity has at least one activity with input, if so the status is set as Active, and we insert the input if not present
 //if the macroactivity has all the activities completed we set the status as completed, and we insert the mactoActivity output
 //if the macroactivity is reactivated, we set the status as Reactivated and we clear the output field in the DOM
-//We will consider all the direct and indirect children of the macroactivity (indirect if this is a macro of a phase that has subphases)
-async function checkAndUpdateMacroStatus(activityId, type) {  //TODO: DEVO AGGIORNARE ANCHE LE MACRO PADRI
+//We will consider the parent macro also (if the activity is in a subphase)
+async function checkAndUpdateMacroStatus(activityId, type) {
     try {
         //get the activity
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
@@ -348,100 +348,24 @@ async function checkAndUpdateMacroStatus(activityId, type) {  //TODO: DEVO AGGIO
         //get the macroactivity of the phaseSubphase
         const macroActivity = phaseSubphase.macroActivity;
 
-        //get all direct and indirect children of the macroactivity (indirect if this is a macro of a phase that has subphases)
-        const allChildren = await checkChildren(phaseSubphase._id);
+        if(phaseSubphase.type === "phase"){ //No need to update the macro of the father phase
 
-        if (type === "output") {
-            //check if the activities of the phasesubphase are all with status = Completed
-            const allCompleted = allChildren.every(act => act.status === "Completed" && act.output !== null && act.output !== "");
+            await handlePhaseMacro(macroActivity, phaseSubphase, type);
 
-            if (allCompleted) {
-                //insert the output in the macroactivity output field
-                let outputField = document.getElementById(`output-${macroActivity._id}`);
-                if (outputField) outputField.value = "Completed";
+        }else if(phaseSubphase.type === "subphase"){
+            //We will consider the parent macro phase also
 
-                // Update the status of the macroactivity to Completed
-                await updateActivityStatus(macroActivity._id, "Completed");
-                //insert the macroactivity output in the backend
-                await insertMacroInputOutput(macroActivity._id, "output", "Completed");
+            // we get the parentPhase
+            let parentPhase = null;
+            if (phaseSubphase.parentPhase) {
+                const parentResponse = await fetch(`http://localhost:8000/api/phaseSubphase/${phaseSubphase.parentPhase}`);
+                parentPhase = await parentResponse.json();
             }
-
-        } else if (type === "input") {
-            //at least one activity has input, so we change the macroactivity input and call the put request to update the macroactivity input and status
-            let inputField = document.getElementById(`input-${macroActivity._id}`);
-            if (inputField) {
-                inputField.value = "Empty";
-            }
-            await updateActivityStatus(macroActivity._id, "Active");
-            //insert the macroactivity input in the backend
-            await insertMacroInputOutput(macroActivity._id, 'input', "Empty");
-        }else if (type === "reactivate") {
-            //check if the macro was Completed, if so we set the status as Reactivated
-            if (macroActivity.status === "Completed") {
-                await updateActivityStatus(macroActivity._id, "Reactivated");
-                //we clear the output field in the DOM
-                let outputField = document.getElementById(`output-${macroActivity._id}`);
-                if (outputField && outputField.value !== "") {
-                    outputField.value = "";
-                }
-            }
+            await handleSubphaseMacro(macroActivity, phaseSubphase, parentPhase, type);
+      
         }
     } catch (error) {
         console.error("Error in checkAndUpdateMacroStatus:", error);
-    }
-}
-
-async function checkAndUpdateMacroStatusOld(activityId, type) {     //TODO DELETE QUANDO L'ALTRA VA
-    //get the activity
-    const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-    const activity = await response.json();
-
-    if (!activity) {
-        console.error("Activity is undefined:", activity);
-        return;
-    }
-    console.log(activity);
-
-    //get the phaseSubphase of the activity
-    const responseData = await fetch(`http://localhost:8000/api/phaseSubphase/${activity.phaseSubphase}`);
-    const phaseSubphase = await responseData.json();
-
-    //get the macroactivity of the phaseSubphase
-    const macroActivity = phaseSubphase.macroActivity;
-
-    if(type === "output"){
-        //check if the activities of the phasesubphase are all with status = Completed
-        let allActivitiesAreCompleted = phaseSubphase.activities.every(act => act.status === "Completed" && act.output !== null && act.output !== "");
-        if (allActivitiesAreCompleted) {
-            //insert the output in the macroactivity output field
-            let outputField = document.getElementById(`output-${macroActivity._id}`);
-            if (outputField) {
-                outputField.value = "Completed";
-            }
-            // Update the status of the macroactivity to Completed
-            await updateActivityStatus(macroActivity._id, "Completed");
-            //insert the macroactivity output in the backend
-            await insertMacroInputOutput(macroActivity._id, 'output', "Completed");
-        }
-    }else if(type === "input"){
-        //at least one activity has input, so we change the macroactivity input and call the put request to update the macroactivity input
-        let inputField = document.getElementById(`input-${macroActivity._id}`);
-        if (inputField) {
-            inputField.value = "Empty";
-        }
-        await updateActivityStatus(macroActivity._id, "Active");
-        //insert the macroactivity input in the backend
-        await insertMacroInputOutput(macroActivity._id, 'input', "Empty");
-    }else if(type === "reactivate"){
-        //check if the macro was Completed, if so we set the status as Reactivated
-        if(macroActivity.status === "Completed"){
-            await updateActivityStatus(macroActivity._id, "Reactivated");
-            //we clear the output field in the DOM
-            let outputField = document.getElementById(`output-${macroActivity._id}`);
-            if (outputField.value !== "") {
-                outputField.value = "";
-            }
-        }
     }
 }
 
