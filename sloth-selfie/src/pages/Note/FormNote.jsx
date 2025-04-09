@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useNote } from '../../contexts/NoteContext';
 import { useIsDesktop } from '../../utils/utils';
 import { apiService } from '../../services/apiService';
+import ShareInput from '../../components/ShareInput';
 
 import ListTask from './ListTask';
 
@@ -65,30 +66,9 @@ const FormNote = () => {
     }, [selected]);
 
     return (
-        <div className='d-flex flex-column w-100 h-100 p-md-2 p-0 position-relative'>
+        <div className='d-flex flex-column w-100 h-100 p-md-2 p-0 position-relative overflow-hidden'>
             
-
-            <div className='d-flex w-100 position-absolute top-0 start-0 z-1'>
-                <div className='d-flex fs-5 fw-bold flex-grow-1 align-items-center p-0 py-md-3'>
-                    {selected.add ? 'Add a new note' : 'Edit the selected note'}
-                </div>
-
-                {isDesktop ? (
-                    <>
-                    {selected.edit && 
-                        <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
-                            <X size={25} color='#555B6E' strokeWidth={1.75} />
-                        </button>
-                    }
-                    </>
-                ) : (
-                    <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
-                        <X size={25} color='#555B6E' strokeWidth={1.75} />
-                    </button>
-                )}
-            </div>
-
-            <form className='d-flex flex-column w-100 pt-5'>
+            <div className='d-flex flex-column w-100 pt-5 overflow-y-auto overflow-x-hidden'>
                 <div className='row py-2 '>
                     <div className='col-6'>
                         <label htmlFor='title' className='form-label'>Title</label>
@@ -143,11 +123,14 @@ const FormNote = () => {
                     </div>
                 </div>
 
-                <div className='row py-2'>
-                    <div className='col-12'>
-                        {/*TODO: share with */}
+                {note.noteAccess === 'shared' && (
+                    <div className='row py-2'>
+                        <div className='col-12'>
+                            <label htmlFor='receivers' className='form-label'>Share with</label>
+                            <ShareInput receivers={note.sharedWith} setReceivers={(receivers) => setNote({...note, ['sharedWith']: receivers})} />
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className='d-flex align-items-center justify-content-center'>
                     <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
@@ -156,7 +139,28 @@ const FormNote = () => {
                     )}
                 </div>
 
-            </form>
+            </div>
+
+
+            <div className='d-flex w-100 position-absolute top-0 start-0'>
+                <div className='d-flex fs-5 fw-bold flex-grow-1 align-items-center p-0 py-md-3'>
+                    {selected.add ? 'Add a new note' : 'Edit the selected note'}
+                </div>
+
+                {isDesktop ? (
+                    <>
+                    {selected.edit && 
+                        <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                            <X size={25} color='#555B6E' strokeWidth={1.75} />
+                        </button>
+                    }
+                    </>
+                ) : (
+                    <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                        <X size={25} color='#555B6E' strokeWidth={1.75} />
+                    </button>
+                )}
+            </div>
         </div>
     );
 }

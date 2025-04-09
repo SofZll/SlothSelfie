@@ -4,6 +4,7 @@ import { usePomodoro } from '../../contexts/PomodoroContext';
 import { useMusic } from '../../contexts/MusicContext';
 import EditPomodoro from './EditPomodoro';
 import PopUpShare from './PopUpShare';
+import PopUpPlan from './PopUpPlan';
 import { Youtube, SearchCheck } from 'lucide-react';
 
 const PopUpPomodoro = () => {
@@ -46,9 +47,7 @@ const PopUpPomodoro = () => {
                         )}
 
                         {popUp.calendar && (
-                            <div className='d-flex justify-content-center'>
-                                <h5>Calendar</h5>
-                            </div>
+                            <PopUpPlan />
                         )}
 
                         {popUp.music && (

@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
+import ShareInput from '../../components/ShareInput';
 
 const FormActivity = () => {
 
@@ -78,14 +79,17 @@ const FormActivity = () => {
                     <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>
-            
+
+            <div className='row py-2'>
+                <div className='col-12'>
+                    <label htmlFor='share' className='form-label'>Share with</label>
+                    <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, ['sharedWith']: receivers})} />
+                </div>
+            </div>
 
             <div className='row py-2'>
                 <div className='col-6'>
                     {/* Field for notification TODO */}
-                </div>
-                <div className='col-6'>
-                    {/* Field for share TODO */}
                 </div>
             </div>
 

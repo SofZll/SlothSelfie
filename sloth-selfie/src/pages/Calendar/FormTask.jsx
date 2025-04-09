@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
+import ShareInput from '../../components/ShareInput';
 
 const FormTask = () => {
 
@@ -67,7 +68,8 @@ const FormTask = () => {
 
             <div className='row py-2'>
                 <div className='col-12'>
-                    {/* Field for share TODO */}
+                    <label htmlFor='sharedWith' className='form-label'>Shared with</label>
+                    <ShareInput receivers={task.sharedWith} setReceivers={(receivers) => setTask({...task, ['sharedWith']: receivers})} />
                 </div>
             </div>
             
