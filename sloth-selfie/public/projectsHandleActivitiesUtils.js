@@ -18,9 +18,11 @@ async function updateActivitiesStatus(activities) {
 
         } else if (activity.status === "Active" && activity.isMacroactivity) {
             let children = await checkChildren(activity.phaseSubphase);
-            let allChildrenCompleted = children.every(child => child.status === "Completed" && child.output !== null && child.output !== "");
-            if (allChildrenCompleted) {
-                asyncOperations.push(updateActivityStatus(activity._id, "Completed"));
+            if(children.length > 0) {
+                let allChildrenCompleted = children.every(child => child.status === "Completed" && child.output !== null && child.output !== "");
+                if (allChildrenCompleted) {
+                    asyncOperations.push(updateActivityStatus(activity._id, "Completed"));
+                }
             }
         }
         // Check the activity deadline and if it is Overdue or Abandoned

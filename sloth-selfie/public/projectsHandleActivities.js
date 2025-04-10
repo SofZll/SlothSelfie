@@ -6,6 +6,10 @@ async function handleActivities(projectId) {
                         <div class="spinner"></div>
                         <p>Loading, please wait...</p>
                     </div>`;
+
+    //updates the DOM to show the loading message
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     try {
         const userLogged = await getLoggedUser();
         if (!userLogged) {

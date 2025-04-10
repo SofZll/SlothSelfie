@@ -9,6 +9,7 @@
 //gantt: bottone -+ in gantt? colori?
 //finire back e front: gestisci handleActivities nel modo corretto con macroactivities
 //se aggiungo/tolgo attività con edit gestire le macro in handleactivities -> nel fetch ho gestito COmpleted<->Active
+//controlla i casi con delay e contract (dipendenze di sub in ritardo)
 
 // Function to get the logged user username
 async function getLoggedUser() {
