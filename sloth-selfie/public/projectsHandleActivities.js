@@ -1,23 +1,29 @@
 // Function to handle activities status by the members of each activity or by the owner
 async function handleActivities(projectId) {
+    //adds loading message and spinner
+    const container = document.getElementById("activity-container");
+    container.innerHTML = `<div class="loading-container">
+                        <div class="spinner"></div>
+                        <p>Loading, please wait...</p>
+                    </div>`;
     try {
-        // Get the logged user
         const userLogged = await getLoggedUser();
-        
         if (!userLogged) {
-            Swal.fire({title: "Error", text: "No user is logged in!",icon: "error"});
+            Swal.fire({title: "Error", text: "No user is logged in!", icon: "error"});
             return;
         }
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
+
+        const projectResponse = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const project = await projectResponse.json();
 
         // Check if the logged user is the owner or a member
         const isOwner = project.owner.username === userLogged;
         const isMember = project.members.some(member => member.username === userLogged);
         if (!isOwner && !isMember) {
-            Swal.fire({title: "Error", text: "You can't handle the activities of this project, you are not the owner nor a member.", icon: "error"});
+            Swal.fire({title: "Error", text: "You can't handle the activities of this project", icon: "error"});
             return;
         }
+
         // Get activities: all if owner, only assigned if member, on top we show the macroactivity of the phase/subphase (only to the owner)
         // Get all activities from the project
         let activities = [];
@@ -34,94 +40,34 @@ async function handleActivities(projectId) {
             activities = activities.filter(activity => activity.sharedWith.some(user => user.username === userLogged));
         }
 
-        // Async operations to resolve
-        let asyncOperations = [];
+        //Updates the activities status
+        await updateActivitiesStatus(activities);
+
+        //refetch after the update
+        const refreshedProject = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        if (!refreshedProject.ok) {
+            throw new Error("Failed to fetch the refreshed project data.");
+        }
+        const refreshedProjectData = await refreshedProject.json();
+
+        // Reconstruct the activities array from the refreshed project
+        let updatedActivities = [];
+        for (const phase of refreshedProjectData.phases) {
+            updatedActivities = updatedActivities.concat(phase.macroActivity);
+            updatedActivities = updatedActivities.concat(phase.activities);
+            for (const subphase of phase.subphases) {
+                updatedActivities = updatedActivities.concat(subphase.macroActivity);
+                updatedActivities = updatedActivities.concat(subphase.activities);
+            }
+        }
+
+        if (!isOwner) {
+            updatedActivities = updatedActivities.filter(activity => activity.sharedWith.some(user => user.username === userLogged));
+        }
 
         // Show the activities
-        let activityContainer = document.getElementById("activity-container");
-        let closeBtn = document.getElementById("closeActivityViewBtn");
+        renderActivities(updatedActivities, userLogged, isOwner);
 
-        let content = `<h2>Project Activities</h2>`;
-        if (activities.length === 0) {
-            content += `<p>No activities assigned to you.</p>`;
-        } else {
-            content += `<ul class="list-group">`;
-            
-            for (const activity of activities) {
-
-                //if the activity is completed, we check if it has dependencies and show the buttons for the owner to decide in case of delay              
-                if (activity.status === "Completed") {
-                    asyncOperations.push(checkOptionsForCompleteActivityDep(activity._id, false));
-
-                    if(activity.isMacroactivity){
-                        //we check if new children were added, if there are children with status !== "Completed", we set the status of the macro as Active
-                        let children = await checkChildren(activity.phaseSubphase);
-                        let allChildrenCompleted = children.every(child => child.status === "Completed" && child.output !== null && child.output !== "");
-                        if (!allChildrenCompleted) {
-                            asyncOperations.push(updateActivityStatus(activity._id, "Active"));
-                        }
-                    }
-                }
-
-                // Check the activity deadline and if it is Overdue or Abandoned
-                [isLate, isAbandoned, isAbandonedNoParticipants] = checkOverdueAbandoned(activity);
-
-                if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
-                    asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
-                }
-                if (isAbandoned || isAbandonedNoParticipants) {
-                    if (activity.status !== "Abandoned") {
-                        asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
-                    }
-                }
-                //if members are re-added, and the activity is not overdue since last 7 days, the activity will be Not_Activatable in case of no input, Activatable otherwise, Active if it has output also
-                if (activity.sharedWith.length > 0 && activity.status === "Abandoned") {
-                    if(!isAbandoned){
-                        if (!activity.input  && activity.status !== "Not_Activatable") {
-                            asyncOperations.push(updateActivityStatus(activity._id, "Not_Activatable"));
-                        } else if (activity.input && !activity.output &&  activity.status !== "Activatable")  {
-                            asyncOperations.push(activatableActivity(activity._id, "Activatable"));
-                        } else if (activity.output && activity.status !== "Active") {
-                            asyncOperations.push(updateActivityStatus(activity._id, "Active"));
-                        }
-                    }
-                }
-
-                //if the activity is reactivated, the output note can be updated and the output field is enabled, we also show the save button and adjust dependencies input
-                if (activity.status === "Reactivated" && !activity.isMacroactivity) {
-                    asyncOperations.push(reactivateActivity(activity._id, "Reactivated"));
-                }
-
-                let star = activity.milestone ? "*" : ""; // milestone
-
-                // Check the status of the input/output fields
-                const [ inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled ] = getActivityInputOutputStatus(activity, userLogged, isOwner, isAbandoned);
-
-                //before showing, check if it is a macro, and if there are activities in the macro phase/subphase
-                let children = [];
-                if(activity.isMacroactivity){
-                    children = await checkChildren(activity.phaseSubphase);
-                }
-                // Show the activity
-                content += generateContent(children, activity, star, inputDisabled, inputSelectDisabled, inputInsertDisabled, outputDisabled, outputSelectDisabled, outputInsertDisabled, isOwner, userLogged);
-            }
-            content += `</ul>`;
-        }
-
-        // Insert the content in the activity container
-        activityContainer.innerHTML = content;
-        activityContainer.style.display = "block";
-        closeBtn.style.display = "block";
-
-        // Wait for all async operations to finish
-        await Promise.all(asyncOperations);
-
-        //Function to disable/enable the buttons depending on the status of the activity
-        for (const activity of activities) {
-            const isMember = activity.sharedWith.some(member => member.username === userLogged);
-            const OwnerNotMember = isOwner && !isMember;
-            await updateActivityButtons(activity._id, isOwner, OwnerNotMember);
-        }
     } catch (error) {
         console.error("Error handling activities of the project:", error);
     }
