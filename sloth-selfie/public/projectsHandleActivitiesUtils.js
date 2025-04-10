@@ -8,11 +8,15 @@ async function updateActivitiesStatus(activities) {
             asyncOperations.push(checkOptionsForCompleteActivityDep(activity._id, false));
 
             if(activity.isMacroactivity){
-                //we check if new children were added, if there are children with status !== "Completed", we set the status of the macro as Active
+                //we check if new children were added, if there are children with status !== "Completed", we set the status of the macro as Active and delete the output note
                 let children = await checkChildren(activity.phaseSubphase);
                 let allChildrenCompleted = children.every(child => child.status === "Completed" && child.output !== null && child.output !== "");
                 if (!allChildrenCompleted) {
                     asyncOperations.push(updateActivityStatus(activity._id, "Active"));
+                    //delete the output note of the macroactivity
+                    if (activity.output) {
+                        asyncOperations.push(deleteNoteById(activity.output._id));
+                    }
                 }
             }
 
@@ -96,6 +100,11 @@ async function renderActivities(activities, userLogged, isOwner) {
         const isMember = activity.sharedWith.some(member => member.username === userLogged);
         const OwnerNotMember = isOwner && !isMember;
         await updateActivityButtons(activity._id, isOwner, OwnerNotMember);
+
+        //small buttons adjustment for macro without children
+        if (activity.isMacroactivity){
+            await adjustMacroButtons(activity._id);
+        }
     }
 }
 
@@ -118,8 +127,7 @@ function generateContent(children, activity, star, inputDisabled, inputSelectDis
                 <option value="empty">Empty</option>
                 <option value="link">Link</option>
             </select>
-            <input type="text" id="input-${activity._id}" value="${(activity.status === 'Not_Activatable' || activity.status === 'Activatable') ? '' :(activity.input?.content || '')}" disabled> 
-
+            <input type="text" id="input-${activity._id}" value="${(activity.input?.content || '')}" disabled> 
             
             <label>Output type:</label>
             <select id="output-type-${activity._id}" disabled>
@@ -127,7 +135,7 @@ function generateContent(children, activity, star, inputDisabled, inputSelectDis
                 <option value="link">Link</option>
                 <option value="true">Completed</option>
             </select>
-            <input type="text" id="output-${activity._id}" value="${(activity.status === 'Reactivated' || activity.status === 'Activatable'|| activity.status === 'Active' || activity.status === 'Not_Activatable') ? '' : (activity.output?.content || '')}" disabled>
+            <input type="text" id="output-${activity._id}" value="${(activity.output?.content || '')}" disabled>
             <p id="startDate-${activity._id}">Start Date: ${new Date(activity.startDate).toLocaleDateString()}<p>
             <p id="deadline-${activity._id}">Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
         `;
@@ -283,6 +291,47 @@ async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
     }
 }
 
+// Function to adjust macroactivity buttons in case it has no children
+async function adjustMacroButtons(macroId) {
+    try{
+        //get the macroactivity
+        const response = await fetch(`http://localhost:8000/api/activity/${macroId}`);
+        const activity = await response.json();
+        if(activity.status === "Reactivated") {
+            //check if the macroactivity has children, if not, we should activate the output field and be able to edit the output note
+            let children = await checkChildren(activity.phaseSubphase);
+            if(children.length === 0) {
+                // Reactivates the buttons and fields
+                toggleElements([
+                    `abandon-${activity._id}`,
+                    `save-output-${activity._id}`,
+                    `output-type-${activity._id}`,
+                    `output-${activity._id}`
+                ], false);
+
+                // Show the "Save updated output" button
+                let saveOutputButton = document.getElementById(`save-output-${activity._id}`);
+                if (saveOutputButton) {
+                    saveOutputButton.style.display = "inline-block";
+                }
+
+                // Disables the reject button
+                toggleElements([`reactivate-${activity._id}`], true);
+
+                // Hides the two buttons for the owner to decide if present
+                let container = document.getElementById(`activity-${activity._id}-buttons-container`);
+                if (container) {
+                    container.innerHTML = "";
+                }
+            }
+        }
+    }
+    catch(error){
+        console.error("Error adjusting macro buttons:", error);
+    }
+}
+    
+
 //Function to check if the macroActivity has direct and indirect children (indirect if this is a macro of a phase that has subphases)
 async function checkChildren(phaseSubphase) {
     try{
@@ -397,6 +446,7 @@ async function handleSubphaseMacro(macroActivity, phaseSubphase, parentPhase, ty
         // we set the status as Reactivated for the macroactivity of the subphase
         if (macroActivity.status === "Completed") {
             await updateActivityStatus(macroActivity._id, "Reactivated");
+            // we clear the output field in the DOM
             let outputField = document.getElementById(`output-${macroActivity._id}`);
             if (outputField && outputField.value !== "") {
                 outputField.value = "";
@@ -405,6 +455,7 @@ async function handleSubphaseMacro(macroActivity, phaseSubphase, parentPhase, ty
         // and for the macroactivity of the parent phase
         if (parentPhase && parentPhase.macroActivity && parentPhase.macroActivity.status === "Completed") {
             await updateActivityStatus(parentPhase.macroActivity._id, "Reactivated");
+            // we clear the output field in the DOM
             let parentOutputField = document.getElementById(`output-${parentPhase.macroActivity._id}`);
             if (parentOutputField && parentOutputField.value !== "") {
                 parentOutputField.value = "";

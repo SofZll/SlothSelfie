@@ -5,11 +5,8 @@
 //TODO, TIME MACHINE DATE, in projectsHandleActivities e projectsHandleActivitiesUtils.js utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
-//viewAslist: orderby solo con activities o anche con macroactivities? colori?
 //gantt: bottone -+ in gantt? colori?
-//finire back e front: gestisci handleActivities nel modo corretto con macroactivities
-//se aggiungo/tolgo attività con edit gestire le macro in handleactivities -> nel fetch ho gestito COmpleted<->Active
-//controlla i casi con delay e contract (dipendenze di sub in ritardo)
+//finire back e front: gestisci handleActivities nel modo corretto con macroactivities -> fatto, testare un po'
 
 // Function to get the logged user username
 async function getLoggedUser() {
@@ -79,7 +76,6 @@ async function loadProjects() {
             list.appendChild(li);
         });
 
-        console.log("Projects loaded successfully:", projects);
     } catch (error) {
         console.error("Error while loading projects:", error);
     }
@@ -195,8 +191,6 @@ async function saveOrUpdateProject(event) {
 
         project.phases.push(phase);
     });
-
-    console.log("Project data to save:", project);
 
     try {
         let response;
@@ -454,8 +448,6 @@ async function removeElement(button) {
             // if it is a subphase, we get the parent phase from data-parent-phase-id
             phaseId = element.getAttribute("data-parent-phase-id");
 
-            console.log("Removing subphase with id:", subphaseId, "from phase:", phaseId);
-
             // removes the subphase from UI
             element.remove();
             // Removes the subphase from the backend
@@ -501,7 +493,6 @@ async function removePhaseFromBackend(projectId, phaseId) {
         if (!response.ok) {
             throw new Error(`Error removing phase: ${data.message}`);
         } 
-        console.log('Phase removed successfully');
         
     } catch (error) {
         console.error('Errore:', error);
@@ -520,7 +511,7 @@ async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
         const data = await response.json();
 
         if (data.success) {
-            console.log('Subphase deleted with success!');
+            
         } else {
             Swal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
             
@@ -542,7 +533,7 @@ async function removeActivityFromBackend(projectId, phaseId, subphaseId, activit
         const data = await response.json();
 
         if (data.success) {
-            console.log('Activity deleted with success!');
+            
         } else {
             Swal.fire({title: "Error", text: "Error while deleting the activity", icon: "error"});
 
@@ -849,6 +840,11 @@ async function toggleProjectForm() {
             warningMessage.remove();
         }
 
+        //eventually close the list/gantt view and the handle activities form
+        document.getElementById("project-view-container").style.display = "none";
+        document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close view button
+        document.getElementById("activity-container").style.display = "none";
+        document.getElementById("closeActivityViewBtn").style.display = "none"; // Hides the close view button
     }
 }
 
