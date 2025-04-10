@@ -44,6 +44,9 @@ async function handleActivities(projectId) {
             activities = activities.filter(activity => activity.sharedWith.some(user => user.username === userLogged));
         }
 
+        //Render the activities
+        renderActivities(activities, userLogged, isOwner);
+
         //Updates the activities status
         await updateActivitiesStatus(activities);
 
@@ -69,7 +72,7 @@ async function handleActivities(projectId) {
             updatedActivities = updatedActivities.filter(activity => activity.sharedWith.some(user => user.username === userLogged));
         }
 
-        // Show the activities
+        // Re-render the activities
         renderActivities(updatedActivities, userLogged, isOwner);
 
     } catch (error) {
@@ -698,7 +701,7 @@ async function adjustOrContractActivitySchedule(activityId, dependentActivitiesI
     }
 }
 
-// Function to update the output note if the activity was reactivated and output was rejected
+// Function to update the output note if the activity was reactivated and output was rejected (if output note is not present in some macro, create it)
 async function updateOutputNote(activityId) {
     try {
 
@@ -713,30 +716,63 @@ async function updateOutputNote(activityId) {
         noteContent = outputValue;
         let userLogged = await getLoggedUser();
 
-        // Update the output note
-        const response = await fetch(`http://localhost:8000/api/activity/output/update`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-                activityId: activityId,
-                content: noteContent,
-                userName: userLogged,
-            })
-        });
+        //get the activity output note, if it is preent, update it, else create it
+        const responseActivity = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const activity = await responseActivity.json();
 
-        
-        if (response.ok) {
-            // After updating the output note, disable the output fields and the save button
-
-            toggleElements([
-                `output-${activityId}`,
-                `output-type-${activityId}`,
-                `save-output-${activityId}`
+        //get the output note
+        const responseNote = await fetch(`http://localhost:8000/api/note/get/${activity.output}`);
+        const note = await responseNote.json();
+        if (!note) {
+            // If the note is not present, create it
+            const response = await fetch(`http://localhost:8000/api/activity/inputOutput`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    activityId: activityId,
+                    content: noteContent,
+                    userName: userLogged,
+                    type: "output"
+                })
+            });
+            if (response.ok) {
+                // After creating the output note, disable the output fields and the save button
+                toggleElements([
+                    `output-${activityId}`,
+                    `output-type-${activityId}`,
+                    `save-output-${activityId}`
                 ], true);
+                toggleElements([`complete-${activityId}`], false);
+            }
 
-            toggleElements([`complete-${activityId}`], false);
+        }else{
 
+            // Update the output note
+            const response = await fetch(`http://localhost:8000/api/activity/output/update`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    activityId: activityId,
+                    content: noteContent,
+                    userName: userLogged,
+                })
+            });
+
+            
+            if (response.ok) {
+                // After updating the output note, disable the output fields and the save button
+
+                toggleElements([
+                    `output-${activityId}`,
+                    `output-type-${activityId}`,
+                    `save-output-${activityId}`
+                    ], true);
+
+                toggleElements([`complete-${activityId}`], false);
+
+            }
         }
 
     } catch (error) {
