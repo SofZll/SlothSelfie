@@ -246,7 +246,8 @@ async function viewAsGantt(projectId) {
                     start: new Date(activity.startDate),
                     end: new Date(activity.deadline),
                     assignee: activity.sharedWith.map(a => a.username).join(", "),
-                    dependencies: activity.dependencies || []
+                    dependencies: activity.dependencies || [],
+                    custom_class: `activities-of-${phase.macroActivity._id}`
                 });
             });
 
@@ -266,7 +267,8 @@ async function viewAsGantt(projectId) {
                         start: new Date(activity.startDate),
                         end: new Date(activity.deadline),
                         assignee: activity.sharedWith.map(a => a.username).join(", "),
-                        dependencies: activity.dependencies || []
+                        dependencies: activity.dependencies || [],
+                        custom_class: `activities-of-${subphase.macroActivity._id}`
                     });
                 });
             });
@@ -275,11 +277,7 @@ async function viewAsGantt(projectId) {
         document.getElementById("gantt-container").innerHTML = ""; // Reset Gantt
         // Creates the Gantt chart
         const gantt = new Gantt("#gantt-container", tasks, {
-            view_mode: "Month",  //"Week"
-            on_click: (task) => console.log(task),
-            on_date_change: (task, start, end) => console.log(task, start, end),
-            on_progress_change: (task, progress) => console.log(task, progress),
-            on_delete: (task) => console.log(task),
+            view_mode: "Week",  //"Week", "Month"
         });
 
         gantt.render();
@@ -367,37 +365,43 @@ function createHierarchy(sidebar, project) {
 
 function addActivityRow(tbody, activity) {
     const row = document.createElement("tr");
-            const phaseCell = document.createElement("td");
-            phaseCell.textContent = "";
-            phaseCell.classList.add("activity-phase-cell");
-            row.appendChild(phaseCell);
 
-            const activityCell = document.createElement("td");
-            //if it is a milestone we add a star to the title
-            activityCell.textContent = activity.milestone ? `*${activity.title}` : activity.title;
-            activityCell.classList.add("activity-title-cell");
-            activityCell.onclick = () => highlightTask(activity._id);
-            row.appendChild(activityCell);
+    // Add class to toggle visibility based on parent macro
+    if (addMacroActivityRow.currentMacroIdClass) {
+        row.classList.add(addMacroActivityRow.currentMacroIdClass);
+    }
 
-            const actorCell = document.createElement("td");
-            actorCell.textContent = activity.sharedWith.map(a => a.username).join(", ");
-            row.appendChild(actorCell);
+    const phaseCell = document.createElement("td");
+    phaseCell.textContent = "";
+    phaseCell.classList.add("activity-phase-cell");
+    row.appendChild(phaseCell);
 
-            const startDateCell = document.createElement("td");
-            startDateCell.textContent = new Date(activity.startDate).toLocaleDateString();
-            row.appendChild(startDateCell);
+    const activityCell = document.createElement("td");
+    //if it is a milestone we add a star to the title
+    activityCell.textContent = activity.milestone ? `*${activity.title}` : activity.title;
+    activityCell.classList.add("activity-title-cell");
+    activityCell.onclick = () => highlightTask(activity._id);
+    row.appendChild(activityCell);
 
-            const deadlineCell = document.createElement("td");
-            deadlineCell.textContent = new Date(activity.deadline).toLocaleDateString();
-            row.appendChild(deadlineCell);
+    const actorCell = document.createElement("td");
+    actorCell.textContent = activity.sharedWith.map(a => a.username).join(", ");
+    row.appendChild(actorCell);
 
-            const daysCell = document.createElement("td");
-            const diffTime = Math.abs(new Date(activity.deadline) - new Date(activity.startDate));
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Calculate number of days
-            daysCell.textContent = diffDays;
-            row.appendChild(daysCell);
+    const startDateCell = document.createElement("td");
+    startDateCell.textContent = new Date(activity.startDate).toLocaleDateString();
+    row.appendChild(startDateCell);
 
-            tbody.appendChild(row);
+    const deadlineCell = document.createElement("td");
+    deadlineCell.textContent = new Date(activity.deadline).toLocaleDateString();
+    row.appendChild(deadlineCell);
+
+    const daysCell = document.createElement("td");
+    const diffTime = Math.abs(new Date(activity.deadline) - new Date(activity.startDate));
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Calculate number of days
+    daysCell.textContent = diffDays;
+    row.appendChild(daysCell);
+
+    tbody.appendChild(row);
 }
 
 function addMacroActivityRow(tbody, macroActivity, className = "") {
@@ -408,7 +412,27 @@ function addMacroActivityRow(tbody, macroActivity, className = "") {
     row.appendChild(phaseCell);
 
     const titleCell = document.createElement("td");
-    titleCell.textContent = `↳ Macro: ${macroActivity.title}`;
+    // Toggle button + macro title
+    const toggleButton = document.createElement("button");
+    toggleButton.textContent = "-";
+    toggleButton.style.marginRight = "5px";
+
+    // Unique class for related activities
+    const macroIdClass = `activities-of-${macroActivity._id}`;
+
+    toggleButton.onclick = () => {
+        const activityRows = document.querySelectorAll(`.${macroIdClass}`);
+        const ganttItems = document.querySelectorAll(`.gantt-task.${macroIdClass}`);
+        const isVisible = activityRows[0]?.style.display !== "none";
+        // Toggle Gantt items visibility
+        ganttItems.forEach(g => g.style.display = isVisible ? "none" : "block");
+        // Toggle activity rows visibility in the table
+        activityRows.forEach(r => r.style.display = isVisible ? "none" : "table-row");
+        toggleButton.textContent = isVisible ? "+" : "-";
+    };
+
+    titleCell.appendChild(toggleButton);
+    titleCell.append(`↳ Macro: ${macroActivity.title}`);
     titleCell.classList.add(className);
     row.appendChild(titleCell);
 
@@ -431,4 +455,7 @@ function addMacroActivityRow(tbody, macroActivity, className = "") {
     row.appendChild(daysCell);
 
     tbody.appendChild(row);
+
+    // Store the current macro ID class for later use
+    addMacroActivityRow.currentMacroIdClass = macroIdClass;
 }

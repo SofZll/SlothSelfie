@@ -1,12 +1,9 @@
-//TODO: modalità di visualizzazione separate dagli eventi normali ed appropriate allo scopo per eventi di Inizio e fine attività (usare il campo isInProject nel modello event) 
-
 //TODO: QUANDO TRASFERISCI SUL SERVER CAMBIA I PATH DEI FETCH nei file projects.js, projectsView.js, projectsHandleActivities.js, projectsHandleActivitiesUtils.js
 
 //TODO, TIME MACHINE DATE, in projectsHandleActivities e projectsHandleActivitiesUtils.js utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
-//gantt: bottone -+ in gantt? colori?
-//finire back e front: gestisci handleActivities nel modo corretto con macroactivities -> fatto, testare un po'
+//gantt: colori?
 
 // Function to get the logged user username
 async function getLoggedUser() {
