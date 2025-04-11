@@ -142,10 +142,10 @@ const PreviewProjects= ({ viewType }) => {
 
             case "ganttChart":
                 return (
-                    <div className="scrollable-list">
+                    <div className="scrollable-list gantt-box">
                         {selectedProject ? (
-                            <div className="event-card event-border-orange">
-                                <h2>Gantt chart for {selectedProject.title}</h2>
+                            <div className="event-card event-border-orange gantt-chart-card">
+                                <h5>{selectedProject.title}</h5>
                                 {/*render the Gantt chart for the selected project */}
                                 <GanttChartView projectId={selectedProject._id} />
                             </div>

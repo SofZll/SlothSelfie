@@ -140,7 +140,7 @@ const GanttChartView = ({ projectId }) => {
   return (
     <div>
       <div style={{ display: "flex" }}>
-        <div id="gantt-container" style={{ flex: 1, height: "300px" }}></div>
+        <div id="gantt-container"></div>
       </div>
     </div>
   );
