@@ -231,20 +231,23 @@ async function viewAsGantt(projectId) {
         // Generate Gantt tasks
         const tasks = [];
         project.phases.forEach(phase => {
+            // Adjust zero duration activities
+            const adjustedMacroActivity = AdjustZeroDuration(phase.macroActivity);
             //macroactivity of the phase
             tasks.push({
                 id: `macro-${phase.macroActivity._id}`,
                 name: `Macro: ${phase.macroActivity.title}`,
                 start: new Date(phase.macroActivity.startDate),
-                end: new Date(phase.macroActivity.deadline),
+                end: new Date(adjustedMacroActivity.deadline),
             });
             // Add activities of the phase
             phase.activities.forEach(activity => {
+                const adjustedActivity = AdjustZeroDuration(activity);
                 tasks.push({
                     id: activity._id,
                     name: activity.title,
                     start: new Date(activity.startDate),
-                    end: new Date(activity.deadline),
+                    end: new Date(adjustedActivity.deadline),
                     assignee: activity.sharedWith.map(a => a.username).join(", "),
                     dependencies: activity.dependencies || [],
                     custom_class: `activities-of-${phase.macroActivity._id}`
@@ -252,20 +255,22 @@ async function viewAsGantt(projectId) {
             });
 
             phase.subphases.forEach(subphase => {
+                const adjustedSubphaseMacroActivity = AdjustZeroDuration(subphase.macroActivity);
                 //macroactivity of the subphase
                 tasks.push({
                     id: `macro-${subphase.macroActivity._id}`,
                     name: `Macro: ${subphase.macroActivity.title}`,
                     start: new Date(subphase.macroActivity.startDate),
-                    end: new Date(subphase.macroActivity.deadline),
+                    end: new Date(adjustedSubphaseMacroActivity.deadline),
                 });
                 // Add activities of the subphase
                 subphase.activities.forEach(activity => {
+                    const adjustedActivity = AdjustZeroDuration(activity);
                     tasks.push({
                         id: activity._id,
                         name: activity.title,
                         start: new Date(activity.startDate),
-                        end: new Date(activity.deadline),
+                        end: new Date(adjustedActivity.deadline),
                         assignee: activity.sharedWith.map(a => a.username).join(", "),
                         dependencies: activity.dependencies || [],
                         custom_class: `activities-of-${subphase.macroActivity._id}`
@@ -283,6 +288,8 @@ async function viewAsGantt(projectId) {
             }
         });
 
+        //Disable default gantt behavior
+        disableDefaultBehaviour(gantt);
         gantt.render();
         createHierarchy(sidebar, project);
 
@@ -299,6 +306,45 @@ function highlightTask(taskId) {
         setTimeout(() => taskElement.style.stroke = "", 1500);
     }
 }
+
+  //function to adjust the activities with 0 days duration for gantt
+  const AdjustZeroDuration = (activity) => {
+    const start = new Date(activity.startDate);
+    let end = new Date(activity.deadline);
+    
+    if (end <= start) {
+      end.setHours(start.getHours() + 1); // Adds 1 hour
+    }
+  
+    return { ...activity, deadline: end };
+  };
+
+  const disableDefaultBehaviour = (gantt) => {
+    // Disable the default gantt behavior
+    gantt.bind_bar = () => {};
+    gantt.bind_bar_progress = () => {};
+    gantt.bind_resize = () => {};
+    gantt.bind_dependency = () => {};
+    gantt.update_bar_position = () => {};
+    gantt.setup_dependencies = () => {};
+    gantt.unselect_all = () => {};
+
+    // Overwrite the SVG listeners to disable the default behavior
+    gantt.$svg.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+    }, true);
+
+    gantt.$svg.addEventListener('mouseup', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+    }, true);
+
+    gantt.$svg.addEventListener('mousemove', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+    }, true);
+  }
 
 // Function to generate the hierarchy in a table format in the sidebar
 function createHierarchy(sidebar, project) {
