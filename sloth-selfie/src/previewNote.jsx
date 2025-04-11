@@ -26,29 +26,41 @@ const  PreviewNote = ({ viewType }) => {
 
     const fetchNotes = async () => {
         const response = await apiService('/notes', 'GET');
-        if (response) setNotes(response);
+        if (response) {
+            const limitedNotes = sortNotes(response); 
+            setNotes(limitedNotes); // We keep the 10 most recent notes
+            console.log("Fetched notes:", limitedNotes);
+        }
     };
 
     const sortNotes = (notes) => {
+        // Order from most recent
         const sortedNotes = [...notes].sort((a, b) => {
             const dateA = new Date(a.lastModified || a.createdAt);
             const dateB = new Date(b.lastModified || b.createdAt);
             return dateB - dateA;
         });
-
-        if (viewType === "all") setNotes(sortedNotes);
-        else if (viewType === "latest") setNotes(sortedNotes.length > 0 ? [sortedNotes[0]] : []);
+        // Limit to 10 most recent notes
+        return sortedNotes.slice(0, 10);
     };
-
-
-
 
     useEffect(() => {
         if (user) {
             fetchNotes();
-            sortNotes(notes);
         }
     }, [user]);
+
+    useEffect(() => {
+        if (notes.length > 0) {
+            const limitedNotes = notes.slice(0, 10); // Limit to 10 notes
+            if (viewType === "all" && notes !== limitedNotes) {
+                setNotes(limitedNotes);
+            } else if (viewType === "latest" && (notes[0] !== limitedNotes[0] || notes.length > 1)) {
+                setNotes([limitedNotes[0]]);
+            }
+        }
+    }, [notes, viewType, setNotes]);
+
 
     const renderNotes = () => {
         return notes.length > 0 ? (
