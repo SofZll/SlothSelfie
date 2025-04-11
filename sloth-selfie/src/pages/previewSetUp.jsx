@@ -103,6 +103,10 @@ function PreviewSetUp(props) {
                             text="Recent Projects deadlines"
                             onClick={() => handleCustomizationChange('projects', 'recentProjectsDeadlines')}
                         />
+                        <Button
+                            text="Choose a project Gantt chart"
+                            onClick={() => handleCustomizationChange('projects', 'projectGanttChart')}
+                        />
                         {/* other projects personalizations */}
                     </div>
                 );

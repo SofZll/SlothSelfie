@@ -199,3 +199,8 @@
     max-height: 90%;
   }
 }
+
+/*Projects selection list*/
+.project-list li {
+  cursor: pointer;
+}

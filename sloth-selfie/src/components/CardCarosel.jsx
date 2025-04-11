@@ -37,7 +37,8 @@ const CardCarosel = ({ title, settingKey }) => {
         listOfPomodoros: "Pomodoros List",
         lastPomodoro: "Last Pomodoro",
         listOfProjects: "Projects List",
-        recentProjectsDeadlines: "Upcoming Deadlines"
+        recentProjectsDeadlines: "Upcoming Deadlines",
+        projectGanttChart: "Project Gantt Chart",
     };
 
     //Get the personalized title
@@ -68,6 +69,8 @@ const CardCarosel = ({ title, settingKey }) => {
                 return <PreviewProjects viewType="list" />;
             case 'recentProjectsDeadlines':
                 return <PreviewProjects viewType="recentDeadlines" />;
+            case 'projectGanttChart':
+                return <PreviewProjects viewType="ganttChart"/>;
             default:
                 return null;
         }
