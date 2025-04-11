@@ -3,8 +3,6 @@
 //TODO, TIME MACHINE DATE, in projectsHandleActivities e projectsHandleActivitiesUtils.js utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V
 
-//gantt: colori?
-
 // Function to get the logged user username
 async function getLoggedUser() {
     try {

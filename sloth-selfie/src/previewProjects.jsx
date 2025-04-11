@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './styles/Previews.css';
 import './styles/App.css';
 
+import GanttChartView from './components/GanttChartView';
+
 import { AuthContext } from './contexts/AuthContext';
 import { useCalendar } from "./contexts/CalendarContext";
 import { apiService } from './services/apiService';
@@ -14,6 +16,7 @@ const PreviewProjects= ({ viewType }) => {
     const { activities, setActivities } = useCalendar();
 
     const [projects, setProjects] = useState([]);
+    const [selectedProject, setSelectedProject] = useState(null); // State to store the selected project
     const navigate = useNavigate();  
 
     // function to navigate to the projects page, we use window.location.href to navigate without using react-router (pure JS)
@@ -68,6 +71,22 @@ const PreviewProjects= ({ viewType }) => {
         if (user) fetchProjects();
     }, [user]);
 
+    // Function to choose a project for the Gantt chart
+    const chooseProject = () => {
+        return (
+            <div className="project-selection">
+                <h2>Select a project for the Gantt chart</h2>
+                <ul className="project-list">
+                    {projects.map((project) => (
+                        <li key={project._id} onClick={() => setSelectedProject(project)}>
+                            {project.title}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        );
+    };
+
 
     const renderProjects = () => {
         if (projects.length === 0) {
@@ -117,6 +136,21 @@ const PreviewProjects= ({ viewType }) => {
                             <div className="div-postit">
                                 <h2>No upcoming deadlines.</h2>
                             </div>
+                        )}
+                    </div>
+                );
+
+            case "ganttChart":
+                return (
+                    <div className="scrollable-list">
+                        {selectedProject ? (
+                            <div className="event-card event-border-orange">
+                                <h2>Gantt chart for {selectedProject.title}</h2>
+                                {/*render the Gantt chart for the selected project */}
+                                <GanttChartView projectId={selectedProject._id} />
+                            </div>
+                        ) : (
+                            chooseProject()
                         )}
                     </div>
                 );

@@ -278,6 +278,9 @@ async function viewAsGantt(projectId) {
         // Creates the Gantt chart
         const gantt = new Gantt("#gantt-container", tasks, {
             view_mode: "Week",  //"Week", "Month"
+            on_click: (task) => {
+                if (!task) return;
+            }
         });
 
         gantt.render();
