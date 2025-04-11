@@ -153,3 +153,19 @@ button.disabled {
     cursor: pointer;
     font-weight: bold;
 }
+
+/*disable default gantt actions to prevent default behavior*/
+g.handle,
+.bar-wrapper:hover,
+.handle.progress,
+.handle.left,
+.handle.right {
+  pointer-events: none !important;
+}
+
+#gantt-container .bar,
+#gantt-container .handle,
+#gantt-container .bar-wrapper {
+  pointer-events: none;
+  cursor: default;
+}
