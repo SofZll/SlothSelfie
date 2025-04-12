@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 
-import NoteCard from './NoteCard';
+import CardNote from "./components/CardNote";
+import FormNote from "./pages/Note/FormNote";
 import './styles/Previews.css';
 
 import { apiService } from './services/apiService';
 import { useNote } from "./contexts/NoteContext";
 import { AuthContext } from './contexts/AuthContext';
 
-//TODO METTI COLORI DI NOTE IN BASE A CATEGORIE, Visualizza i task
+//TODO METTI COLORI DI NOTE IN BASE A CATEGORIE
 
 const  PreviewNote = ({ viewType }) => {
     const navigate = useNavigate();
     const { notes, setNotes } = useNote();
     const { user } = React.useContext(AuthContext);
+
+    const [showForm, setShowForm] = useState(viewType === "add");
 
     const handleLinkClick = (path) => (event) => {
         event.preventDefault();
@@ -57,22 +60,40 @@ const  PreviewNote = ({ viewType }) => {
                 setNotes(limitedNotes);
             } else if (viewType === "latest" && (notes[0] !== limitedNotes[0] || notes.length > 1)) {
                 setNotes([limitedNotes[0]]);
+            }else if (viewType === "add" && notes.length > 0) {
+                setNotes([]);
             }
         }
     }, [notes, viewType, setNotes]);
 
+    useEffect(() => {
+        if (viewType === "add") {
+            setShowForm(true);
+        } else {
+            setShowForm(false);
+        }
+    }, [viewType]);
 
-    const renderNotes = () => {
-        return notes.length > 0 ? (
-            notes.map((note) => (
-                <div key={note._id} className="event-card note-border-yellow">
-                    <NoteCard note={note} setNotes={setNotes} isPreview={true} />
-                </div>
-            ))
-        ) : (
-            <div className="div-postit">
-                <h2>No notes yet!</h2>
-            </div>
+    const renderNotes = () => {    
+        return (
+            <>
+                {showForm && (
+                    <div className="event-card note-border-green">
+                        <FormNote/>
+                    </div>
+                )}
+                {notes.length > 0 ? (
+                    notes.map((note) => (
+                        <div key={note._id} className="event-card note-border-yellow">
+                            <CardNote Note={note} />
+                        </div>
+                    ))
+                ) : !showForm ? (
+                    <div className="div-postit">
+                        <h2>No notes yet!</h2>
+                    </div>
+                ) : null}
+            </>
         );
     };
 

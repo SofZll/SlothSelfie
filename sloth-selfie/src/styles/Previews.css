@@ -240,7 +240,7 @@ g.handle,
 }
 
 #gantt-container {
-  width: 80%;
+  width: 100%;
   max-height: 300px;
   overflow-x: auto;
   overflow-y: auto;

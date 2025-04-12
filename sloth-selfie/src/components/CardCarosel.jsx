@@ -7,6 +7,7 @@ import { CustomizationContext } from '../contexts/PreviewContext';
 import {AuthContext} from '../contexts/AuthContext';
 import { CalendarProvider } from '../contexts/CalendarContext';
 import { NoteProvider } from '../contexts/NoteContext';
+import { TaskProvider } from '../contexts/TaskContext';
 
 import PreviewPomodoro from '../previewPomodoro';
 import PreviewNote from '../previewNote';
@@ -33,6 +34,7 @@ const CardCarosel = ({ title, settingKey }) => {
         showTasksList: "This week's Tasks List",
         listOfNotes: "Notes List",
         lastNote: "Most recent Note",
+        addNote: "Add Note",
         quickStart: "Quick Start",
         listOfPomodoros: "Pomodoros List",
         lastPomodoro: "Last Pomodoro",
@@ -59,6 +61,8 @@ const CardCarosel = ({ title, settingKey }) => {
                 return <PreviewNote viewType="list" />;
             case 'lastNote':
                 return <PreviewNote viewType="latest" />;
+            case 'addNote':
+                return <PreviewNote viewType="add" />;
             case 'quickStart':
                 return <PreviewPomodoro viewType="quickStart" userLogged={user} />;
             case 'listOfPomodoros':
@@ -101,24 +105,26 @@ const CardCarosel = ({ title, settingKey }) => {
     return (
         <CalendarProvider>
             <NoteProvider>
-                <animated.div
-                    className='card d-flex flex-column justify-content-evenly align-items-center'
-                    style={props3}
-                    onMouseEnter={() => setShown(true)}
-                    onMouseLeave={() => setShown(false)}
-                >   
-                    <h2>{title}</h2>
-                    {customizations[settingKey] === 'showCalendar' ? (
-                            renderLegend()
-                    ) : (
-                        <>
-                            <p>{currentTitle}</p>
-                        </>
-                    )}
-                    
-                    {/* Render the content */}
-                    {renderContent()}
-                </animated.div>
+                <TaskProvider>
+                    <animated.div
+                        className='card d-flex flex-column justify-content-evenly align-items-center'
+                        style={props3}
+                        onMouseEnter={() => setShown(true)}
+                        onMouseLeave={() => setShown(false)}
+                    >   
+                        <h2>{title}</h2>
+                        {customizations[settingKey] === 'showCalendar' ? (
+                                renderLegend()
+                        ) : (
+                            <>
+                                <p>{currentTitle}</p>
+                            </>
+                        )}
+                        
+                        {/* Render the content */}
+                        {renderContent()}
+                    </animated.div>
+                </TaskProvider>
             </NoteProvider>
         </CalendarProvider>
     );
