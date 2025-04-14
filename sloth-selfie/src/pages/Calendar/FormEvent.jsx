@@ -38,6 +38,37 @@ const FormEvent = () => {
         } else Swal.fire({ title: 'Error deleting event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
     }
 
+    //TODO TESTA E MODIFICA IN BASE A NUOVO MODELLO EVENTI
+    const exportEvent = async () => {
+        try {
+            const response = await apiService(`/event/${event._id}/export`, 'GET');
+            
+            if (!response) throw new Error('Empty response from server');
+            
+            const blob = response;
+        
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${event.title}.ics`;
+            a.click();
+            
+            Swal.fire({
+                title: 'Event exported',
+                icon: 'success',
+                text: 'Event exported successfully',
+                customClass: { confirmButton: 'button-alert' }
+            });
+            } catch (err) {
+                Swal.fire({
+                title: 'Error exporting event',
+                icon: 'error',
+                text: err.message || 'Unknown error',
+                customClass: { confirmButton: 'button-alert' }
+            });
+            }
+    }
+
     return (
         <form className='d-flex flex-column w-100'>
             <div className='row py-2'>
@@ -204,7 +235,10 @@ const FormEvent = () => {
             <div className='d-flex align-items-center justify-content-center'>
                 <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                 {selected.edit && (
+                    <>
                     <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteEvent()}>delete</button>
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportEvent()}>export</button>
+                    </>
                 )}
             </div>
         </form>

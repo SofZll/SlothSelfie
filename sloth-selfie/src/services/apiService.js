@@ -20,6 +20,11 @@ const apiService = async (endpoint, method = 'GET', body = null) => {
             return null;
         }
 
+        const contentType = response.headers.get('Content-Type');
+        if (contentType && contentType.includes('text/calendar')) {
+            //If it is a calendar file (ICS), return a blob
+            return response.blob();
+        }
 
         return await response.json();
     } catch (error) {

@@ -5,6 +5,7 @@ const Event = require('../models/eventModel');
 const PhaseSubphase = require("../models/phaseSubphaseModel");
 const { createNotification } = require('../controllers/notificationController');
 const { calculateDate } = require('../utils/utils');
+const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
 // Creating an activinotenotety
 const createActivity = async (req, res) => {
@@ -148,6 +149,41 @@ const deleteActivity = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+//Function to export activities on iCalendar (using library: ics.js)
+async function exportActivity(req, res){
+    try {
+        const {activityId} = req.params;
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            return res.status(404).json({ message: "Activity not found" });
+        }
+
+        const { error, value } = createEvent({
+            title: activity.title,
+            description: '',
+            start: [
+                activity.deadline.getFullYear(),
+                activity.deadline.getMonth() + 1,
+                activity.deadline.getDate(),
+            ]
+        });
+        
+        if (error) {
+            console.error("ICS generation error:", error);
+            return res.status(500).json({ message: 'Error while generating .ics' });
+        }
+
+        console.log("Generated .ics value:\n", value);
+    
+        res.setHeader('Content-Type', 'text/calendar');
+        res.setHeader('Content-Disposition', `attachment; filename="${activity.title}.ics"`);
+        res.status(200).send(value);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: 'Error during the activity export' });
+      }
+}
 
 /* Project functions */
 //Function to create a note associated to the input/output of the activity
@@ -390,6 +426,7 @@ module.exports = {
     getActivity,
     updateActivity,
     deleteActivity,
+    exportActivity,
     createNoteAsInputOrOutput,
     updateOutputAsNote,
     updateActivityStatus,

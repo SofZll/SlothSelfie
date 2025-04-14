@@ -33,6 +33,36 @@ const FormTask = () => {
         resetSelected();
     }
 
+    const exportTask = async () => {
+            try {
+                const response = await apiService(`/task/${task._id}/export`, 'GET');
+        
+                if (!response) throw new Error('Empty response from server');
+        
+                const blob = response;
+    
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${task.title}.ics`;
+                a.click();
+        
+                Swal.fire({
+                    title: 'Task exported',
+                    icon: 'success',
+                    text: 'Task exported successfully',
+                    customClass: { confirmButton: 'button-alert' }
+                });
+            } catch (err) {
+                Swal.fire({
+                    title: 'Error exporting task',
+                    icon: 'error',
+                    text: err.message || 'Unknown error',
+                    customClass: { confirmButton: 'button-alert' }
+                });
+            }
+        }
+
     return (
         <form className='d-flex flex-column w-100'>
             <div className='row py-2 '>
@@ -73,7 +103,10 @@ const FormTask = () => {
             
             <div className='d-flex align-items-center justify-content-center'>
                 <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>edit</button>
+                <>
                 <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteTask()}>delete</button>
+                <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportTask()}>export</button>
+                </>
             </div>
 
         </form>

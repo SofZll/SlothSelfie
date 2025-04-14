@@ -2,6 +2,7 @@
 const Task = require('../models/taskModel');
 const User = require('../models/userModel');
 const Note = require('../models/noteModel');
+const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
 // fetch all tasks
 const getTasks = async (req, res) => {
@@ -150,6 +151,41 @@ const editTasks = async (tasks) => {
     }
 }
 
+//Function to export tasks on iCalendar (using library: ics.js)
+async function exportTask(req, res){
+    try {
+        const {taskId} = req.params;
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+
+        const { error, value } = createEvent({
+            title: task.title,
+            description: '',
+            start: [
+                task.deadline.getFullYear(),
+                task.deadline.getMonth() + 1,
+                task.deadline.getDate(),
+            ]
+        });
+        
+        if (error) {
+            console.error("ICS generation error:", error);
+            return res.status(500).json({ message: 'Error while generating .ics' });
+        }
+
+        console.log("Generated .ics value:\n", value);
+    
+        res.setHeader('Content-Type', 'text/calendar');
+        res.setHeader('Content-Disposition', `attachment; filename="${task.title}.ics"`);
+        res.status(200).send(value);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: 'Error during the task export' });
+      }
+}
+
 module.exports = {
     getTasks,
     editTask,
@@ -157,5 +193,6 @@ module.exports = {
     markTaskCompleted,
     deleteTasks,
     addTasks,
-    editTasks
+    editTasks,
+    exportTask
 };
