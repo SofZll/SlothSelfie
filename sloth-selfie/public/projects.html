@@ -1,78 +1,76 @@
 <!DOCTYPE html>
-<html lang="eng">
+<html lang='eng'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Projects</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
 
-    <link rel="stylesheet" href="projects.css">
+    <link rel='stylesheet' href='projects.css'>
 
     <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
     <!--frappe-gantt -->
-    <script src="/dist/frappe-gantt.umd.js"></script>
-    <link rel="stylesheet" href="dist/frappe-gantt.css">
+    <script src='/dist/frappe-gantt.umd.js'></script>
+    <link rel='stylesheet' href='dist/frappe-gantt.css'>
 
 </head>
 <body>
-    <div class="container mt-4">
-        <button id="backToHome" class="btn btn-secondary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house">
-                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
-                <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            </svg>
-        </button>
-        <h1 class="mb-3">Your Projects:</h1>
-        <ul id="projects-list" class="list-group mt-3"></ul>
+    <div class='container-fluid bg-light vh-100 px-5'>
+        <div class='row mb-3'>
+            <div class='col-12 fs-4 pt-2'>
+                Your Projects:
+            </div>
+        </div>
 
-    <button id="closeProjectViewBtn" class="btn btn-primary btn-view" style="display: none;">Close View</button>
-    <div id="project-view-container" class="mt-4"></div>
+        <ul id='projects-list' class='list-group mt-3'></ul>
 
-    <button id="closeActivityViewBtn" class="btn btn-warning btn-form-3" style="display: none;">Close Activities</button>
-    <div id="activity-container"></div>
+        <button id='closeProjectViewBtn' class='btn btn-primary btn-view' style='display: none;'>Close View</button>
+        <div id='project-view-container' class='mt-4'></div>
+
+        <button id='closeActivityViewBtn' class='btn btn-warning btn-form-3' style='display: none;'>Close Activities</button>
+        <div id='activity-container'></div>
     
-    <button id="ToggleFormBtn" class="btn"> + Add a Project</button>
-    <form id="projectForm" style="display: none;">
-        <h2 class="mb-3" id="formTitle">Create a new project:</h2>
+        <button id='ToggleFormBtn' class='btn'> + Add a Project</button>
+    <form id='projectForm' style='display: none;'>
+        <h2 class='mb-3' id='formTitle'>Create a new project:</h2>
 
-        <div class="mb-3">
-            <label class="form-label">Project name</label>
-            <input type="text" class="form-control" id="projectName" required>
+        <div class='mb-3'>
+            <label class='form-label'>Project name</label>
+            <input type='text' class='form-control' id='projectName' required>
         </div>
         
-        <div class="mb-3">
-            <label class="form-label">Project owner (username)</label>
-            <input type="text" class="form-control" id="projectOwner" required readonly>
+        <div class='mb-3'>
+            <label class='form-label'>Project owner (username)</label>
+            <input type='text' class='form-control' id='projectOwner' required readonly>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea class="form-control" id="projectDesc"></textarea>
+        <div class='mb-3'>
+            <label class='form-label'>Description</label>
+            <textarea class='form-control' id='projectDesc'></textarea>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Members (comma separated)</label>
-            <input type="text" class="form-control" id="projectActors" required>
+        <div class='mb-3'>
+            <label class='form-label'>Members (comma separated)</label>
+            <input type='text' class='form-control' id='projectActors' required>
         </div>
 
-        <div id="phasesContainer">
+        <div id='phasesContainer'>
             <h4>Phases</h4>
         </div>
-        <button type="button" class="btn btn-primary mt-2 btn-form" onclick="addPhase()">Add a phase</button>
+        <button type='button' class='btn btn-primary mt-2 btn-form' onclick='addPhase()'>Add a phase</button>
 
-        <div id="alertMessage" style="display: none;">
+        <div id='alertMessage' style='display: none;'>
             Saving...
         </div>
 
-        <button type="submit" class="btn btn-primary mt-2 btn-form" id="createSave">Create project</button>
+        <button type='submit' class='btn btn-primary mt-2 btn-form' id='createSave'>Create project</button>
     </form>
 
     </div>
 
-    <script src="./projects.js"></script>
-    <script src="./projectsView.js"></script>
-    <script src="./projectsHandleActivities.js"></script>
+    <script src='./projects.js'></script>
+    <script src='./projectsView.js'></script>
+    <script src='./projectsHandleActivities.js'></script>
 </body>
 </html>
