@@ -1,4 +1,4 @@
-.settings-button {
+.settings-button.button-clean {
     position: absolute;
     width: 3rem;
     height: 3rem;
@@ -13,7 +13,7 @@
     align-items: center;
 }
 
-.settings-button svg {
+.settings-button.button-clean svg {
     width: 32px;
     height: 32px; 
     transition: transform 0.3s ease-in-out;
