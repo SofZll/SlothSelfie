@@ -47,7 +47,6 @@ const MainRoutes = () => {
                                         <Route path='/profile' element={<Profile />} />
                                     </Routes>
                                     {/*
-                                    <Route path='/notifications' element={<Notifications />} />
                                     <Route path='/calendar' element={<Calendar />} />
                                     <Route path='/forum' element={<Forum />} />*/}
                                     {!isDesktop && (
