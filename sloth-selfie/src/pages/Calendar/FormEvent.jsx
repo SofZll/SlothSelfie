@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { generateTimeOptions } from '../../utils/utils';
+import ShareInput from '../../components/ShareInput';
 
 const FormEvent = () => {
     
@@ -192,11 +193,15 @@ const FormEvent = () => {
             </div>
 
             <div className='row py-2'>
+                <div className='col-12'>
+                    <label htmlFor='share' className='form-label'>Share with</label>
+                    <ShareInput receivers={event.sharedWith} setReceivers={(receivers) => setEvent({...event, ['sharedWith']: receivers})} />
+                </div>
+            </div>
+
+            <div className='row py-2'>
                 <div className='col-6'>
                     {/* Field for notification TODO */}
-                </div>
-                <div className='col-6'>
-                    {/* Field for share TODO */}
                 </div>
             </div>
             

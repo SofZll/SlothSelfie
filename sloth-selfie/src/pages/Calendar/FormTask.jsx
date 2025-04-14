@@ -1,15 +1,18 @@
-import React  from 'react';
+import React, { useState } from 'react';
 
 import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
+import ShareInput from '../../components/ShareInput';
+import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 
 const FormTask = () => {
 
     const { task, setTask, tasks, setTasks, resetTask } = useTask();
     const { resetSelected } = useCalendar();
+    const [deletePopUp, setDeletePopUp] = useState(false);
 
     const handleSubmit = async () => {
         const response = await apiService(`/task/${task._id}`, 'PUT', task);
@@ -24,6 +27,7 @@ const FormTask = () => {
     }
 
     const deleteTask = async () => {
+        setDeletePopUp(false);
         const response = await apiService(`/task/${task._id}`, 'DELETE');
         if (response){
             Swal.fire({ title: 'Task deleted', icon: 'success', text: 'Task deleted successfully', customClass: { confirmButton: 'button-alert' } });
@@ -34,7 +38,7 @@ const FormTask = () => {
     }
 
     return (
-        <form className='d-flex flex-column w-100'>
+        <div className='d-flex flex-column w-100'>
             <div className='row py-2 '>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -67,16 +71,32 @@ const FormTask = () => {
 
             <div className='row py-2'>
                 <div className='col-12'>
-                    {/* Field for share TODO */}
+                    <label htmlFor='sharedWith' className='form-label'>Shared with</label>
+                    <ShareInput receivers={task.sharedWith} setReceivers={(receivers) => setTask({...task, ['sharedWith']: receivers})} />
                 </div>
             </div>
             
             <div className='d-flex align-items-center justify-content-center'>
                 <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>edit</button>
-                <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteTask()}>delete</button>
+                <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
             </div>
 
-        </form>
+            {deletePopUp && (
+                <DeletePopUpLayout handleDelete={() => deleteTask()} handleClose={() => setDeletePopUp(false)}>
+                    <div className='d-flex flex-column text-start'>
+                        Are you sure you want to delete this task?
+                    </div>
+                    <div className='d-flex flex-column'>
+                        <div className='fst-italic fw-bold' style={{ color: '#244476' }}>{task.title}</div>
+                        <div className='d-flex w-100 justify-content-between'>
+                            <div className='fst-italic' style={{ color: '#244476' }}>{new Date(task.deadline).toLocaleDateString()}</div>
+                            <div className='fw-medium' style={{ color: '#244476' }}>{task.completed ? 'Completed' : 'to complte'}</div>
+                        </div>
+                    </div>
+                </DeletePopUpLayout>
+            )}
+
+        </div>
     )
 }
 

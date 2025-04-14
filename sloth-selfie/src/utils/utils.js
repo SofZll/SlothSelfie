@@ -27,6 +27,12 @@ const generateTimeOptions = () => {
     return options;
 };
 
+const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+}
+
 // function for date chatbox and forum
 
 // Function to convert buffer to base64 string
@@ -36,4 +42,4 @@ const bufferToBase64 = (buffer) => {
     return btoa(binary);
 };
 
-export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64 };
+export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime };

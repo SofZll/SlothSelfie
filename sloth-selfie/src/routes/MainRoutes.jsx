@@ -4,8 +4,10 @@ import ProtectedRoute from './ProtectedRoute';
 import { useIsDesktop } from '../utils/utils';
 import { StyleProvider } from '../components/StyleContext';
 import { AuthContext } from '../contexts/AuthContext';
-import Pomodoro from '../pages/Pomodoro/Pomodoro';
 
+
+import Pomodoro from '../pages/Pomodoro/Pomodoro';
+import Projects from '../pages/Projects';
 import Note from '../pages/Note/Note';
 import Calendar from '../pages/Calendar/Calendar';
 import Home from '../pages/Home'
@@ -39,7 +41,9 @@ const MainRoutes = () => {
                             element={
                                 <ProtectedRoute >
                                     <Routes>
+
                                         <Route path='/pomodoro' element={<Pomodoro />} />
+                                        <Route path='/projects' element={<Projects />} />
                                         <Route path='/calendar' element={<Calendar />} />
                                         <Route path='/notes' element={<Note />} />
                                         <Route path='/home' element={<Home />} />
