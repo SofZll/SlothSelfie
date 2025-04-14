@@ -2,8 +2,6 @@ import React, { useContext } from 'react';
 import { StyleContext } from './StyleContext';
 import SlothLogo from '../assets/icons/SlothLogo';
 
-import TimeMachineButton from './TimeMachineButton';
-
 const Header = () => {
     const { color } = useContext(StyleContext);
 
