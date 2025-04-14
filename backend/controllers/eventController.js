@@ -4,9 +4,10 @@ const User = require('../models/userModel');
 const { createNotification } = require('../controllers/notificationController');
 const { calculateDate } = require('../utils/utils');
 const mongoose = require('mongoose');
+const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
 // Creating an event
-const createEvent = async (req, res) => {
+const createNewEvent = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
   const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, notify, notificationTime, customValue, notificationRepeat, notificationType, sharedWith } = req.body;
@@ -199,11 +200,93 @@ const deleteMultipleEvent = async (req, res) => {
   }
 };
 
+//Function to export events on iCalendar (using library: ics.js)
+//TODO: TESTARE E MODIFICARE SE NECESSARIO (quando avremo modello event definitivo)
+async function exportEvent(req, res){
+  try {
+      const {eventId} = req.params;
+      const event = await Event.findById(eventId);
+      if (!event) {
+          return res.status(404).json({ message: "Event not found" });
+      }
+
+      // Build the start/end array
+      const start = event.allDay
+      ? [
+          event.startDate.getFullYear(),
+          event.startDate.getMonth() + 1,
+          event.startDate.getDate(),
+        ]
+      : [
+          event.startDate.getFullYear(),
+          event.startDate.getMonth() + 1,
+          event.startDate.getDate(),
+          event.startDate.getHours(),
+          event.startDate.getMinutes(),
+        ];
+
+    const end = event.allDay
+      ? [
+          event.endDate.getFullYear(),
+          event.endDate.getMonth() + 1,
+          event.endDate.getDate(),
+        ]
+      : [
+          event.endDate.getFullYear(),
+          event.endDate.getMonth() + 1,
+          event.endDate.getDate(),
+          event.endDate.getHours(),
+          event.endDate.getMinutes(),
+        ];
+
+    // Build the recurrence rule if needed
+    let recurrenceRule;
+    if (event.repeatFrequency && event.repeatFrequency !== 'none') {
+      const freqMap = {
+        daily: 'DAILY',
+        weekly: 'WEEKLY',
+        monthly: 'MONTHLY',
+        yearly: 'YEARLY',
+      };
+
+      recurrenceRule = `FREQ=${freqMap[event.repeatFrequency]};`;
+      if (event.repeatEndDate) {
+        const endRecDate = event.repeatEndDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        recurrenceRule += `UNTIL=${endRecDate}`;
+      }
+    }
+
+    const { error, value } = createEvent({
+      title: event.title,
+      description: '',
+      location: event.eventLocation || '',
+      start,
+      end,
+      recurrenceRule,
+    });
+    
+      if (error) {
+          console.error("ICS generation error:", error);
+          return res.status(500).json({ message: 'Error while generating .ics' });
+      }
+
+      console.log("Generated .ics value:\n", value);
+  
+      res.setHeader('Content-Type', 'text/calendar');
+      res.setHeader('Content-Disposition', `attachment; filename="${event.title}.ics"`);
+      res.status(200).send(value);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({ message: 'Error during the event export' });
+    }
+}
+
 module.exports = {
-    createEvent,
+    createNewEvent,
     getEvents,
     updateEvent,
     updateMultipleEvent,
     deleteEvent,
     deleteMultipleEvent,
+    exportEvent
 };

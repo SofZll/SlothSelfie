@@ -50,6 +50,36 @@ const FormActivity = () => {
         resetSelected();
     }
 
+    const exportActivity = async () => {
+        try {
+            const response = await apiService(`/activity/${activity._id}/export`, 'GET');
+    
+            if (!response) throw new Error('Empty response from server');
+    
+            const blob = response;
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${activity.title}.ics`;
+            a.click();
+    
+            Swal.fire({
+                title: 'Activity exported',
+                icon: 'success',
+                text: 'Activity exported successfully',
+                customClass: { confirmButton: 'button-alert' }
+            });
+        } catch (err) {
+            Swal.fire({
+                title: 'Error exporting activity',
+                icon: 'error',
+                text: err.message || 'Unknown error',
+                customClass: { confirmButton: 'button-alert' }
+            });
+        }
+    }
+
     return (
         <form className='d-flex flex-column w-100'>
             <div className='row py-2 '>
@@ -92,7 +122,10 @@ const FormActivity = () => {
             <div className='d-flex align-items-center justify-content-center'>
                 <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                 {selected.edit && (
+                    <>
                     <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteActivity()}>delete</button>
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportActivity()}>export</button>
+                    </>
                 )}
             </div>
             
