@@ -16,7 +16,7 @@ const PlusSidebarLayout = ({ childrenMain, childrenSide }) => {
                 </div>
 
                 {isDesktop && (
-                    <div className='col col-lg-3 col-4 p-0'>
+                    <div className='col col-lg-3 col-4 pt-3 pb-0 px-0 mt-5'>
                         {childrenSide}
                     </div>
                 )}
