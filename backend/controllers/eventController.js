@@ -299,12 +299,12 @@ const importEvents = async (req, res) => {
 
     if (!files || files.length === 0) {
       return res.status(400).json({ message: 'No files provided' });
-  }
+    }
 
     const importedEvents = [];
 
     for (const file of files) {
-        const filePath = path.join(__dirname, '..', file.path);  // Path to the file
+        const filePath = file.path;  // Path to the file
         const data = ical.parseFile(filePath);  // Parsing file .ics
 
       for (const key in data) {
@@ -339,7 +339,7 @@ const importEvents = async (req, res) => {
       }
 
       fs.unlinkSync(file.path); // delete the file after parsing
-  }
+    }
 
     res.status(200).json({ message: 'Import OK', importedEvents });
 
