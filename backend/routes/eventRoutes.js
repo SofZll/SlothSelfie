@@ -1,6 +1,9 @@
 const express = require('express');
 
-const { createNewEvent, getEvents, updateEvent, updateMultipleEvent, deleteEvent, deleteMultipleEvent, exportEvent } = require('../controllers/eventController');
+const multer = require('multer');// Import multer for file upload handling
+const upload = multer({ dest: 'uploads/' }); // temporary storage for uploaded .ics files
+
+const { createNewEvent, getEvents, updateEvent, updateMultipleEvent, deleteEvent, deleteMultipleEvent, exportEvent, importEvent } = require('../controllers/eventController');
 
 const router = express.Router();
 
@@ -12,5 +15,6 @@ router.put('/event/original/:originalId', updateMultipleEvent);
 router.delete('/event/:eventId', deleteEvent);
 router.delete('/event/original/:originalId', deleteMultipleEvent);
 router.get('/event/:eventId/export', exportEvent);
+router.post('/events/import', upload.single('icsFile'), importEvent);
 
 module.exports = router;

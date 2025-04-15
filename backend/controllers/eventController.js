@@ -6,6 +6,12 @@ const { calculateDate } = require('../utils/utils');
 const mongoose = require('mongoose');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
+const ical = require('node-ical');
+const fs = require('fs');
+const path = require('path');
+
+//const Activity = require('../models/activityModel');  TEST
+
 // Creating an event
 const createNewEvent = async (req, res) => {
   const userName = req.session.username;
@@ -281,6 +287,63 @@ async function exportEvent(req, res){
     }
 }
 
+// Import an event from ICS file
+const importEvent = async (req, res) => {
+  const userName = req.session.username;
+  const user = await User.findOne({ username: userName });
+  try {
+    const file = req.file;
+
+    console.log('File received:', req.file);
+
+    if (!file) {
+      return res.status(400).json({ message: 'No file provided' });
+    }
+
+    const filePath = path.join(__dirname, '..', file.path); // Percorso corretto del file
+    const data = ical.parseFile(filePath); // parsing .ics
+    const importedEvents = [];
+
+    for (const key in data) {
+      const icsEvent = data[key];
+      if (icsEvent.type === 'VEVENT') {
+        const newEvent = new Event({
+          title: icsEvent.summary || 'Untitled Event',
+          startDate: new Date(icsEvent.start),
+          endDate: new Date(icsEvent.end),
+          allDay: !icsEvent.start.getHours(),
+          repeatFrequency: icsEvent.rrule ? icsEvent.rrule.options.freq.toLowerCase() : 'none',
+          repeatEndDate: icsEvent.rrule?.options?.until || null,
+          eventLocation: icsEvent.location || '',
+          user: user._id,
+          originalId: new mongoose.Types.ObjectId(),
+        });
+        await newEvent.save();
+        importedEvents.push(newEvent);
+
+        //try with activity model   IT WORKS!
+        /*
+        const newActivity = new Activity({
+          title: icsEvent.summary || 'Untitled Event',
+          deadline: new Date(icsEvent.start),
+          allDay: !icsEvent.start.getHours(),
+          user: user._id,
+        });
+        await newActivity.save();
+        importedEvents.push(newActivity);*/
+      }
+    }
+
+    fs.unlinkSync(file.path); // delete the file after parsing
+
+    res.status(200).json({ message: 'Import OK', importedEvents });
+
+  } catch (error) {
+    console.error('Error importing event:', error);
+    res.status(500).json({ message: 'Import error', error });
+  }
+};
+
 module.exports = {
     createNewEvent,
     getEvents,
@@ -288,5 +351,6 @@ module.exports = {
     updateMultipleEvent,
     deleteEvent,
     deleteMultipleEvent,
-    exportEvent
+    exportEvent,
+    importEvent
 };
