@@ -20,13 +20,16 @@ const FormCalendar = () => {
     const { activities, selected, select } = useCalendar();
     const isDesktop = useIsDesktop();
 
-    // Function to handle the upload of a .ics file as event
+    //TODO TESTA E MODIFICA IN BASE A NUOVO MODELLO EVENTI
+    // Function to handle the upload of .ics files as events
     const handleICSUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
     
         const formData = new FormData();
-        formData.append('icsFile', file);
+        Array.from(files).forEach(file => {
+            formData.append('icsFiles', file);
+        });
     
         try {
             const response = await apiService('/events/import', 'POST', formData, {
@@ -66,7 +69,7 @@ const FormCalendar = () => {
                         <Button text='Event' alt='new event' onClick={() => select('event', false)} />
                         <Button text='no Availability' alt='no availability' onClick={() => select('no availability', false)} />
                         {/* Button to import an event as .ics files */}
-                        <input id='ics-upload'type='file'accept='.ics'onChange={handleICSUpload} style={{ display: 'none' }}/>
+                        <input id='ics-upload' type='file' accept='.ics' multiple onChange={handleICSUpload} style={{ display: 'none' }}/>
                         <Button text='Import .ics' alt='import ics' onClick={() => document.getElementById('ics-upload').click()} />
                     </div>
                 )}
