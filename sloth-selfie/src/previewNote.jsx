@@ -31,7 +31,6 @@ const  PreviewNote = ({ viewType }) => {
         if (response) {
             const limitedNotes = sortNotes(response); 
             setNotes(limitedNotes); // We keep the 10 most recent notes
-            console.log("Fetched notes:", limitedNotes);
         }
     };
 

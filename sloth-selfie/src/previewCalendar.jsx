@@ -39,7 +39,6 @@ const PreviewCalendar = ({ viewType }) => {
             //filter tasks that have no deadline
             const filteredTasks = response.filter(task => task.deadline !== null && task.deadline !== undefined);
             setTasks(filteredTasks);
-            console.log("Filtered tasks:", filteredTasks);
         }
     }
 
@@ -68,9 +67,7 @@ const PreviewCalendar = ({ viewType }) => {
             const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
         
             const todayFilteredEvents = events.filter(ev => {
-                console.log("Event date:", ev.startDate);
                 const eventDate = new Date(ev.startDate).toISOString().split('T')[0]; // "YYYY-MM-DD"
-                console.log("Formatted event date:", eventDate);
                 return eventDate === formattedToday;
             });
         

@@ -24,7 +24,6 @@ function PreviewSetUp(props) {
     const handleCustomizationChange = (setting, option) => {
         setCustomizations(prev => {
             const newCustomizations = { ...prev, [setting]: option };
-            console.log("Updated Customizations inside setCustomizations:", newCustomizations);
 
             // Save the personalizations to local storage
             localStorage.setItem('customizations', JSON.stringify(newCustomizations));

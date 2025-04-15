@@ -58,6 +58,11 @@ export const CalendarProvider = ({ children }) => {
 
     const [events, setEvents] = useState([]);
 
+    const addImportedEvents = (newEvents) => {
+        setEvents(prev => [...prev, ...newEvents]);
+        //setActivities(prev => [...prev, ...newEvents]); //TEST FINCHè EVENTS NON VA, ANCHE NEL BACK
+    };
+
     const resetEvent = () => {
         setEvent({
             _id: '',
@@ -145,7 +150,7 @@ export const CalendarProvider = ({ children }) => {
     return (
         <CalendarContext.Provider 
             value={{ activity, setActivity, activities, setActivities, resetActivity,
-                event, setEvent, events, setEvents, resetEvent,
+                event, setEvent, events, setEvents, addImportedEvents, resetEvent,
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
                 selected, setSelected, select, back, resetSelected }}>
 

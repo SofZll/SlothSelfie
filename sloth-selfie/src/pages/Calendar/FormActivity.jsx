@@ -124,7 +124,7 @@ const FormActivity = () => {
                 {selected.edit && (
                     <>
                     <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteActivity()}>delete</button>
-                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportActivity()}>export</button>
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportActivity()}>export .ics</button>
                     </>
                 )}
             </div>
