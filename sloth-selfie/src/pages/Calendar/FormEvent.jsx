@@ -237,7 +237,7 @@ const FormEvent = () => {
                 {selected.edit && (
                     <>
                     <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteEvent()}>delete</button>
-                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportEvent()}>export</button>
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportEvent()}>export .ics</button>
                     </>
                 )}
             </div>

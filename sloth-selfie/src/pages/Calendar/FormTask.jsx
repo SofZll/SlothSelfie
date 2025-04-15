@@ -105,7 +105,7 @@ const FormTask = () => {
                 <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>edit</button>
                 <>
                 <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteTask()}>delete</button>
-                <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportTask()}>export</button>
+                <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportTask()}>export .ics</button>
                 </>
             </div>
 

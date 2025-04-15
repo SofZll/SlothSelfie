@@ -17,7 +17,7 @@ import { apiService } from '../../services/apiService';
 
 const FormCalendar = () => {
 
-    const { activities, selected, select } = useCalendar();
+    const { activities, selected, select, addImportedEvents } = useCalendar();
     const isDesktop = useIsDesktop();
 
     //TODO TESTA E MODIFICA IN BASE A NUOVO MODELLO EVENTI
@@ -40,14 +40,15 @@ const FormCalendar = () => {
             
             });
 
-            console.log('Imported event:', response);
+            console.log('Imported events:', response);
+            addImportedEvents(response.importedEvents);
     
             Swal.fire({
                 title: 'Import success!',
                 icon: 'success',
                 text: 'Event imported successfully',
                 customClass: { confirmButton: 'button-alert' }
-            }); //TODO: COME FACCIO FETCH DEGLI EVENTI IMPORTATI QUI?
+            });
 
         } catch (err) {
             console.error('Error importing ICS:', err);
