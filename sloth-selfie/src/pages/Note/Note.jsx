@@ -3,13 +3,14 @@ import React, { useState } from 'react';
 import { useNote } from '../../contexts/NoteContext';
 import MainLayout from '../../layouts/MainLayout';
 import { useNavigate } from 'react-router-dom';
+import { apiService } from '../../services/apiService';
 
 import { MoveLeft, Lock, LockOpen, KeyRound, ChevronDown, ChevronUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 
 const Note = () => {
-    const { note, resetNote } = useNote();
+    const { note, setNote, resetNote } = useNote();
     const [openShare, setOpenShare] = useState(false);
     const navigate = useNavigate();
 
@@ -18,11 +19,16 @@ const Note = () => {
         navigate('../notes');
     }
 
+    const completeTask = async (task) => {
+        const response = await apiService(`/task/complete/${task._id}`, 'PUT');
+        if (response) setNote({ ...note, tasks: note.tasks.map(t => t._id === task._id ? response : t) });
+    }
+
     return (
         <MainLayout>
-            <div className='d-flex flex-column w-100 h-100 py-5 overflow-auto'>
+            <div className='d-flex flex-column w-100 h-100 py-5 m-md-3 overflow-auto'>
 
-                <div className='d-flex w-100 justify-content-between align-items-center'>
+                <div className='d-flex w-100 justify-content-between align-items-center mt-3 mt-md-5'>
                     <h1 className='sloth-blue mx-3'>{note.title}</h1>
                     <button className='btn' onClick={() => back()}>
                         <MoveLeft size={30} color='#244476' strokeWidth={1.75} />
@@ -57,7 +63,7 @@ const Note = () => {
                             <div key={index} className='col-md-6 col-12'>
                                 <div className=' d-flex justify-content-between align-items-center rounded shadow p-3 my-2'>
                                     <div className='d-flex align-items-center'>
-                                        <input type='checkbox' checked={task.completed} readOnly />
+                                        <input type='checkbox' checked={task.completed} onChange={() => completeTask(task)} />
                                         <div className='ps-2'>{task.title}</div>
                                     </div>
                                     {task.deadline && (
@@ -75,7 +81,7 @@ const Note = () => {
                     <div className='d-flex flex-column m-3 border rounded p-3 text-break' style={{ maxHeight: '300px' }}>
                         <div className='d-flex justify-content-between align-items-center opacity-50'>
 
-                            <button className='btn' onClick={() => setOpenShare(!openShare)}>
+                            <button className='btn p-1' onClick={() => setOpenShare(!openShare)}>
                                 {openShare ? (
                                     <ChevronUp size={20} strokeWidth={1.5} />
                                 ) : (
