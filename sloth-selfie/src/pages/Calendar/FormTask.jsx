@@ -35,7 +35,9 @@ const FormTask = () => {
 
     const exportTask = async () => {
             try {
-                const response = await apiService(`/task/${task._id}/export`, 'GET');
+                const response = await apiService(`/task/${task._id}/export`, 'GET', null, {
+                    credentials: 'include',
+                });
         
                 if (!response) throw new Error('Empty response from server');
         
@@ -50,7 +52,7 @@ const FormTask = () => {
                 Swal.fire({
                     title: 'Task exported',
                     icon: 'success',
-                    text: 'Task exported successfully',
+                    text: 'Task exported successfully, a mail with .ics attachment will be sent to you',
                     customClass: { confirmButton: 'button-alert' }
                 });
             } catch (err) {

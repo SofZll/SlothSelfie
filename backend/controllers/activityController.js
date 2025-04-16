@@ -5,6 +5,7 @@ const Event = require('../models/eventModel');
 const PhaseSubphase = require("../models/phaseSubphaseModel");
 const { createNotification } = require('../controllers/notificationController');
 const { calculateDate } = require('../utils/utils');
+const {sendExportEmail} = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
 // Creating an activinotenotety
@@ -154,10 +155,13 @@ const deleteActivity = async (req, res) => {
 async function exportActivity(req, res){
     try {
         const {activityId} = req.params;
+        const userName = req.session.username;
         const activity = await Activity.findById(activityId);
         if (!activity) {
             return res.status(404).json({ message: "Activity not found" });
         }
+
+        const user = await User.findOne({ username: userName });
 
         const { error, value } = createEvent({
             title: activity.title,
@@ -175,7 +179,17 @@ async function exportActivity(req, res){
         }
 
         console.log("Generated .ics value:\n", value);
+
+        // send the mail with the .ics file as attachment to the user
+        const userEmail = user.email;
+
+        await sendExportEmail(
+            userEmail,
+            `${activity.title}.ics`,
+            value
+        );
     
+        //download the file on frontend
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${activity.title}.ics"`);
         res.status(200).send(value);
