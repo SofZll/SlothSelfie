@@ -4,13 +4,15 @@ import ProtectedRoute from './ProtectedRoute';
 import { useIsDesktop } from '../utils/utils';
 import { StyleProvider } from '../components/StyleContext';
 import { AuthContext } from '../contexts/AuthContext';
-import Pomodoro from '../pages/Pomodoro/Pomodoro';
 
-import Note from '../pages/Note/Note';
+
+import Pomodoro from '../pages/Pomodoro/Pomodoro';
+import Projects from '../pages/Projects';
+import Notes from '../pages/Note/Notes';
 import Calendar from '../pages/Calendar/Calendar';
 import Home from '../pages/Home'
 import Profile from '../pages/ProfilePage';
-import ChatBox from '../components/ChatBox';
+import ChatBox from '../components/ChatBox/ChatBox';
 //TODO: chambiare gli import
 /*
 
@@ -19,6 +21,7 @@ import Forum from '../Forum';
 */
 import AuthPage from '../pages/AuthPage';
 import { LoadingPageLight } from '../pages/LoadingPage';
+import { ChatProvider } from '../contexts/ChatContext';
 
 // TODO: implement note id and calendar id */
 const MainRoutes = () => {
@@ -38,22 +41,26 @@ const MainRoutes = () => {
                             element={
                                 <ProtectedRoute >
                                     <Routes>
+
                                         <Route path='/pomodoro' element={<Pomodoro />} />
+                                        <Route path='/projects' element={<Projects />} />
                                         <Route path='/calendar' element={<Calendar />} />
-                                        <Route path='/notes' element={<Note />} />
+                                        <Route path='/notes' element={<Notes />} />
+                                        <Route path='/notes/:noteId' element={<Notes openNote={true} />} />
                                         <Route path='/home' element={<Home />} />
                                         <Route path='/home/settings' element={<Home settings={true} />} />
                                         <Route path='/profile' element={<Profile />} />
                                     </Routes>
                                     {/*
-                                    <Route path='/notifications' element={<Notifications />} />
                                     <Route path='/calendar' element={<Calendar />} />
                                     <Route path='/forum' element={<Forum />} />*/}
                                     {!isDesktop && (
-                                        <Routes>
-                                            <Route path='/chat' element={<ChatBox chatId={null} />} />
-                                            <Route path='/chat/:chatId' element={<ChatBox />} />
-                                        </Routes>
+                                        <ChatProvider>
+                                            <Routes>
+                                                <Route path='/chat' element={<ChatBox chatId={null} />} />
+                                                <Route path='/chat/:chatId' element={<ChatBox />} />
+                                            </Routes>
+                                        </ChatProvider>
                                     )}
                                 </ProtectedRoute>
                             }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaCopy, FaCheck } from 'react-icons/fa';
 import { htmlToText } from 'html-to-text';
 
-const CopyButton = ({ Note }) => {
+const CopyButton = ({ Note, Code }) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
@@ -12,6 +12,11 @@ const CopyButton = ({ Note }) => {
     };
 
     const copyText = () => {
+        if (Code) {
+            navigator.clipboard.writeText(Code);
+            return;
+        }
+
         let copiedContent = Note.title;
 
         if (Note.content.length > 0) {
@@ -32,10 +37,17 @@ const CopyButton = ({ Note }) => {
     }
 
     return (
-        <div className='d-flex w-100 align-items-start'>
-            <div className='d-inline-flex text-break fw-bold fs-4 w-auto' style={{ color: '#244476' }}>
-                {Note.title}
-            </div>
+        <div className='d-inline-block'>
+            {Note ? (
+                <div className='d-inline-flex text-break fw-bold fs-4 w-auto' style={{ color: '#244476' }}>
+                    {Note.title}
+                </div>
+            ) : (
+                <div className='d-inline-flex text-break fw-bold fs-6 w-auto' style={{ color: '#244476' }}>
+                    {Code}
+                </div>
+            )}
+            
             <button
                 style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
                 aria-label="Copy text"

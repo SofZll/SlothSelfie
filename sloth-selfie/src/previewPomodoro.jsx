@@ -89,7 +89,7 @@ const renderPomodoroPreview = () => {
   switch (viewType) {
     case 'quickStart':
       return (
-        <div className="container">
+        <div className="containerPreview">
           <p>Start your study session!</p><br />
           <div className={dataPomodoro.isStudioTime ? 'containerRed' : 'containerYellow'}>
             <img
@@ -115,7 +115,7 @@ const renderPomodoroPreview = () => {
         // Verify if the pomodoroList has elements
         if (pomodoroList.length > 0) {
           return (
-            <div className="container">
+            <div className="containerPreview">
               <p>Next Pomodoro sessions:</p><br />
               <div className="scrollable-list">
                 {pomodoroList.map((pomodoro, index) => (
@@ -143,7 +143,7 @@ const renderPomodoroPreview = () => {
           if (pomodoroList.length > 0) {
             const lastPomodoro = pomodoroList[pomodoroList.length - 1];
             return (
-              <div className="container">
+              <div className="containerPreview">
                 <p>Last Pomodoro session:</p><br />
                 <div className="containerYellow">
                   <img src={iconYellowTomato} alt="Tomato" className="tomatoPrew" />

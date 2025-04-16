@@ -1,8 +1,7 @@
-import React, { useState, useContext, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { config } from 'react-spring';
 import Carousel from 'react-spring-3d-carousel';
-import { v4 as uuidv4 } from 'uuid';
 
 import CardCarosel from '../components/CardCarosel';
 
@@ -10,34 +9,29 @@ import { Calendar1, NotebookPen, Presentation, MoveLeft, MoveRight, Settings } f
 import iconTomato from '../assets/icons/tomato.svg';
 import { useNavigate } from 'react-router-dom';
 
-import { CustomizationContext } from '../contexts/PreviewContext';
-import {AuthContext} from '../contexts/AuthContext';
-
 const CarouselHome = (props) => {
 
-  const { customizations } = useContext(CustomizationContext);
-  const { user } = useContext(AuthContext);
   const [goToSlide, setGoToSlide] = useState(0);
   const navigate = useNavigate();
 
   const cards = useMemo(() => [
     {
-      key: uuidv4(),
-      content: (<CardCarosel title='Calendar' settingKey="calendar" caseShow={customizations.calendar}  />)
+      key: 1,
+      content: (<CardCarosel title='Calendar' settingKey='calendar'  />)
     },
     {
-      key: uuidv4(),
-      content: (<CardCarosel title='Notes' settingKey="notes" caseShow={customizations.notes} />)
+      key: 2,
+      content: (<CardCarosel title='Notes' settingKey='notes' />)
     },
     {
-      key: uuidv4(),
-      content: (<CardCarosel title='Pomodoro' settingKey="pomodoro" caseShow={customizations.pomodoro} />)
+      key: 3,
+      content: (<CardCarosel title='Pomodoro' settingKey='pomodoro' />)
     },
     {
-      key: uuidv4(),
-      content: (<CardCarosel title='Projects' settingKey="projects" caseShow={customizations.projects} userLogged={user} />)
+      key: 4,
+      content: (<CardCarosel title='Projects' settingKey='projects' />)
     }
-  ], [customizations]);
+  ], []);
 
   const handlePrev = () => {
     setGoToSlide((prev) => (prev > 0 ? prev - 1 : cards.length - 1));

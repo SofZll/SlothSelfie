@@ -1,13 +1,17 @@
-import React  from 'react';
+import React, { useState }  from 'react';
 
 import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
+import ShareInput from '../../components/ShareInput';
+import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
+import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormActivity = () => {
 
-    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected } = useCalendar();
+    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications } = useCalendar();
+    const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setDeadline = (date) => {
         const newDate = new Date(date);
@@ -36,11 +40,16 @@ const FormActivity = () => {
                 setActivities([...activities, response]);
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+
+            /* notificcheeeee 
+            if (notifications.length > 0) {
+                const response = await apiService(`/notification`, 'POST', {*/
         }
         resetSelected();
     }
 
     const deleteActivity = async () => {
+        setDeletePopUp(false);
         const response = await apiService(`/activity/${activity._id}`, 'DELETE');
         if (response){
             Swal.fire({ title: 'Activity deleted', icon: 'success', text: 'Activity deleted successfully', customClass: { confirmButton: 'button-alert' } });
@@ -83,7 +92,7 @@ const FormActivity = () => {
     }
 
     return (
-        <form className='d-flex flex-column w-100'>
+        <div className='d-flex flex-column w-100'>
             <div className='row py-2 '>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -110,14 +119,17 @@ const FormActivity = () => {
                     <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>
-            
 
-            <div className='row py-2'>
-                <div className='col-6'>
-                    {/* Field for notification TODO */}
+            <div className='row'>
+                <div className='col-12'>
+                    <label htmlFor='share' className='form-label'>Share with</label>
+                    <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, ['sharedWith']: receivers})} />
                 </div>
-                <div className='col-6'>
-                    {/* Field for share TODO */}
+            </div>
+
+            <div className='row'>
+                <div className='col-12 justify-content-center align-items-center d-flex'>
+                    <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
                 </div>
             </div>
 
@@ -125,14 +137,32 @@ const FormActivity = () => {
                 <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                 {selected.edit && (
                     <>
-                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteActivity()}>delete</button>
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
                     <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportActivity()}>export .ics</button>
                     </>
+                    
                 )}
             </div>
+
+            {deletePopUp && (
+                <DeletePopUpLayout handleDelete={() => deleteActivity()} handleClose={() => setDeletePopUp(false)}>
+                    <div className='d-flex flex-column text-start'>
+                        Are you sure you want to delete this activity?
+                    </div>
+                    <div className='d-flex flex-column'>
+                        <div className='fst-italic fw-bold' style={{ color: '#244476' }}>{activity.title}</div>
+                        <div className='d-flex w-100 justify-content-between'>
+                            {activity.deadline && (
+                                <div className='fst-italic' style={{ color: '#244476' }}>{new Date(activity.deadline).toLocaleDateString()}</div>
+                            )}
+                            <div className='fw-medium' style={{ color: '#244476' }}>{activity.completed ? 'Completed' : 'to complte'}</div>
+                        </div>
+                    </div>
+                </DeletePopUpLayout>
+            )}
             
 
-        </form>
+        </div>
     )
 }
 

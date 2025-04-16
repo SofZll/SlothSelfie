@@ -28,9 +28,9 @@ const MobileNav = () => {
             <NavLink to='/pomodoro' activeclassname='active' alt='pomodoro'>
                 <img src={iconTomato} alt='Pomodoro' style={{ width: '36px' }}/>
             </NavLink>
-            <a href='/projects.html' alt='projects'>
-            <Presentation size={36} color="#555B6E" strokeWidth={1.75} />
-            </a>
+            <NavLink to='/projects' activeclassname='active' alt='projects'>
+                <Presentation size={36} color="#555B6E" strokeWidth={1.75} />
+            </NavLink>
             <NavLink to='/profile' activeclassname='active' alt='profile'>
                 <User size={36} color="#555B6E" strokeWidth={1.75} />
             </NavLink>

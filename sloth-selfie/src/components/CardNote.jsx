@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 
 import CopyButton from './CopyButton';
 import { Pen, Trash2, Layers2, ChevronDown, ChevronUp, Maximize2 } from 'lucide-react';
@@ -9,6 +9,8 @@ import Swal from 'sweetalert2';
 
 import { useNote } from '../contexts/NoteContext';
 import { apiService } from '../services/apiService';
+import { useNavigate } from 'react-router-dom';
+import DeletePopUpLayout from '../layouts/DeletePopUpLayout';
 
 
 const CardNote = ({ Note }) => {
@@ -16,11 +18,13 @@ const CardNote = ({ Note }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const previewContent = Note.content.length > 100 ? Note.content.substring(0, 100) : Note.content;
 
-    const { selected, setSelected, setNote, notes, setNotes } = useNote();
+    const { selected, setSelected, setNote, notes, setNotes, deletePopUp, setDeletePopUp } = useNote();
+    const navigate = useNavigate();
 
     const selectNote = () => {
-        setNote(Note);
-        if (Note.tasks) setNote({ ...Note, tasks: Note.tasks.map(t => ({ ...t, deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null })), addedTasks: [], deletedTasks: [] });
+        
+        if (Note.tasks) setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username ), tasks: Note.tasks.map(t => ({ ...t, deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null })), addedTasks: [], deletedTasks: [] });
+        else setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username) });
         setSelected({ ...selected, edit: true, add: false, popUp: true });
     }
 
@@ -30,6 +34,7 @@ const CardNote = ({ Note }) => {
     }
 
     const deleteNote = async () => {
+        setDeletePopUp({show: false, note: null});
         const response = await apiService(`/note/${Note._id}`, 'DELETE');
         if (response) {
             Swal.fire({ title: 'Note deleted', icon: 'success', text: 'Note deleted successfully', customClass: { confirmButton: 'button-alert' } });
@@ -54,6 +59,10 @@ const CardNote = ({ Note }) => {
 
     const openNote = () => {
         
+        if (Note.tasks) setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username ), tasks: Note.tasks.map(t => ({ ...t, deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null })), addedTasks: [], deletedTasks: [] });
+        else setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username) });
+
+        navigate(`/notes/${Note._id}`);
     }
 
     return (
@@ -144,11 +153,26 @@ const CardNote = ({ Note }) => {
                         <Layers2 size={23} color='#244476' strokeWidth={1.6} />
                     </button>
                     
-                    <button className='btn ps-0' onClick={() => deleteNote()}>
+                    <button className='btn ps-0' onClick={() => setDeletePopUp({show: true, note: Note})}>
                         <Trash2 size={23} color='#244476' strokeWidth={1.6} />
                     </button>
                 </div>
             </div>
+
+            {deletePopUp.show && deletePopUp.note && (
+                <DeletePopUpLayout handleDelete={() => deleteNote()} resetPopUp={() => setDeletePopUp({show: false, note: null})}>
+                    <div className='d-flex flex-column text-start'>
+                        Are you sure you want to delete this note?
+                    </div>
+                    <div className='d-flex flex-column'>
+                        <div className='fst-italic fw-bold' style={{ color: '#244476' }}>{deletePopUp.note.title}</div>
+                        <div className='text-start'>
+                            <div className='d-inline-block pe-1'>by</div>
+                            <div className='d-inline-block fst-italic' style={{ color: '#244476' }}>{deletePopUp.note.user.username}</div>
+                        </div>
+                    </div>
+                </DeletePopUpLayout>
+            )}
         </div>
     );
 }

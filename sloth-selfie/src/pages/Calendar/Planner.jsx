@@ -72,9 +72,16 @@ const Planner = () => {
     }
 
     const onItemSelect = (item) => {
-        if (item.type === 'activity') setActivity(activities.find(a => a._id === item._id));
-        else if (item.type === 'event') setEvent(events.find(event => event._id === item._id));
-        else setTask(tasks.find(task => task._id === item._id));
+        if (item.type === 'activity'){
+            const a = activities.find(a => a._id === item._id);
+            setActivity({...a, sharedWith: a.sharedWith.map(u => u.username)});
+        } else if (item.type === 'event') {
+            const e = events.find(e => e._id === item._id);
+            setEvent({...e, sharedWith: e.sharedWith.map(u => u.username)});
+        } else {
+            const t = tasks.find(t => t._id === item._id);
+            setTask({...t, sharedWith: t.sharedWith.map(u => u.username)});
+        }
         
         setSelected({selection: item.type, edit: true, add: false, popUp: !isDesktop});
     }
