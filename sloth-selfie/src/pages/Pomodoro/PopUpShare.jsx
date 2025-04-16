@@ -3,7 +3,7 @@ import React from 'react';
 import { Users, MessageSquare, CircleFadingPlus, DoorOpen, SearchCheck } from 'lucide-react';
 import CopyButton from '../../components/CopyButton';
 
-import socket from '../../services/socket';
+import socket from '../../services/socket/socket';
 import { usePomodoro } from '../../contexts/PomodoroContext';
 
 const PopUpShare = () => {

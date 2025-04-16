@@ -17,7 +17,7 @@ const FormCalendar = () => {
     const isDesktop = useIsDesktop();
 
     return (
-        <div className='d-flex flex-column w-100 h-100'>
+        <div className='d-flex flex-column w-100 h-100 overflow-y-auto overflow-x-hidden'>
             <SelectionCalendarLayout>
                 {selected.selection === '...' && (
                     <div className='d-flex flex-column col-11 col-lg-8 align-items-center py-3'>

@@ -8,7 +8,8 @@ import MobileNav from '../components/MobileNav'
 import Header from '../components/Header'
 import TimeMachineButton from '../components/TimeMachineButton';
 import { TimeMachineProvider } from '../contexts/TimeMachineContext';
-import ChatBox from '../components/ChatBox';
+import { ChatProvider } from '../contexts/ChatContext';
+import ChatBox from '../components/ChatBox/ChatBox';
 
 const MainLayout = ({ children }) => {
     const isDesktop = useIsDesktop();
@@ -18,7 +19,9 @@ const MainLayout = ({ children }) => {
             {isDesktop ? (
                 <>
                     <DesktopNav />
-                    <ChatBox />
+                    <ChatProvider >
+                        <ChatBox />
+                    </ChatProvider>
                 </>
             ) : (
                 <MobileNav />

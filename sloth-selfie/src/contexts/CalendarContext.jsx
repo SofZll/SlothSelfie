@@ -142,12 +142,14 @@ export const CalendarProvider = ({ children }) => {
         });
     }
 
+    const [notifications, setNotifications] = useState([]);
+
     return (
         <CalendarContext.Provider 
             value={{ activity, setActivity, activities, setActivities, resetActivity,
                 event, setEvent, events, setEvents, resetEvent,
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
-                selected, setSelected, select, back, resetSelected }}>
+                selected, setSelected, select, back, resetSelected, notifications, setNotifications }}>
 
             {children}
             

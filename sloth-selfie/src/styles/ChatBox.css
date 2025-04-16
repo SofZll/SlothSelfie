@@ -76,15 +76,30 @@
     margin: 0;
 }
 
+.chat-content p {
+    color: #5c5c5c;
+}
+
 .chat-username {
     font-weight: bold;
     font-size: 15px;
     color: #333;
 }
 
+.chat-unread-count {
+    background-color: #4CAF50;
+    color: white; 
+    width: 1.24rem;
+    height: 1.24rem;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 1px 6px;
+}
+
 .chat-date {
     font-size: 12px;
-    color: #888;
+    color: #5c5c5c;
 }
 
 .chat-selected-header img {

@@ -38,40 +38,6 @@ const createChat = async (req, res) => {
     }
 };
 
-// Create a new message
-const createMessage = async (req, res) => {
-    const { message } = req.body;
-    const { chatId } = req.params;
-
-    try {
-        const user = await User.findOne({ username: req.session.username });
-        const chat = await Chat.findById(chatId);
-
-        if (!chat) {
-            res.status(400).json({ message: 'Chat not found' });
-            return;
-        }
-
-        const newMessage = new Message({
-            chat: chat._id,
-            sender: user._id,
-            content: {
-                text: message
-            }
-        });
-
-        const savedMessage = await newMessage.save();
-        chat.lastMessage = savedMessage._id;
-        chat.lastMessageAt = new Date();
-        await chat.save();
-
-        res.status(201).json({ success: true, savedMessage });
-    } catch (error) {
-        console.error('Error creating message:', error);
-        res.status(400).json({ success: false, message: error.message });
-    }
-};
-
 // Get all chats
 const getChats = async (req, res) => {
     try {
@@ -81,6 +47,19 @@ const getChats = async (req, res) => {
         if (!chats) {
             res.status(400).json({ success: false, message: 'Chats not found' });
             return;
+        }
+
+        for (const chat of chats) {
+            const unreadCount = await Message.countDocuments({
+                chat: chat._id,
+                'status': {
+                    $elemMatch: {
+                        user: user._id,
+                        status: { $ne: 'read' }
+                    }
+                }
+            });
+            chat.unreadCount = unreadCount;
         }
 
         res.status(200).json({ success: true, chats: chats });
@@ -101,7 +80,7 @@ const getMessages = async (req, res) => {
             res.status(400).json({ success: false, message: 'Messages not found' });
             return;
         }
-        console.log("messages: ", messages);
+
         res.status(200).json({ success: true, messages: messages });
     } catch (error) {
         console.error('Error fetching messages:', error);
@@ -109,4 +88,4 @@ const getMessages = async (req, res) => {
     }
 }
 
-module.exports = { createChat, createMessage, getChats, getMessages };
+module.exports = { createChat, getChats, getMessages };
