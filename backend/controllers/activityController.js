@@ -136,14 +136,70 @@ const updateActivity = async (req, res) => {
     }
 };
 
-// Deleting an activity
-const deleteActivity = async (req, res) => {
+// Deleting an activity, if it is a macro, we delete all the subactivities and its phaseSubphase (projects only)
+const deleteActivity = async (req, res) => {    //TODO: GESTIRE CANCELLAZIONE DI NOTE ED EVENTI, E SUBATTIVITà IN CALENDARIO DA TOGLIERE CREDO
     const {activityId} = req.params;
     try {
-        const activity = await Activity.findByIdAndDelete(activityId);
+        const activity = await Activity.findById(activityId);
         if (!activity) {
             return res.status(404).json({ message: "Activity not found" });
         }
+
+        // Macroactivitycase: if the activity is a macroactivity, we need to delete all the subactivities and the phaseSubphase
+        if (activity.isMacroactivity) {
+            console.log("Deleting macroactivity and its structure...");
+
+            const phaseSubphase = await PhaseSubphase.findOne({ macroActivity: activity._id });
+
+            if (phaseSubphase) {
+                if (phaseSubphase.type === 'subphase') {
+                    if (phaseSubphase.activities.length > 0) {
+                        await Activity.deleteMany({ _id: { $in: phaseSubphase.activities } });
+                        console.log(`Eliminate ${phaseSubphase.activities.length} sotto-attività da ${phaseSubphase.title}`);
+                    }
+
+                    //find the phase of the subphase and delete the subphase from it
+                    const phase = await PhaseSubphase.findById(phaseSubphase.parentPhase);
+                    if (phase) {
+                        phase.subphases = phase.subphases.filter(subphaseId => subphaseId.toString() !== phaseSubphase._id.toString());
+                        await phase.save();
+                        console.log(`Eliminata sottofase ${phaseSubphase.title} dalla fase ${phase.title}`);
+                    }
+
+                    await PhaseSubphase.findByIdAndDelete(phaseSubphase._id);
+                    console.log(`Eliminata sottofase ${phaseSubphase.title}`);
+                }
+
+                else if (phaseSubphase.type === 'phase') {
+                    // delete all activities of the subphases
+                    if (phaseSubphase.subphases && phaseSubphase.subphases.length > 0) {
+                        const subphases = await PhaseSubphase.find({ _id: { $in: phaseSubphase.subphases } });
+
+                        for (const sub of subphases) {
+                            if (sub.activities && sub.activities.length > 0) {
+                                await Activity.deleteMany({ _id: { $in: sub.activities } });
+                                //delete the macro also
+                                await Activity.findByIdAndDelete(sub.macroActivity);
+                                console.log(`Eliminate ${sub.activities.length} attività dalla sottofase ${sub.title}`);
+                                console.log(`Eliminata macroattività ${sub.macroActivity}`);
+                            }
+                            await PhaseSubphase.findByIdAndDelete(sub._id);
+                            console.log(`Eliminata sottofase ${sub.title}`);
+                        }
+                    }
+
+                    // Delete the phase
+                    await PhaseSubphase.findByIdAndDelete(phaseSubphase._id);
+                    console.log(`Eliminata fase ${phaseSubphase.title}`);
+                }
+            } else {
+                console.warn("Nessuna fase o sottofase associata trovata alla macroattività.");
+            }
+        }
+
+        // Delete the activity itself
+        await Activity.findByIdAndDelete(activityId);
+
         res.status(200).json({ message: "Activity deleted succesfully" });
     } catch (error) {
         console.error('Error deleting activity:', error);
