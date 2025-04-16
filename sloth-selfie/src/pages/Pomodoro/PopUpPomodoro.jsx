@@ -5,6 +5,7 @@ import { useMusic } from '../../contexts/MusicContext';
 import EditPomodoro from './EditPomodoro';
 import PopUpShare from './PopUpShare';
 import PopUpPlan from './PopUpPlan';
+import PopUpStats from './PopUpStats';
 import { Youtube, SearchCheck } from 'lucide-react';
 
 const PopUpPomodoro = () => {
@@ -28,7 +29,7 @@ const PopUpPomodoro = () => {
 
                         {popUp.music && <h5 className='modal-title' style={{ color: '#244476' }}>Study on Beat</h5>}
 
-                        {popUp.stat && <h5 className='modal-title' style={{ color: '#244476' }}>yours Pomodoro Statistics</h5>}
+                        {popUp.stats && <h5 className='modal-title' style={{ color: '#244476' }}>yours Pomodoro Statistics</h5>}
 
                         <button type='button' className='close' onClick={() => resetPopUp()}>
                             <span>&times;</span>
@@ -102,10 +103,8 @@ const PopUpPomodoro = () => {
                             </div>
                         )}
 
-                        {popUp.stat && (
-                            <div className='d-flex justify-content-center'>
-                                <h5>Statistics</h5>
-                            </div>
+                        {popUp.stats && (
+                            <PopUpStats />
                         )}
 
                     </div>

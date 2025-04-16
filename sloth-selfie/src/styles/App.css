@@ -5,6 +5,19 @@
     --hover-lift: translateY(-1px);
 }
 
+
+.bg-sloth-blue {
+    background-color: #244476;
+}
+
+.sloth-blue {
+    color: #244476;
+}
+
+.outline-sloth-blue {
+    border: 1px solid #244476;
+}
+
 /* css form */
 
 .form-group input, 
