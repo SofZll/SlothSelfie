@@ -6,10 +6,11 @@ import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import ShareInput from '../../components/ShareInput';
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
+import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormActivity = () => {
 
-    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected } = useCalendar();
+    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications } = useCalendar();
     const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setDeadline = (date) => {
@@ -39,6 +40,10 @@ const FormActivity = () => {
                 setActivities([...activities, response]);
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+
+            /* notificcheeeee 
+            if (notifications.length > 0) {
+                const response = await apiService(`/notification`, 'POST', {*/
         }
         resetSelected();
     }
@@ -83,16 +88,16 @@ const FormActivity = () => {
                 </div>
             </div>
 
-            <div className='row py-2'>
+            <div className='row'>
                 <div className='col-12'>
                     <label htmlFor='share' className='form-label'>Share with</label>
                     <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, ['sharedWith']: receivers})} />
                 </div>
             </div>
 
-            <div className='row py-2'>
-                <div className='col-6'>
-                    {/* Field for notification TODO */}
+            <div className='row'>
+                <div className='col-12 justify-content-center align-items-center d-flex'>
+                    <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
                 </div>
             </div>
 

@@ -3,6 +3,7 @@ import { slide as Hamburger } from 'react-burger-menu';
 import { Link } from 'react-router-dom';
 import { StyleContext } from './StyleContext';
 import { AuthContext } from '../contexts/AuthContext';
+import SettingsButton from './SettingsButton';
 
 //TODO: va messo abbosto l'iconna del panino
 const DesktopNav = () => {
@@ -40,6 +41,9 @@ const DesktopNav = () => {
                         <div className='d-flex flex-column'>
                             <span className='profile-username'>{user.username}</span>
                             <Link to='/profile' onClick={closeMenu} className='profile-link'>Profile</Link>
+                        </div>
+                        <div className='setting-button-small'>
+                            <SettingsButton />
                         </div>
                     </div>
                 </div>
