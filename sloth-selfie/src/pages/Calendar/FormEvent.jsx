@@ -6,6 +6,7 @@ import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { generateTimeOptions } from '../../utils/utils';
 import ShareInput from '../../components/ShareInput';
+import NotificationInput from '../../components/NotificationInput';
 
 const FormEvent = () => {
     
@@ -200,8 +201,8 @@ const FormEvent = () => {
             </div>
 
             <div className='row py-2'>
-                <div className='col-6'>
-                    {/* Field for notification TODO */}
+                <div className='col-12 justify-content-center align-items-center d-flex'>
+                    <NotificationInput />
                 </div>
             </div>
             

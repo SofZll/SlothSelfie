@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { usePomodoro } from '../../contexts/PomodoroContext';
 import Button from '../../components/Button';
 import Swal from 'sweetalert2';
-import socket from '../../services/socket';
+import socket from '../../services/socket/socket';
 
 const EditPomodoro = () => {
 
