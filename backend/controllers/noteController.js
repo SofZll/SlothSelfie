@@ -119,8 +119,6 @@ const updateNote = async (req, res) => {
         console.error('Error updating note:', error);
         res.status(500).json({ success: false, message: 'Error updating note' });
     }
-
-
 };
 
 // Delete a note
