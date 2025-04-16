@@ -27,6 +27,30 @@ const generateTimeOptions = () => {
     return options;
 };
 
+const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+}
+
+const dateFromDate = (date) => {
+    if (!date || !(date instanceof Date)) return '';
+    try {
+        return date.toISOString().split('T')[0];
+    } catch (e) {
+        return '';
+    }
+};
+
+const timeFromDate = (date) => {
+    if (!date || !(date instanceof Date)) return '00:00';
+    try {
+        return date.toTimeString().substr(0, 5);
+    } catch (e) {
+        return '00:00';
+    }
+};
+
 // function for date chatbox and forum
 
 // Function to convert buffer to base64 string
@@ -36,4 +60,4 @@ const bufferToBase64 = (buffer) => {
     return btoa(binary);
 };
 
-export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64 };
+export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime, dateFromDate, timeFromDate };

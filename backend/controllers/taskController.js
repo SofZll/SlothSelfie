@@ -129,7 +129,7 @@ const deleteTasks = async (tasks) => {
 }
 
 //function called from note to edit tasks
-const editTasks = async (tasks) => {
+const editTasks = async (tasks, users) => {
     const updatedTasks = [];
     try {
         for (let i = 0; i < tasks.length; i++) {
@@ -139,6 +139,7 @@ const editTasks = async (tasks) => {
             task.title = tasks[i].title;
             task.deadline = tasks[i].deadline;
             task.completed = tasks[i].completed;
+            task.sharedWith = users;
 
             const updatedTask = await task.save();
             if (!updatedTask) return false;

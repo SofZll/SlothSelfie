@@ -18,7 +18,7 @@ const PlusLayout = ({ children, clickCall, selected, popUp }) => {
                     </button>
 
                     {selected && (
-                        <div className='d-flex flex-column w-75 bg-white rounded p-3 position-fixed top-50 start-50 translate-middle pop-up shadow-lg'>
+                        <div className='d-flex flex-column bg-white rounded p-3 position-fixed top-50 start-50 translate-middle pop-up popup-square shadow-lg'>
                             {popUp}
                         </div>
                     )}

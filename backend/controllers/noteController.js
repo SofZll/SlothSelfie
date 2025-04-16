@@ -58,6 +58,8 @@ const getNotes = async (req, res) => {
         .populate('user', 'username')
         .populate('sharedWith', 'username');
 
+        console.log('Fetched notes:', notes);
+
         res.status(200).json(notes);
 
     } catch (error) {
@@ -91,6 +93,8 @@ const updateNote = async (req, res) => {
 
     try {
         const note = await Note.findById(noteId);
+        const users = await findUserId(sharedWith);
+        const userId = await User.findOne({ username: user});
 
         if (!note) {
             return res.status(404).json({ success: false, message: 'Note not found' });
@@ -102,19 +106,13 @@ const updateNote = async (req, res) => {
         }
 
         if (addedTasks) {
-            const users = [];
-            for (let i = 0; i < sharedWith.length; i++) {
-                users.push(sharedWith[i]._id);
-            }
-
-            const response = await addTasks(addedTasks, user, users);
+            const response = await addTasks(addedTasks, userId, users);
             if (!response) return res.status(500).json({ success: false, message: 'Error adding tasks' });
             else note.tasks = response;
         }
-        
 
         if (tasks) {
-            const response = await editTasks(tasks);
+            const response = await editTasks(tasks, users);
             if (!response) return res.status(500).json({ success: false, message: 'Error editing tasks' });
             else note.tasks.push(...response);
         }
@@ -124,6 +122,7 @@ const updateNote = async (req, res) => {
         note.content = content;
         note.noteAccess = noteAccess;
         note.updateDate = new Date();
+        note.sharedWith = noteAccess === 'shared' ? users : [];
 
         const updatedNote = await note.save();
 
@@ -138,8 +137,6 @@ const updateNote = async (req, res) => {
         console.error('Error updating note:', error);
         res.status(500).json({ success: false, message: 'Error updating note' });
     }
-
-
 };
 
 // Delete a note

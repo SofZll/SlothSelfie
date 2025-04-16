@@ -7,6 +7,7 @@ export const NoteProvider = ({ children }) => {
     const [note, setNote] = useState({
         _id: '',
         title: '',
+        user: '',
         category: '',
         content: '',
         noteAccess: 'private',
@@ -24,6 +25,7 @@ export const NoteProvider = ({ children }) => {
         setNote({
             _id: '',
             title: '',
+            user: '',
             category: '',
             content: '',
             noteAccess: 'private',
@@ -57,8 +59,13 @@ export const NoteProvider = ({ children }) => {
         date: ''
     });
 
+    const [deletePopUp, setDeletePopUp] = useState({
+        show: false,
+        note: null
+    });
+
     return (
-        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters }}>
+        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters, deletePopUp, setDeletePopUp }}>
             {children}
         </NoteContext.Provider>
     );

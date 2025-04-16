@@ -2,11 +2,10 @@ const pomodoroSocket = require('./pomodoroSocket');
 const notificationSocket = require('./notificationSocket');
 const chatSocket = require('./chatSocket');
 const userSocketMap = require('./userSocketMap');
+const pomodoroSessionMap = require('./pomodoroSessionMap');
 const User = require('../models/userModel');
 
 const socketHandler = (io) => {
-    const settingPomodoro = {};
-    let intervals = {};
 
     io.on('connection', (socket) => {
         console.log('A user connected:', socket.id);
@@ -14,6 +13,7 @@ const socketHandler = (io) => {
         socket.on('online-user', async (userId) => {
             userSocketMap.set(userId, socket.id);
             await User.findByIdAndUpdate(userId, { isOnline: true });
+            socket.emit('join-chatroom', userId);
             io.emit('status-change', { userId, isOnline: true });
         });
         
@@ -23,11 +23,13 @@ const socketHandler = (io) => {
                 userSocketMap.delete(userId);
                 await User.findByIdAndUpdate(userId, { isOnline: false });
                 io.emit('status-change', { userId, isOnline: false });
+                socket.emit('leave-chatroom', userId);
                 console.log('User disconnected:', userId);
             }
         });
+
         chatSocket.registerHandlers(socket, io);
-        pomodoroSocket.registerHandlers(socket, io, settingPomodoro, userSocketMap, intervals);
+        pomodoroSocket.registerHandlers(socket, io, pomodoroSessionMap);
         notificationSocket.registerHandlers(socket, io, userSocketMap);
     });
 };

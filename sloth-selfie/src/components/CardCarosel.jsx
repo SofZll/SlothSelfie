@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { useSpring, animated } from 'react-spring';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
@@ -27,20 +27,17 @@ const CardCarosel = ({ title, settingKey }) => {
         : '0 2px 10px rgb(0 0 0 / 8%)'
     });
 
-     //Map the setting key to the personalized title
-     const titleMap = {
+    //Map the setting key to the personalized title
+    const titleMap = {
         showEventsList: "Today's Events List",
         showActivitiesList: "This week's Activities List",
-        showTasksList: "This week's Tasks List",
-        listOfNotes: "Notes List",
-        lastNote: "Most recent Note",
-        addNote: "Add Note",
-        quickStart: "Quick Start",
-        listOfPomodoros: "Pomodoros List",
-        lastPomodoro: "Last Pomodoro",
-        listOfProjects: "Projects List",
-        recentProjectsDeadlines: "Upcoming Deadlines",
-        projectGanttChart: "Project Gantt Chart",
+        listOfNotes: 'Notes List',
+        lastNote: 'Most recent Note',
+        quickStart: 'Quick Start',
+        listOfPomodoros: 'Pomodoros List',
+        lastPomodoro: 'Last Pomodoro',
+        listOfProjects: 'Projects List',
+        recentProjectsDeadlines: 'Upcoming Deadlines'
     };
 
     //Get the personalized title
@@ -50,31 +47,31 @@ const CardCarosel = ({ title, settingKey }) => {
     const renderContent = () => {
         switch (customizations[settingKey]) {
             case 'showCalendar':
-                return <PreviewCalendar viewType="calendar" />;
+                return <PreviewCalendar viewType='calendar' />;
             case 'showEventsList':
-                return <PreviewCalendar viewType="events" />;
+                return <PreviewCalendar viewType='events' />;
             case 'showActivitiesList':
-                return <PreviewCalendar viewType="activities" />;
+                return <PreviewCalendar viewType='activities' />;
             case 'showTasksList':
-                return <PreviewCalendar viewType="tasks" />;
+                return <PreviewCalendar viewType='tasks' />;
             case 'listOfNotes':
-                return <PreviewNote viewType="list" />;
+                return <PreviewNote viewType='list' />;
             case 'lastNote':
-                return <PreviewNote viewType="latest" />;
+                return <PreviewNote viewType='latest' />;
             case 'addNote':
-                return <PreviewNote viewType="add" />;
+                return <PreviewNote viewType='add' />;
             case 'quickStart':
-                return <PreviewPomodoro viewType="quickStart" userLogged={user} />;
+                return <PreviewPomodoro viewType='quickStart' userLogged={user} />;
             case 'listOfPomodoros':
-                return <PreviewPomodoro viewType="list" userLogged={user} />;
+                return <PreviewPomodoro viewType='list' userLogged={user} />;
             case 'lastPomodoro':
-                return <PreviewPomodoro viewType="latest" userLogged={user} />;
+                return <PreviewPomodoro viewType='latest' userLogged={user} />;
             case 'listOfProjects':
-                return <PreviewProjects viewType="list" />;
+                return <PreviewProjects viewType='list' />;
             case 'recentProjectsDeadlines':
-                return <PreviewProjects viewType="recentDeadlines" />;
+                return <PreviewProjects viewType='recentDeadlines' />;
             case 'projectGanttChart':
-                return <PreviewProjects viewType="ganttChart"/>;
+                return <PreviewProjects viewType='ganttChart'/>;
             default:
                 return null;
         }
@@ -82,25 +79,25 @@ const CardCarosel = ({ title, settingKey }) => {
 
         // Rendering the legend when in 'calendar' view
         const renderLegend = () => (
-            <div className="legend">
-                <div className="legend-item">
-                    <span className="event-dot-blue"></span>
-                    <span>Event</span>
-                </div>
-                <div className="legend-item">
-                    <span className="event-dot-orange"></span>
-                    <span>Project Event</span>
-                </div>
-                <div className="legend-item">
-                    <span className="event-dot-aqua"></span>
-                    <span>Activity</span>
-                </div>
-                <div className="legend-item">
-                    <span className="event-dot-lightgreen"></span>
-                    <span>Task</span>
-                </div>
+        <div className='legend'>
+            <div className='legend-item'>
+                <span className='event-dot-blue'></span>
+                <span>Event</span>
             </div>
-        );
+            <div className='legend-item'>
+                <span className='event-dot-orange'></span>
+                <span>Project Event</span>
+            </div>
+            <div className='legend-item'>
+                <span className='event-dot-aqua'></span>
+                <span>Activity</span>
+            </div>
+            <div className='legend-item'>
+                <span className='event-dot-lightgreen'></span>
+                <span>Task</span>
+            </div>
+        </div>
+    );
     
     return (
         <CalendarProvider>

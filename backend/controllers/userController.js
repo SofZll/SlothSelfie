@@ -122,7 +122,11 @@ const editProfile = async (req, res) => {
 // Get the profile info: FUNZIONA
 const getUserProfile = async (req, res) => {
     try {
-        const userId = req.params.userId || req.session.userId;
+        let userId = req.params.userId;
+        
+        if (!userId || userId === 'undefined') {
+            userId = req.session.userId;
+        }
         console.log('Requested URL:', req.originalUrl);
         console.log('params:', req.params);
         console.log("Requested userId:", req.params.userId);
