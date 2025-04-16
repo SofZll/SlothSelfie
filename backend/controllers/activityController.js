@@ -137,7 +137,7 @@ const updateActivity = async (req, res) => {
 };
 
 // Deleting an activity, if it is a macro, we delete all the subactivities and its phaseSubphase (projects only)
-const deleteActivity = async (req, res) => {    //TODO: GESTIRE CANCELLAZIONE DI NOTE ED EVENTI, E SUBATTIVITà IN CALENDARIO DA TOGLIERE CREDO
+const deleteActivity = async (req, res) => {    //TODO: GESTIRE SUBATTIVITà IN CALENDARIO DA TOGLIERE LATO FRONT
     const {activityId} = req.params;
     try {
         const activity = await Activity.findById(activityId);
@@ -147,15 +147,15 @@ const deleteActivity = async (req, res) => {    //TODO: GESTIRE CANCELLAZIONE DI
 
         // Macroactivitycase: if the activity is a macroactivity, we need to delete all the subactivities and the phaseSubphase
         if (activity.isMacroactivity) {
-            console.log("Deleting macroactivity and its structure...");
 
             const phaseSubphase = await PhaseSubphase.findOne({ macroActivity: activity._id });
 
             if (phaseSubphase) {
                 if (phaseSubphase.type === 'subphase') {
                     if (phaseSubphase.activities.length > 0) {
-                        await Activity.deleteMany({ _id: { $in: phaseSubphase.activities } });
-                        console.log(`Eliminate ${phaseSubphase.activities.length} sotto-attività da ${phaseSubphase.title}`);
+                        for (const subActivityId of phaseSubphase.activities) {
+                            await deleteActivityWithRelations(subActivityId);
+                        }
                     }
 
                     //find the phase of the subphase and delete the subphase from it
@@ -163,11 +163,9 @@ const deleteActivity = async (req, res) => {    //TODO: GESTIRE CANCELLAZIONE DI
                     if (phase) {
                         phase.subphases = phase.subphases.filter(subphaseId => subphaseId.toString() !== phaseSubphase._id.toString());
                         await phase.save();
-                        console.log(`Eliminata sottofase ${phaseSubphase.title} dalla fase ${phase.title}`);
                     }
 
                     await PhaseSubphase.findByIdAndDelete(phaseSubphase._id);
-                    console.log(`Eliminata sottofase ${phaseSubphase.title}`);
                 }
 
                 else if (phaseSubphase.type === 'phase') {
@@ -177,33 +175,73 @@ const deleteActivity = async (req, res) => {    //TODO: GESTIRE CANCELLAZIONE DI
 
                         for (const sub of subphases) {
                             if (sub.activities && sub.activities.length > 0) {
-                                await Activity.deleteMany({ _id: { $in: sub.activities } });
+                                for (const subActivityId of sub.activities) {
+                                    await deleteActivityWithRelations(subActivityId);
+                                }
                                 //delete the macro also
-                                await Activity.findByIdAndDelete(sub.macroActivity);
-                                console.log(`Eliminate ${sub.activities.length} attività dalla sottofase ${sub.title}`);
-                                console.log(`Eliminata macroattività ${sub.macroActivity}`);
+                                await deleteActivityWithRelations(sub.macroActivity);
                             }
                             await PhaseSubphase.findByIdAndDelete(sub._id);
                             console.log(`Eliminata sottofase ${sub.title}`);
                         }
                     }
-
+                    // delete all activities of the phase
+                    if (phaseSubphase.activities && phaseSubphase.activities.length > 0) {
+                        for (const subActivityId of phaseSubphase.activities) {
+                            await deleteActivityWithRelations(subActivityId);
+                        }
+                    }
+                    // delete the macroactivity
+                    await deleteActivityWithRelations(phaseSubphase.macroActivity);
                     // Delete the phase
                     await PhaseSubphase.findByIdAndDelete(phaseSubphase._id);
-                    console.log(`Eliminata fase ${phaseSubphase.title}`);
                 }
             } else {
-                console.warn("Nessuna fase o sottofase associata trovata alla macroattività.");
+                console.warn("No phase nor subphase associeted found in the macroActivity.");
             }
         }
 
         // Delete the activity itself
-        await Activity.findByIdAndDelete(activityId);
+        await deleteActivityWithRelations(activityId);
 
         res.status(200).json({ message: "Activity deleted succesfully" });
     } catch (error) {
         console.error('Error deleting activity:', error);
         res.status(500).json({ message: error.message });
+    }
+};
+
+const deleteActivityWithRelations = async (activityId) => {
+    try {
+        const activity = await Activity.findById(activityId);
+        if (!activity) {
+            console.warn(`Activity not found with ID: ${activityId}`);
+            return;
+        }
+
+        const { description, input, output, events } = activity;
+
+        // Delete events associated with the activity
+        if (events && events.length > 0) {
+            await Event.deleteMany({ _id: { $in: events } });
+        }
+
+        // Delete notes associated with the activity
+        if (description) {
+            await Note.findByIdAndDelete(description);
+        }
+        if (input) {
+            await Note.findByIdAndDelete(input);
+        }
+        if (output) {
+            await Note.findByIdAndDelete(output);
+        }
+
+        // Delete the activity itself
+        await Activity.findByIdAndDelete(activityId);
+
+    } catch (err) {
+        console.error(`Error while deleting activity ${activityId}:`, err);
     }
 };
 
