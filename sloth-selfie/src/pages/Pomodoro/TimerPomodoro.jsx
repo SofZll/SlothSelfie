@@ -5,7 +5,6 @@ import PopUpPomodoro from './PopUpPomodoro';
 import MusicPomodoro from './MusicPomodoro';
 
 import { usePomodoro } from '../../contexts/PomodoroContext';
-import { useMusic } from '../../contexts/MusicContext';
 import { formatTime } from '../../utils/utils';
 import socket from '../../services/socket/socket';
 

@@ -144,7 +144,7 @@
     0%{transform:translatex(-6px) rotate(20deg) translatey(-30px)}
     10%{transform:translatex(-150px) rotate(40deg) translatey(-50px)}
     20%{transform:translatex(-175px) rotate(0deg) translatey(-17px)}
-    90%{transform:translatex(57px)  rotate(40deg) translatey(-4px)}
+    90%{transform:translatex(70px)  rotate(40deg) translatey(-4px)}
     100%{transform:translatex(87px) rotate(30deg) translatey(-10px)}
 }
 

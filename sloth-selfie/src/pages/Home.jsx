@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import MainLayout from '../layouts/MainLayout';
 import '../styles/Home.css';
 
-import Settings from './previewSetUp';
+import Settings from './Settings';
 import CarouselHome from './CarouselHome';
 import { CustomizationProvider } from '../contexts/PreviewContext';
 import { UserProvider } from '../contexts/UserContext';

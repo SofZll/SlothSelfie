@@ -8,7 +8,7 @@ import { AuthContext } from '../contexts/AuthContext';
 
 import Pomodoro from '../pages/Pomodoro/Pomodoro';
 import Projects from '../pages/Projects';
-import Note from '../pages/Note/Note';
+import Notes from '../pages/Note/Notes';
 import Calendar from '../pages/Calendar/Calendar';
 import Home from '../pages/Home'
 import Profile from '../pages/ProfilePage';
@@ -45,7 +45,8 @@ const MainRoutes = () => {
                                         <Route path='/pomodoro' element={<Pomodoro />} />
                                         <Route path='/projects' element={<Projects />} />
                                         <Route path='/calendar' element={<Calendar />} />
-                                        <Route path='/notes' element={<Note />} />
+                                        <Route path='/notes' element={<Notes />} />
+                                        <Route path='/notes/:noteId' element={<Notes openNote={true} />} />
                                         <Route path='/home' element={<Home />} />
                                         <Route path='/home/settings' element={<Home settings={true} />} />
                                         <Route path='/profile' element={<Profile />} />

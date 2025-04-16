@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 
 import { useNote } from '../contexts/NoteContext';
 import { apiService } from '../services/apiService';
+import { useNavigate } from 'react-router-dom';
 import DeletePopUpLayout from '../layouts/DeletePopUpLayout';
 
 
@@ -18,9 +19,9 @@ const CardNote = ({ Note }) => {
     const previewContent = Note.content.length > 100 ? Note.content.substring(0, 100) : Note.content;
 
     const { selected, setSelected, setNote, notes, setNotes, deletePopUp, setDeletePopUp } = useNote();
+    const navigate = useNavigate();
 
     const selectNote = () => {
-        console.log('selectNote', Note);
         
         if (Note.tasks) setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username ), tasks: Note.tasks.map(t => ({ ...t, deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null })), addedTasks: [], deletedTasks: [] });
         else setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username) });
@@ -58,6 +59,10 @@ const CardNote = ({ Note }) => {
 
     const openNote = () => {
         
+        if (Note.tasks) setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username ), tasks: Note.tasks.map(t => ({ ...t, deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null })), addedTasks: [], deletedTasks: [] });
+        else setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username) });
+
+        navigate(`/notes/${Note._id}`);
     }
 
     return (
