@@ -1,4 +1,4 @@
-import React, { useEffect }  from 'react';
+import React from 'react';
 
 import Swal from 'sweetalert2';
 
@@ -6,11 +6,11 @@ import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { generateTimeOptions } from '../../utils/utils';
 import ShareInput from '../../components/ShareInput';
-import NotificationInput from '../../components/NotificationInput';
+import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormEvent = () => {
     
-    const { event, setEvent, events, setEvents, resetEvent, selected, setSelected } = useCalendar();
+    const { event, setEvent, events, setEvents, resetEvent, selected, notifications, setNotifications} = useCalendar();
 
     const handleSubmit = async () => {
         if (selected.edit) {
@@ -49,7 +49,7 @@ const FormEvent = () => {
                         type='text' className='form-control' id='title'
                         placeholder='Event title'
                         value={event.title}
-                        onChange={(e) => setEvent({...event, ['title']: e.target.value})} 
+                        onChange={(e) => setEvent({...event, title: e.target.value})} 
                         required />
                 </div>
 
@@ -57,7 +57,7 @@ const FormEvent = () => {
                     <label htmlFor='type' className='form-label'>Event Type</label>
                     <select className='form-select' id='type'
                     value={event.type}
-                    onChange={(e) => setEvent({...event, ['type']: e.target.value})}>
+                    onChange={(e) => setEvent({...event, type: e.target.value})}>
                         <option value='personal'>Personal</option>
                         <option value='work'>Work</option>
                         <option value='social'>Social</option>
@@ -71,7 +71,7 @@ const FormEvent = () => {
                     <label htmlFor='date' className='form-label'>Date</label>
                     <input type='Date' className='form-control' id='date'
                     value={new Date(event.date).toISOString().split('T')[0]}
-                    onChange={(e) => setEvent({...event, ['date']: e.target.value})} 
+                    onChange={(e) => setEvent({...event, date: e.target.value})} 
                     required />
                 </div>
 
@@ -79,7 +79,7 @@ const FormEvent = () => {
                     <input
                         className='form-check-input' type='checkbox' id='allDay'
                         checked={event.allDay}
-                        onChange={(e) => setEvent({...event, ['allDay']: e.target.checked})} />
+                        onChange={(e) => setEvent({...event, allDay: e.target.checked})} />
                     <label className='form-check-label' htmlFor='allDay'>All Day</label>
                 </div>
             </div>
@@ -94,12 +94,12 @@ const FormEvent = () => {
                             <input type='time' className='form-control' id='time'
                             placeholder='Event time'
                             value={event.time}
-                            onChange={(e) => setEvent({...event, ['time']: e.target.value})}
+                            onChange={(e) => setEvent({...event, time: e.target.value})}
                             required />
                         ) : (
                             <select className='form-select' id='time'
                             value={event.time}
-                            onChange={(e) => setEvent({...event, ['time']: e.target.value})} required>
+                            onChange={(e) => setEvent({...event, time: e.target.value})} required>
                                 {generateTimeOptions().map(option => (
                                     <option key={option.value} value={option.value}>{option.label}</option>
                                 ))}
@@ -112,7 +112,7 @@ const FormEvent = () => {
                         <input
                             className='form-check-input' type='checkbox' id='isPreciseTime'
                             checked={event.isPreciseTime}
-                            onChange={(e) => setEvent({...event, ['isPreciseTime']: e.target.checked})} />
+                            onChange={(e) => setEvent({...event, isPreciseTime: e.target.checked})} />
                         <label className='form-check-label' htmlFor='isPreciseTime'>Precise Time</label>
                     </div>
                 </div>
@@ -126,7 +126,7 @@ const FormEvent = () => {
                     placeholder={event.allDay ? 'Duration in days' : 'Duration in hours'}
                     min={0}
                     value={event.duration}
-                    onChange={(e) => setEvent({...event, ['duration']: e.target.value})} 
+                    onChange={(e) => setEvent({...event, duration: e.target.value})} 
                     required />
                 </div>
             </div>
@@ -136,7 +136,7 @@ const FormEvent = () => {
                     <label htmlFor='repeatFrequency' className='form-label'>Frequency</label>
                     <select className='form-select' id='repeatFrequency'
                     value={event.repeatFrequency}
-                    onChange={(e) => setEvent({...event, ['repeatFrequency']: e.target.value})}>
+                    onChange={(e) => setEvent({...event, repeatFrequency: e.target.value})}>
                         <option value='none'>No repetition</option>
                         <option value='daily'>Daily</option>
                         <option value='weekly'>Weekly</option>
@@ -152,7 +152,7 @@ const FormEvent = () => {
                         <label htmlFor='repeatMode' className='form-label'>Mode</label>
                         <select className='form-select' id='repeatMode'
                         value={event.repeatMode}
-                        onChange={(e) => setEvent({...event, ['repeatMode']: e.target.value})}>
+                        onChange={(e) => setEvent({...event, repeatMode: e.target.value})}>
                             <option value='ntimes'>Repeat N times</option>
                             <option value='until'>Repeat until</option>
                         </select>
@@ -165,7 +165,7 @@ const FormEvent = () => {
                             placeholder='Number of repetitions'
                             min={0}
                             value={event.repeatTimes}
-                            onChange={(e) => setEvent({...event, ['repeatTimes']: e.target.value})} 
+                            onChange={(e) => setEvent({...event, repeatTimes: e.target.value})} 
                             required />
                         </div>
                     ) : (
@@ -173,7 +173,7 @@ const FormEvent = () => {
                             <label htmlFor='repeatEndDate' className='form-label'>End Date</label>
                             <input type='Date' className='form-control' id='repeatEndDate'
                             value={new Date(event.repeatEndDate).toISOString().split('T')[0]}
-                            onChange={(e) => setEvent({...event, ['repeatEndDate']: e.target.value})}
+                            onChange={(e) => setEvent({...event, repeatEndDate: e.target.value})}
                             required />
                         </div>
                     )}
@@ -185,7 +185,7 @@ const FormEvent = () => {
                     <label htmlFor='eventLocation' className='form-label'>Location</label>
                     <select className='form-select' id='eventLocation'
                     value={event.eventLocation}
-                    onChange={(e) => setEvent({...event, ['eventLocation']: e.target.value})}>
+                    onChange={(e) => setEvent({...event, eventLocation: e.target.value})}>
                         <option value=''>Not specified</option>
                         <option value='physical'>Physical</option>
                         <option value='virtual'>Virtual</option>
@@ -196,13 +196,13 @@ const FormEvent = () => {
             <div className='row py-2'>
                 <div className='col-12'>
                     <label htmlFor='share' className='form-label'>Share with</label>
-                    <ShareInput receivers={event.sharedWith} setReceivers={(receivers) => setEvent({...event, ['sharedWith']: receivers})} />
+                    <ShareInput receivers={event.sharedWith} setReceivers={(receivers) => setEvent({...event, sharedWith: receivers})} />
                 </div>
             </div>
 
             <div className='row py-2'>
                 <div className='col-12 justify-content-center align-items-center d-flex'>
-                    <NotificationInput />
+                <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
                 </div>
             </div>
             

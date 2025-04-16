@@ -22,4 +22,15 @@ const validatePhoneNumber = (phoneNumber) => {
     return phonePattern.test(phoneNumber);
 }
 
-export { validateLogin, validateRegistration, validateEmail, validatePhoneNumber };
+const validateNotification = (notif, n) => {
+    switch (n) {
+        case 1:
+            return notif.type === 'default' && notif.before && notif.beforeType && notif.time;
+        case 2:
+            return notif.type === 'repeat' && notif.repeat && notif.fromDate && notif.fromTime;
+        case 3: 
+            return notif.mode.email || notif.mode.message;
+    }
+};
+
+export { validateLogin, validateRegistration, validateEmail, validatePhoneNumber, validateNotification };

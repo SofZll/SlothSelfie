@@ -1,22 +1,31 @@
 import React, { useState } from 'react';
 import { BellPlus, X, ChevronDown } from 'lucide-react';
-import '../styles/NotificationInput.css';
 
-const NotificationInput = () => {
-    const [notifications, setNotifications] = useState([]);
+import '../../styles/NotificationInput.css';
+import { dateFromDate, timeFromDate } from '../../utils/utils';
+import { validateNotification } from '../../utils/validation';
+import NotificationDefault from './NotificationDefault';
+import NotificationRepeat from './NotificationRepeat';
+
+const NotificationInput = ({ notifications, setNotifications }) => {
     const [showSelectNotification, setShowSelectNotification] = useState(null);
 
     const handleAddNotification = () => {
         const type = 'default';
         const newNotification = {
             type,
+            mode: {
+                email: false,
+                message: true
+            },
             ...(type === 'default' ? {
                 before: 1,
                 beforeType: 'day',
                 time: '08:00',
             } : {
                 repeat: 'daily',
-                from: new Date(),  
+                fromDate: dateFromDate(new Date()),
+                fromTime: timeFromDate(new Date()),  
             })
         };
         if (newNotification) {
@@ -34,6 +43,10 @@ const NotificationInput = () => {
         if (field === 'type') {
             updatedNotifications[index] = {
                 type: value,
+                mode: {
+                    email: false,
+                    message: true
+                },
                 ...(value === 'default' ? {
                     before: 1,
                     beforeType: 'day',
@@ -42,11 +55,20 @@ const NotificationInput = () => {
                     from: undefined
                 } : {
                     repeat: 'daily',
-                    from: new Date(),
+                    fromDate: dateFromDate(new Date()),
+                    fromTime: timeFromDate(new Date()),
                     before: undefined,
                     beforeType: undefined,
                     time: undefined
                 })
+            };
+        } else if (field === 'email' || field === 'message') {
+            updatedNotifications[index] = {
+                ...updatedNotifications[index],
+                mode: {
+                    ...updatedNotifications[index].mode,
+                    [field]: value
+                }
             };
         } else {
             updatedNotifications[index] = {
@@ -84,43 +106,27 @@ const NotificationInput = () => {
                     )}
                     </div>
                     {notif.type === 'default' ? (
-                        <>
-                            <div className='mb-2'>
-                                <label className='form-label'>Notify me:</label>
-                                <div className='input-group'>
-                                    <input type='number' className='form-control' min='1' max='30' value={notif.before} onChange={(e) => handleModifyNotification(index, 'before', e.target.value)} />
-                                    <select className='form-select' value={notif.beforeType} onChange={(e) => handleModifyNotification(index, 'beforeType', e.target.value)}>
-                                        <option value='day'>Day</option>
-                                        <option value='week'>Week</option>
-                                    </select>
-                                    <span className='input-group-text'>before the event</span>
-                                </div>
-                            </div>
-                            <div className='mb-2'>
-                                <label className='form-label'>At:</label>
-                                <input type='time' className='form-control' value={notif.time} onChange={(e) => handleModifyNotification(index, 'time', e.target.value)} />
-                            </div>
-                        </>
+                        <NotificationDefault notif={notif} index={index} handleModifyNotification={handleModifyNotification} />
                     ) : (
-                        <>
-                            <div className='mb-2'>
-                                <label className='form-label'>Repeat every:</label>
-                                <select className='form-select' value={notif.repeat} onChange={(e) => handleModifyNotification(index, 'repeat', e.target.value)}>
-                                    <option value='minute'>Minute</option>
-                                    <option value='hour'>Hour</option>
-                                    <option value='day'>Day</option>
-                                    <option value='week'>Week</option>
-                                </select>
-                            </div>
-                            <div className='mb-2'>
-                                <label className='form-label'>From:</label>
-                                <div className='d-flex gap-2'>
-                                    <input type='date' className='form-control' value={notif.from.toISOString().split('T')[0]} onChange={(e) => handleModifyNotification(index, 'from', new Date(`${e.target.value}T${notif.from.toTimeString().split(' ')[0]}`))} />
-                                    <input type='time' className='form-control' value={notif.from.toTimeString().substr(0, 5)} onChange={(e) => handleModifyNotification(index, 'from', new Date(`${notif.from.toISOString().substr(0, 5)}T${e.target.value}`))} />
-                                </div>
-                            </div>
-                        </>
+                        <NotificationRepeat notif={notif} index={index} handleModifyNotification={handleModifyNotification}/>
                     )}
+                    <div className='mb-2 d-flex flex-row justify-content-around pt-2'>
+                        <div class='form-check'>
+                            <input type='checkbox' className='form-check-input' role='switch' id='mail' checked={notif.mode.email} onChange={(e) => handleModifyNotification(index, 'email', e.target.checked)} />
+                            <label className='form-check-label' for='mail'>email</label>
+                        </div>
+                        <div class='form-check'>
+                            <input type='checkbox' className='form-check-input' role='switch' id='message' checked={notif.mode.message} onChange={(e) => handleModifyNotification(index, 'message', e.target.checked)} />
+                            <label className='form-check-label' for='message'>message</label>
+                        </div>
+                    </div>
+                    <div className='mb-2'>
+                        {!validateNotification(notif, 3) && (
+                            <div className="text-danger small mt-1">
+                                Select al least one notification mode
+                            </div>
+                        )}
+                    </div>
                 </div>
             ))}
             {notifications.length < 5 && (

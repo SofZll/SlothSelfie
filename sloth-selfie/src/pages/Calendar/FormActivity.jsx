@@ -6,11 +6,11 @@ import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import ShareInput from '../../components/ShareInput';
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
-import NotificationInput from '../../components/NotificationInput';
+import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormActivity = () => {
 
-    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected } = useCalendar();
+    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications } = useCalendar();
     const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setDeadline = (date) => {
@@ -40,6 +40,10 @@ const FormActivity = () => {
                 setActivities([...activities, response]);
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+
+            /* notificcheeeee 
+            if (notifications.length > 0) {
+                const response = await apiService(`/notification`, 'POST', {*/
         }
         resetSelected();
     }
@@ -93,7 +97,7 @@ const FormActivity = () => {
 
             <div className='row'>
                 <div className='col-12 justify-content-center align-items-center d-flex'>
-                    <NotificationInput />
+                    <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
                 </div>
             </div>
 
