@@ -3,6 +3,7 @@ const Event = require('../models/eventModel');
 const User = require('../models/userModel');
 const { createNotification } = require('../controllers/notificationController');
 const { calculateDate } = require('../utils/utils');
+const {sendExportEmail} = require('../utils/utils');
 const mongoose = require('mongoose');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
@@ -211,11 +212,14 @@ const deleteMultipleEvent = async (req, res) => {
 async function exportEvent(req, res){
   try {
       const {eventId} = req.params;
+      const userName = req.session.username;
       const event = await Event.findById(eventId);
       if (!event) {
           return res.status(404).json({ message: "Event not found" });
       }
 
+      const user = await User.findOne({ username: userName });
+      
       // Build the start/end array
       const start = event.allDay
       ? [
@@ -277,7 +281,17 @@ async function exportEvent(req, res){
       }
 
       console.log("Generated .ics value:\n", value);
-  
+      
+      // send the mail with the .ics file as attachment to the user
+      const userEmail = user.email;
+      
+      await sendExportEmail(
+          userEmail,
+          `${event.title}.ics`,
+          value
+      );
+          
+      //download the file on frontend
       res.setHeader('Content-Type', 'text/calendar');
       res.setHeader('Content-Disposition', `attachment; filename="${event.title}.ics"`);
       res.status(200).send(value);

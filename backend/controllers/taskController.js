@@ -2,6 +2,7 @@
 const Task = require('../models/taskModel');
 const User = require('../models/userModel');
 const Note = require('../models/noteModel');
+const {sendExportEmail} = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
 // fetch all tasks
@@ -155,10 +156,13 @@ const editTasks = async (tasks) => {
 async function exportTask(req, res){
     try {
         const {taskId} = req.params;
+        const userName = req.session.username;
         const task = await Task.findById(taskId);
         if (!task) {
             return res.status(404).json({ message: "Task not found" });
         }
+
+        const user = await User.findOne({ username: userName });
 
         const { error, value } = createEvent({
             title: task.title,
@@ -176,7 +180,17 @@ async function exportTask(req, res){
         }
 
         console.log("Generated .ics value:\n", value);
-    
+
+        // send the mail with the .ics file as attachment to the user
+        const userEmail = user.email;
+        
+        await sendExportEmail(
+            userEmail,
+            `${task.title}.ics`,
+            value
+        );
+            
+        //download the file on frontend
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${task.title}.ics"`);
         res.status(200).send(value);

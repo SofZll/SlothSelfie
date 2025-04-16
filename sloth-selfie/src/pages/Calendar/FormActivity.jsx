@@ -52,7 +52,9 @@ const FormActivity = () => {
 
     const exportActivity = async () => {
         try {
-            const response = await apiService(`/activity/${activity._id}/export`, 'GET');
+            const response = await apiService(`/activity/${activity._id}/export`, 'GET', null, {
+                credentials: 'include',
+            });
     
             if (!response) throw new Error('Empty response from server');
     
@@ -67,7 +69,7 @@ const FormActivity = () => {
             Swal.fire({
                 title: 'Activity exported',
                 icon: 'success',
-                text: 'Activity exported successfully',
+                text: 'Activity exported successfully, a mail with .ics attachment will be sent to you',
                 customClass: { confirmButton: 'button-alert' }
             });
         } catch (err) {

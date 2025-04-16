@@ -41,7 +41,9 @@ const FormEvent = () => {
     //TODO TESTA E MODIFICA IN BASE A NUOVO MODELLO EVENTI
     const exportEvent = async () => {
         try {
-            const response = await apiService(`/event/${event._id}/export`, 'GET');
+            const response = await apiService(`/event/${event._id}/export`, 'GET', null, {
+                credentials: 'include',
+            });
             
             if (!response) throw new Error('Empty response from server');
             
@@ -56,7 +58,7 @@ const FormEvent = () => {
             Swal.fire({
                 title: 'Event exported',
                 icon: 'success',
-                text: 'Event exported successfully',
+                text: 'Event exported successfully, a mail with .ics attachment will be sent to you',
                 customClass: { confirmButton: 'button-alert' }
             });
             } catch (err) {
