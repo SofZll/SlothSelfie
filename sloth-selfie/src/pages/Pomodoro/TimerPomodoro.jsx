@@ -7,7 +7,7 @@ import MusicPomodoro from './MusicPomodoro';
 import { usePomodoro } from '../../contexts/PomodoroContext';
 import { useMusic } from '../../contexts/MusicContext';
 import { formatTime } from '../../utils/utils';
-import socket from '../../services/socket';
+import socket from '../../services/socket/socket';
 
 import { Share, Pen, RotateCcw, SkipForward, SkipBack, CirclePlay, CirclePause, CircleStop, CirclePlus, CalendarPlus, ChartLine, Music } from 'lucide-react';
 import Swal from 'sweetalert2';

@@ -8,6 +8,10 @@
   max-height: 75vh;
 }
 
+.popup-square {
+  width: 90%;
+}
+
 .form-popup {
   max-height: 63vh;
   overflow-y: auto;

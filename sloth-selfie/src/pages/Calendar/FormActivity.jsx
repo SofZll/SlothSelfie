@@ -6,6 +6,7 @@ import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import ShareInput from '../../components/ShareInput';
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
+import NotificationInput from '../../components/NotificationInput';
 
 const FormActivity = () => {
 
@@ -83,16 +84,16 @@ const FormActivity = () => {
                 </div>
             </div>
 
-            <div className='row py-2'>
+            <div className='row'>
                 <div className='col-12'>
                     <label htmlFor='share' className='form-label'>Share with</label>
                     <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, ['sharedWith']: receivers})} />
                 </div>
             </div>
 
-            <div className='row py-2'>
-                <div className='col-6'>
-                    {/* Field for notification TODO */}
+            <div className='row'>
+                <div className='col-12 justify-content-center align-items-center d-flex'>
+                    <NotificationInput />
                 </div>
             </div>
 
