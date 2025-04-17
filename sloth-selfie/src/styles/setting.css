@@ -2,6 +2,7 @@
 .card-settings {
     width: 90%;
     max-width: 600px;
+    min-height: 270px;
 }
 
 .r-col {
