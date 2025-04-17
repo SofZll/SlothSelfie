@@ -249,7 +249,8 @@ const createNoteDescription = async (description, type, owner, members, projectT
         user: owner, // User is the logged user
         type: type,
         noteAccess: 'restricted', // only for members
-        allowedUsers: members.map(member => member.username) // Set the allowed users to the members
+        allowedUsers: members.map(member => member.username), // Set the allowed users to the members
+        isInProject: true, // Set to true for project-related notes
     });
     await newNote.save();
     return newNote._id;

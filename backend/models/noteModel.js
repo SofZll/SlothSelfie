@@ -43,7 +43,13 @@ const noteSchema = new mongoose.Schema({
         type: Date,
         required: true,
         default: Date.now
+    },
+
+    isInProject: {  //used to differentiate between normal notes and project-activity notes
+        type: Boolean,
+        default: false,
     }
+
 }, { timestamps: true });
 
 const Note = mongoose.model('Note', noteSchema);
