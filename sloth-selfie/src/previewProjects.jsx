@@ -19,12 +19,12 @@ const PreviewProjects= ({ viewType }) => {
     const [selectedProject, setSelectedProject] = useState(null); // State to store the selected project
     const navigate = useNavigate();  
 
-    // function to navigate to the projects page, we use window.location.href to navigate without using react-router (pure JS)
+    // function to navigate to the projects page
     const manageProjects = (event) => {
         event.preventDefault();
         document.body.classList.add('zoom-in');
         setTimeout(() => {
-            navigate(window.location.href = "/projects.html");
+            navigate('/projects');
             document.body.classList.remove('zoom-in');
         }, 300);
     };
