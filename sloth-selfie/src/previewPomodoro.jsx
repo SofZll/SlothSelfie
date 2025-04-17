@@ -90,7 +90,6 @@ const renderPomodoroPreview = () => {
     case 'quickStart':
       return (
         <div className="containerPreview">
-          <p>Start your study session!</p><br />
           <div className={dataPomodoro.isStudioTime ? 'containerRed' : 'containerYellow'}>
             <img
               src={dataPomodoro.isStudioTime ? iconRedTomato : iconYellowTomato}
@@ -116,7 +115,6 @@ const renderPomodoroPreview = () => {
         if (pomodoroList.length > 0) {
           return (
             <div className="containerPreview">
-              <p>Next Pomodoro sessions:</p><br />
               <div className="scrollable-list">
                 {pomodoroList.map((pomodoro, index) => (
                   <div key={index} className={`event-card event-border-yellow`} ><b>Pomodoro</b> {index + 1} - {pomodoro.time}</div>
@@ -144,7 +142,6 @@ const renderPomodoroPreview = () => {
             const lastPomodoro = pomodoroList[pomodoroList.length - 1];
             return (
               <div className="containerPreview">
-                <p>Last Pomodoro session:</p><br />
                 <div className="containerYellow">
                   <img src={iconYellowTomato} alt="Tomato" className="tomatoPrew" />
                   <h2 className="counterYellow">{lastPomodoro.time} </h2> {/* Shows the time of the last pomodoro */}
