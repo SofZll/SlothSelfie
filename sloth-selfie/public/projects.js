@@ -868,8 +868,3 @@ document.getElementById("closeProjectViewBtn").addEventListener("click", async f
     document.getElementById("project-view-container").style.display = "none";
     this.style.display = "none"; // Hides the close view button
 });
-
- // button to go back to home (React)
- document.getElementById("backToHome").addEventListener("click", async function () {
-    window.location.href = "/";
-});
