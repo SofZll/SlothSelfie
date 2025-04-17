@@ -34,14 +34,10 @@
     "ics": "^3.8.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.477.0",
-<<<<<<< HEAD
     "multer": "^1.4.5-lts.2",
     "node-ical": "^0.20.1",
     "nodemailer": "^6.10.1",
-=======
     "nanoid": "^5.1.5",
-    "nodemailer": "^6.10.0",
->>>>>>> swedishCandy
     "react-big-calendar": "^1.16.3",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dnd": "^16.0.1",
