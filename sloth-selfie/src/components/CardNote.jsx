@@ -139,9 +139,11 @@ const CardNote = ({ Note }) => {
                 </div>
             </div> 
 
-            <button className='btn position-absolute top-0 end-0' onClick={() => selectNote()}>
-                <Pen size={20} color='#244476' strokeWidth={1.6} />
-            </button>
+            {!Note.isInProject && (
+                <button className='btn position-absolute top-0 end-0' onClick={() => selectNote()}>
+                    <Pen size={20} color='#244476' strokeWidth={1.6} />
+                </button>
+            )}
 
             <div className='d-flex w-100 position-absolute justify-content-between bottom-0 start-0'>
                 <button className='btn' onClick={() => openNote()}>
@@ -149,13 +151,18 @@ const CardNote = ({ Note }) => {
                 </button>
 
                 <div className='d-inline'>
-                    <button className='btn pe-0' onClick={() => duplicateNote()}>
-                        <Layers2 size={23} color='#244476' strokeWidth={1.6} />
-                    </button>
-                    
-                    <button className='btn ps-0' onClick={() => setDeletePopUp({show: true, note: Note})}>
-                        <Trash2 size={23} color='#244476' strokeWidth={1.6} />
-                    </button>
+                {!Note.isInProject && (
+                    <>
+                        <button className='btn' onClick={() => duplicateNote()}>
+                            <Layers2 size={23} color='#244476' strokeWidth={1.6} />
+                        </button>
+
+                        <button className='btn' onClick={() => setDeletePopUp({show: true, note: Note})}>
+                            <Trash2 size={23} color='#244476' strokeWidth={1.6} />
+                        </button>
+                    </>
+                    )}
+
                 </div>
             </div>
 
