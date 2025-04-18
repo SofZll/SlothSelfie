@@ -1,11 +1,14 @@
 const express = require('express');
 
-const { setNotifications } = require('../controllers/notificationController')
+const { setNotifications, getNotifications, deleteNotification, updateNotification } = require('../controllers/notificationController')
 
 const router = express.Router();
 
 // Notification endpoints
 router.post('/notification', setNotifications);
+router.get('/notifications/:elementId', getNotifications);
+router.delete('/notification/:notificationId', deleteNotification);
+router.put('/notification/:notificationId', updateNotification);
 
 /*
 router.get('/notification/get-notifications', getNotifications);

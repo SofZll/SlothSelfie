@@ -1,7 +1,13 @@
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
-    elementId: {
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+
+    element: {
         type: mongoose.Schema.Types.ObjectId,
         refPath: 'elementType',
         required: true
@@ -94,13 +100,17 @@ const notificationSchema = new mongoose.Schema({
         }
     },
 
-    // stato
     status: {
         type: String,
         enum: ['active', 'inactive'],
         default: 'active'
-    }
+    },
 
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        required: true
+    }
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

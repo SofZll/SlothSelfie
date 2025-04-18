@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { BellPlus, X, ChevronDown } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 import '../../styles/NotificationInput.css';
 import { dateFromDate, timeFromDate } from '../../utils/utils';
 import { validateNotification } from '../../utils/validation';
 import NotificationDefault from './NotificationDefault';
 import NotificationRepeat from './NotificationRepeat';
+
+import { apiService } from '../../services/apiService';
 
 const NotificationInput = ({ notifications, setNotifications }) => {
     const [showSelectNotification, setShowSelectNotification] = useState(null);
@@ -33,7 +36,21 @@ const NotificationInput = ({ notifications, setNotifications }) => {
     }
 
     const handleRemoveNotification = (index) => {
-        setNotifications(notifications.filter((_, i) => i !== index));
+        Swal.fire({
+            title: 'Are you sure?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const response = apiService(`/notification/${notifications[index]._id}`, 'DELETE');
+                if (response) Swal.fire('Deleted!', 'Your notification has been deleted.', 'success');
+                else Swal.fire('Error!', 'There was an error deleting the notification.', 'error');
+                setNotifications(notifications.filter((_, i) => i !== index));
+            }
+        });
     };
 
     const handleModifyNotification = (index, field, value) => {

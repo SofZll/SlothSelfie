@@ -136,6 +136,7 @@ export const CalendarProvider = ({ children }) => {
                 add: false
             });
         }
+        setNotifications([]);
     }
 
     const resetSelected = () => {
