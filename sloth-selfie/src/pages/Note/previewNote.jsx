@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 
-import CardNote from "./components/CardNote";
-import FormNote from "./pages/Note/FormNote";
-import './styles/Previews.css';
+import CardNote from "../../components/CardNote";
+import FormNote from "../../pages/Note/FormNote";
+import '../../styles/Previews.css';
 
-import { apiService } from './services/apiService';
-import { useNote } from "./contexts/NoteContext";
-import { AuthContext } from './contexts/AuthContext';
+import { apiService } from '../../services/apiService';
+import { useNote } from "../../contexts/NoteContext";
+import { AuthContext } from '../../contexts/AuthContext';
 
 
 const  PreviewNote = ({ viewType }) => {

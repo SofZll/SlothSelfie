@@ -9,10 +9,11 @@ import { CalendarProvider } from '../contexts/CalendarContext';
 import { NoteProvider } from '../contexts/NoteContext';
 import { TaskProvider } from '../contexts/TaskContext';
 
-import PreviewPomodoro from '../previewPomodoro';
-import PreviewNote from '../previewNote';
-import PreviewCalendar from '../previewCalendar';
-import PreviewProjects from '../previewProjects';
+//import the previews from the pages folder
+import PreviewCalendar from '../pages/Calendar/previewCalendar';
+import PreviewNote from '../pages/Note/previewNote';
+import PreviewPomodoro from '../pages/Pomodoro/previewPomodoro';
+import PreviewProjects from '../pages/previewProjects';
 
 
 const CardCarosel = ({ title, settingKey }) => {
