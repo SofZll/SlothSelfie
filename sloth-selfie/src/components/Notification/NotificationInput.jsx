@@ -13,19 +13,18 @@ const NotificationInput = ({ notifications, setNotifications }) => {
     const handleAddNotification = () => {
         const type = 'default';
         const newNotification = {
-            type,
+            type: type,
             mode: {
                 email: false,
-                message: true
+                system: true
             },
+            variant: 'day',
             ...(type === 'default' ? {
                 before: 1,
-                beforeType: 'day',
                 time: '08:00',
             } : {
-                repeat: 'daily',
                 fromDate: dateFromDate(new Date()),
-                fromTime: timeFromDate(new Date()),  
+                fromTime: timeFromDate(new Date()),
             })
         };
         if (newNotification) {
@@ -45,24 +44,21 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                 type: value,
                 mode: {
                     email: false,
-                    message: true
+                    system: true
                 },
+                variant: 'day',
                 ...(value === 'default' ? {
                     before: 1,
-                    beforeType: 'day',
                     time: '08:00',
-                    repeat: undefined,
                     from: undefined
                 } : {
-                    repeat: 'daily',
                     fromDate: dateFromDate(new Date()),
                     fromTime: timeFromDate(new Date()),
                     before: undefined,
-                    beforeType: undefined,
                     time: undefined
                 })
             };
-        } else if (field === 'email' || field === 'message') {
+        } else if (field === 'email' || field === 'system') {
             updatedNotifications[index] = {
                 ...updatedNotifications[index],
                 mode: {
@@ -116,8 +112,8 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                             <label className='form-check-label' for='mail'>email</label>
                         </div>
                         <div class='form-check'>
-                            <input type='checkbox' className='form-check-input' role='switch' id='message' checked={notif.mode.message} onChange={(e) => handleModifyNotification(index, 'message', e.target.checked)} />
-                            <label className='form-check-label' for='message'>message</label>
+                            <input type='checkbox' className='form-check-input' role='switch' id='system' checked={notif.mode.system} onChange={(e) => handleModifyNotification(index, 'system', e.target.checked)} />
+                            <label className='form-check-label' for='system'>system</label>
                         </div>
                     </div>
                     <div className='mb-2'>

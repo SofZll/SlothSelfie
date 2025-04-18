@@ -41,9 +41,19 @@ const FormActivity = () => {
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
-            /* notificcheeeee 
+            const newActivity = response;
+
             if (notifications.length > 0) {
-                const response = await apiService(`/notification`, 'POST', {*/
+                const response = await apiService(`/notification`, 'POST', {
+                    type: 'Activity',
+                    elementId: newActivity._id,
+                    notifications: notifications
+                });
+                if (response) setNotifications([]);
+                else Swal.fire({ title: 'Error adding notifications', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+            } else {
+                console.log('No notifications to add');
+            }
         }
         resetSelected();
     }

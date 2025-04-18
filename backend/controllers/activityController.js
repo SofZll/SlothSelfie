@@ -3,8 +3,6 @@ const User = require('../models/userModel');
 const Note = require('../models/noteModel');
 const Event = require('../models/eventModel');
 const PhaseSubphase = require("../models/phaseSubphaseModel");
-const { createNotification } = require('../controllers/notificationController');
-const { calculateDate } = require('../utils/utils');
 const {sendExportEmail} = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
@@ -12,7 +10,7 @@ const { createEvent } = require('ics'); // Import the library for iCalendar gene
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-    const { title, deadline, completed, notify, notificationTime, customValue, notificationRepeat, notificationType, sharedWith} = req.body;
+    const { title, deadline, completed, sharedWith} = req.body;
     
     try {
         let sharedWithUsers = [];
@@ -20,20 +18,11 @@ const createActivity = async (req, res) => {
         if (sharedWith && Array.isArray(sharedWith)) {
             sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
         }
-        const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id), });
+        const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), });
         const savedActivity = await activity.save();
 
         // Populate the sharedWith field with the username of the users
         const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
-
-        // Calculate the date of the notification
-        let dateNotif;
-        console.log(customValue);
-        if (customValue) dateNotif = new Date(customValue).toISOString();
-        else dateNotif = calculateDate(deadline, notificationTime);
-        
-        // Create a notification if the notify flag is set
-        if (notify) await createNotification({ elementId: savedActivity._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);
 
         console.log(savedActivity);
         res.status(200).json({
@@ -500,13 +489,14 @@ async function adjustOrContractActivitySchedule(req, res) {
                 } 
             }
         }
-        // Create notifications to send to the users involved in the dependent activities about the schedule change
+        /* Create notifications to send to the users involved in the dependent activities about the schedule change
         const notificationPromises = activities.map(async (activity) => {
             const dateNotif = new Date().toISOString(); //TODO: TIME MACHINE DATE ?
             return createNotification({ elementId: activity._id, dateNotif, frequencyNotif: 'none', type: 'activity' }, res, true);
         });
 
         await Promise.all(notificationPromises);
+        */
 
         res.status(200).json({ message: "Schedule adjusted/contracted successfully" ,
             updatedMacros: Array.from(macroDeadlinesMap.entries()) // [ [macroId, newDeadline], ... ]
