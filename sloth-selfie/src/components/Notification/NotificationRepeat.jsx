@@ -7,7 +7,7 @@ const NotificationRepeat = ({ notif, index, handleModifyNotification }) => {
         <>
             <div className='mb-2'>
                 <label className='form-label'>Repeat every:</label>
-                <select className='form-select' value={notif.repeat} onChange={(e) => handleModifyNotification(index, 'repeat', e.target.value)}>
+                <select className='form-select' value={notif.variant} onChange={(e) => handleModifyNotification(index, 'variant', e.target.value)}>
                     <option value='minute'>Minute</option>
                     <option value='hour'>Hour</option>
                     <option value='day'>Day</option>
