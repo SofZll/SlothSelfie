@@ -16,7 +16,7 @@ const FormActivity = () => {
     const setDeadline = (date) => {
         const newDate = new Date(date);
         newDate.setHours(23, 59, 59);
-        setActivity({...activity, ['deadline']: newDate});
+        setActivity({...activity, deadline: newDate});
     }
 
     const handleSubmit = async () => {
@@ -33,6 +33,12 @@ const FormActivity = () => {
                 resetActivity();
             } else Swal.fire({ title: 'Error editing activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
+            notifications.forEach(notification => {
+                console.log('Notification:', notification);
+                const response = apiService(`/notification/${notification._id}`, 'PUT', notification);
+                setNotifications([]);
+                console.log('Notification updated:', response);
+            });
         } else {
             const response = await apiService(`/activity`, 'POST', activity);
             if (response){
@@ -110,7 +116,7 @@ const FormActivity = () => {
                         type='text' className='form-control' id='title'
                         placeholder='Activity title'
                         value={activity.title}
-                        onChange={(e) => setActivity({...activity, ['title']: e.target.value})} />
+                        onChange={(e) => setActivity({...activity, title: e.target.value})} />
                 </div>
 
                 <div className='col-6'>
@@ -125,7 +131,7 @@ const FormActivity = () => {
                 <div className='col col-auto form-check'>
                     <input className='form-check-input' type='checkbox' role='switch' id='completed'
                         value={activity.completed}
-                        onChange={(e) => setActivity({...activity, ['completed']: e.target.checked})} />
+                        onChange={(e) => setActivity({...activity, completed: e.target.checked})} />
                     <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>
@@ -133,13 +139,13 @@ const FormActivity = () => {
             <div className='row'>
                 <div className='col-12'>
                     <label htmlFor='share' className='form-label'>Share with</label>
-                    <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, ['sharedWith']: receivers})} />
+                    <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, sharedWith: receivers})} />
                 </div>
             </div>
 
             <div className='row'>
                 <div className='col-12 justify-content-center align-items-center d-flex'>
-                    <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
+                    <NotificationInput notifications={notifications} setNotifications={setNotifications} />
                 </div>
             </div>
 

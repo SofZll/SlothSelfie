@@ -5,7 +5,7 @@ import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
 
-import { useIsDesktop } from '../../utils/utils';
+import { useIsDesktop, dateFromDate, timeFromDate } from '../../utils/utils';
 import ScrollList from '../../components/ScrollList';
 import FormCalendar from './FormCalendar';
 import PlusLayout from '../../layouts/PlusLayout';
@@ -24,7 +24,7 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
 
     const [listNormal, setListNormal] = useState([]);
@@ -42,6 +42,23 @@ const Planner = () => {
     const fetchTasks = async () => {
         const response = await apiService('/tasks', 'GET');
         if (response) setTasks(response);
+    }
+
+    const fetchNotifications = async ({ elementId }) => {
+        const response = await apiService(`/notifications/${elementId}`, 'GET');
+        if (response) {
+            if (response.notifications.length > 0) {
+                setNotifications(response.notifications.map(notification => {
+                    return {
+                        ...notification,
+                        fromDate: dateFromDate(new Date(notification.from)),
+                        fromTime: timeFromDate(new Date(notification.from)),
+                    }
+                }));
+            } else setNotifications([]);
+        } else setNotifications([]);
+        console.log('Notifications:', response);
+        console.log('new notifications:', notifications);
     }
 
     const normalizeData = (datas, type) => {
@@ -71,13 +88,15 @@ const Planner = () => {
         });
     }
 
-    const onItemSelect = (item) => {
+    const onItemSelect = async (item) => {
         if (item.type === 'activity'){
             const a = activities.find(a => a._id === item._id);
             setActivity({...a, sharedWith: a.sharedWith.map(u => u.username)});
+            await fetchNotifications({ elementId: a._id });
         } else if (item.type === 'event') {
             const e = events.find(e => e._id === item._id);
             setEvent({...e, sharedWith: e.sharedWith.map(u => u.username)});
+            await fetchNotifications({ elementId: e._id });
         } else {
             const t = tasks.find(t => t._id === item._id);
             setTask({...t, sharedWith: t.sharedWith.map(u => u.username)});
