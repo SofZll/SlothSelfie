@@ -222,6 +222,14 @@ textarea {
     color: #fff;
 }
 
+.btn-main:disabled,
+.btn-main[disabled]{
+    background-color: #ccc;
+    color: #999;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .btn-small-blue {
     background-color: #244476;
     color: #fff;

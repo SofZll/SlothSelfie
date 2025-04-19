@@ -12,7 +12,7 @@ require('dotenv').config();
 const socketHandler = require('./socket/socketHandler');
 const socket = require('./socket/socket');
 const app = express();
-const agenda = require('./jobs/agenda');
+const agenda = require('./agenda/agenda');
 
 const http = require('http');
 const server = http.createServer(app);

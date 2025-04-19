@@ -2,7 +2,7 @@ const Notification = require('../models/notificationModel');
 const User = require('../models/userModel');
 const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
-const agenda = require('../jobs/agenda');
+const agenda = require('../agenda/agenda');
 
 /**
  * La funzione createNotification si occupa di creare una nuova notifica e di salvarla nel database.

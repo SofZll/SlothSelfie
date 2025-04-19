@@ -7,9 +7,19 @@ const agenda = new Agenda({
     processEvery: '1 minute',
 });
 
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+
+function gracefulShutdown() {
+  agenda.stop(() => {
+    console.log('Notification scheduler stopped');
+    process.exit(0);
+  });
+}
+
 /**
  * Job to send notification
- */
+
 agenda.define('send notification', async job => {
     console.log('Job: ', job.attrs);
     const now = new Date();
@@ -30,6 +40,6 @@ agenda.define('send notification', async job => {
     } catch (error) {
         console.error('Error sending notification:', error);
     }
-});
+}); */
 
 module.exports = agenda;
