@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const { initScheduler, scheduleNotification } = require('../agenda/notificationScheduler');
+
 // Mongodb credentials
 /*
 const mongoCredentials = {
@@ -29,6 +31,11 @@ const connectDB = async () => {
             //useUnifiedTopology: true,
         });
         console.log('Connected to MongoDB');
+
+        // scheduler for notifications
+        initScheduler();
+        await scheduleNotification();
+        console.log('Notification scheduler initialized');
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
         process.exit(1);

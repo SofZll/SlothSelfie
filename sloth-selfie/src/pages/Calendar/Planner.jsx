@@ -4,8 +4,10 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
+import Swal from 'sweetalert2';
 
 import { useIsDesktop, dateFromDate, timeFromDate } from '../../utils/utils';
+import { validateNotification } from '../../utils/validation';
 import ScrollList from '../../components/ScrollList';
 import FormCalendar from './FormCalendar';
 import PlusLayout from '../../layouts/PlusLayout';
@@ -24,7 +26,7 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications, setConditionsMet } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
 
     const [listNormal, setListNormal] = useState([]);
@@ -57,8 +59,6 @@ const Planner = () => {
                 }));
             } else setNotifications([]);
         } else setNotifications([]);
-        console.log('Notifications:', response);
-        console.log('new notifications:', notifications);
     }
 
     const normalizeData = (datas, type) => {
@@ -164,6 +164,24 @@ const Planner = () => {
     useEffect(() => {
         setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
     }, [activities, events, tasks]);
+
+    useEffect(() => {
+        if (notifications.length > 0) {
+            let flag;
+            notifications.forEach(notification => {
+                if (notification.type === 'default') flag = validateNotification(notification, 1);
+                else flag = validateNotification(notification, 2);
+                flag = flag && validateNotification(notification, 3);
+            });
+            if (!flag) {
+                setConditionsMet(false);
+            } else setConditionsMet(true);
+        } else {
+            setConditionsMet(true);
+        }
+
+        // TODO: check validity of activity and event
+    }, [notifications]);
 
     return (
         <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popUp: true })} selected={selected.popUp} popUp={<FormCalendar />}>

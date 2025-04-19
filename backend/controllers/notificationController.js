@@ -4,6 +4,7 @@ const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
 
 const { combineDateTime } = require('../utils/utils');
+const { getScheduledJobs, formatJob } = require('../agenda/notificationScheduler');
 
 const setNotifications = async (req, res) => {
     const { type, elementId, notifications } = req.body;
@@ -34,7 +35,7 @@ const setNotifications = async (req, res) => {
                 elementType: type,
                 type: notification.type,
                 mode: notification.mode,
-                before: isDefault ? notification.before : undefined,
+                before: notification.before,
                 variant: notification.variant,
                 time: isDefault ? notification.time : undefined,
                 from: !isDefault ? combineDateTime(notification.fromDate, notification.fromTime) : undefined,
@@ -101,13 +102,12 @@ const deleteNotification = async (req, res) => {
 
 const updateNotification = async (req, res) => {
     const { notificationId } = req.params;
-    const { type, mode, variant } = req.body;
-    let fromDate, fromTime, before, time;
+    const { type, mode, variant, before } = req.body;
+    let fromDate, fromTime, time;
 
     if (type === 'default') {
-        before = req.body.before;
         time = req.body.time;
-        if (!before || !time) return res.status(400).json({ message: 'Before and time are required' });
+        if (!time) return res.status(400).json({ message: 'Time is required' });
     } else {
         fromDate = req.body.fromDate;
         fromTime = req.body.fromTime;
@@ -136,7 +136,7 @@ const updateNotification = async (req, res) => {
             type,
             mode,
             variant,
-            before: isDefault ? before : undefined,
+            before,
             time: isDefault ? time : undefined,
             from: !isDefault ? combineDateTime(fromDate, fromTime) : undefined,
             to: to
@@ -148,10 +148,29 @@ const updateNotification = async (req, res) => {
     }
 }
 
+const getScheduledNotifications = async (req, res) => {
+    const userId = req.session.userId;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const scheduledNotifications = await getScheduledJobs(userId);
+
+        const notifications = scheduledNotifications.map(formatJob).Activity
+            .sort((a, b) => new Date(a.triggerAt) - new Date(b.triggerAt));
+        
+        res.status(200).json({ success: true, notifications });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
 
 module.exports = {
     setNotifications,
     getNotifications,
     deleteNotification, 
-    updateNotification
+    updateNotification,
+    getScheduledNotifications
 };

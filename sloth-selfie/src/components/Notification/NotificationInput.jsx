@@ -21,9 +21,9 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                 email: false,
                 system: true
             },
+            before: 1,
             variant: 'day',
             ...(type === 'default' ? {
-                before: 1,
                 time: '08:00',
             } : {
                 fromDate: dateFromDate(new Date()),
@@ -35,22 +35,24 @@ const NotificationInput = ({ notifications, setNotifications }) => {
         }
     }
 
-    const handleRemoveNotification = (index) => {
-        Swal.fire({
-            title: 'Are you sure?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const response = apiService(`/notification/${notifications[index]._id}`, 'DELETE');
-                if (response) Swal.fire('Deleted!', 'Your notification has been deleted.', 'success');
-                else Swal.fire('Error!', 'There was an error deleting the notification.', 'error');
-                setNotifications(notifications.filter((_, i) => i !== index));
-            }
-        });
+    const handleRemoveNotification = async (index) => {
+        if (notifications[index]._id !== undefined) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (!result.isConfirmed) return;
+
+            const response = await apiService(`/notification/${notifications[index]._id}`, 'DELETE');
+            if (response) Swal.fire('Deleted!', 'Your notification has been deleted.', 'success');
+            else Swal.fire('Error!', 'There was an error deleting the notification.', 'error');
+        }
+        setNotifications(notifications.filter((_, i) => i !== index));
     };
 
     const handleModifyNotification = (index, field, value) => {
@@ -63,15 +65,15 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                     email: false,
                     system: true
                 },
+                before: 1,
                 variant: 'day',
                 ...(value === 'default' ? {
-                    before: 1,
                     time: '08:00',
-                    from: undefined
+                    fromDate: undefined,
+                    fromTime: undefined
                 } : {
                     fromDate: dateFromDate(new Date()),
                     fromTime: timeFromDate(new Date()),
-                    before: undefined,
                     time: undefined
                 })
             };

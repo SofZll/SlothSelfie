@@ -10,7 +10,7 @@ import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormActivity = () => {
 
-    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications } = useCalendar();
+    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications, conditionsMet } = useCalendar();
     const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setDeadline = (date) => {
@@ -34,10 +34,8 @@ const FormActivity = () => {
             } else Swal.fire({ title: 'Error editing activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
             notifications.forEach(notification => {
-                console.log('Notification:', notification);
-                const response = apiService(`/notification/${notification._id}`, 'PUT', notification);
+                apiService(`/notification/${notification._id}`, 'PUT', notification);
                 setNotifications([]);
-                console.log('Notification updated:', response);
             });
         } else {
             const response = await apiService(`/activity`, 'POST', activity);
@@ -73,6 +71,11 @@ const FormActivity = () => {
             resetActivity();
         } else Swal.fire({ title: 'Error deleting activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
         resetSelected();
+
+        notifications.forEach(notification => {
+            apiService(`/notification/${notification._id}`, 'DELETE');
+            setNotifications([]);
+        });
     }
 
     const exportActivity = async () => {
@@ -150,7 +153,7 @@ const FormActivity = () => {
             </div>
 
             <div className='d-flex align-items-center justify-content-center'>
-                <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                <button type='button' className='btn-main rounded shadow-sm mt-4'disabled={!conditionsMet} onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                 {selected.edit && (
                     <>
                     <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
