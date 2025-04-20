@@ -72,6 +72,8 @@ const userSchema = new mongoose.Schema({
 
     freeDays: {
         type: [String], // Array of strings declaring free days in the week
+        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        required: true,
         default: ['Saturday', 'Sunday'],
     }
 

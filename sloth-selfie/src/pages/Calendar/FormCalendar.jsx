@@ -8,7 +8,7 @@ import FormEvent from './FormEvent';
 import FormNoAvailability from './FormNoAvailability';
 import FormTask from './FormTask';
 import Button from '../../components/Button';
-import ScrollListLayout from '../../components/ScrollList';
+import ScrollList from '../../components/ScrollList';
 
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useIsDesktop } from '../../utils/utils';
@@ -63,6 +63,11 @@ const FormCalendar = () => {
 
     return (
         <div className='d-flex flex-column w-100 h-100 overflow-y-auto overflow-x-hidden'>
+
+            {isDesktop && (
+                <ScrollList CardList={activities} smallView={false} />
+            )}
+
             <SelectionCalendarLayout>
                 {selected.selection === '...' && (
                     <div className='d-flex flex-column col-11 col-lg-8 align-items-center py-3'>
@@ -92,11 +97,6 @@ const FormCalendar = () => {
                 )}
 
             </SelectionCalendarLayout>
-            
-            {isDesktop && (
-                <ScrollListLayout CardList={activities} smallView={false} />
-            )}
-
         </div>
     )
 }
