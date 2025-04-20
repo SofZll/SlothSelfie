@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement } from 'chart.js';
 
 import Swal from 'sweetalert2';
 import { apiService } from '../../services/apiService';
@@ -8,10 +8,7 @@ import { apiService } from '../../services/apiService';
 ChartJS.register(
     CategoryScale,
     LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
+    BarElement
 );
 
 const PopUpStats = () => {
