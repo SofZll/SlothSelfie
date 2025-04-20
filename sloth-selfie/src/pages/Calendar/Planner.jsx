@@ -4,7 +4,6 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
-import Swal from 'sweetalert2';
 
 import { useIsDesktop, dateFromDate, timeFromDate } from '../../utils/utils';
 import { validateNotification } from '../../utils/validation';

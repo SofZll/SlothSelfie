@@ -76,13 +76,13 @@ export const PomodoroProvider = ({ children }) => {
                 setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1, studiedTime: pomodoro.studiedTime + 1, started: true });
 
                 if (pomodoro._id) {
+                    console.log('Pomodoro already exists', pomodoro);
                     const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
                     if (!response) console.log('Error updating pomodoro');
-                    else console.log('Pomodoro updated');
                 } else {
                     const response = await apiService('/pomodoro', 'POST', {...pomodoro, ...settingsPomodoro});
                     if (!response) console.log('Error creating pomodoro');
-                    else console.log('Pomodoro created');
+                    else setPomodoro({ ...pomodoro, _id: response._id, user: response.user });
                 }
             } else setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1, studiedTime: pomodoro.studiedTime + 1 });
         }
