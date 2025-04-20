@@ -78,7 +78,7 @@ const FormTask = () => {
                         type='text' className='form-control' id='title'
                         placeholder='Task title'
                         value={task.title}
-                        onChange={(e) => setTask({...task, ['title']: e.target.value})}
+                        onChange={(e) => setTask({...task, title: e.target.value})}
                         required />
                 </div>
                 <div className='col-6'>
@@ -86,7 +86,7 @@ const FormTask = () => {
                     <input
                         type='date' className='form-control' id='deadline'
                         value={new Date(task.deadline).toISOString().split('T')[0]}
-                        onChange={(e) => setTask({...task, ['deadline']: e.target.value})}
+                        onChange={(e) => setTask({...task, deadline: new Date(e.target.value).toISOString()})}
                         required />
                 </div>
             </div>
@@ -96,7 +96,7 @@ const FormTask = () => {
                     <input
                         className='form-check-input' type='checkbox' role='switch' id='completed'
                         checked={task.completed}
-                        onChange={(e) => setTask({...task, ['completed']: e.target.checked})} />
+                        onChange={(e) => setTask({...task, completed: e.target.checked})} />
                     <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>
@@ -104,7 +104,7 @@ const FormTask = () => {
             <div className='row py-2'>
                 <div className='col-12'>
                     <label htmlFor='sharedWith' className='form-label'>Shared with</label>
-                    <ShareInput receivers={task.sharedWith} setReceivers={(receivers) => setTask({...task, ['sharedWith']: receivers})} />
+                    <ShareInput receivers={task.sharedWith} setReceivers={(receivers) => setTask({...task, sharedWith: receivers})} />
                 </div>
             </div>
             

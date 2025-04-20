@@ -58,8 +58,6 @@ const getNotes = async (req, res) => {
         .populate('user', 'username')
         .populate('sharedWith', 'username');
 
-        console.log('Fetched notes:', notes);
-
         res.status(200).json(notes);
 
     } catch (error) {

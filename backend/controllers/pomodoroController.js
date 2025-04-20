@@ -189,6 +189,7 @@ const totalStudiedTime = async (req, res) => {
         const totalTime = pomodori.reduce((acc, pomodoro) => acc + pomodoro.studiedTime, 0);
 
         res.status(200).json({ totalStudiedTime: totalTime });
+
     } catch (error) {
         console.error('Error fetching pomodori:', error);
         res.status(500).json({ message: error.message });
@@ -201,31 +202,28 @@ const timePomodoriMonths = async (req, res) => {
 
     try {
         const thisMonth = new Date().getMonth();
+        const thisYear = new Date().getFullYear();
+
         const timePerMonth = await Pomodoro.aggregate([
-            { $match: { user: user._id, started: true } },
+            { $match: { user: user._id, finished: true } },
             {
                 $group: {
                     _id: {
-                        $month: "$finishedDate"
+                        year: { $year: "$finishedDate" },
+                        month: { $month: "$finishedDate" }
                     },
                     totalStudiedTime: { $sum: "$studiedTime" }
                 }
             },
-            {
-                $project: {
-                    month: "$_id",
-                    totalStudiedTime: 1,
-                    _id: 0
-                }
-            },
-            { $sort: { month: -1 } },
-            { $limit: 5 }
+            { $sort: { "_id.year": -1, "_id.month": -1 } }
         ]);
+
+        console.log(timePerMonth, 'timePerMonth');
 
         const months = [];
         for (let i = 0; i < 5; i++) {
-            const month = (thisMonth - i + 12) % 12;
-            const foundMonth = timePerMonth.find(item => item.month === month);
+            const month = (thisMonth - i + 12)  % 12;
+            const foundMonth = timePerMonth.find(item => item.month === month && item.year === thisYear);
             months.push({
                 month,
                 totalStudiedTime: foundMonth ? foundMonth.totalStudiedTime : 0
