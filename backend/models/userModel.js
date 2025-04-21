@@ -45,25 +45,6 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    
-    noAvailability: [{
-        startDate: {
-            type: Date,
-            required: true,
-        },
-        endDate: {
-            type: Date,
-        },
-        repeatFrequency: { 
-            type: String, 
-            enum: ['none', 'daily', 'weekly', 'monthly', 'yearly'], 
-            default: 'none',
-            required: true,
-        },
-        numberOfOccurrences: {
-            type: Number,
-        }
-    }],
 
     workingHours: {
         start: { type: String, required: true, default: '09:00' }, // HH:MM
