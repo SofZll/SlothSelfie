@@ -1,4 +1,3 @@
-import Swal from 'sweetalert2';
 const BASE_URL = 'http://localhost:3000/api';
 
 // General API service to make requests to the server

@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 
-const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, getUserId, checkAuth, getNoAvailability, addNoAvailability, removeNoAvailability, getUserIdFromUsername, getUserNoAvailabilityWithId, updateUserPreferences } = require('../controllers/userController');
+const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, getUserId, checkAuth, getUserIdFromUsername, updateUserPreferences } = require('../controllers/userController');
 
 const router = express.Router();
 
@@ -17,10 +17,7 @@ router.get('/user/username', getUsername);
 router.get('/user/userId', getUserId);
 router.get('/user/check-auth', checkAuth);
 
-router.get('/user/no-availability', getNoAvailability);
-router.post('/user/add-no-availability', addNoAvailability);
-router.delete('/user/remove-no-availability/:noAvailabilityId', removeNoAvailability);
-router.get('/user/no-availability/:userId', getUserNoAvailabilityWithId);
+
 router.put('/user/edit-schedule', updateUserPreferences);
 
 router.get('/user/:username', getUserIdFromUsername);

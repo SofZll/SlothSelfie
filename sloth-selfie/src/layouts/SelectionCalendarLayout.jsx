@@ -9,7 +9,7 @@ import { useTask } from '../contexts/TaskContext';
 const SelectionCalendarLayout = ({children}) => {
 
     const isDesktop = useIsDesktop();
-    const { selected, resetSelected, back, resetActivity, resetEvent, resetAvailability } = useCalendar();
+    const { selected, resetSelected, back, resetActivity, resetEvent, resetAvailability, availability } = useCalendar();
     const { resetTask } = useTask();
 
     useEffect(() => {

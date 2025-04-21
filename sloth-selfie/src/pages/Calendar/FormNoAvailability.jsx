@@ -1,22 +1,90 @@
-import React, { useEffect }  from 'react';
+import React  from 'react';
 
 import Swal from 'sweetalert2';
 
-import { apiService } from '../../services/apiService';
 import { generateTimeOptions } from '../../utils/utils';
+import { apiService } from '../../services/apiService';
 
 import { useCalendar } from '../../contexts/CalendarContext';
 
 const FormNoAvailability = () => {
 
-    const { availability, setAvailability, selected } = useCalendar();
+    const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, resetSelected } = useCalendar();
 
     const handleSubmit = async () => {
-        
+        if (!availability.startDate) {
+            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start date is required', customClass: { confirmButton: 'button-alert' } });
+            return;
+        }
+
+        if (availability.days) {
+            if (!availability.endDate) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'End date is required', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+
+            if (availability.startDate > availability.endDate) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start date must be before end date', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+
+            const startDate = new Date(availability.startDate);
+            const endDate = new Date(availability.endDate);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+            setAvailability({ ...availability, startDate, endDate });
+
+            if (availability.repeatFrequency !== 'none') {
+                let gap = 1;
+                if (availability.repeatFrequency === 'weekly') gap = 7;
+                else if (availability.repeatFrequency === 'monthly') gap = 30;
+                else if (availability.repeatFrequency === 'yearly') gap = 365;
+
+                if (availability.endDate >= availability.startDate + gap * 24 * 60 * 60 * 1000) {
+                    Swal.fire({ title: 'Warning', icon: 'warning', text: 'End date must be before the next occurrence', customClass: { confirmButton: 'button-alert' } });
+                    return;
+                }
+            }
+
+        } else {
+            if (!availability.startTime) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start time is required', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+
+            const startDate = new Date(availability.startDate);
+            startDate.setHours(parseInt(availability.startTime.split(':')[0]), parseInt(availability.startTime.split(':')[1]), 0, 0);
+            const endDate = new Date(availability.startDate) + (parseInt(availability.duration) * 60 * 60 * 1000);
+            setAvailability({ ...availability, startDate, endDate });
+
+            if (endDate > new Date(startDate).setHours(23, 59, 59)) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'End time must be before the next day', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+
+            availability.endDate = new Date(availability.startDate);
+            availability.endDate.setHours(availability.startTime.split(':')[0] + parseInt(availability.duration));
+        }
+
+        const response = await apiService(`/no-availability/${selected.edit ? selected._id : ''}`, selected.edit ? 'PUT' : 'POST', availability);
+
+        if (response) {
+            Swal.fire({ title: selected.edit ? 'Availability edited' : 'Availability added', icon: 'success', text: selected.edit ? 'Availability edited successfully' : 'Availability added successfully', customClass: { confirmButton: 'button-alert' } });
+            setAvailabilities([...availabilities, ...(availability.repeatFrequency !== 'none' ? response.listNoAvailability : [response.noAvailability])]);
+        }  else Swal.fire({ title: 'Error', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+
+        resetAvailability();
+        resetSelected();
     }
 
     const deleteAvailability = async () => {
-        
+        const response = await apiService(`/no-availability/${availability._id}`, 'DELETE');
+        if (response) {
+            Swal.fire({ title: 'Availability deleted', icon: 'success', text: 'Availability deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            setAvailabilities(availabilities.filter(av => av._id !== availability._id));
+        } else Swal.fire({ title: 'Error deleting availability', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        resetAvailability();
+        resetSelected();
     }
 
     return (
@@ -33,7 +101,7 @@ const FormNoAvailability = () => {
                     <div className='col-6'>
                         <label htmlFor='endDate' className='form-label'>End Date</label>
                         <input type='date' className='form-control' id='endDate'
-                        value={new Date(availability.endDate).toISOString().split('T')[0]}
+                        value={(new Date(availability.endDate) ).toISOString().split('T')[0]}
                         onChange={(e) => setAvailability({ ...availability, endDate: e.target.value })}
                         required />
                     </div>
