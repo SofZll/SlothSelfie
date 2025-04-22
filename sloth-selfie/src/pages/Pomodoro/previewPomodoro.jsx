@@ -7,7 +7,6 @@ import { usePomodoro } from '../../contexts/PomodoroContext';
 import { AnimationPencil } from './AnimationPencil';
 import { AuthContext } from '../../contexts/AuthContext';
 
-//TODO aggiusta dimensioni animazione per mobile (sborda dalla card)
 
 const PreviewPomodoro = ({ viewType }) => {
   const navigate = useNavigate();
