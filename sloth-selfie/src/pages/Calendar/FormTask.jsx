@@ -17,7 +17,7 @@ const FormTask = () => {
     const handleSubmit = async () => {
         const response = await apiService(`/task/${task._id}`, 'PUT', task);
 
-        if (response){
+        if (response.success) {
             Swal.fire({ title: 'Task edited', icon: 'success', text: 'Task edited successfully', customClass: { confirmButton: 'button-alert' } });
             setTasks(tasks.map(tsk => tsk._id === task._id ? task : tsk));
             resetTask();
@@ -29,7 +29,7 @@ const FormTask = () => {
     const deleteTask = async () => {
         setDeletePopUp(false);
         const response = await apiService(`/task/${task._id}`, 'DELETE');
-        if (response){
+        if (response.success) {
             Swal.fire({ title: 'Task deleted', icon: 'success', text: 'Task deleted successfully', customClass: { confirmButton: 'button-alert' } });
             setTasks(tasks.filter(tsk => tsk._id !== task._id));
             resetTask();

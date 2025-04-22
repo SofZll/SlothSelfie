@@ -29,14 +29,14 @@ const PopUpStats = () => {
 
     const getStudiedTime = async () => {
         const response = await apiService('/pomodori/studied-time', 'GET');
-        if (response) setTotalPomodoros(response.totalStudiedTime);
+        if (response.success) setTotalPomodoros(response.totalStudiedTime);
         else Swal.fire({ icon: 'error', title: 'Error', text: 'Error getting studied time', customClass: { confirmButton: 'button-alert' } });
 
     }
 
     const getTimePomodoriMonths = async () => {
         const response = await apiService('/pomodori/months', 'GET');
-        if (response) setListTimeMonth(response);
+        if (response.success) setListTimeMonth(response.months);
         else Swal.fire({ icon: 'error', title: 'Error', text: 'Error getting time per month', customClass: { confirmButton: 'button-alert' } });
 
         console.log(response, 'listTimeMonth');

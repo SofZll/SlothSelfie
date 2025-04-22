@@ -21,10 +21,10 @@ const setNotifications = async (req, res) => {
             element = await Event.findById(elementId);
             to = element.endDate;
         }
-        if (!element) return res.status(404).json({ message: 'Element not found' });
+        if (!element) return res.status(404).json({ success: false, message: 'Element not found' });
 
         const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         const newNotifications = notifications.map(notification => {
             const isDefault = notification.type === 'default';
@@ -57,14 +57,14 @@ const getNotifications = async (req, res) => {
     const { elementId } = req.params;
     const userId = req.session.userId;
 
-    if (!elementId) return res.status(400).json({ message: 'No element ID provided' });
+    if (!elementId) return res.status(400).json({ success: false, message: 'No element ID provided' });
 
     try {
         const notifications = await Notification.find({ element: elementId, user: userId })
             .populate('user', 'username')
             .sort({ createdAt: -1 });
 
-        if (!notifications) return res.status(404).json({ message: 'No notifications found' });
+        if (!notifications) return res.status(404).json({ success: false, message: 'No notifications found' });
 
         const notificationsSelected = notifications.map(notification => {
             return {
@@ -87,12 +87,12 @@ const getNotifications = async (req, res) => {
 const deleteNotification = async (req, res) => {
     const { notificationId } = req.params;
 
-    if (!notificationId) return res.status(400).json({ message: 'No notification ID provided' });
+    if (!notificationId) return res.status(400).json({ success: false, message: 'No notification ID provided' });
 
     try {
         const notification = await Notification.findByIdAndDelete(notificationId);
 
-        if (!notification) return res.status(404).json({ message: 'Notification not found' });
+        if (!notification) return res.status(404).json({ success: false, message: 'Notification not found' });
 
         res.status(200).json({ success: true, message: 'Notification deleted successfully' });
     } catch (error) {
@@ -107,14 +107,14 @@ const updateNotification = async (req, res) => {
 
     if (type === 'default') {
         time = req.body.time;
-        if (!time) return res.status(400).json({ message: 'Time is required' });
+        if (!time) return res.status(400).json({ success: false, message: 'Time is required' });
     } else {
         fromDate = req.body.fromDate;
         fromTime = req.body.fromTime;
-        if (!fromDate || !fromTime) return res.status(400).json({ message: 'From date and time are required' });
+        if (!fromDate || !fromTime) return res.status(400).json({ success: false, message: 'From date and time are required' });
     }
 
-    if (!notificationId) return res.status(400).json({ message: 'No notification ID provided' });
+    if (!notificationId) return res.status(400).json({ success: false, message: 'No notification ID provided' });
 
     try {
         const notification = await Notification.findById(notificationId);
@@ -127,9 +127,9 @@ const updateNotification = async (req, res) => {
             element = await Event.findById(notification.element);
             to = element.endDate;
         }
-        if (!element) return res.status(404).json({ message: 'Element not found' });
+        if (!element) return res.status(404).json({ success: false, message: 'Element not found' });
                 
-        if (!notification) return res.status(404).json({ message: 'Notification not found' });
+        if (!notification) return res.status(404).json({ success: false, message: 'Notification not found' });
         
         const isDefault = type === 'default';
         const updatedNotification = await Notification.findByIdAndUpdate(notificationId, {
@@ -153,7 +153,7 @@ const getScheduledNotifications = async (req, res) => {
 
     try {
         const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         const scheduledNotifications = await getScheduledJobs(userId);
 

@@ -11,7 +11,7 @@ const CardActivity = ({ Activity, smallView }) => {
 
     const markComplete = async () => {
         const response = await apiService(`/activity/${Activity._id}`, 'PUT', { ...Activity, completed: !Activity.completed });
-        if (response) setActivities(activities.map(act => act._id === Activity._id ? { ...act, completed: !act.completed } : act));
+        if (response.success) setActivities(activities.map(act => act._id === Activity._id ? { ...act, completed: !act.completed } : act));
     }
 
     const selectActivity = () => {

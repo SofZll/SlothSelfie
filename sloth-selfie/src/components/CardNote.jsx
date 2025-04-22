@@ -30,13 +30,13 @@ const CardNote = ({ Note }) => {
 
     const completeTask = async (task) => {
         const response = await apiService(`/task/complete/${task._id}`, 'PUT');
-        if (response) setNotes(notes.map(n => n._id === Note._id ? { ...Note, tasks: Note.tasks.map(t => t._id === task._id ? response : t) } : n));
+        if (response.success) setNotes(notes.map(n => n._id === Note._id ? { ...Note, tasks: Note.tasks.map(t => t._id === task._id ? response.task : t) } : n));
     }
 
     const deleteNote = async () => {
         setDeletePopUp({show: false, note: null});
         const response = await apiService(`/note/${Note._id}`, 'DELETE');
-        if (response) {
+        if (response.success) {
             Swal.fire({ title: 'Note deleted', icon: 'success', text: 'Note deleted successfully', customClass: { confirmButton: 'button-alert' } });
             setNotes(notes.filter(n => n._id !== Note._id));
         } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error deleting note', customClass: { confirmButton: 'button-alert' } });
@@ -51,9 +51,9 @@ const CardNote = ({ Note }) => {
         }
         const copyNote = { ...Note, _id: null, title: `${Note.title} (copy)`, tasks: copyTasks };
         const response = await apiService('/note', 'POST', copyNote);
-        if (response) {
+        if (response.success) {
             Swal.fire({ title: 'Note duplicated', icon: 'success', text: 'Note duplicated successfully', customClass: { confirmButton: 'button-alert' } });
-            setNotes([...notes, response]);
+            setNotes([...notes, response.note]);
         } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error duplicating note', customClass: { confirmButton: 'button-alert' } });
     }
 

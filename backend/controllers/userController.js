@@ -10,13 +10,13 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({ username });
 
         if (!user) {
-            return res.status(401).json({ message: 'User not found' });
+            return res.status(401).json({ success: false, message: 'User not found' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         console.log('isMatch:', isMatch);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Incorrect password' });
+            return res.status(401).json({ success: false, message: 'Invalid password' });
         }
 
         req.session.userId = user._id;
@@ -224,7 +224,7 @@ const updateUserPreferences = async (req, res) => {
     try {
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
 
         // Updates the preferences
@@ -233,9 +233,9 @@ const updateUserPreferences = async (req, res) => {
         user.freeDays = freeDays || user.freeDays;
 
         await user.save();
-        res.json({ message: 'Preferences updated successfully' });
+        res.json({ success: true, message: 'User preferences updated successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating user preferences' });
+        res.status(500).json({ success: false, message: 'Error updating user preferences' });
     }
 };
 

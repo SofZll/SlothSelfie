@@ -28,10 +28,7 @@ const  PreviewNote = ({ viewType }) => {
 
     const fetchNotes = async () => {
         const response = await apiService('/notes', 'GET');
-        if (response) {
-            const limitedNotes = sortNotes(response); 
-            setNotes(limitedNotes); // We keep the 10 most recent notes
-        }
+        if (response.success) setNotes(sortNotes(response.notes));
     };
 
     const sortNotes = (notes) => {

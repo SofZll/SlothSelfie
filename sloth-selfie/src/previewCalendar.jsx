@@ -25,21 +25,17 @@ const PreviewCalendar = ({ viewType }) => {
 
     const fetchEvents = async () => {
         const response = await apiService('/events', 'GET');
-        if (response) setEvents(response);
+        if (response.success) setEvents(response.events);
     }
 
     const fetchActivities = async () => {
         const response = await apiService('/activities', 'GET');
-        if (response) setActivities(response);
+        if (response.success) setActivities(response.activities.filter(activity => activity.deadline !== null && activity.deadline !== undefined && !activity.completed));
     }
 
     const fetchTasks = async () => {
         const response = await apiService('/tasks', 'GET');
-        if (response){
-            //filter tasks that have no deadline
-            const filteredTasks = response.filter(task => task.deadline !== null && task.deadline !== undefined);
-            setTasks(filteredTasks);
-        }
+        if (response.success) setTasks(response.tasks.filter(task => task.deadline !== null && task.deadline !== undefined && !task.completed));
     }
 
     // animation page

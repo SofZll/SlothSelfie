@@ -19,7 +19,7 @@ const TimeMachinePopup = () => {
         }
 
         const response = await apiService('/time/set-time', 'POST', { date: inputDate, time: inputTime });
-        if (response) {
+        if (response.success) {
             console.log('Time set successfully:', response);
             setCurrentDate(inputDate);
             setCurrentTime(inputTime);
@@ -32,7 +32,7 @@ const TimeMachinePopup = () => {
 
     const handleResetTime = async () => {
         const response = await apiService('/time/reset-time', 'POST');
-        if (response) {
+        if (response.success) {
             console.log('Time reset successfully:', response);
             setCurrentDate(response.timeEntry.date);
             setCurrentTime(response.timeEntry.time);

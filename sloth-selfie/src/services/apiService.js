@@ -20,7 +20,7 @@ const apiService = async (endpoint, method = 'GET', body = null) => {
         const response = await fetch(url, options);
         if (!response.ok) {
             console.error('API Service Error:', response);
-            return null;
+            return await response.json();
         }
 
         const contentType = response.headers.get('Content-Type');
