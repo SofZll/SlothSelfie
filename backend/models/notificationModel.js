@@ -47,9 +47,22 @@ const notificationSchema = new mongoose.Schema({
         default: false,
     },
 
-    snoozeInterval: {
+    snoozeUntil: {
+        type: Date,
+        default: null,
+        required: function() {
+            return this.snooze;
+        }
+    },
+
+    snoozeCount: {
         type: Number,
-        default: 10
+        default: 0,
+        min: 0,
+        max: 5,
+        required: function() {
+            return this.snooze;
+        }
     },
 
     // se l'utente è vicino al luogo

@@ -15,19 +15,23 @@ const Notifications = () => {
                 return {
                     ...notification,
                     triggerAt: new Date(notification.triggerAt).toISOString(),
-                    elementType: notification.elementType,
-                    mode: {
-                        system: notification.mode.system,
-                        email: notification.mode.email
-                    },
-                    urgency: notification.urgency,
-                    snooze: notification.snooze
                 }
             }));
         } else {
             setNotifications([]);
         }
         console.log('Notifications:', response);
+    }
+
+    const HandleSnoozeNotif = (index) => async () => {
+        const snoozeTime = new Date(notifications[index].triggerAt);
+        const snoozeInterval = 10;
+        snoozeTime.setMinutes(snoozeTime.getMinutes() + snoozeInterval);
+        
+        const response = await apiService(`/notification/snooze/${notifications[index]._id}`, 'PUT', { snoozeInterval });
+        if (response) {
+            setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
+        }
     }
 
     // TODO: spostare in utils
@@ -39,34 +43,39 @@ const Notifications = () => {
     
     return (
         <MainLayout>
-            <div className="p-6 mx-auto">
-                <h2 className="mb-4 background-light p-3">Upcoming Notifications</h2>
-
+            <div className="p-2 notifications-container">
+                <div className="mb-4 bg-white p-3 border rounded-2">
+                    <h2>Notifications</h2>
+                    <p className='px-2 fs-6 text-secondary'>* Here you can view the upcoming notifications and snooze them, to modify or to delete them you have to go to the activity or event page.</p>
+                </div>
                 {notifications.length > 0 ? (
                     <>
-                        {notifications.map((notif, idx) => (
-                            <li key={idx} className="bg-white shadow-md rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                                <div>
-                                    <p className="text-lg font-medium text-gray-800">
-                                        {notif.elementType === 'Activity' ? '📝 Attività' : '📅 Evento'}
+                        {notifications.map((notif, index) => (
+                            <div key={index} className="bg-white border shadow-sm p-3 rounded-2">
+                                <div className='d-flex flex-column gap-2'>
+                                    <p>
+                                        {notif.elementType === 'Activity' ? '📝 Activity: ' : '📅 Event: '}
+                                        <strong>{notif.element.title}</strong>
                                     </p>
-                                    <p className="text-sm text-gray-500">
-                                        Trigger: <strong>{formatDate(notif.triggerAt)}</strong>
-                                    </p>
-                                    <div className="flex gap-2 mt-2 text-sm">
-                                        {notif.urgency && <span className="text-red-600 flex items-center gap-1"><AlertTriangle size={16} /> Urgente</span>}
-                                        {notif.snooze && <span className="text-yellow-600 flex items-center gap-1"><Clock size={16} /> Snooze attivo</span>}
+                                    <p className='text-secondary'>Type: {notif.type} every {notif.before} {notif.variant}</p>
+                                    <p className='text-secondary'>{notif.elementType === 'Activity' ? 'Deadline: ' : 'Date: '}{formatDate(notif.to)}</p>
+                                    <p>Next notification at: {formatDate(notif.triggerAt)}</p>
+                                    <div className="d-flex gap-2 mt-1">
+                                        {notif.urgency && <span className="d-flex items-center gap-1"><AlertTriangle size={16} /> Urgente</span>}
+                                        {/* permettere all'utente di selezionare il tempo di snooze */}
+                                        <button className='button-clean green' onClick={HandleSnoozeNotif(index)}>Postpone 10 minutes</button>
+                                        {notif.type === 'repeat' && <button className='button-clean green'>Skip this one</button>}
                                     </div>
                                 </div>
-                                <div className="flex gap-4 mt-4 sm:mt-0">
-                                    {notif.mode.system && <Monitor size={20} className="text-blue-600" title="Notifica di sistema" />}
-                                    {notif.mode.email && <Mail size={20} className="text-green-600" title="Email" />}
+                                <div className="d-flex mt-4 gap-3">
+                                    {notif.mode.system && <Monitor size={20} title="Notifica di sistema" />}
+                                    {notif.mode.email && <Mail size={20} title="Email" />}
                                 </div>
-                            </li>
+                            </div>
                         ))}
                     </>
                 ) : (
-                    <p className="text-gray-500">Nessuna notifica pianificata.</p>
+                    <p>Nessuna notifica pianificata.</p>
                 )}
             </div>
         </MainLayout>
