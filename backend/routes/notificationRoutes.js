@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { setNotifications, getNotifications, deleteNotification, updateNotification, getScheduledNotifications } = require('../controllers/notificationController')
+const { setNotifications, getNotifications, deleteNotification, updateNotification, getScheduledNotifications, snoozeNotification } = require('../controllers/notificationController')
 
 const router = express.Router();
 
@@ -9,6 +9,7 @@ router.post('/notification', setNotifications);
 router.get('/notifications/upcoming', getScheduledNotifications);
 router.get('/notifications/:elementId', getNotifications);
 router.delete('/notification/:notificationId', deleteNotification);
+router.put('/notification/snooze/:notificationId', snoozeNotification);
 router.put('/notification/:notificationId', updateNotification);
 /*
 router.get('/notification/get-notifications', getNotifications);
