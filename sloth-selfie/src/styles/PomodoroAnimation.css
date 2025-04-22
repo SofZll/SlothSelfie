@@ -9,6 +9,7 @@
 .animation-box {
     width: 350px;
     height: 350px;
+    position: relative;
 }
 
 .animation-box * {
