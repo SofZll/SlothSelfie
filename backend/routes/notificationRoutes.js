@@ -6,11 +6,10 @@ const router = express.Router();
 
 // Notification endpoints
 router.post('/notification', setNotifications);
+router.get('/notifications/upcoming', getScheduledNotifications);
 router.get('/notifications/:elementId', getNotifications);
 router.delete('/notification/:notificationId', deleteNotification);
 router.put('/notification/:notificationId', updateNotification);
-// router.get('/notification/scheduled', getScheduledNotifications);
-
 /*
 router.get('/notification/get-notifications', getNotifications);
 router.put('/notification/read-notif/:notifId', markNotificationAsRead);

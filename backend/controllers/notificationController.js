@@ -4,7 +4,8 @@ const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
 
 const { combineDateTime } = require('../utils/utils');
-const { getScheduledJobs, formatJob } = require('../agenda/notificationScheduler');
+const { scheduleNotification } = require('../agenda/notificationScheduler');
+const { getScheduledJobs, formatJob } = require('../services/agendaService');
 
 const setNotifications = async (req, res) => {
     const { type, elementId, notifications } = req.body;
@@ -46,6 +47,8 @@ const setNotifications = async (req, res) => {
         console.log('New notifications:', newNotifications);
 
         const savedNotifications = await Notification.insertMany(newNotifications);
+
+        await scheduleNotification(savedNotifications);
 
         res.status(201).json({ success: true, message: 'Notifications created successfully', notifications: savedNotifications });
     } catch (error) {
@@ -150,18 +153,19 @@ const updateNotification = async (req, res) => {
 
 const getScheduledNotifications = async (req, res) => {
     const userId = req.session.userId;
-
+    console.log('miao:');
     try {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
-
+        console.log('User found:', user);
         const scheduledNotifications = await getScheduledJobs(userId);
-
-        const notifications = scheduledNotifications.map(formatJob).Activity
+        console.log('Scheduled notifications:', scheduledNotifications);
+        const notifications = scheduledNotifications.map(formatJob)
             .sort((a, b) => new Date(a.triggerAt) - new Date(b.triggerAt));
-        
+        console.log('Formatted notifications:', notifications);
         res.status(200).json({ success: true, notifications });
     } catch (error) {
+        console.error('Error fetching scheduled notifications:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 }

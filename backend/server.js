@@ -70,14 +70,16 @@ app.get('*', (req, res) => {
 
 socketHandler(io);
 
-agenda.on('ready', async () => {
-    console.log('Agenda started');
-    agenda.start();
-});
-
 agenda.on('error', (error) => {
     console.error('Agenda connection error:', error);
 });
+
+process.on('SIGINT', async () => {
+    console.log("🛑 Ctrl+C intercettato, sto chiudendo Agenda...");
+    await agenda.stop();
+    console.log("✅ Agenda chiusa.");
+    process.exit(0);
+  });
 
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
