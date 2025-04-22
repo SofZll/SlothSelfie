@@ -170,7 +170,11 @@ function setupSorting(project) {
 async function viewAsList(projectId) {
     try {
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch project');
+        }
+        const project = data.project;
 
         const projectViewContainer = renderProjectHeader(project);
 
@@ -209,7 +213,11 @@ async function viewAsList(projectId) {
 async function viewAsGantt(projectId) {
     try {
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch project');
+        }
+        const project = data.project;
 
         const projectViewContainer = renderProjectHeader(project);
 
