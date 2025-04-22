@@ -1,43 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import "../../css/App.css";
-import "../../css/Pomodoro.css";
-import iconYellowTomato from '../../assets/icons/yellowTomato.svg';
-import iconRedTomato from '../../assets/icons/redTomato.svg';
 import { Link, useNavigate } from 'react-router-dom';
-import { stringTime, tomatoPlay, passingTime } from '../../pomodoroUtils';
 import '../../styles/Previews.css';
-//import '../../css/Pomodoro.css'; old css pomodoro
 
-//TODO COLLEGA IL BACKEND
+import { apiService } from '../../services/apiService';
+import { usePomodoro } from '../../contexts/PomodoroContext';
+import { AnimationPencil } from './AnimationPencil';
+import { AuthContext } from '../../contexts/AuthContext';
 
-const PreviewPomodoro = ({ viewType, userLogged }) => {
+//TODO aggiusta dimensioni animazione per mobile (sborda dalla card)
+
+const PreviewPomodoro = ({ viewType }) => {
   const navigate = useNavigate();
-  const [soundAudio, setSoundAudio] = useState('./media/meow.mp3');
+  const { user } = React.useContext(AuthContext);
 
-  const [dataPomodoro, setDataPomodoro] = useState({
-    timeLeft: 30*60,
-    cyclesLeft: 5,
-    cycles: 5,
-    isStudioTime: true,
-    studioTime: 30*60,
-    breakTime: 5*60,
-    notStartedYet: true,
-    done: false,
-    studioTimeTotal: 0,
-  });
+  const [pomodoroList, setPomodoroList] = useState([]);
+  const [allPomodoros, setAllPomodoros] = useState([]);
 
-  const [playTomato, setPlayTomato] = useState(false);
-  const [stringPrintTime, setStringPrintTime] = useState(stringTime(dataPomodoro.timeLeft));
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const {
+    pomodoro,
+    play,
+    setPlay,
+    increasePomodoroTime,
+    resetPomodoro,
+    animation
+  } = usePomodoro();
 
-  //placeholder for the list of pomodoros
-  // This should be replaced with actual data fetching logic
-  const pomodoroList = [
-    { id: 1, name: 'Pomodoro 1', time: '00:25:00' },
-    { id: 2, name: 'Pomodoro 2', time: '00:30:00' },
-    { id: 3, name: 'Pomodoro 3', time: '00:20:00' },
-    { id: 4, name: 'Pomodoro 4', time: '00:15:00' },
-  ];
+  useEffect(() => {
+    let timer;
+    if (play && !pomodoro.finished) {
+      timer = setInterval(() => {
+        increasePomodoroTime();
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [play, pomodoro]);
 
   // animation page
   const handleLinkClick = (path) => (event) => {
@@ -49,67 +45,77 @@ const PreviewPomodoro = ({ viewType, userLogged }) => {
     }, 300);
   };
 
-    // Function to handle login/logout state
+  // Function to handle login/logout state
     useEffect(() => {
-            if (userLogged) {
-                setIsUserLoggedIn(true);
-            } else {
-                setIsUserLoggedIn(false);
-                //placeholder for fetching backend data
-                setDataPomodoro({
-                    timeLeft: 30*60,
-                    cyclesLeft: 5,
-                    cycles: 5,
-                    isStudioTime: true,
-                    studioTime: 30*60,
-                    breakTime: 5*60,
-                    notStartedYet: true,
-                    done: false,
-                    studioTimeTotal: 0,
-                }); // Reset data if the user is logged out
-            }
-        }, [userLogged]);
+      if (user) {
+          fetchPomodoroListToDo();
+          fetchAllPomodoros();
+      }
+    }, [user]);
 
-  useEffect(() => { 
-    if (playTomato && dataPomodoro.cyclesLeft > 0) {
-        const timer = setTimeout(() => {
-            passingTime(dataPomodoro, setDataPomodoro, setPlayTomato, setStringPrintTime);
-        }, 1000);
-
-        return () => clearTimeout(timer);
+  // Function to fetch pomodoro ToDo list from the backend
+  const fetchPomodoroListToDo = async () => {
+    try {
+        const response = await apiService('/pomodori/todo', 'GET', null, { credentials: 'include' });
+        if (response) {
+            setPomodoroList(response); // Set the pomodoro list from the backend
+        }
+    } catch (error) {
+        console.error('Error fetching pomodoro list:', error);
     }
-  }, [dataPomodoro, playTomato]);
+  } 
 
-  useEffect(() => {
-    setStringPrintTime(stringTime(dataPomodoro.timeLeft));
-  }, [dataPomodoro.timeLeft]);
+  // Function to fetch all pomodoros from the backend
+  const fetchAllPomodoros = async () => {
+    try {
+        const response = await apiService('/pomodori', 'GET', null, { credentials: 'include' });
+        if (response) {
+            setAllPomodoros(response); // Set the pomodoro list from the backend
+        }
+    } catch (error) {
+        console.error('Error fetching pomodoro list:', error);
+    }
+  }
 
-  // Render per QuickStart, Last Pomodoro, Pomodoros List
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+// Render per QuickStart, Last Pomodoro, Pomodoros List
 const renderPomodoroPreview = () => {
   switch (viewType) {
     case 'quickStart':
-      return (
-        <div className="containerPreview">
-          <div className={dataPomodoro.isStudioTime ? 'containerRed' : 'containerYellow'}>
-            <img
-              src={dataPomodoro.isStudioTime ? iconRedTomato : iconYellowTomato}
-              alt='Tomato'
-              className='tomatoPrew'
-            />
-            <h2 className={dataPomodoro.isStudioTime ? 'counterRed' : 'counterYellow'}>
-              {stringPrintTime}
-            </h2>
-          </div>
-          <div className="divBtn">
-            <button onClick={() => tomatoPlay(setDataPomodoro, dataPomodoro, setPlayTomato, playTomato, setStringPrintTime)} className="btn btn-main blue">
-              {playTomato ? (dataPomodoro.done ? "Reset timer" : "Stop timer") : (dataPomodoro.notStartedYet ? "Quick start" : "Play timer")}
-            </button>
-            <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
-              <button className="btn btn-main blue">Set Pomodoro</button>
-            </Link>
-          </div>
+    return (
+      <div className="containerPreview">
+
+        <div className="timer-display">
+          You still have {formatTime(pomodoro.timeLeft)} minutes {pomodoro.isStudyTime ? 'to study' : 'in your break'}
         </div>
-      );
+
+        <div className="divBtn">
+          <button
+            onClick={() => {
+              if (pomodoro.finished) resetPomodoro();
+              else setPlay(!play);
+            }}
+            className="btn btn-main blue"
+          >
+            {play ? (pomodoro.finished ? "Reset timer" : "Stop timer") : (pomodoro.started ? "Resume" : "Quick start")}
+          </button>
+          <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
+            <button className="btn btn-main blue">Set Pomodoro</button>
+          </Link>
+        </div>
+
+        <AnimationPencil
+          isStudyTime={pomodoro.isStudyTime}
+          timeLeft={pomodoro.timeLeft}
+          animation={animation}
+        />
+      </div>
+    );
       case 'list':
         // Verify if the pomodoroList has elements
         if (pomodoroList.length > 0) {
@@ -117,7 +123,7 @@ const renderPomodoroPreview = () => {
             <div className="containerPreview">
               <div className="scrollable-list">
                 {pomodoroList.map((pomodoro, index) => (
-                  <div key={index} className={`event-card event-border-yellow`} ><b>Pomodoro</b> {index + 1} - {pomodoro.time}</div>
+                  <div key={index} className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {pomodoro.cycles} - studyTime: {pomodoro.studyTime} - breakTime: {pomodoro.breakTime}</div>
                 ))}
               </div>
               <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
@@ -136,16 +142,12 @@ const renderPomodoroPreview = () => {
         }
         case 'latest':
           default:
-          <div className="scrollable-list"></div>
           // Verify if the lastPomodoro is there
-          if (pomodoroList.length > 0) {
-            const lastPomodoro = pomodoroList[pomodoroList.length - 1];
+          if (allPomodoros.length > 0) {
+            const lastPomodoro = allPomodoros[allPomodoros.length - 1];
             return (
               <div className="containerPreview">
-                <div className="containerYellow">
-                  <img src={iconYellowTomato} alt="Tomato" className="tomatoPrew" />
-                  <h2 className="counterYellow">{lastPomodoro.time} </h2> {/* Shows the time of the last pomodoro */}
-                </div>
+                <div className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {lastPomodoro.cycles} - studyTime: {lastPomodoro.studyTime} - breakTime: {lastPomodoro.breakTime}</div>
                 <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
                   <button className="btn btn-main blue">Set Pomodoro</button>
                 </Link>

@@ -84,7 +84,7 @@ function PreviewSetUp(props) {
                             onClick={() => handleCustomizationChange('pomodoro', 'quickStart')} 
                         />
                         <Button 
-                            text="Pomodoros list"
+                            text="Pomodoros ToDo list"
                             onClick={() => handleCustomizationChange('pomodoro', 'listOfPomodoros')} 
                         />
                         <Button 
