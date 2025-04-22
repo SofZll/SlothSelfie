@@ -49,7 +49,7 @@ const NotificationInput = ({ notifications, setNotifications }) => {
             if (!result.isConfirmed) return;
 
             const response = await apiService(`/notification/${notifications[index]._id}`, 'DELETE');
-            if (response) Swal.fire('Deleted!', 'Your notification has been deleted.', 'success');
+            if (response.success) Swal.fire('Deleted!', 'Your notification has been deleted.', 'success');
             else Swal.fire('Error!', 'There was an error deleting the notification.', 'error');
         }
         setNotifications(notifications.filter((_, i) => i !== index));

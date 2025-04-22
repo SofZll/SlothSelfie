@@ -13,10 +13,10 @@ const getAllProjects = async (req, res) => {
         const user = await User.findOne({ username: userName });
 
         if(!userName) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
         
         const projects = await Project.find({
@@ -28,10 +28,10 @@ const getAllProjects = async (req, res) => {
         .populate('owner', 'username')
         .populate('members', 'username');
 
-        res.status(200).json(projects);
+        res.status(200).json({ success: true, projects });
     } catch (error) {
         console.error('Error fetching projects:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -45,7 +45,7 @@ const getProjectById = async (req, res) => {
             .populate('description');
 
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         //now we get the phases of the project (type 'phase')
@@ -98,10 +98,10 @@ const getProjectById = async (req, res) => {
 
         project.phases = phases;
 
-        res.status(200).json(project);
+        res.status(200).json({ success: true, project });
     } catch (error) {
         console.error('Error fetching project by id:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -113,10 +113,11 @@ const getPhaseSubphaseById = async (req, res) => {
             .populate('macroActivity')
             .populate('activities');
     
-            res.status(200).json(phaseSubphase);
+            res.status(200).json({ success: true, phaseSubphase });
     }
     catch (error) {
         console.error('Error fetching phase/subphase by id:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -317,7 +318,7 @@ const createProject = async (req, res) => {
         // finds the owner ID from the username
         const ownerUser = await User.findOne({ username: owner });
         if (!ownerUser) {
-            return res.status(404).json({ message: 'Owner not found' });
+            return res.status(404).json({ success: false, message: 'Owner not found' });
         }
 
         // finds the members IDs from the usernames
@@ -352,10 +353,10 @@ const createProject = async (req, res) => {
         await newProject.updateOne({ $set: { phases: phaseIds } });
 
 
-        res.status(201).json({ message: 'Project, phases, subphases, and activities saved successfully' });
+        res.status(201).json({ success: true, message: 'Project, phases, subphases, and activities saved successfully' });
     } catch (error) {
         console.error('Error saving project:', error);
-        res.status(500).json({ message: 'Server error while saving project' });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -431,13 +432,13 @@ const updateProject = async (req, res) => {
         // Find the project
         let project = await Project.findById(id);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         // Find the owner id
         const ownerUser = await User.findOne({ username: owner });
         if (!ownerUser) {
-            return res.status(404).json({ message: 'Owner not found' });
+            return res.status(404).json({ success: false, message: 'Owner not found' });
         }
 
         // Find the members ids
@@ -516,11 +517,11 @@ const updateProject = async (req, res) => {
         project.phases = updatedPhaseIds;
         await project.save();
 
-        res.status(200).json({ message: 'Project updated successfully', project });
+        res.status(200).json({ success: true, message: 'Project updated successfully', project });
 
     } catch (error) {
         console.error('Error updating project:', error);
-        res.status(500).json({ message: 'Server error while updating project' });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -560,7 +561,7 @@ const deleteProject = async (req, res) => {
         // Find the project
         const project = await Project.findById(id);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         // Find all phases and subphases of the project
@@ -592,10 +593,10 @@ const deleteProject = async (req, res) => {
         // Delete the project
         await Project.findByIdAndDelete(id);
 
-        res.status(200).send('Project and associated data deleted successfully.');
+        res.status(200).send({ success: true, message: 'Project deleted successfully' });
     } catch (error) {
         console.error('Error deleting project:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -607,13 +608,13 @@ const removePhaseFromBackend = async (req, res) => {
         // Find the project
         const project = await Project.findById(projectId);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         // Find the phase
         const phase = await PhaseSubphase.findById(phaseId);
         if (!phase || phase.type !== 'phase') {
-            return res.status(404).json({ message: 'Phase not found or invalid type' });
+            return res.status(404).json({ success: false, message: 'Phase not found or invalid type' });
         }
 
         // Remove the phase from the project's phases array
@@ -656,7 +657,7 @@ const removePhaseFromBackend = async (req, res) => {
 
     } catch (error) {
         console.error('Error deleting phase:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -668,7 +669,7 @@ const removeSubphaseFromBackend = async (req, res) => {
         // Find the project
         const project = await Project.findById(projectId);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         let subphaseDeleted = false;
@@ -677,7 +678,7 @@ const removeSubphaseFromBackend = async (req, res) => {
         if (phaseId) {
             const phase = await PhaseSubphase.findById(phaseId);
             if (!phase || phase.type !== 'phase') {
-                return res.status(404).json({ message: 'Phase not found or invalid type' });
+                return res.status(404).json({ success: false, message: 'Phase not found or invalid type' });
             }
 
             const initialLength = phase.subphases.length;
@@ -690,7 +691,7 @@ const removeSubphaseFromBackend = async (req, res) => {
         }
 
         if (!subphaseDeleted) {
-            return res.status(404).json({ message: 'Subphase not found in project or phase' });
+            return res.status(404).json({ success: false, message: 'Subphase not found in phase' });
         }
 
         // Delete the subphase
@@ -717,6 +718,7 @@ const removeSubphaseFromBackend = async (req, res) => {
 
     } catch (error) {
         console.error('Error deleting subphase:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -726,7 +728,7 @@ const deleteMacroActivity = async (macroActivityId) => {
         // Find the macroactivity
         const macroActivity = await Activity.findById(macroActivityId);
         if (!macroActivity) {
-            return res.status(404).json({ message: 'Macroactivity not found' });
+            return res.status(404).json({ success: false, message: 'Macroactivity not found' });
         }
 
         // Delete the events linked to the macroactivity
@@ -748,8 +750,10 @@ const deleteMacroActivity = async (macroActivityId) => {
         // Delete the macroactivity
         await Activity.findByIdAndDelete(macroActivityId);
 
+        return res.status(200).json({ success: true, message: 'Macroactivity deleted successfully' });
     } catch (error) {
         console.error('Error deleting macroactivity:', error);
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -761,7 +765,7 @@ const removeActivityFromBackend = async (req, res) => {
         // Find the project
         const project = await Project.findById(projectId);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         let activityDeleted = false;
@@ -772,7 +776,7 @@ const removeActivityFromBackend = async (req, res) => {
         if (phaseSubphaseId) {
             const phaseSubphase = await PhaseSubphase.findById(phaseSubphaseId);
             if (!phaseSubphase) {
-                return res.status(404).json({ message: 'Phase or Subphase not found' });
+                return res.status(404).json({ success: false, message: 'Phase or subphase not found' });
             }
 
             const initialLength = phaseSubphase.activities.length;
@@ -785,13 +789,13 @@ const removeActivityFromBackend = async (req, res) => {
         }
 
         if (!activityDeleted) {
-            return res.status(404).json({ message: 'Activity not found in phase or subphase' });
+            return res.status(404).json({ success: false, message: 'Activity not found in phase or subphase' });
         }
 
         // Retrieve the activity to delete notes and events linked to it
         const activity = await Activity.findById(activityId);
         if (!activity) {
-            return res.status(404).json({ message: 'Activity not found' });
+            return res.status(404).json({ success: false, message: 'Activity not found' });
         }
 
         //get the ids of the notes and events linked to the activity
@@ -814,7 +818,7 @@ const removeActivityFromBackend = async (req, res) => {
 
     } catch (error) {
         console.error('Error deleting activity:', error);
-        return res.status(500).json({ message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 

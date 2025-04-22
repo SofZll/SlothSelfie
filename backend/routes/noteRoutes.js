@@ -5,10 +5,10 @@ const { createNote, getNotes, getNote, updateNote, deleteNote } = require('../co
 const router = express.Router();
 
 // Note endpoints
-router.post('/note', createNote);
 router.get('/notes', getNotes);
-router.get('/note/get/:noteId', getNote);
+router.post('/note', createNote);
 router.put('/note/:noteId', updateNote);
 router.delete('/note/:noteId', deleteNote);
+router.get('/note/get/:noteId', getNote);
 
 module.exports = router;

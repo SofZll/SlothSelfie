@@ -17,7 +17,7 @@ const FormTask = () => {
     const handleSubmit = async () => {
         const response = await apiService(`/task/${task._id}`, 'PUT', task);
 
-        if (response){
+        if (response.success) {
             Swal.fire({ title: 'Task edited', icon: 'success', text: 'Task edited successfully', customClass: { confirmButton: 'button-alert' } });
             setTasks(tasks.map(tsk => tsk._id === task._id ? task : tsk));
             resetTask();
@@ -29,7 +29,7 @@ const FormTask = () => {
     const deleteTask = async () => {
         setDeletePopUp(false);
         const response = await apiService(`/task/${task._id}`, 'DELETE');
-        if (response){
+        if (response.success) {
             Swal.fire({ title: 'Task deleted', icon: 'success', text: 'Task deleted successfully', customClass: { confirmButton: 'button-alert' } });
             setTasks(tasks.filter(tsk => tsk._id !== task._id));
             resetTask();
@@ -37,37 +37,6 @@ const FormTask = () => {
         resetSelected();
     }
 
-    const exportTask = async () => {
-            try {
-                const response = await apiService(`/task/${task._id}/export`, 'GET', null, {
-                    credentials: 'include',
-                });
-        
-                if (!response) throw new Error('Empty response from server');
-        
-                const blob = response;
-    
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${task.title}.ics`;
-                a.click();
-        
-                Swal.fire({
-                    title: 'Task exported',
-                    icon: 'success',
-                    text: 'Task exported successfully, a mail with .ics attachment will be sent to you',
-                    customClass: { confirmButton: 'button-alert' }
-                });
-            } catch (err) {
-                Swal.fire({
-                    title: 'Error exporting task',
-                    icon: 'error',
-                    text: err.message || 'Unknown error',
-                    customClass: { confirmButton: 'button-alert' }
-                });
-            }
-        }
 
     return (
         <div className='d-flex flex-column w-100'>
@@ -78,7 +47,7 @@ const FormTask = () => {
                         type='text' className='form-control' id='title'
                         placeholder='Task title'
                         value={task.title}
-                        onChange={(e) => setTask({...task, ['title']: e.target.value})}
+                        onChange={(e) => setTask({...task, title: e.target.value})}
                         required />
                 </div>
                 <div className='col-6'>
@@ -86,7 +55,7 @@ const FormTask = () => {
                     <input
                         type='date' className='form-control' id='deadline'
                         value={new Date(task.deadline).toISOString().split('T')[0]}
-                        onChange={(e) => setTask({...task, ['deadline']: e.target.value})}
+                        onChange={(e) => setTask({...task, deadline: new Date(e.target.value).toISOString()})}
                         required />
                 </div>
             </div>
@@ -96,7 +65,7 @@ const FormTask = () => {
                     <input
                         className='form-check-input' type='checkbox' role='switch' id='completed'
                         checked={task.completed}
-                        onChange={(e) => setTask({...task, ['completed']: e.target.checked})} />
+                        onChange={(e) => setTask({...task, completed: e.target.checked})} />
                     <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>
@@ -104,18 +73,13 @@ const FormTask = () => {
             <div className='row py-2'>
                 <div className='col-12'>
                     <label htmlFor='sharedWith' className='form-label'>Shared with</label>
-                    <ShareInput receivers={task.sharedWith} setReceivers={(receivers) => setTask({...task, ['sharedWith']: receivers})} />
+                    <ShareInput receivers={task.sharedWith} setReceivers={(receivers) => setTask({...task, sharedWith: receivers})} />
                 </div>
             </div>
             
             <div className='d-flex align-items-center justify-content-center'>
                 <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>edit</button>
-
-                <>
                 <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
-                <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => exportTask()}>export .ics</button>
-                </>
-                
             </div>
 
             {deletePopUp && (

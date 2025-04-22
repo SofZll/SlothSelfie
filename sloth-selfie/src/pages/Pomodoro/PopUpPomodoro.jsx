@@ -5,7 +5,7 @@ import { useMusic } from '../../contexts/MusicContext';
 import EditPomodoro from './EditPomodoro';
 import PopUpShare from './PopUpShare';
 import PopUpPlan from './PopUpPlan';
-import PopUpStats from './PopUpStats';
+import StatsPomodoro from '../../components/StatsPomodoro';
 import { Youtube, SearchCheck } from 'lucide-react';
 
 const PopUpPomodoro = () => {
@@ -104,7 +104,7 @@ const PopUpPomodoro = () => {
                         )}
 
                         {popUp.stats && (
-                            <PopUpStats />
+                            <StatsPomodoro />
                         )}
 
                     </div>
