@@ -13,7 +13,7 @@ const createChat = async (req, res) => {
         const user2 = await User.findOne({ username: username2 });
 
         if ((!user) || (!user2)) {
-            res.status(400).json({ message: 'User not found' });
+            res.status(400).json({ success: false, message: 'User not found' });
             return;
         }
 

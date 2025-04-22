@@ -20,7 +20,7 @@ const getTasks = async (req, res) => {
         .populate('user', 'username')
         .populate('sharedWith', 'username');
 
-        res.status(200).json(tasks);
+        res.status(200).json({ success: true, tasks });
     } catch (error) {
         console.error('Error fetching tasks:', error);
         res.status(500).json({ message: error.message });
@@ -35,7 +35,7 @@ const editTask = async (req, res) => {
     try {
         const task = await Task.findById(taskId);
         if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
+            return res.status(404).json({ success: false, message: 'Task not found' });
         }
 
         task.title = title;
@@ -43,7 +43,7 @@ const editTask = async (req, res) => {
         task.completed = completed;
 
         const updatedTask = await task.save();
-        res.status(200).json(updatedTask);
+        res.status(200).json({ success: true, task: updatedTask });
     } catch (error) {
         console.error('Error updating task:', error);
         res.status(500).json({ message: error.message });
@@ -57,15 +57,15 @@ const markTaskCompleted = async (req, res) => {
     try {
         const task = await Task.findById(taskId);
         if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
+            return res.status(404).json({ success: false, message: 'Task not found' });
         }
 
         task.completed = !task.completed;
         const updatedTask = await task.save();
-        res.status(200).json(updatedTask);
+        res.status(200).json({ success: true, task: updatedTask });
     } catch (error) {
         console.error('Error updating task:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -75,7 +75,7 @@ const deleteTask = async (req, res) => {
     try {
         const task = await Task.findByIdAndDelete(taskId);
         if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
+            return res.status(404).json({ success: false, message: 'Task not found' });
         }
         
         const note = await Note.findOne({ tasks: taskId });
@@ -84,10 +84,10 @@ const deleteTask = async (req, res) => {
             await note.save();
         }
 
-        res.status(200).json({ message: 'Task deleted successfully' });
+        res.status(200).json({ success: true, message: 'Task deleted successfully' });
     } catch (error) {
         console.error('Error deleting task:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -160,7 +160,7 @@ async function exportTask(req, res){
         const userName = req.session.username;
         const task = await Task.findById(taskId);
         if (!task) {
-            return res.status(404).json({ message: "Task not found" });
+            return res.status(404).json({ success: false, message: 'Task not found' });
         }
 
         const user = await User.findOne({ username: userName });
@@ -177,10 +177,8 @@ async function exportTask(req, res){
         
         if (error) {
             console.error("ICS generation error:", error);
-            return res.status(500).json({ message: 'Error while generating .ics' });
+            return res.status(500).json({ success: false, message: 'Error generating ICS file' });
         }
-
-        console.log("Generated .ics value:\n", value);
 
         // send the mail with the .ics file as attachment to the user
         const userEmail = user.email;
@@ -194,10 +192,10 @@ async function exportTask(req, res){
         //download the file on frontend
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${task.title}.ics"`);
-        res.status(200).send(value);
+        res.status(200).send({ success: true, value });
       } catch (err) {
         console.error(err);
-        res.status(500).send({ message: 'Error during the task export' });
+        res.status(500).send({ success: false, message: 'Error exporting task' });
       }
 }
 

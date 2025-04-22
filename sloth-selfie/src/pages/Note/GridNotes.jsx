@@ -14,7 +14,7 @@ const GridNotes = () => {
 
     const fetchNotes = async () => {
         const response = await apiService('/notes', 'GET');
-        if (response) setNotes(response);
+        if (response.success) setNotes(response.notes);
     }
 
     const filterNotes = () => {

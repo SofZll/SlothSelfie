@@ -56,7 +56,7 @@ const AuthProvider = ({ children }) => {
         const checkAuth = async () => {
             try {
                 const response = await apiService('/user/check-auth');
-                if (response?.success) {
+                if (response.success) {
                     await fetchUserData();
                 } else {
                     console.error('Error checking auth:', response);

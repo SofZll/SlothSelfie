@@ -23,7 +23,7 @@ const ChatList = () => {
     const handleChatClick = async (chatId) => {
         console.log('click rilevato');
         const response = await apiService(`/chat/${chatId}`);
-        if (response) {
+        if (response.success) {
             const existingChat = chats.find(chat => chat._id === chatId);
             let messages = response.messages || [];
             if (messages.length > 0) {

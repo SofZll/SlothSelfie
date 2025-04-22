@@ -232,7 +232,11 @@ async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
 
         //get the activity
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-        const activity = await response.json();
+        const activityData = await response.json();
+        if (!activityData.success) {
+            throw new Error('Failed to fetch activity data');
+        }
+        const activity = activityData.activity;
 
         const startBtn = `start-${activityId}`;
         const completeBtn = `complete-${activityId}`;
@@ -296,7 +300,11 @@ async function adjustMacroButtons(macroId) {
     try{
         //get the macroactivity
         const response = await fetch(`http://localhost:8000/api/activity/${macroId}`);
-        const activity = await response.json();
+        const activityData = await response.json();
+        if (!activityData.success) {
+            throw new Error('Failed to fetch activity data');
+        }
+        const activity = activityData.activity;
         if(activity.status === "Reactivated") {
             //check if the macroactivity has children, if not, we should activate the output field and be able to edit the output note
             let children = await checkChildren(activity.phaseSubphase);
@@ -337,7 +345,11 @@ async function checkChildren(phaseSubphase) {
     try{
         //get the phaseSubphase of the activity
         const response = await fetch(`http://localhost:8000/api/phaseSubphase/${phaseSubphase}`);
-        const phaseSubphaseData = await response.json();
+        const phaseSubphaseres = await response.json();
+        if (!phaseSubphaseres.success) {
+            throw new Error('Failed to fetch phaseSubphase data');
+        }
+        const phaseSubphaseData = phaseSubphaseres.phaseSubphase;
         
         //get the activities of the phaseSubphase, they are the children of the macroactivity
         const children = phaseSubphaseData.activities;
@@ -348,7 +360,11 @@ async function checkChildren(phaseSubphase) {
             for(const subphaseId of phaseSubphaseData.subphases) {
                 //get the subphase
                 const response = await fetch(`http://localhost:8000/api/phaseSubphase/${subphaseId}`);
-                const subphaseData = await response.json();
+                const subphaseres = await response.json();
+                if (!subphaseres.success) {
+                    throw new Error('Failed to fetch subphase data');
+                }
+                const subphaseData = subphaseres.phaseSubphase;
                 //get the activities of the subphase
                 children.push(...subphaseData.activities);
             }
@@ -491,7 +507,11 @@ async function adjustDatesOfDependentActivities(dependentActivitiesIds) {
         try {
             // Get the activity
             let response = await fetch(`http://localhost:8000/api/activity/${depId}`);
-            let activity = await response.json();
+            let activityData = await response.json();
+            if (!activityData.success) {
+                throw new Error('Failed to fetch activity data');
+            }
+            let activity = activityData.activity;
             
             let newStartDate = new Date(activity.startDate);
             let newDeadline = new Date(activity.deadline);

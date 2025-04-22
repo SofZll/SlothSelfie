@@ -17,7 +17,7 @@ const ChatProvider = ({ children }) => {
 
     const fetchChats = async () => {
         const response = await apiService('/chat', 'GET');
-        if (response) {
+        if (response.success) {
             let base64Image = '';
             console.log('Fetched chats:', response);
             const transformedData = response.chats.map(chat => {
@@ -53,7 +53,7 @@ const ChatProvider = ({ children }) => {
             const onlineUsers = {};
             await Promise.all(transformedData.map(async (chat) => {
                 const response2 = await apiService(`/user/profile/${chat.otherParticipant._id}`);
-                if (response2) {
+                if (response2.success) {
                     console.log('response2:', response2);
                     onlineUsers[chat.otherParticipant._id] = response2.user.isOnline;
                     console.log('Online users:', onlineUsers);
