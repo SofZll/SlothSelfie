@@ -70,11 +70,11 @@ const FormCalendar = () => {
         else if (selected.selection === 'task') path = `/task/${task._id}/export`;
 
         const response = await apiService(path, 'GET');
-        if (!response) Swal.fire({ title: 'Error exporting data', icon: 'error', text: 'Error exporting data', customClass: { confirmButton: 'button-alert' } });
+        if (!response.success) Swal.fire({ title: 'Error exporting data', icon: 'error', text: 'Error exporting data', customClass: { confirmButton: 'button-alert' } });
         else {
 
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([response], { type: 'text/calendar' }));
+            a.href = URL.createObjectURL(new Blob([response.value], { type: 'text/calendar' }));
             if (selected.selection === 'activity') a.download = `${selected.selection}_${activity.title}.ics`;
             else if (selected.selection === 'event') a.download = `${selected.selection}_${event.title}.ics`;
             else if (selected.selection === 'task') a.download = `${selected.selection}_${task.title}.ics`;

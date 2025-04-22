@@ -27,7 +27,7 @@ const FormActivity = () => {
 
         if (selected.edit) {
             const response = await apiService(`/activity/${activity._id}`, 'PUT', activity);
-            if (response){
+            if (response.success){
                 Swal.fire({ title: 'Activity edited', icon: 'success', text: 'Activity edited successfully', customClass: { confirmButton: 'button-alert' } });
                 setActivities(activities.map(act => act._id === activity._id ? activity : act));
                 resetActivity();
@@ -39,9 +39,9 @@ const FormActivity = () => {
             });
         } else {
             const response = await apiService(`/activity`, 'POST', activity);
-            if (response){
+            if (response.success){
                 Swal.fire({ title: 'Activity added', icon: 'success', text: 'Activity added successfully', customClass: { confirmButton: 'button-alert' } });
-                setActivities([...activities, response]);
+                setActivities([...activities, response.activity]);
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
@@ -53,7 +53,7 @@ const FormActivity = () => {
                     elementId: newActivity._id,
                     notifications: notifications
                 });
-                if (response) setNotifications([]);
+                if (response.success) setNotifications([]);
                 else Swal.fire({ title: 'Error adding notifications', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
             } else {
                 console.log('No notifications to add');
@@ -65,7 +65,7 @@ const FormActivity = () => {
     const deleteActivity = async () => {
         setDeletePopUp(false);
         const response = await apiService(`/activity/${activity._id}`, 'DELETE');
-        if (response){
+        if (response.success) {
             Swal.fire({ title: 'Activity deleted', icon: 'success', text: 'Activity deleted successfully', customClass: { confirmButton: 'button-alert' } });
             setActivities(activities.filter(act => act._id !== activity._id));
             resetActivity();
@@ -93,7 +93,7 @@ const FormActivity = () => {
                 <div className='col-6'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
                     <input type='date' className='form-control' id='deadline'
-                    value={activity.deadline ? (new Date(activity.deadline)).toISOString().split('T')[0] : ''}
+                    value={activity.deadline ? (new Date(activity.deadline)).toLocaleDateString('en-CA') : ''}
                     onChange={(e) => setDeadline(e.target.value)} />
                 </div>
             </div>

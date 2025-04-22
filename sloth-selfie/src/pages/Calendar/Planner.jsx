@@ -34,17 +34,17 @@ const Planner = () => {
 
     const fetchEvents = async () => {
         const response = await apiService('/events', 'GET');
-        if (response) setEvents(response);
+        if (response.success) setEvents(response.events);
     }
 
     const fetchActivities = async () => {
         const response = await apiService('/activities', 'GET');
-        if (response) setActivities(response);
+        if (response.success) setActivities(response.activities);
     }
 
     const fetchTasks = async () => {
         const response = await apiService('/tasks', 'GET');
-        if (response) setTasks(response);
+        if (response.success) setTasks(response.tasks);
     }
 
     const fetchPomodoros = async () => {
@@ -52,12 +52,12 @@ const Planner = () => {
 
     const fetchNoAvailability = async () => {
         const response = await apiService('/no-availabilities', 'GET');
-        if (response) setAvailabilities(response.noAvailability);
+        if (response.success) setAvailabilities(response.noAvailability);
     }
 
     const fetchNotifications = async ({ elementId }) => {
         const response = await apiService(`/notifications/${elementId}`, 'GET');
-        if (response) {
+        if (response.success) {
             if (response.notifications.length > 0) {
                 setNotifications(response.notifications.map(notification => {
                     return {
@@ -145,21 +145,15 @@ const Planner = () => {
         if (event.type === 'activity') {
             const a = activities.find(a => a._id === event._id);
             const response = await apiService(`/activity/${a._id}`, 'PUT', { ...a, deadline });
-            if (response) {
-                setActivities(activities.map(a => a._id === event._id ? response : a));
-            }
+            if (response.success) setActivities(activities.map(a => a._id === event._id ? response.activity : a));
         } else if (event.type === 'event') {
             const e = events.find(e => e._id === event._id);
             const response = await apiService(`/event/${e._id}`, 'PUT', { ...e, date });
-            if (response) {
-                setEvents(events.map(e => e._id === event._id ? response : e));
-            }
+            if (response.success) setEvents(events.map(e => e._id === event._id ? response.event : e));
         } else {
             const t = tasks.find(t => t._id === event._id);
             const response = await apiService(`/task/${t._id}`, 'PUT', { ...t, deadline });
-            if (response) {
-                setTasks(tasks.map(t => t._id === event._id ? response : t));
-            }
+            if (response.success) setTasks(tasks.map(t => t._id === event._id ? response.task : t));
         }
     }
 

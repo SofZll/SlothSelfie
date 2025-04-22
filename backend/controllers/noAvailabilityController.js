@@ -31,6 +31,17 @@ const addNoAvailability = async (req, res) => {
     try {
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
+        const listSameDate = await NoAvailability.find({ 
+            $or: [
+                { startDate: { $gte: startDate, $lte: endDate } },
+                { endDate: { $gte: startDate, $lte: endDate } },
+                { startDate: { $lte: startDate }, endDate: { $gte: endDate } }
+            ],
+            user: user._id
+        });
+
+        if (listSameDate.length > 0) return res.status(400).json({ success: false, message: 'No availability already exists for this time interval' });
+
         if (repeatFrequency !== 'none') {
 
             const listNoAvailability = [];

@@ -28,21 +28,14 @@ const FormNote = () => {
             return;
         }
 
-        if (selected.add) {
-            const response = await apiService('/note', 'POST', note);
-            if (response) {
-                Swal.fire({ title: 'Note added', icon: 'success', text: 'Note added successfully', customClass: { confirmButton: 'button-alert' } });
-                setNotes([...notes, response]);
-            } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error adding note', customClass: { confirmButton: 'button-alert' } });
-        } else {
-            console.log(note, 'noteeeeeeeee');
-            const response = await apiService(`/note/${note._id}`, 'PUT', note);
-            if (response) {
-                Swal.fire({ title: 'Note edited', icon: 'success', text: 'Note edited successfully', customClass: { confirmButton: 'button-alert' } });
-                setNotes(notes.map(n => n._id === note._id ? response : n));
-
-            } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error editing note', customClass: { confirmButton: 'button-alert' } });
+        const response = await apiService(`/note${selected.add ? '' : '/'+note._id}`, selected.add ? 'POST' : 'PUT', note );
+        if (!response.success) Swal.fire({ title: 'Error', icon: 'error', text: 'Error saving note', customClass: { confirmButton: 'button-alert' } });
+        else {
+            if (selected.edit) setNotes(notes.map(n => n._id === note._id ? response.note : n));
+            else setNotes([...notes, response.note]);
+            Swal.fire({ title: 'Success', icon: 'success', text: selected.edit ? 'Note updated successfully' : 'Note added successfully', customClass: { confirmButton: 'button-alert' } });
         }
+        
         resetNote();
         resetSelected();
         

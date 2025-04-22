@@ -88,9 +88,9 @@ export const CalendarProvider = ({ children }) => {
     //Availability state
     const [availability, setAvailability] = useState({
         _id: '',
-        startDate: new Date(),
-        endDate: new Date(),
-        startTime: '00:00',
+        startDate: '',
+        endDate: '',
+        startTime: '',
         days: true,
         duration: 1,
         repeatFrequency: 'none',
@@ -102,9 +102,9 @@ export const CalendarProvider = ({ children }) => {
     const resetAvailability = () => {
         setAvailability({
             _id: '',
-            startDate: new Date(),
-            endDate: new Date(),
-            startTime: '00:00',
+            startDate: '',
+            endDate: '',
+            startTime: '',
             days: true,
             duration: 1,
             repeatFrequency: 'none',

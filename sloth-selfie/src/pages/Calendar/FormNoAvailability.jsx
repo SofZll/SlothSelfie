@@ -11,6 +11,43 @@ const FormNoAvailability = () => {
 
     const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, resetSelected } = useCalendar();
 
+    const setStartDate = (date) => {
+        const newDate = new Date(date);
+        newDate.setHours(0, 0, 0, 0);
+        setAvailability({ ...availability, startDate: newDate });
+        console.log(availability);
+    }
+
+    const setEndDate = (date) => {
+        const newDate = new Date(date);
+        newDate.setHours(23, 59, 59, 999);
+        setAvailability({ ...availability, endDate: newDate });
+        console.log(availability);
+    }
+
+
+    const setStartTime = (time) => {
+        const [hours, minutes] = time.split(':');
+        const newDate = new Date(availability.startDate);
+        const newEndDate = new Date(availability.startDate);
+        newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        newEndDate.setHours(parseInt(hours) + parseInt(availability.duration), parseInt(minutes), 0, 0);
+
+        setAvailability({ ...availability, startTime: time, startDate: newDate, endDate: newEndDate });
+        console.log(availability);
+        console.log(newDate);
+        console.log(newEndDate);
+        console.log(availability.duration);
+
+    }
+
+    const setEndTime = (duration) => {
+        const newDate = new Date(availability.startDate);
+        newDate.setHours(availability.startDate.getHours() + parseInt(duration), availability.startDate.getMinutes(), 0, 0);
+        setAvailability({ ...availability, endDate: newDate });
+    }
+
+
     const handleSubmit = async () => {
         if (!availability.startDate) {
             Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start date is required', customClass: { confirmButton: 'button-alert' } });
@@ -23,16 +60,11 @@ const FormNoAvailability = () => {
                 return;
             }
 
-            if (availability.startDate > availability.endDate) {
+            if (new Date(availability.startDate) > new Date(availability.endDate)) {
+                console.log(availability.startDate, availability.endDate);
                 Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start date must be before end date', customClass: { confirmButton: 'button-alert' } });
                 return;
             }
-
-            const startDate = new Date(availability.startDate);
-            const endDate = new Date(availability.endDate);
-            startDate.setHours(0, 0, 0, 0);
-            endDate.setHours(23, 59, 59, 999);
-            setAvailability({ ...availability, startDate, endDate });
 
             if (availability.repeatFrequency !== 'none') {
                 let gap = 1;
@@ -47,31 +79,23 @@ const FormNoAvailability = () => {
             }
 
         } else {
-            if (!availability.startTime) {
+            if (availability.startTime === '') {
                 Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start time is required', customClass: { confirmButton: 'button-alert' } });
                 return;
             }
 
-            const startDate = new Date(availability.startDate);
-            startDate.setHours(parseInt(availability.startTime.split(':')[0]), parseInt(availability.startTime.split(':')[1]), 0, 0);
-            const endDate = new Date(availability.startDate) + (parseInt(availability.duration) * 60 * 60 * 1000);
-            setAvailability({ ...availability, startDate, endDate });
-
-            if (endDate > new Date(startDate).setHours(23, 59, 59)) {
+            if (!availability.endDate > new Date(availability.startDate).setHours(23, 59, 59, 999)) {
                 Swal.fire({ title: 'Warning', icon: 'warning', text: 'End time must be before the next day', customClass: { confirmButton: 'button-alert' } });
                 return;
             }
-
-            availability.endDate = new Date(availability.startDate);
-            availability.endDate.setHours(availability.startTime.split(':')[0] + parseInt(availability.duration));
         }
 
         const response = await apiService(`/no-availability/${selected.edit ? selected._id : ''}`, selected.edit ? 'PUT' : 'POST', availability);
 
-        if (response) {
+        if (response.success) {
             Swal.fire({ title: selected.edit ? 'Availability edited' : 'Availability added', icon: 'success', text: selected.edit ? 'Availability edited successfully' : 'Availability added successfully', customClass: { confirmButton: 'button-alert' } });
             setAvailabilities([...availabilities, ...(availability.repeatFrequency !== 'none' ? response.listNoAvailability : [response.noAvailability])]);
-        }  else Swal.fire({ title: 'Error', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        } else Swal.fire({ title: 'Error', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
         resetAvailability();
         resetSelected();
@@ -79,7 +103,7 @@ const FormNoAvailability = () => {
 
     const deleteAvailability = async () => {
         const response = await apiService(`/no-availability/${availability._id}`, 'DELETE');
-        if (response) {
+        if (response.success) {
             Swal.fire({ title: 'Availability deleted', icon: 'success', text: 'Availability deleted successfully', customClass: { confirmButton: 'button-alert' } });
             setAvailabilities(availabilities.filter(av => av._id !== availability._id));
         } else Swal.fire({ title: 'Error deleting availability', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
@@ -93,16 +117,16 @@ const FormNoAvailability = () => {
                 <div className='col-6'>
                     <label htmlFor='startDate' className='form-label'>Start Date</label>
                     <input type='date' className='form-control' id='startDate'
-                        value={new Date(availability.startDate).toISOString().split('T')[0]}
-                        onChange={(e) => setAvailability({ ...availability, startDate: e.target.value })}
+                        value={new Date(availability.startDate).toLocaleDateString('en-CA')}
+                        onChange={(e) => setStartDate(e.target.value)}
                         required />
                 </div>
                 {availability.days ? (
                     <div className='col-6'>
                         <label htmlFor='endDate' className='form-label'>End Date</label>
                         <input type='date' className='form-control' id='endDate'
-                        value={(new Date(availability.endDate) ).toISOString().split('T')[0]}
-                        onChange={(e) => setAvailability({ ...availability, endDate: e.target.value })}
+                        value={new Date(availability.endDate).toLocaleDateString('en-CA')}
+                        onChange={(e) => setEndDate(e.target.value)}
                         required />
                     </div>
                 ) : (
@@ -110,7 +134,8 @@ const FormNoAvailability = () => {
                         <label htmlFor='time' className='form-label'>Time</label>
                         <select className='form-select' id='time'
                         value={availability.startTime}
-                        onChange={(e) => setAvailability({ ...availability, startTime: e.target.value })}>
+                        onChange={(e) => setStartTime(e.target.value)}>
+                            <option value=''>Select time</option>
                             {generateTimeOptions().map(option => (
                                 <option key={option.value} value={option.value}>{option.label}</option>
                             ))}
@@ -135,7 +160,7 @@ const FormNoAvailability = () => {
                         <input type='number' className='form-control' id='duration'
                         placeholder='Duration in hours'
                         value={availability.duration}
-                        onChange={(e) => setAvailability({ ...availability, duration: e.target.value })}
+                        onChange={(e) => setEndTime(e.target.value)}
                         min={1}
                         required />
                     </div>
@@ -149,6 +174,7 @@ const FormNoAvailability = () => {
                     value={availability.repeatFrequency}
                     onChange={(e) => setAvailability({ ...availability, repeatFrequency: e.target.value })}>
                         <option value='none'>None</option>
+                        <option value='daily'>Daily</option>
                         <option value='weekly'>Weekly</option>
                         <option value='monthly'>Monthly</option>
                         <option value='yearly'>Yearly</option>

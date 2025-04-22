@@ -63,7 +63,7 @@ export const PomodoroProvider = ({ children }) => {
                 if(pomodoro.cyclesLeft === 0) setPomodoro({ ...pomodoro, finished: true });
 
                 const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
-                if (!response) console.log('Error updating pomodoro');
+                if (!response.success) console.log('Error updating pomodoro');
 
             } else {
                 setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true, finished: true });
@@ -78,10 +78,10 @@ export const PomodoroProvider = ({ children }) => {
                 if (pomodoro._id) {
                     console.log('Pomodoro already exists', pomodoro);
                     const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
-                    if (!response) console.log('Error updating pomodoro');
-                } else {
+                    if (!response.success) console.log('Error updating pomodoro');
+                    console.log('Error updating pomodoro');                } else {
                     const response = await apiService('/pomodoro', 'POST', {...pomodoro, ...settingsPomodoro});
-                    if (!response) console.log('Error creating pomodoro');
+                    if (!response.success) console.log('Error creating pomodoro');
                     else setPomodoro({ ...pomodoro, _id: response._id, user: response.user });
                 }
             } else setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1, studiedTime: pomodoro.studiedTime + 1 });
@@ -93,7 +93,7 @@ export const PomodoroProvider = ({ children }) => {
         setSettingsPomodoro({ ...settingsPomodoro, additionalCycles: settingsPomodoro.additionalCycles + 1 });
         setPomodoro({ ...pomodoro, cyclesLeft: pomodoro.cyclesLeft + 1, finished: false });
         const response = apiService(`/pomodoro/add-additional-cycle/${pomodoro._id}`, 'PUT', pomodoro);
-        if (!response) console.log('Error adding additional cycle');
+        if (!response.success) console.log('Error adding additional cycle');
     }
 
     const resetPomodoro = () => {
@@ -153,7 +153,8 @@ export const PomodoroProvider = ({ children }) => {
         setSettingsPomodoro({ studyTime, breakTime, cycles, additionalCycles: 0 });
         editTimeAnimation( pomodoro.isStudyTime ? studyTime : breakTime );
         const response = await apiService(`/pomodoro/${pomodoro._id}`, 'PUT', { studyTime, breakTime, cycles });
-        if (response) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated', customClass: { confirmButton: 'button-alert' } });
+        if (response.success) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated', customClass: { confirmButton: 'button-alert' } });
+        else Swal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro settings', customClass: { confirmButton: 'button-alert' } });
     }
 
     const skipTime = async () => {
@@ -165,7 +166,7 @@ export const PomodoroProvider = ({ children }) => {
         resetAnimation(pomodoro.isStudyTime ? settingsPomodoro.studyTime : settingsPomodoro.breakTime);
         if (pomodoro._id) {
             const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
-            if (!response) console.log('Error updating pomodoro');
+            if (!response.success) console.log('Error updating pomodoro');
         }
     }
 
@@ -182,7 +183,7 @@ export const PomodoroProvider = ({ children }) => {
         resetAnimation(pomodoro.isStudyTime ? settingsPomodoro.studyTime : settingsPomodoro.breakTime);
         if (pomodoro._id) {
             const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
-            if (!response) console.log('Error updating pomodoro');
+            if (!response.success) console.log('Error updating pomodoro');
         }
     }
 

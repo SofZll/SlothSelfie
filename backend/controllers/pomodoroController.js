@@ -10,10 +10,10 @@ const getPomodori = async (req, res) => {
         const pomodori = await Pomodoro.find({ user: user._id })
             .populate('user', 'username');
 
-        res.status(200).json(pomodori);
+        res.status(200).json({seccess: true, pomodori });
     } catch (error) {
         console.error('Error fetching pomodori:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -25,10 +25,10 @@ const getPomodoriToDo = async (req, res) => {
         const pomodori = await Pomodoro.find({ user: user._id, started: false })
             .populate('user', 'username');
 
-        res.status(200).json(pomodori);
+        res.status(200).json({ success: true, pomodori });
     } catch (error) {
         console.error('Error fetching pomodori:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -58,10 +58,10 @@ const addPomodoro = async (req, res) => {
         }
 
         const pomodoro = await newPomodoro.save();
-        res.status(201).json(pomodoro);
+        res.status(201).json({ success: true, pomodoro });
     } catch (error) {
         console.error('Error creating pomodoro:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -79,13 +79,13 @@ const editPomodoro = async (req, res) => {
         }, { new: true });
 
         if (!pomodoro) {
-            return res.status(404).json({ message: 'Pomodoro not found' });
+            return res.status(404).json({ success: false, message: 'Pomodoro not found' });
         }
 
         res.status(200).json(pomodoro);
     } catch (error) {
         console.error('Error updating pomodoro:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -96,13 +96,13 @@ const deletePomodoro = async (req, res) => {
         const pomodoro = await Pomodoro.findByIdAndDelete(pomodoroId);
 
         if (!pomodoro) {
-            return res.status(404).json({ message: 'Pomodoro not found' });
+            return res.status(404).json({ success: false, message: 'Pomodoro not found' });
         }
 
-        res.status(200).json({ message: 'Pomodoro deleted successfully' });
+        res.status(200).json({ success: true, message: 'Pomodoro deleted successfully' });
     } catch (error) {
         console.error('Error deleting pomodoro:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -121,13 +121,13 @@ const updateCycles = async (req, res) => {
         }, { new: true });
 
         if (!pomodoro) {
-            return res.status(404).json({ message: 'Pomodoro not found' });
+            return res.status(404).json({ success: false, message: 'Pomodoro not found' });
         }
 
         res.status(200).json(pomodoro);
     } catch (error) {
         console.error('Error updating cycles:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -149,7 +149,7 @@ const addAdditionalCycle = async (req, res) => {
         res.status(200).json(pomodoro);
     } catch (error) {
         console.error('Error adding additional cycle:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -163,17 +163,17 @@ const getPomodoroById = async (req, res) => {
             .populate('user', 'username')
 
         if (!pomodoro) {
-            return res.status(404).json({ message: 'Pomodoro not found' });
+            return res.status(404).json({ success: false, message: 'Pomodoro not found' });
         }
 
         if (pomodoro.user.toString() !== user._id.toString()) {
-            return res.status(403).json({ message: 'Unauthorized access' });
+            return res.status(403).json({ success: false, message: 'Unauthorized access' });
         }
 
-        res.status(200).json(pomodoro);
+        res.status(200).json({ success: true, pomodoro });
     } catch (error) {
         console.error('Error fetching pomodoro:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -184,15 +184,15 @@ const totalStudiedTime = async (req, res) => {
     try {
         const pomodori = await Pomodoro.find({ user: user._id, started: true });
 
-        if (pomodori.length === 0) return res.status(200).json({ totalStudiedTime: 0 });
+        if (pomodori.length === 0) return res.status(200).json({ success: true, totalStudiedTime: 0 });
     
         const totalTime = pomodori.reduce((acc, pomodoro) => acc + pomodoro.studiedTime, 0);
 
-        res.status(200).json({ totalStudiedTime: totalTime });
+        res.status(200).json({ success: true, totalStudiedTime: totalTime });
 
     } catch (error) {
         console.error('Error fetching pomodori:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -218,8 +218,6 @@ const timePomodoriMonths = async (req, res) => {
             { $sort: { "_id.year": -1, "_id.month": -1 } }
         ]);
 
-        console.log(timePerMonth, 'timePerMonth');
-
         const months = [];
         for (let i = 0; i < 5; i++) {
             const month = (thisMonth - i + 12)  % 12;
@@ -231,10 +229,10 @@ const timePomodoriMonths = async (req, res) => {
         }
 
         months.reverse();
-        res.status(200).json(months);
+        res.status(200).json({ success: true, months });
     } catch (error) {
         console.error('Error fetching pomodori:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
