@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const { initScheduler, scheduleNotification } = require('../agenda/notificationScheduler');
+const { sendSystemNotification, sendEmailNotification } = require('../services/notificationService');
 
 // Mongodb credentials
 /*
@@ -35,6 +36,11 @@ const connectDB = async () => {
         // scheduler for notifications
         initScheduler();
         await scheduleNotification();
+
+        const testNotification = {
+            _id: '6615c3a427b1e2c5e0c35a7e', // Assicurati che esista nel DB!
+            type: 'default'
+        };
         console.log('Notification scheduler initialized');
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);

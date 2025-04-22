@@ -7,7 +7,31 @@ const { sendSystemNotification, sendEmailNotification } = require('../services/n
 
 const initScheduler = async () => {
     agenda.define('send-notification', async job => {
-        const notification = job.attrs.data.notification;
+        const notificationId = job.attrs.data.notification;
+        const notification = await Notification.findById(notificationId).populate('element');
+        if (!notification) {
+            console.log(`Notification ${notificationId} not found.`);
+            return;
+        }
+        const now = new Date(); // da cambiare con TM
+        console.log('notification', notification);
+
+        if (now < new Date(notification.from) || now > new Date(notification.to)) {
+            console.log(`Notification ${notification._id} skipped, out of active window.`);
+            return;
+        }
+
+        if (notification.type === 'repeat' && notification.snooze) {
+            const snoozeUntil = new Date(notification.snoozeUntil);
+            if (now < snoozeUntil) {
+                console.log(`Notification ${notification._id} snoozed until ${snoozeTime}`);
+                return;
+            } else {
+                notification.snooze = false;
+                notification.snoozeUntil = null;
+            }
+        }
+
         try {
             if (notification.mode.system) {
                 await sendSystemNotification(notification);
@@ -26,8 +50,13 @@ const initScheduler = async () => {
     });
 };
 
-const scheduleNotification = async () => {
-    const notifications = await Notification.find({ status: 'active' });
+const scheduleNotification = async (notifications) => {
+    if (!notifications) {
+        notifications = await Notification.find({ status: 'active' });
+        if (!notifications || notifications.length === 0) return;
+    }
+
+    console.log('Scheduling notifications:', notifications);
     
     notifications.forEach(async (notification) => {
         if (notification.type === 'default') {
@@ -41,13 +70,26 @@ const scheduleNotification = async () => {
 const defaultNotification = async (notification) => {
     const notificationTime = calculateNotificationTime(notification);
 
-    agenda.schedule(notificationTime, 'send-notification', { notification });
+    agenda.schedule(notificationTime, 'send-notification', { notification: notification._id });
+    console.log("JOB RUNNING", job.attrs.type, job.attrs);
 }
 
 const repeatNotification = async (notification) => {
-    const rule = createRule(notification);
+    const rule = `${notification.before} ${notification.variant}s`;
 
-    agenda.every( rule, 'send-notification', { notification }, { skipImmediate: true, timezone: 'Europe/Rome' });
+    const existingJobs = await agenda.jobs({ name: 'send-notification', 'data.notification._id': notification._id });
+
+    if (existingJobs.length === 0) {
+        agenda.every( rule, 'send-notification', { notification: notification._id }, { 
+            skipImmediate: true, 
+            timezone: 'Europe/Rome',
+            unique: { 'data.notification': notification._id },
+        });
+        console.log("CREATING REPEATING JOB", {
+            rule,
+            data: { notificationId: notification._id.toString() }
+        });
+    } else console.log(`Notification ${notification._id} already scheduled.`);
 }
 
 const calculateNotificationTime = (notification) => {
@@ -66,38 +108,6 @@ const calculateNotificationTime = (notification) => {
     notificationTime.setHours(hours, minutes, 0, 0);
 
     return notificationTime;
-}
-
-const createRule = (notification) => {
-    const rule = {
-        startDate: new Date(notification.from),
-        endDate: new Date(notification.to),
-        skipImmediate: true,
-        timezone: 'Europe/Rome'
-    };
-
-    console.log('Rule:', rule);
-    console.log('Notification:', notification);
-    console.log('Notification variant:', notification.variant);
-
-    switch (notification.variant) {
-        case 'minute':
-            rule.rule = `every ${notification.before} minutes`;
-            break;
-        case 'hour':
-            rule.rule = `every ${notification.before} hours`;
-            break;
-        case 'day':
-            rule.rule = `every ${notification.before} days`;
-            break;
-        case 'week':
-            rule.rule = `every ${notification.before} weeks`;
-            break;
-        default:
-            throw new Error('Invalid variant');
-    }
-
-    return rule;
 }
 
 module.exports = {

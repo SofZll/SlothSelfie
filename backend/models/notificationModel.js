@@ -47,9 +47,22 @@ const notificationSchema = new mongoose.Schema({
         default: false,
     },
 
-    snoozeInterval: {
+    snoozeUntil: {
+        type: Date,
+        default: null,
+        required: function() {
+            return this.snooze;
+        }
+    },
+
+    snoozeCount: {
         type: Number,
-        default: 10
+        default: 0,
+        min: 0,
+        max: 5,
+        required: function() {
+            return this.snooze;
+        }
     },
 
     // se l'utente è vicino al luogo
@@ -66,16 +79,13 @@ const notificationSchema = new mongoose.Schema({
         enum: ['minute', 'hour', 'day', 'week'],
     },
 
-    // for type default
     before: {
         type: Number,
-        required: function() {
-            return this.type === 'default';
-        },
         min: 0,
         max: 30
     },
 
+    // for type default
     time: {
         type: String,
         match: /^([01]\d|2[0-3]):([0-5]\d)$/,
@@ -95,9 +105,6 @@ const notificationSchema = new mongoose.Schema({
     // tutti i tipi
     to: {
         type: Date,
-        required: function() {
-            return this.type === 'repeat';
-        }
     },
 
     status: {

@@ -4,7 +4,8 @@ const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
 
 const { combineDateTime } = require('../utils/utils');
-const { getScheduledJobs, formatJob } = require('../agenda/notificationScheduler');
+const { scheduleNotification } = require('../agenda/notificationScheduler');
+const { getScheduledJobs, snoozeJob } = require('../services/agendaService');
 
 const setNotifications = async (req, res) => {
     const { type, elementId, notifications } = req.body;
@@ -47,8 +48,30 @@ const setNotifications = async (req, res) => {
 
         const savedNotifications = await Notification.insertMany(newNotifications);
 
+        await scheduleNotification(savedNotifications);
+
         res.status(201).json({ success: true, message: 'Notifications created successfully', notifications: savedNotifications });
     } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+const getScheduledNotifications = async (req, res) => {
+    const userId = req.session.userId;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const scheduledNotifications = await getScheduledJobs(userId);
+        
+        scheduledNotifications.sort((a, b) => new Date(a.nextRunAt) - new Date(b.nextRunAt));
+
+        console.log('Scheduled notifications:', scheduledNotifications);
+        
+        res.status(200).json({ success: true, notifications: scheduledNotifications });
+    } catch (error) {
+        console.error('Error fetching scheduled notifications:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 }
@@ -148,29 +171,28 @@ const updateNotification = async (req, res) => {
     }
 }
 
-const getScheduledNotifications = async (req, res) => {
-    const userId = req.session.userId;
+const snoozeNotification = async (req, res) => {
+    const { notificationId } = req.params;
+    const { snoozeInterval = 10 } = req.body;
+
+    console.log('Snooze time:', snoozeInterval);
+    console.log('Notification ID:', notificationId);
+    if (!notificationId) return res.status(400).json({ success: 'false', message: 'No notification ID provided' });
+    if (!snoozeInterval) return res.status(400).json({ success: 'false', message: 'Snooze time is required' });
 
     try {
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-        const scheduledNotifications = await getScheduledJobs(userId);
-
-        const notifications = scheduledNotifications.map(formatJob).Activity
-            .sort((a, b) => new Date(a.triggerAt) - new Date(b.triggerAt));
-        
-        res.status(200).json({ success: true, notifications });
+        snoozeJob(notificationId, snoozeInterval);
+        res.status(200).json({ success: true, message: 'Notification snoozed successfully'});
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 }
-
 
 module.exports = {
     setNotifications,
     getNotifications,
     deleteNotification, 
     updateNotification,
-    getScheduledNotifications
+    getScheduledNotifications,
+    snoozeNotification
 };
