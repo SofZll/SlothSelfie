@@ -3,7 +3,7 @@ import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement } from 'chart.js';
 
 import Swal from 'sweetalert2';
-import { apiService } from '../../services/apiService';
+import { apiService } from '../services/apiService';
 
 ChartJS.register(
     CategoryScale,
@@ -11,7 +11,7 @@ ChartJS.register(
     BarElement
 );
 
-const PopUpStats = () => {
+const StatsPomodoro = () => {
 
     const [totalPomodoros, setTotalPomodoros] = useState(0);
     const [listTimeMonth, setListTimeMonth] = useState([
@@ -115,5 +115,5 @@ const PopUpStats = () => {
     );
 }
 
-export default PopUpStats;
+export default StatsPomodoro;
 
