@@ -29,6 +29,20 @@ const initScheduler = async () => {
             } else {
                 notification.snooze = false;
                 notification.snoozeUntil = null;
+                notification.snoozeCount = 0;
+                await notification.save();
+
+                const mainJobs = await agenda.jobs({ 
+                    name: 'send-notification', 
+                    'data.notification._id': notification._id,
+                    'attrs.disabled': true
+                });
+
+                if (mainJobs.length > 0) {
+                    const mainJob = mainJobs[0];
+                    mainJob.attrs.disabled = false;
+                    await mainJob.save();
+                }
             }
         }
 
@@ -43,12 +57,58 @@ const initScheduler = async () => {
             console.error(`Notification ${notification._id} failed:`, error);
         }
     });
+
+    agenda.define('cleanup-notifications-snoozes', async job => {
+        try {
+            await cleanupExpiredSnoozes();
+            console.log('Expired snoozes cleaned up');
+        } catch (error) {
+            console.error('Error cleaning up expired snoozes:', error);
+        }
+    });
     
     agenda.on('ready', async () => {
         await agenda.start();
         console.log('Notification scheduler started');
+        agenda.every('1 minute', 'cleanup-notifications-snoozes');
     });
 };
+
+const cleanupExpiredSnoozes = async () => {
+    const now = new Date();
+
+    const notifications = await Notification.find({ snooze: true, snoozeUntil: { $lt: now } });
+
+    for (const notification of notifications) {
+        const mainJobs = await agenda.jobs({ 
+            name: 'send-notification', 
+            'data.notification._id': notification._id,
+            'attrs.disabled': true
+        });
+
+        if (mainJobs.length > 0) {
+            const mainJob = mainJobs[0];
+            mainJob.attrs.disabled = false;
+            await mainJob.save();
+        }
+
+        notification.snooze = false;
+        notification.snoozeUntil = null;
+        notification.snoozeCount = 0;
+        await notification.save();
+
+        const tempJob = await agenda.jobs({
+            name: 'send-notification',
+            'data.notification._id': notification._id,
+            nextRunAt: { $lte: now },
+        });
+
+        if (tempJob.length > 0) {
+            for (const job of tempJob) await job.remove();
+        }
+    }
+    console.log('Expired snoozes cleaned up');
+}
 
 const scheduleNotification = async (notifications) => {
     if (!notifications) {
@@ -70,20 +130,24 @@ const scheduleNotification = async (notifications) => {
 const defaultNotification = async (notification) => {
     const notificationTime = calculateNotificationTime(notification);
 
-    agenda.schedule(notificationTime, 'send-notification', { notification: notification._id });
-    console.log("JOB RUNNING", job.attrs.type, job.attrs);
+    const existingJobs = await agenda.jobs({ name: 'send-notification', 'data.notification': notification._id });
+    if (existingJobs.length == 0) {
+        const job = await agenda.schedule(notificationTime, 'send-notification', { notification: notification._id });
+        console.log("JOB RUNNING", job.attrs.type, job.attrs);
+    } else {
+        console.log(`Notification ${notification._id} already scheduled.`);
+    }
 }
 
 const repeatNotification = async (notification) => {
     const rule = `${notification.before} ${notification.variant}s`;
 
-    const existingJobs = await agenda.jobs({ name: 'send-notification', 'data.notification._id': notification._id });
+    const existingJobs = await agenda.jobs({ name: 'send-notification', 'data.notification': notification._id });
 
     if (existingJobs.length === 0) {
         agenda.every( rule, 'send-notification', { notification: notification._id }, { 
             skipImmediate: true, 
             timezone: 'Europe/Rome',
-            unique: { 'data.notification': notification._id },
         });
         console.log("CREATING REPEATING JOB", {
             rule,

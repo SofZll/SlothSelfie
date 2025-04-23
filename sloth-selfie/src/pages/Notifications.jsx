@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Clock, Monitor, Mail } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 import '../styles/Notifications.css';
 import MainLayout from '../layouts/MainLayout';
@@ -10,16 +11,14 @@ const Notifications = () => {
 
     const fetchNotifications = async () => {
         const response = await apiService('/notifications/upcoming');
-        if (response) {
+        if (response.success) {
             setNotifications(response.notifications.map(notification => {
                 return {
                     ...notification,
                     triggerAt: new Date(notification.triggerAt).toISOString(),
                 }
             }));
-        } else {
-            setNotifications([]);
-        }
+        } else setNotifications([]);
         console.log('Notifications:', response);
     }
 
@@ -29,9 +28,9 @@ const Notifications = () => {
         snoozeTime.setMinutes(snoozeTime.getMinutes() + snoozeInterval);
         
         const response = await apiService(`/notification/snooze/${notifications[index]._id}`, 'PUT', { snoozeInterval });
-        if (response) {
+        if (response.success) {
             setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
-        }
+        } else Swal.fire({ title: 'Error', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
     }
 
     // TODO: spostare in utils
@@ -43,13 +42,13 @@ const Notifications = () => {
     
     return (
         <MainLayout>
-            <div className="p-2 notifications-container">
+            <div className="p-2 notifications-container h-75 d-flex flex-column">
                 <div className="mb-4 bg-white p-3 border rounded-2">
                     <h2>Notifications</h2>
                     <p className='px-2 fs-6 text-secondary'>* Here you can view the upcoming notifications and snooze them, to modify or to delete them you have to go to the activity or event page.</p>
                 </div>
                 {notifications.length > 0 ? (
-                    <>
+                    <div className="d-flex flex-column gap-3 overflow-y-scroll">
                         {notifications.map((notif, index) => (
                             <div key={index} className="bg-white border shadow-sm p-3 rounded-2">
                                 <div className='d-flex flex-column gap-2'>
@@ -57,23 +56,26 @@ const Notifications = () => {
                                         {notif.elementType === 'Activity' ? '📝 Activity: ' : '📅 Event: '}
                                         <strong>{notif.element.title}</strong>
                                     </p>
-                                    <p className='text-secondary'>Type: {notif.type} every {notif.before} {notif.variant}</p>
+                                    {notif.type === 'repeat' && <p className='text-secondary'>Type: {notif.type} every {notif.before} {notif.variant}</p>}
+                                    {notif.type === 'default' && <p className='text-secondary'>Type: {notif.before} {notif.variant} before</p>}
                                     <p className='text-secondary'>{notif.elementType === 'Activity' ? 'Deadline: ' : 'Date: '}{formatDate(notif.to)}</p>
                                     <p>Next notification at: {formatDate(notif.triggerAt)}</p>
                                     <div className="d-flex gap-2 mt-1">
                                         {notif.urgency && <span className="d-flex items-center gap-1"><AlertTriangle size={16} /> Urgente</span>}
                                         {/* permettere all'utente di selezionare il tempo di snooze */}
-                                        <button className='button-clean green' onClick={HandleSnoozeNotif(index)}>Postpone 10 minutes</button>
-                                        {notif.type === 'repeat' && <button className='button-clean green'>Skip this one</button>}
+                                        <button className='btn btn-outline-success' onClick={HandleSnoozeNotif(index)}>Postpone 10 minutes</button>
+                                        {notif.type === 'repeat' && <button className='btn btn-outline-warning'>Skip this one</button>}
                                     </div>
                                 </div>
+                                {/*
                                 <div className="d-flex mt-4 gap-3">
                                     {notif.mode.system && <Monitor size={20} title="Notifica di sistema" />}
                                     {notif.mode.email && <Mail size={20} title="Email" />}
                                 </div>
+                                */}
                             </div>
                         ))}
-                    </>
+                    </div>
                 ) : (
                     <p>Nessuna notifica pianificata.</p>
                 )}

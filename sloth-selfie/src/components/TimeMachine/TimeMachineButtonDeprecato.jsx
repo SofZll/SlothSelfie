@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/TimeMachine.css';
 import iconTimeMachine from '../assets/icons/time-machine.svg';
-import { useIsDesktop, useIsMobileLandscape } from '../utils/utils';
+import { useIsDesktop, useIsMobileLandscape } from '../../utils/utils';
 
 import TimeMachinePopup from './TimeMachinePopup';
 
