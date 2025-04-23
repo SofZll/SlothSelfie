@@ -331,8 +331,12 @@ async function checkAndUpdateMacroStatus(activityId, type) {
             // we get the parentPhase
             let parentPhase = null;
             if (phaseSubphase.parentPhase) {
-                const parentResponse = await fetch(`http://localhost:8000/api/phaseSubphase/${phaseSubphase.parentPhase}`);
-                parentPhase = await parentResponse.json();
+                const parentResponseres = await fetch(`http://localhost:8000/api/phaseSubphase/${phaseSubphase.parentPhase}`);
+                const parentResponse = await parentResponseres.json();
+                if (!parentResponse.success) {
+                    throw new Error('Failed to fetch parent phaseSubphase');
+                }
+                parentPhase = parentResponse.phaseSubphase;
             }
             await handleSubphaseMacro(macroActivity, phaseSubphase, parentPhase, type);
       
