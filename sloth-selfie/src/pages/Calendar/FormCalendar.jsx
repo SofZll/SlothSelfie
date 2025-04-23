@@ -12,13 +12,15 @@ import Button from '../../components/Button';
 import ScrollList from '../../components/ScrollList';
 
 import { useCalendar } from '../../contexts/CalendarContext';
+import { useTask } from '../../contexts/TaskContext';
 import { useIsDesktop } from '../../utils/utils';
 
 import { apiService } from '../../services/apiService';
 
 const FormCalendar = () => {
 
-    const { activities, selected, select, addImportedEvents, activity, task, event } = useCalendar();
+    const { activities, selected, select, addImportedEvents, activity, event } = useCalendar();
+    const { task } = useTask();
     const isDesktop = useIsDesktop();
 
     //TODO TESTA E MODIFICA IN BASE A NUOVO MODELLO EVENTI
@@ -70,11 +72,11 @@ const FormCalendar = () => {
         else if (selected.selection === 'task') path = `/task/${task._id}/export`;
 
         const response = await apiService(path, 'GET');
-        if (!response.success) Swal.fire({ title: 'Error exporting data', icon: 'error', text: 'Error exporting data', customClass: { confirmButton: 'button-alert' } });
+        if (!response) Swal.fire({ title: 'Error exporting data', icon: 'error', text: 'Error exporting data', customClass: { confirmButton: 'button-alert' } });
         else {
 
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([response.value], { type: 'text/calendar' }));
+            a.href = URL.createObjectURL(response);
             if (selected.selection === 'activity') a.download = `${selected.selection}_${activity.title}.ics`;
             else if (selected.selection === 'event') a.download = `${selected.selection}_${event.title}.ics`;
             else if (selected.selection === 'task') a.download = `${selected.selection}_${task.title}.ics`;

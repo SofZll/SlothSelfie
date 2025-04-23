@@ -24,12 +24,12 @@ const SelectionCalendarLayout = ({children}) => {
     return (
         <div className='d-flex flex-column w-100 my-md-3 bg-white border p-3 rounded'>
 
-            <div className='row d-flex justify-content-between my-3'>
-                <div className='col fs-5'>
-                    {selected.add ? 'Add a new' : 'Edit the selected '} {selected.selection}
+            <div className='d-flex justify-content-between my-3'>
+                <div className='fs-5'>
+                    {selected.add ? 'Add a new ' : 'Edit the selected '} {selected.selection}
                 </div>
 
-                <div className='col col-auto'>
+                <div>
                     {selected.selection !== '...' ? (
                         <button className='btn py-0 m-0' onClick={() => back()} alt='back'>
                             <MoveLeft size={25} color='#555B6E' strokeWidth={1.75} />

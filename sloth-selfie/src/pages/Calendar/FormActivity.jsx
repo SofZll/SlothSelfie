@@ -104,14 +104,15 @@ const FormActivity = () => {
                         type='text' className='form-control' id='title'
                         placeholder='Activity title'
                         value={activity.title}
+                        disabled={activity.project}
                         onChange={(e) => setActivity({...activity, title: e.target.value})} />
                 </div>
 
                 <div className='col-6'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
                     <input type='date' className='form-control' id='deadline'
-                    value={activity.deadline ? (new Date(activity.deadline)).toISOString().split('T')[0] : ''}
                     disabled={activity.project}
+                    value={activity.deadline ? (new Date(activity.deadline)).toLocaleDateString('en-CA') : ''}
                     onChange={(e) => setDeadline(e.target.value)} />
                 </div>
             </div>
@@ -120,8 +121,8 @@ const FormActivity = () => {
                 <div className='col col-auto form-check'>
                     <input className='form-check-input' type='checkbox' role='switch' id='completed'
                         value={activity.completed}
-                        onChange={(e) => setActivity({...activity, completed: e.target.checked})}
-                        disabled={activity.project} />
+                        disabled={activity.project}
+                        onChange={(e) => setActivity({...activity, completed: e.target.checked})} />
                     <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>
@@ -140,35 +141,17 @@ const FormActivity = () => {
             </div>
 
             <div className='d-flex align-items-center justify-content-center'>
-            {!activity.project && (
-                <button
-                type='button'
-                className='btn-main rounded shadow-sm mt-4'
-                onClick={() => handleSubmit()}
-                >
-                {selected.edit ? 'edit' : 'save'}
-                </button>
-            )}
+                {!activity.project && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()} >
+                        {selected.edit ? 'edit' : 'save'}
+                    </button>
+                )}
 
-            {selected.edit && !activity.project && (
-                <button
-                type='button'
-                className='btn-main rounded shadow-sm mt-4 ms-3'
-                onClick={() => setDeletePopUp(true)}
-                >
-                delete
-                </button>
-            )}
-
-            {selected.edit && (
-                <button
-                type='button'
-                className='btn-main rounded shadow-sm mt-4 ms-3'
-                onClick={() => exportActivity()}
-                >
-                export .ics
-                </button>
-            )}
+                {selected.edit && !activity.project && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                        delete
+                    </button>
+                )}
             </div>
 
             {deletePopUp && (
