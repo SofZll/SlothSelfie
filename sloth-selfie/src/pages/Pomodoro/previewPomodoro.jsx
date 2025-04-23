@@ -144,8 +144,16 @@ const renderPomodoroPreview = () => {
 };
 
   // Render the Pomodoro preview based on the viewType prop
-return <>{renderPomodoroPreview()}</>;
-
+  return (
+    <>
+      {renderPomodoroPreview()}
+      <div className="divBtn">
+        <Link to="/pomodoro" onClick={handleLinkClick("/pomodoro")}>
+          <button className="btn btn-main blue">Manage Pomodoro</button>
+        </Link>
+      </div>
+    </>
+  );
 };
 
 export default PreviewPomodoro;
