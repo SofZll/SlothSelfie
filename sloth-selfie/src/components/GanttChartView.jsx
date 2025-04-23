@@ -9,7 +9,11 @@ const GanttChartView = ({ projectId }) => {
     const fetchProject = async () => {
       try {
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const projectData = await response.json();
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch project');
+        }
+        const projectData = data.project;
         console.log(projectData);
         if (!response.ok) {
             throw new Error(`Error: ${response.status} ${response.statusText}`);
