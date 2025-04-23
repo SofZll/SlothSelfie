@@ -4,8 +4,8 @@ import '../../styles/Previews.css';
 
 import { apiService } from '../../services/apiService';
 import { usePomodoro } from '../../contexts/PomodoroContext';
-import { AnimationPencil } from './AnimationPencil';
 import { AuthContext } from '../../contexts/AuthContext';
+import TimerPomodoroMini from '../../components/TimerPomodoroMini';
 
 
 const PreviewPomodoro = ({ viewType }) => {
@@ -85,82 +85,60 @@ const PreviewPomodoro = ({ viewType }) => {
 // Render per QuickStart, Last Pomodoro, Pomodoros List
 const renderPomodoroPreview = () => {
   switch (viewType) {
-    case 'quickStart':
+    
+  case 'quickStart':
     return (
-      <div className="containerPreview">
-
-        <div className="timer-display">
-          You still have {formatTime(pomodoro.timeLeft)} minutes {pomodoro.isStudyTime ? 'to study' : 'in your break'}
-        </div>
-
-        <div className="divBtn">
-          <button
-            onClick={() => {
-              if (pomodoro.finished) resetPomodoro();
-              else setPlay(!play);
-            }}
-            className="btn btn-main blue"
-          >
-            {play ? (pomodoro.finished ? "Reset timer" : "Stop timer") : (pomodoro.started ? "Resume" : "Quick start")}
-          </button>
-          <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
-            <button className="btn btn-main blue">Set Pomodoro</button>
-          </Link>
-        </div>
-
-        <AnimationPencil
-          isStudyTime={pomodoro.isStudyTime}
-          timeLeft={pomodoro.timeLeft}
-          animation={animation}
-        />
-      </div>
+      <TimerPomodoroMini />
     );
-      case 'list':
-        // Verify if the pomodoroList has elements
-        if (pomodoroList.length > 0) {
-          return (
-            <div className="containerPreview">
-              <div className="scrollable-list">
-                {pomodoroList.map((pomodoro, index) => (
-                  <div key={index} className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {pomodoro.cycles} - studyTime: {pomodoro.studyTime} - breakTime: {pomodoro.breakTime}</div>
-                ))}
-              </div>
-              <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
-                <button className="btn btn-main blue">Set Pomodoro</button>
-              </Link>
-            </div>
-          );
-        } else {
-          return (
+
+    case 'list':
+      // Verify if the pomodoroList has elements
+      if (pomodoroList.length > 0) {
+        return (
+          <div className="containerPreview">
             <div className="scrollable-list">
-              <div className="div-postit">
-                <h2>No pomodoros yet!</h2>
-              </div>
-          </div>
-          );
-        }
-        case 'latest':
-          default:
-          // Verify if the lastPomodoro is there
-          if (allPomodoros.length > 0) {
-            const lastPomodoro = allPomodoros[allPomodoros.length - 1];
-            return (
-              <div className="containerPreview">
-                <div className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {lastPomodoro.cycles} - studyTime: {lastPomodoro.studyTime} - breakTime: {lastPomodoro.breakTime}</div>
-                <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
-                  <button className="btn btn-main blue">Set Pomodoro</button>
-                </Link>
-              </div>
-            );
-          } else {
-            return (
-              <div className="scrollable-list">
-              <div className="div-postit">
-                <h2>No pomodoros yet!</h2>
-              </div>
+              {pomodoroList.map((pomodoro, index) => (
+                <div key={index} className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {pomodoro.cycles} - studyTime: {pomodoro.studyTime} - breakTime: {pomodoro.breakTime}</div>
+              ))}
             </div>
-            );
-          }
+            <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
+              <button className="btn btn-main blue">Set Pomodoro</button>
+            </Link>
+          </div>
+        );
+      } else {
+        return (
+          <div className="scrollable-list">
+            <div className="div-postit">
+              <h2>No pomodoros yet!</h2>
+            </div>
+        </div>
+        );
+      }
+
+    case 'latest':
+    
+    default:
+      // Verify if the lastPomodoro is there
+      if (allPomodoros.length > 0) {
+        const lastPomodoro = allPomodoros[allPomodoros.length - 1];
+        return (
+          <div className="containerPreview">
+            <div className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {lastPomodoro.cycles} - studyTime: {lastPomodoro.studyTime} - breakTime: {lastPomodoro.breakTime}</div>
+            <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
+              <button className="btn btn-main blue">Set Pomodoro</button>
+            </Link>
+          </div>
+        );
+      } else {
+        return (
+          <div className="scrollable-list">
+          <div className="div-postit">
+            <h2>No pomodoros yet!</h2>
+          </div>
+        </div>
+        );
+      }
   }
 };
 
