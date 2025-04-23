@@ -629,7 +629,8 @@ const removePhaseFromBackend = async (req, res) => {
 
         // remove the macroactivity of each subphase
         for (const subphaseId of subphaseIds) {
-            await deleteMacroActivity(subphaseId.macroActivity);
+            const subphase = await PhaseSubphase.findById(subphaseId);
+            await deleteMacroActivity(subphase.macroActivity);
         }
 
         // Get all activities belonging to the phase and its subphases
@@ -696,8 +697,14 @@ const removeSubphaseFromBackend = async (req, res) => {
 
         // Delete the subphase
 
+        // Find the subphase
+        console.log('Finding subphase with ID:', subphaseId);
+        const subphase = await PhaseSubphase.findById(subphaseId);
+        console.log('Subphase found:', subphase);
+
         //we first delete the macroactivity of the subphase
-        await deleteMacroActivity(subphaseId.macroActivity);
+        console.log('Deleting macroactivity of subphase:', subphase.macroActivity);
+        await deleteMacroActivity(subphase.macroActivity);
 
         //and its activities
         const activities = await Activity.find({ phaseSubphase: subphaseId });
@@ -725,10 +732,11 @@ const removeSubphaseFromBackend = async (req, res) => {
 // Delete a macroactivity from the project
 const deleteMacroActivity = async (macroActivityId) => {
     try {
+        console.log('Deleting macroactivity with ID:', macroActivityId);
         // Find the macroactivity
         const macroActivity = await Activity.findById(macroActivityId);
         if (!macroActivity) {
-            return res.status(404).json({ success: false, message: 'Macroactivity not found' });
+            throw new Error('Macroactivity not found');
         }
 
         // Delete the events linked to the macroactivity
@@ -750,10 +758,9 @@ const deleteMacroActivity = async (macroActivityId) => {
         // Delete the macroactivity
         await Activity.findByIdAndDelete(macroActivityId);
 
-        return res.status(200).json({ success: true, message: 'Macroactivity deleted successfully' });
     } catch (error) {
-        console.error('Error deleting macroactivity:', error);
-        return res.status(500).json({ success: false, message: error.message });
+        console.error('Error deleting macroactivity:', error.message);
+        throw error;
     }
 };
 

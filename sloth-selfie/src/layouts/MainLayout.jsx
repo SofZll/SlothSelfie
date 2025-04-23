@@ -6,7 +6,7 @@ import '../styles/Menu.css';
 import DesktopNav from '../components/DesktopNav'
 import MobileNav from '../components/MobileNav'
 import Header from '../components/Header'
-import TimeMachineButton from '../components/TimeMachineButton';
+import TimeMachineButton from '../components/TimeMachine/TimeMachineButton';
 import { TimeMachineProvider } from '../contexts/TimeMachineContext';
 import { ChatProvider } from '../contexts/ChatContext';
 import ChatBox from '../components/ChatBox/ChatBox';
