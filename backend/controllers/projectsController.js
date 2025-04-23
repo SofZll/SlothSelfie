@@ -629,7 +629,8 @@ const removePhaseFromBackend = async (req, res) => {
 
         // remove the macroactivity of each subphase
         for (const subphaseId of subphaseIds) {
-            await deleteMacroActivity(subphaseId.macroActivity);
+            const subphase = await PhaseSubphase.findById(subphaseId);
+            await deleteMacroActivity(subphase.macroActivity);
         }
 
         // Get all activities belonging to the phase and its subphases
@@ -696,9 +697,14 @@ const removeSubphaseFromBackend = async (req, res) => {
 
         // Delete the subphase
 
+        // Find the subphase
+        console.log('Finding subphase with ID:', subphaseId);
+        const subphase = await PhaseSubphase.findById(subphaseId);
+        console.log('Subphase found:', subphase);
+
         //we first delete the macroactivity of the subphase
-        console.log('Deleting macroactivity of subphase:', subphaseId.macroActivity);
-        await deleteMacroActivity(subphaseId.macroActivity);
+        console.log('Deleting macroactivity of subphase:', subphase.macroActivity);
+        await deleteMacroActivity(subphase.macroActivity);
 
         //and its activities
         const activities = await Activity.find({ phaseSubphase: subphaseId });
