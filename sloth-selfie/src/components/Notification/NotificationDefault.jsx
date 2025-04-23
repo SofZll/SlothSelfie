@@ -9,7 +9,7 @@ const NotificationDefault = ({ notif, index, handleModifyNotification }) => {
                 <label className='form-label'>Notify me:</label>
                 <div className='input-group'>
                     <input type='number' className='form-control' min='1' max='30' value={notif.before} onChange={(e) => handleModifyNotification(index, 'before', e.target.value)} />
-                    <select className='form-select' value={notif.beforeType} onChange={(e) => handleModifyNotification(index, 'beforeType', e.target.value)}>
+                    <select className='form-select' value={notif.variant} onChange={(e) => handleModifyNotification(index, 'variant', e.target.value)}>
                         <option value='day'>Day</option>
                         <option value='week'>Week</option>
                     </select>

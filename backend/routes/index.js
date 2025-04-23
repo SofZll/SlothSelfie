@@ -13,6 +13,7 @@ const subscriptionRoutes = require('./subscriptionRoutes');
 const projectRoutes = require('./projectsRoutes');
 const chatRoutes = require('./chatRoutes');
 const pomodoroRoutes = require('./pomodoroRoutes');
+const noAvailabilityRoutes = require('./noAvailabilityRoutes');
 
 router.use('/api', userRoutes);
 router.use('/api', noteRoutes);
@@ -26,5 +27,6 @@ router.use('/api', subscriptionRoutes);
 router.use('/api', projectRoutes);
 router.use('/api', chatRoutes);
 router.use('/api', pomodoroRoutes);
+router.use('/api', noAvailabilityRoutes);
 
 module.exports = router;

@@ -34,9 +34,7 @@ const PreviewProjects= ({ viewType }) => {
         const updatedProjects = await Promise.all(
             p.map(async (pr) => {
                 const response = await apiService(`/project/${pr._id}`, 'GET');
-                if (response) {
-                    return { ...pr, ...response };
-                }
+                if (response.success) return { ...pr, ...response.project };
             })
         );
 
@@ -61,9 +59,9 @@ const PreviewProjects= ({ viewType }) => {
 
     const fetchProjects = async () => {
         const response = await apiService('/projects', 'GET');
-        if (response) {
-            setProjects(response);
-            fetchProjectActivities(response);
+        if (response.success) {
+            setProjects(response.projects);
+            fetchProjectActivities(response.projects);
         }
     }
 

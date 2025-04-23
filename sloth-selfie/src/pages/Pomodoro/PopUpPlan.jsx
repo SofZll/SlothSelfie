@@ -46,9 +46,9 @@ const PopUpPlan = () => {
         }
 
         const response = await apiService('/pomodoro', 'POST', pomodoro);
-        if (response) {
-            const eventResponse = await apiService('/event/pomodoro', 'POST', response);
-            if (eventResponse) Swal.fire({ icon: 'success', title: 'Pomodoro added to calendar', text: 'Pomodoro added to calendar successfully', customClass: { confirmButton: 'button-alert' } });
+        if (response.success) {
+            const eventResponse = await apiService('/event/pomodoro', 'POST', response.pomodoro);
+            if (eventResponse.success) Swal.fire({ icon: 'success', title: 'Pomodoro added to calendar', text: 'Pomodoro added to calendar successfully', customClass: { confirmButton: 'button-alert' } });
             else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro to calendar', customClass: { confirmButton: 'button-alert' } });
             
         } else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro', customClass: { confirmButton: 'button-alert' } });

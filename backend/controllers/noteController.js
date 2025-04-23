@@ -33,7 +33,7 @@ const createNote = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
         
-        res.status(201).json(populatedNote);
+        res.status(201).json({ success: true, note: populatedNote });
     } catch (error) {
         console.error('Error creating note:', error);
         res.status(500).json({ success: false, message: 'Error creating note' });
@@ -58,9 +58,7 @@ const getNotes = async (req, res) => {
         .populate('user', 'username')
         .populate('sharedWith', 'username');
 
-        console.log('Fetched notes:', notes);
-
-        res.status(200).json(notes);
+        res.status(200).json({ success: true, notes });
 
     } catch (error) {
         console.error('Error fetching notes:', error);
@@ -78,7 +76,7 @@ const getNote = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
 
-        res.status(200).json(note);
+        res.status(200).json({ success: true, note });
     }
     catch (error) {
         console.error('Error fetching note:', error);
@@ -131,7 +129,7 @@ const updateNote = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
 
-        res.status(200).json(populatedNote);
+        res.status(200).json({ success: true, note: populatedNote });
 
     } catch (error) {
         console.error('Error updating note:', error);

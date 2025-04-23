@@ -23,6 +23,19 @@ const calculateDate = (date, minusTime) => {
     return newDate;
 };
 
+const combineDateTime = (date, time) => {
+    const dateParts = date.split('-');
+    const timeParts = time.split(':');
+
+    const year = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1;
+    const day = parseInt(dateParts[2]);
+    const hour = parseInt(timeParts[0]);
+    const minute = parseInt(timeParts[1]);
+
+    return new Date(year, month, day, hour, minute);
+}
+
 /**
  * La funzione per inviare la notifica, al momento viene chiamata solo dal job di Agenda
  * @param {*} notificationId identificativo della notifica
@@ -187,4 +200,4 @@ const sendExportEmail = async (receiver, fileName, fileContent) => {
     });
 }
 
-module.exports = { calculateDate, emitNotification, findUserId, sendExportEmail };
+module.exports = { calculateDate, combineDateTime, emitNotification, findUserId, sendExportEmail };

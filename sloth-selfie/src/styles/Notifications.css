@@ -1,0 +1,7 @@
+.notifications-container {
+    max-width: 60rem;
+}
+
+.notifications-container p {
+    margin: 0;
+}

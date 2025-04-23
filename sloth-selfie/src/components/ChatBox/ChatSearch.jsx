@@ -13,7 +13,7 @@ const ChatSearch = () => {
 
     const handleNewChat = async () => {
         const response = await apiService('/chat/', 'POST', {username2: participants[0] });
-        if (response) {
+        if (response.success) {
             console.log('Chat created');
             fetchChats();
             setShowShareInput(false);

@@ -21,7 +21,7 @@ const Note = () => {
 
     const completeTask = async (task) => {
         const response = await apiService(`/task/complete/${task._id}`, 'PUT');
-        if (response) setNote({ ...note, tasks: note.tasks.map(t => t._id === task._id ? response : t) });
+        if (response.success) setNote({ ...note, tasks: note.tasks.map(t => t._id === task._id ? response.task : t) });
     }
 
     return (

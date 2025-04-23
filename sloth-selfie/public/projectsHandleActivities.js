@@ -18,7 +18,11 @@ async function handleActivities(projectId) {
         }
 
         const projectResponse = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await projectResponse.json();
+        const data = await projectResponse.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch project');
+        }
+        const project = data.project;
 
         // Check if the logged user is the owner or a member
         const isOwner = project.owner.username === userLogged;
@@ -55,7 +59,11 @@ async function handleActivities(projectId) {
         if (!refreshedProject.ok) {
             throw new Error("Failed to fetch the refreshed project data.");
         }
-        const refreshedProjectData = await refreshedProject.json();
+        const Data = await refreshedProject.json();
+        if (!Data.success) {
+            throw new Error("Refreshed project data is undefined.");
+        }
+        const refreshedProjectData = Data.project;
 
         // Reconstruct the activities array from the refreshed project
         let updatedActivities = [];
@@ -223,7 +231,11 @@ async function insertMacroInputOutput(activityId, fieldType, value = "") {
     let userLogged = await getLoggedUser();
     //get the activity
     const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-    const activity = await response.json();
+    const data = await response.json();
+    if (!data.success) {
+        throw new Error('Failed to fetch activity');
+    }
+    const activity = data.activity;
 
     if (fieldType === "input") {
         let inputType, inputValue;
@@ -288,7 +300,11 @@ async function checkAndUpdateMacroStatus(activityId, type) {
     try {
         //get the activity
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-        const activity = await response.json();
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch activity');
+        }
+        const activity = data.activity;
         if (!activity) {
             console.error("Activity is undefined:", activity);
             return;
@@ -296,7 +312,11 @@ async function checkAndUpdateMacroStatus(activityId, type) {
 
         //get the phaseSubphase of the activity
         const responseData = await fetch(`http://localhost:8000/api/phaseSubphase/${activity.phaseSubphase}`);
-        const phaseSubphase = await responseData.json();
+        const phaseSubphaseData = await responseData.json();
+        if (!phaseSubphaseData.success) {
+            throw new Error('Failed to fetch phaseSubphase');
+        }
+        const phaseSubphase = phaseSubphaseData.phaseSubphase;
 
         //get the macroactivity of the phaseSubphase
         const macroActivity = phaseSubphase.macroActivity;
@@ -351,7 +371,12 @@ async function activatableActivity(activityId, newStatus) {
     try {
         //get the activity
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-        const activity = await response.json();
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error('Failed to fetch activity');
+        }
+        const activity = data.activity;
 
         if (!activity) {
             console.error("Activity is undefined:", activity);
@@ -442,7 +467,11 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
     try {
         // Get the activity
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-        const activity = await response.json();
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch activity');
+        }
+        const activity = data.activity;
 
         if (!activity) {
             console.error("Activity is undefined:", activity);
@@ -512,7 +541,11 @@ async function reactivateActivity(activityId, newStatus) {
     try {
         //get the activity
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-        const activity = await response.json();
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch activity');
+        }
+        const activity = data.activity;
 
         if (!activity) {
             console.error("Activity is undefined:", activity);
@@ -540,7 +573,11 @@ async function reactivateActivity(activityId, newStatus) {
 
                 //we get the dependent activity
                 const response = await fetch(`http://localhost:8000/api/activity/${dependent._id}`);
-                const dependentActivity = await response.json();
+                const dependentActivityData = await response.json();
+                if (!dependentActivityData.success) {
+                    throw new Error('Failed to fetch dependent activity');
+                }
+                const dependentActivity = dependentActivityData.activity;
 
                 //delete the input note
                 await deleteNoteById(dependentActivity.input);
@@ -561,7 +598,11 @@ async function reactivateActivity(activityId, newStatus) {
         let userLogged = await getLoggedUser();
         //get the project of the activity
         const projectResponse = await fetch(`http://localhost:8000/api/project/${activity.project}`);
-        const project = await projectResponse.json();
+        const projectData = await projectResponse.json();
+        if (!projectData.success) {
+            throw new Error('Failed to fetch project');
+        }
+        const project = projectData.project;
         //get the owner of the project
         const isOwner = project.owner.username === userLogged;
         const isMember = activity.sharedWith.includes(userLogged);
@@ -609,7 +650,11 @@ async function handleOwnerDecision(activityId, decision, dependentActivitiesIds,
 
         // Update the dependent activities
         const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-        const activity = await response.json();
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch activity');
+        }
+        const activity = data.activity;
 
         await updateDependentActivities(activityId, activity, onlyBlocked);
 
@@ -639,11 +684,19 @@ async function handleOwnerDecision(activityId, decision, dependentActivitiesIds,
 async function getDependentActivities(activityId) {
     // Get the activity
     const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-    const activity = await response.json();
+    const data = await response.json();
+    if (!data.success) {
+        throw new Error('Failed to fetch activity');
+    }
+    const activity = data.activity;
 
     // Get the entire project to find all activities
     const projectResponse = await fetch(`http://localhost:8000/api/project/${activity.project}`);
-    const project = await projectResponse.json();
+    const projectdata = await projectResponse.json();
+    if (!projectdata.success) {
+        throw new Error('Failed to fetch project');
+    }
+    const project = projectdata.project;
     let activities = project.phases.flatMap(phase => phase.activities)
                     .concat(project.phases.flatMap(phase => phase.subphases.flatMap(sub => sub.activities)));
     
@@ -718,11 +771,19 @@ async function updateOutputNote(activityId) {
 
         //get the activity output note, if it is preent, update it, else create it
         const responseActivity = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-        const activity = await responseActivity.json();
+        const activityData = await responseActivity.json();
+        if (!activityData.success) {
+            throw new Error('Failed to fetch activity');
+        }
+        const activity = activityData.activity;
 
         //get the output note
         const responseNote = await fetch(`http://localhost:8000/api/note/get/${activity.output}`);
-        const note = await responseNote.json();
+        const noteData = await responseNote.json();
+        if (!noteData.success) {
+            throw new Error('Failed to fetch note');
+        }
+        const note = noteData.note;
         if (!note) {
             // If the note is not present, create it
             const response = await fetch(`http://localhost:8000/api/activity/inputOutput`, {
@@ -784,7 +845,11 @@ async function updateOutputNote(activityId) {
 async function getOutputContent(noteId) {
     try {
         const response = await fetch(`http://localhost:8000/api/note/get/${noteId}`);
-        const output = await response.json();
+        const outputData = await response.json();
+        if (!outputData.success) {
+            throw new Error('Failed to fetch output note');
+        }
+        const output = outputData.note;
         return output.content;
     } catch (error) {
         console.error("Error getting output content:", error);
