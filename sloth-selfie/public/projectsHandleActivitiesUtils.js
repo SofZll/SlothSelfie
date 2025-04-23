@@ -359,8 +359,8 @@ async function checkChildren(phaseSubphase) {
             //we get the subphases of the phase
             for(const subphaseId of phaseSubphaseData.subphases) {
                 //get the subphase
-                const response = await fetch(`http://localhost:8000/api/phaseSubphase/${subphaseId}`);
-                const subphaseres = await response.json();
+                const response2 = await fetch(`http://localhost:8000/api/phaseSubphase/${subphaseId}`);
+                const subphaseres = await response2.json();
                 if (!subphaseres.success) {
                     throw new Error('Failed to fetch subphase data');
                 }
