@@ -25,7 +25,7 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { activity, setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
 
     const [show, setShow] = useState('plans');
