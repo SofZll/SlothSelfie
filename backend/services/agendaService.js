@@ -14,9 +14,10 @@ const getScheduledJobs = async (userId, hours = 24) => {
     const jobs = await agenda.jobs({ 
         name: 'send-notification',
         nextRunAt: { $gte: now, $lte: limit },
+        'attrs.disabled': { $ne: true },
     });
 
-    const populatedJobs = await Promise.all(jobs.map(async (job) => {
+    const populatedJobs = (await Promise.all(jobs.map(async (job) => {
         const notificationId = job.attrs.data.notification;
         const populatedNotification = await Notification.findById(notificationId).populate('element');
 
@@ -39,7 +40,7 @@ const getScheduledJobs = async (userId, hours = 24) => {
             to: new Date(populatedNotification.to),
             status: job.attrs.lastFinishedAt ? 'inactive' : 'active',
         };
-    }));
+    }))).filter(job => job !== null);
 
     console.log('Jobs:', populatedJobs);
 
@@ -50,23 +51,57 @@ const snoozeJob = async (notificationId, snoozeTime) => {
     const notification = await Notification.findById(notificationId);
     if (!notification) throw new Error('Notification not found');
 
-    if (notification.snoozeCount >= 3) throw new Error('Maximum snooze count reached');
+    console.log('Snoozing notification:', notification);
+    // let the user know that he can snooze only 3 times
+    if (notification.snoozeCount >= 3) throw new Error('You can snooze only 3 times');
     
-    const job = await agenda.jobs({
+    const jobs = await agenda.jobs({
         name: 'send-notification',
         'data.notification': notification._id
     });
 
-    if (!job || job.length === 0) throw new Error('Job not found');
+    if (!jobs || jobs.length === 0) throw new Error('Job not found');
 
-    const jobToUpdate = job[0];
-    const newTime = new Date(jobToUpdate.attrs.nextRunAt + snoozeTime * 60 * 1000);
-    await notification.updateOne({ snooze: true, snoozeUntil: newTime, snoozeCount: notification.snoozeCount + 1 });
+    if (notification.type === 'default') {
+        const jobToUpdate = jobs[0];
+        const newTime = new Date(jobToUpdate.attrs.nextRunAt.getTime() + snoozeTime * 60 * 1000);
+        await jobToUpdate.schedule(newTime).save();
+        notification.snoozeUntil = newTime;
+        await notification.save();
+    } else if (notification.type === 'repeat') {
+        const mainJob = jobs.find(job => job.attrs.disabled !== true && !(job.attrs.data && job.attrs.data.isSnoozeJob));
 
-    if (notification.type === 'default') await jobToUpdate.schedule(newTime).save();
-    else if (notification.type === 'repeat') {
-        await agenda.schedule(newTime, 'send-notification', { notification });
+        if (mainJob) {
+            mainJob.attrs.disabled = true;
+            await mainJob.save();
+        }
+
+        const now = new Date();
+        const existingSnoozeJob = jobs.find(job =>
+            job.attrs.data && job.attrs.data.isSnoozeJob && job.attrs.nextRunAt > now
+        );
+
+        if (existingSnoozeJob) {
+            const newTime = new Date(existingSnoozeJob.attrs.nextRunAt.getTime() + snoozeTime * 60 * 1000);
+            await existingSnoozeJob.schedule(newTime).save();
+            notification.snoozeUntil = newTime;
+            await notification.save();
+        } else {
+            const newTime = new Date(mainJob.attrs.nextRunAt.getTime() + snoozeTime * 60 * 1000);
+            await agenda.schedule(newTime, 'send-notification', {
+                notification: notification._id,
+                isSnoozeJob: true,
+                originalJobId: mainJob?._id,
+            });
+            notification.snoozeUntil = newTime;
+            await notification.save();
+        }
     }
+
+    await notification.updateOne({
+        snooze: true,
+        snoozeCount: notification.snoozeCount + 1
+    });
 }
 
     

@@ -28,15 +28,32 @@ const FormActivity = () => {
         if (selected.edit) {
             const response = await apiService(`/activity/${activity._id}`, 'PUT', activity);
             if (response.success){
+                const notificationPromises = notifications.map(async notification =>{
+                    if (notification._id) {
+                        const response = await apiService(`/notification/${notification._id}`, 'PUT', notification);
+                        if (response.success) return response.notification;
+                        else Swal.fire({ title: 'Error editing notification', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                    } else {
+                        const response = await apiService(`/notification`, 'POST', {
+                            type: 'Activity',
+                            elementId: activity._id,
+                            notifications: [notification]
+                        });
+                        if (response.success) return response.notification;
+                        else {
+                            console.log('Error adding notification', response.message);
+                            Swal.fire({ title: 'Error adding notification', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                        }
+                    }
+                });
+
+                await Promise.all(notificationPromises);
+
                 Swal.fire({ title: 'Activity edited', icon: 'success', text: 'Activity edited successfully', customClass: { confirmButton: 'button-alert' } });
                 setActivities(activities.map(act => act._id === activity._id ? activity : act));
                 resetActivity();
-            } else Swal.fire({ title: 'Error editing activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
-
-            notifications.forEach(notification => {
-                apiService(`/notification/${notification._id}`, 'PUT', notification);
                 setNotifications([]);
-            });
+            } else Swal.fire({ title: 'Error editing activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
         } else {
             const response = await apiService(`/activity`, 'POST', activity);
             if (response.success){
