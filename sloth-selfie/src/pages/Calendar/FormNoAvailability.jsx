@@ -66,18 +66,6 @@ const FormNoAvailability = () => {
                 return;
             }
 
-            if (availability.repeatFrequency !== 'none') {
-                let gap = 1;
-                if (availability.repeatFrequency === 'weekly') gap = 7;
-                else if (availability.repeatFrequency === 'monthly') gap = 30;
-                else if (availability.repeatFrequency === 'yearly') gap = 365;
-
-                if (availability.endDate >= availability.startDate + gap * 24 * 60 * 60 * 1000) {
-                    Swal.fire({ title: 'Warning', icon: 'warning', text: 'End date must be before the next occurrence', customClass: { confirmButton: 'button-alert' } });
-                    return;
-                }
-            }
-
         } else {
             if (availability.startTime === '') {
                 Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start time is required', customClass: { confirmButton: 'button-alert' } });
@@ -86,6 +74,24 @@ const FormNoAvailability = () => {
 
             if (!availability.endDate > new Date(availability.startDate).setHours(23, 59, 59, 999)) {
                 Swal.fire({ title: 'Warning', icon: 'warning', text: 'End time must be before the next day', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+        }
+
+
+        if (availability.repeatFrequency !== 'none') {
+            let gap = 1;
+            if (availability.repeatFrequency === 'weekly') gap = 7;
+            else if (availability.repeatFrequency === 'monthly') gap = 30;
+            else if (availability.repeatFrequency === 'yearly') gap = 365;
+
+            if (new Date(availability.endDate).getDate() >= new Date(availability.startDate).getDate() + gap) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'End date must be before the next occurrence', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+
+            if (!availability.numberOfOccurrences || availability.numberOfOccurrences < 1) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Number of occurrences must be greater than 0', customClass: { confirmButton: 'button-alert' } });
                 return;
             }
         }
@@ -105,7 +111,8 @@ const FormNoAvailability = () => {
         const response = await apiService(`/no-availability/${availability._id}`, 'DELETE');
         if (response.success) {
             Swal.fire({ title: 'Availability deleted', icon: 'success', text: 'Availability deleted successfully', customClass: { confirmButton: 'button-alert' } });
-            setAvailabilities(availabilities.filter(av => av._id !== availability._id));
+            if (availability.repeatFrequency === 'none') setAvailabilities(availabilities.filter(a => a._id !== availability._id));
+            else setAvailabilities(availabilities.filter(a => a.fatherId !== availability._id && a._id !== availability._id));
         } else Swal.fire({ title: 'Error deleting availability', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
         resetAvailability();
         resetSelected();

@@ -22,14 +22,10 @@ const getNoAvailability = async (req, res) => {
     }
 };
 
-//Add new no availability for group events
-const addNoAvailability = async (req, res) => {
-    const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
-    const { startDate, endDate, days, repeatFrequency, numberOfOccurrences } = req.body;
+const addSingleNoAvailability = async (user, startDate, endDate, days, repeatFrequency, numberOfOccurrences, fatherId) => {
 
     try {
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        if (!user) return ({ success: false, message: 'User not found' });
 
         const listSameDate = await NoAvailability.find({ 
             $or: [
@@ -40,9 +36,43 @@ const addNoAvailability = async (req, res) => {
             user: user._id
         });
 
-        if (listSameDate.length > 0) return res.status(400).json({ success: false, message: 'No availability already exists for this time interval' });
+        if (listSameDate.length > 0) return ({ success: false, message: 'No availability already exists for this time interval' });
 
-        if (repeatFrequency !== 'none') {
+        const newNoAvailabilityInstance = new NoAvailability({
+            user: user._id,
+            startDate,
+            endDate,
+            days,
+            repeatFrequency
+        });
+
+        if (fatherId) newNoAvailabilityInstance.fatherId = fatherId;
+        if (repeatFrequency !== 'none' && numberOfOccurrences) newNoAvailabilityInstance.numberOfOccurrences = numberOfOccurrences;
+
+        const response = await newNoAvailabilityInstance.save();
+        return ({ success: true, response });
+    } catch (error) {
+        console.error('Error adding no availability:', error);
+        return ({ success: false, message: 'Error adding no availability' });
+    }
+};
+        
+
+
+//Add new no availability for group events
+const addNoAvailability = async (req, res) => {
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
+    const { startDate, endDate, days, repeatFrequency, numberOfOccurrences } = req.body;
+
+    try {
+        
+        if (repeatFrequency === 'none') {
+            const response = await addSingleNoAvailability(user, startDate, endDate, days, repeatFrequency);
+            if (!response.success) res.status(400).json({ success: false, message: response.message });
+            else res.status(200).json({ success: true, noAvailability: response.response });
+
+        } else {
 
             const listNoAvailability = [];
             let gap = 1;
@@ -54,41 +84,42 @@ const addNoAvailability = async (req, res) => {
 
             for (let i = 0; i < numberOfOccurrences; i++) {
 
-                const start = new Date(startDate) + (i * gap * 24 * 60 * 60 * 1000);
-                const end = new Date(endDate) + (i * gap * 24 * 60 * 60 * 1000);
+                const start = new Date(startDate);
+                start.setDate(start.getDate() + (i * gap));
+                const end = new Date(endDate);
+                end.setDate(end.getDate() + (i * gap));
+                console.log('start', start);
+                console.log('end', end);
 
-                const newNoAvailabilityInstance = new NoAvailability({
-                    user: user._id,
-                    startDate: start,
-                    endDate: end,
-                    days,
-                    repeatFrequency,
-                    fatherId: fatherId,
-                });
+                const response = await addSingleNoAvailability(user, start, end, days, repeatFrequency, numberOfOccurrences, fatherId);
 
-                const response = await newNoAvailabilityInstance.save();
-                listNoAvailability.push(response);
-                if (i === 0) fatherId = response._id;
+                if (!response.success) {
+                    res.status(400).json({ success: false, message: response.message });
+                    if (i !== 0) await NoAvailability.deleteMany({ 
+                        $or: [
+                            { _id: fatherId },
+                            { fatherId: fatherId }
+                        ]
+                    });
+                    return;
+                }
+
+                console.log('response', response);
+
+                if (i === 0) fatherId = response.response._id;
+                listNoAvailability.push(response.response);
             }
 
             res.status(200).json({ success: true, listNoAvailability });
-        } else {
-            const newNoAvailability = new NoAvailability({
-                user: user._id,
-                startDate,
-                endDate,
-                days,
-                repeatFrequency,
-            });
-
-            const noAvailability = await newNoAvailability.save();
-            res.status(200).json({ success: true, noAvailability });
         }
     } catch (error) {
         console.error('Error adding no availability:', error);
         res.status(500).json({ success: false, message: 'Error adding no availability' });
     }
 };
+
+//const editNoAvailability = async (id, startDate, endDate, days, repeatFrequency, numberOfOccurrences) => {
+
 
 //Update no availability
 /*
@@ -121,7 +152,9 @@ const deleteNoAvailability = async (req, res) => {
             await NoAvailability.deleteMany({
                 $or: [
                     { _id: nA2delete._id },
-                    { fatherId: nA2delete.fatherId }
+                    { fatherId: nA2delete.fatherId },
+                    { _id: nA2delete.fatherId },
+                    { fatherId: nA2delete._id }
                 ]
             });
         } else await NoAvailability.findByIdAndDelete(noAvailabilityId);
