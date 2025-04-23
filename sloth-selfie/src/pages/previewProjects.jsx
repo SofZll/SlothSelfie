@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import './styles/Previews.css';
-import './styles/App.css';
+import '../styles/Previews.css';
+import '../styles/App.css';
 
-import GanttChartView from './components/GanttChartView';
+import GanttChartView from '../components/GanttChartView';
 
-import { AuthContext } from './contexts/AuthContext';
-import { useCalendar } from "./contexts/CalendarContext";
-import { apiService } from './services/apiService';
+import { AuthContext } from '../contexts/AuthContext';
+import { useCalendar } from "../contexts/CalendarContext";
+import { apiService } from '../services/apiService';
 
 //TODO CAMBIARE PATH DEL FETCH SUL SERVER
 

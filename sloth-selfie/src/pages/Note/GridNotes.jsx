@@ -54,7 +54,7 @@ const GridNotes = () => {
 
 
     return (
-        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popUp: true })} selected={selected.popUp} popUp={<FormNote />}>
+        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popUp: true })} selected={selected.popUp} popUp={ <div className="formPopup"><FormNote /></div>}>
             
             <div className='row py-2 w-100 mt-md-5'>
                 <div className='col-6'>

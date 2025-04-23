@@ -22,6 +22,9 @@
     border-radius: 10px;
     width: 80vmin;
     word-wrap: break-word;
+    overflow: hidden;
+    overflow-x: auto;
+    position: relative;
 }
 
 
@@ -31,9 +34,11 @@
     }
 
     .card {
-        height: 90%;
+        height: auto;
+        min-height: 200px;
         width: 30rem;
-        max-height: none;
+        max-height: 55vh;
+        overflow-y: auto;
     }
 }
 
