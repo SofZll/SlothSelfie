@@ -491,9 +491,11 @@ async function removePhaseFromBackend(projectId, phaseId) {
 
         const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(`Error removing phase: ${data.message}`);
-        } 
+        if (data.success) {
+            
+        } else {
+            Swal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
+        }
         
     } catch (error) {
         console.error('Errore:', error);
