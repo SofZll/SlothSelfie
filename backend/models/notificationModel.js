@@ -94,12 +94,8 @@ const notificationSchema = new mongoose.Schema({
         }
     },
 
-    // for type repeat
     from: {
         type: Date,
-        required: function() {
-            return this.type === 'repeat';
-        }
     },
 
     // tutti i tipi
@@ -124,7 +120,14 @@ const notificationSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
-notificationSchema.index({ elementId: 1, elementType: 1 }, { unique: true });
+notificationSchema.index({
+    user: 1,
+    element: 1,
+    elementType: 1,
+    type: 1,
+    variant: 1,
+    before: 1
+}, { unique: true });
 notificationSchema.index({ status: 1, from: 1, to: 1 }, { unique: true });
 
 notificationSchema.virtual('isActive').get(function() {

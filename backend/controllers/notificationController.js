@@ -11,7 +11,7 @@ const setNotifications = async (req, res) => {
     const { type, elementId, notifications } = req.body;
     const userId = req.session.userId;
     
-    if (!notifications || notifications.length === 0) return res.status(400).json({ message: 'No notifications provided' });
+    if (!notifications || notifications.length === 0) return res.status(400).json({ success: false, message: 'No notifications provided' });
 
     try {
         let element, to;
@@ -39,7 +39,7 @@ const setNotifications = async (req, res) => {
                 before: notification.before,
                 variant: notification.variant,
                 time: isDefault ? notification.time : undefined,
-                from: !isDefault ? combineDateTime(notification.fromDate, notification.fromTime) : undefined,
+                from: !isDefault ? combineDateTime(notification.fromDate, notification.fromTime) : new Date(),
                 to: to
             }
         });
@@ -61,11 +61,12 @@ const getScheduledNotifications = async (req, res) => {
 
     try {
         const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         const scheduledNotifications = await getScheduledJobs(userId);
         
-        scheduledNotifications.sort((a, b) => new Date(a.nextRunAt) - new Date(b.nextRunAt));
+        const filteredNotifications = scheduledNotifications.filter(n => n && n.triggerAt);
+        filteredNotifications.sort((a, b) => new Date(a.triggerAt) - new Date(b.triggerAt));
 
         console.log('Scheduled notifications:', scheduledNotifications);
         
@@ -181,7 +182,7 @@ const snoozeNotification = async (req, res) => {
     if (!snoozeInterval) return res.status(400).json({ success: 'false', message: 'Snooze time is required' });
 
     try {
-        snoozeJob(notificationId, snoozeInterval);
+        await snoozeJob(notificationId, snoozeInterval);
         res.status(200).json({ success: true, message: 'Notification snoozed successfully'});
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
