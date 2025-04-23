@@ -1,16 +1,142 @@
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
-    sender: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: true
     },
-    receivers: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'User',
-        required: true,
+
+    element: {
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: 'elementType',
+        required: true
     },
+
+    elementType: {
+        type: String,
+        required: true,
+        enum: ['Event', 'Activity'] // add se la notifica è per qualche altro tipo di elemento
+    },
+
+    type: {
+        type: String,
+        enum: ['default', 'repeat'],
+        required: true
+    },
+
+    mode: {
+        email: {
+            type: Boolean,
+            default: false
+        },
+
+        system: {
+            type: Boolean,
+            default: true
+        }
+    },
+
+    urgency: {
+        type: Boolean,
+        default: false
+    },
+
+    snooze: {
+        type: Boolean,
+        default: false,
+    },
+
+    snoozeUntil: {
+        type: Date,
+        default: null,
+        required: function() {
+            return this.snooze;
+        }
+    },
+
+    snoozeCount: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5,
+        required: function() {
+            return this.snooze;
+        }
+    },
+
+    // se l'utente è vicino al luogo
+    location: {
+        lat: Number,
+        long: Number,
+        radius: Number
+    },
+
+    // se il tipo è default indica il tempo prima dell'evento in cui inviare la notifica
+    // se il tipo è repeat indica ogni quanto inviare la notifica
+    variant: {
+        type: String,
+        enum: ['minute', 'hour', 'day', 'week'],
+    },
+
+    before: {
+        type: Number,
+        min: 0,
+        max: 30
+    },
+
+    // for type default
+    time: {
+        type: String,
+        match: /^([01]\d|2[0-3]):([0-5]\d)$/,
+        required: function() {
+            return this.type === 'default';
+        }
+    },
+
+    // for type repeat
+    from: {
+        type: Date,
+        required: function() {
+            return this.type === 'repeat';
+        }
+    },
+
+    // tutti i tipi
+    to: {
+        type: Date,
+    },
+
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'active'
+    },
+
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        required: true
+    }
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+
+notificationSchema.index({ elementId: 1, elementType: 1 }, { unique: true });
+notificationSchema.index({ status: 1, from: 1, to: 1 }, { unique: true });
+
+notificationSchema.virtual('isActive').get(function() {
+    const now = global.virtualNow || new Date();
+    if (this.status === 'inactive') return false;
+    if (this.type === 'repeat') {
+        return this.from <= now && this.to >= now;
+    }
+    return true;
+});
+
+/*const notificationSchema = new mongoose.Schema({
     type: {
         type: [String],
         enum: ['email', 'OS'],
@@ -61,6 +187,7 @@ const notificationSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
+*/
 
 const Notification = mongoose.model('Notification', notificationSchema);
 

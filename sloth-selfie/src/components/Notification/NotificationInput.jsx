@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BellPlus, X, ChevronDown } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 import '../../styles/NotificationInput.css';
 import { dateFromDate, timeFromDate } from '../../utils/utils';
@@ -7,25 +8,26 @@ import { validateNotification } from '../../utils/validation';
 import NotificationDefault from './NotificationDefault';
 import NotificationRepeat from './NotificationRepeat';
 
+import { apiService } from '../../services/apiService';
+
 const NotificationInput = ({ notifications, setNotifications }) => {
     const [showSelectNotification, setShowSelectNotification] = useState(null);
 
     const handleAddNotification = () => {
         const type = 'default';
         const newNotification = {
-            type,
+            type: type,
             mode: {
                 email: false,
-                message: true
+                system: true
             },
+            before: 1,
+            variant: 'day',
             ...(type === 'default' ? {
-                before: 1,
-                beforeType: 'day',
                 time: '08:00',
             } : {
-                repeat: 'daily',
                 fromDate: dateFromDate(new Date()),
-                fromTime: timeFromDate(new Date()),  
+                fromTime: timeFromDate(new Date()),
             })
         };
         if (newNotification) {
@@ -33,7 +35,23 @@ const NotificationInput = ({ notifications, setNotifications }) => {
         }
     }
 
-    const handleRemoveNotification = (index) => {
+    const handleRemoveNotification = async (index) => {
+        if (notifications[index]._id !== undefined) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (!result.isConfirmed) return;
+
+            const response = await apiService(`/notification/${notifications[index]._id}`, 'DELETE');
+            if (response.success) Swal.fire('Deleted!', 'Your notification has been deleted.', 'success');
+            else Swal.fire('Error!', 'There was an error deleting the notification.', 'error');
+        }
         setNotifications(notifications.filter((_, i) => i !== index));
     };
 
@@ -45,24 +63,21 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                 type: value,
                 mode: {
                     email: false,
-                    message: true
+                    system: true
                 },
+                before: 1,
+                variant: 'day',
                 ...(value === 'default' ? {
-                    before: 1,
-                    beforeType: 'day',
                     time: '08:00',
-                    repeat: undefined,
-                    from: undefined
+                    fromDate: undefined,
+                    fromTime: undefined
                 } : {
-                    repeat: 'daily',
                     fromDate: dateFromDate(new Date()),
                     fromTime: timeFromDate(new Date()),
-                    before: undefined,
-                    beforeType: undefined,
                     time: undefined
                 })
             };
-        } else if (field === 'email' || field === 'message') {
+        } else if (field === 'email' || field === 'system') {
             updatedNotifications[index] = {
                 ...updatedNotifications[index],
                 mode: {
@@ -116,8 +131,8 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                             <label className='form-check-label' for='mail'>email</label>
                         </div>
                         <div class='form-check'>
-                            <input type='checkbox' className='form-check-input' role='switch' id='message' checked={notif.mode.message} onChange={(e) => handleModifyNotification(index, 'message', e.target.checked)} />
-                            <label className='form-check-label' for='message'>message</label>
+                            <input type='checkbox' className='form-check-input' role='switch' id='system' checked={notif.mode.system} onChange={(e) => handleModifyNotification(index, 'system', e.target.checked)} />
+                            <label className='form-check-label' for='system'>system</label>
                         </div>
                     </div>
                     <div className='mb-2'>

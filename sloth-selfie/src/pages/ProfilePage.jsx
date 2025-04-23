@@ -39,7 +39,7 @@ const ProfilePage = () => {
             formData.append('image', file);
             
             const response = await apiService('/user/edit-image', 'POST', formData);
-            if (response) {
+            if (response.success) {
                 console.log('Image uploaded successfully');
             } else {
                 console.error('Error uploading image:', response);
@@ -57,7 +57,7 @@ const ProfilePage = () => {
         }
 
         const response = await apiService('/user/edit-profile', 'POST', user);
-        if (response) {
+        if (response.success) {
             console.log('Profile updated successfully');
             setIsEditing(false);
         } else {
@@ -68,7 +68,7 @@ const ProfilePage = () => {
 
     const handleLogout = async () => {
         const response = await apiService('/user/logout', 'POST');
-        if (response) {
+        if (response.success) {
             setUser(null);
         } else {
             console.error('Error logging out:', response);

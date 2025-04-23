@@ -6,9 +6,9 @@ const router = express.Router();
 // Pomodoro endpoints
 router.get('/pomodori', getPomodori);
 router.get('/pomodori/todo', getPomodoriToDo);
-router.get('/pomodoro/:pomodoroId', getPomodoroById);
-router.get('/pomodoro/studiedTime', totalStudiedTime);
-router.get('/pomodoro/months', timePomodoriMonths);
+router.get('/pomodori/studied-time', totalStudiedTime);
+router.get('/pomodori/months', timePomodoriMonths);
+router.get('/pomodori/:pomodoroId', getPomodoroById);
 
 router.post('/pomodoro', addPomodoro);
 

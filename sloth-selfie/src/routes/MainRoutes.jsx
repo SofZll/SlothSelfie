@@ -13,10 +13,10 @@ import Calendar from '../pages/Calendar/Calendar';
 import Home from '../pages/Home'
 import Profile from '../pages/ProfilePage';
 import ChatBox from '../components/ChatBox/ChatBox';
+import Notifications from '../pages/Notifications';
 //TODO: chambiare gli import
 /*
 
-import Notifications from '../Notifications';
 import Forum from '../Forum';
 */
 import AuthPage from '../pages/AuthPage';
@@ -50,6 +50,7 @@ const MainRoutes = () => {
                                         <Route path='/home' element={<Home />} />
                                         <Route path='/home/settings' element={<Home settings={true} />} />
                                         <Route path='/profile' element={<Profile />} />
+                                        <Route path='/notifications' element={<Notifications />} />
                                     </Routes>
                                     {/*
                                     <Route path='/calendar' element={<Calendar />} />

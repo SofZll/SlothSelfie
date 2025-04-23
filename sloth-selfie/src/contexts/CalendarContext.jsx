@@ -87,11 +87,12 @@ export const CalendarProvider = ({ children }) => {
 
     //Availability state
     const [availability, setAvailability] = useState({
-        startDate: new Date(),
-        endDate: new Date(),
+        _id: '',
+        startDate: '',
+        endDate: '',
         startTime: '',
         days: true,
-        duration: 0,
+        duration: 1,
         repeatFrequency: 'none',
         numberOfOccurrences: 0,
     });
@@ -100,11 +101,12 @@ export const CalendarProvider = ({ children }) => {
 
     const resetAvailability = () => {
         setAvailability({
-            startDate: new Date(),
-            endDate: new Date(),
+            _id: '',
+            startDate: '',
+            endDate: '',
             startTime: '',
             days: true,
-            duration: 0,
+            duration: 1,
             repeatFrequency: 'none',
             numberOfOccurrences: 0,
         });
@@ -136,6 +138,7 @@ export const CalendarProvider = ({ children }) => {
                 add: false
             });
         }
+        setNotifications([]);
     }
 
     const resetSelected = () => {
@@ -149,12 +152,15 @@ export const CalendarProvider = ({ children }) => {
 
     const [notifications, setNotifications] = useState([]);
 
+    // disable save button if conditions are not met
+    const [conditionsMet, setConditionsMet] = useState(false);
+
     return (
         <CalendarContext.Provider 
             value={{ activity, setActivity, activities, setActivities, resetActivity,
                 event, setEvent, events, setEvents, addImportedEvents, resetEvent,
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
-                selected, setSelected, select, back, resetSelected, notifications, setNotifications }}>
+                selected, setSelected, select, back, resetSelected, notifications, setNotifications, conditionsMet, setConditionsMet, }}>
 
             {children}
             

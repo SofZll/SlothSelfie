@@ -1,4 +1,3 @@
-import Swal from 'sweetalert2';
 const BASE_URL = 'http://localhost:3000/api';
 
 // General API service to make requests to the server
@@ -21,7 +20,7 @@ const apiService = async (endpoint, method = 'GET', body = null) => {
         const response = await fetch(url, options);
         if (!response.ok) {
             console.error('API Service Error:', response);
-            return null;
+            return await response.json();
         }
 
         const contentType = response.headers.get('Content-Type');

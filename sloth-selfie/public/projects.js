@@ -48,7 +48,13 @@ async function loadProjects() {
             throw new Error('Error fetching projects');
         }
 
-        const projects = await response.json();
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error('Failed to fetch projects');
+        }
+
+        const projects = data.projects;
         
         const list = document.getElementById("projects-list");
         list.innerHTML = ""; // clear the list before loading the projects
@@ -651,7 +657,12 @@ function fillActivityFields(activityDiv, activity, projectActors, parentId, pare
 async function editProject(projectId) {
     try {
         const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error('Failed to fetch project data');
+        }
+        const project = data.project;
 
         // fill the form with the project data
         

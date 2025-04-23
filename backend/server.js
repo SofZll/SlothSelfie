@@ -12,7 +12,7 @@ require('dotenv').config();
 const socketHandler = require('./socket/socketHandler');
 const socket = require('./socket/socket');
 const app = express();
-const agenda = require('./jobs/agenda');
+const agenda = require('./agenda/agenda');
 
 const http = require('http');
 const server = http.createServer(app);
@@ -70,14 +70,16 @@ app.get('*', (req, res) => {
 
 socketHandler(io);
 
-agenda.on('ready', async () => {
-    console.log('Agenda started');
-    agenda.start();
-});
-
 agenda.on('error', (error) => {
     console.error('Agenda connection error:', error);
 });
+
+process.on('SIGINT', async () => {
+    console.log("🛑 Ctrl+C intercettato, sto chiudendo Agenda...");
+    await agenda.stop();
+    console.log("✅ Agenda chiusa.");
+    process.exit(0);
+  });
 
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {

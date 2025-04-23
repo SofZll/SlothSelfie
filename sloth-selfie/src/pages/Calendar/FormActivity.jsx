@@ -10,13 +10,13 @@ import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormActivity = () => {
 
-    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications } = useCalendar();
+    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications, conditionsMet } = useCalendar();
     const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setDeadline = (date) => {
         const newDate = new Date(date);
         newDate.setHours(23, 59, 59);
-        setActivity({...activity, ['deadline']: newDate});
+        setActivity({...activity, deadline: newDate});
     }
 
     const handleSubmit = async () => {
@@ -27,23 +27,37 @@ const FormActivity = () => {
 
         if (selected.edit) {
             const response = await apiService(`/activity/${activity._id}`, 'PUT', activity);
-            if (response){
+            if (response.success){
                 Swal.fire({ title: 'Activity edited', icon: 'success', text: 'Activity edited successfully', customClass: { confirmButton: 'button-alert' } });
                 setActivities(activities.map(act => act._id === activity._id ? activity : act));
                 resetActivity();
             } else Swal.fire({ title: 'Error editing activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
+            notifications.forEach(notification => {
+                apiService(`/notification/${notification._id}`, 'PUT', notification);
+                setNotifications([]);
+            });
         } else {
             const response = await apiService(`/activity`, 'POST', activity);
-            if (response){
+            if (response.success){
                 Swal.fire({ title: 'Activity added', icon: 'success', text: 'Activity added successfully', customClass: { confirmButton: 'button-alert' } });
-                setActivities([...activities, response]);
+                setActivities([...activities, response.activity]);
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
-            /* notificcheeeee 
+            const newActivity = response;
+
             if (notifications.length > 0) {
-                const response = await apiService(`/notification`, 'POST', {*/
+                const response = await apiService(`/notification`, 'POST', {
+                    type: 'Activity',
+                    elementId: newActivity._id,
+                    notifications: notifications
+                });
+                if (response.success) setNotifications([]);
+                else Swal.fire({ title: 'Error adding notifications', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+            } else {
+                console.log('No notifications to add');
+            }
         }
         resetSelected();
     }
@@ -51,44 +65,17 @@ const FormActivity = () => {
     const deleteActivity = async () => {
         setDeletePopUp(false);
         const response = await apiService(`/activity/${activity._id}`, 'DELETE');
-        if (response){
+        if (response.success) {
             Swal.fire({ title: 'Activity deleted', icon: 'success', text: 'Activity deleted successfully', customClass: { confirmButton: 'button-alert' } });
             setActivities(activities.filter(act => act._id !== activity._id));
             resetActivity();
         } else Swal.fire({ title: 'Error deleting activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
         resetSelected();
-    }
 
-    const exportActivity = async () => {
-        try {
-            const response = await apiService(`/activity/${activity._id}/export`, 'GET', null, {
-                credentials: 'include',
-            });
-    
-            if (!response) throw new Error('Empty response from server');
-    
-            const blob = response;
-
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${activity.title}.ics`;
-            a.click();
-    
-            Swal.fire({
-                title: 'Activity exported',
-                icon: 'success',
-                text: 'Activity exported successfully, a mail with .ics attachment will be sent to you',
-                customClass: { confirmButton: 'button-alert' }
-            });
-        } catch (err) {
-            Swal.fire({
-                title: 'Error exporting activity',
-                icon: 'error',
-                text: err.message || 'Unknown error',
-                customClass: { confirmButton: 'button-alert' }
-            });
-        }
+        notifications.forEach(notification => {
+            apiService(`/notification/${notification._id}`, 'DELETE');
+            setNotifications([]);
+        });
     }
 
     return (
@@ -101,14 +88,14 @@ const FormActivity = () => {
                         placeholder='Activity title'
                         value={activity.title}
                         disabled={activity.project}
-                        onChange={(e) => setActivity({...activity, ['title']: e.target.value})} />
+                        onChange={(e) => setActivity({...activity, title: e.target.value})} />
                 </div>
 
                 <div className='col-6'>
                     <label htmlFor='deadline' className='form-label'>Deadline</label>
                     <input type='date' className='form-control' id='deadline'
-                    value={activity.deadline ? (new Date(activity.deadline)).toISOString().split('T')[0] : ''}
                     disabled={activity.project}
+                    value={activity.deadline ? (new Date(activity.deadline)).toLocaleDateString('en-CA') : ''}
                     onChange={(e) => setDeadline(e.target.value)} />
                 </div>
             </div>
@@ -117,8 +104,8 @@ const FormActivity = () => {
                 <div className='col col-auto form-check'>
                     <input className='form-check-input' type='checkbox' role='switch' id='completed'
                         value={activity.completed}
-                        onChange={(e) => setActivity({...activity, ['completed']: e.target.checked})}
-                        disabled={activity.project} />
+                        disabled={activity.project}
+                        onChange={(e) => setActivity({...activity, completed: e.target.checked})} />
                     <label className='form-check-label' htmlFor='completed'>Completed</label>
                 </div>
             </div>
@@ -126,46 +113,28 @@ const FormActivity = () => {
             <div className='row'>
                 <div className='col-12'>
                     <label htmlFor='share' className='form-label'>Share with</label>
-                    <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, ['sharedWith']: receivers})} />
+                    <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, sharedWith: receivers})} />
                 </div>
             </div>
 
             <div className='row'>
                 <div className='col-12 justify-content-center align-items-center d-flex'>
-                    <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
+                    <NotificationInput notifications={notifications} setNotifications={setNotifications} />
                 </div>
             </div>
 
             <div className='d-flex align-items-center justify-content-center'>
-            {!activity.project && (
-                <button
-                type='button'
-                className='btn-main rounded shadow-sm mt-4'
-                onClick={() => handleSubmit()}
-                >
-                {selected.edit ? 'edit' : 'save'}
-                </button>
-            )}
+                {!activity.project && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()} >
+                        {selected.edit ? 'edit' : 'save'}
+                    </button>
+                )}
 
-            {selected.edit && !activity.project && (
-                <button
-                type='button'
-                className='btn-main rounded shadow-sm mt-4 ms-3'
-                onClick={() => setDeletePopUp(true)}
-                >
-                delete
-                </button>
-            )}
-
-            {selected.edit && (
-                <button
-                type='button'
-                className='btn-main rounded shadow-sm mt-4 ms-3'
-                onClick={() => exportActivity()}
-                >
-                export .ics
-                </button>
-            )}
+                {selected.edit && !activity.project && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                        delete
+                    </button>
+                )}
             </div>
 
             {deletePopUp && (

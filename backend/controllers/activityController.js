@@ -3,8 +3,6 @@ const User = require('../models/userModel');
 const Note = require('../models/noteModel');
 const Event = require('../models/eventModel');
 const PhaseSubphase = require("../models/phaseSubphaseModel");
-const { createNotification } = require('../controllers/notificationController');
-const { calculateDate } = require('../utils/utils');
 const {sendExportEmail} = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
@@ -12,7 +10,7 @@ const { createEvent } = require('ics'); // Import the library for iCalendar gene
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-    const { title, deadline, completed, notify, notificationTime, customValue, notificationRepeat, notificationType, sharedWith} = req.body;
+    const { title, deadline, completed, sharedWith} = req.body;
     
     try {
         let sharedWithUsers = [];
@@ -20,29 +18,15 @@ const createActivity = async (req, res) => {
         if (sharedWith && Array.isArray(sharedWith)) {
             sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
         }
-        const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id), });
+        const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), });
         const savedActivity = await activity.save();
 
-        // Populate the sharedWith field with the username of the users
         const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
 
-        // Calculate the date of the notification
-        let dateNotif;
-        console.log(customValue);
-        if (customValue) dateNotif = new Date(customValue).toISOString();
-        else dateNotif = calculateDate(deadline, notificationTime);
-        
-        // Create a notification if the notify flag is set
-        if (notify) await createNotification({ elementId: savedActivity._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);
-
-        console.log(savedActivity);
-        res.status(200).json({
-            ...populatedActivity.toObject(),
-            sharedWith: populatedActivity.sharedWith.map(user => user.username)
-        });
+        res.status(200).json({ success: true, activity: populatedActivity });
     } catch (error) {
         console.error('Error creating activity:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -62,10 +46,10 @@ const getActivities = async (req, res) => {
         .populate('description', 'content' )
         .populate('sharedWith', 'username');
         
-        res.status(200).json(activities);
+        res.status(200).json({ success: true, activities });
     } catch (error) {
         console.error('Error fetching activities:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -73,17 +57,14 @@ const getActivities = async (req, res) => {
 const getActivity = async (req, res) => {
     const {activityId} = req.params;
     try {
-        const activity = await Activity.findById(activityId).populate('sharedWith', '_id username');
+        const activity = await Activity.findById(activityId).populate('sharedWith', 'username');
         if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
+            return res.status(404).json({ success: false, message: "Activity not found" });
         }
-        res.status(200).json({
-            ...activity.toObject(),
-            sharedWith: activity.sharedWith.map(user => user.username) //we include usernames
-        });
+        res.status(200).json({ success: true, activity });
     } catch (error) {
         console.error('Error fetching activity:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -92,10 +73,6 @@ const updateActivity = async (req, res) => {
     const{activityId} = req.params;
     const {title, deadline, completed, sharedWith} = req.body;
     const userName = req.session.username;
-    // Log to check the user in session
-    console.log("User in session:", userName);
-
-    console.log("Shared with:", sharedWith);
 
     const user = await User.findOne({ username: userName });
 
@@ -104,16 +81,15 @@ const updateActivity = async (req, res) => {
     if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
       sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
     }
-    console.log(sharedWithUsers);
 
     try {
         const activity = await Activity.findById(activityId);
         if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
+            return res.status(404).json({ success: false, message: "Activity not found" });
         }
         //we find the current user and check if it is his activity, or if it is shared with him
         if (activity.user.toString() !== user._id.toString() && !activity.sharedWith.includes(user._id.toString())) {
-            return res.status(403).json({ message: "You are not allowed to update this activity" });
+            return res.status(403).json({ success: false, message: "You are not authorized to update this activity" });
         }
 
         // Update the activity
@@ -125,10 +101,7 @@ const updateActivity = async (req, res) => {
         .populate('description', 'content')
         .populate('sharedWith', 'username');
 
-        res.status(200).json({
-            ...updatedActivity.toObject(),
-            sharedWith: updatedActivity.sharedWith?.map(user => user.username) || []
-        });
+        res.status(200).json({ success: true, activity: updatedActivity });
 
     } catch (error) {
         console.error('Error updating activity:', error);
@@ -142,12 +115,13 @@ const deleteActivity = async (req, res) => {
     try {
         const activity = await Activity.findByIdAndDelete(activityId);
         if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
+            return res.status(404).json({ success: false, message: "Activity not found" });
         }
-        res.status(200).json({ message: "Activity deleted succesfully" });
+
+        res.status(200).json({ success: true, message: "Activity deleted successfully" });
     } catch (error) {
         console.error('Error deleting activity:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -158,7 +132,7 @@ async function exportActivity(req, res){
         const userName = req.session.username;
         const activity = await Activity.findById(activityId);
         if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
+            return res.status(404).json({ success: false, message: 'Activity not found' });
         }
 
         const user = await User.findOne({ username: userName });
@@ -175,10 +149,8 @@ async function exportActivity(req, res){
         
         if (error) {
             console.error("ICS generation error:", error);
-            return res.status(500).json({ message: 'Error while generating .ics' });
+            return res.status(500).json({ success: false, message: 'Error generating ICS file' });
         }
-
-        console.log("Generated .ics value:\n", value);
 
         // send the mail with the .ics file as attachment to the user
         const userEmail = user.email;
@@ -192,10 +164,10 @@ async function exportActivity(req, res){
         //download the file on frontend
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${activity.title}.ics"`);
-        res.status(200).send(value);
+        res.status(200).send({ success: true, value });
       } catch (err) {
         console.error(err);
-        res.status(500).send({ message: 'Error during the activity export' });
+        res.status(500).send({ success: false, message: 'Error exporting activity' });
       }
 }
 
@@ -240,13 +212,13 @@ async function createNoteAsInputOrOutput(req, res) {
         );
 
         if (!updatedActivity) {
-            return res.status(404).json({ message: "Activity not found" });
+            return res.status(404).json({ success: false, message: "Activity not found" });
         }
 
-        res.status(201).json({ message: "Note created and linked to activity", note: savedNote });
+        res.status(201).json({ success: true, message: "Note created and linked to activity", note: savedNote });
     } catch (error) {
         console.error("Error creating note:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error" });
     }
 }
 
@@ -272,10 +244,10 @@ async function updateOutputAsNote(req, res) {
 
         const savedNote = await note.save();
 
-        res.status(201).json({ message: "Note created and linked to activity", note: savedNote });
+        res.status(201).json({ success: true, message: "Note updated successfully", note: savedNote });
     } catch (error) {
         console.error("Error updating note:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error" });
     }
 }
 
@@ -288,23 +260,23 @@ async function updateActivityStatus(req, res) {
         //find the activity
         const activity = await Activity.findById(activityId);
         if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
+            return res.status(404).json({ success: false, message: "Activity not found" });
         }
         
         // Update the status of the activity only if it is different
         if (activity.status === status) {
-            return res.status(200).json({ message: "Status already up to date", activity });
+            return res.status(200).json({ success: true, message: "Status is already set to the requested value" });
         }
 
         // Update the status of the activity
         activity.status = status;
         await activity.save();
 
-        res.status(200).json(activity);
+        res.status(200).json({ success: true, message: "Activity status updated successfully", activity });
     }
     catch (error) {
         console.error("Error updating activity status:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error" });
     }
 }
 
@@ -407,21 +379,22 @@ async function adjustOrContractActivitySchedule(req, res) {
                 } 
             }
         }
-        // Create notifications to send to the users involved in the dependent activities about the schedule change
+        /* Create notifications to send to the users involved in the dependent activities about the schedule change
         const notificationPromises = activities.map(async (activity) => {
             const dateNotif = new Date().toISOString(); //TODO: TIME MACHINE DATE ?
             return createNotification({ elementId: activity._id, dateNotif, frequencyNotif: 'none', type: 'activity' }, res, true);
         });
 
         await Promise.all(notificationPromises);
+        */
 
-        res.status(200).json({ message: "Schedule adjusted/contracted successfully" ,
+        res.status(200).json({ success: true, message: "Schedule adjusted/contracted successfully" ,
             updatedMacros: Array.from(macroDeadlinesMap.entries()) // [ [macroId, newDeadline], ... ]
         });
     }
     catch (error) {
         console.error("Error adjusting/contracting activity schedule:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error" });
     }
 }
 
