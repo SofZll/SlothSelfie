@@ -80,11 +80,11 @@ const getEvents = async (req, res) => {
       ...event.toObject(),
       sharedWith: event.sharedWith.map(user => user.username)
     }));
-    res.status(200).json(eventsWithUsernames);
+    res.status(200).json({ success: true, eventsWithUsernames });
   }
   catch (error) {
     console.error('Error fetching events:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

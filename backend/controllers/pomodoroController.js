@@ -10,7 +10,7 @@ const getPomodori = async (req, res) => {
         const pomodori = await Pomodoro.find({ user: user._id })
             .populate('user', 'username');
 
-        res.status(200).json({seccess: true, pomodori });
+        res.status(200).json({success: true, pomodori });
     } catch (error) {
         console.error('Error fetching pomodori:', error);
         res.status(500).json({ success: false, message: error.message });

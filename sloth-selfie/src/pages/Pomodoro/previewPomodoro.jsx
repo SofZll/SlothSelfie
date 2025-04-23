@@ -56,8 +56,8 @@ const PreviewPomodoro = ({ viewType }) => {
   const fetchPomodoroListToDo = async () => {
     try {
         const response = await apiService('/pomodori/todo', 'GET', null, { credentials: 'include' });
-        if (response) {
-            setPomodoroList(response); // Set the pomodoro list from the backend
+        if (response.success) {
+            setPomodoroList(response.pomodori); // Set the pomodoro list from the backend
         }
     } catch (error) {
         console.error('Error fetching pomodoro list:', error);
@@ -68,8 +68,9 @@ const PreviewPomodoro = ({ viewType }) => {
   const fetchAllPomodoros = async () => {
     try {
         const response = await apiService('/pomodori', 'GET', null, { credentials: 'include' });
-        if (response) {
-            setAllPomodoros(response); // Set the pomodoro list from the backend
+        console.log('Response from backend:', response); // Log the response for debugging
+        if (response.success) {
+            setAllPomodoros(response.pomodori); // Set the pomodoro list from the backend
         }
     } catch (error) {
         console.error('Error fetching pomodoro list:', error);
