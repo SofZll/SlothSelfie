@@ -80,8 +80,11 @@ async function handleActivities(projectId) {
             updatedActivities = updatedActivities.filter(activity => activity.sharedWith.some(user => user.username === userLogged));
         }
 
-        // Re-render the activities
+        // Re-render the activities to update the status from the refreshed project
         renderActivities(updatedActivities, userLogged, isOwner);
+
+        //Updates the buttons
+        await updateActivitiesStatus(updatedActivities);
 
     } catch (error) {
         console.error("Error handling activities of the project:", error);
@@ -609,7 +612,7 @@ async function reactivateActivity(activityId, newStatus) {
         const project = projectData.project;
         //get the owner of the project
         const isOwner = project.owner.username === userLogged;
-        const isMember = activity.sharedWith.includes(userLogged);
+        const isMember = activity.sharedWith.some(user => user.username === userLogged);
         
         if(isOwner && !isMember){
             //we will not activate the saveUpdatedOutput nor the abandon button
