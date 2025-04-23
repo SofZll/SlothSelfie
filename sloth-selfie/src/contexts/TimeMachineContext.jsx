@@ -1,34 +1,18 @@
 import React, { useState, useEffect, createContext } from 'react';
 import '../styles/TimeMachine.css';
 
+import { dateFromDate, timeFromDate } from '../utils/utils';
+
 const TimeMachineContext = createContext();
 
 const TimeMachineProvider = ({ children }) => {
+    const [virtualNow, setVirtualNow] = useState(new Date());
     const [machineOpen, setMachineOpen] = useState(false);
-    const [currentTime, setCurrentTime] = useState('');
-    const [currentDate, setCurrentDate] = useState('');
-
-    /*  TODO: fai in modo che il tempo scorra in tempo reale */
-    const setTime = () => {
-            const now = new Date();
-            const time = now.toTimeString().split(' ')[0].slice(0, 5);
-    
-            const formattedDate = now.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            }).replace(',', '').replace(/\b[a-z]/g, char => char.toUpperCase());
-            
-            setCurrentDate(formattedDate);
-            setCurrentTime(time);
-        }
-    
-        useEffect(() => {
-            setTime();
-        }, []);
+    const currentDate = dateFromDate(virtualNow);
+    const currentTime = timeFromDate(virtualNow);
     
     return (
-        <TimeMachineContext.Provider value={{ machineOpen, setMachineOpen, currentTime, setCurrentTime, currentDate, setCurrentDate }}>
+        <TimeMachineContext.Provider value={{ machineOpen, setMachineOpen, virtualNow, setVirtualNow, currentTime, currentDate }}>
             {children}
         </TimeMachineContext.Provider>
     );

@@ -1,12 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import { apiService } from '../services/apiService';
-import { TimeMachineContext } from '../contexts/TimeMachineContext';
+import { apiService } from '../../services/apiService';
+import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 
 // TODO: il resto delle funzioni
 
 const TimeMachinePopup = () => {
-    const { setMachineOpen, currentTime, setCurrentTime, currentDate, setCurrentDate } = useContext(TimeMachineContext);
+    const { setMachineOpen, virtualNow, setVirtualNow, currentTime, currentDate } = useContext(TimeMachineContext);
 
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');
@@ -21,8 +21,6 @@ const TimeMachinePopup = () => {
         const response = await apiService('/time/set-time', 'POST', { date: inputDate, time: inputTime });
         if (response.success) {
             console.log('Time set successfully:', response);
-            setCurrentDate(inputDate);
-            setCurrentTime(inputTime);
             setMachineOpen(false);
         } else {
             console.error('Error setting time');
@@ -34,8 +32,6 @@ const TimeMachinePopup = () => {
         const response = await apiService('/time/reset-time', 'POST');
         if (response.success) {
             console.log('Time reset successfully:', response);
-            setCurrentDate(response.timeEntry.date);
-            setCurrentTime(response.timeEntry.time);
             setInputDate('');
             setInputTime('');
         } else {
@@ -43,6 +39,14 @@ const TimeMachinePopup = () => {
             Swal.fire({ icon: 'error', title: 'Oops...', text: 'Error resetting time' });
         }
     }
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setVirtualNow(prev => new Date(prev.getTime() + 1000));
+        }, 1000);
+    
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className='modal fade show time-machine-popup'>
