@@ -1,3 +1,13 @@
+.container {
+    margin-left: 55px; /*for desktop zoom*/
+  }
+
+@media screen and (max-width: 700px) and (hover: none) { /*for mobile*/
+    .container {
+        margin-left: 0;
+    }   
+}
+
 button.disabled {
     pointer-events: none;
     opacity: 0.7;

@@ -109,112 +109,18 @@ const updateActivity = async (req, res) => {
     }
 };
 
-// Deleting an activity, if it is a macro, we delete all the subactivities and its phaseSubphase (projects only)
-const deleteActivity = async (req, res) => {    //TODO: GESTIRE SUBATTIVITà IN CALENDARIO DA TOGLIERE LATO FRONT
+// Deleting an activity
+const deleteActivity = async (req, res) => {
     const {activityId} = req.params;
     try {
-        const activity = await Activity.findById(activityId);
+        const activity = await Activity.findByIdAndDelete(activityId);
         if (!activity) {
             return res.status(404).json({ success: false, message: "Activity not found" });
         }
-
-        // Macroactivitycase: if the activity is a macroactivity, we need to delete all the subactivities and the phaseSubphase
-        if (activity.isMacroactivity) {
-
-            const phaseSubphase = await PhaseSubphase.findOne({ macroActivity: activity._id });
-
-            if (phaseSubphase) {
-                if (phaseSubphase.type === 'subphase') {
-                    if (phaseSubphase.activities.length > 0) {
-                        for (const subActivityId of phaseSubphase.activities) {
-                            await deleteActivityWithRelations(subActivityId);
-                        }
-                    }
-
-                    //find the phase of the subphase and delete the subphase from it
-                    const phase = await PhaseSubphase.findById(phaseSubphase.parentPhase);
-                    if (phase) {
-                        phase.subphases = phase.subphases.filter(subphaseId => subphaseId.toString() !== phaseSubphase._id.toString());
-                        await phase.save();
-                    }
-
-                    await PhaseSubphase.findByIdAndDelete(phaseSubphase._id);
-                }
-
-                else if (phaseSubphase.type === 'phase') {
-                    // delete all activities of the subphases
-                    if (phaseSubphase.subphases && phaseSubphase.subphases.length > 0) {
-                        const subphases = await PhaseSubphase.find({ _id: { $in: phaseSubphase.subphases } });
-
-                        for (const sub of subphases) {
-                            if (sub.activities && sub.activities.length > 0) {
-                                for (const subActivityId of sub.activities) {
-                                    await deleteActivityWithRelations(subActivityId);
-                                }
-                                //delete the macro also
-                                await deleteActivityWithRelations(sub.macroActivity);
-                            }
-                            await PhaseSubphase.findByIdAndDelete(sub._id);
-                            console.log(`Eliminata sottofase ${sub.title}`);
-                        }
-                    }
-                    // delete all activities of the phase
-                    if (phaseSubphase.activities && phaseSubphase.activities.length > 0) {
-                        for (const subActivityId of phaseSubphase.activities) {
-                            await deleteActivityWithRelations(subActivityId);
-                        }
-                    }
-                    // delete the macroactivity
-                    await deleteActivityWithRelations(phaseSubphase.macroActivity);
-                    // Delete the phase
-                    await PhaseSubphase.findByIdAndDelete(phaseSubphase._id);
-                }
-            } else {
-                console.warn("No phase nor subphase associeted found in the macroActivity.");
-            }
-        }
-
-        // Delete the activity itself
-        await deleteActivityWithRelations(activityId);
-
         res.status(200).json({ success: true, message: "Activity deleted successfully" });
     } catch (error) {
         console.error('Error deleting activity:', error);
         res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-const deleteActivityWithRelations = async (activityId) => {
-    try {
-        const activity = await Activity.findById(activityId);
-        if (!activity) {
-            console.warn(`Activity not found with ID: ${activityId}`);
-            return;
-        }
-
-        const { description, input, output, events } = activity;
-
-        // Delete events associated with the activity
-        if (events && events.length > 0) {
-            await Event.deleteMany({ _id: { $in: events } });
-        }
-
-        // Delete notes associated with the activity
-        if (description) {
-            await Note.findByIdAndDelete(description);
-        }
-        if (input) {
-            await Note.findByIdAndDelete(input);
-        }
-        if (output) {
-            await Note.findByIdAndDelete(output);
-        }
-
-        // Delete the activity itself
-        await Activity.findByIdAndDelete(activityId);
-
-    } catch (err) {
-        console.error(`Error while deleting activity ${activityId}:`, err);
     }
 };
 
@@ -292,7 +198,8 @@ async function createNoteAsInputOrOutput(req, res) {
             content: content,
             user: user,
             noteAccess: "restricted", // only for members
-            allowedUsers: allowedUsernames
+            allowedUsers: allowedUsernames,
+            isInProject: true, // to differentiate between normal notes and project-activity notes
         });
         const savedNote = await newNote.save();
 

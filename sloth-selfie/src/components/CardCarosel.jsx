@@ -8,11 +8,13 @@ import {AuthContext} from '../contexts/AuthContext';
 import { CalendarProvider } from '../contexts/CalendarContext';
 import { NoteProvider } from '../contexts/NoteContext';
 import { TaskProvider } from '../contexts/TaskContext';
+import { PomodoroProvider } from '../contexts/PomodoroContext';
 
-import PreviewPomodoro from '../previewPomodoro';
-import PreviewNote from '../previewNote';
-import PreviewCalendar from '../previewCalendar';
-import PreviewProjects from '../previewProjects';
+//import the previews from the pages folder
+import PreviewCalendar from '../pages/Calendar/previewCalendar';
+import PreviewNote from '../pages/Note/previewNote';
+import PreviewPomodoro from '../pages/Pomodoro/previewPomodoro';
+import PreviewProjects from '../pages/previewProjects';
 
 
 const CardCarosel = ({ title, settingKey }) => {
@@ -34,7 +36,7 @@ const CardCarosel = ({ title, settingKey }) => {
         listOfNotes: 'Notes List',
         lastNote: 'Most recent Note',
         quickStart: 'Quick Start',
-        listOfPomodoros: 'Pomodoros List',
+        listOfPomodoros: 'Pomodoros ToDo List',
         lastPomodoro: 'Last Pomodoro',
         listOfProjects: 'Projects List',
         recentProjectsDeadlines: 'Upcoming Deadlines'
@@ -61,11 +63,11 @@ const CardCarosel = ({ title, settingKey }) => {
             case 'addNote':
                 return <PreviewNote viewType='add' />;
             case 'quickStart':
-                return <PreviewPomodoro viewType='quickStart' userLogged={user} />;
+                return <PreviewPomodoro viewType='quickStart' />;
             case 'listOfPomodoros':
-                return <PreviewPomodoro viewType='list' userLogged={user} />;
+                return <PreviewPomodoro viewType='list' />;
             case 'lastPomodoro':
-                return <PreviewPomodoro viewType='latest' userLogged={user} />;
+                return <PreviewPomodoro viewType='latest' />;
             case 'listOfProjects':
                 return <PreviewProjects viewType='list' />;
             case 'recentProjectsDeadlines':
@@ -103,24 +105,26 @@ const CardCarosel = ({ title, settingKey }) => {
         <CalendarProvider>
             <NoteProvider>
                 <TaskProvider>
-                    <animated.div
-                        className='card d-flex flex-column justify-content-evenly align-items-center'
-                        style={props3}
-                        onMouseEnter={() => setShown(true)}
-                        onMouseLeave={() => setShown(false)}
-                    >   
-                        <h2>{title}</h2>
-                        {customizations[settingKey] === 'showCalendar' ? (
-                                renderLegend()
-                        ) : (
-                            <>
-                                <p>{currentTitle}</p>
-                            </>
-                        )}
-                        
-                        {/* Render the content */}
-                        {renderContent()}
-                    </animated.div>
+                    <PomodoroProvider>
+                        <animated.div
+                            className='card d-flex flex-column justify-content-evenly align-items-center'
+                            style={props3}
+                            onMouseEnter={() => setShown(true)}
+                            onMouseLeave={() => setShown(false)}
+                        >   
+                            <h2>{title}</h2>
+                            {customizations[settingKey] === 'showCalendar' ? (
+                                    renderLegend()
+                            ) : (
+                                <>
+                                    <p>{currentTitle}</p>
+                                </>
+                            )}
+                            
+                            {/* Render the content */}
+                            {renderContent()}
+                        </animated.div>
+                    </PomodoroProvider>
                 </TaskProvider>
             </NoteProvider>
         </CalendarProvider>

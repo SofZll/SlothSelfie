@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
 
-import './styles/Previews.css';
-import './styles/App.css';
+import '../../styles/Previews.css';
+import '../../styles/App.css';
 
-import { AuthContext } from './contexts/AuthContext';
-import { useCalendar } from "./contexts/CalendarContext";
+import { AuthContext } from '../../contexts/AuthContext';
+import { useCalendar } from "../../contexts/CalendarContext";
 
-import { apiService } from './services/apiService';
+import { apiService } from '../../services/apiService';
 
 //TODO: Riguarda campo time per eventi quando vanno
 
