@@ -96,7 +96,7 @@ const FormCalendar = () => {
             )}
 
             <SelectionCalendarLayout>
-                {selected.selection === '...' ? (
+                {selected.selection === '...' && (
                     <div className='d-flex flex-column col-11 col-lg-8 align-items-center py-3'>
                         <Button text='Activity' alt='new activity' onClick={() => select('activity', false)} />
                         <Button text='Event' alt='new event' onClick={() => select('event', false)} />
@@ -105,16 +105,7 @@ const FormCalendar = () => {
                         <input id='ics-upload' type='file' accept='.ics' multiple onChange={handleICSUpload} style={{ display: 'none' }}/>
                         <Button text='Import .ics' alt='import ics' onClick={() => document.getElementById('ics-upload').click()} />
                     </div>
-                ) : (
-                    <>
-                    {selected.selection !== 'no availability' && selected.edit && (
-                        <button className='btn position-absolute bottom-0 start-0 translate-middle-y' onClick={() => exportData()}>
-                            <Download size='27' color='#555B6E' strokeWidth='1.75' />
-                        </button>
-                    )}
-                    </>
                 )}
-
 
                 {selected.selection === 'activity' && (
                     <div className="formPopup">
@@ -138,6 +129,12 @@ const FormCalendar = () => {
                     <div className="formPopup">
                         <FormTask />
                     </div>
+                )}
+
+                {selected.selection !== '...' && selected.selection !== 'no availability' && selected.edit && (
+                    <button className='btn position-absolute bottom-0 start-0 translate-middle-y' onClick={() => exportData()}>
+                        <Download size='27' color='#555B6E' strokeWidth='1.75' />
+                    </button>
                 )}
 
             </SelectionCalendarLayout>

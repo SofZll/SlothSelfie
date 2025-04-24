@@ -152,7 +152,6 @@ const FormActivity = () => {
                         delete
                     </button>
                 )}
-               <button type='button' id='useless-button' className='btn-main rounded shadow-sm mt-4 ms-3' style={{fontSize: '1px', color: 'white', backgroundColor: 'transparent', border: 'none', padding: '2px 5px'}}>.</button>
             </div>
 
             {deletePopUp && (
