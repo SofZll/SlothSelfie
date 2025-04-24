@@ -10,7 +10,6 @@ import { useCalendar } from "../../contexts/CalendarContext";
 
 import { apiService } from '../../services/apiService';
 
-//TODO: Riguarda campo time per eventi quando vanno
 
 const PreviewCalendar = ({ viewType }) => {
     const { activities, setActivities, events, setEvents } = useCalendar();
@@ -148,12 +147,19 @@ useEffect(() => {
                 return (
                     <div className="scrollable-list EventShow">
                         {todayEvents.length > 0 ? (
-                            todayEvents.map((event) => (
-                                <div key={event._id} className={`event-card ${getEventBorderClass(event)}`}>
-                                    <b>{event.title}</b>
-                                    <p>Time: {event.time}</p>
-                                </div>
-                            ))
+                            todayEvents.map((event) => {
+                                const startDate = new Date(event.startDate);
+                                const endDate = new Date(event.endDate);
+                                const formattedStartDate = startDate.toLocaleString();
+                                const formattedEndDate = endDate.toLocaleString();
+    
+                                return (
+                                    <div key={event._id} className={`event-card ${getEventBorderClass(event)}`}>
+                                        <b>{event.title}</b>
+                                        <p>{formattedStartDate} - {formattedEndDate}</p>
+                                    </div>
+                                );
+                            })
                         ) : (
                             <div className="div-postit">
                                  <h2>No events today!</h2>
