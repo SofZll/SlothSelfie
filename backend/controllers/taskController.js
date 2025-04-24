@@ -192,7 +192,7 @@ async function exportTask(req, res){
         //download the file on frontend
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${task.title}.ics"`);
-        res.status(200).send({ success: true, value });
+        res.status(200).send(value);
       } catch (err) {
         console.error(err);
         res.status(500).send({ success: false, message: 'Error exporting task' });
