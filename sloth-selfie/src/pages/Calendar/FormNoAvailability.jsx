@@ -13,9 +13,17 @@ const FormNoAvailability = () => {
 
     const setStartDate = (date) => {
         const newDate = new Date(date);
-        newDate.setHours(0, 0, 0, 0);
-        setAvailability({ ...availability, startDate: newDate });
-        console.log(availability);
+        if (availability.days) {
+            newDate.setHours(0, 0, 0, 0);
+            setAvailability({ ...availability, startDate: newDate });
+        } else {
+            newDate.setHours(new Date(availability.startDate).getHours(), new Date(availability.startDate).getMinutes(), 0, 0);
+            if (selected.edit) {
+                const newEndDate = new Date(newDate);
+                newEndDate.setHours(newEndDate.getHours() + parseInt(availability.duration), newEndDate.getMinutes(), 0, 0);
+                setAvailability({ ...availability, startDate: newDate, endDate: newEndDate });
+            } else setAvailability({ ...availability, startDate: newDate });
+        }
     }
 
     const setEndDate = (date) => {
@@ -34,17 +42,15 @@ const FormNoAvailability = () => {
         newEndDate.setHours(parseInt(hours) + parseInt(availability.duration), parseInt(minutes), 0, 0);
 
         setAvailability({ ...availability, startTime: time, startDate: newDate, endDate: newEndDate });
-        console.log(availability);
-        console.log(newDate);
-        console.log(newEndDate);
-        console.log(availability.duration);
-
     }
 
     const setEndTime = (duration) => {
-        const newDate = new Date(availability.startDate);
-        newDate.setHours(availability.startDate.getHours() + parseInt(duration), availability.startDate.getMinutes(), 0, 0);
-        setAvailability({ ...availability, endDate: newDate });
+        if (!duration) setAvailability({ ...availability, duration: null });
+        else {
+            const newDate = new Date(availability.startDate);
+            newDate.setHours(newDate.getHours() + parseInt(duration), newDate.getMinutes(), 0, 0);
+            setAvailability({ ...availability, endDate: newDate, duration: parseInt(duration) });
+        }
     }
 
 
@@ -72,6 +78,11 @@ const FormNoAvailability = () => {
                 return;
             }
 
+            if (!availability.duration) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Duration is required', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+
             if (!availability.endDate > new Date(availability.startDate).setHours(23, 59, 59, 999)) {
                 Swal.fire({ title: 'Warning', icon: 'warning', text: 'End time must be before the next day', customClass: { confirmButton: 'button-alert' } });
                 return;
@@ -96,11 +107,15 @@ const FormNoAvailability = () => {
             }
         }
 
-        const response = await apiService(`/no-availability/${selected.edit ? selected._id : ''}`, selected.edit ? 'PUT' : 'POST', availability);
+        const response = await apiService(`/no-availability/${selected.edit ? availability._id : ''}`, selected.edit ? 'PUT' : 'POST', availability);
 
         if (response.success) {
             Swal.fire({ title: selected.edit ? 'Availability edited' : 'Availability added', icon: 'success', text: selected.edit ? 'Availability edited successfully' : 'Availability added successfully', customClass: { confirmButton: 'button-alert' } });
-            setAvailabilities([...availabilities, ...(availability.repeatFrequency !== 'none' ? response.listNoAvailability : [response.noAvailability])]);
+            if (selected.edit) {
+                if (availability.repeatFrequency === 'none') setAvailabilities(availabilities.map(a => a._id === availability._id ? response.noAvailability : a));
+                else setAvailabilities([...availabilities.filter(a => a.fatherId !== availability.fatherId), ...response.listNoAvailability]);
+            }
+            else setAvailabilities([...availabilities, ...(availability.repeatFrequency !== 'none' ? response.listNoAvailability : [response.noAvailability])]);
         } else Swal.fire({ title: 'Error', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
         resetAvailability();

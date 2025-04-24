@@ -100,6 +100,7 @@ export const CalendarProvider = ({ children }) => {
         duration: 1,
         repeatFrequency: 'none',
         numberOfOccurrences: 0,
+        fatherId: '',
     });
 
     const [availabilities, setAvailabilities] = useState([]);
@@ -114,6 +115,7 @@ export const CalendarProvider = ({ children }) => {
             duration: 1,
             repeatFrequency: 'none',
             numberOfOccurrences: 0,
+            fatherId: '',
         });
     }
 

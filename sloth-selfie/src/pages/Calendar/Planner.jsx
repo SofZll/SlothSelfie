@@ -34,7 +34,7 @@ const Planner = () => {
 
     const fetchEvents = async () => {
         const response = await apiService('/events', 'GET');
-        if (response.success) setEvents(response.events);
+        if (response.success) setEvents(response.eventsWithUsernames);
     }
 
     const fetchActivities = async () => {
