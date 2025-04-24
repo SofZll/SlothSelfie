@@ -58,6 +58,20 @@ const initScheduler = async () => {
         }
     });
 
+    agenda.define('send-notification-now', async job => {
+        const notification = job.attrs.data.notification;
+        try {
+            if (notification.mode.system) {
+                await sendSystemNotification(notification);
+            }
+            if (notification.mode.email) {
+                await sendEmailNotification(notification);
+            }
+        } catch (error) {
+            console.error(`Notification ${notification._id} failed:`, error);
+        }
+    });
+
     agenda.define('cleanup-notifications-snoozes', async job => {
         try {
             await cleanupExpiredSnoozes();
@@ -123,6 +137,9 @@ const scheduleNotification = async (notifications) => {
             defaultNotification(notification);
         } else if (notification.type === 'repeat') {
             repeatNotification(notification);
+        } else if (notification.type === 'now') {
+            const job = await agenda.schedule(new Date(), 'send-notification-now', { notification: notification._id });
+            console.log("JOB RUNNING", job.attrs.type, job.attrs);
         }
     });
 };
@@ -176,5 +193,5 @@ const calculateNotificationTime = (notification) => {
 
 module.exports = {
     initScheduler,
-    scheduleNotification,
+    scheduleNotification
 };

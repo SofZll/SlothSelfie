@@ -22,6 +22,14 @@ const eventSchema = new mongoose.Schema({
         ref: 'User',
     }],
 
+    status: [{
+        type: String,
+        enum: ['accepted', 'declined', 'waiting'],
+        required: function() {
+            return this.sharedWith.length > 1;
+        }
+    }],
+
     startDate: {
         type: Date,
         required: true,
@@ -49,15 +57,6 @@ const eventSchema = new mongoose.Schema({
     eventLocation: {
         type: String,
         default: null,
-    },
-
-    notify: {
-        type: Boolean,
-        default: false
-    },
-    notificationTime: {
-        type: Number,
-        default: 0
     },
 
     isInProject: {  //used to differentiate between normal events and project-activity events
