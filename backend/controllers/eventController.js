@@ -320,6 +320,7 @@ const importEvents = async (req, res) => {
     for (const file of files) {
         const filePath = file.path;  // Path to the file
         const data = ical.parseFile(filePath);  // Parsing file .ics
+        console.log('Parsed data:', data);  // Log the parsed data for debugging
 
       for (const key in data) {
         const icsEvent = data[key];
@@ -339,8 +340,8 @@ const importEvents = async (req, res) => {
           importedEvents.push(newEvent);
 
           //try with activity model   IT WORKS!
-          /*
-          const newActivity = new Activity({
+         
+          /*const newActivity = new Activity({
             title: icsEvent.summary || 'Untitled Event',
             deadline: new Date(icsEvent.start),
             allDay: !icsEvent.start.getHours(),

@@ -77,9 +77,9 @@ const FormCalendar = () => {
 
             const a = document.createElement('a');
             a.href = URL.createObjectURL(response);
-            if (selected.selection === 'activity') a.download = `${selected.selection}_${activity.title}.ics`;
-            else if (selected.selection === 'event') a.download = `${selected.selection}_${event.title}.ics`;
-            else if (selected.selection === 'task') a.download = `${selected.selection}_${task.title}.ics`;
+            if (selected.selection === 'activity') a.download = `${activity.title}.ics`;
+            else if (selected.selection === 'event') a.download = `${event.title}.ics`;
+            else if (selected.selection === 'task') a.download = `${task.title}.ics`;
             a.click();
 
             Swal.fire({ title: 'Export success!', icon: 'success', text: `${selected.selection} exported successfully, a mail with .ics attachment will be sent to you`, customClass: { confirmButton: 'button-alert' } });
