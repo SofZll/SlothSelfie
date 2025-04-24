@@ -157,6 +157,11 @@
     }
   }
 
+  .stats-preview-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
 /*Projects selection list*/
 .project-list li {
   cursor: pointer;

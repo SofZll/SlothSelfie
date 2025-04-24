@@ -6,6 +6,7 @@ import { apiService } from '../../services/apiService';
 import { usePomodoro } from '../../contexts/PomodoroContext';
 import { AuthContext } from '../../contexts/AuthContext';
 import TimerPomodoroMini from '../../components/TimerPomodoroMini';
+import StatsPomodoro from '../../components/StatsPomodoro';
 
 
 const PreviewPomodoro = ({ viewType }) => {
@@ -96,16 +97,11 @@ const renderPomodoroPreview = () => {
       // Verify if the pomodoroList has elements
       if (pomodoroList.length > 0) {
         return (
-          <div className="containerPreview">
             <div className="scrollable-list">
               {pomodoroList.map((pomodoro, index) => (
                 <div key={index} className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {pomodoro.cycles} - studyTime: {pomodoro.studyTime} - breakTime: {pomodoro.breakTime}</div>
               ))}
             </div>
-            <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
-              <button className="btn btn-main blue">Set Pomodoro</button>
-            </Link>
-          </div>
         );
       } else {
         return (
@@ -117,6 +113,13 @@ const renderPomodoroPreview = () => {
         );
       }
 
+    case 'stats':
+      return (
+        <div className="containerPreview d-flex flex-column align-items-center stats-preview-scroll">
+      <StatsPomodoro />
+    </div>
+      );
+
     case 'latest':
     
     default:
@@ -124,12 +127,7 @@ const renderPomodoroPreview = () => {
       if (allPomodoros.length > 0) {
         const lastPomodoro = allPomodoros[allPomodoros.length - 1];
         return (
-          <div className="containerPreview">
             <div className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {lastPomodoro.cycles} - studyTime: {lastPomodoro.studyTime} - breakTime: {lastPomodoro.breakTime}</div>
-            <Link to="/pomodoro" onClick={() => handleLinkClick('/pomodoro')}>
-              <button className="btn btn-main blue">Set Pomodoro</button>
-            </Link>
-          </div>
         );
       } else {
         return (

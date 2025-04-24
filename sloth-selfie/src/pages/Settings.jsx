@@ -91,6 +91,10 @@ function PreviewSetUp(props) {
                             text="Last Pomodoro"
                             onClick={() => handleCustomizationChange('pomodoro', 'lastPomodoro')} 
                         />
+                        <Button
+                            text="Pomodoros Stats"
+                            onClick={() => handleCustomizationChange('pomodoro', 'stats')}
+                        />
                         {/* other pomodoro personalizations */}
                     </div>
                 );
