@@ -1,5 +1,6 @@
 import React, { useState, useRef, createContext, useEffect } from 'react';
 
+import socket from '../services/socket/socket';
 import { apiService } from '../services/apiService';
 import { bufferToBase64 } from '../utils/utils';
 
@@ -77,6 +78,30 @@ const AuthProvider = ({ children }) => {
             isMounted = false;
         };
     }, []);
+
+    useEffect(() => {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => console.log('Notification permission:', permission));
+        }
+    }, []);
+
+    useEffect(() => {
+        if (user?._id) socket.connect();
+        else socket.disconnect();
+    }, [user]);
+
+    useEffect(() => {
+        if (!user?._id || Notification.permission !== 'granted') return;
+
+        const handler = ({ title, body, notificationId }) => {
+            new Notification(title, { body, tag: notificationId, renotify: true });
+        };
+        socket.on('system-notification', handler);
+
+        return () => {
+            socket.off('system-notification', handler);
+        }
+    }, [user]);
 
     return (
         <AuthContext.Provider value={{ user, setUser, fetchUserData, loading }}>
