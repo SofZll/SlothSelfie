@@ -84,7 +84,7 @@ const initScheduler = async () => {
     agenda.on('ready', async () => {
         await agenda.start();
         console.log('Notification scheduler started');
-        agenda.every('1 minute', 'cleanup-notifications-snoozes');
+        agenda.every('1 hour', 'cleanup-notifications-snoozes');
     });
 };
 
