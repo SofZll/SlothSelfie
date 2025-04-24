@@ -36,7 +36,7 @@ const PopUpPomodoro = () => {
                         </button>
                     </div>
 
-                    <div className='modal-body col-12'>
+                    <div className='modal-body col-12' style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                         <div className='border-top border-secondary d-flex w-100 mt-3'></div>
 
                         {popUp.edit && (  
