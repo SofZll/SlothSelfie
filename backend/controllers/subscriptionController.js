@@ -5,11 +5,19 @@ const subscribe = async (req, res) => {
         const subscription = req.body;
         const userId = req.session.userId;
 
-        await Subscription.create({ user: userId, subscription });
-        res.status(201).json({ message: 'Subscription saved successfully!' });
+        const existingSubscription = await Subscription.findOne({ user: userId });
+        if (!existingSubscription) {
+            const newSubscription = new Subscription({ user: userId, subscription });
+            await newSubscription.save();
+            return res.status(201).json({ success: true, message: 'Subscription saved successfully!' });
+        } else {
+            existingSubscription.subscription = subscription;
+            await existingSubscription.save();
+            return res.status(200).json({ success: true, message: 'Subscription updated successfully!' });
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to save subscription' });
+        res.status(500).json({ success: false, error: 'Failed to save subscription' });
     }
 }
 

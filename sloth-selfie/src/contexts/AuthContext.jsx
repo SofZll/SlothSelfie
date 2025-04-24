@@ -1,8 +1,9 @@
 import React, { useState, useRef, createContext, useEffect } from 'react';
+import { toastInfo } from '../utils/toastUtils';
 
 import socket from '../services/socket/socket';
 import { apiService } from '../services/apiService';
-import { bufferToBase64 } from '../utils/utils';
+import { bufferToBase64, urlBase64ToUint8Array } from '../utils/utils';
 
 const AuthContext = createContext();
 
@@ -93,6 +94,7 @@ const AuthProvider = ({ children }) => {
                 console.log('SW registered:', registration);
                 let subscription = await registration.pushManager.getSubscription();
                 if (!subscription) {
+                    console.log('key:', process.env.REACT_APP_VAPID_PUBLIC_KEY);
                     const key = process.env.REACT_APP_VAPID_PUBLIC_KEY;
                     const appKey = urlBase64ToUint8Array(key);
                     subscription = await registration.pushManager.subscribe({
@@ -101,7 +103,7 @@ const AuthProvider = ({ children }) => {
                     });
                     console.log('New subscription:', subscription);
                 }
-                await apiService('/subscribe', 'POST', { subscription });
+                await apiService('/subscribe', 'POST', subscription);
                 console.log('Subscription sent to backend');
             } catch (err) {
                 console.error('SW/Push error:', err);
@@ -118,13 +120,12 @@ const AuthProvider = ({ children }) => {
         if (!user?._id || Notification.permission !== 'granted') return;
 
         const handler = ({ title, body, notificationId }) => {
-            new Notification(title, { body, tag: notificationId, renotify: true });
+            console.log('Notification received:', { title, body, notificationId });
+            toastInfo(title, body);
         };
         socket.on('system-notification', handler);
 
-        return () => {
-            socket.off('system-notification', handler);
-        }
+        return () => socket.off('system-notification', handler);
     }, [user]);
 
     return (

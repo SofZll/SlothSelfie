@@ -51,8 +51,6 @@ const timeFromDate = (date) => {
     }
 };
 
-// function for date chatbox and forum
-
 // Function to convert buffer to base64 string
 // Since the image is stored a Buffer we need to convert it to base64
 const bufferToBase64 = (buffer) => {
@@ -60,4 +58,14 @@ const bufferToBase64 = (buffer) => {
     return btoa(binary);
 };
 
-export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime, dateFromDate, timeFromDate };
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const b64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(b64);
+    const outputArr = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) outputArr[i] = rawData.charCodeAt(i);
+    return outputArr;
+}
+
+
+export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime, dateFromDate, timeFromDate, urlBase64ToUint8Array };
