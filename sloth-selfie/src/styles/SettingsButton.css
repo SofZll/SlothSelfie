@@ -53,3 +53,7 @@
 .modal-content select[multiple] {
     height: 20vh;
 }
+
+label, h3 {
+    color: #333;
+}
