@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 
 const { initScheduler, scheduleNotification } = require('../agenda/notificationScheduler');
-const { sendSystemNotification, sendEmailNotification } = require('../services/notificationService');
-
 // Mongodb credentials
 /*
 const mongoCredentials = {

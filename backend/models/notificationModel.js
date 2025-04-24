@@ -21,7 +21,7 @@ const notificationSchema = new mongoose.Schema({
 
     type: {
         type: String,
-        enum: ['default', 'repeat'],
+        enum: ['default', 'repeat', 'now'],
         required: true
     },
 

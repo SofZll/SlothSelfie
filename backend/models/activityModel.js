@@ -17,17 +17,18 @@ const activitySchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    notify: {
-        type: Boolean,
-        default: false
-    },
-    notificationTime: {
-        type: Number,
-        default: 0
-    },
+
     sharedWith: [{ //used also for assigning activities to users in projects
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+    }],
+
+    status: [{
+        type: String,
+        enum: ['accepted', 'declined', 'waiting'],
+        required: function() {
+            return this.sharedWith.length > 1;
+        }
     }],
 
     // New fields only for Project-activities 
