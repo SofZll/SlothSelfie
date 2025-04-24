@@ -62,7 +62,7 @@ const FormActivity = () => {
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
-            const newActivity = response;
+            const newActivity = response.activity;
 
             if (notifications.length > 0) {
                 const response = await apiService(`/notification`, 'POST', {

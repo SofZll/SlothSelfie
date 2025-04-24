@@ -1,6 +1,6 @@
 import React from 'react';
-import { useIsDesktop } from '../utils/utils';
 
+import { useIsDesktop } from '../utils/utils';
 import '../styles/Menu.css';
 
 import DesktopNav from '../components/DesktopNav'

@@ -26,8 +26,8 @@ const ChatBox = () => {
             if (matchedChat) {
                 setSelectedChat(matchedChat);
             }
-        } else if (user?._id) fetchChats();
-    }, [chatId, user?._id, chats, fetchChats, setSelectedChat]);
+        }
+    }, [chatId, chats, setSelectedChat]);
 
     useEffect(() => {
         if (!user?._id) return;

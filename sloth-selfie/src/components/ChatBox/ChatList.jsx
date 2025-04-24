@@ -1,4 +1,4 @@
-import React, { useMemo , useContext} from 'react';
+import React, { useMemo , useEffect, useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -53,10 +53,13 @@ const ChatList = () => {
             console.error('Error fetching chat:', response);
             Swal.fire({ icon: 'error', title: 'Errore', text: response.message });
         }
-        if (!isDesktop && chats) {
+    }
+
+    useEffect(() => {
+        if (!isDesktop && selectedChat) {
             navigate(`/chat/${selectedChat.otherParticipant.username}`);
         }
-    }
+    }, [selectedChat, isDesktop, navigate]);
 
     return (
         <>
