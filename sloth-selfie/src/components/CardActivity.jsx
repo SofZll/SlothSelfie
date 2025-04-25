@@ -7,7 +7,7 @@ import { Pen } from 'lucide-react';
 
 const CardActivity = ({ Activity, smallView }) => {
 
-    const { setActivity, activities, setActivities, setSelected } = useCalendar();
+    const { setActivity, activities, setActivities, setSelected, fetchNotifications } = useCalendar();
 
     const markComplete = async () => {
         const response = await apiService(`/activity/${Activity._id}`, 'PUT', { ...Activity, completed: !Activity.completed });
@@ -17,6 +17,7 @@ const CardActivity = ({ Activity, smallView }) => {
     const selectActivity = () => {
         setActivity(Activity);
         setSelected({ selection: 'activity', edit: true });
+        fetchNotifications({ elementId: Activity._id });
     }
 
     return (

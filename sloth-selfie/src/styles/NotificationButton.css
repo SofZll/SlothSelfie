@@ -1,0 +1,19 @@
+.notification-wrapper {
+    z-index: 1056;
+}
+
+.notification-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: fixed;
+    top: 0.8rem;
+    left: 0.5rem;
+    width: 5rem;
+    height: 3rem;
+    background-color: transparent;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: move;
+}

@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState }  from 'react';
 
+import { dateFromDate, timeFromDate } from '../utils/utils';
+import { apiService } from '../services/apiService';
+
 const CalendarContext = createContext();
 
 export const CalendarProvider = ({ children }) => {
@@ -159,6 +162,21 @@ export const CalendarProvider = ({ children }) => {
 
     const [notifications, setNotifications] = useState([]);
 
+    const fetchNotifications = async ({ elementId }) => {
+        const response = await apiService(`/notifications/${elementId}`, 'GET');
+        if (response.success) {
+            if (response.notifications.length > 0) {
+                setNotifications(response.notifications.map(notification => {
+                    return {
+                        ...notification,
+                        fromDate: dateFromDate(new Date(notification.from)),
+                        fromTime: timeFromDate(new Date(notification.from)),
+                    }
+                }));
+            } else setNotifications([]);
+        } else setNotifications([]);
+    }
+
     // disable save button if conditions are not met
     const [conditionsMet, setConditionsMet] = useState(false);
 
@@ -167,7 +185,7 @@ export const CalendarProvider = ({ children }) => {
             value={{ activity, setActivity, activities, setActivities, resetActivity,
                 event, setEvent, events, setEvents, addImportedEvents, resetEvent,
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
-                selected, setSelected, select, back, resetSelected, notifications, setNotifications, conditionsMet, setConditionsMet, }}>
+                selected, setSelected, select, back, resetSelected, notifications, setNotifications, fetchNotifications, conditionsMet, setConditionsMet, }}>
 
             {children}
             

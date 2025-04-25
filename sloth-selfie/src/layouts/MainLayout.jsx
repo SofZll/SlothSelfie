@@ -10,6 +10,7 @@ import TimeMachineButton from '../components/TimeMachine/TimeMachineButton';
 import { TimeMachineProvider } from '../contexts/TimeMachineContext';
 import { ChatProvider } from '../contexts/ChatContext';
 import ChatBox from '../components/ChatBox/ChatBox';
+import NotificationButton from '../components/NotificationButton';
 
 const MainLayout = ({ children }) => {
     const isDesktop = useIsDesktop();
@@ -24,7 +25,10 @@ const MainLayout = ({ children }) => {
                     </ChatProvider>
                 </>
             ) : (
-                <MobileNav />
+                <>
+                    <NotificationButton />
+                    <MobileNav />
+                </>
             )}
             <Header />
             <TimeMachineProvider>

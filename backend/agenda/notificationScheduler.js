@@ -1,12 +1,11 @@
 const Notification = require('../models/notificationModel');
-const Activity = require('../models/activityModel');
-const Event = require('../models/eventModel');
 const agenda = require('./agenda');
 
 const { sendSystemNotification, sendEmailNotification } = require('../services/notificationService');
 
 const initScheduler = async () => {
     agenda.define('send-notification', async job => {
+        console.log('🏁 SEND NOTIFICATION FIRED!');
         const notificationId = job.attrs.data.notification;
         const notification = await Notification.findById(notificationId).populate('element');
         if (!notification) {
@@ -17,32 +16,20 @@ const initScheduler = async () => {
         console.log('notification', notification);
 
         if (now < new Date(notification.from) || now > new Date(notification.to)) {
-            console.log(`Notification ${notification._id} skipped, out of active window.`);
+            console.log(`Notification ${notification._id.toString()} skipped, out of active window.`);
             return;
         }
 
         if (notification.type === 'repeat' && notification.snooze) {
-            const snoozeUntil = new Date(notification.snoozeUntil);
+            const snoozeUntil = new Date(notification.snoozeSettings.until);
             if (now < snoozeUntil) {
-                console.log(`Notification ${notification._id} snoozed until ${snoozeTime}`);
+                console.log(`Notification ${notification._id.toString()} snoozed until ${snoozeUntil}`);
                 return;
             } else {
                 notification.snooze = false;
-                notification.snoozeUntil = null;
-                notification.snoozeCount = 0;
+                notification.snoozeSettings.until = null;
+                notification.snoozeSettings.count = 0;
                 await notification.save();
-
-                const mainJobs = await agenda.jobs({ 
-                    name: 'send-notification', 
-                    'data.notification._id': notification._id,
-                    'attrs.disabled': true
-                });
-
-                if (mainJobs.length > 0) {
-                    const mainJob = mainJobs[0];
-                    mainJob.attrs.disabled = false;
-                    await mainJob.save();
-                }
             }
         }
 
@@ -54,12 +41,14 @@ const initScheduler = async () => {
                 await sendEmailNotification(notification);
             }
         } catch (error) {
-            console.error(`Notification ${notification._id} failed:`, error);
+            console.error(`Notification ${notification._id.toString()} failed:`, error);
         }
     });
 
     agenda.define('send-notification-now', async job => {
-        const notification = job.attrs.data.notification;
+        const notificationId = job.attrs.data.notification;
+        const notification = await Notification.findById(notificationId).populate('element');
+
         try {
             if (notification.mode.system) {
                 await sendSystemNotification(notification);
@@ -68,7 +57,7 @@ const initScheduler = async () => {
                 await sendEmailNotification(notification);
             }
         } catch (error) {
-            console.error(`Notification ${notification._id} failed:`, error);
+            console.error(`Notification ${notification._id.toString()} failed:`, error);
         }
     });
 
@@ -91,36 +80,26 @@ const initScheduler = async () => {
 const cleanupExpiredSnoozes = async () => {
     const now = new Date();
 
-    const notifications = await Notification.find({ snooze: true, snoozeUntil: { $lt: now } });
+    const notifications = await Notification.find({ snooze: true, 'snoozeSettings.until': { $lt: now } });
 
     for (const notification of notifications) {
-        const mainJobs = await agenda.jobs({ 
-            name: 'send-notification', 
-            'data.notification._id': notification._id,
-            'attrs.disabled': true
-        });
-
-        if (mainJobs.length > 0) {
-            const mainJob = mainJobs[0];
-            mainJob.attrs.disabled = false;
-            await mainJob.save();
-        }
 
         notification.snooze = false;
-        notification.snoozeUntil = null;
-        notification.snoozeCount = 0;
+        notification.snoozeSettings.until = null;
+        notification.snoozeSettings.count = 0;
         await notification.save();
 
         const tempJob = await agenda.jobs({
             name: 'send-notification',
-            'data.notification._id': notification._id,
-            nextRunAt: { $lte: now },
+            'data.notification': notification._id.toString(),
+            'data.isSnoozeJob': true,
         });
 
         if (tempJob.length > 0) {
             for (const job of tempJob) await job.remove();
         }
     }
+
     console.log('Expired snoozes cleaned up');
 }
 
@@ -132,45 +111,67 @@ const scheduleNotification = async (notifications) => {
 
     console.log('Scheduling notifications:', notifications);
     
-    notifications.forEach(async (notification) => {
+    for (const notification of notifications) {
         if (notification.type === 'default') {
             defaultNotification(notification);
         } else if (notification.type === 'repeat') {
             repeatNotification(notification);
         } else if (notification.type === 'now') {
-            const job = await agenda.schedule(new Date(), 'send-notification-now', { notification: notification._id });
+            const job = await agenda.schedule(new Date(), 'send-notification-now', { notification: notification._id.toString() });
             console.log("JOB RUNNING", job.attrs.type, job.attrs);
         }
-    });
+    };
 };
 
 const defaultNotification = async (notification) => {
     const notificationTime = calculateNotificationTime(notification);
 
-    const existingJobs = await agenda.jobs({ name: 'send-notification', 'data.notification': notification._id });
+    const existingJobs = await agenda.jobs({ name: 'send-notification', 'data.notification': notification._id.toString() });
     if (existingJobs.length == 0) {
-        const job = await agenda.schedule(notificationTime, 'send-notification', { notification: notification._id });
+        const uniqueId = generateUniqueId();
+        console.log('uniqueId', uniqueId);
+
+        const job = await agenda.schedule(notificationTime, 'send-notification', { 
+            notification: notification._id.toString(),
+            uniqueId
+        });
         console.log("JOB RUNNING", job.attrs.type, job.attrs);
     } else {
-        console.log(`Notification ${notification._id} already scheduled.`);
+        console.log(`Notification ${notification._id.toString()} already scheduled.`);
     }
 }
 
 const repeatNotification = async (notification) => {
     const rule = `${notification.before} ${notification.variant}s`;
 
-    const existingJobs = await agenda.jobs({ name: 'send-notification', 'data.notification': notification._id });
+    const existingJobs = await agenda.jobs({ name: 'send-notification', 'data.notification': notification._id.toString() });
 
     if (existingJobs.length === 0) {
-        agenda.every( rule, 'send-notification', { notification: notification._id }, { 
-            skipImmediate: true, 
-            timezone: 'Europe/Rome',
+        const uniqueId = await generateUniqueId();
+        
+        const job = agenda.create('send-notification', {
+            notification: notification._id.toString(),
+            uniqueId,
         });
+
+        job.repeatEvery(rule, {
+            skipImmediate: true,
+        });
+        job.save();
+
         console.log("CREATING REPEATING JOB", {
             rule,
-            data: { notificationId: notification._id.toString() }
+            data: { 
+                notificationId: notification._id.toString(),
+                uniqueId,
+            }
         });
-    } else console.log(`Notification ${notification._id} already scheduled.`);
+    } else console.log(`Notification ${notification._id.toString()} already scheduled.`);
+}
+
+const generateUniqueId = async () => {
+    const { nanoid } = await import('nanoid');
+    return nanoid(10);
 }
 
 const calculateNotificationTime = (notification) => {
