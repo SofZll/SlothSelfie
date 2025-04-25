@@ -26,7 +26,7 @@ const FormActivity = () => {
         }
 
         if (selected.edit) {
-            const response = await apiService(`/activity/${activity._id}`, 'PUT', activity);
+            const response = await apiService(`/activity/${activity._id}`, 'PUT', { activity, notifications });
             if (response.success){
                 const notificationPromises = notifications.map(async notification =>{
                     if (notification._id) {
@@ -62,7 +62,7 @@ const FormActivity = () => {
                 resetActivity();
             } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
 
-            const newActivity = response;
+            const newActivity = response.activity;
 
             if (notifications.length > 0) {
                 const response = await apiService(`/notification`, 'POST', {

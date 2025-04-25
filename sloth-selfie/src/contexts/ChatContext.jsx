@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from 'react';
+import React, { useState, createContext, useContext, useEffect } from 'react';
 
 import { apiService } from '../services/apiService';
 import { useIsDesktop, bufferToBase64 } from '../utils/utils';
@@ -67,6 +67,10 @@ const ChatProvider = ({ children }) => {
             console.error('Error fetching chats:', response);
         }
     }
+
+    useEffect(() => {
+        if (user?._id) fetchChats();
+    }, [user?._id]);
 
     return (
         <ChatContext.Provider value={{

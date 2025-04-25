@@ -16,6 +16,14 @@ const eventSchema = new mongoose.Schema({
         ref: 'User',
     }],
 
+    status: [{
+        type: String,
+        enum: ['accepted', 'declined', 'waiting'],
+        required: function() {
+            return this.sharedWith.length > 1;
+        }
+    }],
+
     startDate: {
         type: Date,
         required: true,

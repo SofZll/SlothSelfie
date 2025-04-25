@@ -27,16 +27,6 @@ const chatSocket = {
                 console.error('Error marking message as read:', error);
             }
         });
-
-        socket.on('join-chatroom', (userId) => {
-            console.log(`${socket.id} joined chat ${userId}`);
-            socket.join(userId);
-        });
-        
-        socket.on('leave-chatroom', (userId) => {
-            console.log(`${socket.id} left chat ${userId}`);
-            socket.leave(userId);
-        });
     }
 }
 

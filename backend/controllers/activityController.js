@@ -70,8 +70,8 @@ const getActivity = async (req, res) => {
 
 // Updating an activity
 const updateActivity = async (req, res) => {
-    const{activityId} = req.params;
-    const {title, deadline, completed, sharedWith} = req.body;
+    const { activityId } = req.params; 
+    const { title, deadline, completed, sharedWith } = req.body;
     const userName = req.session.username;
 
     const user = await User.findOne({ username: userName });
@@ -378,14 +378,27 @@ async function adjustOrContractActivitySchedule(req, res) {
                 } 
             }
         }
-        /* Create notifications to send to the users involved in the dependent activities about the schedule change
-        const notificationPromises = activities.map(async (activity) => {
-            const dateNotif = new Date().toISOString(); //TODO: TIME MACHINE DATE ?
-            return createNotification({ elementId: activity._id, dateNotif, frequencyNotif: 'none', type: 'activity' }, res, true);
-        });
-
-        await Promise.all(notificationPromises);
-        */
+        /* Create notifications to send to the users involved in the dependent activities about the schedule change */
+        for (const activity of activities) {
+            const usersToNotify = await User.find({ _id: { $in: activity.sharedWith } });
+            for (const user of usersToNotify) {
+                console.log('user:', user);
+                console.log('activity:', activity);
+                const notification = await Notification.create({
+                    user: user._id,
+                    element: activity._id,
+                    elementType: 'Activity',
+                    type: 'now',
+                    mode: {
+                        system: true,
+                        email: true,
+                    }
+                });
+                await scheduleNotification([notification]);
+                console.log(`Notifying user ${user.username} about schedule change for activity ${activity._id}`);
+            }
+            console.log(`Notifying users about schedule change for activity ${activity._id}:`, usersToNotify);
+        }
 
         res.status(200).json({ success: true, message: "Schedule adjusted/contracted successfully" ,
             updatedMacros: Array.from(macroDeadlinesMap.entries()) // [ [macroId, newDeadline], ... ]

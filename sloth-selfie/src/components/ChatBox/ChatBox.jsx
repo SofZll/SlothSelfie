@@ -21,55 +21,28 @@ const ChatBox = () => {
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        if (!socket.connected) {
-            socket.connect();
-        }
-        return () => {
-            socket.disconnect();
-        };
-    }, []);    
-
-    useEffect(() => {
         if (chatId) {
             const matchedChat = chats.find(chat => chat.otherParticipant.username === chatId);
             if (matchedChat) {
                 setSelectedChat(matchedChat);
             }
-        } else {
-            if (user?._id) fetchChats();
         }
-    }, [chatId, user?._id]);
-    
-    useEffect(() => {
-        if (user?._id) {
-            socket.emit('join-chatroom', user._id);
-            console.log('User joined chatroom:', user._id);
-            socket.emit('online-user', user._id);
-        }
-    }, [user?._id]);
+    }, [chatId, chats, setSelectedChat]);
 
     useEffect(() => {
         if (!user?._id) return;
-        socket.emit('online-user', user._id);
+        
+        const handleStatusChange = ({ userId, isOnline }) => {
+            setOnlineUsers(prev => ({ ...prev, [userId]: isOnline }));
+        };
 
-        socket.on('status-change', ({ userId, isOnline }) => {
-            console.log('User status changed:', userId, isOnline);
-            setOnlineUsers(prev => ({
-                ...prev,
-                [userId]: isOnline
-            }));
-        });
-
-        socket.on('receive-message', (message) => {
-            console.log('New message received:', message);
-            if (selectedChat && selectedChat._id === message.chat._id) {
+        const handleReceiveMessage = (message) => {
+            if (selectedChat?._id === message.chat._id) {
                 setSelectedChat((prevChat) => {
-                    const updatedMessages = [...prevChat.messages,
-                        {
-                            ...message,
-                            createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
-                        }
-                    ];
+                    const updatedMessages = [...prevChat.messages, {
+                        ...message,
+                        createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
+                    }];
                     console.log('Updated messages:', updatedMessages);
                     updatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
                     return { ...prevChat, messages: updatedMessages };
@@ -119,13 +92,16 @@ const ChatBox = () => {
         
                 return updatedChats;
             });
-        });
+        };
+
+        socket.on('status-change', handleStatusChange);
+        socket.on('receive-message', handleReceiveMessage);
 
         return () => {
             socket.off('status-change');
             socket.off('receive-message');
-        }
-    }, [user?._id, selectedChat, chats]);
+        };
+    }, [user?._id, selectedChat?._id, setChats, setOnlineUsers]);
 
     const chatContent = (
         <div className={`d-relative flex-column message-container ${isDesktop ? 'desktop' : ''} `}>
