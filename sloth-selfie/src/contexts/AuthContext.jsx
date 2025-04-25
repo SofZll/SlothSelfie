@@ -91,10 +91,9 @@ const AuthProvider = ({ children }) => {
         (async () => {
             try {
                 const registration = await navigator.serviceWorker.register('/sw.js');
-                console.log('SW registered:', registration);
+
                 let subscription = await registration.pushManager.getSubscription();
                 if (!subscription) {
-                    console.log('key:', process.env.REACT_APP_VAPID_PUBLIC_KEY);
                     const key = process.env.REACT_APP_VAPID_PUBLIC_KEY;
                     const appKey = urlBase64ToUint8Array(key);
                     subscription = await registration.pushManager.subscribe({
@@ -104,7 +103,6 @@ const AuthProvider = ({ children }) => {
                     console.log('New subscription:', subscription);
                 }
                 await apiService('/subscribe', 'POST', subscription);
-                console.log('Subscription sent to backend');
             } catch (err) {
                 console.error('SW/Push error:', err);
             }

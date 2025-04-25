@@ -19,7 +19,6 @@ const ChatProvider = ({ children }) => {
         const response = await apiService('/chat', 'GET');
         if (response.success) {
             let base64Image = '';
-            console.log('Fetched chats:', response);
             const transformedData = response.chats.map(chat => {
                 const otherParticipant = chat.participants.find(p => p._id !== user._id);
     
@@ -47,16 +46,13 @@ const ChatProvider = ({ children }) => {
             });
 
             setChats(transformedData)
-            console.log(transformedData);
 
             //get status of users
             const onlineUsers = {};
             await Promise.all(transformedData.map(async (chat) => {
                 const response2 = await apiService(`/user/profile/${chat.otherParticipant._id}`);
                 if (response2.success) {
-                    console.log('response2:', response2);
-                    onlineUsers[chat.otherParticipant._id] = response2.user.isOnline;
-                    console.log('Online users:', onlineUsers);
+                    onlineUsers[chat.otherParticipant._id] = response2.user.isOnline;22222
                 } else {
                     console.error('Error fetching user status:', response2);
                 }
