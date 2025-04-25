@@ -5,7 +5,7 @@ const Event = require('../models/eventModel');
 
 const { combineDateTime } = require('../utils/utils');
 const { scheduleNotification } = require('../agenda/notificationScheduler');
-const { getScheduledJobs, snoozeJob } = require('../services/agendaService');
+const { getScheduledJobs, snoozeJob, updateJobs } = require('../services/agendaService');
 
 const setNotifications = async (req, res) => {
     const { type, elementId, notifications } = req.body;
@@ -165,6 +165,8 @@ const updateNotification = async (req, res) => {
             from: !isDefault ? combineDateTime(fromDate, fromTime) : undefined,
             to: to
         }, { new: true });
+
+        await updateJobs(notificationId);
 
         res.status(200).json({ success: true, message: 'Notification updated successfully', notification: updatedNotification });
     } catch (error) {

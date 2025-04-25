@@ -2,6 +2,8 @@ const agenda = require('../agenda/agenda');
 const User = require('../models/userModel');
 const Notification = require('../models/notificationModel');
 
+const { scheduleNotification } = require('../agenda/notificationScheduler');
+
 const getScheduledJobs = async (userId, hours = 24) => {
     const now = new Date(); // da cambiare con TM
     const limit = new Date(now.getTime() + hours * 60 * 60 * 1000);
@@ -104,9 +106,20 @@ const snoozeJob = async (notificationId, snoozeTime) => {
     });
 }
 
-    
+const updateJobs = async (notificationId) => {
+    const notification = await Notification.findById(notificationId);
+    if (!notification) throw new Error('Notification not found');
+
+    await agenda.cancel({ 
+        name: 'send-notification',
+        'data.notification': notification._id
+    });
+
+    await scheduleNotification([notification]);
+}
 
 module.exports = {
     getScheduledJobs,
     snoozeJob,
+    updateJobs
 };

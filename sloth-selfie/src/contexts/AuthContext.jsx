@@ -1,7 +1,9 @@
 import React, { useState, useRef, createContext, useEffect } from 'react';
+import { toastInfo } from '../utils/toastUtils';
 
+import socket from '../services/socket/socket';
 import { apiService } from '../services/apiService';
-import { bufferToBase64 } from '../utils/utils';
+import { bufferToBase64, urlBase64ToUint8Array } from '../utils/utils';
 
 const AuthContext = createContext();
 
@@ -77,6 +79,54 @@ const AuthProvider = ({ children }) => {
             isMounted = false;
         };
     }, []);
+
+    useEffect(() => {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => console.log('Notification permission:', permission));
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!user?._id || Notification.permission !== 'granted') return;
+        (async () => {
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                console.log('SW registered:', registration);
+                let subscription = await registration.pushManager.getSubscription();
+                if (!subscription) {
+                    console.log('key:', process.env.REACT_APP_VAPID_PUBLIC_KEY);
+                    const key = process.env.REACT_APP_VAPID_PUBLIC_KEY;
+                    const appKey = urlBase64ToUint8Array(key);
+                    subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: appKey
+                    });
+                    console.log('New subscription:', subscription);
+                }
+                await apiService('/subscribe', 'POST', subscription);
+                console.log('Subscription sent to backend');
+            } catch (err) {
+                console.error('SW/Push error:', err);
+            }
+        })();
+    }, [user]);
+
+    useEffect(() => {
+        if (user?._id) socket.connect();
+        else socket.disconnect();
+    }, [user]);
+
+    useEffect(() => {
+        if (!user?._id || Notification.permission !== 'granted') return;
+
+        const handler = ({ title, body, notificationId }) => {
+            console.log('Notification received:', { title, body, notificationId });
+            toastInfo(title, body);
+        };
+        socket.on('system-notification', handler);
+
+        return () => socket.off('system-notification', handler);
+    }, [user]);
 
     return (
         <AuthContext.Provider value={{ user, setUser, fetchUserData, loading }}>

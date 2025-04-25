@@ -23,6 +23,14 @@ const activitySchema = new mongoose.Schema({
         ref: 'User',
     }],
 
+    status: [{
+        type: String,
+        enum: ['accepted', 'declined', 'waiting'],
+        required: function() {
+            return this.sharedWith.length > 1;
+        }
+    }],
+
     // New fields only for Project-activities 
     project: {
         type: mongoose.Schema.Types.ObjectId,
