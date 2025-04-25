@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Clock, Monitor, Mail } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -7,6 +8,7 @@ import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
 
 const Notifications = () => {
+    const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
 
     const fetchNotifications = async () => {
@@ -54,7 +56,7 @@ const Notifications = () => {
                                 <div className='d-flex flex-column gap-2'>
                                     <p>
                                         {notif.elementType === 'Activity' ? '📝 Activity: ' : '📅 Event: '}
-                                        <strong>{notif.element.title}</strong>
+                                        <strong onClick={() => navigate('/d')}>{notif.element.title}</strong>
                                     </p>
                                     {notif.type === 'repeat' && <p className='text-secondary'>Type: {notif.type} every {notif.before} {notif.variant}</p>}
                                     {notif.type === 'default' && <p className='text-secondary'>Type: {notif.before} {notif.variant} before</p>}

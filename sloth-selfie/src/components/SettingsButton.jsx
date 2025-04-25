@@ -7,7 +7,7 @@ import '../styles/SettingsButton.css';
 import { generateTimeOptions } from '../utils/utils';
 import { AuthContext } from '../contexts/AuthContext';
 
-const SettingsButton = () => {
+const SettingsButton = ({ color }) => {
     const { user, setUser } = useContext(AuthContext);
 
     const [showSettingsOptions, setShowSettingsOptions] = useState(false);
@@ -113,8 +113,8 @@ const SettingsButton = () => {
 
     return (
         <>
-            <button className='settings-button button-clean white mt-3' onClick={() => setShowSettingsOptions(!showSettingsOptions)}>
-                <Settings size='30' color='#244476' strokeWidth='1.75' />
+            <button className={`settings-button button-clean ${color === 'dark' ? 'white' : ' ' } mt-3`} onClick={() => setShowSettingsOptions(!showSettingsOptions)}>
+                <Settings size='30' color={color === 'dark' ? '#1c2135' : '#fff'} strokeWidth='1.75' />
             </button>
             
             {showSettingsOptions && !showSettings && (

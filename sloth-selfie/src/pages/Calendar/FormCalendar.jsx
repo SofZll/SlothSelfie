@@ -115,7 +115,7 @@ const FormCalendar = () => {
 
                 {selected.selection === 'event' && (
                     <div className="formPopup">
-                    <FormEvent />
+                        <FormEvent />
                     </div>
                 )}
 

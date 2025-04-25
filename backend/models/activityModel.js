@@ -39,7 +39,7 @@ const activitySchema = new mongoose.Schema({
     
     phaseSubphase: {
         type: mongoose.Schema.Types.ObjectId,
-         ref: 'PhaseSubphase',
+        ref: 'PhaseSubphase',
         default: null
     },
 
@@ -50,13 +50,13 @@ const activitySchema = new mongoose.Schema({
 
     dependencies: [{
         type: mongoose.Schema.Types.ObjectId,
-         ref: 'Activity' 
-        }],
+        ref: 'Activity' 
+    }],
 
     status: {
         type: String,
-        enum: ["Not_Activatable", "Activatable", "Active", "Completed", "Reactivated", "Overdue", "Abandoned"],
-        default: "Not_Activatable"
+        enum: ['Not_Activatable', 'Activatable', 'Active', 'Completed', 'Reactivated', 'Overdue', 'Abandoned'],
+        default: 'Not_Activatable'
     },
 
     description: {
