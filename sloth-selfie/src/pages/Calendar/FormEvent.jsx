@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Swal from 'sweetalert2';
 
@@ -6,11 +6,13 @@ import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { generateTimeOptions } from '../../utils/utils';
 import ShareInput from '../../components/ShareInput';
+import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormEvent = () => {
     
     const { event, setEvent, events, setEvents, resetEvent, selected, notifications, setNotifications} = useCalendar();
+    const [deletePopUp, setDeletePopUp] = useState(false);
 
     const handleSubmit = async () => {
         if (selected.edit) {
@@ -40,41 +42,9 @@ const FormEvent = () => {
         } else Swal.fire({ title: 'Error deleting event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
     }
 
-    //TODO TESTA E MODIFICA IN BASE A NUOVO MODELLO EVENTI
-    const exportEvent = async () => {
-        try {
-            const response = await apiService(`/event/${event._id}/export`, 'GET', null, {
-                credentials: 'include',
-            });
-            
-            if (!response) throw new Error('Empty response from server');
-            
-            const blob = response;
-        
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${event.title}.ics`;
-            a.click();
-            
-            Swal.fire({
-                title: 'Event exported',
-                icon: 'success',
-                text: 'Event exported successfully, a mail with .ics attachment will be sent to you',
-                customClass: { confirmButton: 'button-alert' }
-            });
-            } catch (err) {
-                Swal.fire({
-                title: 'Error exporting event',
-                icon: 'error',
-                text: err.message || 'Unknown error',
-                customClass: { confirmButton: 'button-alert' }
-            });
-            }
-    }
 
     return (
-        <form className='d-flex flex-column w-100'>
+        <div className='d-flex flex-column w-100'>
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -253,37 +223,42 @@ const FormEvent = () => {
             
             
             <div className='d-flex align-items-center justify-content-center'>
-            {!event.isInProject && (
-                <button
-                type='button'
-                className='btn-main rounded shadow-sm mt-4'
-                onClick={() => handleSubmit()}
-                >
-                {selected.edit ? 'edit' : 'save'}
-                </button>
-            )}
+                {!event.isInProject && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>
+                        {selected.edit ? 'edit' : 'save'}
+                    </button>
+                )}
 
-            {selected.edit && !event.isInProject && (
-                <button
-                type='button'
-                className='btn-main rounded shadow-sm mt-4 ms-3'
-                onClick={() => deleteEvent()}
-                >
-                delete
-                </button>
-            )}
-
-            {selected.edit && (
-                <button
-                type='button'
-                className='btn-main rounded shadow-sm mt-4 ms-3'
-                onClick={() => exportEvent()}
-                >
-                export .ics
-                </button>
-            )}
+                {selected.edit && !event.isInProject && (
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                        delete
+                    </button>
+                )}
             </div>
-        </form>
+            {deletePopUp && (
+                <DeletePopUpLayout handleDelete={() => deleteEvent()} handleClose={() => setDeletePopUp(false)}>
+                    <div className='d-flex flex-column text-start'>
+                        Are you sure you want to delete this {event.repeatFrequency !== 'none' ? 'recurring event' : 'event'}?
+                    </div>
+                    <div className='d-flex flex-column'>
+                        <div className='fst-italic fw-bold' style={{ color: '#244476' }}>{event.title}</div>
+                        <div className='fst-italic' style={{ color: '#244476' }}>start: {new Date(event.startDate).toLocaleDateString()}</div>
+                        <div className='fst-italic' style={{ color: '#244476' }}>end: {new Date(event.endDate).toLocaleDateString()}</div>
+
+                        {event.repeatFrequency !== 'none' && (
+                            <>
+                            {event.repeatMode === 'ntimes' ? (
+                                <div className='fst-italic' style={{ color: '#244476' }}>repeat {event.repeatTimes} times</div>
+                            ) : (
+                                <div className='fst-italic' style={{ color: '#244476' }}>repeat until {new Date(event.repeatEndDate).toLocaleDateString()}</div>
+                            )}
+                            </>
+                        )}
+                    </div>
+                </DeletePopUpLayout>
+            )}
+
+        </div>
     )
 }
 

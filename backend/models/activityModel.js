@@ -17,14 +17,7 @@ const activitySchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    notify: {
-        type: Boolean,
-        default: false
-    },
-    notificationTime: {
-        type: Number,
-        default: 0
-    },
+
     sharedWith: [{ //used also for assigning activities to users in projects
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -38,7 +31,7 @@ const activitySchema = new mongoose.Schema({
     
     phaseSubphase: {
         type: mongoose.Schema.Types.ObjectId,
-         ref: 'PhaseSubphase',
+        ref: 'PhaseSubphase',
         default: null
     },
 
@@ -49,8 +42,8 @@ const activitySchema = new mongoose.Schema({
 
     dependencies: [{
         type: mongoose.Schema.Types.ObjectId,
-         ref: 'Activity' 
-        }],
+        ref: 'Activity' 
+    }],
 
     status: {
         type: String,
@@ -77,7 +70,8 @@ const activitySchema = new mongoose.Schema({
     },
 
     milestone: {
-        type: Boolean, default: false 
+        type: Boolean,
+        default: false 
     },
 
     events: [{  // Events related to the activity startDate and deadline

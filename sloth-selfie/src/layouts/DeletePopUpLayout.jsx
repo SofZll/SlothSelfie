@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DeletePopUpLayout = ({ children, handleDelete, resetPopUp }) => {
+const DeletePopUpLayout = ({ children, handleDelete, handleClose }) => {
 
     return (
         <div className='position-fixed start-0 top-0 vh-100 vw-100 d-flex justify-content-center align-items-center' style={{ zIndex: 1000 }}>
@@ -13,7 +13,7 @@ const DeletePopUpLayout = ({ children, handleDelete, resetPopUp }) => {
                         <h5 className='modal-title' style={{ color: '#244476' }}>
                             Deletion Warning
                         </h5>
-                        <button type='button' className='close' onClick={() => resetPopUp()}>
+                        <button type='button' className='close' onClick={() => handleClose()}>
                             <span>&times;</span>
                         </button>
                     </div>
@@ -24,7 +24,7 @@ const DeletePopUpLayout = ({ children, handleDelete, resetPopUp }) => {
                         </div>
                     </div>
                     <div className='d-flex justify-content-center align-items-center py-3'>
-                        <button type='button' className='btn btn-outline-light' style={{ backgroundColor: '#244476' }} onClick={() => resetPopUp()}>
+                        <button type='button' className='btn btn-outline-light' style={{ backgroundColor: '#244476' }} onClick={() => handleClose()}>
                             Cancel
                         </button>
                         <button type='button' className='btn btn-outline-light' style={{ backgroundColor: '#244476' }} onClick={() => handleDelete()}>
