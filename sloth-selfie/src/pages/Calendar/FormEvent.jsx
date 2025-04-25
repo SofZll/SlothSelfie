@@ -75,9 +75,9 @@ const FormEvent = () => {
                 <div className='col-6'>
                     <label htmlFor='date' className='form-label'>Date</label>
                     <input type='Date' className='form-control' id='date'
-                    value={new Date(event.date).toISOString().split('T')[0]}
+                    value={new Date(event.startDate).toISOString().split('T')[0]}
                     disabled={event.isInProject}
-                    onChange={(e) => setEvent({...event, date: e.target.value})} 
+                    onChange={(e) => setEvent({...event, startDate: e.target.value})} 
                     required />
                 </div>
 

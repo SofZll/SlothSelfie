@@ -25,8 +25,7 @@ const getEvents = async (req, res) => {
         { sharedWith: user._id }
       ]
     }).populate('sharedWith', 'username')
-    .populate('user', 'username')
-    .populate('pomodoro');
+    .populate('user', 'username');
 
     res.status(200).json({ success: true, events });
   } catch (error) {
@@ -35,7 +34,7 @@ const getEvents = async (req, res) => {
   }
 };
 
-const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, pomodoro, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
+const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
 
@@ -53,7 +52,6 @@ const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, 
       repeatFrequency,
       eventLocation,
       isInProject,
-      pomodoro,
     });
 
     if (repeatFrequency !== 'none') {
@@ -76,8 +74,6 @@ const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, 
     .populate('sharedWith', 'username')
     .populate('user', 'username');
 
-    if (event.pomodoro) event.populate('pomodoro');
-
     return ({ success: true, event });
   } catch (error) {
     console.error('Error creating event:', error);
@@ -85,15 +81,15 @@ const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, 
   }
 }
 
-const createEvent = async (req, res) => {
-  const { title, type, startDate, endDate, allDay, repeatFrequency, repeatEndDate, repeatTimes, eventLocation, sharedWith, isInProject, pomodoro} = req.body;
+const createNewEvent = async (req, res) => {
+  const { title, type, startDate, endDate, allDay, repeatFrequency, repeatEndDate, repeatTimes, eventLocation, sharedWith, isInProject} = req.body;
 
   try {
 
     const users = await findUserId(sharedWith);
 
     if (repeatFrequency === 'none') {
-      const event = await newEvent(title, type, startDate, endDate, allDay, eventLocation, users, isInProject, pomodoro, repeatFrequency);
+      const event = await newEvent(title, type, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
       if (event.success) {
         res.status(201).json({ success: true, event: event.event });
       } else {
@@ -116,7 +112,7 @@ const createEvent = async (req, res) => {
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, pomodoro, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -136,7 +132,7 @@ const createEvent = async (req, res) => {
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, pomodoro, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -161,7 +157,7 @@ const createEvent = async (req, res) => {
   }
 }
 
-const editEvent = async (Id, title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, pomodoro, repeatFrequency, repeatEndDate, repeatTimes) => {
+const editEvent = async (Id, title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes) => {
 
   try {
     const event = await Event.findById(Id);
@@ -175,7 +171,6 @@ const editEvent = async (Id, title, type, startDate, endDate, allDay, eventLocat
     event.eventLocation = eventLocation;
     event.sharedWith = sharedWith;
     event.isInProject = isInProject;
-    event.pomodoro = pomodoro;
     event.repeatFrequency = repeatFrequency;
     event.repeatEndDate = repeatEndDate;
     event.repeatTimes = repeatTimes;
@@ -194,13 +189,13 @@ const editEvent = async (Id, title, type, startDate, endDate, allDay, eventLocat
 // Update an event
 const updateEvent = async (req, res) => {
   const { eventId } = req.params;
-  const { title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, pomodoro, repeatFrequency, repeatEndDate, repeatTimes } = req.body;
+  const { title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes } = req.body;
 
   try {
     const users = await findUserId(sharedWith);
     
     if (repeatFrequency === 'none') {
-      const event = await editEvent(eventId, title, type, startDate, endDate, allDay, eventLocation, users, isInProject, pomodoro, repeatFrequency);
+      const event = await editEvent(eventId, title, type, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
       if (event.success) {
         res.status(200).json({ success: true, event: event.event });
       } else {
@@ -227,7 +222,7 @@ const updateEvent = async (req, res) => {
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await editEvent(events2edit[i]._id, title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, pomodoro, repeatFrequency, repeatEndDate, repeatTimes);
+          const event = await editEvent(events2edit[i]._id, title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -242,7 +237,7 @@ const updateEvent = async (req, res) => {
             newStartDate.setDate(newStartDate.getDate() + (i * gap));
             newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-            const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, pomodoro, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+            const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
             if (event.success) events.push(event.event);
             else {
               res.status(400).json({ success: false, message: event.message });
@@ -263,7 +258,7 @@ const updateEvent = async (req, res) => {
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await editEvent(events2edit[i]._id, title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, pomodoro, repeatFrequency, repeatEndDate, repeatTimes);
+          const event = await editEvent(events2edit[i]._id, title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -459,7 +454,7 @@ const importEvents = async (req, res) => {
 
 module.exports = {
   getEvents,
-  createEvent,
+  createNewEvent,
   updateEvent,
   deleteEvent,
   exportEvent,
