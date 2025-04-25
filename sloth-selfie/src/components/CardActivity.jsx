@@ -16,7 +16,7 @@ const CardActivity = ({ Activity, smallView }) => {
 
     const selectActivity = () => {
         setActivity(Activity);
-        setSelected({ selection: 'activity', edit: true });
+        setSelected({ selection: 'activity', edit: true, add: false, popup: true });
     }
 
     return (

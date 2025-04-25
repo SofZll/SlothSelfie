@@ -11,7 +11,6 @@ export const CalendarProvider = ({ children }) => {
         user: '',
         deadline: '',
         late: false,
-        date: '',
         completed: false,
         sharedWith: []
     });
@@ -25,7 +24,6 @@ export const CalendarProvider = ({ children }) => {
             user: '',
             deadline: '',
             late: false,
-            date: '',
             completed: false,
             sharedWith: []
         });
@@ -37,7 +35,8 @@ export const CalendarProvider = ({ children }) => {
         title: '',
         user: '',
         type: 'personal',
-        date: new Date(),
+        startDate: new Date(),
+        endDate: new Date(),
         time: '',
         isPreciseTime: false,
         duration: null,
@@ -65,7 +64,8 @@ export const CalendarProvider = ({ children }) => {
             title: '',
             user: '',
             type: 'personal',
-            date: new Date(),
+            startDate: new Date(),
+            endDate: new Date(),
             time: '',
             isPreciseTime: false,
             duration: null,
