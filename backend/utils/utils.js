@@ -155,11 +155,8 @@ const findUserId = async (usernames) => {
     
     for (let i = 0; i < usernames.length; i++) {
         let user = await User.findOne({ username: usernames[i] });
-        if (!user) {
-            throw new Error(`User ${usernames[i]} not found`);
-        }
-
-        userIds.push(user._id);
+        if (!user) console.log(`User ${usernames[i]} not found`);
+        else userIds.push(user._id);
     }
 
     return userIds;
