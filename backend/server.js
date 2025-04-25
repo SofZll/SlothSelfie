@@ -42,8 +42,6 @@ app.use(bodyParser.json());
 app.use(session);
 
 app.use((req, res, next) => {
-    //console.log('Session ID:', req.sessionID);
-    //console.log('Session:', req.session);
     req.io = io;
     next();
 });
@@ -75,7 +73,6 @@ agenda.on('error', (error) => {
 });
 
 process.on('SIGINT', async () => {
-    console.log("🛑 Ctrl+C intercettato, sto chiudendo Agenda...");
     await agenda.stop();
     console.log("✅ Agenda chiusa.");
     process.exit(0);

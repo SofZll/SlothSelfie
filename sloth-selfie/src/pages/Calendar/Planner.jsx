@@ -40,6 +40,7 @@ const Planner = () => {
     const fetchActivities = async () => {
         const response = await apiService('/activities', 'GET');
         if (response.success) setActivities(response.activities);
+        console.log('activities', response.activities);
     }
 
     const fetchTasks = async () => {

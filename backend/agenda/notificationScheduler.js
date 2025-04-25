@@ -99,8 +99,6 @@ const cleanupExpiredSnoozes = async () => {
             for (const job of tempJob) await job.remove();
         }
     }
-
-    console.log('Expired snoozes cleaned up');
 }
 
 const scheduleNotification = async (notifications) => {

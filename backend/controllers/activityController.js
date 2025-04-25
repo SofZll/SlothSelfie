@@ -44,26 +44,25 @@ const getActivities = async (req, res) => {
         })
         .populate('user', 'username')
         .populate('description', 'content' )
-        .populate('sharedWith', 'username');
-        
-        res.status(200).json({ success: true, activities });
+        .populate('sharedWith', 'username')
+        .lean();
+
+        const modifiedActivities = activities.map(activity => {
+            const isSharedWith = activity.sharedWith.some(
+                sharedUser => sharedUser._id.toString() === user._id.toString()
+            );
+            
+            const response = isSharedWith ? activity.responses?.find(r => r.user?.toString() === user._id.toString())?.status || 'pending' : undefined;
+
+            return {
+                ...activity,
+                ...(isSharedWith && { response })
+            };
+        });
+        console.log('Activities:', modifiedActivities);
+        res.status(200).json({ success: true, activities: modifiedActivities });
     } catch (error) {
         console.error('Error fetching activities:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// Fetching a single activity
-const getActivity = async (req, res) => {
-    const {activityId} = req.params;
-    try {
-        const activity = await Activity.findById(activityId).populate('sharedWith', 'username');
-        if (!activity) {
-            return res.status(404).json({ success: false, message: "Activity not found" });
-        }
-        res.status(200).json({ success: true, activity });
-    } catch (error) {
-        console.error('Error fetching activity:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
@@ -71,38 +70,54 @@ const getActivity = async (req, res) => {
 // Updating an activity
 const updateActivity = async (req, res) => {
     const { activityId } = req.params; 
-    const { title, deadline, completed, sharedWith } = req.body;
+    const { title, deadline, completed, sharedWith, status } = req.body;
     const userName = req.session.username;
 
-    const user = await User.findOne({ username: userName });
-
-    // get the users to share the activity with
-    let sharedWithUsers = [];
-    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
-      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
-    }
-
     try {
+        const user = await User.findOne({ username: userName });
+
+        // get the users to share the activity with
+        let sharedWithUsers = [];
+        if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+            sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
+        }
+
         const activity = await Activity.findById(activityId);
         if (!activity) {
             return res.status(404).json({ success: false, message: "Activity not found" });
         }
-        //we find the current user and check if it is his activity, or if it is shared with him
-        if (activity.user.toString() !== user._id.toString() && !activity.sharedWith.includes(user._id.toString())) {
+        
+        const isAuthor = activity.user.toString() === user._id.toString();
+        const isSharedWith = activity.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
+
+        if (!isAuthor && !isSharedWith) {
             return res.status(403).json({ success: false, message: "You are not authorized to update this activity" });
         }
 
-        // Update the activity
+        const updateData = {}
+        if (isAuthor) {
+            updateData.title = title;
+            updateData.deadline = deadline;
+            updateData.completed = completed;
+            updateData.sharedWith = sharedWithUsers.map(u => u._id);
+        } else if (isSharedWith && status) {
+            const responseIndex = activity.responses.findIndex(r => r.user.toString() === user._id.toString());
+
+            if (responseIndex !== -1) activity.responses[responseIndex].status = status;
+            else activity.responses.push({ user: user._id, status });// Update the existing response
+
+            updateData.responses = activity.responses;
+
+            if (status === 'declined') updateData.sharedWith = activity.sharedWith.filter(sharedUser => sharedUser._id.toString() !== user._id.toString());
+        }
+
         const updatedActivity = await Activity.findByIdAndUpdate(
             activityId,
-            { title, deadline, completed, sharedWith: sharedWithUsers.map(u => u._id) },
+            updateData,
             { new: true }
-        ).populate('user', 'username')
-        .populate('description', 'content')
-        .populate('sharedWith', 'username');
+        ).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
 
         res.status(200).json({ success: true, activity: updatedActivity });
-
     } catch (error) {
         console.error('Error updating activity:', error);
         res.status(500).json({ message: error.message });
@@ -423,7 +438,6 @@ function updateMacroDeadlineMap(map, macro, deadline) {
 module.exports = {
     createActivity,
     getActivities,
-    getActivity,
     updateActivity,
     deleteActivity,
     exportActivity,

@@ -17,8 +17,7 @@ export const CalendarProvider = ({ children }) => {
         date: '',
         completed: false,
         sharedWith: [],
-        notify: false,
-        notificationTime: 0,
+        response: ''
     });
 
     const [activities, setActivities] = useState([]);
@@ -33,8 +32,7 @@ export const CalendarProvider = ({ children }) => {
             date: '',
             completed: false,
             sharedWith: [],
-            notify: false,
-            notificationTime: 0,
+            response: ''
         });
     }
 
