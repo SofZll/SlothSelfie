@@ -18,16 +18,7 @@ const Notes = ({ openNote }) => {
                 {openNote ? (
                     <Note />
                 ) : (
-                    <PlusSidebarLayout
-                     childrenMain={
-                        <div className="shifter" style={{ height: '100%', overflowY: 'auto' }}>
-                        <GridNotes />
-                      </div>
-                    } 
-                    childrenSide={
-                    <FormNote />
-                }
-                />
+                    <PlusSidebarLayout childrenMain={<GridNotes />} childrenSide={<FormNote />} />
                 )}
             </TaskProvider>
         </NoteProvider>

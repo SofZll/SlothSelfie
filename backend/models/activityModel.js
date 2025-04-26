@@ -82,7 +82,8 @@ const activitySchema = new mongoose.Schema({
     },
 
     milestone: {
-        type: Boolean, default: false 
+        type: Boolean,
+        default: false 
     },
 
     events: [{  // Events related to the activity startDate and deadline

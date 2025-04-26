@@ -1,10 +1,15 @@
+/*for desktop zoom*/
 .container {
-    margin-left: 55px; /*for desktop zoom*/
+    padding-left: 55px;
+    padding-right: 15px;
+    transition: padding 0.3s ease;
   }
 
-@media screen and (max-width: 700px) and (hover: none) { /*for mobile*/
+/*for mobile*/
+@media screen and (max-width: 700px) and (hover: none) { 
     .container {
-        margin-left: 0;
+        padding-left: 10px;
+        padding-right: 10px;
     }   
 }
 

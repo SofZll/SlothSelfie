@@ -1,15 +1,17 @@
-import React  from 'react';
+import React, { useState } from 'react';
 
 import Swal from 'sweetalert2';
 
 import { generateTimeOptions } from '../../utils/utils';
 import { apiService } from '../../services/apiService';
+import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 
 import { useCalendar } from '../../contexts/CalendarContext';
 
 const FormNoAvailability = () => {
 
     const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, resetSelected } = useCalendar();
+    const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setStartDate = (date) => {
         const newDate = new Date(date);
@@ -134,7 +136,7 @@ const FormNoAvailability = () => {
     }
 
     return (
-        <form className='d-flex flex-column w-100'>
+        <div className='d-flex flex-column w-100'>
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='startDate' className='form-label'>Start Date</label>
@@ -218,10 +220,41 @@ const FormNoAvailability = () => {
             <div className='d-flex align-items-center justify-content-center'>
                 <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                 {selected.edit && (
-                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => deleteAvailability()}>delete</button>
+                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
                 )}
             </div>
-        </form>
+
+            {deletePopUp && (
+                <DeletePopUpLayout handleDelete={() => deleteAvailability()} handleClose={() => setDeletePopUp(false)}>
+                    <div className='d-flex flex-column text-start'>
+                        Are you sure you want to delete this {availability.repeatFrequency !== 'none' && 'series of '}availability?
+                    </div>
+
+                    <div className='d-flex justify-content-between pe-3 pt-2'>
+
+                        <div className='d-flex flex-column'>
+                            <div className='fst-italic' style={{ color: '#244476' }}>
+                                start: {new Date(availability.startDate).toLocaleDateString('en-CA')}
+                            </div>
+                            <div className='fst-italic' style={{ color: '#244476' }}>
+                                end: {new Date(availability.endDate).toLocaleDateString('en-CA')}
+                            </div>
+                        </div>
+
+                        {availability.repeatFrequency !== 'none' && (
+                            <div className='d-flex flex-column'>
+                                <div className='fst-italic' style={{ color: '#244476' }}>
+                                    repeat: {availability.repeatFrequency}
+                                </div>
+                                <div className='fst-italic' style={{ color: '#244476' }}>
+                                    occurrences: {availability.numberOfOccurrences}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </DeletePopUpLayout>
+            )}
+        </div>
     )
 }
 
