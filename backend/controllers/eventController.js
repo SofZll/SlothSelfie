@@ -420,7 +420,7 @@ const importEvents = async (req, res) => {
             allDay: !icsEvent.start.getHours(),
             repeatFrequency: icsEvent.rrule ? icsEvent.rrule.options.freq.toLowerCase() : 'none',
             repeatEndDate: icsEvent.rrule?.options?.until || null,
-            eventLocation: icsEvent.location || '',
+            eventLocation: icsEvent.location || 'physical',
             user: user._id,
             originalId: new mongoose.Types.ObjectId(),
           });
