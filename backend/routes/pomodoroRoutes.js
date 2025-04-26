@@ -9,7 +9,7 @@ router.get('/pomodori/todo', getPlannedPomodori);
 router.get('/pomodori/studied-time', totalStudiedTime);
 router.get('/pomodori/months', timePomodoriMonths);
 
-router.get('/pomodori/:pomodoroId', getPomodoroById);
+router.get('/pomodoro/:pomodoroId', getPomodoroById);
 
 router.post('/pomodoro', addPomodoro);
 router.post('/pomodoro/calendar', newPomodoro);

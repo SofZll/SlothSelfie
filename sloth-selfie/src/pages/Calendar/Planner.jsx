@@ -142,9 +142,9 @@ const Planner = () => {
             const response = await apiService(`/task/${t._id}`, 'PUT', { ...t, deadline });
             if (response.success) setTasks(tasks.map(t => t._id === event._id ? response.task : t));
         } else if (event.type === 'pomodoro') {
-            //const p = pomodoros.find(p => p._id === event._id);
-            //const response = await apiService(`/pomodoro/${p._id}`, 'PUT', { ...p, deadline });
-            //if (response.success) setPomodoros(pomodoros.map(p => p._id === event._id ? response.pomodoro : p));
+            const p = plannedPomodori.find(p => p._id === event._id);
+            const response = await apiService(`/pomodoro/${p._id}`, 'PUT', { ...p, deadline });
+            if (response.success) setPlannedPomodori(plannedPomodori.map(p => p._id === event._id ? response.pomodoro : p));
         }
     }
 
@@ -185,6 +185,15 @@ const Planner = () => {
                     backgroundColor: 'gray',
                 }
             }
+        } else if (event.type === 'pomodoro') {
+            return {
+                style: {
+                    backgroundColor: event.late ? 'red' : 'lightyellow',
+                    border: event.late ? 'none' : '2px solid orange',
+                    color: event.late ? 'white' : 'orange',
+                    
+                }
+            }
         }
     }
 
@@ -201,7 +210,7 @@ const Planner = () => {
         if (show === 'plans') setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
         else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
         else if (show === 'no availability') setListNormal([...normalizeData(availabilities, 'no availability')]);
-    }, [activities, events, tasks, availabilities, show]);
+    }, [activities, events, tasks, availabilities, show, plannedPomodori]);
 
     useEffect(() => {
         if (notifications.length > 0) {

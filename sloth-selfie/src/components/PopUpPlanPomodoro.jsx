@@ -3,10 +3,12 @@ import React from 'react';
 import Swal from 'sweetalert2';
 import { apiService } from '../services/apiService';
 import { usePomodoro } from '../contexts/PomodoroContext';
+import { useCalendar } from '../contexts/CalendarContext';
 
 const PopUpPlanPomodoro = ({ edit }) => {
 
-    const { resetPopUp, resetSettingsPomodoro, settingsPomodoro, setSettingsPomodoro } = usePomodoro();
+    const { resetSettingsPomodoro, settingsPomodoro, setSettingsPomodoro, plannedPomodori, setPlannedPomodori, resetPopUp } = usePomodoro();
+    const { resetSelected } = useCalendar();
 
     const setDeadline = (date) => {
         const newDate = new Date(date);
@@ -25,10 +27,19 @@ const PopUpPlanPomodoro = ({ edit }) => {
             return;
         }
 
-        const response = await apiService('/pomodoro/calendar', 'POST', settingsPomodoro);
-        if (response.success) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully', customClass: { confirmButton: 'button-alert' } });
-        else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro', customClass: { confirmButton: 'button-alert' } });
+        if(edit) {
+            const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'PUT', settingsPomodoro);
+            if (response.success) {
+                Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro updated successfully', customClass: { confirmButton: 'button-alert' } });
+                setPlannedPomodori(plannedPomodori.map(p => p._id === settingsPomodoro._id ? settingsPomodoro : p));
+            } else Swal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro', customClass: { confirmButton: 'button-alert' } });
+        } else {
+            const response = await apiService('/pomodoro/calendar', 'POST', settingsPomodoro);
+            if (response.success) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully', customClass: { confirmButton: 'button-alert' } });
+            else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro', customClass: { confirmButton: 'button-alert' } });
+        }
 
+        resetSelected();
         resetPopUp();
         resetSettingsPomodoro();
     }
@@ -67,8 +78,8 @@ const PopUpPlanPomodoro = ({ edit }) => {
                         type='number'
                         className='form-control'
                         placeholder='minutes'
-                        value={settingsPomodoro.studyTime}
-                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, studyTime: e.target.value })}
+                        value={settingsPomodoro.studyTime/60}
+                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, studyTime: parseInt(e.target.value) * 60 })}
                     />
                 </div>
                 <div className='col-6'>
@@ -77,8 +88,8 @@ const PopUpPlanPomodoro = ({ edit }) => {
                         type='number'
                         className='form-control'
                         placeholder='minutes'
-                        value={settingsPomodoro.breakTime}
-                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, breakTime: e.target.value })}
+                        value={settingsPomodoro.breakTime/60}
+                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, breakTime: parseInt(e.target.value) * 60 })}
                     />
                 </div>
             </div>
@@ -90,7 +101,7 @@ const PopUpPlanPomodoro = ({ edit }) => {
                         className='form-control'
                         placeholder='number of cycles'
                         value={settingsPomodoro.cycles}
-                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, cycles: e.target.value })}
+                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, cycles: parseInt(e.target.value) })}
                     />
                 </div>
             </div>

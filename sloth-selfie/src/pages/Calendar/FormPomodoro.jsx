@@ -15,17 +15,14 @@ import PopUpPlanPomodoro from '../../components/PopUpPlanPomodoro';
 const FormPomodoro = () => {
 
     const { selected, setSelected, resetSelected } = useCalendar();
-    const { plannedPomodori, settingsPomodoro, setPomodoro, setPlannedPomodori, resetSettingsPomodoro } = usePomodoro();
+    const { plannedPomodori, setPlannedPomodori, settingsPomodoro, resetSettingsPomodoro } = usePomodoro();
     const [deletePopUp, setDeletePopUp] = useState(false);
 
     const navigate = useNavigate();
 
     const goToPomodoro = () => {
         const p = plannedPomodori.find(p => p._id === settingsPomodoro._id);
-        if (p) {
-            setPomodoro({ ...p  });
-            navigate('/pomodoro');
-        }
+        if (p) navigate(`/pomodoro/${p._id}`);
 
     }
 

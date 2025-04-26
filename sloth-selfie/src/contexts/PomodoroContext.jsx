@@ -10,8 +10,8 @@ export const PomodoroProvider = ({ children }) => {
     const [settingsPomodoro, setSettingsPomodoro] = useState({
         _id: '',
         title: 'Pomodoro',
-        studyTime: 60,
-        breakTime: 60,
+        studyTime: 30*60,
+        breakTime: 5*60,
         cycles: 5,
         additionalCycles: 0
     });
@@ -20,8 +20,8 @@ export const PomodoroProvider = ({ children }) => {
         setSettingsPomodoro({
             _id: '',
             title: 'Pomodoro',
-            studyTime: 60,
-            breakTime: 60,
+            studyTime: 30*60,
+            breakTime: 5*60,
             cycles: 5,
             additionalCycles: 0
         });
@@ -30,7 +30,7 @@ export const PomodoroProvider = ({ children }) => {
     const [pomodoro, setPomodoro] = useState({
         _id: '',
         title: 'Pomodoro',
-        timeLeft: 60,
+        timeLeft: 30*60,
         cyclesLeft: 5,
         isStudyTime: true,
         started: false,
@@ -43,10 +43,10 @@ export const PomodoroProvider = ({ children }) => {
 
     const [animation, setAnimation] = useState({
         reset: false,
-        pencilTime: `${60}s`,
-        lineTime: `${(60*0.8)}s`,
-        delayGo: `${(60*0.2)}s`,
-        delayBack: `${(60*0.1)}s`,
+        pencilTime: `${30*60}s`,
+        lineTime: `${(30*60*0.8)}s`,
+        delayGo: `${(30*60*0.2)}s`,
+        delayBack: `${(30*60*0.1)}s`,
     });
 
     const resetAnimation = (time) => {
@@ -164,9 +164,9 @@ export const PomodoroProvider = ({ children }) => {
             }
         }
 
-        setSettingsPomodoro({ studyTime, breakTime, cycles, additionalCycles: 0 });
+        setSettingsPomodoro({ ...settingsPomodoro, studyTime, breakTime, cycles});
         editTimeAnimation( pomodoro.isStudyTime ? studyTime : breakTime );
-        const response = await apiService(`/pomodoro/${pomodoro._id}`, 'PUT', { studyTime, breakTime, cycles });
+        const response = await apiService(`/pomodoro/${pomodoro._id}`, 'PUT', settingsPomodoro);
         if (response.success) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated', customClass: { confirmButton: 'button-alert' } });
         else Swal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro settings', customClass: { confirmButton: 'button-alert' } });
     }
