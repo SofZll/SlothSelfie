@@ -5,7 +5,7 @@ import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
 
-import { useIsDesktop, dateFromDate, timeFromDate } from '../../utils/utils';
+import { useIsDesktop, timeFromDate } from '../../utils/utils';
 import { validateNotification } from '../../utils/validation';
 import ScrollList from '../../components/ScrollList';
 import FormCalendar from './FormCalendar';
@@ -26,7 +26,7 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
     const { setPlannedPomodori, plannedPomodori, settingsPomodoro, setSettingsPomodoro } = usePomodoro();
 
@@ -42,6 +42,7 @@ const Planner = () => {
     const fetchActivities = async () => {
         const response = await apiService('/activities', 'GET');
         if (response.success) setActivities(response.activities);
+        console.log('activities', response.activities);
     }
 
     const fetchTasks = async () => {
@@ -57,21 +58,6 @@ const Planner = () => {
     const fetchNoAvailability = async () => {
         const response = await apiService('/no-availabilities', 'GET');
         if (response.success) setAvailabilities(response.noAvailability);
-    }
-
-    const fetchNotifications = async ({ elementId }) => {
-        const response = await apiService(`/notifications/${elementId}`, 'GET');
-        if (response.success) {
-            if (response.notifications.length > 0) {
-                setNotifications(response.notifications.map(notification => {
-                    return {
-                        ...notification,
-                        fromDate: dateFromDate(new Date(notification.from)),
-                        fromTime: timeFromDate(new Date(notification.from)),
-                    }
-                }));
-            } else setNotifications([]);
-        } else setNotifications([]);
     }
 
     const normalizeData = (datas, type) => {

@@ -7,7 +7,7 @@ import '../styles/SettingsButton.css';
 import { generateTimeOptions } from '../utils/utils';
 import { AuthContext } from '../contexts/AuthContext';
 
-const SettingsButton = () => {
+const SettingsButton = ({ color }) => {
     const { user, setUser } = useContext(AuthContext);
 
     const [showSettingsOptions, setShowSettingsOptions] = useState(false);
@@ -113,14 +113,14 @@ const SettingsButton = () => {
 
     return (
         <>
-            <button className='settings-button button-clean white mt-3' onClick={() => setShowSettingsOptions(!showSettingsOptions)}>
-                <Settings size='30' color='#244476' strokeWidth='1.75' />
+            <button className={`settings-button button-clean ${color === 'dark' ? 'white' : ' ' } mt-3`} onClick={() => setShowSettingsOptions(!showSettingsOptions)}>
+                <Settings size='30' color={color === 'dark' ? '#1c2135' : '#fff'} strokeWidth='1.75' />
             </button>
             
             {showSettingsOptions && !showSettings && (
                 <div className="settings-options">
                     <div className='modal-overlay'>
-                        <div className='modal-content'>
+                        <div className='modal-content modal-content-settings'>
                         <button className='button-clean white mt-3 ' onClick={handleCloseSettings}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
                                 <path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -134,7 +134,7 @@ const SettingsButton = () => {
 
             {showSettings && selectedSetting === 'workHours' && (
                 <div className='modal-overlay'>
-                    <div className='modal-content'>
+                    <div className='modal-content modal-content-settings'>
                         <button className='button-clean white mt-3 ' onClick={handleCloseSettings}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">

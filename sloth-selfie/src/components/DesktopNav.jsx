@@ -43,7 +43,7 @@ const DesktopNav = () => {
                             <Link to='/profile' onClick={closeMenu} className='profile-link'>Profile</Link>
                         </div>
                         <div className='setting-button-small'>
-                            <SettingsButton />
+                            <SettingsButton color='light'/>
                         </div>
                     </div>
                 </div>

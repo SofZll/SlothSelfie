@@ -43,7 +43,6 @@ const ChatBox = () => {
                         ...message,
                         createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
                     }];
-                    console.log('Updated messages:', updatedMessages);
                     updatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
                     return { ...prevChat, messages: updatedMessages };
                 });

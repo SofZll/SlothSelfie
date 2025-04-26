@@ -56,6 +56,67 @@ const sendSystemNotification = async (notification) => {
 const sendEmailNotification = async (notification) => {
     console.log('Sending email notification:', notification);
 
+    const receiver = await User.findById(notification.user);
+    if (!receiver) {
+        console.error('Receiver not found:', notification.user);
+        return;
+    }
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD,
+        },
+    });
+
+    let subjectContent, htmlContent;
+
+    if (notification.elementType === 'Event') {
+        subjectContent = `Friendly Reminder: The Event ${notification.element.title} is Coming Up!`;
+        htmlContent = `
+            <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+                <h2 style="color: #4CAF50;">📅 Reminder: ${notification.element.title}</h2>
+                <p>Hey <strong>${receiver.username}</strong>,</p>
+                <p>Your event is coming up soon! Here are the details:</p>
+                <ul>
+                    <li><strong>Date:</strong> ${notification.element.date}</li>
+                    <li><strong>Time:</strong> ${notification.element.time}</li>
+                    <li><strong>Location:</strong> ${notification.element.eventLocation}</li>
+                </ul>
+                <p>Make sure to be there! </p>
+                <p><a href="http://localhost:3000" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Event Details on Sloth Selfie</a></p>
+            </div>
+        `;
+    } else if (notification.elementType === 'Activity') {
+        subjectContent = `Friendly Reminder: The Activity ${notification.element.title} Deadline is Approaching!`;
+        htmlContent = `
+            <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+                <h2 style="color: #4CAF50;">📅 Reminder: ${notification.element.title}</h2>
+                <p>Hey <strong>${receiver.username}</strong>,</p>
+                <p>Your activity deadline is approaching! Here are the details:</p>
+                <ul>
+                    <li><strong>Deadline:</strong> ${notification.element.deadline}</li>
+                    <li><strong>Completed:</strong> ${notification.element.completed ? 'Yes' : 'No'}</li>
+                </ul>
+                <p>Make sure to complete the activity on time! </p>
+                <p><a href="http://localhost:3000" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Activity Details on Sloth Selfie</a></p>
+            </div>
+        `;
+    }
+
+    const mailOptions = {
+        from: `"Sloth Selfie 🦥" <${process.env.EMAIL_USER}>`,
+        to: receiver.email,
+        subject: subjectContent,
+        html: htmlContent,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) console.log(error);
+        else console.log('Email sent: ' + info.response);
+    });
+
     if (notification.type === 'default') {
         await Notification.findByIdAndUpdate(notification._id, { status: 'inactive' });
     }

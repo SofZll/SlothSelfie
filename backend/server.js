@@ -42,19 +42,17 @@ app.use(bodyParser.json());
 app.use(session);
 
 app.use((req, res, next) => {
-    //console.log('Session ID:', req.sessionID);
-    //console.log('Session:', req.session);
     req.io = io;
     next();
 });
 
 app.use(routes);
 
-//serve static files from public folder
-app.use(express.static(path.join(__dirname, 'public')));
+//serve static files from public folder in sloth-selfie
+app.use(express.static(path.join(__dirname, '..', 'sloth-selfie', 'public')));
 
 app.get('/projects', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'projects.html'));
+    res.sendFile(path.join(__dirname, '..', 'sloth-selfie', 'public', 'projects.html'));
 });
 
 // Static files from frontend
@@ -75,7 +73,6 @@ agenda.on('error', (error) => {
 });
 
 process.on('SIGINT', async () => {
-    console.log("🛑 Ctrl+C intercettato, sto chiudendo Agenda...");
     await agenda.stop();
     console.log("✅ Agenda chiusa.");
     process.exit(0);
