@@ -50,11 +50,11 @@ app.use((req, res, next) => {
 
 app.use(routes);
 
-//serve static files from public folder
-app.use(express.static(path.join(__dirname, 'public')));
+//serve static files from public folder in sloth-selfie
+app.use(express.static(path.join(__dirname, '..', 'sloth-selfie', 'public')));
 
 app.get('/projects', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'projects.html'));
+    res.sendFile(path.join(__dirname, '..', 'sloth-selfie', 'public', 'projects.html'));
 });
 
 // Static files from frontend

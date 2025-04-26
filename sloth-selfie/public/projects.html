@@ -20,48 +20,47 @@
         <h1 class="mb-3">Your Projects:</h1>
         <ul id="projects-list" class="list-group mt-3"></ul>
 
-    <button id="closeProjectViewBtn" class="btn btn-primary btn-view" style="display: none;">Close View</button>
-    <div id="project-view-container" class="mt-4"></div>
+        <button id="closeProjectViewBtn" class="btn btn-primary btn-view" style="display: none;">Close View</button>
+        <div id="project-view-container" class="mt-4"></div>
 
-    <button id="closeActivityViewBtn" class="btn btn-warning btn-form-3" style="display: none;">Close Activities</button>
-    <div id="activity-container"></div>
-    
-    <button id="ToggleFormBtn" class="btn"> + Add a Project</button>
-    <form id="projectForm" style="display: none;">
-        <h2 class="mb-3" id="formTitle">Create a new project:</h2>
-
-        <div class="mb-3">
-            <label class="form-label">Project name</label>
-            <input type="text" class="form-control" id="projectName" required>
-        </div>
+        <button id="closeActivityViewBtn" class="btn btn-warning btn-form-3" style="display: none;">Close Activities</button>
+        <div id="activity-container"></div>
         
-        <div class="mb-3">
-            <label class="form-label">Project owner (username)</label>
-            <input type="text" class="form-control" id="projectOwner" required readonly>
-        </div>
+        <button id="ToggleFormBtn" class="btn"> + Add a Project</button>
+        <form id="projectForm" style="display: none;">
+            <h2 class="mb-3" id="formTitle">Create a new project:</h2>
 
-        <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea class="form-control" id="projectDesc"></textarea>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Project name</label>
+                <input type="text" class="form-control" id="projectName" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Project owner (username)</label>
+                <input type="text" class="form-control" id="projectOwner" required readonly>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Members (comma separated)</label>
-            <input type="text" class="form-control" id="projectActors" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" id="projectDesc"></textarea>
+            </div>
 
-        <div id="phasesContainer">
-            <h4>Phases</h4>
-        </div>
-        <button type="button" class="btn btn-primary mt-2 btn-form" onclick="addPhase()">Add a phase</button>
+            <div class="mb-3">
+                <label class="form-label">Members (comma separated)</label>
+                <input type="text" class="form-control" id="projectActors" required>
+            </div>
 
-        <div id="alertMessage" style="display: none;">
-            Saving...
-        </div>
+            <div id="phasesContainer">
+                <h4>Phases</h4>
+            </div>
+            <button type="button" class="btn btn-primary mt-2 btn-form" onclick="addPhase()">Add a phase</button>
 
-        <button type="submit" class="btn btn-primary mt-2 btn-form" id="createSave">Create project</button>
-    </form>
+            <div id="alertMessage" style="display: none;">
+                Saving...
+            </div>
 
+            <button type="submit" class="btn btn-primary mt-2 btn-form" id="createSave">Create project</button>
+        </form>
     </div>
 
     <script src="./projects.js"></script>
