@@ -8,21 +8,35 @@ const PomodoroContext = createContext();
 export const PomodoroProvider = ({ children }) => {
 
     const [settingsPomodoro, setSettingsPomodoro] = useState({
+        _id: '',
+        title: 'Pomodoro',
         studyTime: 60,
         breakTime: 60,
         cycles: 5,
         additionalCycles: 0
     });
 
+    const resetSettingsPomodoro = () => {
+        setSettingsPomodoro({
+            _id: '',
+            title: 'Pomodoro',
+            studyTime: 60,
+            breakTime: 60,
+            cycles: 5,
+            additionalCycles: 0
+        });
+    };
+
     const [pomodoro, setPomodoro] = useState({
         _id: '',
-        user: '',
+        title: 'Pomodoro',
         timeLeft: 60,
         cyclesLeft: 5,
         isStudyTime: true,
         started: false,
         finished: false,
         studiedTime: 0,
+        deadline: new Date(),
     });
 
     const [play, setPlay] = useState(false);
@@ -74,13 +88,14 @@ export const PomodoroProvider = ({ children }) => {
         } else {
             if (!pomodoro.started) {
                 if (pomodoro._id) {
+                    console.log('Updating pomodoro');
                     const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
                     if (!response.success) console.log('Error updating pomodoro', response.message);
                     else setPomodoro({ ...pomodoro, started: true });
                 } else {
                     const response = await apiService('/pomodoro', 'POST', {...pomodoro, ...settingsPomodoro});
                     if (!response.success) console.log('Error creating pomodoro', response.message);
-                    else setPomodoro({ ...pomodoro, _id: response.pomodoro._id, user: response.pomodoro.user, started: true });
+                    else setPomodoro({ ...pomodoro, _id: response.pomodoro._id, started: true });
                 }
             } else setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1, studiedTime: pomodoro.studiedTime + 1 });
         }
@@ -114,13 +129,14 @@ export const PomodoroProvider = ({ children }) => {
 
         setPomodoro({
             _id: '',
-            user: '',
+            title: 'Pomodoro',
             timeLeft: settingsPomodoro.studyTime,
             cyclesLeft: settingsPomodoro.cycles,
             isStudyTime: true,
             started: false,
             finished: false,
             studiedTime: 0,
+            deadline: new Date(),
         });
 
         resetAnimation(settingsPomodoro.studyTime);
@@ -210,12 +226,16 @@ export const PomodoroProvider = ({ children }) => {
         peopleInSession: 0,
     })
 
+
+    const [plannedPomodori, setPlannedPomodori] = useState([]);
+
     return (
         <PomodoroContext.Provider
             value={{ play, setPlay, 
-            pomodoro, setPomodoro, settingsPomodoro, setSettingsPomodoro, increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, editSettingsPomodoro, skipTime, skipBack,
+            pomodoro, setPomodoro, settingsPomodoro, setSettingsPomodoro, resetSettingsPomodoro, increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, editSettingsPomodoro, skipTime, skipBack,
             animation, setAnimation, resetAnimation, editTimeAnimation,
             popUp, setPopUp, resetPopUp,
+            plannedPomodori, setPlannedPomodori,
             socketData, setSocketData }}>
             {children}
         </PomodoroContext.Provider>

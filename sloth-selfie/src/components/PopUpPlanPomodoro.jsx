@@ -1,41 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import Swal from 'sweetalert2';
-import { apiService } from '../../services/apiService';
-import { usePomodoro } from '../../contexts/PomodoroContext';
-import ShareInput from '../../components/ShareInput';
+import { apiService } from '../services/apiService';
+import { usePomodoro } from '../contexts/PomodoroContext';
 
-const PopUpPlan = () => {
+const PopUpPlanPomodoro = ({ edit }) => {
 
-    const { resetPopUp } = usePomodoro();
-    const [pomodoro, setPomodoro] = useState({
-        title: 'Pomodoro',
-        deadline: new Date(),
-        studyTime: 30,
-        breakTime: 5,
-        cycles: 5,
-        sharedWith: []
-    });
-
-    const resetPomodoro = () => {
-        setPomodoro({
-            title: 'Pomodoro',
-            deadline: new Date(),
-            studyTime: 30,
-            breakTime: 5,
-            cycles: 5,
-            sharedWith: []
-        }); 
-    }
+    const { resetPopUp, resetSettingsPomodoro, settingsPomodoro, setSettingsPomodoro } = usePomodoro();
 
     const setDeadline = (date) => {
         const newDate = new Date(date);
         newDate.setHours(23, 59, 59, 999);
-        setPomodoro({ ...pomodoro, deadline: newDate });
+        setSettingsPomodoro({ ...settingsPomodoro, deadline: newDate });
     }
 
-    const addPomodoroCalendar = async () => {
-        if (!pomodoro.title || !pomodoro.deadline || !pomodoro.studyTime || !pomodoro.breakTime || !pomodoro.cycles) {
+    const submitPomodoroCalendar = async () => {
+        if (!settingsPomodoro.title || !settingsPomodoro.deadline || !settingsPomodoro.studyTime || !settingsPomodoro.breakTime || !settingsPomodoro.cycles) {
             Swal.fire({
                 title: 'Error',
                 icon: 'error',
@@ -45,12 +25,12 @@ const PopUpPlan = () => {
             return;
         }
 
-        const response = await apiService('/pomodoro/calendar', 'POST', pomodoro);
+        const response = await apiService('/pomodoro/calendar', 'POST', settingsPomodoro);
         if (response.success) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully', customClass: { confirmButton: 'button-alert' } });
         else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro', customClass: { confirmButton: 'button-alert' } });
 
         resetPopUp();
-        resetPomodoro();
+        resetSettingsPomodoro();
     }
 
     return (
@@ -62,8 +42,8 @@ const PopUpPlan = () => {
                         type='text'
                         className='form-control'
                         placeholder='Pomodoro title'
-                        value={pomodoro.title}
-                        onChange={(e) => setPomodoro({ ...pomodoro, title: e.target.value })}
+                        value={settingsPomodoro.title}
+                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, title: e.target.value })}
                     />
                 </div>
             </div>
@@ -74,7 +54,7 @@ const PopUpPlan = () => {
                     <input
                         type='date'
                         className='form-control'
-                        value={pomodoro.deadline.toISOString().split('T')[0]}
+                        value={settingsPomodoro.deadline ? new Date(settingsPomodoro.deadline).toISOString().split('T')[0] : ''}
                         onChange={(e) => setDeadline(e.target.value)}
                     />
                 </div>
@@ -87,8 +67,8 @@ const PopUpPlan = () => {
                         type='number'
                         className='form-control'
                         placeholder='minutes'
-                        value={pomodoro.studyTime}
-                        onChange={(e) => setPomodoro({ ...pomodoro, studyTime: e.target.value })}
+                        value={settingsPomodoro.studyTime}
+                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, studyTime: e.target.value })}
                     />
                 </div>
                 <div className='col-6'>
@@ -97,8 +77,8 @@ const PopUpPlan = () => {
                         type='number'
                         className='form-control'
                         placeholder='minutes'
-                        value={pomodoro.breakTime}
-                        onChange={(e) => setPomodoro({ ...pomodoro, breakTime: e.target.value })}
+                        value={settingsPomodoro.breakTime}
+                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, breakTime: e.target.value })}
                     />
                 </div>
             </div>
@@ -109,24 +89,19 @@ const PopUpPlan = () => {
                         type='number'
                         className='form-control'
                         placeholder='number of cycles'
-                        value={pomodoro.cycles}
-                        onChange={(e) => setPomodoro({ ...pomodoro, cycles: e.target.value })}
+                        value={settingsPomodoro.cycles}
+                        onChange={(e) => setSettingsPomodoro({ ...settingsPomodoro, cycles: e.target.value })}
                     />
                 </div>
             </div>
 
-            <div className='d-flex justify-content-center w-100 mt-3'>
-                <div className='col-12'>
-                    <label className='form-label'>Share your Pomodoro</label>
-                    <ShareInput receivers={pomodoro.sharedWith} setReceivers={(receivers) => setPomodoro({ ...pomodoro, sharedWith: receivers })} />
-                </div>
+            <div className='d-flex align-items-center justify-content-center'>
+                <button className='btn-main rounded shadow-sm mt-4' onClick={() => submitPomodoroCalendar()}>
+                    save
+                </button>
             </div>
-
-            <button className='btn bg-sloth-blue btn-outline-light mt-3' onClick={() => addPomodoroCalendar()}>
-                save
-            </button>
         </div>
     );
 }
 
-export default PopUpPlan;
+export default PopUpPlanPomodoro;

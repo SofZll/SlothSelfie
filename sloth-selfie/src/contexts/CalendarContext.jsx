@@ -147,8 +147,6 @@ export const CalendarProvider = ({ children }) => {
         });
     }
 
-    const [plannedPomodori, setPlannedPomodori] = useState([]);
-
     const [notifications, setNotifications] = useState([]);
 
     // disable save button if conditions are not met
@@ -159,7 +157,6 @@ export const CalendarProvider = ({ children }) => {
             value={{ activity, setActivity, activities, setActivities, resetActivity,
                 event, setEvent, events, setEvents, addImportedEvents, resetEvent,
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
-                plannedPomodori, setPlannedPomodori,
                 selected, setSelected, select, back, resetSelected, notifications, setNotifications, conditionsMet, setConditionsMet, }}>
 
             {children}

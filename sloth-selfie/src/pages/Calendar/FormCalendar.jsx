@@ -8,6 +8,7 @@ import FormActivity from './FormActivity';
 import FormEvent from './FormEvent';
 import FormNoAvailability from './FormNoAvailability';
 import FormTask from './FormTask';
+import FormPomodoro from './FormPomodoro';
 import Button from '../../components/Button';
 import ScrollList from '../../components/ScrollList';
 
@@ -128,6 +129,12 @@ const FormCalendar = () => {
                 {selected.selection === 'task' && (
                     <div className="formPopup">
                         <FormTask />
+                    </div>
+                )}
+
+                {selected.selection === 'pomodoro' && (
+                    <div className="formPopup w-100">
+                        <FormPomodoro />
                     </div>
                 )}
 
