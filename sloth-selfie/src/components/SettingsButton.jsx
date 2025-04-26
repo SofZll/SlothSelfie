@@ -120,7 +120,7 @@ const SettingsButton = ({ color }) => {
             {showSettingsOptions && !showSettings && (
                 <div className="settings-options">
                     <div className='modal-overlay'>
-                        <div className='modal-content'>
+                        <div className='modal-content modal-content-settings'>
                         <button className='button-clean white mt-3 ' onClick={handleCloseSettings}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
                                 <path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -134,7 +134,7 @@ const SettingsButton = ({ color }) => {
 
             {showSettings && selectedSetting === 'workHours' && (
                 <div className='modal-overlay'>
-                    <div className='modal-content'>
+                    <div className='modal-content modal-content-settings'>
                         <button className='button-clean white mt-3 ' onClick={handleCloseSettings}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">

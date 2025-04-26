@@ -5,7 +5,7 @@ const Event = require('../models/eventModel');
 
 const { combineDateTime } = require('../utils/utils');
 const { scheduleNotification } = require('../agenda/notificationScheduler');
-const { getScheduledJobs, snoozeJob, updateJobs } = require('../services/agendaService');
+const { getScheduledJobs, snoozeJob, updateJobs, deleteJobs } = require('../services/agendaService');
 
 const setNotifications = async (req, res) => {
     const { type, elementId, notifications } = req.body;
@@ -114,8 +114,9 @@ const deleteNotification = async (req, res) => {
     if (!notificationId) return res.status(400).json({ success: false, message: 'No notification ID provided' });
 
     try {
+        await deleteJobs(notificationId);
         const notification = await Notification.findByIdAndDelete(notificationId);
-
+        
         if (!notification) return res.status(404).json({ success: false, message: 'Notification not found' });
 
         res.status(200).json({ success: true, message: 'Notification deleted successfully' });

@@ -5,7 +5,7 @@ import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
 
-import { useIsDesktop, dateFromDate, timeFromDate } from '../../utils/utils';
+import { useIsDesktop, timeFromDate } from '../../utils/utils';
 import { validateNotification } from '../../utils/validation';
 import ScrollList from '../../components/ScrollList';
 import FormCalendar from './FormCalendar';
