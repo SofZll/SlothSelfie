@@ -7,8 +7,8 @@ const DeletePopUpLayout = ({ children, handleDelete, handleClose }) => {
 
             <div className='bg-white w-100 h-100 opacity-50'></div>
 
-            <div className='modal-dialog custom-modal position-absolute top-50 start-50 translate-middle'>
-                <div className='modal-content border border-secondary'>
+            <div className='modal-dialog custom-modal position-absolute top-50 start-50 translate-middle bg-white'>
+                <div className='modal-content border border-secondary p-3'>
                     <div className='modal-header'>
                         <h5 className='modal-title' style={{ color: '#244476' }}>
                             Deletion Warning

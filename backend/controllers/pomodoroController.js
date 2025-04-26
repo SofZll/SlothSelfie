@@ -40,16 +40,14 @@ const newPomodoro = async (req, res) => {
 
     try {
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-        console.log('Creating new pomodoro:', { user: user._id, title, deadline, studyTime, breakTime, cycles });
-        console.log('Deadline:', new Date(deadline));
         
         const newPomodoro = new Pomodoro({
             user: user._id,
             title,
             deadline: new Date(deadline),
-            studyTime: studyTime*60,
-            breakTime: breakTime*60,
+            studyTime: studyTime,
+            breakTime: breakTime,
+            isStudyTime: true,
             cycles,
             started: false,
             finished: false,
@@ -98,15 +96,14 @@ const addPomodoro = async (req, res) => {
 
 const editPomodoro = async (req, res) => {
     const { pomodoroId } = req.params;
-    const { studyTime, breakTime, cycles, started, finished } = req.body;
+    const { studyTime, breakTime, cycles, deadline } = req.body;
 
     try {
         const pomodoro = await Pomodoro.findByIdAndUpdate(pomodoroId, {
             studyTime,
             breakTime,
             cycles,
-            started,
-            finished
+            deadline: new Date(deadline) 
         }, { new: true });
 
         if (!pomodoro) {
@@ -197,7 +194,7 @@ const getPomodoroById = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Pomodoro not found' });
         }
 
-        if (pomodoro.user.toString() !== user._id.toString()) {
+        if (pomodoro.user._id.toString() !== user._id.toString()) {
             return res.status(403).json({ success: false, message: 'Unauthorized access' });
         }
 
