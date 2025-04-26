@@ -10,6 +10,7 @@ const getPomodori = async (req, res) => {
         const pomodori = await Pomodoro.find({ user: user._id })
             .populate('user', 'username');
 
+
         res.status(200).json({success: true, pomodori });
     } catch (error) {
         console.error('Error fetching pomodori:', error);
@@ -17,17 +18,47 @@ const getPomodori = async (req, res) => {
     }
 }
 
-const getPomodoriToDo = async (req, res) => {
+const getPlannedPomodori = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
 
     try {
-        const pomodori = await Pomodoro.find({ user: user._id, started: false })
+        const pomodori = await Pomodoro.find({ user: user._id, deadline: { $ne: null }, finished: false })
             .populate('user', 'username');
 
         res.status(200).json({ success: true, pomodori });
     } catch (error) {
         console.error('Error fetching pomodori:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+const newPomodoro = async (req, res) => {
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
+    const {  title, deadline, studyTime, breakTime, cycles } = req.body;
+
+    try {
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        console.log('Creating new pomodoro:', { user: user._id, title, deadline, studyTime, breakTime, cycles });
+        console.log('Deadline:', new Date(deadline));
+        
+        const newPomodoro = new Pomodoro({
+            user: user._id,
+            title,
+            deadline: new Date(deadline),
+            studyTime: studyTime*60,
+            breakTime: breakTime*60,
+            cycles,
+            started: false,
+            finished: false,
+            studiedTime: 0,
+        });
+        const pomodoro = await newPomodoro.save();
+        res.status(201).json({ success: true, pomodoro });
+    } catch (error) {
+        console.error('Error creating pomodoro:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 }
@@ -50,9 +81,9 @@ const addPomodoro = async (req, res) => {
         if (started) {
             if (finished) newPomodoro.finishedDate = new Date();
 
-            const { isStudyTime, studiedTime, cyclesLeft, additionalCycles } = req.body;
+            const { isStudyTime, cyclesLeft, additionalCycles } = req.body;
             newPomodoro.isStudyTime = isStudyTime;
-            newPomodoro.studiedTime = studiedTime;
+            newPomodoro.studiedTime = 0;
             newPomodoro.cyclesLeft = cyclesLeft;
             newPomodoro.additionalCycles = additionalCycles;
         }
@@ -82,7 +113,7 @@ const editPomodoro = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Pomodoro not found' });
         }
 
-        res.status(200).json(pomodoro);
+        res.status(200).json({ success: true, pomodoro });
     } catch (error) {
         console.error('Error updating pomodoro:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -124,7 +155,7 @@ const updateCycles = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Pomodoro not found' });
         }
 
-        res.status(200).json(pomodoro);
+        res.status(200).json({ success: true, pomodoro });
     } catch (error) {
         console.error('Error updating cycles:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -143,10 +174,10 @@ const addAdditionalCycle = async (req, res) => {
         }, { new: true });
 
         if (!pomodoro) {
-            return res.status(404).json({ message: 'Pomodoro not found' });
+            return res.status(404).json({ success: false, message: 'Pomodoro not found' });
         }
 
-        res.status(200).json(pomodoro);
+        res.status(200).json({ success: true, pomodoro });
     } catch (error) {
         console.error('Error adding additional cycle:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -238,8 +269,9 @@ const timePomodoriMonths = async (req, res) => {
 
 module.exports = {
     getPomodori,
-    getPomodoriToDo,
+    getPlannedPomodori,
     addPomodoro,
+    newPomodoro,
     editPomodoro,
     deletePomodoro,
     updateCycles,

@@ -25,7 +25,7 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, plannedPomodori, setPlannedPomodori } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
 
     const [show, setShow] = useState('plans');
@@ -48,6 +48,8 @@ const Planner = () => {
     }
 
     const fetchPomodoros = async () => {
+        const response = await apiService('/pomodori/todo', 'GET');
+        if (response.success) setPlannedPomodori(response.pomodori);
     }
 
     const fetchNoAvailability = async () => {
@@ -203,8 +205,8 @@ const Planner = () => {
     
     useEffect(() => {
         if (show === 'plans') setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
-        //else if (show === 'pomodoro') setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
-        if (show === 'no availability') setListNormal([...normalizeData(availabilities, 'no availability')]);
+        else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
+        else if (show === 'no availability') setListNormal([...normalizeData(availabilities, 'no availability')]);
     }, [activities, events, tasks, availabilities, show]);
 
     useEffect(() => {
