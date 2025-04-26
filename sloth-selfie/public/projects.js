@@ -492,7 +492,7 @@ async function removePhaseFromBackend(projectId, phaseId) {
         const data = await response.json();
 
         if (data.success) {
-            
+            console.log("Phase removed successfully:", data.message); 
         } else {
             Swal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
         }
@@ -514,7 +514,7 @@ async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
         const data = await response.json();
 
         if (data.success) {
-            
+            console.log("Subphase removed successfully:", data.message);
         } else {
             Swal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
             
@@ -536,7 +536,7 @@ async function removeActivityFromBackend(projectId, phaseId, subphaseId, activit
         const data = await response.json();
 
         if (data.success) {
-            
+            console.log("Activity removed successfully:", data.message);
         } else {
             Swal.fire({title: "Error", text: "Error while deleting the activity", icon: "error"});
 

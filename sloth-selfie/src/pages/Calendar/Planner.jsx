@@ -25,7 +25,7 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, plannedPomodori, setPlannedPomodori } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
 
     const [show, setShow] = useState('plans');
@@ -34,7 +34,7 @@ const Planner = () => {
 
     const fetchEvents = async () => {
         const response = await apiService('/events', 'GET');
-        if (response.success) setEvents(response.eventsWithUsernames);
+        if (response.success) setEvents(response.events);
     }
 
     const fetchActivities = async () => {
@@ -49,6 +49,8 @@ const Planner = () => {
     }
 
     const fetchPomodoros = async () => {
+        const response = await apiService('/pomodori/todo', 'GET');
+        if (response.success) setPlannedPomodori(response.pomodori);
     }
 
     const fetchNoAvailability = async () => {
@@ -67,7 +69,8 @@ const Planner = () => {
                     user: data.user,
                     start: new Date(data.startDate),
                     end: new Date(data.endDate),
-                    type: 'no availability'
+                    type: 'no availability',
+                    allDay: data.days,
                 };
             });
         }
@@ -83,13 +86,15 @@ const Planner = () => {
                 } : {
                     ...(new Date(data.deadline) < new Date() ? { 
                         late: true,
-                        start: new Date(),
-                        end: new Date(),
+                        start: new Date().setHours(0, 0, 0, 0),
+                        end: new Date().setHours(23, 59, 59, 999),
                     } : {
                         late: false,
-                        start: new Date(data.deadline),
-                        end: new Date(data.deadline),
+                        start: new Date(data.deadline).setHours(0, 0, 0, 0),
+                        end: new Date(data.deadline).setHours(23, 59, 59, 999),
                     }),
+                    allDay: true,
+                    durationEditable: false,
                 }),
                 type: type
             };
@@ -114,32 +119,42 @@ const Planner = () => {
             else setAvailability({ ...na, startTime: timeFromDate(new Date(na.startDate)), duration: (new Date(na.endDate) - new Date(na.startDate)) / (1000 * 60 * 60) });
         }
         
-        setSelected({selection: item.type, edit: true, add: false, popUp: !isDesktop});
+        setSelected({selection: item.type, edit: true, add: false, popup: !isDesktop});
     }
 
-    //event and activity are the same
-    const onEventDrop = async ({ event, start }) => {
-        let deadline, date;
-
-        if (event.type === 'no availability') return;
-
-        if (event.type === 'activity') {
-            deadline = new Date(start);
-            deadline.setHours(0, 0, 0, 0);
-        } else date = new Date(start);
-
+    const onActivityTaskPomodoroDrop = async ({ event, start }) => {
+        let deadline = new Date(start);
+        deadline.setHours(23, 59, 59, 999);
         if (event.type === 'activity') {
             const a = activities.find(a => a._id === event._id);
             const response = await apiService(`/activity/${a._id}`, 'PUT', { ...a, deadline });
             if (response.success) setActivities(activities.map(a => a._id === event._id ? response.activity : a));
-        } else if (event.type === 'event') {
-            const e = events.find(e => e._id === event._id);
-            const response = await apiService(`/event/${e._id}`, 'PUT', { ...e, date });
-            if (response.success) setEvents(events.map(e => e._id === event._id ? response.event : e));
-        } else {
+        } else if (event.type === 'task') {
             const t = tasks.find(t => t._id === event._id);
             const response = await apiService(`/task/${t._id}`, 'PUT', { ...t, deadline });
             if (response.success) setTasks(tasks.map(t => t._id === event._id ? response.task : t));
+        } else if (event.type === 'pomodoro') {
+            //const p = pomodoros.find(p => p._id === event._id);
+            //const response = await apiService(`/pomodoro/${p._id}`, 'PUT', { ...p, deadline });
+            //if (response.success) setPomodoros(pomodoros.map(p => p._id === event._id ? response.pomodoro : p));
+        }
+    }
+
+    //event and activity are the same
+    const onEventDrop = async ({ event, start, end }) => {
+
+        if (event.type === 'activity' || event.type === 'task' || event.type === 'pomodoro') return onActivityTaskPomodoroDrop({ event, start });
+        else if (event.type === 'event') {
+            const e = events.find(e => e._id === event._id);
+            const response = await apiService(`/event/${e._id}`, 'PUT', { ...e, start, end });
+            if (response.success) setEvents(events.map(e => e._id === event._id ? response.event : e));
+        } else if (event.type === 'no availability') {
+            const na = availabilities.find(na => na._id === event._id);
+            const response = await apiService(`/no-availability/${na._id}`, 'PUT', { ...na, startDate: start, endDate: end });
+            if (response.success) {
+                if (na.repeatFrequency === 'none') setAvailabilities(availabilities.map(na => na._id === event._id ? response.noAvailability : na));
+                else setAvailabilities([...availabilities.filter(noAvailability => noAvailability.fatherId !== na.fatherId), ...response.listNoAvailability]);
+            }
         }
     }
 
@@ -176,8 +191,8 @@ const Planner = () => {
     
     useEffect(() => {
         if (show === 'plans') setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
-        //else if (show === 'pomodoro') setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
-        if (show === 'no availability') setListNormal([...normalizeData(availabilities, 'no availability')]);
+        else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
+        else if (show === 'no availability') setListNormal([...normalizeData(availabilities, 'no availability')]);
     }, [activities, events, tasks, availabilities, show]);
 
     useEffect(() => {
@@ -199,14 +214,14 @@ const Planner = () => {
     }, [notifications]);
 
     return (
-        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popUp: true })} selected={selected.popUp} popUp={<FormCalendar />}>
+        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popup: true })} selected={selected.popup} popUp={<FormCalendar />}>
 
             {!isDesktop && (
-                <div className='d-flex w-100'>
-                    <div className='btn-group ms-4' role='group'>
-                        <button type='button' className='btn btn-light border-secondary-subtle m-0 px-3' onClick={() => setShow('no availability')}>No Availability</button>
-                        <button type='button' className='btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3' onClick={() => setShow('pomodoro')}>Pomodoros</button>
-                        <button type='button' className='btn btn-light border-secondary-subtle m-0 px-3' onClick={() => setShow('plans')}>Plans</button>
+                <div className='d-flex w-100 justify-content-center'>
+                    <div className='btn-group' role='group'>
+                        <button type='button' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'no availability' && 'bg-secondary-subtle'}`} onClick={() => setShow('no availability')}>No Availability</button>
+                        <button type='button' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
+                        <button type='button' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'plans' && 'bg-secondary-subtle'}`} onClick={() => setShow('plans')}>Plans</button>
                     </div>
                 </div>
             )}
@@ -229,9 +244,9 @@ const Planner = () => {
             {isDesktop ? (
                 <div className='d-flex w-100'>
                     <div className='btn-group ms-4' role='group'>
-                        <button type='button' className='btn btn-light border-secondary-subtle m-0 px-3 ' onClick={() => setShow('no availability')}>No Availability</button>
-                        <button type='button' className='btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3' onClick={() => setShow('pomodoro')}>Pomodoros</button>
-                        <button type='button' className='btn btn-light border-secondary-subtle m-0 px-3' onClick={() => setShow('plans')}>Plans</button>
+                        <button type='button' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'no availability' && 'bg-secondary-subtle'}`} onClick={() => setShow('no availability')}>No Availability</button>
+                        <button type='button' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
+                        <button type='button' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'plans' && 'bg-secondary-subtle'}`} onClick={() => setShow('plans')}>Plans</button>
                     </div>
                 </div>
             ) : (

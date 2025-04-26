@@ -145,7 +145,13 @@ const editNoAvailability = async (id, startDate, endDate, days, repeatFrequency,
         nA2update.endDate = endDate;
         nA2update.days = days;
         nA2update.repeatFrequency = repeatFrequency;
-        if (repeatFrequency !== 'none' && numberOfOccurrences) nA2update.numberOfOccurrences = numberOfOccurrences;
+        if (repeatFrequency === 'none') {
+            nA2update.fatherId = null;
+            nA2update.numberOfOccurrences = 0;
+        } else {
+            nA2update.fatherId = nA2update.fatherId || id;
+            nA2update.numberOfOccurrences = numberOfOccurrences;
+        }
 
         const response = await nA2update.save();
         console.log('response', response);

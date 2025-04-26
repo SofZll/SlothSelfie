@@ -24,7 +24,7 @@ const PreviewCalendar = ({ viewType }) => {
 
     const fetchEvents = async () => {
         const response = await apiService('/events', 'GET');
-        if (response.success) setEvents(response.eventsWithUsernames);
+        if (response.success) setEvents(response.events);
     }
 
     const fetchActivities = async () => {
