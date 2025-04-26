@@ -25,9 +25,23 @@ const SelectionCalendarLayout = ({children}) => {
         <div className='d-flex flex-column w-100 my-md-3 bg-white border p-3 rounded'>
 
             <div className='d-flex justify-content-between my-3'>
-                <div className='fs-5'>
-                    {selected.add ? 'Add a new ' : 'Edit the selected '} {selected.selection}
-                </div>
+                {selected.add || selected.selection === '...' && (
+                    <div className='fs-5'>
+                        Add a new {selected.selection}
+                    </div>
+                )}
+
+                {selected.edit && (
+                    <div className='fs-5'>
+                        Edit {selected.selection}
+                    </div>
+                )}
+
+                {selected.selection === 'pomodoro' &&  !selected.edit && (
+                    <div className='fs-5'>
+                        Planned Pomodoro
+                    </div>
+                )}
 
                 <div>
                     {selected.selection !== '...' ? (

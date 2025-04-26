@@ -139,7 +139,7 @@ const deletePomodoro = async (req, res) => {
 
 const updateCycles = async (req, res) => {
     const { pomodoroId } = req.params;
-    const { cyclesLeft, isStudyTime, studiedTime, finished, started } = req.body;
+    const { cyclesLeft, isStudyTime, studiedTime, finished } = req.body;
 
     try {
         const pomodoro = await Pomodoro.findByIdAndUpdate(pomodoroId, {
@@ -148,7 +148,7 @@ const updateCycles = async (req, res) => {
             studiedTime,
             finished,
             finishedDate: finished ? new Date() : null,
-            started
+            started: true
         }, { new: true });
 
         if (!pomodoro) {

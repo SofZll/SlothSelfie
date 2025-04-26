@@ -14,6 +14,7 @@ import PlusLayout from '../../layouts/PlusLayout';
 import { AuthContext } from '../../contexts/AuthContext';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
+import { usePomodoro } from '../../contexts/PomodoroContext';
 
 import { apiService } from '../../services/apiService';
 
@@ -25,8 +26,9 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, plannedPomodori, setPlannedPomodori } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, setNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
+    const { setPlannedPomodori, plannedPomodori, settingsPomodoro, setSettingsPomodoro } = usePomodoro();
 
     const [show, setShow] = useState('plans');
 
@@ -131,9 +133,15 @@ const Planner = () => {
             const na = availabilities.find(na => na._id === item._id);
             if (na.days) setAvailability({ ...na});
             else setAvailability({ ...na, startTime: timeFromDate(new Date(na.startDate)), duration: (new Date(na.endDate) - new Date(na.startDate)) / (1000 * 60 * 60) });
+        } else if (item.type === 'pomodoro') {
+            const p = plannedPomodori.find(p => p._id === item._id);
+            await setSettingsPomodoro({ ...p });
+            console.log(p);
+            console.log(settingsPomodoro);
         }
         
-        setSelected({selection: item.type, edit: true, add: false, popup: !isDesktop});
+        if (item.type === 'pomodoro') setSelected({selection: item.type, add: false, popup: !isDesktop});
+        else setSelected({selection: item.type, edit: true, add: false, popup: !isDesktop});
     }
 
     const onActivityTaskPomodoroDrop = async ({ event, start }) => {

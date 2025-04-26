@@ -24,6 +24,9 @@ const TimerPomodoro = () => {
         } else setPlay(!play);
     }
 
+    console.log('settingsPomodoro', settingsPomodoro);
+    console.log('pomodoro', pomodoro);
+
     const handleClick = async (call, message) => {
         
         if (socketData.inShare) socket.emit(message);

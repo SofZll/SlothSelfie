@@ -4,7 +4,7 @@ import { usePomodoro } from '../../contexts/PomodoroContext';
 import { useMusic } from '../../contexts/MusicContext';
 import EditPomodoro from './EditPomodoro';
 import PopUpShare from './PopUpShare';
-import PopUpPlan from './PopUpPlan';
+import PopUpPlanPomodoro from '../../components/PopUpPlanPomodoro';
 import StatsPomodoro from '../../components/StatsPomodoro';
 import { Youtube, SearchCheck } from 'lucide-react';
 
@@ -48,7 +48,7 @@ const PopUpPomodoro = () => {
                         )}
 
                         {popUp.calendar && (
-                            <PopUpPlan />
+                            <PopUpPlanPomodoro edit={false} />
                         )}
 
                         {popUp.music && (
