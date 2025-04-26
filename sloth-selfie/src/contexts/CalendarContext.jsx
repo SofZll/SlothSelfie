@@ -53,8 +53,7 @@ export const CalendarProvider = ({ children }) => {
     const [events, setEvents] = useState([]);
 
     const addImportedEvents = (newEvents) => {
-        setEvents(prev => [...(Array.isArray(prev) ? prev : []), ...newEvents]);
-        //setEvents(prev => [...prev, ...newEvents]);  //da err prev not iterable, colpa di eventi non inizializzati? dove i devo passare?
+        setEvents(prev => [...prev, ...newEvents]);
         //setActivities(prev => [...prev, ...newEvents]); //TEST FINCHè EVENTS NON VA, ANCHE NEL BACK
     };
 
