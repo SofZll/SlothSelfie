@@ -40,7 +40,7 @@
     z-index: 1000;
 }
 
-.modal-content {
+.modal-content-settings {
     background: white;
     padding: 10px;
     border-radius: 10px;
@@ -50,7 +50,7 @@
     z-index: 1001;
 }
 
-.modal-content select[multiple] {
+.modal-content-settings select[multiple] {
     height: 20vh;
 }
 

@@ -109,8 +109,19 @@ const updateJobs = async (notificationId) => {
     await scheduleNotification([notification]);
 }
 
+const deleteJobs = async (notificationId) => {
+    const notification = await Notification.findById(notificationId);
+    if (!notification) throw new Error('Notification not found');
+
+    await agenda.cancel({ 
+        name: 'send-notification',
+        'data.notification': notification._id.toString()
+    });
+}
+
 module.exports = {
     getScheduledJobs,
     snoozeJob,
-    updateJobs
+    updateJobs,
+    deleteJobs
 };

@@ -104,7 +104,7 @@ const updateActivity = async (req, res) => {
             const responseIndex = activity.responses.findIndex(r => r.user.toString() === user._id.toString());
 
             if (responseIndex !== -1) activity.responses[responseIndex].status = status;
-            else activity.responses.push({ user: user._id, status });// Update the existing response
+            else activity.responses.push({ user: user._id, status });
 
             updateData.responses = activity.responses;
 

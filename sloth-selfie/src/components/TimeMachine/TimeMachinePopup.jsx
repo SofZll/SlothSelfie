@@ -6,7 +6,7 @@ import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 // TODO: il resto delle funzioni
 
 const TimeMachinePopup = () => {
-    const { setMachineOpen, virtualNow, setVirtualNow, currentTime, currentDate } = useContext(TimeMachineContext);
+    const { setMachineOpen, setVirtualNow, currentTime, currentDate } = useContext(TimeMachineContext);
 
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');
@@ -18,7 +18,10 @@ const TimeMachinePopup = () => {
             return;
         }
 
-        const response = await apiService('/time/set-time', 'POST', { date: inputDate, time: inputTime });
+        const dateTime = new Date(`${inputDate}T${inputTime}`);
+        setVirtualNow(dateTime);
+
+        const response = await apiService('/time/set', 'POST', { date: inputDate, time: inputTime });
         if (response.success) {
             console.log('Time set successfully:', response);
             setMachineOpen(false);
@@ -29,9 +32,10 @@ const TimeMachinePopup = () => {
     }
 
     const handleResetTime = async () => {
-        const response = await apiService('/time/reset-time', 'POST');
+        const response = await apiService('/time/reset', 'POST');
         if (response.success) {
             console.log('Time reset successfully:', response);
+            setVirtualNow(new Date());
             setInputDate('');
             setInputTime('');
         } else {
@@ -39,14 +43,6 @@ const TimeMachinePopup = () => {
             Swal.fire({ icon: 'error', title: 'Oops...', text: 'Error resetting time' });
         }
     }
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setVirtualNow(prev => new Date(prev.getTime() + 1000));
-        }, 1000);
-    
-        return () => clearInterval(interval);
-    }, []);
 
     return (
         <div className='modal fade show time-machine-popup'>
