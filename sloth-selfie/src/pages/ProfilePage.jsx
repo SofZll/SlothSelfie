@@ -83,7 +83,7 @@ const ProfilePage = () => {
                 <div className='profile-container d-flex align-items-center justify-content-center flex-column m-2 p-3'>
                     <div>
                         <h2>{user.username}</h2>
-                        <SettingsButton />
+                        <SettingsButton color='dark' />
                     </div>
                     <div className='profile-image d-flex align-items-center justify-content-center m-auto overflow-hidden'>
                         {user.profile_image && (

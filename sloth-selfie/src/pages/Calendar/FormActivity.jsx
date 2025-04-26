@@ -142,7 +142,7 @@ const FormActivity = () => {
 
             <div className='d-flex align-items-center justify-content-center'>
                 {!activity.project && (
-                    <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()} >
+                    <button type='button' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()} >
                         {selected.edit ? 'edit' : 'save'}
                     </button>
                 )}

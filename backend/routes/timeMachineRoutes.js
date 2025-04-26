@@ -1,12 +1,12 @@
 const express = require('express');
 
-const { fetchState, setTime, resetTime } = require('../controllers/timeMachineController');
+const { setTime, resetTime, getIsActive } = require('../controllers/timeMachineController');
 
 const router = express.Router();
 
 // Time machine endpoint
-router.get('/time/fetch-state', fetchState);
-router.post('/time/set-time', setTime);
-router.post('/time/reset-time', resetTime);
+router.post('/time/set', setTime);
+router.post('/time/reset', resetTime);
+router.get('/time/state', getIsActive);
 
 module.exports = router;

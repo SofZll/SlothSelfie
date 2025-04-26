@@ -13,15 +13,12 @@ const ChatList = () => {
     const { user } = useContext(AuthContext);
 
     const filteredChats = useMemo(() => {
-        console.log('chats.otherParticipant.username: ', chats.map(chat => chat.otherParticipant.username));
-        console.log('searchTerm: ', searchTerm);
         return chats.filter(chat => 
             chat.otherParticipant.username.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [chats, searchTerm]);
 
     const handleChatClick = async (chatId) => {
-        console.log('click rilevato');
         const response = await apiService(`/chat/${chatId}`);
         if (response.success) {
             const existingChat = chats.find(chat => chat._id === chatId);

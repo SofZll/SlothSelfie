@@ -42,29 +42,36 @@ const notificationSchema = new mongoose.Schema({
         default: false
     },
 
+    urgencySettings: {
+        frequency: {
+            type: String,
+            enum: ['5min', '10min', '15min', '30min'],
+            default: '10min'
+        },
+        max: {
+            type: Number,
+            default: 3
+        }
+    },
+
     snooze: {
         type: Boolean,
         default: false,
     },
 
-    snoozeUntil: {
-        type: Date,
-        default: null,
-        required: function() {
-            return this.snooze;
+    snoozeSettings: {
+        until: {
+            type: Date,
+            default: null
+        },
+        count: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 3
         }
     },
-
-    snoozeCount: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 5,
-        required: function() {
-            return this.snooze;
-        }
-    },
-
+    
     // se l'utente è vicino al luogo
     location: {
         lat: Number,

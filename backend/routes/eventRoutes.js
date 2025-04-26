@@ -10,9 +10,9 @@ const router = express.Router();
 // Event endpoints
 router.get('/events', getEvents);
 router.post('/event', createNewEvent);
-router.post('/event/import', upload.array('icsFiles'), importEvents);
+router.post('/events/import', upload.array('icsFiles'), importEvents);  
 router.put('/event/:eventId', updateEvent);
 router.delete('/event/:eventId', deleteEvent);
 router.get('/event/:eventId/export', exportEvent);
-
+ 
 module.exports = router;
