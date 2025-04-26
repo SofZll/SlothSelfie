@@ -9,33 +9,33 @@ const PopUpPlan = () => {
 
     const { resetPopUp } = usePomodoro();
     const [pomodoro, setPomodoro] = useState({
-        title: '',
-        date: new Date(),
+        title: 'Pomodoro',
+        deadline: new Date(),
         studyTime: 30,
         breakTime: 5,
         cycles: 5,
-        studiedTime: 0,
-        started: false,
-        finished: false,
-        sharedWith: [],
+        sharedWith: []
     });
 
     const resetPomodoro = () => {
         setPomodoro({
-            title: '',
-            date: new Date(),
+            title: 'Pomodoro',
+            deadline: new Date(),
             studyTime: 30,
             breakTime: 5,
             cycles: 5,
-            studiedTime: 0,
-            started: false,
-            finished: false,
-            sharedWith: [],
+            sharedWith: []
         }); 
     }
 
+    const setDeadline = (date) => {
+        const newDate = new Date(date);
+        newDate.setHours(23, 59, 59, 999);
+        setPomodoro({ ...pomodoro, deadline: newDate });
+    }
+
     const addPomodoroCalendar = async () => {
-        if (!pomodoro.title || !pomodoro.date || !pomodoro.studyTime || !pomodoro.breakTime || !pomodoro.cicles) {
+        if (!pomodoro.title || !pomodoro.deadline || !pomodoro.studyTime || !pomodoro.breakTime || !pomodoro.cycles) {
             Swal.fire({
                 title: 'Error',
                 icon: 'error',
@@ -45,13 +45,9 @@ const PopUpPlan = () => {
             return;
         }
 
-        const response = await apiService('/pomodoro', 'POST', pomodoro);
-        if (response.success) {
-            const eventResponse = await apiService('/event/pomodoro', 'POST', response.pomodoro);
-            if (eventResponse.success) Swal.fire({ icon: 'success', title: 'Pomodoro added to calendar', text: 'Pomodoro added to calendar successfully', customClass: { confirmButton: 'button-alert' } });
-            else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro to calendar', customClass: { confirmButton: 'button-alert' } });
-            
-        } else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro', customClass: { confirmButton: 'button-alert' } });
+        const response = await apiService('/pomodoro/calendar', 'POST', pomodoro);
+        if (response.success) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully', customClass: { confirmButton: 'button-alert' } });
+        else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro', customClass: { confirmButton: 'button-alert' } });
 
         resetPopUp();
         resetPomodoro();
@@ -60,7 +56,7 @@ const PopUpPlan = () => {
     return (
         <div className='d-flex flex-column'>
             <div className='d-flex justify-content-center w-100 mt-3'>
-                <div className='col-6'>
+                <div className='col-12'>
                     <label className='form-label'>Title</label>
                     <input
                         type='text'
@@ -70,13 +66,16 @@ const PopUpPlan = () => {
                         onChange={(e) => setPomodoro({ ...pomodoro, title: e.target.value })}
                     />
                 </div>
-                <div className='col-6'>
+            </div>
+
+            <div className='d-flex justify-content-center w-100 mt-3'>
+                <div className='col-12'>
                     <label className='form-label'>Date</label>
                     <input
                         type='date'
                         className='form-control'
-                        value={pomodoro.date.toISOString().split('T')[0]}
-                        onChange={(e) => setPomodoro({ ...pomodoro, date: new Date(e.target.value) })}
+                        value={pomodoro.deadline.toISOString().split('T')[0]}
+                        onChange={(e) => setDeadline(e.target.value)}
                     />
                 </div>
             </div>
