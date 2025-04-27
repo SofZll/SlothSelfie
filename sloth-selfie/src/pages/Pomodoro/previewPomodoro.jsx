@@ -57,6 +57,7 @@ const PreviewPomodoro = ({ viewType }) => {
   const fetchPomodoroListToDo = async () => {
     try {
         const response = await apiService('/pomodori/todo', 'GET', null, { credentials: 'include' });
+        console.log('Response from backend:', response); // Log the response for debugging
         if (response.success) {
             setPomodoroList(response.pomodori); // Set the pomodoro list from the backend
         }
@@ -99,7 +100,9 @@ const renderPomodoroPreview = () => {
         return (
             <div className="scrollable-list">
               {pomodoroList.map((pomodoro, index) => (
-                <div key={index} className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {pomodoro.cycles} - studyTime: {pomodoro.studyTime} - breakTime: {pomodoro.breakTime}</div>
+                <div key={index} className={`event-card event-border-yellow`} >
+                  <b>Pomodoro</b> cycles: {pomodoro.cycles} - studyTime: {formatTime(pomodoro.studyTime)} - breakTime: {formatTime(pomodoro.breakTime)}
+                </div>
               ))}
             </div>
         );
@@ -127,7 +130,9 @@ const renderPomodoroPreview = () => {
       if (allPomodoros.length > 0) {
         const lastPomodoro = allPomodoros[allPomodoros.length - 1];
         return (
-            <div className={`event-card event-border-yellow`} ><b>Pomodoro</b> cycles: {lastPomodoro.cycles} - studyTime: {lastPomodoro.studyTime} - breakTime: {lastPomodoro.breakTime}</div>
+            <div className={`event-card event-border-yellow`} >
+              <b>Pomodoro</b> cycles: {lastPomodoro.cycles} - studyTime: {formatTime(lastPomodoro.studyTime)} - breakTime: {formatTime(lastPomodoro.breakTime)}
+            </div>
         );
       } else {
         return (
