@@ -35,6 +35,10 @@ const AuthProvider = ({ children }) => {
                     start: response.user.workingHours.start || '',
                     end: response.user.workingHours.end || '',
                 },
+                dayHours: {
+                    start: response.user.dayHours.start || '',
+                    end: response.user.dayHours.end || '',
+                },
                 freeDays: response.user.freeDays || [''],
                 noAvailability: response.user.noAvailability || [],
             };
@@ -126,8 +130,24 @@ const AuthProvider = ({ children }) => {
         return () => socket.off('system-notification', handler);
     }, [user]);
 
+    const [setting, setSetting] = useState({
+        open: false,
+        section: '',
+    });
+
+    const resetSetting = () => {
+        setSetting({
+            open: false,
+            section: '',
+        });
+    }
+
+    const back = () => {
+        setSetting({ ...setting, section: '' });
+    } 
+
     return (
-        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading }}>
+        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, setting, setSetting, resetSetting, back }}>
             {!loading && children}
         </AuthContext.Provider>
     );
