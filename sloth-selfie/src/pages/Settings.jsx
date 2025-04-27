@@ -1,148 +1,280 @@
-import React, { useState, useContext  } from 'react';
-import '../styles/setting.css';
-import Button from '../components/Button';
-import { useNavigate } from 'react-router-dom';
-import { CustomizationContext } from '../contexts/PreviewContext';
+import React, { useState, useEffect, useContext } from 'react';
 
-
+import Swal from 'sweetalert2';
 import { X } from 'lucide-react';
 
-function PreviewSetUp(props) {
-    const [isSetting, setIsSetting] = useState('calendar');
-    const { customizations, setCustomizations } = useContext(CustomizationContext);
-    const navigate = useNavigate();
+import { generateTimeOptions } from '../utils/utils';
+import { AuthContext } from '../contexts/AuthContext';
+import { apiService } from '../services/apiService';
 
-    const handleSetUp = () => {
-        props.setSetUp(false);
-        navigate('..');
+const Settings = () => {
+
+    const { user, setUser, setting, setSetting, resetSetting, back } = useContext(AuthContext);
+
+    {/***  
+    const validateWorkHours = () => {
+        // start hour must be before the end hour
+        if (workHours.start >= workHours.end) {
+            Swal.fire({
+                title: 'Invalid time range',
+                text: 'The start time must be earlier than the end time.',
+                icon: 'error',
+                customClass: { confirmButton: 'button-alert' }
+            });
+            return false;
+        }
+        return true;
     };
 
-    const handleSetting = (setting) => {
-        setIsSetting(setting);
-    };
-
-    const handleCustomizationChange = (setting, option) => {
-        setCustomizations(prev => {
-            const newCustomizations = { ...prev, [setting]: option };
-
-            // Save the personalizations to local storage
-            localStorage.setItem('customizations', JSON.stringify(newCustomizations));
-            return newCustomizations;
-        });
-    };
-
-    const renderCustomizationOptions = () => {
-        switch (isSetting) {
-            case 'calendar':
-                return (
-                    <div className='customization-options'>
-                        <h5>Customize Calendar</h5>
-                        <Button 
-                            text="Show Calendar" 
-                            onClick={() => handleCustomizationChange('calendar', 'showCalendar')} 
-                        />
-                        <Button 
-                            text="Today's Events list"
-                            onClick={() => handleCustomizationChange('calendar', 'showEventsList')} 
-                        />
-                        <Button 
-                            text="This week's Activities List"
-                            onClick={() => handleCustomizationChange('calendar', 'showActivitiesList')}
-                        />
-                        <Button
-                            text="This week's Tasks List"
-                            onClick={() => handleCustomizationChange('calendar', 'showTasksList')}
-                        />
-                        {/* other calendar personalizations */}
-                    </div>
-                );
-            case 'notes':
-                return (
-                    <div className='customization-options'>
-                        <h5>Customize Notes</h5>
-                        <Button 
-                            text="Notes list (10 most recent)"
-                            onClick={() => handleCustomizationChange('notes', 'listOfNotes')} 
-                        />
-                        <Button 
-                            text="Most recent Note"
-                            onClick={() => handleCustomizationChange('notes', 'lastNote')} 
-                        />
-                        <Button
-                            text="Add a Note"
-                            onClick={() => handleCustomizationChange('notes', 'addNote')}
-                        />
-                        {/* other notes personalizations */}
-                    </div>
-                );
-            case 'pomodoro':
-                return (
-                    <div className='customization-options'>
-                        <h5>Customize Pomodoro</h5>
-                        <Button 
-                            text="Quick Start"
-                            onClick={() => handleCustomizationChange('pomodoro', 'quickStart')} 
-                        />
-                        <Button 
-                            text="Pomodoros ToDo list"
-                            onClick={() => handleCustomizationChange('pomodoro', 'listOfPomodoros')} 
-                        />
-                        <Button 
-                            text="Last Pomodoro"
-                            onClick={() => handleCustomizationChange('pomodoro', 'lastPomodoro')} 
-                        />
-                        <Button
-                            text="Pomodoros Stats"
-                            onClick={() => handleCustomizationChange('pomodoro', 'stats')}
-                        />
-                        {/* other pomodoro personalizations */}
-                    </div>
-                );
-            case 'projects':
-                return (
-                    <div className='customization-options'>
-                        <h5>Customize Projects</h5>
-                        <Button 
-                            text="Projects list"
-                            onClick={() => handleCustomizationChange('projects', 'listOfProjects')} 
-                        />
-                        <Button 
-                            text="Recent Projects deadlines"
-                            onClick={() => handleCustomizationChange('projects', 'recentProjectsDeadlines')}
-                        />
-                        <Button
-                            text="Choose a project's Gantt"
-                            onClick={() => handleCustomizationChange('projects', 'projectGanttChart')}
-                        />
-                        {/* other projects personalizations */}
-                    </div>
-                );
-            default:
-                return null;
+    const handleSelectSetting = (setting) => {
+        setSelectedSetting(setting);
+        if (setting === 'workHours') {
+            setShowSettings(true);
         }
     };
 
-    return (
-        <div className='d-flex position-relative rounded-3 mb-5 p-3 bg-white card-settings'>
-            <button className='btn position-absolute end-0 top-0' onClick={handleSetUp} alt='exit'>
-                <X size={36} color='#555B6E' strokeWidth={1.75} />
-            </button>
-            
-            <div className='d-flex flex-row w-100'>
-                <div className='d-flex flex-column border-end r-col'>
-                    <Button text='Calendar' alt='calendar' onClick={() => handleSetting('calendar')} />
-                    <Button text='Notes' alt='notes' onClick={() => handleSetting('notes')} />
-                    <Button text='Pomodoro' alt='pomodoro' onClick={() => handleSetting('pomodoro')} />
-                    <Button text='Projects' alt='projects' onClick={() => handleSetting('projects')} />
-                </div>
+    const handleCloseSettings = () => {
+        setShowSettings(false);
+        setShowSettingsOptions(false);
+    };
 
-                <div className='cd-flex flex-column l-col'>
-                    {renderCustomizationOptions()}
+    const handleSaveSettings = async () => {
+        if (validateWorkHours()) {
+            try {
+                const updatedData = {
+                    workingHours: {
+                        start: workHours.start,
+                        end: workHours.end
+                    },
+                    freeDays: workHours.daysOff
+                };
+    
+                const response = await fetch('http://localhost:3000/api/user/edit-schedule', { //TODO CAMBIA NEL SERVER
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        workingHours: { start: workHours.start, end: workHours.end },
+                        freeDays: workHours.daysOff,
+                        userId : user._id,
+                    })
+                });
+                const data = await response.json();
+                console.log('Response:', data);
+                
+                if (response.ok) {
+                    console.log('Profile updated successfully:', response);
+                    Swal.fire({
+                        title: 'Success',
+                        text: ' Settings saved correctly!',
+                        icon: 'success',
+                        customClass: { confirmButton: 'button-success' }
+                    });
+                    setUser({
+                        ...user,
+                        workingHours: updatedData.workingHours,
+                        freeDays: updatedData.freeDays
+                    });
+                    setShowSettings(false);
+                    setShowSettingsOptions(false);
+                } else {
+                    console.error('Failed to update profile:', response);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'There was an issue saving your settings. Please try again.',
+                        icon: 'error',
+                        customClass: { confirmButton: 'button-alert' }
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'There was an issue saving your settings. Please try again later.',
+                    icon: 'error',
+                    customClass: { confirmButton: 'button-alert' }
+                });
+            }
+        }
+    };
+    ***/} 
+
+    const [daysOff, setDaysOff] = useState([]);
+    const [workingHours, setWorkingHours] = useState({
+        start: '',
+        end: '',
+    });
+    const [dayHour, setDayHour] = useState({
+        start: '',
+        end: '',
+    });
+
+    const handleSaveSettings = async () => {
+        if (setting.section === 'calendar') {
+            const response = await apiService('/user/edit-schedule', 'PUT', {daysOff, workingHours, dayHour});
+            if (response.success){
+                Swal.fire({ title: 'Success', text: 'Settings saved correctly!', icon: 'success', customClass: { confirmButton: 'button-success' } });
+                setUser({ ...user, workingHours: {...response.workingHours}, freeDays: [...response.freeDays], dayHours: {...response.dayHours} });
+            } else Swal.fire({ title: 'Error', text: 'There was an issue saving your settings. Please try again.', icon: 'error', customClass: { confirmButton: 'button-alert' } });
+        }
+
+        resetSetting();
+    }
+
+
+    const selectDaysOff = (selectedValue) => {
+        const isAlreadySelected = daysOff.includes(selectedValue);
+
+        if (isAlreadySelected) setDaysOff(daysOff.filter((day) => day !== selectedValue));
+        else setDaysOff([...daysOff, selectedValue]);
+    };
+
+    useEffect(() => {
+        if (user) {
+            setWorkingHours({
+                start: user.workingHours.start,
+                end: user.workingHours.end,
+            });
+            setDayHour({
+                start: user.dayHours.start,
+                end: user.dayHours.end,
+            });
+            setDaysOff(user.freeDays);
+        }
+    }, [user]);
+
+    return (
+        <div className='d-flex h-100 w-100 justify-content-center align-items-center position-fixed bg-dark bg-opacity-25' style={{ zIndex: '1000'}}>
+        <div className='d-flex justify-content-center align-items-start position-fixed pop-up bg-white border border-secondary rounded' style={{ width: '350px', minHeight: '350px' }}>
+            <div className='modal-dialog custom-modal my-3 d-flex h-100'>
+                <div className='modal-content p-3 h-100 d-flex flex-column justify-content-between'>
+
+                    <div className='modal-header w-100 d-flex align-items-center justify-content-between border-bottom border-secondary'>
+                        {setting.section === '' && (
+                            <h5 className='modal-title py-2' style={{ color: '#244476' }}>Settings</h5>
+                        )}
+
+                        {setting.section === 'calendar' && (
+                            <h5 className='modal-title py-2' style={{ color: '#244476' }}>Calendar Settings</h5>
+                        )}
+
+                        {setting.section === 'notification' && (
+                            <h5 className='modal-title' style={{ color: '#244476' }}>Notification Settings</h5>
+                        )}
+
+                        <button type='button' className='close' onClick={() => resetSetting()}>
+                            <span>&times;</span>
+                        </button>
+                    </div>
+
+                    <div className='modal-body overflow-y-scroll col-12' style={{ maxHeight: 'calc(80vh - 200px)' }}>
+                        
+
+                        {setting.section === '' && (
+                            <div className='d-flex flex-column justify-content-around h-100 py-5 gap-3'>
+                                <button className='btn btn-outline-secondary' onClick={() => setSetting({ section: 'calendar', open: true })}>
+                                    Calendar
+
+                                </button>
+                                <button className='btn btn-outline-secondary' onClick={() => setSetting({ section: 'notification', open: true })}>
+                                    Notification
+                                </button>
+                            </div>
+                        )}
+
+                        {setting.section === 'calendar' && (
+                            <div className='d-flex flex-column justify-content-around h-100 py-2 gap-3'>
+                                <div className='row py-2'>
+                                    <div className='col-6 d-flex align-items-stretch justify-content-between flex-column'>
+                                        <label htmlFor='startWorkingHour'>Start Working Hour</label>
+                                        <select
+                                            id='startWorkingHour'
+                                            className='form-select'
+                                            value={workingHours.start}
+                                            onChange={(e) => setWorkingHours({ ...workingHours, start: e.target.value })}>
+                                            {generateTimeOptions().map((option) => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className='col-6 d-flex align-items-stretch justify-content-between flex-column'>
+                                        <label htmlFor='endWorkingHour'>End Working Hour</label>
+                                        <select
+                                            id='endWorkingHour'
+                                            className='form-select'
+                                            value={workingHours.end}
+                                            onChange={(e) => setWorkingHours({ ...workingHours, end: e.target.value })}>
+                                            {generateTimeOptions().map((option) => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className='row py-2'>
+                                    <div className='col-6 d-flex align-items-stretch justify-content-between flex-column'>
+                                        <label htmlFor='startDayHour'>Start Day Hour</label>
+                                        <select
+                                            id='startDayHour'
+                                            className='form-select'
+                                            value={dayHour.start}
+                                            onChange={(e) => setDayHour({ ...dayHour, start: e.target.value })}>
+                                            {generateTimeOptions().map((option) => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className='col-6 d-flex align-items-stretch justify-content-between flex-column'>
+                                        <label htmlFor='endDayHour'>End Day Hour</label>
+                                        <select
+                                            id='endDayHour'
+                                            className='form-select'
+                                            value={dayHour.end}
+                                            onChange={(e) => setDayHour({ ...dayHour, end: e.target.value })}>
+                                            {generateTimeOptions().map((option) => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className='d-flex flex-column gap-2'>
+                                    <label htmlFor='daysOff'>Days Off</label>
+                                    <select
+                                        id='daysOff'
+                                        className='form-select'
+                                        multiple
+                                        value={daysOff}
+                                        onChange={(e) => selectDaysOff(e.target.value)}>
+                                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+                                            <option key={day} value={day}>
+                                                {day}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+
+                        {setting.section === 'notification' && (
+                            <></>
+                        )}
+                    </div>
+
+
+                    {setting.section !== '' && (
+                        <div className='d-flex align-items-center justify-content-center w-100 border-top border-secondary'>
+                            <button className='btn-main rounded shadow-sm mt-2' onClick={() => handleSaveSettings()}>
+                                save
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
-            
         </div>
-    );
+        </div>
+    )
 }
 
-export default PreviewSetUp;
+export default Settings;
