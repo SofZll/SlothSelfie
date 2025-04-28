@@ -2,6 +2,7 @@ const Notification = require('../models/notificationModel');
 const agenda = require('./agenda');
 
 const { sendSystemNotification, sendEmailNotification } = require('../services/notificationService');
+const { getCurrentNow } = require('../services/timeMachineService');
 
 const initScheduler = async () => {
     agenda.define('send-notification', async job => {
@@ -12,7 +13,7 @@ const initScheduler = async () => {
             console.log(`Notification ${notificationId} not found.`);
             return;
         }
-        const now = new Date(); // da cambiare con TM
+        const now = getCurrentNow();
         console.log('notification', notification);
 
         if (now < new Date(notification.from) || now > new Date(notification.to)) {
@@ -78,7 +79,7 @@ const initScheduler = async () => {
 };
 
 const cleanupExpiredSnoozes = async () => {
-    const now = new Date();
+    const now = getCurrentNow();
 
     const notifications = await Notification.find({ snooze: true, 'snoozeSettings.until': { $lt: now } });
 
@@ -115,7 +116,7 @@ const scheduleNotification = async (notifications) => {
         } else if (notification.type === 'repeat') {
             repeatNotification(notification);
         } else if (notification.type === 'now') {
-            const job = await agenda.schedule(new Date(), 'send-notification-now', { notification: notification._id.toString() });
+            const job = await agenda.schedule(getCurrentNow(), 'send-notification-now', { notification: notification._id.toString() });
             console.log("JOB RUNNING", job.attrs.type, job.attrs);
         }
     };

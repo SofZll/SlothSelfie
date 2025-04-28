@@ -3,26 +3,31 @@ const User = require('../models/userModel');
 const Note = require('../models/noteModel');
 const Event = require('../models/eventModel');
 const PhaseSubphase = require("../models/phaseSubphaseModel");
-const {sendExportEmail} = require('../utils/utils');
+const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
+const { getCurrentNow } = require('../services/timeMachineService');
+
+const now = getCurrentNow();
 
 // Creating an activinotenotety
 const createActivity = async (req, res) => {
     const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
     const { title, deadline, completed, sharedWith} = req.body;
     
     try {
+        const user = await User.findOne({ username: userName });
+
         let sharedWithUsers = [];
         sharedWithUsers.push(user);
         if (sharedWith && Array.isArray(sharedWith)) {
             sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
         }
-        const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), });
+
+        const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), createdAt: now });
         const savedActivity = await activity.save();
 
         const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
-
+        
         res.status(200).json({ success: true, activity: populatedActivity });
     } catch (error) {
         console.error('Error creating activity:', error);
@@ -33,14 +38,16 @@ const createActivity = async (req, res) => {
 // fetch all activities
 const getActivities = async (req, res) => {
     const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
     
     try {
+        const user = await User.findOne({ username: userName });
+
         const activities = await Activity.find({
             $or: [
                 { user: user._id },
                 { sharedWith: user._id }
-            ]
+            ],
+            createdAt: { $lte: now }
         })
         .populate('user', 'username')
         .populate('description', 'content' )
@@ -48,18 +55,18 @@ const getActivities = async (req, res) => {
         .lean();
 
         const modifiedActivities = activities.map(activity => {
-            const isSharedWith = activity.sharedWith.some(
-                sharedUser => sharedUser._id.toString() === user._id.toString()
-            );
+            const isSharedWith = activity.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
             
             const response = isSharedWith ? activity.responses?.find(r => r.user?.toString() === user._id.toString())?.status || 'pending' : undefined;
 
             return {
                 ...activity,
-                ...(isSharedWith && { response })
+                ...(isSharedWith && { response }),
+                sharedWith: activity.sharedWith.map(sharedUser => sharedUser.username)
             };
         });
-        console.log('Activities:', modifiedActivities);
+        console.log('modified activities: ', modifiedActivities);
+
         res.status(200).json({ success: true, activities: modifiedActivities });
     } catch (error) {
         console.error('Error fetching activities:', error);
@@ -70,7 +77,8 @@ const getActivities = async (req, res) => {
 // Updating an activity
 const updateActivity = async (req, res) => {
     const { activityId } = req.params; 
-    const { title, deadline, completed, sharedWith, status } = req.body;
+    const { activity } = req.body;
+    const { title, deadline, completed, sharedWith, status } = activity;
     const userName = req.session.username;
 
     try {
@@ -83,16 +91,14 @@ const updateActivity = async (req, res) => {
         }
 
         const activity = await Activity.findById(activityId);
-        if (!activity) {
-            return res.status(404).json({ success: false, message: "Activity not found" });
-        }
+        if (!activity) return res.status(404).json({ success: false, message: "Activity not found" });
+
+        if (activity.createdAt > now) return res.status(403).json({ success: false, message: "You cannot update an activity in the future" });
         
         const isAuthor = activity.user.toString() === user._id.toString();
         const isSharedWith = activity.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
 
-        if (!isAuthor && !isSharedWith) {
-            return res.status(403).json({ success: false, message: "You are not authorized to update this activity" });
-        }
+        if (!isAuthor && !isSharedWith) return res.status(403).json({ success: false, message: "You are not authorized to update this activity" });
 
         const updateData = {}
         if (isAuthor) {
@@ -117,7 +123,12 @@ const updateActivity = async (req, res) => {
             { new: true }
         ).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
 
-        res.status(200).json({ success: true, activity: updatedActivity });
+        const transformedActivity = {
+            ...updatedActivity._doc,
+            sharedWith: updatedActivity.sharedWith.map(sharedUser => sharedUser.username),
+        };
+
+        res.status(200).json({ success: true, activity: transformedActivity });
     } catch (error) {
         console.error('Error updating activity:', error);
         res.status(500).json({ message: error.message });
@@ -127,11 +138,11 @@ const updateActivity = async (req, res) => {
 // Deleting an activity
 const deleteActivity = async (req, res) => {
     const {activityId} = req.params;
+
     try {
         const activity = await Activity.findByIdAndDelete(activityId);
-        if (!activity) {
-            return res.status(404).json({ success: false, message: "Activity not found" });
-        }
+        if (!activity) return res.status(404).json({ success: false, message: "Activity not found" });
+
         res.status(200).json({ success: true, message: "Activity deleted successfully" });
     } catch (error) {
         console.error('Error deleting activity:', error);
@@ -141,13 +152,12 @@ const deleteActivity = async (req, res) => {
 
 //Function to export activities on iCalendar (using library: ics.js)
 async function exportActivity(req, res){
+    const { activityId } = req.params;
+    const userName = req.session.username;
+
     try {
-        const {activityId} = req.params;
-        const userName = req.session.username;
         const activity = await Activity.findById(activityId);
-        if (!activity) {
-            return res.status(404).json({ success: false, message: 'Activity not found' });
-        }
+        if (!activity) return res.status(404).json({ success: false, message: 'Activity not found' });
 
         const user = await User.findOne({ username: userName });
 
@@ -179,11 +189,13 @@ async function exportActivity(req, res){
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${activity.title}.ics"`);
         res.status(200).send(value);
-      } catch (err) {
-        console.error(err);
-        res.status(500).send({ success: false, message: 'Error exporting activity' });
-      }
+    } catch (err) {
+    console.error(err);
+    res.status(500).send({ success: false, message: 'Error exporting activity' });
+    }
 }
+
+// time machine fino a qui per ora
 
 /* Project functions */
 //Function to create a note associated to the input/output of the activity

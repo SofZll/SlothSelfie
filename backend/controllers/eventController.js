@@ -4,7 +4,7 @@ const User = require('../models/userModel');
 const mongoose = require('mongoose');
 
 const { findUserId } = require('../utils/utils');
-const {sendExportEmail} = require('../utils/utils');
+const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 
 const ical = require('node-ical');
