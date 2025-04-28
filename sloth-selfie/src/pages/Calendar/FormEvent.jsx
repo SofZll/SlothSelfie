@@ -24,7 +24,7 @@ const FormEvent = () => {
 
         const weekday = weekdays[startDate.getDay()];
         const isFreeDay = user.freeDays.includes(weekday);
-        if (isFreeDay && event.type === 'work') Swal.fire({ title: 'Warning', icon: 'warning', text: 'Selected date is a free day', customClass: { confirmButton: 'button-alert' } });
+        if (isFreeDay && event.type === 'work') NewSwal({ title: 'Warning', icon: 'warning', text: 'Selected date is a free day'});
 
         if (allDay) {
             if (event.type === 'work') startDate.setHours(user.workingHours.start.split(':')[0], user.workingHours.start.split(':')[1]);
@@ -32,9 +32,9 @@ const FormEvent = () => {
         } else if (time !== '') {
             startDate.setHours(event.time.split(':')[0], event.time.split(':')[1]);
             if (event.type === 'work' && startDate < new Date(date).setHours(user.workingHours.start.split(':')[0], user.workingHours.start.split(':')[1])) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Event start time is before working hours', customClass: { confirmButton: 'button-alert' } });
+                NewSwal({ title: 'Warning', icon: 'warning', text: 'Event start time is before working hours'});
             } else if (startDate < new Date(date).setHours(user.dayHours.start.split(':')[0], user.dayHours.start.split(':')[1])) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Event start time is before day hours', customClass: { confirmButton: 'button-alert' } });
+                NewSwal({ title: 'Warning', icon: 'warning', text: 'Event start time is before day hours'});
             }
         }
         return startDate;
@@ -50,9 +50,9 @@ const FormEvent = () => {
         } else {
             endDate.setHours(endDate.getHours() + parseInt(duration));
             if (event.type === 'work' && endDate > new Date(start).setHours(user.workingHours.end.split(':')[0], user.workingHours.end.split(':')[1])) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Event end time is after working hours', customClass: { confirmButton: 'button-alert' } });
+                NewSwal({ title: 'Warning', icon: 'warning', text: 'Event end time is after working hours'});
             } else if (endDate > new Date(start).setHours(user.dayHours.end.split(':')[0], user.dayHours.end.split(':')[1])) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Event end time is after day hours', customClass: { confirmButton: 'button-alert' } });
+                NewSwal({ title: 'Warning', icon: 'warning', text: 'Event end time is after day hours'});
             }
         }
     }

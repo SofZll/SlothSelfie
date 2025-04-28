@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
 import { apiService } from '../services/apiService';
 import { usePomodoro } from '../contexts/PomodoroContext';
 import { useCalendar } from '../contexts/CalendarContext';
@@ -18,7 +18,7 @@ const PopUpPlanPomodoro = ({ edit }) => {
 
     const submitPomodoroCalendar = async () => {
         if (!settingsPomodoro.title || !settingsPomodoro.deadline || !settingsPomodoro.studyTime || !settingsPomodoro.breakTime || !settingsPomodoro.cycles) {
-            Swal.fire({
+            NewSwal({
                 title: 'Error',
                 icon: 'error',
                 text: 'Please fill all fields',
@@ -30,13 +30,13 @@ const PopUpPlanPomodoro = ({ edit }) => {
         if(edit) {
             const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'PUT', settingsPomodoro);
             if (response.success) {
-                Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro updated successfully', customClass: { confirmButton: 'button-alert' } });
+                NewSwal({ icon: 'success', title: 'Success', text: 'Pomodoro updated successfully'});
                 setPlannedPomodori(plannedPomodori.map(p => p._id === settingsPomodoro._id ? settingsPomodoro : p));
-            } else Swal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro', customClass: { confirmButton: 'button-alert' } });
+            } else NewSwal({ icon: 'error', title: 'Error', text: 'Error updating pomodoro'});
         } else {
             const response = await apiService('/pomodoro/calendar', 'POST', settingsPomodoro);
-            if (response.success) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully', customClass: { confirmButton: 'button-alert' } });
-            else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro', customClass: { confirmButton: 'button-alert' } });
+            if (response.success) NewSwal({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully'});
+            else NewSwal({ icon: 'error', title: 'Error', text: 'Error adding pomodoro'});
         }
 
         resetSelected();

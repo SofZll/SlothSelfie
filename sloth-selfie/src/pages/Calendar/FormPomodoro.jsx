@@ -29,9 +29,9 @@ const FormPomodoro = () => {
     const deletePomodoro = async () => {
         const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'DELETE');
         if (response.success) {
-            Swal.fire({ title: 'Success', icon: 'success', text: 'Pomodoro deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            NewSwal({ title: 'Success', icon: 'success', text: 'Pomodoro deleted successfully'});
             setPlannedPomodori(plannedPomodori.filter(p => p._id !== settingsPomodoro._id));
-        } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error deleting pomodoro', customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal({ title: 'Error', icon: 'error', text: 'Error deleting pomodoro'});
 
         setDeletePopUp(false);
         resetSettingsPomodoro();
