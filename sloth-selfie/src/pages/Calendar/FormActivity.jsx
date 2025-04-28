@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Swal from 'sweetalert2';
 
@@ -10,7 +10,7 @@ import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormActivity = () => {
 
-    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications, conditionsMet } = useCalendar();
+    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications, conditionsMet, setConditionsMet } = useCalendar();
     const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setDeadline = (date) => {
@@ -20,10 +20,6 @@ const FormActivity = () => {
     }
 
     const handleSubmit = async () => {
-        if (!activity.title) {
-            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Title is required', customClass: { confirmButton: 'button-alert' } });
-            return;
-        }
 
         if (selected.edit) {
             const response = await apiService(`/activity/${activity._id}`, 'PUT', { activity, notifications });
@@ -103,6 +99,11 @@ const FormActivity = () => {
             setNotifications([]);
         });
     }
+
+    useEffect(() => {
+        if (activity.title) setConditionsMet(true);
+        else setConditionsMet(false);
+    }, [activity.title]);
 
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden' style={{ maxHeight: '70vh' }}>
