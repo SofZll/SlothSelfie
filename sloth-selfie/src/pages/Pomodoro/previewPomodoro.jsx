@@ -14,7 +14,7 @@ const PreviewPomodoro = ({ viewType }) => {
   const { user } = React.useContext(AuthContext);
 
   const [pomodoroList, setPomodoroList] = useState([]);
-  const [allPomodoros, setAllPomodoros] = useState([]);
+  const [lastPomodoros, setLastPomodoros] = useState([]);
 
   const {
     pomodoro,
@@ -49,7 +49,7 @@ const PreviewPomodoro = ({ viewType }) => {
     useEffect(() => {
       if (user) {
           fetchPomodoroListToDo();
-          fetchAllPomodoros();
+          fetchLastPomodoros();
       }
     }, [user]);
 
@@ -57,7 +57,6 @@ const PreviewPomodoro = ({ viewType }) => {
   const fetchPomodoroListToDo = async () => {
     try {
         const response = await apiService('/pomodori/todo', 'GET', null, { credentials: 'include' });
-        console.log('Response from backend:', response); // Log the response for debugging
         if (response.success) {
             setPomodoroList(response.pomodori); // Set the pomodoro list from the backend
         }
@@ -66,13 +65,12 @@ const PreviewPomodoro = ({ viewType }) => {
     }
   } 
 
-  // Function to fetch all pomodoros from the backend
-  const fetchAllPomodoros = async () => {
+  // Function to fetch last pomodoros from the backend
+  const fetchLastPomodoros = async () => {
     try {
-        const response = await apiService('/pomodori', 'GET', null, { credentials: 'include' });
-        console.log('Response from backend:', response); // Log the response for debugging
+        const response = await apiService('/pomodori/lasts', 'GET', null, { credentials: 'include' });
         if (response.success) {
-            setAllPomodoros(response.pomodori); // Set the pomodoro list from the backend
+            setLastPomodoros(response.pomodori); // Set the pomodoros from the backend
         }
     } catch (error) {
         console.error('Error fetching pomodoro list:', error);
@@ -85,7 +83,7 @@ const PreviewPomodoro = ({ viewType }) => {
     return `${m}:${s}`;
   };
 
-// Render per QuickStart, Last Pomodoro, Pomodoros List
+// Render per QuickStart, Last Pomodoro, Pomodoros List, Stats
 const renderPomodoroPreview = () => {
   switch (viewType) {
     
@@ -101,7 +99,7 @@ const renderPomodoroPreview = () => {
             <div className="scrollable-list">
               {pomodoroList.map((pomodoro, index) => (
                 <div key={index} className={`event-card event-border-yellow`} >
-                  <b>Pomodoro</b> cycles: {pomodoro.cycles} - studyTime: {formatTime(pomodoro.studyTime)} - breakTime: {formatTime(pomodoro.breakTime)}
+                  <b>{pomodoro.title}</b> cycles: {pomodoro.cycles} - studyTime: {formatTime(pomodoro.studyTime)} - breakTime: {formatTime(pomodoro.breakTime)}
                 </div>
               ))}
             </div>
@@ -127,11 +125,11 @@ const renderPomodoroPreview = () => {
     
     default:
       // Verify if the lastPomodoro is there
-      if (allPomodoros.length > 0) {
-        const lastPomodoro = allPomodoros[allPomodoros.length - 1];
+      if (lastPomodoros.length > 0) {
+        const lastPomodoro = lastPomodoros[0];
         return (
             <div className={`event-card event-border-yellow`} >
-              <b>Pomodoro</b> cycles: {lastPomodoro.cycles} - studyTime: {formatTime(lastPomodoro.studyTime)} - breakTime: {formatTime(lastPomodoro.breakTime)}
+              <b>{lastPomodoro.title}</b> cycles: {lastPomodoro.cycles} - studyTime: {formatTime(lastPomodoro.studyTime)} - breakTime: {formatTime(lastPomodoro.breakTime)}
             </div>
         );
       } else {
