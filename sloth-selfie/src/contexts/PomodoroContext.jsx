@@ -166,6 +166,7 @@ export const PomodoroProvider = ({ children }) => {
 
         setSettingsPomodoro({ ...settingsPomodoro, studyTime, breakTime, cycles});
         editTimeAnimation( pomodoro.isStudyTime ? studyTime : breakTime );
+        
         const response = await apiService(`/pomodoro/${pomodoro._id}`, 'PUT', settingsPomodoro);
         if (response.success) NewSwal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated'});
         else NewSwal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro settings'});
