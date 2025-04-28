@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { NewSwal } from '../utils/swalUtils';
 import { apiService } from '../services/apiService';
@@ -8,7 +8,7 @@ import { useCalendar } from '../contexts/CalendarContext';
 const PopUpPlanPomodoro = ({ edit }) => {
 
     const { resetSettingsPomodoro, settingsPomodoro, setSettingsPomodoro, plannedPomodori, setPlannedPomodori, resetPopUp } = usePomodoro();
-    const { resetSelected } = useCalendar();
+    const { resetSelected, setConditionsMet, conditionsMet } = useCalendar();
 
     const setDeadline = (date) => {
         const newDate = new Date(date);
@@ -17,15 +17,6 @@ const PopUpPlanPomodoro = ({ edit }) => {
     }
 
     const submitPomodoroCalendar = async () => {
-        if (!settingsPomodoro.title || !settingsPomodoro.deadline || !settingsPomodoro.studyTime || !settingsPomodoro.breakTime || !settingsPomodoro.cycles) {
-            NewSwal({
-                title: 'Error',
-                icon: 'error',
-                text: 'Please fill all fields',
-                customClass: { confirmButton: 'button-alert' },
-            });
-            return;
-        }
 
         if(edit) {
             const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'PUT', settingsPomodoro);
@@ -43,6 +34,12 @@ const PopUpPlanPomodoro = ({ edit }) => {
         resetPopUp();
         resetSettingsPomodoro();
     }
+
+    useEffect(() => {
+        if (!settingsPomodoro.title || !settingsPomodoro.deadline || !settingsPomodoro.studyTime || !settingsPomodoro.breakTime || !settingsPomodoro.cycles) {
+            setConditionsMet(false);
+        } else setConditionsMet(true);
+    }, [settingsPomodoro]);
 
     return (
         <div className='d-flex flex-column'>
@@ -107,7 +104,7 @@ const PopUpPlanPomodoro = ({ edit }) => {
             </div>
 
             <div className='d-flex align-items-center justify-content-center'>
-                <button className='btn-main rounded shadow-sm mt-4' onClick={() => submitPomodoroCalendar()}>
+                <button className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => submitPomodoroCalendar()}>
                     save
                 </button>
             </div>
