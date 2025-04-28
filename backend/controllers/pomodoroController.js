@@ -33,6 +33,24 @@ const getPlannedPomodori = async (req, res) => {
     }
 }
 
+const getLastsPomodori = async (req, res) => {
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
+
+    try {
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const pomodori = await Pomodoro.find({ user: user._id, finished: false, started: true }).sort({ updatedAt: -1 }).limit(5)
+
+        if (!pomodori) return res.status(404).json({ success: false, message: 'Pomodori not found' });
+        
+        res.status(200).json({ success: true, pomodori });
+    } catch (error) {
+        console.error('Error fetching pomodori:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
 const newPomodoro = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
@@ -267,6 +285,7 @@ const timePomodoriMonths = async (req, res) => {
 module.exports = {
     getPomodori,
     getPlannedPomodori,
+    getLastsPomodori,
     addPomodoro,
     newPomodoro,
     editPomodoro,

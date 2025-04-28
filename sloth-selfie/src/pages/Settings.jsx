@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import Swal from 'sweetalert2';
-import { X } from 'lucide-react';
 
 import { generateTimeOptions } from '../utils/utils';
 import { AuthContext } from '../contexts/AuthContext';
@@ -9,94 +8,7 @@ import { apiService } from '../services/apiService';
 
 const Settings = () => {
 
-    const { user, setUser, setting, setSetting, resetSetting, back } = useContext(AuthContext);
-
-    {/***  
-    const validateWorkHours = () => {
-        // start hour must be before the end hour
-        if (workHours.start >= workHours.end) {
-            Swal.fire({
-                title: 'Invalid time range',
-                text: 'The start time must be earlier than the end time.',
-                icon: 'error',
-                customClass: { confirmButton: 'button-alert' }
-            });
-            return false;
-        }
-        return true;
-    };
-
-    const handleSelectSetting = (setting) => {
-        setSelectedSetting(setting);
-        if (setting === 'workHours') {
-            setShowSettings(true);
-        }
-    };
-
-    const handleCloseSettings = () => {
-        setShowSettings(false);
-        setShowSettingsOptions(false);
-    };
-
-    const handleSaveSettings = async () => {
-        if (validateWorkHours()) {
-            try {
-                const updatedData = {
-                    workingHours: {
-                        start: workHours.start,
-                        end: workHours.end
-                    },
-                    freeDays: workHours.daysOff
-                };
-    
-                const response = await fetch('http://localhost:3000/api/user/edit-schedule', { //TODO CAMBIA NEL SERVER
-                    method: 'PUT',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        workingHours: { start: workHours.start, end: workHours.end },
-                        freeDays: workHours.daysOff,
-                        userId : user._id,
-                    })
-                });
-                const data = await response.json();
-                console.log('Response:', data);
-                
-                if (response.ok) {
-                    console.log('Profile updated successfully:', response);
-                    Swal.fire({
-                        title: 'Success',
-                        text: ' Settings saved correctly!',
-                        icon: 'success',
-                        customClass: { confirmButton: 'button-success' }
-                    });
-                    setUser({
-                        ...user,
-                        workingHours: updatedData.workingHours,
-                        freeDays: updatedData.freeDays
-                    });
-                    setShowSettings(false);
-                    setShowSettingsOptions(false);
-                } else {
-                    console.error('Failed to update profile:', response);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'There was an issue saving your settings. Please try again.',
-                        icon: 'error',
-                        customClass: { confirmButton: 'button-alert' }
-                    });
-                }
-            } catch (error) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'There was an issue saving your settings. Please try again later.',
-                    icon: 'error',
-                    customClass: { confirmButton: 'button-alert' }
-                });
-            }
-        }
-    };
-    ***/} 
+    const { user, setUser, setting, setSetting, resetSetting } = useContext(AuthContext);
 
     const [daysOff, setDaysOff] = useState([]);
     const [workingHours, setWorkingHours] = useState({
