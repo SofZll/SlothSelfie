@@ -39,7 +39,7 @@ const FormPomodoro = () => {
     }
     
     return (
-        <div className='d-flex w-100 justify-content-center align-items-center position-relative'>
+        <div className='d-flex w-100 justify-content-center align-items-center position-relative  overflow-x-hidden'>
             {selected.edit ? (
                 <PopUpPlanPomodoro edit={true} />
             ) : (

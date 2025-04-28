@@ -136,7 +136,7 @@ const FormNoAvailability = () => {
     }
 
     return (
-        <div className='d-flex flex-column w-100'>
+        <div className='d-flex flex-column w-100 overflow-x-hidden'>
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='startDate' className='form-label'>Start Date</label>
