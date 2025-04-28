@@ -8,6 +8,7 @@ import '../../styles/Calendar.css';
 
 import { CalendarProvider } from '../../contexts/CalendarContext';
 import { TaskProvider } from '../../contexts/TaskContext';
+import { PomodoroProvider } from '../../contexts/PomodoroContext';
 
 
 const Calendar = () => {
@@ -15,7 +16,9 @@ const Calendar = () => {
     return (
         <CalendarProvider>
             <TaskProvider>
-                <PlusSidebarLayout childrenMain={<Planner />} childrenSide={<FormCalendar />} />
+                <PomodoroProvider>
+                    <PlusSidebarLayout childrenMain={<Planner />} childrenSide={<FormCalendar />} />
+                </PomodoroProvider>
             </TaskProvider>
         </CalendarProvider>
     )

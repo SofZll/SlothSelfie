@@ -215,7 +215,8 @@ const getUserIdFromUsername = async (req, res) => {
 
 // Function to update the user schedule settings preferences
 const updateUserPreferences = async (req, res) => {
-    const { workingHours, freeDays, userId } = req.body;
+    const { userId } = req.session;
+    const { workingHours, daysOff, dayHour } = req.body;
 
     try {
         const user = await User.findById(userId);
@@ -226,10 +227,12 @@ const updateUserPreferences = async (req, res) => {
         // Updates the preferences
         user.workingHours.start = workingHours.start || user.workingHours.start;
         user.workingHours.end = workingHours.end || user.workingHours.end;
-        user.freeDays = freeDays || user.freeDays;
+        user.freeDays = daysOff || user.freeDays;
+        user.dayHours.start = dayHour.start || user.dayHours.start;
+        user.dayHours.end = dayHour.end || user.dayHours.end;
 
         await user.save();
-        res.json({ success: true, message: 'User preferences updated successfully' });
+        res.json({ success: true, workingHours: user.workingHours, freeDays: user.freeDays, dayHours: user.dayHours });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error updating user preferences' });
     }

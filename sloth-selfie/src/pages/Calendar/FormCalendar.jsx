@@ -8,6 +8,7 @@ import FormActivity from './FormActivity';
 import FormEvent from './FormEvent';
 import FormNoAvailability from './FormNoAvailability';
 import FormTask from './FormTask';
+import FormPomodoro from './FormPomodoro';
 import Button from '../../components/Button';
 import ScrollList from '../../components/ScrollList';
 
@@ -131,8 +132,14 @@ const FormCalendar = () => {
                     </div>
                 )}
 
+                {selected.selection === 'pomodoro' && (
+                    <div className="formPopup w-100">
+                        <FormPomodoro />
+                    </div>
+                )}
+
                 {selected.edit && (selected.selection === 'activity' || selected.selection === 'event' || selected.selection === 'task') && (
-                    <button className='btn position-absolute bottom-0 start-0 translate-middle-y mb-0 mb-md-4' onClick={() => exportData()}>
+                    <button className='btn position-absolute bottom-0 start-0 m-0 p-1' onClick={() => exportData()}>
                         <Download size='27' color='#555B6E' strokeWidth='1.75' />
                     </button>
                 )}

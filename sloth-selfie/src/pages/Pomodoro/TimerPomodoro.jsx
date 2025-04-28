@@ -7,17 +7,27 @@ import MusicPomodoro from './MusicPomodoro';
 import { usePomodoro } from '../../contexts/PomodoroContext';
 import { formatTime } from '../../utils/utils';
 import socket from '../../services/socket/socket';
+import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { apiService } from '../../services/apiService';
 
 import { Share, Pen, RotateCcw, SkipForward, SkipBack, CirclePlay, CirclePause, CircleStop, CirclePlus, CalendarPlus, ChartLine, Music } from 'lucide-react';
 import { NewSwal } from '../../utils/swalUtils';
 
 
 const TimerPomodoro = () => {
-    const { play, setPlay, pomodoro, setPomodoro, settingsPomodoro, setSettingsPomodoro,
+    const { play, setPlay,
+        pomodoro, setPomodoro,
+        settingsPomodoro, setSettingsPomodoro, resetSettingsPomodoro,
         increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, skipTime, skipBack,
         popUp, setPopUp,
+        editTimeAnimation, resetAnimation,
         socketData, setSocketData, resetPopUp } = usePomodoro();
 
+    const { pomodoroId } = useParams();
+    const navigate = useNavigate();
+
+    
     const handlePlay = () => {
         if (socketData.inShare) {
             socket.emit('play', { play: !play });
@@ -93,6 +103,30 @@ const TimerPomodoro = () => {
             setPlay(false);
         });
     }, [socketData, setSocketData, setSettingsPomodoro, setPomodoro, setPlay, resetPopUp]);
+
+    //get the id of the pomodoro from the url
+    useEffect(() => {
+
+        const fetchPomodoro = async () => {
+            const response = await apiService(`/pomodoro/${pomodoroId}`, 'GET');
+            if (response.success) {
+                setSettingsPomodoro({ ...response.pomodoro });
+                setPomodoro({ ...response.pomodoro, timeLeft: (response.pomodoro.isStudyTime ? response.pomodoro.studyTime : response.pomodoro.breakTime), cyclesLeft: (response.pomodoro.cyclesLeft || response.pomodoro.cycles) });
+                resetAnimation(pomodoro.timeLeft);
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: response.message });
+                navigate('/pomodoro');
+            }
+        }
+
+        
+        if (pomodoroId) fetchPomodoro();
+        else {
+            resetSettingsPomodoro();
+            newPomodoro();
+        }
+    }, []);
+
 
 
     return (

@@ -91,6 +91,43 @@ const deleteTask = async (req, res) => {
     }
 };
 
+//function to delete user from share with
+const deleteUserFromShareWith = async (userId, tasks) => {
+    try {
+        for (let i = 0; i < tasks.length; i++) {
+            const task = await Task.findById(tasks[i]._id);
+            if (!task) {
+                console.error('Task not found:', tasks[i]._id, task, tasks[i]);
+                return false;
+            }
+
+            task.sharedWith = task.sharedWith.filter(user => user.toString() !== userId.toString());
+            const updatedTask = await task.save();
+            if (!updatedTask) return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error deleting user from shared tasks:', error);
+        return false;
+    }
+}
+
+//function called from note to delete tasks
+const deleteTasks = async (tasks) => {
+    try {
+        for (let i = 0; i < tasks.length; i++) {
+            const deletedTask = await Task.findByIdAndDelete(tasks[i]._id);
+            if (!deletedTask) {
+                return false;
+            }
+        }
+        return true;
+    } catch (error) {
+        console.error('Error deleting tasks:', error);
+        return false;
+    }
+}
+
 //function called from note to add tasks
 const addTasks = async (tasks, user, sharedWith) => {
     const tasksArray = [];
@@ -108,22 +145,6 @@ const addTasks = async (tasks, user, sharedWith) => {
         return tasksArray;
     } catch (error) {
         console.error('Error creating tasks:', error);
-        return false;
-    }
-}
-
-//function called from note to delete tasks
-const deleteTasks = async (tasks) => {
-    try {
-        for (let i = 0; i < tasks.length; i++) {
-            const deletedTask = await Task.findByIdAndDelete(tasks[i]._id);
-            if (!deletedTask) {
-                return false;
-            }
-        }
-        return true;
-    } catch (error) {
-        console.error('Error deleting tasks:', error);
         return false;
     }
 }
@@ -193,10 +214,10 @@ async function exportTask(req, res){
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${task.title}.ics"`);
         res.status(200).send(value);
-      } catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).send({ success: false, message: 'Error exporting task' });
-      }
+    }
 }
 
 module.exports = {
@@ -205,6 +226,7 @@ module.exports = {
     deleteTask,
     markTaskCompleted,
     deleteTasks,
+    deleteUserFromShareWith,
     addTasks,
     editTasks,
     exportTask

@@ -152,7 +152,8 @@ const createActivities = async (activities, projectId, phaseSubphaseId, ownerId,
             milestone: activity.milestone,
             dependencies: dependenciesIds,
             phaseSubphase: phaseSubphaseId,
-            events: [eventStartId, eventDeadlineId]
+            events: [eventStartId, eventDeadlineId],
+            responses: [sharedWithUserIds.map(user => ({ user, status: 'pending' }))],
         });
 
         const savedActivity = await newActivity.save();
@@ -184,7 +185,8 @@ const createMacroActivity = async (macroActivity, projectId, phaseSubphaseId, ow
         user: ownerId,
         isMacroactivity: true,
         phaseSubphase: phaseSubphaseId,
-        events: [eventStartId, eventDeadlineId]
+        events: [eventStartId, eventDeadlineId],
+        responses: [sharedWithUserIds.map(user => ({ user, status: 'pending' }))],
     });
 
     // Save the macroactivity and return its _id

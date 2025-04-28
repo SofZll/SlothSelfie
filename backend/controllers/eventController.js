@@ -279,18 +279,32 @@ const updateEvent = async (req, res) => {
 };
 
 const deleteEvent = async (req, res) => {
+  const userName = req.session.username;
+  const user = await User.findOne({ username: userName });
   const {eventId} = req.params;
   
   try {
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
     
-    if (repeatFrequency === 'none') await Event.findByIdAndDelete(eventId);
-    else await Event.deleteMany({ fatherId: event.fatherId });
+    if (event.user.toString() === user._id.toString()) {
+      if (repeatFrequency === 'none') await event.remove();
+      else await Event.deleteMany({ fatherId: event.fatherId });
+    } else {
+      if (repeatFrequency === 'none') {
+        event.sharedWith = event.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+        await event.save();
+      } else {
+        const events = await Event.find({ fatherId: event.fatherId });
+        for (let i = 0; i < events.length; i++) {
+          events[i].sharedWith = events[i].sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+          await events[i].save();
+        }
+      }
+    }
 
     res.status(200).json({ success: true, message: "Event deleted successfully" });
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error deleting event:', error);
     res.status(500).json({ success: false, message: error.message });
   }
@@ -349,7 +363,10 @@ async function exportEvent(req, res){
       };
 
       recurrenceRule = `FREQ=${freqMap[event.repeatFrequency]};`;
-      if (event.repeatEndDate) {
+
+      if (event.repeatTimes && event.repeatTimes > 0) {
+        recurrenceRule += `COUNT=${event.repeatTimes};`;
+      } else if (event.repeatEndDate) {
         const endRecDate = event.repeatEndDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
         recurrenceRule += `UNTIL=${endRecDate}`;
       }
@@ -358,7 +375,7 @@ async function exportEvent(req, res){
     const { error, value } = createEvent({
       title: event.title,
       description: '',
-      location: event.eventLocation || '',
+      location: event.eventLocation || 'physical',
       start,
       end,
       recurrenceRule,
@@ -396,8 +413,7 @@ const importEvents = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
   try {
-    const files = req.files
-
+    const files = req.files;
 
     if (!files || files.length === 0) {
       return res.status(400).json({ message: 'No files provided' });
@@ -413,19 +429,55 @@ const importEvents = async (req, res) => {
       for (const key in data) {
         const icsEvent = data[key];
         if (icsEvent.type === 'VEVENT') {
-          const newEvent = new Event({
-            title: icsEvent.summary || 'Untitled Event',
-            startDate: new Date(icsEvent.start),
-            endDate: new Date(icsEvent.end),
-            allDay: !icsEvent.start.getHours(),
-            repeatFrequency: icsEvent.rrule ? icsEvent.rrule.options.freq.toLowerCase() : 'none',
-            repeatEndDate: icsEvent.rrule?.options?.until || null,
-            eventLocation: icsEvent.location || 'physical',
-            user: user._id,
-            originalId: new mongoose.Types.ObjectId(),
-          });
-          await newEvent.save();
-          importedEvents.push(newEvent);
+          const commonOriginalId = new mongoose.Types.ObjectId();  // Create the originalId for the event one time
+
+          // Check if the event has a recurrence rule (rrule)
+          if (icsEvent.rrule) {
+            const rule = icsEvent.rrule;
+            const startDate = new Date(icsEvent.start);
+      
+            // Create a new event for each occurrence of the recurring event
+            const dates = rule.allBetween(startDate, rule.options.until || new Date('2100-01-01'), true); 
+            // true = inclusivo
+      
+            for (const date of dates) {
+              const newEvent = new Event({
+                title: icsEvent.summary || 'Untitled Event',
+                startDate: new Date(date),
+                endDate: new Date(date.getTime() + (icsEvent.end - icsEvent.start)), //duration is the same for all occurrences
+                allDay: !date.getHours(),
+                repeatFrequency: rule.options.freq.toLowerCase(),
+                repeatEndDate: rule.options.until || null,
+                repeatTimes: rule.options.count || 0,
+                eventLocation: icsEvent.location || 'physical',
+                user: user._id,
+                originalId: commonOriginalId,  // Use the same originalId for all occurrences
+              });
+              await newEvent.save();
+              importedEvents.push(newEvent);
+
+              console.log('Imported recurring event:', newEvent);  // Log the imported event for debugging
+            }
+      
+          } else {
+            // If it's not a recurring event, just create a single event
+            const newEvent = new Event({
+              title: icsEvent.summary || 'Untitled Event',
+              startDate: new Date(icsEvent.start),
+              endDate: new Date(icsEvent.end),
+              allDay: !icsEvent.start.getHours(),
+              repeatFrequency: 'none',
+              repeatEndDate: null,
+              repeatTimes: 0,
+              eventLocation: icsEvent.location || 'physical',
+              user: user._id,
+              originalId: commonOriginalId,
+            });
+            await newEvent.save();
+            importedEvents.push(newEvent);
+
+            console.log('Imported single event:', newEvent);  // Log the imported event for debugging
+          }
 
           //try with activity model   IT WORKS!
          
@@ -435,8 +487,8 @@ const importEvents = async (req, res) => {
             allDay: !icsEvent.start.getHours(),
             user: user._id,
           });
-          await newActivity.save();
-          importedEvents.push(newActivity);*/
+          await newActivity.save(); 
+          importedEvents.push(newActivity);*/   
 
         }
       }

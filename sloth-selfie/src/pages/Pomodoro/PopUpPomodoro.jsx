@@ -2,9 +2,11 @@ import React from 'react';
 
 import { usePomodoro } from '../../contexts/PomodoroContext';
 import { useMusic } from '../../contexts/MusicContext';
+import { CalendarProvider } from '../../contexts/CalendarContext';
+
 import EditPomodoro from './EditPomodoro';
 import PopUpShare from './PopUpShare';
-import PopUpPlan from './PopUpPlan';
+import PopUpPlanPomodoro from '../../components/PopUpPlanPomodoro';
 import StatsPomodoro from '../../components/StatsPomodoro';
 import { Youtube, SearchCheck } from 'lucide-react';
 
@@ -16,9 +18,9 @@ const PopUpPomodoro = () => {
 
     return (
 
-        <div className='d-flex justify-content-center align-items-center position-fixed pop-up'>
+        <div className='d-flex justify-content-center align-items-center position-fixed pop-up bg-white  border border-secondary rounded'>
             <div className='modal-dialog custom-modal'>
-                <div className='modal-content border border-secondary'>
+                <div className='modal-content p-3'>
 
                     <div className='modal-header'>
                         {popUp.edit && <h5 className='modal-title' style={{ color: '#244476' }}>Edit your Pomodoro</h5>}
@@ -48,7 +50,9 @@ const PopUpPomodoro = () => {
                         )}
 
                         {popUp.calendar && (
-                            <PopUpPlan />
+                            <CalendarProvider>
+                                <PopUpPlanPomodoro edit={false} />
+                            </CalendarProvider>
                         )}
 
                         {popUp.music && (

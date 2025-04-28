@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import MainLayout from '../layouts/MainLayout';
 import '../styles/Home.css';
 
-import Settings from './Settings';
+import PreviewSetUp from './PreviewSetUp';
 import CarouselHome from './CarouselHome';
 import { CustomizationProvider } from '../contexts/PreviewContext';
 import { UserProvider } from '../contexts/UserContext';
@@ -17,7 +17,7 @@ const Home = ({ settings = false }) => {
             <MainLayout>
                 <div className='d-flex h-75 w-100 justify-content-center'>
                     {inSettings ? (
-                        <Settings setSetUp={setInSettings} />
+                        <PreviewSetUp setSetUp={setInSettings} />
                     ) : (
                         <UserProvider>
                             <CarouselHome setSetUp={setInSettings} />
