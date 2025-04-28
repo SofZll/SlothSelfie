@@ -114,7 +114,7 @@ const TimerPomodoro = () => {
                 setPomodoro({ ...response.pomodoro, timeLeft: (response.pomodoro.isStudyTime ? response.pomodoro.studyTime : response.pomodoro.breakTime), cyclesLeft: (response.pomodoro.cyclesLeft || response.pomodoro.cycles) });
                 resetAnimation(pomodoro.timeLeft);
             } else {
-                Swal.fire({ icon: 'error', title: 'Error', text: response.message });
+                NewSwal({ icon: 'error', title: 'Error', text: response.message });
                 navigate('/pomodoro');
             }
         }

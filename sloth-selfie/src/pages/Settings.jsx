@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
 
 import { generateTimeOptions } from '../utils/utils';
 import { AuthContext } from '../contexts/AuthContext';
@@ -24,9 +24,9 @@ const Settings = () => {
         if (setting.section === 'calendar') {
             const response = await apiService('/user/edit-schedule', 'PUT', {daysOff, workingHours, dayHour});
             if (response.success){
-                Swal.fire({ title: 'Success', text: 'Settings saved correctly!', icon: 'success', customClass: { confirmButton: 'button-success' } });
+                NewSwal({ title: 'Success', text: 'Settings saved correctly!', icon: 'success'});
                 setUser({ ...user, workingHours: {...response.workingHours}, freeDays: [...response.freeDays], dayHours: {...response.dayHours} });
-            } else Swal.fire({ title: 'Error', text: 'There was an issue saving your settings. Please try again.', icon: 'error', customClass: { confirmButton: 'button-alert' } });
+            } else NewSwal({ title: 'Error', text: 'There was an issue saving your settings. Please try again.', icon: 'error'});
         }
 
         resetSetting();
