@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 
 import { NewSwal } from '../../utils/swalUtils';
 
@@ -12,7 +12,7 @@ import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormEvent = () => {
     
-    const { event, setEvent, events, setEvents, resetEvent, selected, resetSelected, notifications, setNotifications} = useCalendar();
+    const { event, setEvent, events, setEvents, resetEvent, selected, resetSelected, notifications, setNotifications, setConditionsMet, conditionsMet } = useCalendar();
     const [deletePopUp, setDeletePopUp] = useState(false);
     const { user } = useContext(AuthContext);
     const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -98,44 +98,7 @@ const FormEvent = () => {
     }
 
     const handleSubmit = async () => {
-        if (event.title === '') {
-            NewSwal.fire({ title: 'Error', icon: 'error', text: 'Title is required'});
-            return;
-        }
-        if (event.startDate === null) {
-            NewSwal.fire({ title: 'Error', icon: 'error', text: 'Start date is required'});
-            return;
-        }
-        if (event.endDate === null) {
-            NewSwal.fire({ title: 'Error', icon: 'error', text: 'End date is required'});
-            return;
-        }
-        if (event.duration === null) {
-            NewSwal.fire({ title: 'Error', icon: 'error', text: 'Duration is required'});
-            return;
-        }
-        if (event.duration > 1) {
-            NewSwal.fire({ title: 'Error', icon: 'error', text: `Duration must be at least 1 ${event.allDay ? 'day' : 'hour'}`});
-            return;
-        }
-        if (!event.allDay && event.time === '') {
-            NewSwal.fire({ title: 'Error', icon: 'error', text: 'Time is required'});
-            return;
-        }
-
         if (event.repeatFrequency !== 'none') {
-            if (event.repeatMode === 'ntimes' && event.repeatTimes <= 0) {
-                NewSwal.fire({ title: 'Error', icon: 'error', text: 'Repeat times must be greater than 0'});
-                return;
-            }
-            if (event.repeatMode === 'until' && event.repeatEndDate === null) {
-                NewSwal.fire({ title: 'Error', icon: 'error', text: 'Repeat end date is required'});
-                return;
-            }
-            if (new Date(event.repeatEndDate) < new Date(event.startDate)) {
-                NewSwal.fire({ title: 'Error', icon: 'error', text: 'Repeat end date must be after start date'});
-                return;
-            }
 
             let gap = 1;
             if (event.repeatFrequency === 'weekly') gap = 7;
@@ -166,6 +129,26 @@ const FormEvent = () => {
             resetEvent();
         } else NewSwal.fire({ title: 'Error deleting event', icon: 'error', text: response.message});
     }
+
+    useEffect(() => {
+        if (!event.title || !event.startDate || !event.endDate || !event.duration || event.duration <= 0) {
+            setConditionsMet(false);
+        } else if (!event.allDay && event.time === '') {
+            setConditionsMet(false); 
+        } else setConditionsMet(true);
+
+        if (event.repeatFrequency !== 'none') {
+            if (event.repeatMode === 'ntimes' && event.repeatTimes <= 0) {
+                setConditionsMet(false);
+            }
+            if (event.repeatMode === 'until' && event.repeatEndDate === null) {
+                setConditionsMet(false);
+            }
+            if (new Date(event.repeatEndDate) < new Date(event.startDate)) {
+                setConditionsMet(false);
+            }
+        }
+    }, [event]);
 
 
     return (
@@ -348,7 +331,8 @@ const FormEvent = () => {
             </div>
             
             
-            <div className='d-flex align-items-center justify-content-center'>
+            
+            <div className='d-flex align-items-center justify-content-center bg-white'>
                 {!event.isInProject && (
                     <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>
                         {selected.edit ? 'edit' : 'save'}
