@@ -91,6 +91,22 @@ const deleteTask = async (req, res) => {
     }
 };
 
+//function to delete user from share with
+const deleteUserFromShareWith = async (userId, taskId) => {
+    try {
+        for (let i = 0; i < taskId.length; i++) {
+            const task = await Task.findByIdAndUpdate(taskId[i], { $pull: { sharedWith: userId } });
+            if (!task) {
+                return false;
+            }
+        }
+        return true;
+    } catch (error) {
+        console.error('Error deleting user from share with:', error);
+        return false;
+    }
+}
+
 //function called from note to add tasks
 const addTasks = async (tasks, user, sharedWith) => {
     const tasksArray = [];
@@ -193,10 +209,10 @@ async function exportTask(req, res){
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${task.title}.ics"`);
         res.status(200).send(value);
-      } catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).send({ success: false, message: 'Error exporting task' });
-      }
+    }
 }
 
 module.exports = {
@@ -205,6 +221,7 @@ module.exports = {
     deleteTask,
     markTaskCompleted,
     deleteTasks,
+    deleteUserFromShareWith,
     addTasks,
     editTasks,
     exportTask

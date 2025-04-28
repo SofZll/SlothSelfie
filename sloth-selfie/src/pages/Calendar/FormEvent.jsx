@@ -75,6 +75,7 @@ const FormEvent = () => {
     }
 
     const setStartTime = (time) => {
+        console.log('time', time);
         if (time === '') {
             setEvent({ ...event, time: '' });
             return;
@@ -83,8 +84,11 @@ const FormEvent = () => {
             setEvent({ ...event, time });
             return;
         }
-        if (event.duration !== null) setEvent({...event, time, startDate: calcStartDate(event.startDate, event.allDay, time), endDate: calcEndDate(event.startDate, event.duration, event.allDay)});
+        if (event.duration !== null) setEvent({...event, time, startDate: calcStartDate(event.startDate, event.allDay, time) });
         else setEvent({ ...event, time, startDate: calcStartDate(event.startDate, event.allDay, time), endDate: calcEndDate(event.startDate, event.duration, event.allDay) });
+
+
+        console.log('startDate', event.startDate);
     }
 
     const setAllDay = (allDay) => {
@@ -165,7 +169,7 @@ const FormEvent = () => {
 
 
     return (
-        <div className='d-flex flex-column w-100 overflow-x-hidden'>
+        <div className='d-flex flex-column w-100 overflow-x-hidden' style={{ maxHeight: '70vh' }}>
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -196,7 +200,7 @@ const FormEvent = () => {
                 <div className='col-6'>
                     <label htmlFor='date' className='form-label'>Date</label>
                     <input type='Date' className='form-control' id='date'
-                    value={event.startDate ? new Date(event.startDate).toISOString().split('T')[0] : ''}
+                    value={event.startDate ? new Date(event.startDate).toLocaleDateString('en-CA') : ''}
                     disabled={event.isInProject}
                     onChange={(e) => setStartDate(e.target.value)} 
                     required />
@@ -230,6 +234,7 @@ const FormEvent = () => {
                             value={event.time}
                             disabled={event.isInProject}
                             onChange={(e) => setStartTime(e.target.value)} required>
+                                <option value=''>Select time</option>
                                 {generateTimeOptions().map(option => (
                                     <option key={option.value} value={option.value}>{option.label}</option>
                                 ))}

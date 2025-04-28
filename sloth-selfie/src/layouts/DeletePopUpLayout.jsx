@@ -5,7 +5,7 @@ const DeletePopUpLayout = ({ children, handleDelete, handleClose }) => {
     return (
         <div className='position-fixed start-0 top-0 vh-100 vw-100 d-flex justify-content-center align-items-center' style={{ zIndex: 1000 }}>
 
-            <div className='bg-white w-100 h-100 opacity-50'></div>
+            <div className='bg-dark w-100 h-100 bg-opacity-25'></div>
 
             <div className='modal-dialog custom-modal position-absolute top-50 start-50 translate-middle bg-white'>
                 <div className='modal-content border border-secondary p-3'>
