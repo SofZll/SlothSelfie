@@ -12,8 +12,6 @@ export const NoteProvider = ({ children }) => {
         content: '',
         noteAccess: 'private',
         sharedWith: [],
-        createDate: new Date(),
-        updateDate: new Date(),
         tasks: [],
         addedTasks: [],
         deletedTasks: []
@@ -30,8 +28,6 @@ export const NoteProvider = ({ children }) => {
             content: '',
             noteAccess: 'private',
             sharedWith: [],
-            createDate: new Date(),
-            updateDate: new Date(),
             tasks: [],
             addedTasks: [],
             deletedTasks: []

@@ -133,10 +133,10 @@ const Note = () => {
 
                 <div className='d-flex justify-content-end align-items-center m-3 opacity-50'>
                     <div className='b-inline-block mx-1'>
-                        Created at: {new Date(note.createDate).toLocaleDateString()}
+                        Created at: {new Date(note.createdAt).toLocaleDateString()}
                     </div>
                     <div className='b-inline-block mx-1'>
-                        Updated at: {new Date(note.updateDate).toLocaleDateString()}
+                        Updated at: {new Date(note.updatedAt).toLocaleDateString()}
                     </div>
                 </div>
 

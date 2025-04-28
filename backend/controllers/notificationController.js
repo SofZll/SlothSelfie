@@ -65,7 +65,7 @@ const getScheduledNotifications = async (req, res) => {
 
         const scheduledNotifications = await getScheduledJobs(userId);
         
-        const filteredNotifications = scheduledNotifications.filter(n => n && n.triggerAt);
+        const filteredNotifications = scheduledNotifications.filter(n => n && n.triggerAt && n.status === 'active');
         filteredNotifications.sort((a, b) => new Date(a.triggerAt) - new Date(b.triggerAt));
 
         console.log('Scheduled notifications:', scheduledNotifications);

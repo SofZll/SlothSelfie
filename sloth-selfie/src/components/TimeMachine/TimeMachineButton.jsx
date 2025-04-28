@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import TimeMachinePopup from './TimeMachinePopup';
-import { StyleContext } from '../StyleContext';
+import { StyleContext } from '../../contexts/StyleContext';
 
 const TimeMachineButton = () => {
     const { color } = useContext(StyleContext);

@@ -103,16 +103,13 @@ const Planner = () => {
 
     const onItemSelect = async (item) => {
         if (item.type === 'activity'){
-            const a = activities.find(a => a._id === item._id);
-            setActivity({...a, sharedWith: a.sharedWith.map(u => u.username)});
-            await fetchNotifications({ elementId: a._id });
+            setActivity({...activities.find(a => a._id === item._id)})
+            await fetchNotifications({ elementId: item._id });
         } else if (item.type === 'event') {
-            const e = events.find(e => e._id === item._id);
-            setEvent({...e, sharedWith: e.sharedWith.map(u => u.username)});
-            await fetchNotifications({ elementId: e._id });
+            setEvent({...events.find(e => e._id === item._id)});
+            await fetchNotifications({ elementId: item._id });
         } else if (item.type === 'task') {
-            const t = tasks.find(t => t._id === item._id);
-            setTask({...t, sharedWith: t.sharedWith.map(u => u.username)});
+            setTask({...tasks.find(t => t._id === item._id)});
         } else if (item.type === 'no availability') {
             const na = availabilities.find(na => na._id === item._id);
             if (na.days) setAvailability({ ...na});

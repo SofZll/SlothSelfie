@@ -2,7 +2,7 @@ import React, { useContext, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import { useIsDesktop } from '../utils/utils';
-import { StyleProvider } from '../components/StyleContext';
+import { StyleProvider } from '../contexts/StyleContext';
 import { AuthContext } from '../contexts/AuthContext';
 
 

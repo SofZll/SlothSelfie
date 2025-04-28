@@ -119,21 +119,21 @@ body {
 }
 
 .teal {
-    background-color: #26a69a;
+    background-color: #6ebbb3;
     color: white;
 }
 
 .teal:hover {
-    background-color: #00897b;
+    background-color: #0ba798;
 }
 
 .blue {
-    background-color: #5c6bc0;
+    background-color: #5664b7;
     color: white;
 }
 
 .blue:hover {
-    background-color: #3949ab;
+    background-color: #3e4dac;
 }
 
 /* animations */

@@ -131,10 +131,10 @@ const CardNote = ({ Note }) => {
             <div className='row w-100 mt-2 mb-5'>
                 <div className='col opacity-50 fs-6'>
                     <div>
-                        Created: {new Date(Note.createDate).toLocaleDateString()}
+                        Created: {new Date(Note.createdAt).toLocaleDateString()}
                     </div>
                     <div>
-                        Last Modified: {new Date(Note.updateDate).toLocaleDateString()}
+                        Last Modified: {new Date(Note.updatedAt).toLocaleDateString()}
                     </div>
                 </div>
             </div> 

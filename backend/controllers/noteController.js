@@ -3,6 +3,9 @@ const User = require('../models/userModel');
 
 const { addTasks, editTasks, deleteTasks } = require('./taskController');
 const { findUserId } = require('../utils/utils');
+const { getCurrentNow } = require('../services/timeMachineService');
+
+const now = getCurrentNow();
 
 // Create a new note
 const createNote = async (req, res) => {
@@ -20,8 +23,8 @@ const createNote = async (req, res) => {
             content: content || '',
             noteAccess,
             sharedWith: noteAccess === 'shared' ? users : [],
-            createDate: new Date(),
-            updateDate: new Date(),
+            createdAt: now,
+            updatedAt: now
         });
         
         if (tasks) note.tasks = await addTasks(tasks, user, users);
@@ -52,7 +55,8 @@ const getNotes = async (req, res) => {
                 { user: user._id },
                 { noteAccess: 'public' },
                 { noteAccess: 'shared', sharedWith: user._id }
-            ]
+            ],
+            createdAt: { $lte: now }
         })
         .populate('tasks')
         .populate('user', 'username')
@@ -76,9 +80,10 @@ const getNote = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
 
+        if (note.createdAt > now) return res.status(403).json({ success: false, message: 'Note not found' });
+
         res.status(200).json({ success: true, note });
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching note:', error);
         return res.status(500).json({ success: false, message: 'Error fetching note' });
     }
@@ -119,7 +124,7 @@ const updateNote = async (req, res) => {
         note.category = category;
         note.content = content;
         note.noteAccess = noteAccess;
-        note.updateDate = new Date();
+        note.updatedAt = new Date();
         note.sharedWith = noteAccess === 'shared' ? users : [];
 
         const updatedNote = await note.save();
@@ -130,7 +135,6 @@ const updateNote = async (req, res) => {
         .populate('sharedWith', 'username');
 
         res.status(200).json({ success: true, note: populatedNote });
-
     } catch (error) {
         console.error('Error updating note:', error);
         res.status(500).json({ success: false, message: 'Error updating note' });
@@ -154,7 +158,6 @@ const deleteNote = async (req, res) => {
 
         await Note.findByIdAndDelete(noteId);
         res.status(200).json({ success: true, message: 'Note deleted successfully' });
-
     } catch (error) {
         console.error('Error deleting note:', error);
         res.status(500).json({ success: false, message: 'Error deleting note' });

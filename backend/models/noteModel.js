@@ -33,18 +33,7 @@ const noteSchema = new mongoose.Schema({
     fileLink: { // Optional link to a file for projects
         type: String
     },
-
-    createDate:{
-        type: Date,
-        required: true,
-        default: Date.now
-    },
-    updateDate:{
-        type: Date,
-        required: true,
-        default: Date.now
-    },
-
+    
     isInProject: {  //used to differentiate between normal notes and project-activity notes
         type: Boolean,
         default: false,

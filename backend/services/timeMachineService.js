@@ -1,26 +1,26 @@
-let virtualDate = null;
+let virtualNow = null;
 
 const setTimeMachine = (date) => {
-    virtualDate = new Date(date);
-    console.log('Virtual date set to:', virtualDate);
+    virtualNow = new Date(date);
+    console.log('Virtual date set to:', virtualNow);
 }
 
 const resetTimeMachine = () => {
-    virtualDate = null;
+    virtualNow = null;
     console.log('Virtual date reset');
 }
 
-const getCurrentDate = () => {
-    return virtualDate ? virtualDate : new Date();
+const getCurrentNow = () => {
+    return virtualNow ? virtualNow : new Date();
 }
 
 const isActive = () => {
-    return virtualDate !== null;
+    return virtualNow !== null;
 }
 
 module.exports = {
     setTimeMachine,
     resetTimeMachine,
-    getCurrentDate,
+    getCurrentNow,
     isActive
 };

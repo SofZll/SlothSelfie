@@ -31,6 +31,14 @@ const ShareInput = ({ receivers, setReceivers }) => {
         if (e.key === 'Enter' && e.target.id === 'receivers') addReceiver();
     };
 
+    useEffect(() => {
+        console.log('Current receivers:', receivers);
+        console.log('Type of receivers:', Array.isArray(receivers) ? 'array' : typeof receivers);
+        if (receivers.some(r => r === undefined)) {
+            console.warn('Undefined values detected in receivers!');
+        }
+    }, [receivers]);
+
     return (
         <div className='container my-2 p-0 justify-content-start'>
             <div className='d-flex flex-column align-items-center'>

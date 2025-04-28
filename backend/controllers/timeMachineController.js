@@ -1,5 +1,5 @@
 const TimeMachine = require('../models/timeMachineModel');
-const { setTimeMachine, resetTimeMachine, getCurrentDate, isActive } = require('../services/timeMachineService');
+const { setTimeMachine, resetTimeMachine, isActive } = require('../services/timeMachineService');
 
 const { combineDateTime } = require('../utils/utils');
 

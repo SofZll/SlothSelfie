@@ -5,13 +5,16 @@ const activitySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+
     deadline: {
         type: Date
     },
+
     completed: {
         type: Boolean,
         default: false
     },
+
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -39,7 +42,8 @@ const activitySchema = new mongoose.Schema({
     project: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Project',
-        default: null }, // if this field is null, this is a normal activivty
+        default: null  // if this field is null, this is a normal activivty
+    },
     
     phaseSubphase: {
         type: mongoose.Schema.Types.ObjectId,

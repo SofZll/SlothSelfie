@@ -26,6 +26,7 @@ const FormActivity = () => {
         }
 
         if (selected.edit) {
+            console.log('Editing activity', activity);
             const response = await apiService(`/activity/${activity._id}`, 'PUT', { activity, notifications });
             if (response.success){
                 const notificationPromises = notifications.map(async notification =>{
@@ -50,6 +51,7 @@ const FormActivity = () => {
                 await Promise.all(notificationPromises);
 
                 Swal.fire({ title: 'Activity edited', icon: 'success', text: 'Activity edited successfully', customClass: { confirmButton: 'button-alert' } });
+                console.log('Activity edited', activity);
                 setActivities(activities.map(act => act._id === activity._id ? activity : act));
                 resetActivity();
                 setNotifications([]);
@@ -94,6 +96,7 @@ const FormActivity = () => {
             setNotifications([]);
         });
     }
+    console.log('FormActivity', activity);
 
     return (
         <div className='d-flex flex-column w-100'>
