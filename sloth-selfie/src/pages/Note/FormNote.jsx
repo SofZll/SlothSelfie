@@ -7,7 +7,7 @@ import ShareInput from '../../components/ShareInput';
 
 import ListTask from './ListTask';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { X } from 'lucide-react';
 
@@ -19,21 +19,21 @@ const FormNote = () => {
     const handleSubmit = async () => {
 
         if (!note.title) {
-            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Title is required', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Title is required'});
             return;
         }
 
         if (!note.content && note.tasks.length === 0) {
-            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Content or tasks are required', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Content or tasks are required'});
             return;
         }
 
         const response = await apiService(`/note${selected.add ? '' : '/'+note._id}`, selected.add ? 'POST' : 'PUT', note );
-        if (!response.success) Swal.fire({ title: 'Error', icon: 'error', text: 'Error saving note', customClass: { confirmButton: 'button-alert' } });
+        if (!response.success) NewSwal.fire({ title: 'Error', icon: 'error', text: 'Error saving note'});
         else {
             if (selected.edit) setNotes(notes.map(n => n._id === note._id ? response.note : n));
             else setNotes([...notes, response.note]);
-            Swal.fire({ title: 'Success', icon: 'success', text: selected.edit ? 'Note updated successfully' : 'Note added successfully', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Success', icon: 'success', text: selected.edit ? 'Note updated successfully' : 'Note added successfully'});
         }
         
         resetNote();
@@ -57,14 +57,14 @@ const FormNote = () => {
                         <input type='text' className='form-control' id='title'
                         placeholder='Note title'
                         value={note.title}
-                        onChange={(e) => setNote({...note, ['title']: e.target.value})} />
+                        onChange={(e) => setNote({...note, title: e.target.value})} />
                     </div>
 
                     <div className='col-6'>
                         <label htmlFor='category' className='form-label'>Category</label>
                         <select className='form-select' id='category'
                         value={note.category}
-                        onChange={(e) => setNote({...note, ['category']: e.target.value})}>
+                        onChange={(e) => setNote({...note, category: e.target.value})}>
                             <option value=''>Select category</option>
                             <option value='personal'>Personal</option>
                             <option value='work'>Work</option>
@@ -80,7 +80,7 @@ const FormNote = () => {
                         <textarea className='form-control' id='textarea'
                         placeholder='Type here the note content'
                         value={note.content}
-                        onChange={(e) => setNote({...note, ['content']: e.target.value})}
+                        onChange={(e) => setNote({...note, content: e.target.value})}
                         required />
                     </div>
                 </div>
@@ -97,7 +97,7 @@ const FormNote = () => {
                         <label htmlFor='noteAccess' className='form-label'>Note access</label>
                         <select className='form-select' id='noteAccess'
                         value={note.noteAccess}
-                        onChange={(e) => setNote({...note, ['noteAccess']: e.target.value})}>
+                        onChange={(e) => setNote({...note, noteAccess: e.target.value})}>
                             <option value='private'>Private</option>
                             <option value='public'>Public</option>
                             <option value='shared'>Shared</option>
@@ -109,7 +109,7 @@ const FormNote = () => {
                     <div className='row py-2'>
                         <div className='col-12'>
                             <label htmlFor='receivers' className='form-label'>Share with</label>
-                            <ShareInput receivers={note.sharedWith} setReceivers={(receivers) => setNote({...note, ['sharedWith']: receivers})} />
+                            <ShareInput receivers={note.sharedWith} setReceivers={(receivers) => setNote({...note, sharedWith: receivers})} />
                         </div>
                     </div>
                 )}

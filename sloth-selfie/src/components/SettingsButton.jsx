@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import { Settings } from 'lucide-react';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
 import '../styles/SettingsButton.css';
 
 import { generateTimeOptions } from '../utils/utils';
@@ -18,7 +18,7 @@ const SettingsButton = ({ color }) => {
     const validateWorkHours = () => {
         // start hour must be before the end hour
         if (workHours.start >= workHours.end) {
-            Swal.fire({
+            NewSwal.fire({
                 title: 'Invalid time range',
                 text: 'The start time must be earlier than the end time.',
                 icon: 'error',
@@ -67,7 +67,7 @@ const SettingsButton = ({ color }) => {
                 
                 if (response.ok) {
                     console.log('Profile updated successfully:', response);
-                    Swal.fire({
+                    NewSwal.fire({
                         title: 'Success',
                         text: ' Settings saved correctly!',
                         icon: 'success',
@@ -82,7 +82,7 @@ const SettingsButton = ({ color }) => {
                     setShowSettingsOptions(false);
                 } else {
                     console.error('Failed to update profile:', response);
-                    Swal.fire({
+                    NewSwal.fire({
                         title: 'Error',
                         text: 'There was an issue saving your settings. Please try again.',
                         icon: 'error',
@@ -90,7 +90,7 @@ const SettingsButton = ({ color }) => {
                     });
                 }
             } catch (error) {
-                Swal.fire({
+                NewSwal.fire({
                     title: 'Error',
                     text: 'There was an issue saving your settings. Please try again later.',
                     icon: 'error',

@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 
@@ -14,7 +14,7 @@ const TimeMachinePopup = () => {
     const handleSetTime = async (e) => {
         e.preventDefault();
         if (!inputDate || !inputTime) {
-            Swal.fire({ icon: 'error', title: 'Oops...', text: 'Please enter a date and time' });
+            NewSwal.fire({ icon: 'error', title: 'Oops...', text: 'Please enter a date and time' });
             return;
         }
 
@@ -27,7 +27,7 @@ const TimeMachinePopup = () => {
             setMachineOpen(false);
         } else {
             console.error('Error setting time');
-            Swal.fire({ icon: 'error', title: 'Oops...', text: 'Error setting time' });
+            NewSwal.fire({ icon: 'error', title: 'Oops...', text: 'Error setting time' });
         }
     }
 
@@ -40,7 +40,7 @@ const TimeMachinePopup = () => {
             setInputTime('');
         } else {
             console.error('Error resetting time');
-            Swal.fire({ icon: 'error', title: 'Oops...', text: 'Error resetting time' });
+            NewSwal.fire({ icon: 'error', title: 'Oops...', text: 'Error resetting time' });
         }
     }
 

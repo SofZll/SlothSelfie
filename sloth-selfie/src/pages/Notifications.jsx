@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, Clock, Monitor, Mail } from 'lucide-react';
-import Swal from 'sweetalert2';
+import { AlertTriangle } from 'lucide-react';
+import { NewSwal } from '../utils/swalUtils';
 
 import '../styles/Notifications.css';
 import MainLayout from '../layouts/MainLayout';
@@ -32,7 +32,7 @@ const Notifications = () => {
         const response = await apiService(`/notification/snooze/${notifications[index]._id}`, 'PUT', { snoozeInterval });
         if (response.success) {
             setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
-        } else Swal.fire({ title: 'Error', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
     }
 
     // TODO: spostare in utils

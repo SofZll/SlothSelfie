@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import socket from '../../services/socket/socket';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { useChat } from '../../contexts/ChatContext';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -11,7 +11,7 @@ const MessageInput = () => {
 
     const handleSendMessage = () => {
         if (!newMessage.trim()) {
-            Swal.fire({ icon: 'error', title: 'Errore', text: 'Inserisci un messaggio' });
+            NewSwal.fire({ icon: 'error', title: 'Errore', text: 'Inserisci un messaggio' });
         } else {
             const message = {
                 chat: {

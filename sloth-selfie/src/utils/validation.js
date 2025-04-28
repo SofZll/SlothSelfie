@@ -1,14 +1,12 @@
 const validateLogin = (username, password) => {
-    if (!username || !password) {
-        return false;
-    }
+    if (!username || !password) return false;
+
     return true;
 }
 
 const validateRegistration = (name, username, email, password) => {
-    if (!name || !username || !email || !password) {
-        return false;
-    }
+    if (!name || !username || !email || !password) return false;
+
     return true;
 }
 

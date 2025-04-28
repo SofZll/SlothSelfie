@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Undo2 } from 'lucide-react';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { apiService } from '../../services/apiService';
 import { useChat } from '../../contexts/ChatContext';
@@ -18,7 +18,7 @@ const ChatSearch = () => {
             setShowShareInput(false);
         } else {
             console.error('Error creating chat:', response);
-            Swal.fire({ icon: 'error', title: 'Errore', text: response.message });
+            NewSwal.fire({ icon: 'error', title: 'Errore', text: response.message });
         }
     }
 

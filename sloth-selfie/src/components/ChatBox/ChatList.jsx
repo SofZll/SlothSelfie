@@ -1,6 +1,6 @@
 import React, { useMemo , useEffect, useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { apiService } from '../../services/apiService';
 import socket from '../../services/socket/socket';
@@ -48,7 +48,7 @@ const ChatList = () => {
             });
         } else {
             console.error('Error fetching chat:', response);
-            Swal.fire({ icon: 'error', title: 'Errore', text: response.message });
+            NewSwal.fire({ icon: 'error', title: 'Errore', text: response.message });
         }
     }
 

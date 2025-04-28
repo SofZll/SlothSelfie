@@ -14,6 +14,13 @@ const Toast = Swal.mixin({
     }
 });
 
+export const NewSwal = Swal.mixin({
+    heightAuto: false,
+    scrollbarPadding: false,
+    showCloseButton: true,
+    confirmButtonText: 'OK',
+});
+
 export const toastInfo = (title, body) => {
     Toast.fire({
         icon: 'info',

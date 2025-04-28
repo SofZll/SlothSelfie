@@ -9,7 +9,7 @@ import { formatTime } from '../../utils/utils';
 import socket from '../../services/socket/socket';
 
 import { Share, Pen, RotateCcw, SkipForward, SkipBack, CirclePlay, CirclePause, CircleStop, CirclePlus, CalendarPlus, ChartLine, Music } from 'lucide-react';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 
 const TimerPomodoro = () => {
@@ -73,14 +73,14 @@ const TimerPomodoro = () => {
         });
 
         socket.on('session closed', () => {
-            Swal.fire({ icon: 'success', title: 'Session closed', text: 'You have exited the session.' });
+            NewSwal.fire({ icon: 'success', title: 'Session closed', text: 'You have exited the session.' });
             setSocketData({ inShare: false, room: '', peopleInSession: 0 });
             setPlay(false);
             resetPopUp();
         });
 
         socket.on('error', ({ message }) => {
-            Swal.fire({ icon: 'error', title: 'Oops...', text: message });
+            NewSwal.fire({ icon: 'error', title: 'Oops...', text: message });
         });
 
         socket.on('passing time', async (data) => {

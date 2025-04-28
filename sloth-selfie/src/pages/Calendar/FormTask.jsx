@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
@@ -18,10 +18,10 @@ const FormTask = () => {
         const response = await apiService(`/task/${task._id}`, 'PUT', task);
 
         if (response.success) {
-            Swal.fire({ title: 'Task edited', icon: 'success', text: 'Task edited successfully', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Task edited', icon: 'success', text: 'Task edited successfully'});
             setTasks(tasks.map(tsk => tsk._id === task._id ? task : tsk));
             resetTask();
-        } else Swal.fire({ title: 'Error editing task', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Error editing task', icon: 'error', text: response.message});
 
         resetSelected();
     }
@@ -30,10 +30,10 @@ const FormTask = () => {
         setDeletePopUp(false);
         const response = await apiService(`/task/${task._id}`, 'DELETE');
         if (response.success) {
-            Swal.fire({ title: 'Task deleted', icon: 'success', text: 'Task deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Task deleted', icon: 'success', text: 'Task deleted successfully'});
             setTasks(tasks.filter(tsk => tsk._id !== task._id));
             resetTask();
-        } else Swal.fire({ title: 'Error deleting task', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Error deleting task', icon: 'error', text: response.message});
         resetSelected();
     }
 

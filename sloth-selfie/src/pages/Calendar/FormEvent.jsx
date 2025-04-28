@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
@@ -18,28 +18,28 @@ const FormEvent = () => {
         if (selected.edit) {
             const response = await apiService(`/event/${event._id}`, 'PUT', event);
             if (response){
-                Swal.fire({ title: 'Event edited', icon: 'success', text: 'Event edited successfully', customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Event edited', icon: 'success', text: 'Event edited successfully'});
                 setEvents(events.map(evt => evt._id === event._id ? event : evt));
                 resetEvent();
-            } else Swal.fire({ title: 'Error editing event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+            } else NewSwal.fire({ title: 'Error editing event', icon: 'error', text: response.message});
 
         } else if (selected.add) {
             const response = await apiService('/event', 'POST', event);
             if (response){
-                Swal.fire({ title: 'Event added', icon: 'success', text: 'Event added successfully', customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Event added', icon: 'success', text: 'Event added successfully'});
                 setEvents([...events, response]);
                 resetEvent();
-            } else Swal.fire({ title: 'Error adding event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+            } else NewSwal.fire({ title: 'Error adding event', icon: 'error', text: response.message});
         }
     }
 
     const deleteEvent = async () => {
         const response = await apiService(`/event/${event._id}`, 'DELETE', event);
         if (response){
-            Swal.fire({ title: 'Event deleted', icon: 'success', text: 'Event deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Event deleted', icon: 'success', text: 'Event deleted successfully'});
             setEvents(events.filter(evt => evt._id !== event._id));
             resetEvent();
-        } else Swal.fire({ title: 'Error deleting event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Error deleting event', icon: 'error', text: response.message});
     }
 
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement } from 'chart.js';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
 import { apiService } from '../services/apiService';
 
 ChartJS.register(
@@ -30,14 +30,14 @@ const StatsPomodoro = () => {
     const getStudiedTime = async () => {
         const response = await apiService('/pomodori/studied-time', 'GET');
         if (response.success) setTotalPomodoros(response.totalStudiedTime);
-        else Swal.fire({ icon: 'error', title: 'Error', text: 'Error getting studied time', customClass: { confirmButton: 'button-alert' } });
+        else NewSwal.fire({ icon: 'error', title: 'Error', text: 'Error getting studied time'});
 
     }
 
     const getTimePomodoriMonths = async () => {
         const response = await apiService('/pomodori/months', 'GET');
         if (response.success) setListTimeMonth(response.months);
-        else Swal.fire({ icon: 'error', title: 'Error', text: 'Error getting time per month', customClass: { confirmButton: 'button-alert' } });
+        else NewSwal.fire({ icon: 'error', title: 'Error', text: 'Error getting time per month'});
 
         console.log(response, 'listTimeMonth');
     }

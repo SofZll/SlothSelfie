@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 
 import { useCalendar } from '../../contexts/CalendarContext';

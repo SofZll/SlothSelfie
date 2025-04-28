@@ -56,7 +56,7 @@
 }
 
 .profile-info.show {
-    max-height: 350px;
+    max-height: 400px;
     padding: 10px 0;
     opacity: 1;
     border-radius: 10px;

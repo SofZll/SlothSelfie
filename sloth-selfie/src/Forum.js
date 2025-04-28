@@ -9,7 +9,7 @@ import gif from "./media/gif.svg";
 import maps from "./media/maps.svg";
 import camera from "./media/camera.svg";
 import { calculateTime, sortElements} from "./globalFunctions";
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 import MapPreview from "./mapPreview";
 
 function ForumFunction({ username }) {
@@ -259,7 +259,7 @@ function ForumFunction({ username }) {
     const handleNewContent = async (isComment = false) => {
         if (!isComment){
             if (newPostText.trim() === '') {
-                Swal.fire({
+                NewSwal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: 'Post cannot be empty',
@@ -306,7 +306,7 @@ function ForumFunction({ username }) {
             }
         } else {
             if (newCommentText.trim() === '') {
-                Swal.fire({
+                NewSwal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: 'Comment cannot be empty',

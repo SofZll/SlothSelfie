@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { generateTimeOptions } from '../../utils/utils';
 import { apiService } from '../../services/apiService';
@@ -58,35 +58,35 @@ const FormNoAvailability = () => {
 
     const handleSubmit = async () => {
         if (!availability.startDate) {
-            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start date is required', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Start date is required'});
             return;
         }
 
         if (availability.days) {
             if (!availability.endDate) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'End date is required', customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'End date is required'});
                 return;
             }
 
             if (new Date(availability.startDate) > new Date(availability.endDate)) {
                 console.log(availability.startDate, availability.endDate);
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start date must be before end date', customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Start date must be before end date'});
                 return;
             }
 
         } else {
             if (availability.startTime === '') {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start time is required', customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Start time is required'});
                 return;
             }
 
             if (!availability.duration) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Duration is required', customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Duration is required'});
                 return;
             }
 
             if (!availability.endDate > new Date(availability.startDate).setHours(23, 59, 59, 999)) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'End time must be before the next day', customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'End time must be before the next day'});
                 return;
             }
         }
@@ -99,12 +99,12 @@ const FormNoAvailability = () => {
             else if (availability.repeatFrequency === 'yearly') gap = 365;
 
             if (new Date(availability.endDate).getDate() >= new Date(availability.startDate).getDate() + gap) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'End date must be before the next occurrence', customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'End date must be before the next occurrence'});
                 return;
             }
 
             if (!availability.numberOfOccurrences || availability.numberOfOccurrences < 1) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Number of occurrences must be greater than 0', customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Number of occurrences must be greater than 0'});
                 return;
             }
         }
@@ -112,13 +112,13 @@ const FormNoAvailability = () => {
         const response = await apiService(`/no-availability/${selected.edit ? availability._id : ''}`, selected.edit ? 'PUT' : 'POST', availability);
 
         if (response.success) {
-            Swal.fire({ title: selected.edit ? 'Availability edited' : 'Availability added', icon: 'success', text: selected.edit ? 'Availability edited successfully' : 'Availability added successfully', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: selected.edit ? 'Availability edited' : 'Availability added', icon: 'success', text: selected.edit ? 'Availability edited successfully' : 'Availability added successfully'});
             if (selected.edit) {
                 if (availability.repeatFrequency === 'none') setAvailabilities(availabilities.map(a => a._id === availability._id ? response.noAvailability : a));
                 else setAvailabilities([...availabilities.filter(a => a.fatherId !== availability.fatherId), ...response.listNoAvailability]);
             }
             else setAvailabilities([...availabilities, ...(availability.repeatFrequency !== 'none' ? response.listNoAvailability : [response.noAvailability])]);
-        } else Swal.fire({ title: 'Error', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
 
         resetAvailability();
         resetSelected();
@@ -127,10 +127,10 @@ const FormNoAvailability = () => {
     const deleteAvailability = async () => {
         const response = await apiService(`/no-availability/${availability._id}`, 'DELETE');
         if (response.success) {
-            Swal.fire({ title: 'Availability deleted', icon: 'success', text: 'Availability deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Availability deleted', icon: 'success', text: 'Availability deleted successfully'});
             if (availability.repeatFrequency === 'none') setAvailabilities(availabilities.filter(a => a._id !== availability._id));
             else setAvailabilities(availabilities.filter(a => a.fatherId !== availability._id && a._id !== availability._id));
-        } else Swal.fire({ title: 'Error deleting availability', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Error deleting availability', icon: 'error', text: response.message});
         resetAvailability();
         resetSelected();
     }

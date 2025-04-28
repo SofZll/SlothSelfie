@@ -6,6 +6,7 @@ import MainRoutes from './routes/MainRoutes';
 import { AuthProvider } from './contexts/AuthContext';
 
 function NewApp() {
+    
     return (
         <AuthProvider>
             <MainRoutes />

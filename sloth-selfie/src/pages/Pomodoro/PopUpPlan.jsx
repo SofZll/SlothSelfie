@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { usePomodoro } from '../../contexts/PomodoroContext';
 import ShareInput from '../../components/ShareInput';
@@ -36,7 +36,7 @@ const PopUpPlan = () => {
 
     const addPomodoroCalendar = async () => {
         if (!pomodoro.title || !pomodoro.deadline || !pomodoro.studyTime || !pomodoro.breakTime || !pomodoro.cycles) {
-            Swal.fire({
+            NewSwal.fire({
                 title: 'Error',
                 icon: 'error',
                 text: 'Please fill all fields',
@@ -46,8 +46,8 @@ const PopUpPlan = () => {
         }
 
         const response = await apiService('/pomodoro/calendar', 'POST', pomodoro);
-        if (response.success) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully', customClass: { confirmButton: 'button-alert' } });
-        else Swal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro', customClass: { confirmButton: 'button-alert' } });
+        if (response.success) NewSwal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully'});
+        else NewSwal.fire({ icon: 'error', title: 'Error', text: 'Error adding pomodoro'});
 
         resetPopUp();
         resetPomodoro();
