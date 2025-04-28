@@ -5,7 +5,7 @@ import rehypeRaw from 'rehype-raw';
 
 import CopyButton from './CopyButton';
 import { Pen, Trash2, Layers2, ChevronDown, ChevronUp, Maximize2 } from 'lucide-react';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
 
 import { useNote } from '../contexts/NoteContext';
 import { apiService } from '../services/apiService';
@@ -37,9 +37,9 @@ const CardNote = ({ Note }) => {
         setDeletePopUp({show: false, note: null});
         const response = await apiService(`/note/${Note._id}`, 'DELETE');
         if (response.success) {
-            Swal.fire({ title: 'Note deleted', icon: 'success', text: 'Note deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Note deleted', icon: 'success', text: 'Note deleted successfully'});
             setNotes(notes.filter(n => n._id !== Note._id));
-        } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error deleting note', customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Error', icon: 'error', text: 'Error deleting note'});
     }
 
     const duplicateNote = async () => {
@@ -52,9 +52,9 @@ const CardNote = ({ Note }) => {
         const copyNote = { ...Note, _id: null, title: `${Note.title} (copy)`, tasks: copyTasks };
         const response = await apiService('/note', 'POST', copyNote);
         if (response.success) {
-            Swal.fire({ title: 'Note duplicated', icon: 'success', text: 'Note duplicated successfully', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Note duplicated', icon: 'success', text: 'Note duplicated successfully'});
             setNotes([...notes, response.note]);
-        } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error duplicating note', customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Error', icon: 'error', text: 'Error duplicating note'});
     }
 
     const openNote = () => {

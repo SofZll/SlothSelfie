@@ -65,7 +65,6 @@ const getActivities = async (req, res) => {
                 sharedWith: activity.sharedWith.map(sharedUser => sharedUser.username)
             };
         });
-        console.log('modified activities: ', modifiedActivities);
 
         res.status(200).json({ success: true, activities: modifiedActivities });
     } catch (error) {
@@ -190,8 +189,8 @@ async function exportActivity(req, res){
         res.setHeader('Content-Disposition', `attachment; filename="${activity.title}.ics"`);
         res.status(200).send(value);
     } catch (err) {
-    console.error(err);
-    res.status(500).send({ success: false, message: 'Error exporting activity' });
+        console.error(err);
+        res.status(500).send({ success: false, message: 'Error exporting activity' });
     }
 }
 

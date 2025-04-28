@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState }  from 'react';
 
 import { apiService } from '../services/apiService';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
 
 const PomodoroContext = createContext();
 
@@ -151,8 +151,8 @@ export const PomodoroProvider = ({ children }) => {
         setSettingsPomodoro({ studyTime, breakTime, cycles, additionalCycles: 0 });
         editTimeAnimation( pomodoro.isStudyTime ? studyTime : breakTime );
         const response = await apiService(`/pomodoro/${pomodoro._id}`, 'PUT', { studyTime, breakTime, cycles });
-        if (response.success) Swal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated', customClass: { confirmButton: 'button-alert' } });
-        else Swal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro settings', customClass: { confirmButton: 'button-alert' } });
+        if (response.success) NewSwal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated'});
+        else NewSwal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro settings'});
     }
 
     const skipTime = async () => {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
@@ -21,7 +21,7 @@ const FormActivity = () => {
 
     const handleSubmit = async () => {
         if (!activity.title) {
-            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Title is required', customClass: { confirmButton: 'button-alert' } });
+            NewNewSwal.fireire({ title: 'Warning', icon: 'warning', text: 'Title is required'});
             return;
         }
 
@@ -33,7 +33,7 @@ const FormActivity = () => {
                     if (notification._id) {
                         const response = await apiService(`/notification/${notification._id}`, 'PUT', notification);
                         if (response.success) return response.notification;
-                        else Swal.fire({ title: 'Error editing notification', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                        else NewNewSwal.fireire({ title: 'Error editing notification', icon: 'error', text: response.message});
                     } else {
                         const response = await apiService(`/notification`, 'POST', {
                             type: 'Activity',
@@ -43,26 +43,26 @@ const FormActivity = () => {
                         if (response.success) return response.notification;
                         else {
                             console.log('Error adding notification', response.message);
-                            Swal.fire({ title: 'Error adding notification', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                            NewNewSwal.fireire({ title: 'Error adding notification', icon: 'error', text: response.message});
                         }
                     }
                 });
 
                 await Promise.all(notificationPromises);
 
-                Swal.fire({ title: 'Activity edited', icon: 'success', text: 'Activity edited successfully', customClass: { confirmButton: 'button-alert' } });
+                NewNewSwal.fireire({ title: 'Activity edited', icon: 'success', text: 'Activity edited successfully'});
                 console.log('Activity edited', activity);
                 setActivities(activities.map(act => act._id === activity._id ? activity : act));
                 resetActivity();
                 setNotifications([]);
-            } else Swal.fire({ title: 'Error editing activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+            } else NewNewSwal.fireire({ title: 'Error editing activity', icon: 'error', text: response.message});
         } else {
             const response = await apiService(`/activity`, 'POST', activity);
             if (response.success){
-                Swal.fire({ title: 'Activity added', icon: 'success', text: 'Activity added successfully', customClass: { confirmButton: 'button-alert' } });
+                NewNewSwal.fireire({ title: 'Activity added', icon: 'success', text: 'Activity added successfully'});
                 setActivities([...activities, response.activity]);
                 resetActivity();
-            } else Swal.fire({ title: 'Error adding activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+            } else NewNewSwal.fireire({ title: 'Error adding activity', icon: 'error', text: response.message});
 
             const newActivity = response.activity;
 
@@ -73,7 +73,7 @@ const FormActivity = () => {
                     notifications: notifications
                 });
                 if (response.success) setNotifications([]);
-                else Swal.fire({ title: 'Error adding notifications', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                else NewNewSwal.fireire({ title: 'Error adding notifications', icon: 'error', text: response.message});
             } else {
                 console.log('No notifications to add');
             }
@@ -85,10 +85,10 @@ const FormActivity = () => {
         setDeletePopUp(false);
         const response = await apiService(`/activity/${activity._id}`, 'DELETE');
         if (response.success) {
-            Swal.fire({ title: 'Activity deleted', icon: 'success', text: 'Activity deleted successfully', customClass: { confirmButton: 'button-alert' } });
+            NewNewSwal.fireire({ title: 'Activity deleted', icon: 'success', text: 'Activity deleted successfully'});
             setActivities(activities.filter(act => act._id !== activity._id));
             resetActivity();
-        } else Swal.fire({ title: 'Error deleting activity', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        } else NewNewSwal.fireire({ title: 'Error deleting activity', icon: 'error', text: response.message});
         resetSelected();
 
         notifications.forEach(notification => {

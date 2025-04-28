@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BellPlus, X, ChevronDown } from 'lucide-react';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import '../../styles/NotificationInput.css';
 import { dateFromDate, timeFromDate } from '../../utils/utils';
@@ -37,7 +37,7 @@ const NotificationInput = ({ notifications, setNotifications }) => {
 
     const handleRemoveNotification = async (index) => {
         if (notifications[index]._id !== undefined) {
-            const result = await Swal.fire({
+            const result = await NewSwal.fire({
                 title: 'Are you sure?',
                 icon: 'warning',
                 showCancelButton: true,
@@ -49,8 +49,8 @@ const NotificationInput = ({ notifications, setNotifications }) => {
             if (!result.isConfirmed) return;
 
             const response = await apiService(`/notification/${notifications[index]._id}`, 'DELETE');
-            if (response.success) Swal.fire('Deleted!', 'Your notification has been deleted.', 'success');
-            else Swal.fire('Error!', 'There was an error deleting the notification.', 'error');
+            if (response.success) NewSwal.fire('Deleted!', 'Your notification has been deleted.', 'success');
+            else NewSwal.fire('Error!', 'There was an error deleting the notification.', 'error');
         }
         setNotifications(notifications.filter((_, i) => i !== index));
     };

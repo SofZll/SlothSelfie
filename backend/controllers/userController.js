@@ -121,8 +121,9 @@ const editProfile = async (req, res) => {
 
 // Get the profile info: FUNZIONA
 const getUserProfile = async (req, res) => {
+    let userId = req.params.userId;
+
     try {
-        let userId = req.params.userId;
         
         if (!userId || userId === 'undefined') {
             userId = req.session.userId;
@@ -197,16 +198,11 @@ const checkAuth = async (req, res) => {
 const getUserIdFromUsername = async (req, res) => {
     const { username } = req.params;
 
-    if (!username) {
-        return res.status(400).json({ success: false, message: 'Username is required' });
-    }
+    if (!username) return res.status(400).json({ success: false, message: 'Username is required' });
 
     try {
-        // find the user
         const user = await User.findOne({ username: username });
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         // Restituisci l'ID dell'utente
         res.status(200).json({ success: true, userId: user._id.toString() });

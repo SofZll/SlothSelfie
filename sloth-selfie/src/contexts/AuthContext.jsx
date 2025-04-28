@@ -1,5 +1,5 @@
 import React, { useState, useRef, createContext, useEffect } from 'react';
-import { toastInfo } from '../utils/toastUtils';
+import { toastInfo } from '../utils/swalUtils';
 
 import socket from '../services/socket/socket';
 import { apiService } from '../services/apiService';

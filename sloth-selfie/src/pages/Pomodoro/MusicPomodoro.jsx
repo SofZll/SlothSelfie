@@ -5,7 +5,7 @@ import { usePomodoro } from '../../contexts/PomodoroContext';
 import axios from 'axios';
 
 import { AudioLines, X } from 'lucide-react';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 const MusicPomodoro = () => {
 
@@ -41,7 +41,7 @@ const MusicPomodoro = () => {
                     const title = response.data.items[0].snippet.title;
                     setMusic({ ...music, link: `https://www.youtube.com/embed/${video}`, selected: true, search: false, url: '', title });
                 })
-                .catch(() => Swal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Youtube URL', customClass: { confirmButton: 'button-alert' } }));
+                .catch(() => NewSwal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Youtube URL'}));
             }
             else if (videoId[0] === 2) {
                 axios.get(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${videoId[1]}&key=${API_KEY}`)
@@ -50,9 +50,9 @@ const MusicPomodoro = () => {
                         const title = response.data.items[0].snippet.title;
                         setMusic({ ...music, link: `https://www.youtube.com/embed/${video}`, selected: true, search: false, url: '' , title });
                     })
-                    .catch(() => Swal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Youtube URL', customClass: { confirmButton: 'button-alert' } }));
-            } else Swal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Youtube URL', customClass: { confirmButton: 'button-alert' } });
-        } else Swal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Youtube URL', customClass: { confirmButton: 'button-alert' } });
+                    .catch(() => NewSwal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Youtube URL'}));
+            } else NewSwal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Youtube URL'});
+        } else NewSwal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Youtube URL'});
     }
 
     const getSpotifyToken = async () => {
@@ -109,7 +109,7 @@ const MusicPomodoro = () => {
         const trackId = extractSpotifyId(music.url);
 
         if (!trackId) {
-            return Swal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Spotify URL' });
+            return NewSwal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Spotify URL' });
         }
     
         let type = "";
@@ -135,7 +135,7 @@ const MusicPomodoro = () => {
                 type = "artist";
                 break;
             default:
-                return Swal.fire({ icon: 'error', title: 'Invalid Type' });
+                return NewSwal.fire({ icon: 'error', title: 'Invalid Type' });
         }
     
         try {
@@ -162,6 +162,8 @@ const MusicPomodoro = () => {
                 case "episode":
                     title = response.data.name;
                     break;
+                default:
+                    return NewSwal.fire({ icon: 'error', title: 'Invalid Type' });
             }
     
             setMusic({
@@ -175,7 +177,7 @@ const MusicPomodoro = () => {
     
         } catch (err) {
             console.error(err);
-            Swal.fire({ icon: 'error', title: 'Spotify Error', text: 'Failed to fetch content from Spotify' });
+            NewSwal.fire({ icon: 'error', title: 'Spotify Error', text: 'Failed to fetch content from Spotify' });
         }
     }
 
@@ -206,7 +208,8 @@ const MusicPomodoro = () => {
                             />
                         ) : (
                             <iframe 
-                                src={music.link} 
+                                src={music.link}
+                                title='Spotify player' 
                                 width='100%' height='152' frameborder='0'
                                 allowFullScreen 
                                 allow='autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture' 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 import { Download } from 'lucide-react';
 
 import SelectionCalendarLayout from '../../layouts/SelectionCalendarLayout';
@@ -46,7 +46,7 @@ const FormCalendar = () => {
             console.log('Imported events:', response);
             addImportedEvents(response.importedEvents);
     
-            Swal.fire({
+            NewSwal.fire({
                 title: 'Import success!',
                 icon: 'success',
                 text: 'Event imported successfully',
@@ -55,7 +55,7 @@ const FormCalendar = () => {
 
         } catch (err) {
             console.error('Error importing ICS:', err);
-            Swal.fire({
+            NewSwal.fire({
                 title: 'Error importing .ics',
                 icon: 'error',
                 text: 'Error importing .ics file',
@@ -72,7 +72,7 @@ const FormCalendar = () => {
         else if (selected.selection === 'task') path = `/task/${task._id}/export`;
 
         const response = await apiService(path, 'GET');
-        if (!response) Swal.fire({ title: 'Error exporting data', icon: 'error', text: 'Error exporting data', customClass: { confirmButton: 'button-alert' } });
+        if (!response) NewSwal.fire({ title: 'Error exporting data', icon: 'error', text: 'Error exporting data'});
         else {
 
             const a = document.createElement('a');
@@ -82,7 +82,7 @@ const FormCalendar = () => {
             else if (selected.selection === 'task') a.download = `${task.title}.ics`;
             a.click();
 
-            Swal.fire({ title: 'Export success!', icon: 'success', text: `${selected.selection} exported successfully, a mail with .ics attachment will be sent to you`, customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Export success!', icon: 'success', text: `${selected.selection} exported successfully, a mail with .ics attachment will be sent to you`});
         }
 
     }

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authSloth from '../assets/icons/authSloth.png';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
 
 import { validateLogin, validateRegistration } from '../utils/validation.js'
 import AuthLayout from '../layouts/AuthLayout';
@@ -29,7 +29,7 @@ function getCursorPosition(event) {
 }
 
 const AuthPage = ({ formType = 'login' }) => {
-    const { user, fetchUserData } = useContext(AuthContext);
+    const { fetchUserData } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [currentFormType, setcurrentFormType] = useState(formType);
@@ -51,7 +51,7 @@ const AuthPage = ({ formType = 'login' }) => {
                 navigate('/home');
             } else {
                 console.error('Error logging in:', response);
-                Swal.fire({ title: 'Login failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Login failed', icon: 'error', text: response.message});
             }
         } else if (currentFormType === 'register' && validateRegistration(userInfo.name, userInfo.username, userInfo.email, userInfo.password)) {
             const response = await apiService('/user/register', 'POST', userInfo);
@@ -61,9 +61,9 @@ const AuthPage = ({ formType = 'login' }) => {
                 navigate('/login');
             } else {
                 console.error('Error registering:', response);
-                Swal.fire({ title: 'Registration failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Registration failed', icon: 'error', text: response.message});
             }
-        } else Swal.fire({ title: 'Invalid input', icon: 'error', text: 'Please fill in all fields', customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Invalid input', icon: 'error', text: 'Please fill in all fields'});
     }
 
     return (

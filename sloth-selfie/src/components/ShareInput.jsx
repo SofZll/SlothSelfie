@@ -1,18 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import '../styles/ShareInput.css';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
+
+import { apiService } from '../services/apiService';
 
 const ShareInput = ({ receivers, setReceivers }) => {
     const [receiverInput, setReceiverInput] = useState('');
     const [removingIndex, setRemovingIndex] = useState(null);
 
-    const addReceiver = () => {
+    const addReceiver = async () => {
         if (receiverInput.trim() !== '') {
             if (!receivers.includes(receiverInput.trim())) {
+                const response = await apiService(`/user/${receiverInput.trim()}`, 'GET');
+                if (!response.success) {
+                    NewSwal.fire('Utente non trovato', '', 'warning');
+                    return;
+                }
+
                 setReceivers([...receivers, receiverInput.trim()]);
                 setReceiverInput('');
             } else {
-                Swal.fire('Utente già inserito', '', 'warning');
+                NewSwal.fire('Utente già inserito', '', 'warning');
             }
         }
     };
@@ -30,14 +38,6 @@ const ShareInput = ({ receivers, setReceivers }) => {
     const enterKey = (e) => {
         if (e.key === 'Enter' && e.target.id === 'receivers') addReceiver();
     };
-
-    useEffect(() => {
-        console.log('Current receivers:', receivers);
-        console.log('Type of receivers:', Array.isArray(receivers) ? 'array' : typeof receivers);
-        if (receivers.some(r => r === undefined)) {
-            console.warn('Undefined values detected in receivers!');
-        }
-    }, [receivers]);
 
     return (
         <div className='container my-2 p-0 justify-content-start'>

@@ -8,7 +8,7 @@ import Menu from './Menu';
 import TimeMachine from './TimeMachine';
 import socket from './socket';
 import 'leaflet/dist/leaflet.css';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 import { ActivityProvider } from './ActivityContext';
 import { useMediaQuery } from 'react-responsive';
 import MainRoutes from './routes/MainRoutes';
@@ -70,7 +70,7 @@ function App() {
 
       notification.onclick = () => {
         console.log('Notification clicked');
-        Swal.fire({
+        NewSwal.fire({
           title: newNotif.title,
           text: newNotif.body,
           icon: 'info',
