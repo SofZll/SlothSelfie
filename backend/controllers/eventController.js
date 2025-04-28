@@ -279,18 +279,32 @@ const updateEvent = async (req, res) => {
 };
 
 const deleteEvent = async (req, res) => {
+  const userName = req.session.username;
+  const user = await User.findOne({ username: userName });
   const {eventId} = req.params;
   
   try {
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
     
-    if (repeatFrequency === 'none') await Event.findByIdAndDelete(eventId);
-    else await Event.deleteMany({ fatherId: event.fatherId });
+    if (event.user.toString() === user._id.toString()) {
+      if (repeatFrequency === 'none') await event.remove();
+      else await Event.deleteMany({ fatherId: event.fatherId });
+    } else {
+      if (repeatFrequency === 'none') {
+        event.sharedWith = event.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+        await event.save();
+      } else {
+        const events = await Event.find({ fatherId: event.fatherId });
+        for (let i = 0; i < events.length; i++) {
+          events[i].sharedWith = events[i].sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+          await events[i].save();
+        }
+      }
+    }
 
     res.status(200).json({ success: true, message: "Event deleted successfully" });
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error deleting event:', error);
     res.status(500).json({ success: false, message: error.message });
   }

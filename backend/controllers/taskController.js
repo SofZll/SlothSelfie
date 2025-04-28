@@ -92,17 +92,38 @@ const deleteTask = async (req, res) => {
 };
 
 //function to delete user from share with
-const deleteUserFromShareWith = async (userId, taskId) => {
+const deleteUserFromShareWith = async (userId, tasks) => {
     try {
-        for (let i = 0; i < taskId.length; i++) {
-            const task = await Task.findByIdAndUpdate(taskId[i], { $pull: { sharedWith: userId } });
+        for (let i = 0; i < tasks.length; i++) {
+            const task = await Task.findById(tasks[i]._id);
             if (!task) {
+                console.error('Task not found:', tasks[i]._id, task, tasks[i]);
+                return false;
+            }
+
+            task.sharedWith = task.sharedWith.filter(user => user.toString() !== userId.toString());
+            const updatedTask = await task.save();
+            if (!updatedTask) return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error deleting user from shared tasks:', error);
+        return false;
+    }
+}
+
+//function called from note to delete tasks
+const deleteTasks = async (tasks) => {
+    try {
+        for (let i = 0; i < tasks.length; i++) {
+            const deletedTask = await Task.findByIdAndDelete(tasks[i]._id);
+            if (!deletedTask) {
                 return false;
             }
         }
         return true;
     } catch (error) {
-        console.error('Error deleting user from share with:', error);
+        console.error('Error deleting tasks:', error);
         return false;
     }
 }
@@ -124,22 +145,6 @@ const addTasks = async (tasks, user, sharedWith) => {
         return tasksArray;
     } catch (error) {
         console.error('Error creating tasks:', error);
-        return false;
-    }
-}
-
-//function called from note to delete tasks
-const deleteTasks = async (tasks) => {
-    try {
-        for (let i = 0; i < tasks.length; i++) {
-            const deletedTask = await Task.findByIdAndDelete(tasks[i]._id);
-            if (!deletedTask) {
-                return false;
-            }
-        }
-        return true;
-    } catch (error) {
-        console.error('Error deleting tasks:', error);
         return false;
     }
 }
