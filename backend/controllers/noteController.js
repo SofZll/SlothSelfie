@@ -1,7 +1,7 @@
 const Note = require('../models/noteModel');
 const User = require('../models/userModel');
 
-const { addTasks, editTasks, deleteTasks } = require('./taskController');
+const { addTasks, editTasks, deleteTasks, deleteUserFromShareWith } = require('./taskController');
 const { findUserId } = require('../utils/utils');
 const { getCurrentNow } = require('../services/timeMachineService');
 
@@ -144,6 +144,8 @@ const updateNote = async (req, res) => {
 // Delete a note
 const deleteNote = async (req, res) => {
     const { noteId } = req.params;
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
         
     try {
         const note = await Note.findById(noteId);
@@ -151,12 +153,26 @@ const deleteNote = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Note not found' });
         }
 
-        if (note.tasks.length > 0) {
-            const response = await deleteTasks(note.tasks);
-            if (!response) return res.status(500).json({ success: false, message: 'Error deleting tasks' });
-        }
+        if (note.user._id.toString() !== user._id.toString() && note.noteAccess === 'shared') {
 
-        await Note.findByIdAndDelete(noteId);
+            note.sharedWith = note.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+
+            if (note.tasks.length > 0) {
+                const response = await deleteUserFromShareWith(user._id, note.tasks);
+                if (!response) return res.status(500).json({ success: false, message: 'Error deleting user from task share with' });
+            }
+            await note.save();
+        } else if (note.user._id.toString() !== user._id.toString() && note.noteAccess === 'public') {
+            return res.status(403).json({ success: false, message: 'You are not authorized to delete this note' });
+        } else {
+
+            if (note.tasks.length > 0) {
+                const response = await deleteTasks(note.tasks);
+                if (!response) return res.status(500).json({ success: false, message: 'Error deleting tasks' });
+            }
+
+            await Note.findByIdAndDelete(noteId);
+        }
         res.status(200).json({ success: true, message: 'Note deleted successfully' });
     } catch (error) {
         console.error('Error deleting note:', error);

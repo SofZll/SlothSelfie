@@ -24,6 +24,7 @@ const noteSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: 'public',
+        enum: ['public', 'private', 'shared']
     },
     sharedWith: [{
         type: mongoose.Schema.Types.ObjectId,

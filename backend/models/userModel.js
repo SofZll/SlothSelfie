@@ -47,12 +47,17 @@ const userSchema = new mongoose.Schema({
     },
 
     workingHours: {
-        start: { type: String, required: true, default: '09:00' }, // HH:MM
-        end: { type: String, required: true, default: '17:00' }, // HH:MM
+        start: { type: String, required: true, default: '09:00' },
+        end: { type: String, required: true, default: '17:00' },
+    },
+
+    dayHours: {
+        start: { type: String, required: true, default: '08:00' },
+        end: { type: String, required: true, default: '23:59' },
     },
 
     freeDays: {
-        type: [String], // Array of strings declaring free days in the week
+        type: [String],
         enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         required: true,
         default: ['Saturday', 'Sunday'],

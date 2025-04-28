@@ -66,16 +66,21 @@ const ProfilePage = () => {
         <MainLayout>
             <div className='profile d-flex align-items-center justify-content-center flex-column w-100 p-0'>
                 <div className='profile-container d-flex align-items-center justify-content-center flex-column m-2 p-3'>
-                    <div>
-                        <h2>{user.username}</h2>
-                        <SettingsButton color='dark' />
+                    <div className='d-flex justify-content-center position-relative w-100'>
+                        <h2 className='h-auto py-2 mb-3'>{user.username}</h2>
+
+                        <div className='d-flex position-absolute end-0 top-0'>
+                            <SettingsButton dark={true} />
+                        </div>
                     </div>
+
                     <div className='profile-image d-flex align-items-center justify-content-center m-auto overflow-hidden'>
                         {user.profile_image && (
                             <img src={user.profile_image} alt='profile-img' onClick={handleClickImage}/>
                         )}
                         <input type='file' id='file-input' style={{display: 'none'}} onChange={handleEditImage}/>
                     </div>
+
                     <button className='button-clean white mt-3' onClick={() => setShowProfile(!showProfile)}>
                         {showProfile ? 'Hide': 'Expands'}
                     </button>

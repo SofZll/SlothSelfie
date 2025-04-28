@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { getPomodori, getPlannedPomodori, addPomodoro, newPomodoro, editPomodoro, deletePomodoro, updateCycles, addAdditionalCycle, getPomodoroById, totalStudiedTime, timePomodoriMonths } = require('../controllers/pomodoroController');
+const { getPomodori, getPlannedPomodori, getLastsPomodori, addPomodoro, newPomodoro, editPomodoro, deletePomodoro, updateCycles, addAdditionalCycle, getPomodoroById, totalStudiedTime, timePomodoriMonths } = require('../controllers/pomodoroController');
 const router = express.Router();
 
 // Pomodoro endpoints
@@ -8,8 +8,9 @@ router.get('/pomodori', getPomodori);
 router.get('/pomodori/todo', getPlannedPomodori);
 router.get('/pomodori/studied-time', totalStudiedTime);
 router.get('/pomodori/months', timePomodoriMonths);
+router.get('/pomodori/lasts', getLastsPomodori);
 
-router.get('/pomodori/:pomodoroId', getPomodoroById);
+router.get('/pomodoro/:pomodoroId', getPomodoroById);
 
 router.post('/pomodoro', addPomodoro);
 router.post('/pomodoro/calendar', newPomodoro);

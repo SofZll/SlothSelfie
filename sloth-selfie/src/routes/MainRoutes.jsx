@@ -41,7 +41,7 @@ const MainRoutes = () => {
                             element={
                                 <ProtectedRoute >
                                     <Routes>
-
+                                        <Route path='/pomodoro/:pomodoroId' element={<Pomodoro />} />
                                         <Route path='/pomodoro' element={<Pomodoro />} />
                                         <Route path='/projects' element={<Projects />} />
                                         <Route path='/calendar' element={<Calendar />} />

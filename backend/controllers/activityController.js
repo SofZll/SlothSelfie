@@ -136,11 +136,19 @@ const updateActivity = async (req, res) => {
 
 // Deleting an activity
 const deleteActivity = async (req, res) => {
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
     const {activityId} = req.params;
 
     try {
-        const activity = await Activity.findByIdAndDelete(activityId);
+        const activity = await Activity.findById(activityId);
         if (!activity) return res.status(404).json({ success: false, message: "Activity not found" });
+
+
+        if (activity.user.toString() !== user._id.toString()) {
+            activity.sharedWith = activity.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+            await activity.save();
+        } else await activity.remove();
 
         res.status(200).json({ success: true, message: "Activity deleted successfully" });
     } catch (error) {

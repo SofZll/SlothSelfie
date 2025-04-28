@@ -18,7 +18,7 @@ const CardNote = ({ Note }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const previewContent = Note.content.length > 100 ? Note.content.substring(0, 100) : Note.content;
 
-    const { selected, setSelected, setNote, notes, setNotes, deletePopUp, setDeletePopUp } = useNote();
+    const { selected, setSelected, note, setNote, notes, setNotes, deletePopUp, setDeletePopUp } = useNote();
     const navigate = useNavigate();
 
     const selectNote = () => {
@@ -34,12 +34,13 @@ const CardNote = ({ Note }) => {
     }
 
     const deleteNote = async () => {
-        setDeletePopUp({show: false, note: null});
-        const response = await apiService(`/note/${Note._id}`, 'DELETE');
+        const response = await apiService(`/note/${deletePopUp.note._id}`, 'DELETE');
         if (response.success) {
             NewSwal.fire({ title: 'Note deleted', icon: 'success', text: 'Note deleted successfully'});
-            setNotes(notes.filter(n => n._id !== Note._id));
-        } else NewSwal.fire({ title: 'Error', icon: 'error', text: 'Error deleting note'});
+            setNotes(notes.filter(n => n._id !== deletePopUp.note._id));
+        } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
+
+        setDeletePopUp({show: false, note: null});
     }
 
     const duplicateNote = async () => {
@@ -167,7 +168,7 @@ const CardNote = ({ Note }) => {
             </div>
 
             {deletePopUp.show && deletePopUp.note && (
-                <DeletePopUpLayout handleDelete={() => deleteNote()} resetPopUp={() => setDeletePopUp({show: false, note: null})}>
+                <DeletePopUpLayout handleDelete={() => deleteNote()} handleClose={() => setDeletePopUp({show: false, note: null})}>
                     <div className='d-flex flex-column text-start'>
                         Are you sure you want to delete this note?
                     </div>

@@ -15,7 +15,7 @@ const CardActivity = ({ Activity, smallView }) => {
     }
 
     const selectActivity = () => {
-        setActivity(Activity);
+        setActivity({ ...Activity, sharedWith: Activity.sharedWith.map(user => user.username)});
         setSelected({ selection: 'activity', edit: true, add: false, popup: true });
         fetchNotifications({ elementId: Activity._id });
     }
@@ -52,7 +52,7 @@ const CardActivity = ({ Activity, smallView }) => {
             <div className='row w-100 d-flex align-items-center'>
                 {Activity.response !== 'pending' && (
                     <div className='col col-6 d-flex justify-content-center'>
-                        <button type='button' className={`btn btn-outline-secondary ${Activity.completed && 'btn-active'}`} onClick={() => markComplete()}>
+                        <button type='button' className={`btn btn-outline-secondary ${Activity.completed && 'btn-active'}`} disabled={Activity.project} onClick={() => markComplete()}>
                             {Activity.completed ? 'Completed' : 'to Complete'}
                         </button>
                     </div>
@@ -78,10 +78,12 @@ const CardActivity = ({ Activity, smallView }) => {
                     </div>
                 </div>
             )}
-            
-            <button className='btn position-absolute top-0 end-0 p-0' onClick={() => selectActivity()}>
-                <Pen size={20} color='#244476' strokeWidth={1.25} />
-            </button>
+
+            {!Activity.project && Activity.response !== 'pending' && (
+                <button className='btn position-absolute top-0 end-0 p-0' onClick={() => selectActivity()}>
+                    <Pen size={20} color='#244476' strokeWidth={1.25} />
+                </button>
+            )}
         </div>
     )
 }

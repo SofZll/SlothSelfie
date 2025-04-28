@@ -151,8 +151,6 @@ export const CalendarProvider = ({ children }) => {
         });
     }
 
-    const [plannedPomodori, setPlannedPomodori] = useState([]);
-
     const [notifications, setNotifications] = useState([]);
 
     const fetchNotifications = async ({ elementId }) => {
@@ -178,8 +176,7 @@ export const CalendarProvider = ({ children }) => {
             value={{ activity, setActivity, activities, setActivities, resetActivity,
                 event, setEvent, events, setEvents, addImportedEvents, resetEvent,
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
-                plannedPomodori, setPlannedPomodori,
-                selected, setSelected, select, back, resetSelected, notifications, setNotifications, fetchNotifications, conditionsMet, setConditionsMet, }}>
+                selected, setSelected, select, back, resetSelected, notifications, setNotifications, fetchNotifications, conditionsMet, setConditionsMet }}>
 
             {children}
             
