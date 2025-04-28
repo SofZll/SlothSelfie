@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Swal from 'sweetalert2';
 
@@ -11,7 +11,7 @@ import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 const FormTask = () => {
 
     const { task, setTask, tasks, setTasks, resetTask } = useTask();
-    const { resetSelected } = useCalendar();
+    const { resetSelected, setConditionsMet, conditionsMet } = useCalendar();
     const [deletePopUp, setDeletePopUp] = useState(false);
 
     const handleSubmit = async () => {
@@ -36,6 +36,11 @@ const FormTask = () => {
         } else Swal.fire({ title: 'Error deleting task', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
         resetSelected();
     }
+
+    useEffect(() => {
+        if (task.title) setConditionsMet(true);
+        else setConditionsMet(false);
+    }, [task.title]);
 
 
     return (
@@ -78,7 +83,7 @@ const FormTask = () => {
             </div>
             
             <div className='d-flex align-items-center justify-content-center'>
-                <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>edit</button>
+                <button type='button' className='btn-main rounded shadow-sm mt-4'  disabled={!conditionsMet} onClick={() => handleSubmit()}>edit</button>
                 <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
             </div>
 

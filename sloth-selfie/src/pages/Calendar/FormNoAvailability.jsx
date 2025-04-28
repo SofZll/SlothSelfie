@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Swal from 'sweetalert2';
 
@@ -10,7 +10,7 @@ import { useCalendar } from '../../contexts/CalendarContext';
 
 const FormNoAvailability = () => {
 
-    const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, resetSelected } = useCalendar();
+    const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, resetSelected, setConditionsMet, conditionsMet } = useCalendar();
     const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setStartDate = (date) => {
@@ -57,40 +57,14 @@ const FormNoAvailability = () => {
 
 
     const handleSubmit = async () => {
-        if (!availability.startDate) {
-            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start date is required', customClass: { confirmButton: 'button-alert' } });
-            return;
-        }
-
-        if (availability.days) {
-            if (!availability.endDate) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'End date is required', customClass: { confirmButton: 'button-alert' } });
-                return;
-            }
-
-            if (new Date(availability.startDate) > new Date(availability.endDate)) {
-                console.log(availability.startDate, availability.endDate);
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start date must be before end date', customClass: { confirmButton: 'button-alert' } });
-                return;
-            }
-
-        } else {
-            if (availability.startTime === '') {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Start time is required', customClass: { confirmButton: 'button-alert' } });
-                return;
-            }
-
-            if (!availability.duration) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Duration is required', customClass: { confirmButton: 'button-alert' } });
-                return;
-            }
+        
+        if (!availability.days) {
 
             if (!availability.endDate > new Date(availability.startDate).setHours(23, 59, 59, 999)) {
                 Swal.fire({ title: 'Warning', icon: 'warning', text: 'End time must be before the next day', customClass: { confirmButton: 'button-alert' } });
                 return;
             }
         }
-
 
         if (availability.repeatFrequency !== 'none') {
             let gap = 1;
@@ -100,11 +74,6 @@ const FormNoAvailability = () => {
 
             if (new Date(availability.endDate).getDate() >= new Date(availability.startDate).getDate() + gap) {
                 Swal.fire({ title: 'Warning', icon: 'warning', text: 'End date must be before the next occurrence', customClass: { confirmButton: 'button-alert' } });
-                return;
-            }
-
-            if (!availability.numberOfOccurrences || availability.numberOfOccurrences < 1) {
-                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Number of occurrences must be greater than 0', customClass: { confirmButton: 'button-alert' } });
                 return;
             }
         }
@@ -134,6 +103,20 @@ const FormNoAvailability = () => {
         resetAvailability();
         resetSelected();
     }
+
+    useEffect(() => {
+        if (!availability.startDate || !availability.endDate) {
+            setConditionsMet(false);
+        }else if (!availability.days && (!availability.startTime || !availability.duration)) {
+            setConditionsMet(false);
+        } else if (availability.startDate > availability.endDate) {
+            setConditionsMet(false);
+        } else if (availability.repeatFrequency !== 'none' && (!availability.numberOfOccurrences || availability.numberOfOccurrences < 1)) {
+            setConditionsMet(false);
+        } else {
+            setConditionsMet(true);
+        }
+    }, [availability.startDate, availability.endDate, availability.repeatFrequency, availability.numberOfOccurrences]);
 
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden'>
@@ -218,7 +201,7 @@ const FormNoAvailability = () => {
             </div>
 
             <div className='d-flex align-items-center justify-content-center'>
-                <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                <button type='button' className='btn-main rounded shadow-sm mt-4'  disabled={!conditionsMet} onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                 {selected.edit && (
                     <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
                 )}
