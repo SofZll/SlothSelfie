@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 
 import Swal from 'sweetalert2';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
+import { AuthContext } from '../../contexts/AuthContext';
 import { generateTimeOptions } from '../../utils/utils';
 import ShareInput from '../../components/ShareInput';
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
@@ -11,26 +12,146 @@ import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormEvent = () => {
     
-    const { event, setEvent, events, setEvents, resetEvent, selected, notifications, setNotifications} = useCalendar();
+    const { event, setEvent, events, setEvents, resetEvent, selected, resetSelected, notifications, setNotifications} = useCalendar();
     const [deletePopUp, setDeletePopUp] = useState(false);
+    const { user } = useContext(AuthContext);
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    const calcStartDate = (date, allDay, time) => {
+        if (date === '') return null
+
+        const startDate = new Date(date);
+
+        const weekday = weekdays[startDate.getDay()];
+        const isFreeDay = user.freeDays.includes(weekday);
+        if (isFreeDay && event.type === 'work') Swal.fire({ title: 'Warning', icon: 'warning', text: 'Selected date is a free day', customClass: { confirmButton: 'button-alert' } });
+
+        if (allDay) {
+            if (event.type === 'work') startDate.setHours(user.workingHours.start.split(':')[0], user.workingHours.start.split(':')[1]);
+            else startDate.setHours(user.dayHours.start.split(':')[0], user.dayHours.start.split(':')[1]);
+        } else if (time !== '') {
+            startDate.setHours(event.time.split(':')[0], event.time.split(':')[1]);
+            if (event.type === 'work' && startDate < new Date(date).setHours(user.workingHours.start.split(':')[0], user.workingHours.start.split(':')[1])) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Event start time is before working hours', customClass: { confirmButton: 'button-alert' } });
+            } else if (startDate < new Date(date).setHours(user.dayHours.start.split(':')[0], user.dayHours.start.split(':')[1])) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Event start time is before day hours', customClass: { confirmButton: 'button-alert' } });
+            }
+        }
+        return startDate;
+    }
+
+    const calcEndDate = (start, duration, allDay) => {
+
+        const endDate = new Date(start);
+        if (allDay) {
+            endDate.setDate(endDate.getDate() + parseInt(duration));
+            if (event.type === 'work') endDate.setHours(user.workingHours.end.split(':')[0], user.workingHours.end.split(':')[1]);
+            else endDate.setHours(user.dayHours.end.split(':')[0], user.dayHours.end.split(':')[1]);
+        } else {
+            endDate.setHours(endDate.getHours() + parseInt(duration));
+            if (event.type === 'work' && endDate > new Date(start).setHours(user.workingHours.end.split(':')[0], user.workingHours.end.split(':')[1])) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Event end time is after working hours', customClass: { confirmButton: 'button-alert' } });
+            } else if (endDate > new Date(start).setHours(user.dayHours.end.split(':')[0], user.dayHours.end.split(':')[1])) {
+                Swal.fire({ title: 'Warning', icon: 'warning', text: 'Event end time is after day hours', customClass: { confirmButton: 'button-alert' } });
+            }
+        }
+    }
+
+
+    const setStartDate = (date) => {
+        
+        setEvent({ ...event, startDate: calcStartDate(date, event.allDay, event.time) });
+    }
+
+    const setEndDate = (date) => {
+        if (date === '') {
+            setEvent({ ...event, endDate: null });
+            return;
+        } else if (!event.startDate) {
+            setEvent({ ...event, duration: parseInt(date) });
+            return;
+        }
+        setEvent({ ...event, endDate: calcEndDate(event.start, date, event.allDay), duration: parseInt(date) });
+    }
+
+    const setStartTime = (time) => {
+        if (time === '') {
+            setEvent({ ...event, time: '' });
+            return;
+        } else if (!event.startDate) {
+            calcStartDate(new Date(), event.allDay, time);
+            setEvent({ ...event, time });
+            return;
+        }
+        if (event.duration !== null) setEvent({...event, time, startDate: calcStartDate(event.startDate, event.allDay, time), endDate: calcEndDate(event.startDate, event.duration, event.allDay)});
+        else setEvent({ ...event, time, startDate: calcStartDate(event.startDate, event.allDay, time), endDate: calcEndDate(event.startDate, event.duration, event.allDay) });
+    }
+
+    const setAllDay = (allDay) => {
+        if (!event.startDate) setEvent({ ...event, allDay });
+        else if (event.startDate === null) setEvent({ ...event, allDay });
+        else setEvent({ ...event, allDay, startDate: calcStartDate(event.startDate, allDay, event.time), endDate: calcEndDate(event.startDate, event.duration, allDay) });
+    }
 
     const handleSubmit = async () => {
-        if (selected.edit) {
-            const response = await apiService(`/event/${event._id}`, 'PUT', event);
-            if (response){
-                Swal.fire({ title: 'Event edited', icon: 'success', text: 'Event edited successfully', customClass: { confirmButton: 'button-alert' } });
-                setEvents(events.map(evt => evt._id === event._id ? event : evt));
-                resetEvent();
-            } else Swal.fire({ title: 'Error editing event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
-
-        } else if (selected.add) {
-            const response = await apiService('/event', 'POST', event);
-            if (response){
-                Swal.fire({ title: 'Event added', icon: 'success', text: 'Event added successfully', customClass: { confirmButton: 'button-alert' } });
-                setEvents([...events, response]);
-                resetEvent();
-            } else Swal.fire({ title: 'Error adding event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        if (event.title === '') {
+            Swal.fire({ title: 'Error', icon: 'error', text: 'Title is required', customClass: { confirmButton: 'button-alert' } });
+            return;
         }
+        if (event.startDate === null) {
+            Swal.fire({ title: 'Error', icon: 'error', text: 'Start date is required', customClass: { confirmButton: 'button-alert' } });
+            return;
+        }
+        if (event.endDate === null) {
+            Swal.fire({ title: 'Error', icon: 'error', text: 'End date is required', customClass: { confirmButton: 'button-alert' } });
+            return;
+        }
+        if (event.duration === null) {
+            Swal.fire({ title: 'Error', icon: 'error', text: 'Duration is required', customClass: { confirmButton: 'button-alert' } });
+            return;
+        }
+        if (event.duration > 1) {
+            Swal.fire({ title: 'Error', icon: 'error', text: `Duration must be at least 1 ${event.allDay ? 'day' : 'hour'}`, customClass: { confirmButton: 'button-alert' } });
+            return;
+        }
+        if (!event.allDay && event.time === '') {
+            Swal.fire({ title: 'Error', icon: 'error', text: 'Time is required', customClass: { confirmButton: 'button-alert' } });
+            return;
+        }
+
+        if (event.repeatFrequency !== 'none') {
+            if (event.repeatMode === 'ntimes' && event.repeatTimes <= 0) {
+                Swal.fire({ title: 'Error', icon: 'error', text: 'Repeat times must be greater than 0', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+            if (event.repeatMode === 'until' && event.repeatEndDate === null) {
+                Swal.fire({ title: 'Error', icon: 'error', text: 'Repeat end date is required', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+            if (new Date(event.repeatEndDate) < new Date(event.startDate)) {
+                Swal.fire({ title: 'Error', icon: 'error', text: 'Repeat end date must be after start date', customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+
+            let gap = 1;
+            if (event.repeatFrequency === 'weekly') gap = 7;
+            else if (event.repeatFrequency === 'monthly') gap = 30;
+            else if (event.repeatFrequency === 'yearly') gap = 365;
+
+            if (new Date(event.repeatEndDate) - new Date(event.startDate) < gap * 24 * 60 * 60 * 1000) {
+                Swal.fire({ title: 'Error', icon: 'error', text: `Repeat end date must be at least ${gap} days after start date`, customClass: { confirmButton: 'button-alert' } });
+                return;
+            }
+        }
+
+        const response = await apiService(`/event/${selected.edit ? event._id : ''}`, selected.edit ? 'PUT' : 'POST', event);
+        if (response) {
+            Swal.fire({ title: selected.edit ? 'Event updated' : 'Event created', icon: 'success', text: selected.edit ? 'Event updated successfully' : 'Event created successfully', customClass: { confirmButton: 'button-alert' } });
+            if (event.repeatFrequency === 'none') setEvents(events.map(evt => evt._id === event._id ? response.event : evt));
+            else setEvents([...events.filter(evt => evt.fatherId !== response.events[0].fatherId), ...response.events]);
+        } else Swal.fire({ title: 'Error saving event', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+        resetEvent();
+        resetSelected();
     }
 
     const deleteEvent = async () => {
@@ -44,7 +165,7 @@ const FormEvent = () => {
 
 
     return (
-        <div className='d-flex flex-column w-100'>
+        <div className='d-flex flex-column w-100 overflow-x-hidden'>
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>
@@ -75,9 +196,9 @@ const FormEvent = () => {
                 <div className='col-6'>
                     <label htmlFor='date' className='form-label'>Date</label>
                     <input type='Date' className='form-control' id='date'
-                    value={new Date(event.startDate).toISOString().split('T')[0]}
+                    value={event.startDate ? new Date(event.startDate).toISOString().split('T')[0] : ''}
                     disabled={event.isInProject}
-                    onChange={(e) => setEvent({...event, startDate: e.target.value})} 
+                    onChange={(e) => setStartDate(e.target.value)} 
                     required />
                 </div>
 
@@ -86,7 +207,7 @@ const FormEvent = () => {
                         className='form-check-input' type='checkbox' id='allDay'
                         checked={event.allDay}
                         disabled={event.isInProject}
-                        onChange={(e) => setEvent({...event, allDay: e.target.checked})} />
+                        onChange={(e) => setAllDay(e.target.checked)} />
                     <label className='form-check-label' htmlFor='allDay'>All Day</label>
                 </div>
             </div>
@@ -102,13 +223,13 @@ const FormEvent = () => {
                             placeholder='Event time'
                             value={event.time}
                             disabled={event.isInProject}
-                            onChange={(e) => setEvent({...event, time: e.target.value})}
+                            onChange={(e) => setStartTime(e.target.value)}
                             required />
                         ) : (
                             <select className='form-select' id='time'
                             value={event.time}
                             disabled={event.isInProject}
-                            onChange={(e) => setEvent({...event, time: e.target.value})} required>
+                            onChange={(e) => setStartTime(e.target.value)} required>
                                 {generateTimeOptions().map(option => (
                                     <option key={option.value} value={option.value}>{option.label}</option>
                                 ))}
@@ -136,7 +257,7 @@ const FormEvent = () => {
                     min={0}
                     value={event.duration}
                     disabled={event.isInProject}
-                    onChange={(e) => setEvent({...event, duration: e.target.value})} 
+                    onChange={(e) => setEndDate(e.target.value)}
                     required />
                 </div>
             </div>
@@ -235,6 +356,7 @@ const FormEvent = () => {
                     </button>
                 )}
             </div>
+
             {deletePopUp && (
                 <DeletePopUpLayout handleDelete={() => deleteEvent()} handleClose={() => setDeletePopUp(false)}>
                     <div className='d-flex flex-column text-start'>

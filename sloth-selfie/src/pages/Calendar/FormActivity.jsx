@@ -96,7 +96,7 @@ const FormActivity = () => {
     }
 
     return (
-        <div className='d-flex flex-column w-100'>
+        <div className='d-flex flex-column w-100 overflow-x-hidden'>
             <div className='row py-2 '>
                 <div className='col-6'>
                     <label htmlFor='title' className='form-label'>Title</label>

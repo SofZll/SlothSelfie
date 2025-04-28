@@ -64,7 +64,7 @@ export const PomodoroProvider = ({ children }) => {
             reset: false,
             pencilTime: `${time}s`,
             lineTime: `${(time*0.8)}s`,
-            delayGo: `${(time*0.2)}s`,
+            delayGo: `${(time*0.3)}s`,
             delayBack: `${(time*0.1)}s`,
         });
     }
