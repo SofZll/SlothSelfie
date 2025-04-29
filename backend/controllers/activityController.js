@@ -73,6 +73,21 @@ const getActivities = async (req, res) => {
     }
 };
 
+// Fetching a single activity
+const getActivity = async (req, res) => {
+    const {activityId} = req.params;
+    try {
+        const activity = await Activity.findById(activityId).populate('sharedWith', 'username');
+        if (!activity) {
+            return res.status(404).json({ success: false, message: "Activity not found" });
+        }
+        res.status(200).json({ success: true, activity });
+    } catch (error) {
+        console.error('Error fetching activity:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // Updating an activity
 const updateActivity = async (req, res) => {
     const { activityId } = req.params; 
@@ -231,7 +246,7 @@ async function createNoteAsInputOrOutput(req, res) {
             category: type === 'input' ? "Activity Input" : "Activity Output",
             content: content,
             user: user,
-            noteAccess: "restricted", // only for members
+            noteAccess: "shared", // only for members
             allowedUsers: allowedUsernames,
             isInProject: true, // to differentiate between normal notes and project-activity notes
         });
@@ -457,6 +472,7 @@ function updateMacroDeadlineMap(map, macro, deadline) {
 module.exports = {
     createActivity,
     getActivities,
+    getActivity,
     updateActivity,
     deleteActivity,
     exportActivity,

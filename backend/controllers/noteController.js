@@ -71,6 +71,25 @@ const getNotes = async (req, res) => {
 };
 
 // Fetch a single note by ID
+const getNote2 = async (req, res) => {
+    const { noteId } = req.params;
+
+    try{
+        const note = await Note.findById(noteId)
+        .populate('user', 'username')
+        .populate('tasks')
+        .populate('sharedWith', 'username');
+
+        if (note.createdAt > now) return res.status(403).json({ success: false, message: 'Note not found' }); //MI DA 403 FORBIDDEN
+
+        res.status(200).json({ success: true, note });
+    } catch (error) {
+        console.error('Error fetching note:', error);
+        return res.status(500).json({ success: false, message: 'Error fetching note' });
+    }
+}
+
+// Fetch a single note by ID
 const getNote = async (req, res) => {
     const { noteId } = req.params;
 
@@ -80,10 +99,9 @@ const getNote = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
 
-        if (note.createdAt > now) return res.status(403).json({ success: false, message: 'Note not found' });
-
         res.status(200).json({ success: true, note });
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error fetching note:', error);
         return res.status(500).json({ success: false, message: 'Error fetching note' });
     }

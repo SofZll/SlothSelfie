@@ -13,7 +13,7 @@ async function handleActivities(projectId) {
     try {
         const userLogged = await getLoggedUser();
         if (!userLogged) {
-            NewSwal.fire({title: "Error", text: "No user is logged in!", icon: "error"});
+            Swal.fire({title: "Error", text: "No user is logged in!", icon: "error"});
             return;
         }
 
@@ -28,7 +28,7 @@ async function handleActivities(projectId) {
         const isOwner = project.owner.username === userLogged;
         const isMember = project.members.some(member => member.username === userLogged);
         if (!isOwner && !isMember) {
-            NewSwal.fire({title: "Error", text: "You can't handle the activities of this project", icon: "error"});
+            Swal.fire({title: "Error", text: "You can't handle the activities of this project", icon: "error"});
             return;
         }
 
@@ -143,7 +143,7 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         }
 
         if (inputType === "link" && !isValidURL(inputValue)) {
-            NewSwal.fire({title: "Error", text: "Invalid link. Please enter a valid URL.", icon: "error"});
+            Swal.fire({title: "Error", text: "Invalid link. Please enter a valid URL.", icon: "error"});
             return;
         }
 
@@ -191,7 +191,7 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         let outputValue = document.getElementById(`output-${activityId}`).value.trim();
 
         if (outputType === "link" && !isValidURL(outputValue)) {
-            NewSwal.fire({title: "Error", text: "Invalid link. Please enter a valid URL.", icon: "error"});
+            Swal.fire({title: "Error", text: "Invalid link. Please enter a valid URL.", icon: "error"});
             return;
         }
          noteContent = outputValue;
@@ -770,7 +770,7 @@ async function updateOutputNote(activityId) {
         let outputValue = document.getElementById(`output-${activityId}`).value.trim();
 
         if (outputType === "link" && !isValidURL(outputValue)) {
-            NewSwal.fire({title: "Error", text: "Invalid link. Please enter a valid URL.", icon: "error"});
+            Swal.fire({title: "Error", text: "Invalid link. Please enter a valid URL.", icon: "error"});
             return;
         }
         noteContent = outputValue;
@@ -891,7 +891,7 @@ async function abandonActivity(activityId) {
         });
 
         //send an alert to the logged user
-        NewSwal.fire({title: "Success!", text: "You have abandoned this activity.", icon: "success"});
+        Swal.fire({title: "Success!", text: "You have abandoned this activity.", icon: "success"});
 
         //disable the abandon button for the user
         toggleElements([`abandon-${activityId}`], true);
