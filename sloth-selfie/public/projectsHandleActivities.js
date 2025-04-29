@@ -479,6 +479,7 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
             throw new Error('Failed to fetch activity');
         }
         const activity = data.activity;
+        console.log('activity: ', activity);
 
         if (!activity) {
             console.error("Activity is undefined:", activity);
@@ -553,6 +554,8 @@ async function reactivateActivity(activityId, newStatus) {
             throw new Error('Failed to fetch activity');
         }
         const activity = data.activity;
+        console.log('activity: ', activity);
+
 
         if (!activity) {
             console.error("Activity is undefined:", activity);
@@ -662,6 +665,8 @@ async function handleOwnerDecision(activityId, decision, dependentActivitiesIds,
             throw new Error('Failed to fetch activity');
         }
         const activity = data.activity;
+        console.log('activity: ', activity);
+
 
         await updateDependentActivities(activityId, activity, onlyBlocked);
 
@@ -696,6 +701,8 @@ async function getDependentActivities(activityId) {
         throw new Error('Failed to fetch activity');
     }
     const activity = data.activity;
+    console.log('activity: ', activity);
+
 
     // Get the entire project to find all activities
     const projectResponse = await fetch(`http://localhost:8000/api/project/${activity.project}`);

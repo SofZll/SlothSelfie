@@ -6,6 +6,7 @@ const PhaseSubphase = require("../models/phaseSubphaseModel");
 const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 const { getCurrentNow } = require('../services/timeMachineService');
+const { scheduleNotification } = require('../agenda/notificationScheduler');
 
 const now = getCurrentNow();
 
@@ -25,6 +26,20 @@ const createActivity = async (req, res) => {
 
         const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), createdAt: now });
         const savedActivity = await activity.save();
+
+        const notifications = sharedWithUsers.map(sharedUser => ({
+            user: sharedUser._id,
+            element: savedActivity._id,
+            elementType: 'Activity',
+            type: 'now',
+            mode: {
+                system: true,
+                email: true,
+            }
+        }));
+
+        const createdNotifications = await Notification.insertMany(notifications);
+        await scheduleNotification(createdNotifications);
 
         const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
         
