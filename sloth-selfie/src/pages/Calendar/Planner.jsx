@@ -75,17 +75,24 @@ const Planner = () => {
                     allDay: data.days,
                 };
             });
-        }
-
-        return (type === 'event' ? datas : datas.filter(data => !data.completed && data.deadline)).map(data => {
-            return {
-                _id: data._id,
-                title: data.title,
-                user: data.user,
-                ...(type === 'event' ? {
-                    start: new Date(data.start),
-                    end: new Date(data.end),
-                } : {
+        } else if (type === 'event') {
+            return datas.map(data => {
+                return {
+                    _id: data._id,
+                    title: data.title,
+                    user: data.user,
+                    start: new Date(data.startDate),
+                    end: new Date(data.endDate),
+                    type: 'event',
+                    inProject: data.isInProject,
+                };
+            });
+        } else {
+            return datas.filter(data => !data.completed && data.deadline).map(data => {
+                return {
+                    _id: data._id,
+                    title: data.title,
+                    user: data.user,
                     ...(new Date(data.deadline) < new Date() ? { 
                         late: true,
                         start: new Date().setHours(0, 0, 0, 0),
@@ -97,10 +104,10 @@ const Planner = () => {
                     }),
                     allDay: true,
                     durationEditable: false,
-                }),
-                type: type
-            };
-        });
+                    type: type,
+                };
+            });
+        }
     }
 
     const onItemSelect = async (item) => {
@@ -191,7 +198,16 @@ const Planner = () => {
                     
                 }
             }
+        } else if (event.type === 'event') {
+            if (event.inProject) {
+                return {
+                    style: {
+                        backgroundColor: 'orange',
+                    }
+                }
+            }
         }
+
     }
 
     useEffect(() => {
