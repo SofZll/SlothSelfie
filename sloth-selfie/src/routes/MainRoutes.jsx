@@ -45,7 +45,7 @@ const MainRoutes = () => {
                                         <Route path='/pomodoro' element={<Pomodoro />} />
                                         <Route path='/projects' element={<Projects />} />
                                         <Route path='/calendar' element={<Calendar />} />
-                                        <Route path='/notes' element={<Notes />} />
+                                        <Route path='/notes' element={<Notes openNote={false} />} />
                                         <Route path='/notes/:noteId' element={<Notes openNote={true} />} />
                                         <Route path='/home' element={<Home />} />
                                         <Route path='/home/settings' element={<Home settings={true} />} />
