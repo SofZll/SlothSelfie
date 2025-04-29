@@ -50,9 +50,9 @@ const CardActivity = ({ Activity, smallView }) => {
             )}
 
             <div className='row w-100 d-flex align-items-center'>
-                {Activity.response !== 'pending' && (
+                {Activity.response !== 'pending' && !Activity.project && (
                     <div className='col col-6 d-flex justify-content-center'>
-                        <button type='button' className={`btn btn-outline-secondary ${Activity.completed && 'btn-active'}`} disabled={Activity.project} onClick={() => markComplete()}>
+                        <button type='button' className={`btn btn-outline-secondary ${Activity.completed && 'btn-active'}`} onClick={() => markComplete()}>
                             {Activity.completed ? 'Completed' : 'to Complete'}
                         </button>
                     </div>
@@ -64,7 +64,7 @@ const CardActivity = ({ Activity, smallView }) => {
                 )}
             </div>
             
-            {Activity.response === 'pending' && (
+            {Activity.response === 'pending' && !Activity.project && (
                 <div className='row w-100 d-flex align-items-center'>
                     <div className='col col-6 d-flex justify-content-center'>
                         <button type='button' className='btn btn-success' onClick={() => handleResponse('accepted')}>

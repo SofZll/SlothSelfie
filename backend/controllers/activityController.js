@@ -3,6 +3,8 @@ const User = require('../models/userModel');
 const Note = require('../models/noteModel');
 const Event = require('../models/eventModel');
 const PhaseSubphase = require("../models/phaseSubphaseModel");
+const Notification = require('../models/notificationModel');
+const { scheduleNotification } = require('../agenda/notificationScheduler');
 const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 const { getCurrentNow } = require('../services/timeMachineService');
@@ -400,9 +402,9 @@ async function adjustOrContractActivitySchedule(req, res) {
                 const event = await Event.findById(eventId);
                 if (event) {
                     if (index === 0) {
-                        event.date = activity.startDate;
+                        event.startDate = activity.startDate;
                     } else if (index === 1 && action === 'delay') {
-                        event.date = activity.deadline;
+                        event.deadline = activity.deadline;
                     }
                     await event.save();
                 }
@@ -422,7 +424,7 @@ async function adjustOrContractActivitySchedule(req, res) {
                 await macro.save();
                 const macroEvent = await Event.findById(macro.events[1]);
                 if (macroEvent) {
-                    macroEvent.date = maxDeadline;
+                    macroEvent.deadline = maxDeadline;
                     await macroEvent.save();
                 } 
             }
