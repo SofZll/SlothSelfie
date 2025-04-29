@@ -155,7 +155,7 @@ const FormActivity = () => {
                 </div>
             )}
 
-            {activity.response === 'pending' ? (
+            {(activity.response === 'pending' && !activity.project) ? (
                 <div className='d-flex align-items-center justify-content-center'>
                     <button type='button' className='btn btn-success' onClick={() => handleResponse('accepted')}>
                         Accept
