@@ -220,7 +220,7 @@ async function saveOrUpdateProject(event) {
         const data = await response.json();
 
         if (response.ok) {
-            NewSwal.fire({title: "Success!", text: projectId ? "Project updated successfully!" : "Project saved successfully!", icon: "success"});
+            Swal.fire({title: "Success!", text: projectId ? "Project updated successfully!" : "Project saved successfully!", icon: "success"});
             resetForm();
             await loadProjects();
             //eventually close the list/gantt view and the handle activities form
@@ -494,7 +494,7 @@ async function removePhaseFromBackend(projectId, phaseId) {
         if (data.success) {
             console.log("Phase removed successfully:", data.message); 
         } else {
-            NewSwal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
+            Swal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
         }
         
     } catch (error) {
@@ -516,7 +516,7 @@ async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
         if (data.success) {
             console.log("Subphase removed successfully:", data.message);
         } else {
-            NewSwal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
+            Swal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
             
         }
     } catch (error) {
@@ -538,7 +538,7 @@ async function removeActivityFromBackend(projectId, phaseId, subphaseId, activit
         if (data.success) {
             console.log("Activity removed successfully:", data.message);
         } else {
-            NewSwal.fire({title: "Error", text: "Error while deleting the activity", icon: "error"});
+            Swal.fire({title: "Error", text: "Error while deleting the activity", icon: "error"});
 
         }
     } catch (error) {
@@ -566,7 +566,7 @@ async function deleteProject(projectId) {
             });
 
             if (response.ok) {
-                NewSwal.fire({title: "Success!", text: "Project deleted successfully!", icon: "success"});
+                Swal.fire({title: "Success!", text: "Project deleted successfully!", icon: "success"});
                 
                 // Close the project view if the project is deleted
                 document.getElementById("project-view-container").style.display = "none";
@@ -588,7 +588,7 @@ async function deleteProject(projectId) {
                 }
                 resetForm();
             } else {
-                NewSwal.fire({title: "Error", text: "Error while deleting the project.", icon: "error"});
+                Swal.fire({title: "Error", text: "Error while deleting the project.", icon: "error"});
             }
         } catch (error) {
             console.error("Error deleting project:", error);
