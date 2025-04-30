@@ -96,6 +96,7 @@ const getNote = async (req, res) => {
 const updateNote = async (req, res) => {
     const { noteId } = req.params;
     const { title, user, category, content, tasks, addedTasks, deletedTasks, noteAccess, sharedWith } = req.body;
+    const now = getCurrentNow();
 
     try {
         const note = await Note.findById(noteId);
@@ -127,7 +128,7 @@ const updateNote = async (req, res) => {
         note.category = category;
         note.content = content;
         note.noteAccess = noteAccess;
-        note.updatedAt = new Date();
+        note.updatedAt = now;
         note.sharedWith = noteAccess === 'shared' ? users : [];
 
         const updatedNote = await note.save();

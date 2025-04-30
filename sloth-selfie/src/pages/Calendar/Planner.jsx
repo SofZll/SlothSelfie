@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-calendar/dist/Calendar.css';
@@ -11,6 +11,7 @@ import ScrollList from '../../components/ScrollList';
 import FormCalendar from './FormCalendar';
 import PlusLayout from '../../layouts/PlusLayout';
 
+import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import { AuthContext } from '../../contexts/AuthContext';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
@@ -19,6 +20,11 @@ import { usePomodoro } from '../../contexts/PomodoroContext';
 import { apiService } from '../../services/apiService';
 
 const Planner = () => {
+    const { getVirtualNow, refreshKey } = useContext(TimeMachineContext);
+    const now = getVirtualNow();
+      
+    const [calendarView, setCalendarView] = useState('month');
+    const [date, setDate] = useState(getVirtualNow());
 
     const isDesktop = useIsDesktop();
 
@@ -60,9 +66,9 @@ const Planner = () => {
         if (response.success) setAvailabilities(response.noAvailability);
     }
 
-    const normalizeData = (datas, type) => {
+    const normalizeData = useCallback((datas, type) => {
         if (!Array.isArray(datas)) return [];
-
+    
         if (type === 'no availability') {
             return datas.map(data => {
                 return {
@@ -76,32 +82,52 @@ const Planner = () => {
                 };
             });
         }
-
-        return (type === 'event' ? datas : datas.filter(data => !data.completed && data.deadline)).map(data => {
-            return {
+    
+        const filteredData = type === 'event' ? datas : datas.filter(data => !data.completed && data.deadline);
+    
+        return filteredData.map(data => {
+            const base = {
                 _id: data._id,
                 title: data.title,
                 user: data.user,
-                ...(type === 'event' ? {
-                    start: new Date(data.start),
-                    end: new Date(data.end),
-                } : {
-                    ...(new Date(data.deadline) < new Date() ? { 
-                        late: true,
-                        start: new Date().setHours(0, 0, 0, 0),
-                        end: new Date().setHours(23, 59, 59, 999),
-                    } : {
-                        late: false,
-                        start: new Date(data.deadline).setHours(0, 0, 0, 0),
-                        end: new Date(data.deadline).setHours(23, 59, 59, 999),
-                    }),
-                    allDay: true,
-                    durationEditable: false,
-                }),
                 type: type
             };
+    
+            if (type === 'event') {
+                return {
+                    ...base,
+                    start: new Date(data.start),
+                    end: new Date(data.end),
+                };
+            } else {
+                const deadline = new Date(data.deadline);
+                const isLate = deadline < now;
+    
+                let start, end;
+                if (isLate) {
+                    start = new Date(now);
+                    start.setHours(0, 0, 0, 0);
+                    end = new Date(now);
+                    end.setHours(23, 59, 59, 999);
+                } else {
+                    start = new Date(deadline);
+                    start.setHours(0, 0, 0, 0);
+                    end = new Date(deadline);
+                    end.setHours(23, 59, 59, 999);
+                }
+    
+                return {
+                    ...base,
+                    late: isLate,
+                    start,
+                    end,
+                    allDay: true,
+                    durationEditable: false,
+                };
+            }
         });
-    }
+    }, [now]);
+    
 
     const onItemSelect = async (item) => {
         if (item.type === 'activity'){
@@ -194,15 +220,18 @@ const Planner = () => {
         }
     }
 
+    const dayPropGetter = useCallback((date) => ({
+        className: moment(date).isSame(now, 'day') ? 'virtual-day' : ''
+    }), [now]);
+
     useEffect(() => {
         fetchActivities();
         fetchEvents();
         fetchTasks();
         fetchPomodoros();
         fetchNoAvailability();
-    }, [user, show]);
+    }, [user, show, refreshKey]);
 
-    
     useEffect(() => {
         if (show === 'plans') setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
         else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
@@ -210,6 +239,7 @@ const Planner = () => {
     }, [activities, events, tasks, availabilities, show, plannedPomodori]);
 
     useEffect(() => {
+        console.log('Planner useEffect 2');
         if (notifications.length > 0) {
             let flag;
             notifications.forEach(notification => {
@@ -251,6 +281,11 @@ const Planner = () => {
                     className='calendar-main'
                     onEventDrop={onEventDrop}
                     eventPropGetter={eventStyleGetter}
+                    dayPropGetter={dayPropGetter}
+                    view={calendarView}
+                    onView={(view) => setCalendarView(view)}
+                    date={date}
+                    onNavigate={(date) => setDate(date)}
                     resizable
                 />
             </div>
