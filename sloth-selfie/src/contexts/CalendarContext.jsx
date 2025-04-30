@@ -2,10 +2,13 @@ import React, { createContext, useContext, useState }  from 'react';
 
 import { dateFromDate, timeFromDate } from '../utils/utils';
 import { apiService } from '../services/apiService';
+import { TimeMachineContext } from './TimeMachineContext';
 
 const CalendarContext = createContext();
 
 export const CalendarProvider = ({ children }) => {
+    const { getVirtualNow } = useContext(TimeMachineContext);
+    const now = new Date(getVirtualNow());
 
     //Activity state
     const [activity, setActivity] = useState({
@@ -40,8 +43,8 @@ export const CalendarProvider = ({ children }) => {
         title: '',
         user: '',
         type: 'personal',
-        startDate: new Date(),
-        endDate: new Date(),
+        startDate: new Date(now),
+        endDate: new Date(now),
         time: '',
         isPreciseTime: false,
         duration: null,
@@ -68,8 +71,8 @@ export const CalendarProvider = ({ children }) => {
             title: '',
             user: '',
             type: 'personal',
-            startDate: new Date(),
-            endDate: new Date(),
+            startDate: new Date(now),
+            endDate: new Date(now),
             time: '',
             isPreciseTime: false,
             duration: null,

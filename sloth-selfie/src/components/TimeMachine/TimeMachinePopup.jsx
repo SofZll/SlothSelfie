@@ -6,7 +6,7 @@ import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 // TODO: il resto delle funzioni
 
 const TimeMachinePopup = () => {
-    const { setMachineOpen, setVirtualNow, currentTime, currentDate } = useContext(TimeMachineContext);
+    const { setMachineOpen, setVirtualNow, currentTime, currentDate, triggerRefresh } = useContext(TimeMachineContext);
 
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');
@@ -25,6 +25,7 @@ const TimeMachinePopup = () => {
         if (response.success) {
             console.log('Time set successfully:', response);
             setMachineOpen(false);
+            triggerRefresh();
         } else {
             console.error('Error setting time');
             NewSwal.fire({ icon: 'error', title: 'Oops...', text: 'Error setting time' });
