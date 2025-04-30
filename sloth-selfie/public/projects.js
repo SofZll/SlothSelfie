@@ -374,9 +374,9 @@ function addActivity(button, type) {
     let projectActorsInput = document.querySelector("#projectActors").value.trim();
     let projectActors = projectActorsInput ? projectActorsInput.split(",").map(actor => actor.trim()) : [];
 
-    // Creates the options for the select element with the members of the activity
+    // Creates the options for the select element with the members of the activity, we select everyone by default
     let membersOptions = projectActors.map(actor => 
-        `<option value="${actor}">${actor}</option>`
+        `<option value="${actor}" selected>${actor}</option>`
     ).join("");
 
     // Gets all project activities for selecting dependencies, we only show the ones that are already saved with an id from the backend
