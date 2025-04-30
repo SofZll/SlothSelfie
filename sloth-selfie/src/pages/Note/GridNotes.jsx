@@ -21,7 +21,7 @@ const GridNotes = () => {
 
         let n = [];
         if (filters.date === '') n = [...notes];
-        else n = notes.filter(nt => new Date(nt.createDate).toLocaleDateString() === new Date(filters.date).toLocaleDateString());
+        else n = notes.filter(nt => new Date(nt.createdAt).toLocaleDateString() === new Date(filters.date).toLocaleDateString());
 
         switch (filters.order) {
             case 'title':
@@ -31,10 +31,10 @@ const GridNotes = () => {
                 n.sort((a, b) => a.content.length - b.content.length);
                 break;
             case 'most_recent':
-                n.sort((a, b) => new Date(b.createDate) - new Date(a.createDate));
+                n.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 break;
             case 'least_recent':
-                n.sort((a, b) => new Date(a.createDate) - new Date(b.createDate));
+                n.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
                 break;
             default:
                 break;

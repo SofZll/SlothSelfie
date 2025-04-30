@@ -34,7 +34,7 @@ const Planner = () => {
     const { user } = useContext(AuthContext);
     const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
-    const { setPlannedPomodori, plannedPomodori, settingsPomodoro, setSettingsPomodoro } = usePomodoro();
+    const { setPlannedPomodori, plannedPomodori, setSettingsPomodoro } = usePomodoro();
 
     const [show, setShow] = useState('plans');
 
@@ -48,7 +48,6 @@ const Planner = () => {
     const fetchActivities = async () => {
         const response = await apiService('/activities', 'GET');
         if (response.success) setActivities(response.activities);
-        console.log('activities', response.activities);
     }
 
     const fetchTasks = async () => {
@@ -68,9 +67,10 @@ const Planner = () => {
 
     const normalizeData = useCallback((datas, type) => {
         if (!Array.isArray(datas)) return [];
-    
+
         if (type === 'no availability') {
-            return datas.map(data => {
+
+            return datas.map((data) => {
                 return {
                     _id: data._id,
                     title: 'No Availability for group events',
@@ -81,53 +81,40 @@ const Planner = () => {
                     allDay: data.days,
                 };
             });
-        }
-    
-        const filteredData = type === 'event' ? datas : datas.filter(data => !data.completed && data.deadline);
-    
-        return filteredData.map(data => {
-            const base = {
-                _id: data._id,
-                title: data.title,
-                user: data.user,
-                type: type
-            };
-    
-            if (type === 'event') {
+        } else if (type === 'event') {
+            return datas.map((data) => {
                 return {
-                    ...base,
-                    start: new Date(data.start),
-                    end: new Date(data.end),
+                    _id: data._id,
+                    title: data.title,
+                    user: data.user,
+                    start: new Date(data.startDate),
+                    end: new Date(data.endDate),
+                    type: 'event',
+                    inProject: data.isInProject,
                 };
-            } else {
+            });
+        } else {
+            return datas.filter(data => !data.completed && data.deadline).map(data => {
                 const deadline = new Date(data.deadline);
                 const isLate = deadline < now;
-    
-                let start, end;
-                if (isLate) {
-                    start = new Date(now);
-                    start.setHours(0, 0, 0, 0);
-                    end = new Date(now);
-                    end.setHours(23, 59, 59, 999);
-                } else {
-                    start = new Date(deadline);
-                    start.setHours(0, 0, 0, 0);
-                    end = new Date(deadline);
-                    end.setHours(23, 59, 59, 999);
-                }
+
+                const start = isLate ? new Date(now.setHours(0, 0, 0, 0)) : new Date(deadline.setHours(0, 0, 0, 0));
+                const end = isLate ? new Date(now.setHours(23, 59, 59, 999)) : new Date(deadline.setHours(23, 59, 59, 999));
     
                 return {
-                    ...base,
+                    _id: data._id,
+                    title: data.title,
+                    user: data.user,
+                    start: start,
+                    end: end,
+                    type: type,
                     late: isLate,
-                    start,
-                    end,
-                    allDay: true,
                     durationEditable: false,
+                    allDay: true,
                 };
-            }
-        });
+            });
+        }
     }, [now]);
-    
 
     const onItemSelect = async (item) => {
         if (item.type === 'activity'){
@@ -145,8 +132,6 @@ const Planner = () => {
         } else if (item.type === 'pomodoro') {
             const p = plannedPomodori.find(p => p._id === item._id);
             await setSettingsPomodoro({ ...p });
-            console.log(p);
-            console.log(settingsPomodoro);
         }
         
         if (item.type === 'pomodoro') setSelected({selection: item.type, add: false, popup: !isDesktop});
@@ -217,7 +202,16 @@ const Planner = () => {
                     
                 }
             }
+        } else if (event.type === 'event') {
+            if (event.inProject) {
+                return {
+                    style: {
+                        backgroundColor: 'orange',
+                    }
+                }
+            }
         }
+
     }
 
     const dayPropGetter = useCallback((date) => ({

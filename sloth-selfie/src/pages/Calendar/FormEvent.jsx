@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 
-import { NewSwal } from '../../utils/swalUtils';
+import { toastWarning, NewSwal } from '../../utils/swalUtils';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
@@ -17,84 +17,128 @@ const FormEvent = () => {
     const { user } = useContext(AuthContext);
     const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    const calcStartDate = (date, allDay, time) => {
-        if (date === '') return null
-
-        const startDate = new Date(date);
-
-        const weekday = weekdays[startDate.getDay()];
-        const isFreeDay = user.freeDays.includes(weekday);
-        if (isFreeDay && event.type === 'work') NewSwal({ title: 'Warning', icon: 'warning', text: 'Selected date is a free day'});
-
-        if (allDay) {
-            if (event.type === 'work') startDate.setHours(user.workingHours.start.split(':')[0], user.workingHours.start.split(':')[1]);
-            else startDate.setHours(user.dayHours.start.split(':')[0], user.dayHours.start.split(':')[1]);
-        } else if (time !== '') {
+    const startTimeWarning = (time) => {
+        const startDate = new Date();
+        if (time !== '') {
             startDate.setHours(event.time.split(':')[0], event.time.split(':')[1]);
-            if (event.type === 'work' && startDate < new Date(date).setHours(user.workingHours.start.split(':')[0], user.workingHours.start.split(':')[1])) {
-                NewSwal({ title: 'Warning', icon: 'warning', text: 'Event start time is before working hours'});
-            } else if (startDate < new Date(date).setHours(user.dayHours.start.split(':')[0], user.dayHours.start.split(':')[1])) {
-                NewSwal({ title: 'Warning', icon: 'warning', text: 'Event start time is before day hours'});
+            if (event.type === 'work' && startDate < new Date(startDate).setHours(user.workingHours.start.split(':')[0], user.workingHours.start.split(':')[1])) {
+                toastWarning('Warning', 'Event start time is before working hours');
+            } else if (startDate < new Date(startDate).setHours(user.dayHours.start.split(':')[0], user.dayHours.start.split(':')[1])) {
+                toastWarning('Warning', 'Event start time is before day hours');
             }
         }
-        return startDate;
     }
 
-    const calcEndDate = (start, duration, allDay) => {
+    const endTimeWarning = (time, duration) => {
+        const startDate = new Date();
+        if (time !== '') {
+            startDate.setHours(event.time.split(':')[0], event.time.split(':')[1]);
+            if (duration) {
+                startDate.setHours(startDate.getHours() + parseInt(duration));
+                if (event.type === 'work' && startDate > new Date(startDate).setHours(user.workingHours.end.split(':')[0], user.workingHours.end.split(':')[1])) {
+                    toastWarning('Warning', 'Event end time is after working hours');
+                } else if (startDate > new Date(startDate).setHours(user.dayHours.end.split(':')[0], user.dayHours.end.split(':')[1])) {
+                    toastWarning('Warning', 'Event end time is after day hours');
+                }
+            }
+        }
+    }
+
+    const weekendWarning = (start, duration) => {
+        if (start) {
+            const weekday = weekdays[new Date(start).getDay()];
+            const isFreeDay = user.freeDays.includes(weekday);
+            if (isFreeDay && event.type === 'work') return toastWarning('Warning', 'Selected date is a free day');
+        }
+
+        if (duration) {
+            for (let i = 1; i < duration; i++) {
+                const nextDate = new Date(start);
+                nextDate.setDate(nextDate.getDate() + i);
+                const weekday = weekdays[nextDate.getDay()];
+                const isFreeDay = user.freeDays.includes(weekday);
+                if (isFreeDay && event.type === 'work') return toastWarning('Warning', 'Selected date is a free day');
+            }
+        }
+    }
+    
+    const calcStartDate = (date, allDay, time) => {
+
+        if (date !== '') {
+            const startDate = new Date(date);
+
+            if (!allDay && time !== '') startDate.setHours(time.split(':')[0], time.split(':')[1]);
+            
+            return startDate;
+        } else return null;
+    }
+
+    const calcEndDate = (start, allDay, duration) => {
 
         const endDate = new Date(start);
-        if (allDay) {
-            endDate.setDate(endDate.getDate() + parseInt(duration));
-            if (event.type === 'work') endDate.setHours(user.workingHours.end.split(':')[0], user.workingHours.end.split(':')[1]);
-            else endDate.setHours(user.dayHours.end.split(':')[0], user.dayHours.end.split(':')[1]);
-        } else {
-            endDate.setHours(endDate.getHours() + parseInt(duration));
-            if (event.type === 'work' && endDate > new Date(start).setHours(user.workingHours.end.split(':')[0], user.workingHours.end.split(':')[1])) {
-                NewSwal({ title: 'Warning', icon: 'warning', text: 'Event end time is after working hours'});
-            } else if (endDate > new Date(start).setHours(user.dayHours.end.split(':')[0], user.dayHours.end.split(':')[1])) {
-                NewSwal({ title: 'Warning', icon: 'warning', text: 'Event end time is after day hours'});
+        if (!allDay) {
+            if (event.time !== '') {
+                endDate.setHours(endDate.getHours() + parseInt(duration));
+                endTimeWarning(event.time, duration);
             }
+        } else {
+            endDate.setDate(endDate.getDate() + parseInt(duration));
         }
+        return endDate;
     }
-
 
     const setStartDate = (date) => {
-        
-        setEvent({ ...event, startDate: calcStartDate(date, event.allDay, event.time) });
+        if (date === '' || date === null) {
+            setEvent({ ...event, startDate: null });
+            return;
+        } 
+
+        const startDate = calcStartDate(date, event.allDay, event.time);
+        if (event.duration !== null && event.time !== '') {
+            const endDate = calcEndDate(startDate, event.allDay, event.duration);
+            setEvent({ ...event, startDate, endDate });
+            endTimeWarning(event.time, event.duration);
+        } setEvent({ ...event, startDate });
+        weekendWarning(startDate);
     }
 
-    const setEndDate = (date) => {
-        if (date === '') {
-            setEvent({ ...event, endDate: null });
-            return;
-        } else if (!event.startDate) {
-            setEvent({ ...event, duration: parseInt(date) });
+    const setEndDate = (duration) => {
+        if (duration === '') {
+            setEvent({ ...event, duration: null });
             return;
         }
-        setEvent({ ...event, endDate: calcEndDate(event.start, date, event.allDay), duration: parseInt(date) });
+        
+        if (!event.startDate) {
+            setEvent({ ...event, duration: parseInt(duration) });
+            return;
+        }
+
+        setEvent({ ...event, duration: parseInt(duration), endDate: calcEndDate(event.startDate, event.allDay, duration) });
+        if (event.allDay) weekendWarning(event.startDate, duration);
     }
 
     const setStartTime = (time) => {
-        console.log('time', time);
-        if (time === '') {
-            setEvent({ ...event, time: '' });
-            return;
-        } else if (!event.startDate) {
-            calcStartDate(new Date(), event.allDay, time);
+        if (time === '') setEvent({ ...event, time: '' });
+        else if (!event.startDate) {
+            startTimeWarning(time);
             setEvent({ ...event, time });
-            return;
+        } else if (event.duration === null) setEvent({...event, time, startDate: calcStartDate(event.startDate, event.allDay, time) });
+        else {
+            const start = calcStartDate(event.startDate, event.allDay, time);
+            const end = calcEndDate(start, event.allDay, event.duration);
+            setEvent({ ...event, time, startDate: start, endDate: end });
+            endTimeWarning(time, event.duration);
         }
-        if (event.duration !== null) setEvent({...event, time, startDate: calcStartDate(event.startDate, event.allDay, time) });
-        else setEvent({ ...event, time, startDate: calcStartDate(event.startDate, event.allDay, time), endDate: calcEndDate(event.startDate, event.duration, event.allDay) });
-
-
-        console.log('startDate', event.startDate);
     }
 
     const setAllDay = (allDay) => {
         if (!event.startDate) setEvent({ ...event, allDay });
-        else if (event.startDate === null) setEvent({ ...event, allDay });
-        else setEvent({ ...event, allDay, startDate: calcStartDate(event.startDate, allDay, event.time), endDate: calcEndDate(event.startDate, event.duration, allDay) });
+        else if (!event.duration || event.time !== '') setEvent({ ...event, allDay, startDate: calcStartDate(event.startDate, allDay, event.time)});
+        else {
+            const start = calcStartDate(event.startDate, allDay, event.time);
+            const end = calcEndDate(start, allDay, event.duration);
+            setEvent({ ...event, allDay, startDate: start, endDate: end });
+        }
     }
 
     const handleSubmit = async () => {
@@ -135,20 +179,20 @@ const FormEvent = () => {
             setConditionsMet(false);
         } else if (!event.allDay && event.time === '') {
             setConditionsMet(false); 
+        } else if (event.type === '') {
+            setConditionsMet(false);
         } else setConditionsMet(true);
-
+        
         if (event.repeatFrequency !== 'none') {
             if (event.repeatMode === 'ntimes' && event.repeatTimes <= 0) {
                 setConditionsMet(false);
-            }
-            if (event.repeatMode === 'until' && event.repeatEndDate === null) {
+            } else if (event.repeatMode === 'until' && event.repeatEndDate === null) {
                 setConditionsMet(false);
-            }
-            if (new Date(event.repeatEndDate) < new Date(event.startDate)) {
+            } else if (event.repeatMode === 'until' && new Date(event.repeatEndDate) < new Date(event.startDate)) {
                 setConditionsMet(false);
             }
         }
-    }, [event]);
+    }, [event.title, event.startDate, event.endDate, event.duration, event.allDay, event.time, event.repeatFrequency, event.repeatMode, event.repeatTimes, event.repeatEndDate]);
 
 
     return (
@@ -171,6 +215,7 @@ const FormEvent = () => {
                     value={event.type}
                     disabled={event.isInProject}
                     onChange={(e) => setEvent({...event, type: e.target.value})}>
+                        <option value=''>Select type</option>
                         <option value='personal'>Personal</option>
                         <option value='work'>Work</option>
                         <option value='social'>Social</option>
@@ -185,7 +230,7 @@ const FormEvent = () => {
                     <input type='Date' className='form-control' id='date'
                     value={event.startDate ? new Date(event.startDate).toLocaleDateString('en-CA') : ''}
                     disabled={event.isInProject}
-                    onChange={(e) => setStartDate(e.target.value)} 
+                    onChange={(e) => setStartDate(e.target.value)}
                     required />
                 </div>
 
@@ -243,7 +288,7 @@ const FormEvent = () => {
                     <input type='number' className='form-control' id='duration'
                     placeholder={event.allDay ? 'Duration in days' : 'Duration in hours'}
                     min={0}
-                    value={event.duration}
+                    value={event.duration || ''}
                     disabled={event.isInProject}
                     onChange={(e) => setEndDate(e.target.value)}
                     required />
@@ -285,16 +330,16 @@ const FormEvent = () => {
                             <input type='number' className='form-control' id='repeatTimes'
                             placeholder='Number of repetitions'
                             min={0}
-                            value={event.repeatTimes}
+                            value={event.repeatTimes || ''}
                             disabled={event.isInProject}
-                            onChange={(e) => setEvent({...event, repeatTimes: e.target.value})} 
+                            onChange={(e) => setEvent({...event, repeatTimes: parseInt(e.target.value)})} 
                             required />
                         </div>
                     ) : (
                         <div className='col col-6'>
                             <label htmlFor='repeatEndDate' className='form-label'>End Date</label>
                             <input type='Date' className='form-control' id='repeatEndDate'
-                            value={new Date(event.repeatEndDate).toISOString().split('T')[0]}
+                            value={event.repeatEndDate ? new Date(event.repeatEndDate).toLocaleDateString('en-CA') : ''}
                             disabled={event.isInProject}
                             onChange={(e) => setEvent({...event, repeatEndDate: e.target.value})}
                             required />
@@ -334,7 +379,7 @@ const FormEvent = () => {
             
             <div className='d-flex align-items-center justify-content-center bg-white'>
                 {!event.isInProject && (
-                    <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>
+                    <button type='button' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
                         {selected.edit ? 'edit' : 'save'}
                     </button>
                 )}
