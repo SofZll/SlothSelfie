@@ -16,3 +16,25 @@
 .customization-options h5 {
     text-align: center;
 }
+
+/*preview options*/
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    margin-left: 3rem;
+  }
+  
+  .radio-option {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .radio-option input[type="radio"] {
+    transform: scale(1.5);
+    margin-right: 0.5rem;
+  }
+  
