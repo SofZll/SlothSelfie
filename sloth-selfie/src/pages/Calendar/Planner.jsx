@@ -28,7 +28,7 @@ const Planner = () => {
     const { user } = useContext(AuthContext);
     const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
-    const { setPlannedPomodori, plannedPomodori, settingsPomodoro, setSettingsPomodoro } = usePomodoro();
+    const { setPlannedPomodori, plannedPomodori, setSettingsPomodoro } = usePomodoro();
 
     const [show, setShow] = useState('plans');
 
@@ -42,7 +42,6 @@ const Planner = () => {
     const fetchActivities = async () => {
         const response = await apiService('/activities', 'GET');
         if (response.success) setActivities(response.activities);
-        console.log('activities', response.activities);
     }
 
     const fetchTasks = async () => {
@@ -126,8 +125,6 @@ const Planner = () => {
         } else if (item.type === 'pomodoro') {
             const p = plannedPomodori.find(p => p._id === item._id);
             await setSettingsPomodoro({ ...p });
-            console.log(p);
-            console.log(settingsPomodoro);
         }
         
         if (item.type === 'pomodoro') setSelected({selection: item.type, add: false, popup: !isDesktop});
