@@ -47,12 +47,13 @@ export const CalendarProvider = ({ children }) => {
         duration: null,
         allDay: false,
         repeatFrequency: 'none',
-        repeatMode: 'ntimes',
+        repeatMode: '',
         repeatTimes: 0,
         repeatEndDate: null,
         eventLocation: '',
         sharedWith: [],
         isInProject: false,
+        fatherId: '',
     });
 
     const [events, setEvents] = useState([]);
@@ -75,12 +76,13 @@ export const CalendarProvider = ({ children }) => {
             duration: null,
             allDay: false,
             repeatFrequency: 'none',
-            repeatMode: 'ntimes',
+            repeatMode: '',
             repeatEndDate: null,
             repeatTimes: 0,
             eventLocation: '',
             sharedWith: [],
             isInProject: false,
+            fatherId: '',
         });
     }
 

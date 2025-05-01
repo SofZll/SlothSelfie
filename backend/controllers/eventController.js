@@ -27,6 +27,7 @@ const getEvents = async (req, res) => {
     }).populate('sharedWith', 'username')
     .populate('user', 'username');
 
+
     res.status(200).json({ success: true, events });
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -34,12 +35,21 @@ const getEvents = async (req, res) => {
   }
 };
 
-const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
-  const userName = req.session.username;
-  const user = await User.findOne({ username: userName });
+const newEvent = async (title, user, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
 
   try {
     if (!user) return ({ success: false, message: 'User not found' });
+
+    const listSameDate = await Event.find({
+      $or: [
+        { startDate: { $gte: startDate, $lte: endDate } },
+        { endDate: { $gte: startDate, $lte: endDate } },
+        { startDate: { $lte: startDate }, endDate: { $gte: endDate } }
+      ],
+      user: user._id
+    });
+
+    if (listSameDate.length > 0) return ({ success: false, message: 'Event already exists in this time slot' });
 
     const newEvent = new Event({
       title,
@@ -50,9 +60,10 @@ const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, 
       allDay,
       type,
       repeatFrequency,
-      eventLocation,
       isInProject,
     });
+
+    if (eventLocation) newEvent.eventLocation = eventLocation;
 
     if (repeatFrequency !== 'none') {
       if (fatherId) newEvent.fatherId = fatherId;
@@ -82,14 +93,15 @@ const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, 
 }
 
 const createNewEvent = async (req, res) => {
+  const userName = req.session.username;
   const { title, type, startDate, endDate, allDay, repeatFrequency, repeatEndDate, repeatTimes, eventLocation, sharedWith, isInProject} = req.body;
 
   try {
-
+    const user = await User.findOne({ username: userName });
     const users = await findUserId(sharedWith);
 
     if (repeatFrequency === 'none') {
-      const event = await newEvent(title, type, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
+      const event = await newEvent(title, user, type, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
       if (event.success) {
         res.status(201).json({ success: true, event: event.event });
       } else {
@@ -112,7 +124,7 @@ const createNewEvent = async (req, res) => {
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          const event = await newEvent(title, user, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -132,7 +144,7 @@ const createNewEvent = async (req, res) => {
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          const event = await newEvent(title, user, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -188,6 +200,8 @@ const editEvent = async (Id, title, type, startDate, endDate, allDay, eventLocat
 
 // Update an event
 const updateEvent = async (req, res) => {
+  const userName = req.session.username;
+  const user = await User.findOne({ username: userName });
   const { eventId } = req.params;
   const { title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes } = req.body;
 
@@ -237,7 +251,7 @@ const updateEvent = async (req, res) => {
             newStartDate.setDate(newStartDate.getDate() + (i * gap));
             newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-            const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+            const event = await newEvent(title, user, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
             if (event.success) events.push(event.event);
             else {
               res.status(400).json({ success: false, message: event.message });
@@ -288,10 +302,10 @@ const deleteEvent = async (req, res) => {
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
     
     if (event.user.toString() === user._id.toString()) {
-      if (repeatFrequency === 'none') await event.remove();
+      if (event.repeatFrequency === 'none') await event.deleteOne();
       else await Event.deleteMany({ fatherId: event.fatherId });
     } else {
-      if (repeatFrequency === 'none') {
+      if (event.repeatFrequency === 'none') {
         event.sharedWith = event.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
         await event.save();
       } else {
