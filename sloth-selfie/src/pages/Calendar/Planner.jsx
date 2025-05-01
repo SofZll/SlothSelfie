@@ -80,10 +80,16 @@ const Planner = () => {
                     _id: data._id,
                     title: data.title,
                     user: data.user,
-                    start: new Date(data.startDate),
-                    end: new Date(data.endDate),
+                    ...(data.allDay ? {
+                        start: new Date(data.startDate).setHours(0, 0, 0, 0),
+                        end: new Date(data.endDate).setHours(23, 59, 59, 999),
+                    } : {
+                        start: new Date(data.startDate),
+                        end: new Date(data.endDate),
+                    }),
                     type: 'event',
                     inProject: data.isInProject,
+                    allDay: data.allDay,
                 };
             });
         } else {
@@ -114,7 +120,14 @@ const Planner = () => {
             setActivity({...activities.find(a => a._id === item._id)})
             await fetchNotifications({ elementId: item._id });
         } else if (item.type === 'event') {
-            setEvent({...events.find(e => e._id === item._id)});
+            const e = events.find(e => e._id === item._id);
+            if (e.allDay) {
+                setEvent({ ...e, duration: (new Date(e.endDate).getDate() - new Date(e.startDate).getDate() + 1), time: '', isPreciseTime: false });
+            } else {
+                const minutes = [0, 15, 30, 45];
+                const time = timeFromDate(new Date(e.startDate));
+                setEvent({ ...e, time, duration: (new Date(e.endDate).getHours() - new Date(e.startDate).getHours()), isPreciseTime: !minutes.includes(new Date(e.startDate).getMinutes()) });
+            }
             await fetchNotifications({ elementId: item._id });
         } else if (item.type === 'task') {
             setTask({...tasks.find(t => t._id === item._id)});
@@ -155,7 +168,7 @@ const Planner = () => {
         if (event.type === 'activity' || event.type === 'task' || event.type === 'pomodoro') return onActivityTaskPomodoroDrop({ event, start });
         else if (event.type === 'event') {
             const e = events.find(e => e._id === event._id);
-            const response = await apiService(`/event/${e._id}`, 'PUT', { ...e, start, end });
+            const response = await apiService(`/event/${e._id}`, 'PUT', { ...e, startDate: start, endDate: end });
             if (response.success) setEvents(events.map(e => e._id === event._id ? response.event : e));
         } else if (event.type === 'no availability') {
             const na = availabilities.find(na => na._id === event._id);
