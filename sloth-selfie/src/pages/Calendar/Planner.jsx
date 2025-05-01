@@ -129,11 +129,11 @@ const Planner = () => {
         } else if (item.type === 'event') {
             const e = events.find(e => e._id === item._id);
             if (e.allDay) {
-                setEvent({ ...e, duration: (new Date(e.endDate).getDate() - new Date(e.startDate).getDate() + 1), time: '', isPreciseTime: false });
+                setEvent({ ...e, duration: (new Date(e.endDate).getDate() - new Date(e.startDate).getDate() + 1), time: '', isPreciseTime: false, fatherId: e.fatherId || '', repeatMode: (e.repeatTimes && e.repeatTimes > 0) ? 'ntimes' : 'until'});
             } else {
                 const minutes = [0, 15, 30, 45];
                 const time = timeFromDate(new Date(e.startDate));
-                setEvent({ ...e, time, duration: (new Date(e.endDate).getHours() - new Date(e.startDate).getHours()), isPreciseTime: !minutes.includes(new Date(e.startDate).getMinutes()) });
+                setEvent({ ...e, time, duration: (new Date(e.endDate).getHours() - new Date(e.startDate).getHours()), isPreciseTime: !minutes.includes(new Date(e.startDate).getMinutes()), fatherId: e.fatherId || '', repeatMode: (e.repeatTimes && e.repeatTimes > 0) ? 'ntimes' : 'until'});
             }
             await fetchNotifications({ elementId: item._id });
         } else if (item.type === 'task') {

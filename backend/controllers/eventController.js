@@ -76,9 +76,9 @@ const newEvent = async (title, user, type, startDate, endDate, allDay, eventLoca
     saveEvent = await newEvent.save();
 
     if (repeatFrequency !== 'none' && !fatherId) {
-      const events = await Event.findById(saveEvent._id);
-      events.fatherId = saveEvent._id;
-      await events.save();
+      const event = await Event.findById(saveEvent._id);
+      event.fatherId = saveEvent._id;
+      await event.save();
     }
 
     const event = await Event.findById(saveEvent._id)
@@ -136,9 +136,8 @@ const createNewEvent = async (req, res) => {
           }
         }
       } else if (repeatEndDate) {
-        const endDate = new Date(repeatEndDate);
         let i = 0;
-        while (startDate <= endDate) {
+        while (new Date(startDate).setDate(new Date(startDate).getDate() + (i * gap)) <= new Date(repeatEndDate)) {
           const newStartDate = new Date(startDate);
           const newEndDate = new Date(endDate);
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
