@@ -8,13 +8,13 @@ const { scheduleNotification } = require('../agenda/notificationScheduler');
 const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 const { getCurrentNow } = require('../services/timeMachineService');
-
-const now = getCurrentNow();
+const { scheduleNotification } = require('../agenda/notificationScheduler');
 
 // Creating an activinotenotety
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const { title, deadline, completed, sharedWith} = req.body;
+    const now = getCurrentNow();
     
     try {
         const user = await User.findOne({ username: userName });
@@ -28,6 +28,20 @@ const createActivity = async (req, res) => {
         const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), createdAt: now });
         const savedActivity = await activity.save();
 
+        const notifications = sharedWithUsers.map(sharedUser => ({
+            user: sharedUser._id,
+            element: savedActivity._id,
+            elementType: 'Activity',
+            type: 'now',
+            mode: {
+                system: true,
+                email: true,
+            }
+        }));
+
+        const createdNotifications = await Notification.insertMany(notifications);
+        await scheduleNotification(createdNotifications);
+
         const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
         
         res.status(200).json({ success: true, activity: populatedActivity });
@@ -40,6 +54,7 @@ const createActivity = async (req, res) => {
 // fetch all activities
 const getActivities = async (req, res) => {
     const userName = req.session.username;
+    const now = getCurrentNow();
     
     try {
         const user = await User.findOne({ username: userName });
@@ -96,6 +111,7 @@ const updateActivity = async (req, res) => {
     const { activity } = req.body;
     const { title, deadline, completed, sharedWith, status } = activity;
     const userName = req.session.username;
+    const now = getCurrentNow();
 
     try {
         const user = await User.findOne({ username: userName });

@@ -9,7 +9,7 @@ import { X } from 'lucide-react';
 
 function PreviewSetUp(props) {
     const [isSetting, setIsSetting] = useState('calendar');
-    const { setCustomizations } = useContext(CustomizationContext);
+    const { customizations, setCustomizations } = useContext(CustomizationContext);
     const navigate = useNavigate();
 
     const handleSetUp = () => {
@@ -32,89 +32,177 @@ function PreviewSetUp(props) {
     };
 
     const renderCustomizationOptions = () => {
-        switch (isSetting) {
+        switch (isSetting) {  
             case 'calendar':
                 return (
                     <div className='customization-options'>
                         <h5>Customize Calendar</h5>
-                        <Button 
-                            text="Show Calendar" 
-                            onClick={() => handleCustomizationChange('calendar', 'showCalendar')} 
-                        />
-                        <Button 
-                            text="Today's Events list"
-                            onClick={() => handleCustomizationChange('calendar', 'showEventsList')} 
-                        />
-                        <Button 
-                            text="This week's Activities List"
-                            onClick={() => handleCustomizationChange('calendar', 'showActivitiesList')}
-                        />
-                        <Button
-                            text="This week's Tasks List"
-                            onClick={() => handleCustomizationChange('calendar', 'showTasksList')}
-                        />
-                        {/* other calendar personalizations */}
+                        <div className="radio-group">
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="calendarOption"
+                                    value="showCalendar"
+                                    checked={customizations.calendar === 'showCalendar'}
+                                    onChange={() => handleCustomizationChange('calendar', 'showCalendar')}
+                                />
+                                Show Calendar
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="calendarOption"
+                                    value="showEventsList"
+                                    checked={customizations.calendar === 'showEventsList'}
+                                    onChange={() => handleCustomizationChange('calendar', 'showEventsList')}
+                                />
+                                Today's Events List
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="calendarOption"
+                                    value="showActivitiesList"
+                                    checked={customizations.calendar === 'showActivitiesList'}
+                                    onChange={() => handleCustomizationChange('calendar', 'showActivitiesList')}
+                                />
+                                This Week's Activities List
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="calendarOption"
+                                    value="showTasksList"
+                                    checked={customizations.calendar === 'showTasksList'}
+                                    onChange={() => handleCustomizationChange('calendar', 'showTasksList')}
+                                />
+                                This Week's Tasks List
+                            </label>
+                        </div>
                     </div>
                 );
             case 'notes':
                 return (
                     <div className='customization-options'>
                         <h5>Customize Notes</h5>
-                        <Button 
-                            text="Notes list (10 most recent)"
-                            onClick={() => handleCustomizationChange('notes', 'listOfNotes')} 
-                        />
-                        <Button 
-                            text="Most recent Note"
-                            onClick={() => handleCustomizationChange('notes', 'lastNote')} 
-                        />
-                        <Button
-                            text="Add a Note"
-                            onClick={() => handleCustomizationChange('notes', 'addNote')}
-                        />
-                        {/* other notes personalizations */}
+                        <div className="radio-group">
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="notesOption"
+                                    value="listOfNotes"
+                                    checked={customizations.notes === 'listOfNotes'}
+                                    onChange={() => handleCustomizationChange('notes', 'listOfNotes')}
+                                />
+                                Notes list (10 most recent)
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="notesOption"
+                                    value="lastNote"
+                                    checked={customizations.notes === 'lastNote'}
+                                    onChange={() => handleCustomizationChange('notes', 'lastNote')}
+                                />
+                                Most recent Note
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="notesOption"
+                                    value="addNote"
+                                    checked={customizations.notes === 'addNote'}
+                                    onChange={() => handleCustomizationChange('notes', 'addNote')}
+                                />
+                                Add a Note
+                            </label>
+                        </div>
                     </div>
                 );
             case 'pomodoro':
                 return (
                     <div className='customization-options'>
                         <h5>Customize Pomodoro</h5>
-                        <Button 
-                            text="Quick Start"
-                            onClick={() => handleCustomizationChange('pomodoro', 'quickStart')} 
-                        />
-                        <Button 
-                            text="Pomodoros ToDo list"
-                            onClick={() => handleCustomizationChange('pomodoro', 'listOfPomodoros')} 
-                        />
-                        <Button 
-                            text="Last Pomodoro"
-                            onClick={() => handleCustomizationChange('pomodoro', 'lastPomodoro')} 
-                        />
-                        <Button
-                            text="Pomodoros Stats"
-                            onClick={() => handleCustomizationChange('pomodoro', 'stats')}
-                        />
-                        {/* other pomodoro personalizations */}
+                        <div className="radio-group">
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="pomodoroOption"
+                                    value="quickStart"
+                                    checked={customizations.pomodoro === 'quickStart'}
+                                    onChange={() => handleCustomizationChange('pomodoro', 'quickStart')}
+                                />
+                                Quick Start
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="pomodoroOption"
+                                    value="listOfPomodoros"
+                                    checked={customizations.pomodoro === 'listOfPomodoros'}
+                                    onChange={() => handleCustomizationChange('pomodoro', 'listOfPomodoros')}
+                                />
+                                Pomodoros ToDo list
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="pomodoroOption"
+                                    value="lastPomodoro"
+                                    checked={customizations.pomodoro === 'lastPomodoro'}
+                                    onChange={() => handleCustomizationChange('pomodoro', 'lastPomodoro')}
+                                />
+                                Last Pomodoro
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="pomodoroOption"
+                                    value="stats"
+                                    checked={customizations.pomodoro === 'stats'}
+                                    onChange={() => handleCustomizationChange('pomodoro', 'stats')}
+                                />
+                                Pomodoros Stats
+                            </label>
+                        </div>
                     </div>
                 );
             case 'projects':
                 return (
                     <div className='customization-options'>
                         <h5>Customize Projects</h5>
-                        <Button 
-                            text="Projects list"
-                            onClick={() => handleCustomizationChange('projects', 'listOfProjects')} 
-                        />
-                        <Button 
-                            text="Recent Projects deadlines"
-                            onClick={() => handleCustomizationChange('projects', 'recentProjectsDeadlines')}
-                        />
-                        <Button
-                            text="Choose a project's Gantt"
-                            onClick={() => handleCustomizationChange('projects', 'projectGanttChart')}
-                        />
-                        {/* other projects personalizations */}
+                        <div className="radio-group">
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="projectsOption"
+                                    value="listOfProjects"
+                                    checked={customizations.projects === 'listOfProjects'}
+                                    onChange={() => handleCustomizationChange('projects', 'listOfProjects')}
+                                />
+                                Projects list
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="projectsOption"
+                                    value="recentProjectsDeadlines"
+                                    checked={customizations.projects === 'recentProjectsDeadlines'}
+                                    onChange={() => handleCustomizationChange('projects', 'recentProjectsDeadlines')}
+                                />
+                                Recent Projects deadlines
+                            </label>
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="projectsOption"
+                                    value="projectGanttChart"
+                                    checked={customizations.projects === 'projectGanttChart'}
+                                    onChange={() => handleCustomizationChange('projects', 'projectGanttChart')}
+                                />
+                                Choose a project's Gantt
+                            </label>
+                        </div>
                     </div>
                 );
             default:

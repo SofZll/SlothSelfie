@@ -15,7 +15,7 @@ const CardActivity = ({ Activity, smallView }) => {
     }
 
     const selectActivity = () => {
-        setActivity({ ...Activity, sharedWith: Activity.sharedWith.map(user => user.username)});
+        setActivity({ ...Activity});
         setSelected({ selection: 'activity', edit: true, add: false, popup: true });
         fetchNotifications({ elementId: Activity._id });
     }
