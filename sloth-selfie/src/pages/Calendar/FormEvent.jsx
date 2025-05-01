@@ -175,7 +175,7 @@ const FormEvent = () => {
             if (event.repeatFrequency === 'none') {
                 if (selected.edit) setEvents(events.map(evt => evt._id === event._id ? response.event : evt));
                 else setEvents([...events, response.event]);
-            } else setEvents([...events.filter(evt => evt.fatherId && evt.fatherId !== response.events[0].fatherId), ...response.events]);
+            } else setEvents([...events.filter(evt => evt.fatherId !== response.events[0].fatherId), ...response.events]);
         } else NewSwal.fire({ title: 'Error saving event', icon: 'error', text: response.message});
         resetEvent();
         resetSelected();
