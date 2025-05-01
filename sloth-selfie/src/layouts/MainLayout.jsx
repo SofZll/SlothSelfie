@@ -9,7 +9,6 @@ import MobileNav from '../components/MobileNav'
 import Header from '../components/Header'
 import TimeMachineButton from '../components/TimeMachine/TimeMachineButton';
 import Settings from '../pages/Settings';
-import { TimeMachineProvider } from '../contexts/TimeMachineContext';
 import { ChatProvider } from '../contexts/ChatContext';
 import ChatBox from '../components/ChatBox/ChatBox';
 import NotificationButton from '../components/NotificationButton';
@@ -35,9 +34,7 @@ const MainLayout = ({ children }) => {
             )}
             <Header />
             
-            <TimeMachineProvider>
-                <TimeMachineButton />
-            </TimeMachineProvider>
+            <TimeMachineButton />
 
             {setting.open && <Settings />}
 

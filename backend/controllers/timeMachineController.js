@@ -1,5 +1,5 @@
 const TimeMachine = require('../models/timeMachineModel');
-const { setTimeMachine, resetTimeMachine, isActive } = require('../services/timeMachineService');
+const { setTimeMachine, resetTimeMachine, isActive, getCurrentNow } = require('../services/timeMachineService');
 
 const { combineDateTime } = require('../utils/utils');
 
@@ -12,6 +12,7 @@ const setTime = async (req, res) => {
         if (!dateTime) return res.status(400).json({ success: false, message: 'Invalid date or time format' });
 
         setTimeMachine(dateTime);
+        console.log('Time set to:', dateTime);
         
         res.status(200).json({ success: true, message: 'Time set successfully' });
     }catch (error) {
@@ -25,7 +26,7 @@ const resetTime = async (req, res) => {
     try {
         resetTimeMachine();
 
-        res.status(200).json({ success: true, state, timeEntry, message: 'Time reset successfully' });
+        res.status(200).json({ success: true, message: 'Time reset successfully' });
     } catch (error) {
         console.error('Error resetting time:', error);
         res.status(500).json({ success: false, message: 'Error resetting time' });
@@ -35,7 +36,7 @@ const resetTime = async (req, res) => {
 const getIsActive = async (req, res) => {
     try {
         const state = isActive();
-        res.status(200).json({ success: true, state });
+        res.status(200).json({ success: true, state, virtualNow: getCurrentNow() });
     } catch (error) {
         console.error('Error getting time machine state:', error);
         res.status(500).json({ success: false, message: 'Error getting time machine state' });

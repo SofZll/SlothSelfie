@@ -1,26 +1,69 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect, createContext, useRef } from 'react';
 import '../styles/TimeMachine.css';
 
 import { dateFromDate, timeFromDate } from '../utils/utils';
+import { apiService } from '../services/apiService';
 
 const TimeMachineContext = createContext();
 
 const TimeMachineProvider = ({ children }) => {
-    const [virtualNow, setVirtualNow] = useState(new Date());
+    const [isActive, setIsActive] = useState(false);
     const [machineOpen, setMachineOpen] = useState(false);
-    const currentDate = dateFromDate(virtualNow);
-    const currentTime = timeFromDate(virtualNow);
+    const virtualNowRef = useRef(new Date());
+
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const triggerRefresh = () => setRefreshKey((prev) => prev + 1);
+
+    // TODO: mettere resettime e seetime qui
+    useEffect(() => {
+        const loadTimeState = async () => {
+            try {
+                const response = await apiService('/time/state', 'GET');
+
+                if (response.success) {
+                    setIsActive(response.state);
+                    virtualNowRef.current = new Date(response.virtualNow);
+                    localStorage.setItem('timeMachineState', JSON.stringify({
+                        isActive: response.state,
+                        virtualNow: new Date(response.virtualNow)
+                    }));
+                } else {
+                    const savedState = localStorage.getItem('timeMachineState');
+                    if (savedState) {
+                        const { isActive, virtualNow } = JSON.parse(savedState);
+                        setIsActive(isActive);
+                        virtualNowRef.current = new Date(virtualNow);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading time machine state:', error);
+                const savedState = localStorage.getItem('timeMachineState');
+                if (savedState) {
+                    const { isActive, virtualNow } = JSON.parse(savedState);
+                    setIsActive(isActive);
+                    virtualNowRef.current = new Date(virtualNow);
+                }
+            }
+        }
+
+        loadTimeState();
+    }, []);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setVirtualNow(prev => new Date(prev.getTime() + 1000)); // Aggiornamento corretto
+            virtualNowRef.current = new Date(virtualNowRef.current.getTime() + 1000);
         }, 1000);
-        
+    
         return () => clearInterval(interval);
     }, []);
-    
+
+    const getVirtualNow = () => new Date(virtualNowRef.current);
+    const getCurrentDate = () => dateFromDate(virtualNowRef.current);
+    const getCurrentTime = () => timeFromDate(virtualNowRef.current);
+
     return (
-        <TimeMachineContext.Provider value={{ machineOpen, setMachineOpen, virtualNow, setVirtualNow, currentTime, currentDate }}>
+        <TimeMachineContext.Provider value={{ machineOpen, setMachineOpen, getVirtualNow, setVirtualNow: (newDate) => { virtualNowRef.current = new Date(newDate); }, isActive, setIsActive, getCurrentDate, getCurrentTime, refreshKey, triggerRefresh }}>
             {children}
         </TimeMachineContext.Provider>
     );

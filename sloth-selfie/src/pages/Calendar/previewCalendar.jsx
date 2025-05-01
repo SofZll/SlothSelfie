@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
 
@@ -7,13 +7,16 @@ import '../../styles/App.css';
 
 import { AuthContext } from '../../contexts/AuthContext';
 import { useCalendar } from "../../contexts/CalendarContext";
+import { TimeMachineContext } from "../../contexts/TimeMachineContext";
 
 import { apiService } from '../../services/apiService';
 
 
 const PreviewCalendar = ({ viewType }) => {
     const { activities, setActivities, events, setEvents } = useCalendar();
-    const { user } = React.useContext(AuthContext);
+    const { user } = useContext(AuthContext);
+    const { getVirtualNow } = useContext(TimeMachineContext);
+    const now = new Date(getVirtualNow());
 
     const navigate = useNavigate();
     const [todayActivities, setTodayActivities] = useState([]);
@@ -58,7 +61,7 @@ const PreviewCalendar = ({ viewType }) => {
     // Get today's events
     useEffect(() => {
         if (events.length > 0) {
-            const today = new Date(); // TODO: TIME MACHINE DATE  
+            const today = new Date(now);
             const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
         
             const todayFilteredEvents = events.filter(ev => {
@@ -74,10 +77,10 @@ const PreviewCalendar = ({ viewType }) => {
 const getUpcomingItems = (items, dateKey, setItems) => {
     if (items.length === 0) return;
 
-    const today = new Date(); // TIME MACHINE DATE
-    today.setHours(0, 0, 0, 0); // Compare only the days
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0); // Set time to midnight to compare only the date
 
-    const nextWeek = new Date();
+    const nextWeek = new Date(today);
     nextWeek.setDate(today.getDate() + 7); // Limit to 7 days from today
 
     const upcoming = items.filter(item => {
@@ -134,6 +137,14 @@ useEffect(() => {
         }
     };
 
+    const tileClassName = ({ date }) => {
+        const isVirtualNow = date.toDateString() === now.toDateString();
+        if (isVirtualNow) {
+          return 'highlight-today';
+        }
+        return '';
+    };
+
     const getEventBorderClass = (event) => {
         if (event.isInProject) return "event-border-orange";
         return "event-border-blue";
@@ -142,7 +153,7 @@ useEffect(() => {
     const renderCalendar = () => {
         switch (viewType) {
             case "calendar":
-                return <Calendar tileContent={tileContent} />;
+                return <Calendar value={new Date(now)} tileContent={tileContent} tileClassName={tileClassName} />;
             case "events":
                 return (
                     <div className="scrollable-list EventShow">
@@ -172,8 +183,9 @@ useEffect(() => {
                     <div className="scrollable-list ActivityShow">
                         {todayActivities.length > 0 ? (
                             todayActivities.map((activity) => {
+                                const tmpNow = new Date(now);
                                 const activityDate = new Date(activity.deadline);
-                                const isOverdue = activityDate < new Date().setHours(0, 0, 0, 0); // check if overdue
+                                const isOverdue = activityDate < tmpNow.setHours(0, 0, 0, 0); // check if overdue
                                 return (
                                     <div key={activity._id} className={`event-card ${isOverdue ? "event-border-red" : "event-border-aqua"}`}>
                                         <b>{activity.title}</b>
@@ -193,8 +205,9 @@ useEffect(() => {
                     <div className="scrollable-list TaskShow">
                         {todayTasks.length > 0 ? (
                             todayTasks.map((task) => {
+                                const tmpNow = new Date(now);
                                 const taskDate = new Date(task.deadline);
-                                const isOverdue = taskDate < new Date().setHours(0, 0, 0, 0); // check if overdue
+                                const isOverdue = taskDate < tmpNow.setHours(0, 0, 0, 0); // check if overdue
                                 return (
                                     <div key={task._id} className={`event-card ${isOverdue ? "event-border-red" : "event-border-lightgreen"}`}>
                                         <b>{task.title}</b>

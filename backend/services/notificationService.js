@@ -2,6 +2,7 @@ const Notification = require('../models/notificationModel');
 const Subscription = require('../models/subscriptionModel');
 const User = require('../models/userModel');
 const webPush = require('web-push');
+const nodemailer = require('nodemailer');
 const { getIO } = require('../socket/socket');
 
 const sendSystemNotification = async (notification) => {

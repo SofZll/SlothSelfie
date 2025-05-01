@@ -18,9 +18,17 @@ const getTasks = async (req, res) => {
             ]
         })
         .populate('user', 'username')
-        .populate('sharedWith', 'username');
+        .populate('sharedWith', 'username')
+        .lean();
 
-        res.status(200).json({ success: true, tasks });
+        const transformedTasks = tasks.map(task => {
+            return {
+                ...task,
+                sharedWith: task.sharedWith.map(user => user.username)
+            }
+        });
+
+        res.status(200).json({ success: true, tasks: transformedTasks });
     } catch (error) {
         console.error('Error fetching tasks:', error);
         res.status(500).json({ message: error.message });
@@ -43,6 +51,7 @@ const editTask = async (req, res) => {
         task.completed = completed;
 
         const updatedTask = await task.save();
+        updatedTask.sharedWith = updatedTask.sharedWith.map(user => user.username);
         res.status(200).json({ success: true, task: updatedTask });
     } catch (error) {
         console.error('Error updating task:', error);

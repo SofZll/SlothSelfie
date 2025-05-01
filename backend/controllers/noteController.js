@@ -5,13 +5,12 @@ const { addTasks, editTasks, deleteTasks, deleteUserFromShareWith } = require('.
 const { findUserId } = require('../utils/utils');
 const { getCurrentNow } = require('../services/timeMachineService');
 
-const now = getCurrentNow();
-
 // Create a new note
 const createNote = async (req, res) => {
     const { title, category, content, tasks, noteAccess, sharedWith } = req.body;
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
 
     try {
         const users = await findUserId(sharedWith);
@@ -47,6 +46,7 @@ const createNote = async (req, res) => {
 const getNotes = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
 
     try {
         
@@ -71,8 +71,9 @@ const getNotes = async (req, res) => {
 };
 
 // Fetch a single note by ID
-const getNote2 = async (req, res) => {
+const getNote = async (req, res) => {
     const { noteId } = req.params;
+    const now = getCurrentNow();
 
     try{
         const note = await Note.findById(noteId)
@@ -80,6 +81,8 @@ const getNote2 = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
 
+        console.log('Note:', note);
+        console.log('Current time:', now);
         if (note.createdAt > now) return res.status(403).json({ success: false, message: 'Note not found' }); //MI DA 403 FORBIDDEN
 
         res.status(200).json({ success: true, note });
@@ -89,28 +92,11 @@ const getNote2 = async (req, res) => {
     }
 }
 
-// Fetch a single note by ID
-const getNote = async (req, res) => {
-    const { noteId } = req.params;
-
-    try{
-        const note = await Note.findById(noteId)
-        .populate('user', 'username')
-        .populate('tasks')
-        .populate('sharedWith', 'username');
-
-        res.status(200).json({ success: true, note });
-    }
-    catch (error) {
-        console.error('Error fetching note:', error);
-        return res.status(500).json({ success: false, message: 'Error fetching note' });
-    }
-}
-
 // Update a note
 const updateNote = async (req, res) => {
     const { noteId } = req.params;
     const { title, user, category, content, tasks, addedTasks, deletedTasks, noteAccess, sharedWith } = req.body;
+    const now = getCurrentNow();
 
     try {
         const note = await Note.findById(noteId);
@@ -142,7 +128,7 @@ const updateNote = async (req, res) => {
         note.category = category;
         note.content = content;
         note.noteAccess = noteAccess;
-        note.updatedAt = new Date();
+        note.updatedAt = now;
         note.sharedWith = noteAccess === 'shared' ? users : [];
 
         const updatedNote = await note.save();
