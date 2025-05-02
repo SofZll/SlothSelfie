@@ -180,7 +180,7 @@ const deleteActivity = async (req, res) => {
         if (activity.user.toString() !== user._id.toString()) {
             activity.sharedWith = activity.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
             await activity.save();
-        } else await activity.remove();
+        } else await activity.deleteOne();
 
         res.status(200).json({ success: true, message: "Activity deleted successfully" });
     } catch (error) {

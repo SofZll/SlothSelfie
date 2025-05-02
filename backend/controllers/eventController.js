@@ -9,6 +9,7 @@ const { createEvent } = require('ics'); // Import the library for iCalendar gene
 
 const ical = require('node-ical');
 const fs = require('fs');
+const { RRule } = require('rrule');
 
 
 const getEvents = async (req, res) => {
@@ -27,6 +28,7 @@ const getEvents = async (req, res) => {
     }).populate('sharedWith', 'username')
     .populate('user', 'username');
 
+
     res.status(200).json({ success: true, events });
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -34,12 +36,21 @@ const getEvents = async (req, res) => {
   }
 };
 
-const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
-  const userName = req.session.username;
-  const user = await User.findOne({ username: userName });
+const newEvent = async (title, user, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
 
   try {
     if (!user) return ({ success: false, message: 'User not found' });
+
+    const listSameDate = await Event.find({
+      $or: [
+        { startDate: { $gte: startDate, $lte: endDate } },
+        { endDate: { $gte: startDate, $lte: endDate } },
+        { startDate: { $lte: startDate }, endDate: { $gte: endDate } }
+      ],
+      user: user._id
+    });
+
+    if (listSameDate.length > 0) return ({ success: false, message: 'Event already exists in this time slot' });
 
     const newEvent = new Event({
       title,
@@ -50,9 +61,10 @@ const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, 
       allDay,
       type,
       repeatFrequency,
-      eventLocation,
       isInProject,
     });
+
+    if (eventLocation) newEvent.eventLocation = eventLocation;
 
     if (repeatFrequency !== 'none') {
       if (fatherId) newEvent.fatherId = fatherId;
@@ -65,9 +77,9 @@ const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, 
     saveEvent = await newEvent.save();
 
     if (repeatFrequency !== 'none' && !fatherId) {
-      const events = await Event.findById(saveEvent._id);
-      events.fatherId = saveEvent._id;
-      await events.save();
+      const event = await Event.findById(saveEvent._id);
+      event.fatherId = saveEvent._id;
+      await event.save();
     }
 
     const event = await Event.findById(saveEvent._id)
@@ -82,14 +94,15 @@ const newEvent = async (title, type, startDate, endDate, allDay, eventLocation, 
 }
 
 const createNewEvent = async (req, res) => {
+  const userName = req.session.username;
   const { title, type, startDate, endDate, allDay, repeatFrequency, repeatEndDate, repeatTimes, eventLocation, sharedWith, isInProject} = req.body;
 
   try {
-
+    const user = await User.findOne({ username: userName });
     const users = await findUserId(sharedWith);
 
     if (repeatFrequency === 'none') {
-      const event = await newEvent(title, type, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
+      const event = await newEvent(title, user, type, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
       if (event.success) {
         res.status(201).json({ success: true, event: event.event });
       } else {
@@ -112,7 +125,7 @@ const createNewEvent = async (req, res) => {
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          const event = await newEvent(title, user, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -124,15 +137,14 @@ const createNewEvent = async (req, res) => {
           }
         }
       } else if (repeatEndDate) {
-        const endDate = new Date(repeatEndDate);
         let i = 0;
-        while (startDate <= endDate) {
+        while (new Date(startDate).setDate(new Date(startDate).getDate() + (i * gap)) <= new Date(repeatEndDate)) {
           const newStartDate = new Date(startDate);
           const newEndDate = new Date(endDate);
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          const event = await newEvent(title, user, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -188,6 +200,8 @@ const editEvent = async (Id, title, type, startDate, endDate, allDay, eventLocat
 
 // Update an event
 const updateEvent = async (req, res) => {
+  const userName = req.session.username;
+  const user = await User.findOne({ username: userName });
   const { eventId } = req.params;
   const { title, type, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes } = req.body;
 
@@ -237,7 +251,7 @@ const updateEvent = async (req, res) => {
             newStartDate.setDate(newStartDate.getDate() + (i * gap));
             newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-            const event = await newEvent(title, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+            const event = await newEvent(title, user, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
             if (event.success) events.push(event.event);
             else {
               res.status(400).json({ success: false, message: event.message });
@@ -288,10 +302,10 @@ const deleteEvent = async (req, res) => {
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
     
     if (event.user.toString() === user._id.toString()) {
-      if (repeatFrequency === 'none') await event.remove();
+      if (event.repeatFrequency === 'none') await event.deleteOne();
       else await Event.deleteMany({ fatherId: event.fatherId });
     } else {
-      if (repeatFrequency === 'none') {
+      if (event.repeatFrequency === 'none') {
         event.sharedWith = event.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
         await event.save();
       } else {
@@ -311,7 +325,6 @@ const deleteEvent = async (req, res) => {
 };
 
 //Function to export events on iCalendar (using library: ics.js)
-//TODO: TESTARE E MODIFICARE SE NECESSARIO (quando avremo modello event definitivo)
 async function exportEvent(req, res){
   try {
       const {eventId} = req.params;
@@ -322,6 +335,11 @@ async function exportEvent(req, res){
       }
 
       const user = await User.findOne({ username: userName });
+
+      //For the allDay events, we need to add +1 day to the end date in order to have the correct date in the .ics file
+      const adjustedEnd = event.allDay
+      ? new Date(event.endDate.getTime() + 24 * 60 * 60 * 1000) // +1 giorno
+      : event.endDate;
       
       // Build the start/end array
       const start = event.allDay
@@ -340,16 +358,16 @@ async function exportEvent(req, res){
 
     const end = event.allDay
       ? [
-          event.endDate.getFullYear(),
-          event.endDate.getMonth() + 1,
-          event.endDate.getDate(),
+          adjustedEnd.getFullYear(),
+          adjustedEnd.getMonth() + 1,
+          adjustedEnd.getDate(),
         ]
       : [
-          event.endDate.getFullYear(),
-          event.endDate.getMonth() + 1,
-          event.endDate.getDate(),
-          event.endDate.getHours(),
-          event.endDate.getMinutes(),
+          adjustedEnd.getFullYear(),
+          adjustedEnd.getMonth() + 1,
+          adjustedEnd.getDate(),
+          adjustedEnd.getHours(),
+          adjustedEnd.getMinutes(),
         ];
 
     // Build the recurrence rule if needed
@@ -365,7 +383,7 @@ async function exportEvent(req, res){
       recurrenceRule = `FREQ=${freqMap[event.repeatFrequency]};`;
 
       if (event.repeatTimes && event.repeatTimes > 0) {
-        recurrenceRule += `COUNT=${event.repeatTimes};`;
+        recurrenceRule += `COUNT=${event.repeatTimes}`;
       } else if (event.repeatEndDate) {
         const endRecDate = event.repeatEndDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
         recurrenceRule += `UNTIL=${endRecDate}`;
@@ -408,7 +426,7 @@ async function exportEvent(req, res){
 }
 
 // Import events from ICS file
-//TODO: TESTARE E MODIFICARE SE NECESSARIO (quando avremo modello event definitivo) controlla gestione di eventi ripetuti
+//TODO: controlla gestione di eventi ripetuti
 const importEvents = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
@@ -430,23 +448,41 @@ const importEvents = async (req, res) => {
         const icsEvent = data[key];
         if (icsEvent.type === 'VEVENT') {
           const commonOriginalId = new mongoose.Types.ObjectId();  // Create the originalId for the event one time
+          const isAllDay = !icsEvent.start.getHours(); // Check if the event is all-day
+          
+          //Correct end date for all-day events interpreted as exclusive by other apps (e.g. Outlook)
+          const correctedEnd = isAllDay
+            ? new Date(icsEvent.end.getTime() - 24 * 60 * 60 * 1000)
+            : new Date(icsEvent.end);
 
           // Check if the event has a recurrence rule (rrule)
           if (icsEvent.rrule) {
-            const rule = icsEvent.rrule;
+            const rule = RRule.fromString(icsEvent.rrule.toString());
+            console.log('Recurrence rule:', rule);  // Log the recurrence rule for debugging
+
+            const RRuleFrequencyMap = {
+              [RRule.DAILY]: 'daily',
+              [RRule.WEEKLY]: 'weekly',
+              [RRule.MONTHLY]: 'monthly',
+              [RRule.YEARLY]: 'yearly',
+            };
+
             const startDate = new Date(icsEvent.start);
-      
+
             // Create a new event for each occurrence of the recurring event
-            const dates = rule.allBetween(startDate, rule.options.until || new Date('2100-01-01'), true); 
-            // true = inclusivo
+            const dates = rule.between(startDate, rule.options.until || new Date('2100-01-01'), true); // true = inclusive
       
+            const duration = correctedEnd - icsEvent.start;
+
             for (const date of dates) {
+              const recurringIsAllDay = !date.getHours();
+
               const newEvent = new Event({
                 title: icsEvent.summary || 'Untitled Event',
                 startDate: new Date(date),
-                endDate: new Date(date.getTime() + (icsEvent.end - icsEvent.start)), //duration is the same for all occurrences
-                allDay: !date.getHours(),
-                repeatFrequency: rule.options.freq.toLowerCase(),
+                endDate: new Date(date.getTime() + duration), //duration is the same for all occurrences
+                allDay: recurringIsAllDay,
+                repeatFrequency: RRuleFrequencyMap[rule.options.freq] || 'custom',
                 repeatEndDate: rule.options.until || null,
                 repeatTimes: rule.options.count || 0,
                 eventLocation: icsEvent.location || 'physical',
@@ -464,8 +500,8 @@ const importEvents = async (req, res) => {
             const newEvent = new Event({
               title: icsEvent.summary || 'Untitled Event',
               startDate: new Date(icsEvent.start),
-              endDate: new Date(icsEvent.end),
-              allDay: !icsEvent.start.getHours(),
+              endDate: correctedEnd,
+              allDay: isAllDay,
               repeatFrequency: 'none',
               repeatEndDate: null,
               repeatTimes: 0,
@@ -478,18 +514,6 @@ const importEvents = async (req, res) => {
 
             console.log('Imported single event:', newEvent);  // Log the imported event for debugging
           }
-
-          //try with activity model   IT WORKS!
-         
-          /*const newActivity = new Activity({
-            title: icsEvent.summary || 'Untitled Event',
-            deadline: new Date(icsEvent.start),
-            allDay: !icsEvent.start.getHours(),
-            user: user._id,
-          });
-          await newActivity.save(); 
-          importedEvents.push(newActivity);*/   
-
         }
       }
 
