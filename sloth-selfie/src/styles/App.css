@@ -31,6 +31,11 @@ body {
     -ms-overflow-style: none;
 }
 
+html, body {
+    overflow: hidden;
+    height: 100%;
+}
+
 /* css form */
 
 .form-group input, 

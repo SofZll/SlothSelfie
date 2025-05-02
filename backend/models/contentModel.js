@@ -55,6 +55,8 @@ const contentSchema = new mongoose.Schema({
     }
 }, {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
 const Content = mongoose.model('Content', contentSchema);

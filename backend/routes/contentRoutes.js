@@ -7,9 +7,9 @@ const { createPost, createComment, getPosts , updateContent} = require('../contr
 const router = express.Router();
 
 // forum endpoint
-router.post('/forum/new-post', upload.single('image'), createPost);
-router.post('/forum/new-comment', createComment);
+router.post('/forum/post', upload.single('image'), createPost);
+router.post('/forum/:postId/comment', createComment);
 router.get('/forum/posts', getPosts);
-router.put('/forum/update-content', updateContent);
+router.put('/forum/:contentId', updateContent);
 
 module.exports = router;

@@ -8,7 +8,6 @@ const { scheduleNotification } = require('../agenda/notificationScheduler');
 const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 const { getCurrentNow } = require('../services/timeMachineService');
-const { scheduleNotification } = require('../agenda/notificationScheduler');
 
 // Creating an activinotenotety
 const createActivity = async (req, res) => {

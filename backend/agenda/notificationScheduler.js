@@ -62,9 +62,10 @@ const initScheduler = async () => {
         }
     });
 
-    agenda.define('cleanup-notifications-snoozes', async job => {
+    agenda.define('cleanup-notifications', async job => {
         try {
             await cleanupExpiredSnoozes();
+            await cleanupOutdatedJobs();
             console.log('Expired snoozes cleaned up');
         } catch (error) {
             console.error('Error cleaning up expired snoozes:', error);
@@ -98,6 +99,21 @@ const cleanupExpiredSnoozes = async () => {
 
         if (tempJob.length > 0) {
             for (const job of tempJob) await job.remove();
+        }
+    }
+}
+
+const cleanupOutdatedJobs = async () => {
+    const now = getCurrentNow();
+
+    const jobs = await agenda.jobs({ name: 'send-notification' || 'send-notification-now' });
+    for (const job of jobs) {
+        const notification = await Notification.findById(job.attrs.data.notification);
+        if (!notification) continue;
+
+        if (now - new Date(notification.to)) {
+            await job.remove();
+            console.log(`Removed outdated job for notification ${notification._id.toString()}`);
         }
     }
 }
