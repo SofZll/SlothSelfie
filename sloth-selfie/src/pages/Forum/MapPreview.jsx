@@ -12,14 +12,14 @@ const MapPreview = ({ center , id = 0 , isPost = false}) => {
     });
 
     useEffect(() => {
+        if (!center || center[0] == null || center[1] == null) return;
+
         const mapId = `map-${id}`;
         const container = document.getElementById(mapId);
 
         if (!container) return;
 
-        if (mapRef.current) {
-            mapRef.current.remove();
-        }
+        if (mapRef.current) mapRef.current.remove();
 
         if (container && !mapRef.current) {
             if (!isPost){
@@ -42,9 +42,16 @@ const MapPreview = ({ center , id = 0 , isPost = false}) => {
                 });
             }
 
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(mapRef.current);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(mapRef.current);
+
             L.marker(center, {icon: newIcon}).addTo(mapRef.current);
         }
+
+        setTimeout(() => {
+            mapRef.current.invalidateSize();
+        }, 0);
 
         return () => {
             if (mapRef.current){
@@ -54,7 +61,7 @@ const MapPreview = ({ center , id = 0 , isPost = false}) => {
         };
     }, [center]);
 
-    return <div id={`map-${id}`} className={`map ${isPost ? "post" : ""}`} />;
+    return <div id={`map-${id}`} className={`map ${isPost ? 'post' : ''}`} />;
 }
 
 export default MapPreview;

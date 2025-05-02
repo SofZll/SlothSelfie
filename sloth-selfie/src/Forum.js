@@ -9,34 +9,20 @@ import gif from "./media/gif.svg";
 import maps from "./media/maps.svg";
 import camera from "./media/camera.svg";
 import { calculateTime, sortElements} from "./globalFunctions";
-import { NewSwal } from '../../utils/swalUtils';
-import MapPreview from "./mapPreview";
+import { NewSwal } from './utils/swalUtils';
+import MapPreview from "./pages/Forum/MapPreview";
 
 function ForumFunction({ username }) {
-    const sortingOptions = [
-        {value: 'mostRecent', label: 'Most Recent'},
-        {value: 'mostLiked', label: 'Most Liked'}
-    ];
-
-    const [posts, setPosts] = useState([]);
-    const [newPostText, setNewPostText] = useState('');
+    
     const [newCommentText, setNewCommentText] = useState('');
     const [selectedPostId, setSelectedPostId] = useState(null);
-    const [sortingOption, setSortingOption] = useState(sortingOptions[0]);
+    
     const [sharePost, setSharePost] = useState(null);
     const [showShare, setShowShare] = useState(false);
     const [userId, setUserId] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [visiblePosts, setVisiblePosts] = useState(3);
 
-    const [inputImage, setInputImage] = useState(null);
     const [inputGif, setInputGif] = useState(null);
-
-    const [longitude, setLongitude] = useState(null);
-    const [latitude, setLatitude] = useState(null);
-    const center = [latitude, longitude];
-    const [showMap, setShowMap] = useState(false);
-    const [chosen, setChosen] = useState(false);
 
     useEffect(() => {
         const getUserId = async () => {
@@ -114,12 +100,6 @@ function ForumFunction({ username }) {
         }
     };
 
-    const loadPosts = () => {
-        setVisiblePosts(visiblePosts + 3);
-    };
-
-    const postsToShow = posts.slice(0, visiblePosts);
-
     const handleSortChange = (option) => {
         setSortingOption(option);
     };
@@ -134,96 +114,7 @@ function ForumFunction({ username }) {
         }
     };
 
-    const handleLike = async (postId, isComment = false, commentId = null) => {
-        const post = posts.find(post => post._id === postId);
-        console.log('likes:', post);
-
-        if (isComment) {
-            const comment = post.comments.find(comment => comment._id === commentId);
-
-            if (comment.likes && comment.likes.includes(userId)) {
-                comment.likes = comment.likes.filter(id => id !== userId);
-            } else {
-                comment.likes = comment.likes ? [...comment.likes, userId] : [userId];
-            }
-
-            try {
-                const response = await fetch('http://localhost:8000/api/forum/update-content', {
-                    method: 'PUT',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ contentId: commentId, likes: comment.likes }),
-                });
-
-                if (response.ok) {
-                    console.log('Comment updated');
-                } else {
-                    console.error('Error updating comment');
-                }
-            } catch (error) {
-                console.error('Error updating content:', error);
-            }
-
-            // Trigger animation
-            const heartIcon = document.querySelector(`#heart-icon-comment-${comment._id}`);
-            heartIcon.classList.remove('animate');
-            void heartIcon.offsetWidth;
-            heartIcon.classList.add('animate');
-        } else {
-            if (post.likes && post.likes.includes(userId)) {
-                post.likes = post.likes.filter(id => id !== userId);
-            } else {
-                post.likes = post.likes ? [...post.likes, userId] : [userId];
-            }
-
-            try {
-                const response = await fetch('http://localhost:8000/api/forum/update-content', {
-                    method: 'PUT',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ contentId: postId, likes: post.likes }),
-                });
-
-                if (response.ok) {
-                    console.log('Post updated');
-                } else {
-                    console.error('Error updating post');
-                }
-            } catch (error) {
-                console.error('Error updating content:', error);
-            }
-
-            // Trigger animation
-            const heartIcon = document.querySelector(`#heart-icon-post-${post._id}`);
-            heartIcon.classList.remove('animate');
-            void heartIcon.offsetWidth;
-            heartIcon.classList.add('animate');
-        }
-
-        setPosts(posts.map(post => {
-            if (post._id === postId) {
-                if (isComment) {
-                    post.comments = post.comments.map(comment => {
-                        if (comment._id === commentId) {
-                            return { ...comment };
-                        }
-                        return comment;
-                    });
-                } else {
-                    return { ...post };
-                }
-            }
-            return post;
-        }));
-    };
-
-    const handleComments = (postId) => {
-        setSelectedPostId(selectedPostId === postId ? null : postId);
-    };
+    
 
     const handleShare = (post) => {
         const shareOptions = [
@@ -250,10 +141,6 @@ function ForumFunction({ username }) {
     const toggleModal = (post = null) => {
         setShowShare(!showShare);
         setSharePost(post);
-    };
-
-    const isLiked = (item) => {
-        return item.likes.includes(userId);
     };
 
     const handleNewContent = async (isComment = false) => {
@@ -345,45 +232,6 @@ function ForumFunction({ username }) {
                 console.error('Error commenting:', error);
             }
         }
-    };
-
-    const cameraClick = () => {
-        const cameraInput = document.getElementById('cameraInput');
-        cameraInput.click();
-        setChosen(true);
-    }
-
-    const imageClick = () => {
-        const imageInput = document.getElementById('imageInput');
-        imageInput.click();
-        setChosen(true);
-    }
-
-    const gifClick = () => {
-        console.log('GIF');
-    }
-
-    const mapsClick = () => {
-        getPosition();
-        setShowMap(!showMap);
-        setChosen(true);
-    }
-
-    const inputChange = (event, setState) => {
-        const file = event.target.files[0];
-        if (file) {
-            const fileUrl = URL.createObjectURL(file);
-            setState(fileUrl);
-        }
-    };
-
-    // geolocation
-    const getPosition = () => {
-        navigator.geolocation.getCurrentPosition((position) => {
-            setLatitude(position.coords.latitude);
-            setLongitude(position.coords.longitude);
-            console.log(latitude, longitude);
-        });
     };
 
     return (

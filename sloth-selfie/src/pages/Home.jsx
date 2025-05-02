@@ -6,7 +6,6 @@ import '../styles/Home.css';
 import PreviewSetUp from './PreviewSetUp';
 import CarouselHome from './CarouselHome';
 import { CustomizationProvider } from '../contexts/PreviewContext';
-import { UserProvider } from '../contexts/UserContext';
 
 const Home = ({ settings = false }) => {
 
@@ -19,9 +18,7 @@ const Home = ({ settings = false }) => {
                     {inSettings ? (
                         <PreviewSetUp setSetUp={setInSettings} />
                     ) : (
-                        <UserProvider>
-                            <CarouselHome setSetUp={setInSettings} />
-                        </UserProvider>
+                        <CarouselHome setSetUp={setInSettings} />
                     )}
                 </div>
             </MainLayout>

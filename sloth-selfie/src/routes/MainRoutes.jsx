@@ -5,7 +5,6 @@ import { useIsDesktop } from '../utils/utils';
 import { StyleProvider } from '../contexts/StyleContext';
 import { AuthContext } from '../contexts/AuthContext';
 
-
 import Pomodoro from '../pages/Pomodoro/Pomodoro';
 import Projects from '../pages/Projects';
 import Notes from '../pages/Note/Notes';
@@ -14,11 +13,8 @@ import Home from '../pages/Home'
 import Profile from '../pages/ProfilePage';
 import ChatBox from '../components/ChatBox/ChatBox';
 import Notifications from '../pages/Notifications';
-//TODO: chambiare gli import
-/*
+import ForumWrapper from '../pages/Forum/ForumWrapper';
 
-import Forum from '../Forum';
-*/
 import AuthPage from '../pages/AuthPage';
 import { LoadingPageLight } from '../pages/LoadingPage';
 import { ChatProvider } from '../contexts/ChatContext';
@@ -51,10 +47,8 @@ const MainRoutes = () => {
                                         <Route path='/home/settings' element={<Home settings={true} />} />
                                         <Route path='/profile' element={<Profile />} />
                                         <Route path='/notifications' element={<Notifications />} />
+                                        <Route path='/forum' element={<ForumWrapper />} />
                                     </Routes>
-                                    {/*
-                                    <Route path='/calendar' element={<Calendar />} />
-                                    <Route path='/forum' element={<Forum />} />*/}
                                     {!isDesktop && (
                                         <ChatProvider>
                                             <Routes>

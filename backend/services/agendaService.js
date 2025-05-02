@@ -3,15 +3,14 @@ const User = require('../models/userModel');
 const Notification = require('../models/notificationModel');
 
 const { scheduleNotification } = require('../agenda/notificationScheduler');
+const { getCurrentNow } = require('../services/timeMachineService');
 
 const getScheduledJobs = async (userId, hours = 24) => {
-    const now = new Date(); // da cambiare con TM
+    const now = getCurrentNow();
     const limit = new Date(now.getTime() + hours * 60 * 60 * 1000);
 
     const user = await User.findById(userId);
-    if (!user) {
-        throw new Error('User not found');
-    }
+    if (!user) throw new Error('User not found');
 
     const jobs = await agenda.jobs({ 
         name: 'send-notification',
@@ -119,9 +118,18 @@ const deleteJobs = async (notificationId) => {
     });
 }
 
+const resetJobs = async () => {
+    const jobs = await agenda.jobs({ name: 'send-notification' });
+
+    for (const job of jobs) await job.remove();
+
+    await scheduleNotification();
+}
+
 module.exports = {
     getScheduledJobs,
     snoozeJob,
     updateJobs,
-    deleteJobs
+    deleteJobs,
+    resetJobs
 };
