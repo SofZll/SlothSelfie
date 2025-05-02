@@ -50,19 +50,19 @@ export const CalendarProvider = ({ children }) => {
         duration: null,
         allDay: false,
         repeatFrequency: 'none',
-        repeatMode: 'ntimes',
+        repeatMode: '',
         repeatTimes: 0,
         repeatEndDate: null,
         eventLocation: '',
         sharedWith: [],
         isInProject: false,
+        fatherId: '',
     });
 
     const [events, setEvents] = useState([]);
 
     const addImportedEvents = (newEvents) => {
         setEvents(prev => [...prev, ...newEvents]);
-        //setActivities(prev => [...prev, ...newEvents]); //TEST FINCHè EVENTS NON VA, ANCHE NEL BACK
     };
 
     const resetEvent = () => {
@@ -78,12 +78,13 @@ export const CalendarProvider = ({ children }) => {
             duration: null,
             allDay: false,
             repeatFrequency: 'none',
-            repeatMode: 'ntimes',
+            repeatMode: '',
             repeatEndDate: null,
             repeatTimes: 0,
             eventLocation: '',
             sharedWith: [],
             isInProject: false,
+            fatherId: '',
         });
     }
 

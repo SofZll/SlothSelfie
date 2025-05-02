@@ -21,10 +21,16 @@ const FormEvent = () => {
         const startDate = new Date();
         if (time !== '') {
             startDate.setHours(event.time.split(':')[0], event.time.split(':')[1]);
-            if (event.type === 'work' && startDate < new Date(startDate).setHours(user.workingHours.start.split(':')[0], user.workingHours.start.split(':')[1])) {
-                toastWarning('Warning', 'Event start time is before working hours');
+            if (event.type === 'work') {
+                if (startDate < new Date(startDate).setHours(user.workingHours.start.split(':')[0], user.workingHours.start.split(':')[1])) {
+                    toastWarning('Warning', 'Event start time is before working hours');
+                } else if (startDate > new Date(startDate).setHours(user.workingHours.end.split(':')[0], user.workingHours.end.split(':')[1])) {
+                    toastWarning('Warning', 'Event start time is after working hours');
+                }
             } else if (startDate < new Date(startDate).setHours(user.dayHours.start.split(':')[0], user.dayHours.start.split(':')[1])) {
                 toastWarning('Warning', 'Event start time is before day hours');
+            } else if (startDate > new Date(startDate).setHours(user.dayHours.end.split(':')[0], user.dayHours.end.split(':')[1])) {
+                toastWarning('Warning', 'Event start time is after day hours');
             }
         }
     }
@@ -82,7 +88,7 @@ const FormEvent = () => {
                 endTimeWarning(event.time, duration);
             }
         } else {
-            endDate.setDate(endDate.getDate() + parseInt(duration));
+            endDate.setDate(endDate.getDate() + parseInt(duration) - 1);
         }
         return endDate;
     }
@@ -94,11 +100,11 @@ const FormEvent = () => {
         } 
 
         const startDate = calcStartDate(date, event.allDay, event.time);
-        if (event.duration !== null && event.time !== '') {
+        if (event.duration && (event.allDay || event.time !== '')) {
             const endDate = calcEndDate(startDate, event.allDay, event.duration);
             setEvent({ ...event, startDate, endDate });
             endTimeWarning(event.time, event.duration);
-        } setEvent({ ...event, startDate });
+        } else setEvent({ ...event, startDate });
         weekendWarning(startDate);
     }
 
@@ -118,10 +124,10 @@ const FormEvent = () => {
     }
 
     const setStartTime = (time) => {
-        if (time === '') setEvent({ ...event, time: '' });
+        if (time === '') return setEvent({ ...event, time: '' });
         else if (!event.startDate) {
-            startTimeWarning(time);
             setEvent({ ...event, time });
+            startTimeWarning(time);
         } else if (event.duration === null) setEvent({...event, time, startDate: calcStartDate(event.startDate, event.allDay, time) });
         else {
             const start = calcStartDate(event.startDate, event.allDay, time);
@@ -129,14 +135,22 @@ const FormEvent = () => {
             setEvent({ ...event, time, startDate: start, endDate: end });
             endTimeWarning(time, event.duration);
         }
+            startTimeWarning(time);
     }
 
     const setAllDay = (allDay) => {
         if (!event.startDate) setEvent({ ...event, allDay });
-        else if (!event.duration || event.time !== '') setEvent({ ...event, allDay, startDate: calcStartDate(event.startDate, allDay, event.time)});
+        else if (!event.duration || (!allDay && event.time === '')) {
+            console.log('time', event.time);
+            const start = calcStartDate(event.startDate, allDay, event.time);
+            setEvent({ ...event, allDay, startDate: start });
+        }
         else {
+            console.log('time', event.time);
             const start = calcStartDate(event.startDate, allDay, event.time);
             const end = calcEndDate(start, allDay, event.duration);
+            console.log('start', start);
+            console.log('end', end);
             setEvent({ ...event, allDay, startDate: start, endDate: end });
         }
     }
@@ -149,17 +163,19 @@ const FormEvent = () => {
             else if (event.repeatFrequency === 'monthly') gap = 30;
             else if (event.repeatFrequency === 'yearly') gap = 365;
 
-            if (new Date(event.repeatEndDate) - new Date(event.startDate) < gap * 24 * 60 * 60 * 1000) {
+            if (new Date(event.repeatEndDate).getDate - new Date(event.startDate).getDate  < gap * 24 * 60 * 60 * 1000) {
                 NewSwal.fire({ title: 'Error', icon: 'error', text: `Repeat end date must be at least ${gap} days after start date`});
                 return;
             }
         }
 
         const response = await apiService(`/event/${selected.edit ? event._id : ''}`, selected.edit ? 'PUT' : 'POST', event);
-        if (response) {
+        if (response.success) {
             NewSwal.fire({ title: selected.edit ? 'Event updated' : 'Event created', icon: 'success', text: selected.edit ? 'Event updated successfully' : 'Event created successfully'});
-            if (event.repeatFrequency === 'none') setEvents(events.map(evt => evt._id === event._id ? response.event : evt));
-            else setEvents([...events.filter(evt => evt.fatherId !== response.events[0].fatherId), ...response.events]);
+            if (event.repeatFrequency === 'none') {
+                if (selected.edit) setEvents(events.map(evt => evt._id === event._id ? response.event : evt));
+                else setEvents([...events, response.event]);
+            } else setEvents([...events.filter(evt => evt.fatherId !== response.events[0].fatherId), ...response.events]);
         } else NewSwal.fire({ title: 'Error saving event', icon: 'error', text: response.message});
         resetEvent();
         resetSelected();
@@ -167,11 +183,16 @@ const FormEvent = () => {
 
     const deleteEvent = async () => {
         const response = await apiService(`/event/${event._id}`, 'DELETE', event);
-        if (response){
+        if (response.success) {
             NewSwal.fire({ title: 'Event deleted', icon: 'success', text: 'Event deleted successfully'});
-            setEvents(events.filter(evt => evt._id !== event._id));
-            resetEvent();
+            if (event.repeatFrequency === 'none') setEvents(events.filter(evt => evt._id !== event._id));
+            else setEvents(events.filter(evt => evt.fatherId !== event.fatherId));
+            
         } else NewSwal.fire({ title: 'Error deleting event', icon: 'error', text: response.message});
+            
+        setDeletePopUp(false);
+        resetSelected();
+        resetEvent();
     }
 
     useEffect(() => {
@@ -259,7 +280,7 @@ const FormEvent = () => {
                             required />
                         ) : (
                             <select className='form-select' id='time'
-                            value={event.time}
+                            value={event.time || ''}
                             disabled={event.isInProject}
                             onChange={(e) => setStartTime(e.target.value)} required>
                                 <option value=''>Select time</option>
@@ -316,9 +337,10 @@ const FormEvent = () => {
                     <div className='col col-6'>
                         <label htmlFor='repeatMode' className='form-label'>Mode</label>
                         <select className='form-select' id='repeatMode'
-                        value={event.repeatMode}
+                        value={event.repeatMode || ''}
                         disabled={event.isInProject}
                         onChange={(e) => setEvent({...event, repeatMode: e.target.value})}>
+                            <option value=''>Select mode</option>
                             <option value='ntimes'>Repeat N times</option>
                             <option value='until'>Repeat until</option>
                         </select>
