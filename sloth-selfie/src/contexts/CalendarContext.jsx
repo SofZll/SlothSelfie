@@ -63,7 +63,6 @@ export const CalendarProvider = ({ children }) => {
 
     const addImportedEvents = (newEvents) => {
         setEvents(prev => [...prev, ...newEvents]);
-        //setActivities(prev => [...prev, ...newEvents]); //TEST FINCHè EVENTS NON VA, ANCHE NEL BACK
     };
 
     const resetEvent = () => {

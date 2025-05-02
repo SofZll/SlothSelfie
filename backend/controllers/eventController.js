@@ -9,6 +9,7 @@ const { createEvent } = require('ics'); // Import the library for iCalendar gene
 
 const ical = require('node-ical');
 const fs = require('fs');
+const { RRule } = require('rrule');
 
 
 const getEvents = async (req, res) => {
@@ -324,7 +325,6 @@ const deleteEvent = async (req, res) => {
 };
 
 //Function to export events on iCalendar (using library: ics.js)
-//TODO: TESTARE E MODIFICARE SE NECESSARIO (quando avremo modello event definitivo)
 async function exportEvent(req, res){
   try {
       const {eventId} = req.params;
@@ -335,6 +335,11 @@ async function exportEvent(req, res){
       }
 
       const user = await User.findOne({ username: userName });
+
+      //For the allDay events, we need to add +1 day to the end date in order to have the correct date in the .ics file
+      const adjustedEnd = event.allDay
+      ? new Date(event.endDate.getTime() + 24 * 60 * 60 * 1000) // +1 giorno
+      : event.endDate;
       
       // Build the start/end array
       const start = event.allDay
@@ -353,16 +358,16 @@ async function exportEvent(req, res){
 
     const end = event.allDay
       ? [
-          event.endDate.getFullYear(),
-          event.endDate.getMonth() + 1,
-          event.endDate.getDate(),
+          adjustedEnd.getFullYear(),
+          adjustedEnd.getMonth() + 1,
+          adjustedEnd.getDate(),
         ]
       : [
-          event.endDate.getFullYear(),
-          event.endDate.getMonth() + 1,
-          event.endDate.getDate(),
-          event.endDate.getHours(),
-          event.endDate.getMinutes(),
+          adjustedEnd.getFullYear(),
+          adjustedEnd.getMonth() + 1,
+          adjustedEnd.getDate(),
+          adjustedEnd.getHours(),
+          adjustedEnd.getMinutes(),
         ];
 
     // Build the recurrence rule if needed
@@ -378,7 +383,7 @@ async function exportEvent(req, res){
       recurrenceRule = `FREQ=${freqMap[event.repeatFrequency]};`;
 
       if (event.repeatTimes && event.repeatTimes > 0) {
-        recurrenceRule += `COUNT=${event.repeatTimes};`;
+        recurrenceRule += `COUNT=${event.repeatTimes}`;
       } else if (event.repeatEndDate) {
         const endRecDate = event.repeatEndDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
         recurrenceRule += `UNTIL=${endRecDate}`;
@@ -421,7 +426,7 @@ async function exportEvent(req, res){
 }
 
 // Import events from ICS file
-//TODO: TESTARE E MODIFICARE SE NECESSARIO (quando avremo modello event definitivo) controlla gestione di eventi ripetuti
+//TODO: controlla gestione di eventi ripetuti
 const importEvents = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
@@ -443,23 +448,41 @@ const importEvents = async (req, res) => {
         const icsEvent = data[key];
         if (icsEvent.type === 'VEVENT') {
           const commonOriginalId = new mongoose.Types.ObjectId();  // Create the originalId for the event one time
+          const isAllDay = !icsEvent.start.getHours(); // Check if the event is all-day
+          
+          //Correct end date for all-day events interpreted as exclusive by other apps (e.g. Outlook)
+          const correctedEnd = isAllDay
+            ? new Date(icsEvent.end.getTime() - 24 * 60 * 60 * 1000)
+            : new Date(icsEvent.end);
 
           // Check if the event has a recurrence rule (rrule)
           if (icsEvent.rrule) {
-            const rule = icsEvent.rrule;
+            const rule = RRule.fromString(icsEvent.rrule.toString());
+            console.log('Recurrence rule:', rule);  // Log the recurrence rule for debugging
+
+            const RRuleFrequencyMap = {
+              [RRule.DAILY]: 'daily',
+              [RRule.WEEKLY]: 'weekly',
+              [RRule.MONTHLY]: 'monthly',
+              [RRule.YEARLY]: 'yearly',
+            };
+
             const startDate = new Date(icsEvent.start);
-      
+
             // Create a new event for each occurrence of the recurring event
-            const dates = rule.allBetween(startDate, rule.options.until || new Date('2100-01-01'), true); 
-            // true = inclusivo
+            const dates = rule.between(startDate, rule.options.until || new Date('2100-01-01'), true); // true = inclusive
       
+            const duration = correctedEnd - icsEvent.start;
+
             for (const date of dates) {
+              const recurringIsAllDay = !date.getHours();
+
               const newEvent = new Event({
                 title: icsEvent.summary || 'Untitled Event',
                 startDate: new Date(date),
-                endDate: new Date(date.getTime() + (icsEvent.end - icsEvent.start)), //duration is the same for all occurrences
-                allDay: !date.getHours(),
-                repeatFrequency: rule.options.freq.toLowerCase(),
+                endDate: new Date(date.getTime() + duration), //duration is the same for all occurrences
+                allDay: recurringIsAllDay,
+                repeatFrequency: RRuleFrequencyMap[rule.options.freq] || 'custom',
                 repeatEndDate: rule.options.until || null,
                 repeatTimes: rule.options.count || 0,
                 eventLocation: icsEvent.location || 'physical',
@@ -477,8 +500,8 @@ const importEvents = async (req, res) => {
             const newEvent = new Event({
               title: icsEvent.summary || 'Untitled Event',
               startDate: new Date(icsEvent.start),
-              endDate: new Date(icsEvent.end),
-              allDay: !icsEvent.start.getHours(),
+              endDate: correctedEnd,
+              allDay: isAllDay,
               repeatFrequency: 'none',
               repeatEndDate: null,
               repeatTimes: 0,
@@ -491,18 +514,6 @@ const importEvents = async (req, res) => {
 
             console.log('Imported single event:', newEvent);  // Log the imported event for debugging
           }
-
-          //try with activity model   IT WORKS!
-         
-          /*const newActivity = new Activity({
-            title: icsEvent.summary || 'Untitled Event',
-            deadline: new Date(icsEvent.start),
-            allDay: !icsEvent.start.getHours(),
-            user: user._id,
-          });
-          await newActivity.save(); 
-          importedEvents.push(newActivity);*/   
-
         }
       }
 
