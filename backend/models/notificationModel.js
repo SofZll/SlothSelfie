@@ -128,15 +128,6 @@ const notificationSchema = new mongoose.Schema({
     autoIndex: false
 });
 
-notificationSchema.index({
-    user: 1,
-    element: 1,
-    elementType: 1,
-    type: 1,
-    variant: 1,
-    before: 1
-}, { unique: true });
-
 notificationSchema.virtual('isActive').get(function() {
     const now = global.virtualNow || new Date();
     if (this.status === 'inactive') return false;
