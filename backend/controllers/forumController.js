@@ -3,20 +3,17 @@ const User = require('../models/userModel');
 
 // Create post
 const createPost = async (req, res) => {
-    const {userId, text, latitude, longitude} = req.body;
+    const userId = req.session.userId;
+    const { text, latitude, longitude } = req.body;
     const image = req.file;
 
     console.log('Received data:', { userId, text });
 
-    if (!userId || !text) {
-        return res.status(400).json({ success: false, message: 'Missing required fields'})
-    }
+    if (!userId || !text) return res.status(400).json({ success: false, message: 'Missing required fields'});
 
     try {
         const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         const newPost = new Content({
             author: user._id,
@@ -43,7 +40,8 @@ const createPost = async (req, res) => {
 
 // Create comment
 const createComment = async (req, res) => {
-    const {userId, text, postId} = req.body;
+    const userId = req.session.userId;
+    const { text, postId } = req.body;
     const post = await Content.findById(postId);
 
     if (!userId || !text || !postId) {
@@ -83,6 +81,7 @@ const createComment = async (req, res) => {
 const getPosts = async (req, res) => {
     try {
         const posts = await Content.find({ type: 'post' })
+            .sort({ createdAt: -1 })
             .populate({
                 path: 'author',
                 select: 'username image',
@@ -104,8 +103,10 @@ const getPosts = async (req, res) => {
 
 // Update content
 const updateContent = async (req, res) => {
+    const { contentId } = req.params;
+    const { likes } = req.body;
+
     try {
-        const {contentId, likes} = req.body;
         const updatedContent = await Content.findByIdAndUpdate(
             contentId,
             { likes },

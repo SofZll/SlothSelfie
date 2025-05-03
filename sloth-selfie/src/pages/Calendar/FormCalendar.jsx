@@ -24,7 +24,6 @@ const FormCalendar = () => {
     const { task } = useTask();
     const isDesktop = useIsDesktop();
 
-    //TODO TESTA E MODIFICA IN BASE A NUOVO MODELLO EVENTI
     // Function to handle the upload of .ics files as events
     const handleICSUpload = async (e) => {
         const files = e.target.files;
