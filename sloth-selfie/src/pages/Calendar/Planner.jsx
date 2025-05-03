@@ -8,6 +8,7 @@ import moment from 'moment';
 import { useIsDesktop, timeFromDate } from '../../utils/utils';
 import { validateNotification } from '../../utils/validation';
 import ScrollList from '../../components/ScrollList';
+import SettingsCalendar from '../../components/SettingsCalendar';
 import FormCalendar from './FormCalendar';
 import PlusLayout from '../../layouts/PlusLayout';
 
@@ -31,7 +32,7 @@ const Planner = () => {
     const localizer = momentLocalizer(moment);
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
-    const { user } = useContext(AuthContext);
+    const { user, calendarSettings } = useContext(AuthContext);
     const { event, setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
     const { setPlannedPomodori, plannedPomodori, setSettingsPomodoro } = usePomodoro();
@@ -266,7 +267,9 @@ const Planner = () => {
     }, [notifications]);
 
     return (
-        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popup: true })} selected={selected.popup} popUp={<FormCalendar />}>
+        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popup: true })} selected={selected.popup} popUp={<FormCalendar />} isCalendar={true}>
+
+            <SettingsCalendar />
 
             {!isDesktop && (
                 <div className='d-flex w-100 justify-content-center'>

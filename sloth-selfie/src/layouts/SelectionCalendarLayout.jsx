@@ -1,15 +1,17 @@
-import React, { useEffect } from 'react';
-import { useIsDesktop } from '../utils/utils';
-
-import { X, MoveLeft } from 'lucide-react';
+import React, { useEffect, useContext } from 'react';
+import { X, MoveLeft, Settings } from 'lucide-react';
 
 import { useCalendar } from '../contexts/CalendarContext';
+import { AuthContext } from '../contexts/AuthContext';
 import { useTask } from '../contexts/TaskContext';
+
+import { useIsDesktop } from '../utils/utils';
 
 const SelectionCalendarLayout = ({children}) => {
 
     const isDesktop = useIsDesktop();
     const { selected, resetSelected, back, resetActivity, resetEvent, resetAvailability } = useCalendar();
+    const { calendarSettings, setCalendarSettings } = useContext(AuthContext);
     const { resetTask } = useTask();
 
     useEffect(() => {
@@ -22,8 +24,14 @@ const SelectionCalendarLayout = ({children}) => {
     }, [selected.selection]);
 
     return (
-        <div className='d-flex flex-column w-100 my-md-3 bg-white border p-3 rounded'>
-
+        <div className='d-flex flex-column w-100 my-md-3 bg-white border p-3 pt-2 rounded position-relative'>
+            {(isDesktop && (selected.selection === '...' && !selected.edit)) && (
+                <div className='position-absolute end-0 top-25 translate-middle-y mt-4 me-3'>
+                    <button className='btn rounded-circle p-1 m-0' onClick={() => setCalendarSettings(!calendarSettings)}>
+                        <Settings size={30} color='#888' strokeWidth='1.75' />
+                    </button>
+                </div>
+            )}
             <div className='d-flex justify-content-between my-3'>
                 {selected.add || selected.selection === '...' && (
                     <div className='fs-5'>

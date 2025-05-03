@@ -25,7 +25,7 @@ const ProfilePage = () => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => setUser({ ...setUser, profile_image: reader.result });
+            reader.onloadend = () => setUser({ ...user, profile_image: reader.result });
             reader.readAsDataURL(file);
 
             const formData = new FormData();
@@ -44,14 +44,6 @@ const ProfilePage = () => {
             console.log('Profile updated successfully');
             setIsEditing(false);
         } else NewSwal.fire({ title: 'Error updating profile', icon: 'error', text: response.message});
-    }
-
-    const handleLogout = async () => {
-        const response = await apiService('/user/logout', 'POST');
-        if (response.success) setUser(null);
-        else NewSwal.fire({ title: 'Error logging out', icon: 'error', text: response.message});
-
-        navigate('/login');
     }
 
     useEffect(() => {
@@ -176,7 +168,6 @@ const ProfilePage = () => {
                     ):(
                         <div className='d-flex justify-content-center gap-3 w-100'>
                             <button className={`button-clean button-edit green ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(true)}>Edit profile</button>
-                            <button className={`button-clean button-edit red ${showProfile ? 'show' : ''}`} onClick={handleLogout}>Log out</button>
                         </div>
                     )}
                 </div>

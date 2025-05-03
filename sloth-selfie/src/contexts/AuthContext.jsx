@@ -10,6 +10,7 @@ const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [calendarSettings, setCalendarSettings] = useState(false);
     const userRef = useRef(false);
 
     const fetchUserData = async () => {
@@ -130,24 +131,8 @@ const AuthProvider = ({ children }) => {
         return () => socket.off('system-notification', handler);
     }, [user]);
 
-    const [setting, setSetting] = useState({
-        open: false,
-        section: '',
-    });
-
-    const resetSetting = () => {
-        setSetting({
-            open: false,
-            section: '',
-        });
-    }
-
-    const back = () => {
-        setSetting({ ...setting, section: '' });
-    } 
-
     return (
-        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, setting, setSetting, resetSetting, back }}>
+        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, calendarSettings, setCalendarSettings }}>
             {!loading && children}
         </AuthContext.Provider>
     );
