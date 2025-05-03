@@ -57,6 +57,8 @@ const initScheduler = async () => {
             if (notification.mode.email) {
                 await sendEmailNotification(notification);
             }
+            await job.remove();
+            console.log(`Notification ${notification._id.toString()} sent and job removed.`);
         } catch (error) {
             console.error(`Notification ${notification._id.toString()} failed:`, error);
         }
@@ -120,7 +122,7 @@ const cleanupOutdatedJobs = async () => {
 
 const scheduleNotification = async (notifications) => {
     if (!notifications) {
-        notifications = await Notification.find({ status: 'active' });
+        notifications = await Notification.find({ status: 'active', type: { $ne: 'now' } })
         if (!notifications || notifications.length === 0) return;
     }
 
