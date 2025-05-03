@@ -426,7 +426,6 @@ async function exportEvent(req, res){
 }
 
 // Import events from ICS file
-//TODO: controlla gestione di eventi ripetuti
 const importEvents = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
@@ -448,7 +447,9 @@ const importEvents = async (req, res) => {
         const icsEvent = data[key];
         if (icsEvent.type === 'VEVENT') {
           const commonOriginalId = new mongoose.Types.ObjectId();  // Create the originalId for the event one time
-          const isAllDay = !icsEvent.start.getHours(); // Check if the event is all-day
+          // Check if the event is all-day
+          const isAllDay = icsEvent.datetype === 'date' || 
+                 (icsEvent.start && icsEvent.start.params && icsEvent.start.params.VALUE === 'DATE');
           
           //Correct end date for all-day events interpreted as exclusive by other apps (e.g. Outlook)
           const correctedEnd = isAllDay
@@ -475,13 +476,12 @@ const importEvents = async (req, res) => {
             const duration = correctedEnd - icsEvent.start;
 
             for (const date of dates) {
-              const recurringIsAllDay = !date.getHours();
-
+              
               const newEvent = new Event({
                 title: icsEvent.summary || 'Untitled Event',
                 startDate: new Date(date),
                 endDate: new Date(date.getTime() + duration), //duration is the same for all occurrences
-                allDay: recurringIsAllDay,
+                allDay: isAllDay,
                 repeatFrequency: RRuleFrequencyMap[rule.options.freq] || 'custom',
                 repeatEndDate: rule.options.until || null,
                 repeatTimes: rule.options.count || 0,
