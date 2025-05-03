@@ -32,7 +32,7 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
+    const { event, setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
     const { setPlannedPomodori, plannedPomodori, setSettingsPomodoro } = usePomodoro();
 
@@ -127,7 +127,7 @@ const Planner = () => {
             setActivity({...activities.find(a => a._id === item._id)})
             await fetchNotifications({ elementId: item._id });
         } else if (item.type === 'event') {
-            const e = events.find(e => e._id === item._id);
+            const e = events.find(ev => ev._id === item._id);
             if (e.allDay) {
                 setEvent({ ...e, duration: (new Date(e.endDate).getDate() - new Date(e.startDate).getDate() + 1), time: '', isPreciseTime: false, fatherId: e.fatherId || '', repeatMode: (e.repeatTimes && e.repeatTimes > 0) ? 'ntimes' : 'until'});
             } else {
@@ -136,6 +136,7 @@ const Planner = () => {
                 setEvent({ ...e, time, duration: (new Date(e.endDate).getHours() - new Date(e.startDate).getHours()), isPreciseTime: !minutes.includes(new Date(e.startDate).getMinutes()), fatherId: e.fatherId || '', repeatMode: (e.repeatTimes && e.repeatTimes > 0) ? 'ntimes' : 'until'});
             }
             await fetchNotifications({ elementId: item._id });
+            console.log('event', event );
         } else if (item.type === 'task') {
             setTask({...tasks.find(t => t._id === item._id)});
         } else if (item.type === 'no availability') {

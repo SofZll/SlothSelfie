@@ -340,7 +340,6 @@ const FormEvent = () => {
                         value={event.repeatMode || ''}
                         disabled={event.isInProject}
                         onChange={(e) => setEvent({...event, repeatMode: e.target.value})}>
-                            <option value=''>Select mode</option>
                             <option value='ntimes'>Repeat N times</option>
                             <option value='until'>Repeat until</option>
                         </select>

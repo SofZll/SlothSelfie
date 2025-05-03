@@ -139,7 +139,7 @@ const FormCalendar = () => {
                 )}
 
                 {selected.edit && (selected.selection === 'activity' || selected.selection === 'event' || selected.selection === 'task') && (
-                    <button className='btn position-absolute bottom-0 start-0 m-0 p-1' onClick={() => exportData()}>
+                    <button className='btn position-absolute bottom-0 start-0 m-1 p-1 bg-white shadow-sm' onClick={() => exportData()}>
                         <Download size='27' color='#555B6E' strokeWidth='1.75' />
                     </button>
                 )}
