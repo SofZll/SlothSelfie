@@ -487,7 +487,7 @@ const importEvents = async (req, res) => {
                 repeatTimes: rule.options.count || 0,
                 eventLocation: icsEvent.location || 'physical',
                 user: user._id,
-                originalId: commonOriginalId,  // Use the same originalId for all occurrences
+                fatherId: commonOriginalId,  // Use the same originalId for all occurrences
               });
               await newEvent.save();
               importedEvents.push(newEvent);
@@ -507,7 +507,7 @@ const importEvents = async (req, res) => {
               repeatTimes: 0,
               eventLocation: icsEvent.location || 'physical',
               user: user._id,
-              originalId: commonOriginalId,
+              fatherId: commonOriginalId,
             });
             await newEvent.save();
             importedEvents.push(newEvent);
