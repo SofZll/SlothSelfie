@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { Plus, Settings } from 'lucide-react';
 
 import { useIsDesktop } from '../utils/utils';
+import { AuthContext } from '../contexts/AuthContext';
+import SettingsCalendar from '../components/SettingsCalendar';
 
-import { Plus } from 'lucide-react';
-
-const PlusLayout = ({ children, clickCall, selected, popUp }) => {
-
+const PlusLayout = ({ children, clickCall, selected, popUp, isCalendar = false }) => {
+    const { calendarSettings, setCalendarSettings } = useContext(AuthContext);
     const isDesktop = useIsDesktop();
 
     return (
@@ -13,6 +14,12 @@ const PlusLayout = ({ children, clickCall, selected, popUp }) => {
 
             {!isDesktop && (
                 <>
+                    {isCalendar && (
+                        <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-settings pop-up' alt='settings' onClick={() => setCalendarSettings(!calendarSettings)}>
+                            <Settings size={36} color='#fafafa' strokeWidth={1.75} />
+                        </button>
+                    )}
+                    
                     <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-plus pop-up' alt='add' onClick={() => clickCall()}>
                         <Plus size={36} color='#fafafa' strokeWidth={1.75} />
                     </button>

@@ -3,6 +3,10 @@
   bottom: 11vh;
 }
 
+.btn-settings {
+  bottom: 17.8vh;
+}
+
 .pop-up {
   z-index: 5;
   max-height: 75vh;
