@@ -1,0 +1,182 @@
+import React, { useState, useEffect, useContext } from 'react';
+import iconHeartEmpty from '../../assets/icons/heart-empty.svg';
+import iconHeartFull from '../../assets/icons/heart-full.svg';
+
+import { AuthContext } from '../../contexts/AuthContext';
+import { useForumContext } from '../../contexts/ForumContext';
+import MapPreview from './MapPreview';
+
+import { calculateTime } from '../../utils/utils';
+import { apiService } from '../../services/apiService';
+
+const PostsList = ({ handleNewContent }) => {
+    const { user } = useContext(AuthContext);
+    const { posts, setPosts, newCommentText, setNewCommentText, toggleModal, sortingOption, sortingOptions, setSortingOption, selectedPostId, setSelectedPostId } = useForumContext();
+
+    const [visiblePosts, setVisiblePosts] = useState(3);
+
+    const isLiked = (item) => {return item.likes.includes(user._id)};
+
+    const handleLike = async (postId, isComment = false, commentId = null) => {
+        const post = posts.find(post => post._id === postId);
+        console.log('likes:', post);
+
+        let element, type;
+        if (isComment) {
+            const comment = post.comments.find(comment => comment._id === commentId);
+            element = comment;
+            type = 'comment';
+        } else {
+            element = post;
+            type = 'post';
+        }
+
+        if (element.likes && element.likes.includes(user._id)) {
+            element.likes = element.likes.filter(id => id !== user._id);
+        } else {
+            element.likes = element.likes ? [...element.likes, user._id] : [user._id];
+        }
+
+        const response = await apiService(`/forum/${element._id}`, 'PUT', { likes: element.likes });
+        if (response.success) console.log('element updated');
+        else console.log('Error updating element');
+
+        const heartIcon = document.querySelector(`#heart-icon-${type}-${element._id}`);
+        heartIcon.classList.remove('animate');
+        void heartIcon.offsetWidth;
+        heartIcon.classList.add('animate');
+
+        setPosts(posts.map(post => {
+            if (post._id === postId) {
+                if (isComment) {
+                    post.comments = post.comments.map(comment => {
+                        if (comment._id === commentId) {
+                            return { ...comment };
+                        }
+                        return comment;
+                    });
+                } else {
+                    return { ...post };
+                }
+            }
+            return post;
+        }));
+    };
+
+    const handleComments = (postId) => setSelectedPostId(selectedPostId === postId ? null : postId);
+
+    const calculateComments = (comments) => {
+        if (!comments || comments.length === 0) return 'No comments';
+        else if (comments.length === 1) return '1 comment';
+        else return `${comments.length} comments`;
+    };
+
+    const handleSorting = (option, posts) => {
+        const postsCopy = [...posts]; // Crea una copia dell'array originale
+    
+        if (option === 'mostRecent') {
+            return postsCopy.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (option === 'mostLiked') {
+            return postsCopy.sort((a, b) => b.likes.length - a.likes.length);
+        }
+        return postsCopy;
+    };
+
+    const sortedPosts = handleSorting(sortingOption, posts);
+
+    const loadPosts = () => {
+        setVisiblePosts(visiblePosts + 3);
+    };
+
+    const postsToShow = sortedPosts.slice(0, visiblePosts);
+
+    return (
+        <div className='w-100 pb-3 flex-column gap-3 posts-list'>
+            <div className='d-flex justify-content-center gap-2 my-2'>
+                <label className='m-0 d-flex align-items-center' htmlFor='sorting'>Sort by: </label>
+                <select className='form-select form-select-sm' id='sorting' value={sortingOption} onChange={(e) => setSortingOption(e.target.value)}>
+                    {sortingOptions.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                </select>
+            </div>
+            {sortedPosts?.length > 0 ? (
+                <>
+                    {postsToShow.length > 0 ? (
+                        postsToShow.map((post) => (
+                            <div key={post._id} className='rounded-3 shadow-sm p-2 post'>
+                                <div className='post-title'>
+                                    <div className='d-flex align-items-center gap-2'>
+                                        <img src={post.author.imageUrl} alt='user' />
+                                        <h3>{post.author.username}</h3>
+                                    </div>
+                                    <p>{calculateTime(post.date)}</p>
+                                </div>
+                                <p>{post.text}</p>
+                                {post.image && <img className='post-image' src={post.image} alt='post' />}
+                                {post.location.latitude && post.location.longitude && (
+                                    <>
+                                        <a href={`https://www.google.com/maps?q=${post.location.latitude},${post.location.longitude}`} className='link-map' target='_blank' rel='noopener noreferrer'>Open on Google maps</a>
+                                        <MapPreview center={[post.location.latitude, post.location.longitude]} id={post._id} isPost='true' />
+                                    </>
+                                )}
+                                <div className='post-functions'>
+                                    <span className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post._id)}>
+                                        {post.likes ? post.likes.length : 0}
+                                        <img
+                                            id={`heart-icon-post-${post._id}`}
+                                            src={isLiked(post) ? iconHeartFull : iconHeartEmpty}
+                                            alt='like'
+                                            className='heart-icon'
+                                        />
+                                    </span>
+                                    <span onClick={() => handleComments(post._id)}>{calculateComments(post.comments)}</span>
+                                    <span onClick={() => toggleModal(post)}>share</span>
+                                </div>
+                                <div className={`d-flex flex-column gap-3 post-comments ${selectedPostId === post._id ? 'show' : ''}`}>
+                                    <div className='d-flex justify-content-center align-items-center gap-2 new-comment'>
+                                        <textarea
+                                            placeholder='comment'
+                                            value={newCommentText}
+                                            onChange={(e) => setNewCommentText(e.target.value)}
+                                        />
+                                        <button className='button-clean green' onClick={() => handleNewContent(true)}>Post</button>
+                                    </div>
+                                    {post.comments.map((comment) => (
+                                        <div key={comment._id} className='rounded-3 px-3 py-2 shadow-sm comment'>
+                                            <div className='comment-title'>
+                                                <h4>{comment.author.username}</h4>
+                                                <p>{calculateTime(comment.date)}</p>
+                                            </div>
+                                            <p>{comment.text}</p>
+                                            <span className={isLiked(comment) ? 'liked' : ''} onClick={() => handleLike(post._id, true, comment._id)}>
+                                                {comment.likes ? comment.likes.length : 0}
+                                                <img
+                                                    id={`heart-icon-comment-${comment._id}`}
+                                                    src={isLiked(comment) ? iconHeartFull : iconHeartEmpty}
+                                                    alt='like'
+                                                    className='heart-icon'
+                                                />
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p>No posts to show</p>
+                    )}
+                    {visiblePosts < posts.length && (
+                        <button className='load-more-btn' onClick={loadPosts}>
+                            Load more
+                        </button>
+                    )}
+                </>
+            ) : (
+                <p>No posts to show</p>
+            )}
+        </div>
+    );
+}
+
+export default PostsList;

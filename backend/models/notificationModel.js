@@ -124,18 +124,9 @@ const notificationSchema = new mongoose.Schema({
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
+    autoIndex: false
 });
-
-notificationSchema.index({
-    user: 1,
-    element: 1,
-    elementType: 1,
-    type: 1,
-    variant: 1,
-    before: 1
-}, { unique: true });
-notificationSchema.index({ status: 1, from: 1, to: 1 }, { unique: true });
 
 notificationSchema.virtual('isActive').get(function() {
     const now = global.virtualNow || new Date();

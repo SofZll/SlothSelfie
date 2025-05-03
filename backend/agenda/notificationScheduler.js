@@ -57,14 +57,17 @@ const initScheduler = async () => {
             if (notification.mode.email) {
                 await sendEmailNotification(notification);
             }
+            await job.remove();
+            console.log(`Notification ${notification._id.toString()} sent and job removed.`);
         } catch (error) {
             console.error(`Notification ${notification._id.toString()} failed:`, error);
         }
     });
 
-    agenda.define('cleanup-notifications-snoozes', async job => {
+    agenda.define('cleanup-notifications', async job => {
         try {
             await cleanupExpiredSnoozes();
+            await cleanupOutdatedJobs();
             console.log('Expired snoozes cleaned up');
         } catch (error) {
             console.error('Error cleaning up expired snoozes:', error);
@@ -74,7 +77,7 @@ const initScheduler = async () => {
     agenda.on('ready', async () => {
         await agenda.start();
         console.log('Notification scheduler started');
-        agenda.every('1 hour', 'cleanup-notifications-snoozes');
+        agenda.every('1 hour', 'cleanup-notifications');
     });
 };
 
@@ -102,9 +105,24 @@ const cleanupExpiredSnoozes = async () => {
     }
 }
 
+const cleanupOutdatedJobs = async () => {
+    const now = getCurrentNow();
+
+    const jobs = await agenda.jobs({ name: 'send-notification' || 'send-notification-now' });
+    for (const job of jobs) {
+        const notification = await Notification.findById(job.attrs.data.notification);
+        if (!notification) continue;
+
+        if (job.attrs.name === 'send-notification' && (now > new Date(job.attrs.lastFinishedAt))){
+            await job.remove();
+            console.log(`Removed outdated job for notification ${notification._id.toString()}`);
+        }
+    }
+}
+
 const scheduleNotification = async (notifications) => {
     if (!notifications) {
-        notifications = await Notification.find({ status: 'active' });
+        notifications = await Notification.find({ status: 'active', type: { $ne: 'now' } })
         if (!notifications || notifications.length === 0) return;
     }
 

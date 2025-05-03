@@ -68,5 +68,21 @@ function urlBase64ToUint8Array(base64String) {
     return outputArr;
 }
 
+//todo: tm
+const calculateTime = (d) => {
+    if (!d) return '';
+    const now = new Date();
+    const date = new Date(d);
+    const diff = Math.abs(now - date);
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
 
-export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime, dateFromDate, timeFromDate, urlBase64ToUint8Array };
+    if (days > 0) return `${days} days ago`;
+    if (hours > 0) return `${hours} hours ago`;
+    if (minutes > 0) return `${minutes} minutes ago`;
+    return `${seconds} seconds ago`;
+};
+
+export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime, dateFromDate, timeFromDate, urlBase64ToUint8Array, calculateTime };
