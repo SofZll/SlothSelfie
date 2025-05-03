@@ -75,7 +75,7 @@ const initScheduler = async () => {
     agenda.on('ready', async () => {
         await agenda.start();
         console.log('Notification scheduler started');
-        agenda.every('1 hour', 'cleanup-notifications-snoozes');
+        agenda.every('1 hour', 'cleanup-notifications');
     });
 };
 
@@ -111,7 +111,7 @@ const cleanupOutdatedJobs = async () => {
         const notification = await Notification.findById(job.attrs.data.notification);
         if (!notification) continue;
 
-        if (now - new Date(notification.to)) {
+        if (job.attrs.name === 'send-notification' && (now > new Date(job.attrs.lastFinishedAt))){
             await job.remove();
             console.log(`Removed outdated job for notification ${notification._id.toString()}`);
         }

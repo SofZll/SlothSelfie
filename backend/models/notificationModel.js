@@ -135,7 +135,6 @@ notificationSchema.index({
     variant: 1,
     before: 1
 }, { unique: true });
-notificationSchema.index({ status: 1, from: 1, to: 1 }, { unique: true });
 
 notificationSchema.virtual('isActive').get(function() {
     const now = global.virtualNow || new Date();
