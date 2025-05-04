@@ -36,6 +36,12 @@ html, body {
     height: 100%;
 }
 
+/* modal */
+
+.modal {
+    background-color: rgba(0,0,0,0.5);
+}
+
 /* css form */
 
 .form-group input, 

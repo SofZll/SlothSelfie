@@ -6,17 +6,13 @@ import { AuthContext } from '../contexts/AuthContext';
 
 const SettingsButton = ({ dark, isCalendar = false }) => {
     console.log('isCalendar', isCalendar);
-    const { setCalendarSettings, calendarSettings } = useContext(AuthContext);
+    const { setCalendarSettings, calendarSettings, setSettings, settings } = useContext(AuthContext);
 
     return (
         <button className='btn rounded-circle p-1 m-0' onClick={() => {
-            if (isCalendar) {
-                setCalendarSettings(!calendarSettings);
-                console.log('calendarSettings', calendarSettings);
-                
-            }
-            }}
-        >
+            if (isCalendar) setCalendarSettings(!calendarSettings);
+            else setSettings(!settings);
+        }}>
             <Settings size={dark ? 30 : 22} color={dark ? '#888' : '#fff'} strokeWidth='1.75' />
         </button>
     )
