@@ -4,7 +4,7 @@ const Note = require('../models/noteModel');
 const Event = require('../models/eventModel');
 const PhaseSubphase = require("../models/phaseSubphaseModel");
 const Notification = require('../models/notificationModel');
-const { scheduleNotification } = require('../agenda/notificationScheduler');
+const { sendNotificationNow } = require('../scheduler/notificationScheduler');
 const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
 const { getCurrentNow } = require('../services/timeMachineService');
@@ -39,11 +39,17 @@ const createActivity = async (req, res) => {
         }));
 
         const createdNotifications = await Notification.insertMany(notifications);
-        await scheduleNotification(createdNotifications);
+        for (const notification of createdNotifications) {
+            await sendNotificationNow(notification);
+        }
 
         const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
-        
-        res.status(200).json({ success: true, activity: populatedActivity });
+        const modifiedActivity = {
+            ...populatedActivity._doc,
+            sharedWith: populatedActivity.sharedWith.map(sharedUser => sharedUser.username),
+        };
+
+        res.status(200).json({ success: true, activity: modifiedActivity });
     } catch (error) {
         console.error('Error creating activity:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -460,7 +466,7 @@ async function adjustOrContractActivitySchedule(req, res) {
                         email: true,
                     }
                 });
-                await scheduleNotification([notification]);
+                await sendNotificationNow(notification);
                 console.log(`Notifying user ${user.username} about schedule change for activity ${activity._id}`);
             }
             console.log(`Notifying users about schedule change for activity ${activity._id}:`, usersToNotify);

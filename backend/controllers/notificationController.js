@@ -4,8 +4,8 @@ const Activity = require('../models/activityModel');
 const Event = require('../models/eventModel');
 
 const { combineDateTime } = require('../utils/utils');
-const { scheduleNotification } = require('../agenda/notificationScheduler');
-const { getScheduledJobs, snoozeJob, updateJobs, deleteJobs } = require('../services/agendaService');
+const { getScheduledJobs, snoozeJob } = require('../services/jobService');
+const { calculateNotificationTime, getRepeatInterval } = require('../services/notificationService');
 
 const setNotifications = async (req, res) => {
     const { type, elementId, notifications } = req.body;
@@ -48,7 +48,17 @@ const setNotifications = async (req, res) => {
 
         const savedNotifications = await Notification.insertMany(newNotifications);
 
-        await scheduleNotification(savedNotifications);
+        for (const notification of savedNotifications) {
+            if (notification.type === 'default') {
+                notification.triggerAt = calculateNotificationTime(notification);
+            } else if (notification.type === 'repeat') {
+                const lastSent = notification.from;
+                const interval = getRepeatInterval(notification);
+                notification.triggerAt = new Date(lastSent.getTime() + interval);
+            }
+            notification.status = 'active';
+            await notification.save();
+        }
 
         res.status(201).json({ success: true, message: 'Notifications created successfully', notifications: savedNotifications });
     } catch (error) {
@@ -114,7 +124,6 @@ const deleteNotification = async (req, res) => {
     if (!notificationId) return res.status(400).json({ success: false, message: 'No notification ID provided' });
 
     try {
-        await deleteJobs(notificationId);
         const notification = await Notification.findByIdAndDelete(notificationId);
         
         if (!notification) return res.status(404).json({ success: false, message: 'Notification not found' });
@@ -167,7 +176,16 @@ const updateNotification = async (req, res) => {
             to: to
         }, { new: true });
 
-        await updateJobs(notificationId);
+        // recalculate triggerAt
+        if (updatedNotification.type === 'default') {
+            updatedNotification.triggerAt = calculateNotificationTime(updatedNotification);
+        } else if (updatedNotification.type === 'repeat') {
+            const lastSent = updatedNotification.from;
+            const interval = getRepeatInterval(updatedNotification);
+            updatedNotification.triggerAt = new Date(lastSent.getTime() + interval);
+        }
+        updatedNotification.status = 'active';
+        await updatedNotification.save();
 
         res.status(200).json({ success: true, message: 'Notification updated successfully', notification: updatedNotification });
     } catch (error) {
