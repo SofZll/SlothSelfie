@@ -1,8 +1,6 @@
-const TimeMachine = require('../models/timeMachineModel');
 const { setTimeMachine, resetTimeMachine, isActive, getCurrentNow } = require('../services/timeMachineService');
 
 const { combineDateTime } = require('../utils/utils');
-const { resetJobs } = require('../services/agendaService');
 
 //function to set the time in the TimeMachine
 const setTime = async (req, res) => {
@@ -15,8 +13,6 @@ const setTime = async (req, res) => {
         setTimeMachine(dateTime);
         console.log('Time set to:', dateTime);
 
-        await resetJobs();
-        
         res.status(200).json({ success: true, message: 'Time set successfully' });
     }catch (error) {
         console.error('Error setting time:', error);
