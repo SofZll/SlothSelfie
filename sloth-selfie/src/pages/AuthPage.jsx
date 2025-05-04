@@ -68,7 +68,7 @@ const AuthPage = ({ formType = 'login' }) => {
 
     return (
         <AuthLayout>
-            <div className='container' onMouseMove={(e) => getCursorPosition(e)}>
+            <div className='container-auth' onMouseMove={(e) => getCursorPosition(e)}>
                 <img src={authSloth} alt='authSloth' className='auth-sloth' />
                 <div className='eye-cover1'>
                     <div id='eyes1'></div>

@@ -10,6 +10,7 @@ const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [settings, setSettings] = useState(false);
     const [calendarSettings, setCalendarSettings] = useState(false);
     const userRef = useRef(false);
 
@@ -132,7 +133,7 @@ const AuthProvider = ({ children }) => {
     }, [user]);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, calendarSettings, setCalendarSettings }}>
+        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, calendarSettings, setCalendarSettings, settings, setSettings }}>
             {!loading && children}
         </AuthContext.Provider>
     );

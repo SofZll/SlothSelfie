@@ -11,6 +11,7 @@ import TimeMachineButton from '../components/TimeMachine/TimeMachineButton';
 import { ChatProvider } from '../contexts/ChatContext';
 import ChatBox from '../components/ChatBox/ChatBox';
 import NotificationButton from '../components/NotificationButton';
+import Settings from '../components/Settings'
 
 const MainLayout = ({ children }) => {
     const isDesktop = useIsDesktop();
@@ -33,7 +34,7 @@ const MainLayout = ({ children }) => {
             <Header />
             
             <TimeMachineButton />
-           
+            <Settings />
             <main className='d-flex h-100 w-100 align-items-center justify-content-center'>{children}</main>
 
         </div>

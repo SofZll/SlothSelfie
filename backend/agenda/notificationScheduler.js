@@ -108,14 +108,20 @@ const cleanupExpiredSnoozes = async () => {
 const cleanupOutdatedJobs = async () => {
     const now = getCurrentNow();
 
-    const jobs = await agenda.jobs({ name: 'send-notification' || 'send-notification-now' });
+    const jobs = await agenda.jobs({ name: { $in: ['send-notification', 'send-notification-now'] } });
     for (const job of jobs) {
         const notification = await Notification.findById(job.attrs.data.notification);
-        if (!notification) continue;
-
-        if (job.attrs.name === 'send-notification' && (now > new Date(job.attrs.lastFinishedAt))){
+        if (!notification) {
             await job.remove();
-            console.log(`Removed outdated job for notification ${notification._id.toString()}`);
+            continue;
+        }
+
+        const lastFinished = job.attrs.lastFinishedAt;
+        const nextRun = job.attrs.nextRunAt;
+
+        if (lastFinished && !nextRun) {
+            await job.remove();
+            console.log(`Removed finished job for notification ${notification._id.toString()}`);
         }
     }
 }
