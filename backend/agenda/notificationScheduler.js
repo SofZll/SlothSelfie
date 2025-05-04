@@ -1,4 +1,6 @@
 const Notification = require('../models/notificationModel');
+const User = require('../models/userModel');
+const Event = require('../models/eventModel');
 const agenda = require('./agenda');
 
 const { sendSystemNotification, sendEmailNotification } = require('../services/notificationService');
@@ -7,18 +9,72 @@ const { getCurrentNow } = require('../services/timeMachineService');
 const initScheduler = async () => {
     agenda.define('send-notification', async job => {
         console.log('🏁 SEND NOTIFICATION FIRED!');
+
         const notificationId = job.attrs.data.notification;
         const notification = await Notification.findById(notificationId).populate('element');
         if (!notification) {
             console.log(`Notification ${notificationId} not found.`);
             return;
         }
-        const now = getCurrentNow();
-        console.log('notification', notification);
 
+        const now = getCurrentNow();
         if (now < new Date(notification.from) || now > new Date(notification.to)) {
             console.log(`Notification ${notification._id.toString()} skipped, out of active window.`);
             return;
+        }
+
+        const userId = notification.user;
+        const user = await User.findById(userId)
+        if (!user){
+            console.log(`User ${userId} not found.`);
+            return;
+        }
+        if (user.disableNotifications.all) {
+            console.log(`User ${userId} has notifications disabled.`);
+            return;
+        }
+
+        if (notification.elementType === 'event') {
+            const elementId = notification.element;
+            const element = await Event.findById(elementId);
+            if (!element) {
+                console.log(`Element ${elementId} not found.`);
+                return;
+            }
+
+            if (element.type === 'work' && user.disableNotifications.outsideWorkingHours) {
+                const [startHour, startMinute] = user.workingHours.start.split(':').map(Number);
+                const [endHour, endMinute] = user.workingHours.end.split(':').map(Number);
+            
+                const startTime = new Date(now);
+                startTime.setHours(startHour, startMinute, 0, 0);
+            
+                const endTime = new Date(now);
+                endTime.setHours(endHour, endMinute, 0, 0);
+            
+                const nowTime = new Date(now);
+            
+                if (nowTime < startTime || nowTime > endTime) {
+                    console.log(`Notification ${notification._id.toString()} skipped, outside working hours.`);
+                    return;
+                }
+            } else if (user.disableNotifications.outsideDayHours) {
+                const [startHour, startMinute] = user.dayHours.start.split(':').map(Number);
+                const [endHour, endMinute] = user.dayHours.end.split(':').map(Number);
+            
+                const startTime = new Date(now);
+                startTime.setHours(startHour, startMinute, 0, 0);
+            
+                const endTime = new Date(now);
+                endTime.setHours(endHour, endMinute, 0, 0);
+            
+                const nowTime = new Date(now);
+            
+                if (nowTime < startTime || nowTime > endTime) {
+                    console.log(`Notification ${notification._id.toString()} skipped, outside day hours.`);
+                    return;
+                }
+            }
         }
 
         if (notification.type === 'repeat' && notification.snooze) {
@@ -35,10 +91,10 @@ const initScheduler = async () => {
         }
 
         try {
-            if (notification.mode.system) {
+            if (notification.mode.system && !user.disableNotifications.system) {
                 await sendSystemNotification(notification);
             }
-            if (notification.mode.email) {
+            if (notification.mode.email && !user.disableNotifications.email) {
                 await sendEmailNotification(notification);
             }
         } catch (error) {
