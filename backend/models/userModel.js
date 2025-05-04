@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const fs = require('fs').promises;
 const path = require('path');
+const { all } = require('../routes/userRoutes');
 const defaultImagePath = path.join(__dirname, '../media/img/defaultImage.jpg');
 
 const userSchema = new mongoose.Schema({
@@ -38,12 +39,34 @@ const userSchema = new mongoose.Schema({
         },
         contentType: {
             type: String,
-            default: 'image/jpeg',
-        },
+            default: 'image/jpeg'
+        }
     },
     isOnline: {
         type: Boolean,
-        default: false,
+        default: false
+    },
+    disableNotifications: {
+        all: {
+            type: Boolean,
+            default: false
+        },
+        email: {
+            type: Boolean,
+            default: false
+        },
+        system: {
+            type: Boolean,
+            default: false
+        },
+        outsideWorkingHours: {
+            type: Boolean,
+            default: true
+        },
+        outsideDayHours: {
+            type: Boolean,
+            default: true
+        }
     },
 
     workingHours: {
