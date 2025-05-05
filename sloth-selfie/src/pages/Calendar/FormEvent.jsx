@@ -173,9 +173,9 @@ const FormEvent = () => {
         if (response.success) {
             NewSwal.fire({ title: selected.edit ? 'Event updated' : 'Event created', icon: 'success', text: selected.edit ? 'Event updated successfully' : 'Event created successfully'});
             if (event.repeatFrequency === 'none') {
-                if (selected.edit) setEvents(events.map(evt => evt._id === event._id ? response.event : evt));
+                if (selected.edit) setEvents([...events.filter(evt => evt._id !== event._id && evt.fatherId !== event.fatherId), response.event]);
                 else setEvents([...events, response.event]);
-            } else setEvents([...events.filter(evt => evt.fatherId !== response.events[0].fatherId), ...response.events]);
+            } else setEvents([...events.filter(evt => evt.fatherId !== response.events[0].fatherId && evt._id !== response.events[0]._id), ...response.events]);
         } else NewSwal.fire({ title: 'Error saving event', icon: 'error', text: response.message});
         resetEvent();
         resetSelected();
@@ -210,7 +210,7 @@ const FormEvent = () => {
             } else if (event.repeatMode === 'until' && event.repeatEndDate === null) {
                 setConditionsMet(false);
             } else if (event.repeatMode === 'until' && new Date(event.repeatEndDate) < new Date(event.startDate)) {
-                setConditionsMet(false);
+                if (!selected.edit) setConditionsMet(false);
             }
         }
     }, [event.title, event.startDate, event.endDate, event.duration, event.allDay, event.time, event.repeatFrequency, event.repeatMode, event.repeatTimes, event.repeatEndDate]);
@@ -339,7 +339,7 @@ const FormEvent = () => {
                         <select className='form-select' id='repeatMode'
                         value={event.repeatMode || ''}
                         disabled={event.isInProject}
-                        onChange={(e) => setEvent({...event, repeatMode: e.target.value})}>
+                        onChange={(e) => setEvent({...event, repeatMode: e.target.value, repeatTimes: 0, repeatEndDate: null})}>
                             <option value='ntimes'>Repeat N times</option>
                             <option value='until'>Repeat until</option>
                         </select>

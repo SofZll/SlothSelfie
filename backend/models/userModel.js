@@ -7,7 +7,6 @@ const defaultImagePath = path.join(__dirname, '../media/img/defaultImage.jpg');
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
     },
     username: {
         type: String,
@@ -16,7 +15,6 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
         unique: true,
     },
     password: {
@@ -67,6 +65,20 @@ const userSchema = new mongoose.Schema({
             type: Boolean,
             default: true
         }
+    },
+
+    isAdmin: {
+        type: Boolean,
+        default: false,
+        required: true,
+    },
+    isRoom: {
+        type: Boolean,
+        default: false,
+    },
+    isDevice: {
+        type: Boolean,
+        default: false,
     },
 
     workingHours: {
