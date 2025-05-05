@@ -28,6 +28,8 @@ const getEvents = async (req, res) => {
     }).populate('sharedWith', 'username')
     .populate('user', 'username');
 
+    console.log('Fetched events:', events); // Log the fetched events for debugging
+
 
 
     res.status(200).json({ success: true, events });
@@ -241,11 +243,31 @@ const updateEvent = async (req, res) => {
     const users = await findUserId(sharedWith);
     
     if (repeatFrequency === 'none') {
-      const event = await editEvent(eventId, title, type, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
-      if (event.success) {
-        res.status(200).json({ success: true, event: event.event });
+      const event = await Event.findById(eventId);
+      if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+      else {
+        if (event.repeatFrequency !== 'none') {
+          const events = await Event.find({ fatherId: event.fatherId });
+          for (let i = 1; i < events.length; i++) {
+            await events[i].deleteOne();
+          }
+
+          const response = await editEvent(events[0]._id, title, type, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
+          if (response.success) {
+            res.status(200).json({ success: true, event: response.event });
+            return;
+          } else {
+            res.status(400).json({ success: false, message: response.message });
+            return;
+          }
+        }
+      }
+    
+      const response = await editEvent(eventId, title, type, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
+      if (response.success) {
+        res.status(200).json({ success: true, event: response.event });
       } else {
-        res.status(400).json({ success: false, message: event.message });
+        res.status(400).json({ success: false, message: response.message });
       }
     } else {
       const event = await Event.findById(eventId);
@@ -268,24 +290,46 @@ const updateEvent = async (req, res) => {
           res.status(200).json({ success: true, events });
         } else return res.status(404).json({ success: false, message: 'No events found to edit' });
       } else {
-        console.log('Editing event with new parameters');
 
-        const startDateDifference = new Date(startDate) - new Date(event.startDate);
-        const endDateDifference = new Date(endDate) - new Date(event.endDate);
+        let startDateDifference, endDateDifference, addition;
+
+        if (event.startDate.getTime() < new Date(startDate).getTime()) {
+          startDateDifference = new Date(startDate).getTime() - event.startDate.getTime();
+          endDateDifference = new Date(endDate).getTime() - event.endDate.getTime();
+          addition = true;
+        } else if (event.startDate.getTime() === new Date(startDate).getTime()) {
+          startDateDifference = 0;
+          endDateDifference = 0;
+          addition = false;
+        } else {
+          startDateDifference = event.startDate.getTime() - new Date(startDate).getTime();
+          endDateDifference = event.endDate.getTime() - new Date(endDate).getTime();
+          addition = false;
+        }
 
         let gap = 1;
         if (repeatFrequency === 'weekly') gap = 7;
         else if (repeatFrequency === 'monthly') gap = 30;
         else if (repeatFrequency === 'yearly') gap = 365;
 
-        let fatherId = event.fatherId || event._id;
+        let fatherId = event.fatherId || eventId;
         
-        const events2edit = await Event.find({ fatherId: fatherId }).sort({ startDate: 1 });
+        const events2edit = await Event.find({
+          $or: [
+            { _id: eventId },
+            { fatherId: fatherId }
+          ]
+        }).sort({ startDate: 1 });
+
+        console.log('Events to edit:', events2edit);
+        if (events2edit.length === 0) return res.status(404).json({ success: false, message: 'No events found to edit' });
+
     
         if (repeatTimes) {
+
           for (let i = 0; i < repeatTimes; i++) {
-            const newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + (i * gap) + startDateDifference);
-            const newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (i * gap) + endDateDifference);
+            const newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( addition ? + startDateDifference : - startDateDifference));
+            const newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( addition ? + endDateDifference : - endDateDifference));
 
             if (i >= events2edit.length) {
               const responseEvent = await newEvent(title, user, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
@@ -309,11 +353,9 @@ const updateEvent = async (req, res) => {
           }
         } else if (repeatEndDate) {
           let count = 0;
-          const tmpStartDate = new Date(events2edit[0].startDate);
-          const tmpEndDate = new Date(events2edit[0].endDate);
-          while (tmpStartDate <= new Date(repeatEndDate)) {
-            const newStartDate = new Date(tmpStartDate.getTime() + startDateDifference);
-            const newEndDate = new Date(tmpEndDate.getTime() + endDateDifference);
+          let newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + ( addition ? + startDateDifference : - startDateDifference));
+          let newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + ( addition ? + endDateDifference : - startDateDifference));
+          while (newStartDate <= (new Date(repeatEndDate).setHours(23, 59, 59, 999))) {
 
             if (count >= events2edit.length) {
               const responseEvent = await newEvent(title, user, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
@@ -328,6 +370,8 @@ const updateEvent = async (req, res) => {
               } else events.push(response.event);
             }
             count++;
+            newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + (count * gap * 1000 * 60 * 60 * 24) + ( addition ? + startDateDifference : - startDateDifference));
+            newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (count * gap * 1000 * 60 * 60 * 24) + ( addition ? + endDateDifference : - endDateDifference));
           }
 
           if (count < events2edit.length) {

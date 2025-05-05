@@ -48,11 +48,28 @@
   background-color: transparent !important;
 }
 
+.rooms__control,
+.rooms__option,
+.rooms__multi-value__label,
+.rooms__menu {
+  font-size: 14px;
+  height: auto;
+}
+
+.rooms__menu-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.roomsDesktop__menu-list {
+  height: 70px;
+  overflow-y: auto;
+}
+
 @media screen and (min-width: 768px) {
   .pop-up {
     max-height: none;
   }
-
   .form-popup {
     max-height: none;
   }

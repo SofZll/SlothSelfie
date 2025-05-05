@@ -17,6 +17,10 @@
     border: 1px solid #244476;
 }
 
+.fs-small {
+    font-size: 14px;
+}
+
 /*hides scrollbar*/
 
 ::-webkit-scrollbar {
