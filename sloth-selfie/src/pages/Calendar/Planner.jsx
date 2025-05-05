@@ -310,12 +310,16 @@ const Planner = () => {
                 <div className='d-flex w-100 justify-content-center flex-column'>
                     <div className='btn-group' role='group'>
                         <button type='button' className={`btn btn-light border-secondary-subtle m-0 px-3 fs-small ${show === 'no availability' && 'bg-secondary-subtle'}`} onClick={() => setShow('no availability')}>Availability</button>
-                        <button type='button' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 fs-small ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
-                        <button type='button' className={`btn btn-light border-secondary-subtle border-end-0 m-0 px-3 fs-small ${show === 'tools' && 'bg-secondary-subtle'}`} onClick={() => setShow('tools')}>Tools</button>
+                        {!user.isAdmin && (
+                            <>
+                                <button type='button' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 fs-small ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
+                                <button type='button' className={`btn btn-light border-secondary-subtle border-end-0 m-0 px-3 fs-small ${show === 'tools' && 'bg-secondary-subtle'}`} onClick={() => setShow('tools')}>Tools</button>
+                            </>
+                        )}
                         <button type='button' className={`btn btn-light border-secondary-subtle m-0 px-3 fs-small ${show === 'plans' && 'bg-secondary-subtle'}`} onClick={() => setShow('plans')}>Plans</button>
                     </div>
 
-                    {show === 'tools' && (
+                    {(show === 'tools' || user.isAdmin) && (
                         <div className='d-flex w-100 justify-content-center'>
                             <div className='col-6 mt-2'>
                                 <Select
@@ -368,33 +372,39 @@ const Planner = () => {
                 <div className='d-flex w-100 justify-content-between align-items-center p-3'>
                     <div className='btn-group ms-4' role='group'>
                         <button type='button' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'no availability' && 'bg-secondary-subtle'}`} onClick={() => setShow('no availability')}>Availability</button>
-                        <button type='button' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
-                        <button type='button' className={`btn btn-light border-secondary-subtle border-end-0 m-0 px-3 ${show === 'tools' && 'bg-secondary-subtle'}`} onClick={() => setShow('tools')}>Tools</button>
+                        {!user.isAdmin && (
+                            <>
+                                <button type='button' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
+                                <button type='button' className={`btn btn-light border-secondary-subtle border-end-0 m-0 px-3 ${show === 'tools' && 'bg-secondary-subtle'}`} onClick={() => setShow('tools')}>Tools</button>
+                            </>
+                        )}
                         <button type='button' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'plans' && 'bg-secondary-subtle'}`} onClick={() => setShow('plans')}>Plans</button>
                     </div>
 
-                    <div className='d-flex justify-content-center align-items-center w-50'>
-                        <div className='col-6'>
-                            <Select
-                            isMulti
-                            classNamePrefix='roomsDesktop'
-                            options={roomOptions}
-                            value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
-                            onChange={handleChange}
-                            placeholder={`${selectedRooms.length} room${selectedRooms.length !== 1 ? 's' : ''}`}
-                            />
+                    {(show === 'tools' || user.isAdmin) && (
+                        <div className='d-flex justify-content-center align-items-center w-50'>
+                            <div className='col-6'>
+                                <Select
+                                isMulti
+                                classNamePrefix='roomsDesktop'
+                                options={roomOptions}
+                                value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
+                                onChange={handleChange}
+                                placeholder={`${selectedRooms.length} room${selectedRooms.length !== 1 ? 's' : ''}`}
+                                />
+                            </div>
+                            <div className='col-6'>
+                                <Select
+                                isMulti
+                                classNamePrefix='devicesDesktop'
+                                options={deviceOptions}
+                                value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
+                                onChange={handleChange}
+                                placeholder={`${selectedDevices.length} device${selectedDevices.length !== 1 ? 's' : ''}`}
+                                />
+                            </div>
                         </div>
-                        <div className='col-6'>
-                            <Select
-                            isMulti
-                            classNamePrefix='devicesDesktop'
-                            options={deviceOptions}
-                            value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
-                            onChange={handleChange}
-                            placeholder={`${selectedDevices.length} device${selectedDevices.length !== 1 ? 's' : ''}`}
-                            />
-                        </div>
-                    </div>
+                    )}
                 </div>
             ) : (
                 <ScrollList CardList={activities} smallView={true} />

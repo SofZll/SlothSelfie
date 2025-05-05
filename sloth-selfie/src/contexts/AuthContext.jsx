@@ -34,12 +34,15 @@ const AuthProvider = ({ children }) => {
             if (!userRef.current || userRef.current._id !== newUser._id) {
                 userRef.current = newUser;
                 setUser(newUser);
-            }
+            } else setUser(newUser);
 
+            return newUser;
         } else {
             console.error('Error fetching profile data:', response);
             userRef.current = null;
             setUser(null);
+
+            return null;
         }
     };
 
@@ -118,7 +121,7 @@ const AuthProvider = ({ children }) => {
     }, [user]);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, calendarSettings, setCalendarSettings, settings, setSettings }}>
+        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, calendarSettings, setCalendarSettings, settings, setSettings, userRef }}>
             {!loading && children}
         </AuthContext.Provider>
     );
