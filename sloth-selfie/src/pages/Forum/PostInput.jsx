@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Camera, Image, MapPin } from 'lucide-react';
 
 import MapPreview from './MapPreview';
+import GeolocalizationInput from '../../components/GeolocalizationInput';
 import { useForumContext } from '../../contexts/ForumContext';
 
 const PostInput = ({ handleNewContent }) => {
     const { newPostText, setNewPostText, inputImage, setInputImage, showMap, setShowMap, longitude, setLongitude, latitude, setLatitude } = useForumContext();
 
     const [chosen, setChosen] = useState(false);
+    const [showGeo, setShowGeo] = useState(false);
+    const [inputMap, setInputMap] = useState(null);
     const center = [latitude, longitude];
 
     const cameraClick = () => {
@@ -22,20 +25,8 @@ const PostInput = ({ handleNewContent }) => {
         setChosen(true);
     }
 
-    const mapsClick = () => {
-        getPosition();
-        setShowMap(!showMap);
-        setChosen(true);
-    }
-
-    const getPosition = () => {
-        navigator.geolocation.getCurrentPosition((position) => {
-            setLatitude(position.coords.latitude);
-            setLongitude(position.coords.longitude);
-            console.log(latitude, longitude);
-        });
-    };
-
+    const mapsClick = () => setShowGeo(!showGeo);
+    
     const inputChange = (event, setState) => {
         const file = event.target.files[0];
         if (file) {
@@ -43,6 +34,14 @@ const PostInput = ({ handleNewContent }) => {
             setState(fileUrl);
         }
     };
+
+    useEffect(() => {
+        if (inputMap) {
+            setShowMap(true);
+            setLatitude(inputMap[0]);
+            setLongitude(inputMap[1]);
+        }
+    }, [inputMap]);
 
     return (
         <div className='d-flex align-items-center justify-content-center position-relative flex-row w-100 px-1 gap-2 new-post'>
@@ -54,6 +53,7 @@ const PostInput = ({ handleNewContent }) => {
                         <span className='delete-image' onClick={() => {setInputImage(null); setChosen(false);}}>&times;</span>
                     </div>
                 )}
+                <GeolocalizationInput showGeo={showGeo} setShowGeo={setShowGeo} setInputMap={setInputMap} />
                 {showMap && latitude && longitude && (
                     <>
                         <a href={`https://www.google.com/maps?q=${latitude},${longitude}`} className='link-map' target='_blank' rel='noopener noreferrer'>Open on Google maps</a>

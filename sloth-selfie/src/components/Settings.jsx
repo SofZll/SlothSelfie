@@ -72,7 +72,7 @@ const Settings = () => {
                         </div>
                     </div>
                     <div className='modal-footer'>
-                        <button type='button' className='btn btn-danger fw-medium' onClick={handleLogout}>
+                        <button type='button' className='btn btn-danger fw-medium' onClick={() => handleLogout()}>
                             <LogOut size={19} /> Log out
                         </button>
                     </div>
