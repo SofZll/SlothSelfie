@@ -50,7 +50,7 @@ const SettingsCalendar = () => {
     if (!calendarSettings) return null;
 
     return (
-        <div className={`modal fade ${calendarSettings ? 'show d-block' : ''}`} id='settingsCalendarModal' tabIndex='-1' aria-labelledby='settingsCalendarModal' aria-hidden='true' style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className={`modal fade ${calendarSettings ? 'show d-block' : ''}`} id='settingsCalendarModal' tabIndex='-1' aria-labelledby='settingsCalendarModal' aria-hidden='true'>
             <div className='modal-dialog modal-dialog-centered'>
                 <div className='modal-content '>
                     <div className='modal-header'>

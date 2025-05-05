@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { initScheduler, scheduleNotification } = require('../agenda/notificationScheduler');
+const { startVirtualScheduler } = require('../scheduler/notificationScheduler');
 // Mongodb credentials
 /*
 const mongoCredentials = {
@@ -32,8 +32,7 @@ const connectDB = async () => {
         console.log('Connected to MongoDB');
 
         // scheduler for notifications
-        initScheduler();
-        await scheduleNotification();
+        startVirtualScheduler();
 
         const testNotification = {
             _id: '6615c3a427b1e2c5e0c35a7e', // Assicurati che esista nel DB!

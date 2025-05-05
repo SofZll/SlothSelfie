@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 
-const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, getUserId, checkAuth, getUserIdFromUsername, updateUserPreferences } = require('../controllers/userController');
+const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, getUserId, checkAuth, getUserIdFromUsername, updateUserPreferences, switchNotification } = require('../controllers/userController');
 
 const router = express.Router();
 
@@ -16,6 +16,7 @@ router.get('/user/profile/:userId?', getUserProfile);
 router.get('/user/username', getUsername);
 router.get('/user/userId', getUserId);
 router.get('/user/check-auth', checkAuth);
+router.put('/user/disable-notifications', switchNotification);
 
 
 router.put('/user/edit-schedule', updateUserPreferences);

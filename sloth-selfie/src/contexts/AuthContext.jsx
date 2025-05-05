@@ -10,6 +10,7 @@ const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [settings, setSettings] = useState(false);
     const [calendarSettings, setCalendarSettings] = useState(false);
     const userRef = useRef(false);
 
@@ -24,24 +25,9 @@ const AuthProvider = ({ children }) => {
             const formattedBirthday = response.user.birthday ? new Date(response.user.birthday).toISOString().split('T')[0] : '';
             
             const newUser = {
-                _id: response.user._id || '',
-                name: response.user.name || '',
-                username: response.user.username || '',
-                email: response.user.email || '',
-                birthday: formattedBirthday,
-                phoneNumber: response.user.phoneNumber || '',
-                gender: response.user.gender || '',
+                ...response.user,
                 profile_image: base64Image,
-                workingHours: {
-                    start: response.user.workingHours.start || '',
-                    end: response.user.workingHours.end || '',
-                },
-                dayHours: {
-                    start: response.user.dayHours.start || '',
-                    end: response.user.dayHours.end || '',
-                },
-                freeDays: response.user.freeDays || [''],
-                noAvailability: response.user.noAvailability || [],
+                birthday: formattedBirthday
             };
             
             // Only update if ID changed or user was null
@@ -132,7 +118,7 @@ const AuthProvider = ({ children }) => {
     }, [user]);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, calendarSettings, setCalendarSettings }}>
+        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, calendarSettings, setCalendarSettings, settings, setSettings }}>
             {!loading && children}
         </AuthContext.Provider>
     );

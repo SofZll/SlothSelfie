@@ -32,6 +32,7 @@ const Notifications = () => {
         const response = await apiService(`/notification/snooze/${notifications[index]._id}`, 'PUT', { snoozeInterval });
         if (response.success) {
             setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
+            window.location.reload();
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
     }
 
@@ -79,7 +80,7 @@ const Notifications = () => {
                         ))}
                     </div>
                 ) : (
-                    <p>Nessuna notifica pianificata.</p>
+                    <p className='ps-2'>Nessuna notifica pianificata.</p>
                 )}
             </div>
         </MainLayout>
