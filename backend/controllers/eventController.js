@@ -514,7 +514,10 @@ const importEvents = async (req, res) => {
 
           // Check if the event has a recurrence rule (rrule)
           if (icsEvent.rrule) {
-            const rule = RRule.fromString(icsEvent.rrule.toString());
+            const rule = new RRule({
+              ...icsEvent.rrule.origOptions,
+              tzid: undefined  // Remove timezone information to avoid issues with time offsets
+            });
             console.log('Recurrence rule:', rule);  // Log the recurrence rule for debugging
 
             const RRuleFrequencyMap = {
@@ -524,10 +527,8 @@ const importEvents = async (req, res) => {
               [RRule.YEARLY]: 'yearly',
             };
 
-            const startDate = new Date(icsEvent.start);
-
             // Create a new event for each occurrence of the recurring event
-            const dates = rule.between(startDate, rule.options.until || new Date('2100-01-01'), true); // true = inclusive
+            const dates = rule.between(rule.options.dtstart, rule.options.until || new Date('2100-01-01'), true); // true = inclusive
       
             const duration = correctedEnd - icsEvent.start;
 
