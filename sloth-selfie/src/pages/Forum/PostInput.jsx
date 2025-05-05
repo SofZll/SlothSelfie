@@ -56,7 +56,6 @@ const PostInput = ({ handleNewContent }) => {
                 <GeolocalizationInput showGeo={showGeo} setShowGeo={setShowGeo} setInputMap={setInputMap} />
                 {showMap && latitude && longitude && (
                     <>
-                        <a href={`https://www.google.com/maps?q=${latitude},${longitude}`} className='link-map' target='_blank' rel='noopener noreferrer'>Open on Google maps</a>
                         {latitude && longitude && <MapPreview center={center} />}
                         <span className='delete-map' onClick={() => {setShowMap(false); setChosen(false);}}>&times;</span>
                     </>
