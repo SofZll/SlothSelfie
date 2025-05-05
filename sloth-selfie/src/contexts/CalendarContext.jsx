@@ -50,7 +50,7 @@ export const CalendarProvider = ({ children }) => {
         duration: null,
         allDay: false,
         repeatFrequency: 'none',
-        repeatMode: 'until',
+        repeatMode: 'ntimes',
         repeatTimes: 0,
         repeatEndDate: null,
         eventLocation: '',
@@ -78,7 +78,7 @@ export const CalendarProvider = ({ children }) => {
             duration: null,
             allDay: false,
             repeatFrequency: 'none',
-            repeatMode: 'until',
+            repeatMode: 'ntimes',
             repeatEndDate: null,
             repeatTimes: 0,
             eventLocation: '',
@@ -175,12 +175,22 @@ export const CalendarProvider = ({ children }) => {
     // disable save button if conditions are not met
     const [conditionsMet, setConditionsMet] = useState(false);
 
+    const [selectedRooms, setSelectedRooms] = useState([]);
+    const [rooms, setRooms] = useState([]);
+
+    const [selectedDevices, setSelectedDevices] = useState([]);
+    const [devices, setDevices] = useState([]);
+
     return (
         <CalendarContext.Provider 
             value={{ activity, setActivity, activities, setActivities, resetActivity,
                 event, setEvent, events, setEvents, addImportedEvents, resetEvent,
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
-                selected, setSelected, select, back, resetSelected, notifications, setNotifications, fetchNotifications, conditionsMet, setConditionsMet }}>
+                selected, setSelected, select, back, resetSelected,
+                notifications, setNotifications, fetchNotifications,
+                conditionsMet, setConditionsMet, 
+                rooms, setRooms, selectedRooms, setSelectedRooms,
+                devices, setDevices, selectedDevices, setSelectedDevices }}>
 
             {children}
             
