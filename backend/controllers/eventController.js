@@ -483,7 +483,11 @@ async function exportEvent(req, res){
       recurrenceRule = `FREQ=${freqMap[event.repeatFrequency]};`;
 
       if (event.repeatTimes && event.repeatTimes > 0) {
-        recurrenceRule += `COUNT=${event.repeatTimes}`;
+        // Set the count of all the occurrences 
+        const occurrences = await Event.find({ fatherId: event.fatherId });
+        //compare the dates of the occurrences with the start date of the event, if it is before the start date, we remove it from the count
+        const occurrencesCount = occurrences.filter(occurrence => occurrence.startDate >= event.startDate).length;
+        recurrenceRule += `COUNT=${occurrencesCount}`;
       } else if (event.repeatEndDate) {
         const endRecDate = event.repeatEndDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
         recurrenceRule += `UNTIL=${endRecDate}`;
