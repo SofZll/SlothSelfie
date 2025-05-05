@@ -71,6 +71,12 @@ const notificationSchema = new mongoose.Schema({
             max: 3
         }
     },
+
+    snoozeFather: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Notification',
+        default: null
+    },
     
     // se l'utente è vicino al luogo
     location: {
@@ -108,6 +114,17 @@ const notificationSchema = new mongoose.Schema({
     // tutti i tipi
     to: {
         type: Date,
+    },
+
+    triggerAt: {
+        type: Date,
+        default: null
+    },
+
+    lastSentAt: {
+        type: Date,
+        default: null,
+        required: this.type === 'repeat'
     },
 
     status: {

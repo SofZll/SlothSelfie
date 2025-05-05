@@ -238,6 +238,25 @@ const updateUserPreferences = async (req, res) => {
     }
 };
 
+const switchNotification = async (req, res) => {
+    const { userId } = req.session;
+    const { field, value } = req.body;
+    console.log('SwitchNotification - field:', field, 'value:', value);
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        // disable notifications
+        user.disableNotifications[field] = value;
+        console.log('SwitchNotification - user.disableNotifications:', user.disableNotifications);
+
+        await user.save();
+        res.json({ success: true, disableNotifications: user.disableNotifications });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error updating user preferences' });
+    }
+};
 
 module.exports = {
     loginUser,
@@ -251,4 +270,5 @@ module.exports = {
     checkAuth,
     getUserIdFromUsername,
     updateUserPreferences,
+    switchNotification
 };

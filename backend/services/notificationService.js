@@ -1,4 +1,6 @@
 const Notification = require('../models/notificationModel');
+const Event = require('../models/eventModel');
+const Activity = require('../models/activityModel');
 const Subscription = require('../models/subscriptionModel');
 const User = require('../models/userModel');
 const webPush = require('web-push');
@@ -14,15 +16,19 @@ const sendSystemNotification = async (notification) => {
         return;
     }
 
+    let element;
+    if (notification.elementType === 'Activity') element = await Activity.findById(notification.element);
+    else if (notification.elementType === 'Event') element = await Element.findById(notification.element);
+
     let body = '';
     if (notification.type != 'now') {
-        body = `il tuo ${notification.elementType} "${notification.element.title}" scade il ${new Date(notification.to).toLocaleString()}`;
+        body = `il tuo ${notification.elementType} "${element.title}" scade il ${new Date(notification.to).toLocaleString()}`;
     } else {
-        body = `il tuo ${notification.elementType} "${notification.element.title}" è stato modificato`;
+        body = `il tuo ${notification.elementType} "${element.title}" è stato modificato`;
     }
 
     const payload = {
-        title: notification.element.title,
+        title: element.title,
         body,
         notificationId: notification.id,
         url: 'http://localhost:3000',
@@ -63,6 +69,10 @@ const sendEmailNotification = async (notification) => {
         return;
     }
 
+    let element;
+    if (notification.elementType === 'Activity') element = await Activity.findById(notification.element);
+    else if (notification.elementType === 'Event') element = await Element.findById(notification.element);
+
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -74,31 +84,31 @@ const sendEmailNotification = async (notification) => {
     let subjectContent, htmlContent;
 
     if (notification.elementType === 'Event') {
-        subjectContent = `Friendly Reminder: The Event ${notification.element.title} is Coming Up!`;
+        subjectContent = `Friendly Reminder: The Event ${element.title} is Coming Up!`;
         htmlContent = `
             <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-                <h2 style="color: #4CAF50;">📅 Reminder: ${notification.element.title}</h2>
+                <h2 style="color: #4CAF50;">📅 Reminder: ${element.title}</h2>
                 <p>Hey <strong>${receiver.username}</strong>,</p>
                 <p>Your event is coming up soon! Here are the details:</p>
                 <ul>
-                    <li><strong>Date:</strong> ${notification.element.date}</li>
-                    <li><strong>Time:</strong> ${notification.element.time}</li>
-                    <li><strong>Location:</strong> ${notification.element.eventLocation}</li>
+                    <li><strong>Date:</strong> ${element.date}</li>
+                    <li><strong>Time:</strong> ${element.time}</li>
+                    <li><strong>Location:</strong> ${element.eventLocation}</li>
                 </ul>
                 <p>Make sure to be there! </p>
                 <p><a href="http://localhost:3000" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Event Details on Sloth Selfie</a></p>
             </div>
         `;
     } else if (notification.elementType === 'Activity') {
-        subjectContent = `Friendly Reminder: The Activity ${notification.element.title} Deadline is Approaching!`;
+        subjectContent = `Friendly Reminder: The Activity ${element.title} Deadline is Approaching!`;
         htmlContent = `
             <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-                <h2 style="color: #4CAF50;">📅 Reminder: ${notification.element.title}</h2>
+                <h2 style="color: #4CAF50;">📅 Reminder: ${element.title}</h2>
                 <p>Hey <strong>${receiver.username}</strong>,</p>
                 <p>Your activity deadline is approaching! Here are the details:</p>
                 <ul>
-                    <li><strong>Deadline:</strong> ${notification.element.deadline}</li>
-                    <li><strong>Completed:</strong> ${notification.element.completed ? 'Yes' : 'No'}</li>
+                    <li><strong>Deadline:</strong> ${element.deadline}</li>
+                    <li><strong>Completed:</strong> ${element.completed ? 'Yes' : 'No'}</li>
                 </ul>
                 <p>Make sure to complete the activity on time! </p>
                 <p><a href="http://localhost:3000" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Activity Details on Sloth Selfie</a></p>
@@ -123,7 +133,44 @@ const sendEmailNotification = async (notification) => {
     }
 }
 
+const calculateNotificationTime = (notification) => {
+    const notificationTime = new Date(notification.to);
+
+    switch (notification.variant) {
+        case 'day':
+            notificationTime.setDate(notificationTime.getDate() - notification.before);
+            break;
+        case 'week':
+            notificationTime.setDate(notificationTime.getDate() - (notification.before * 7));
+            break;
+    }
+
+    const [hours, minutes] = notification.time.split(':');
+    notificationTime.setHours(hours, minutes, 0, 0);
+
+    return notificationTime;
+}
+
+const getRepeatInterval = (notification) => {
+    const value = notification.before || 1;
+
+    switch (notification.variant) {
+        case 'minute':
+            return value * 60 * 1000;
+        case 'hour':
+            return value * 60 * 60 * 1000;
+        case 'day':
+            return value * 24 * 60 * 60 * 1000;
+        case 'week':
+            return value * 7 * 24 * 60 * 60 * 1000;
+        default:
+            return 24 * 60 * 60 * 1000;
+    }
+}
+
 module.exports = {
     sendSystemNotification,
     sendEmailNotification,
+    calculateNotificationTime,
+    getRepeatInterval
 };
