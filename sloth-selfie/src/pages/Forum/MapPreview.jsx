@@ -50,8 +50,10 @@ const MapPreview = ({ center , id = 0 , isPost = false}) => {
         }
 
         setTimeout(() => {
-            mapRef.current.invalidateSize();
-        }, 0);
+            if (mapRef.current) {
+                mapRef.current.invalidateSize();
+            }
+        }, 300);
 
         return () => {
             if (mapRef.current){
