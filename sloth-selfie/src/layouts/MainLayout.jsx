@@ -12,29 +12,44 @@ import { ChatProvider } from '../contexts/ChatContext';
 import ChatBox from '../components/ChatBox/ChatBox';
 import NotificationButton from '../components/NotificationButton';
 import Settings from '../components/Settings'
+import LogoutButton from '../components/LogoutButton';
 
 const MainLayout = ({ children }) => {
     const isDesktop = useIsDesktop();
+    const { user } = useContext(AuthContext);
+
 
     return (
         <div className='d-flex h-100 w-100 align-items-center justify-content-center overflow-hidden'>
-            {isDesktop ? (
+            {!user.isAdmin && (
                 <>
-                    <DesktopNav />
-                    <ChatProvider >
-                        <ChatBox />
-                    </ChatProvider>
-                </>
-            ) : (
-                <>
-                    <NotificationButton />
-                    <MobileNav />
+                    {isDesktop ? (
+                        <>
+                            <DesktopNav />
+                            <ChatProvider >
+                                <ChatBox />
+                            </ChatProvider>
+                        </>
+                    ) : (
+                        <>
+                            <NotificationButton />
+                            <MobileNav />
+                        </>
+                    )}
                 </>
             )}
+            
             <Header />
             
-            <TimeMachineButton />
-            <Settings />
+            {!user.isAdmin ? (
+                <>
+                    <TimeMachineButton />
+                    <Settings />
+                </>
+            ) : (
+                <LogoutButton />
+            )}
+
             <main className='d-flex h-100 w-100 align-items-center justify-content-center'>{children}</main>
 
         </div>

@@ -29,27 +29,33 @@ const MainRoutes = () => {
             <Suspense fallback={<LoadingPageLight />}>
                 <StyleProvider>
                     <Routes>
-                        <Route path='/' element={<Navigate to={user ? '/home' : '/login'} />} />
+                        <Route path='/' element={<Navigate to={user ? (user.isAdmin ? '/admin' : '/home') : '/login'} />} />
                         <Route path='/login' element={<AuthPage formType='login' />} />
                         <Route path='/register' element={<AuthPage formType='register' />} />
                         <Route
                             path='/*'
                             element={
-                                <ProtectedRoute >
-                                    <Routes>
-                                        <Route path='/pomodoro/:pomodoroId' element={<Pomodoro />} />
-                                        <Route path='/pomodoro' element={<Pomodoro />} />
-                                        <Route path='/projects' element={<Projects />} />
-                                        <Route path='/calendar' element={<Calendar />} />
-                                        <Route path='/notes' element={<Notes openNote={false} />} />
-                                        <Route path='/notes/:noteId' element={<Notes openNote={true} />} />
-                                        <Route path='/home' element={<Home />} />
-                                        <Route path='/home/settings' element={<Home settings={true} />} />
-                                        <Route path='/profile' element={<Profile />} />
-                                        <Route path='/notifications' element={<Notifications />} />
-                                        <Route path='/forum' element={<ForumWrapper />} />
-                                    </Routes>
-                                    {!isDesktop && (
+                                <ProtectedRoute >   
+                                    {user?.isAdmin ? (
+                                        <Routes>
+                                            <Route path='/admin' element={<Calendar />} />
+                                        </Routes>
+                                    ) : (
+                                        <Routes>
+                                            <Route path='/pomodoro/:pomodoroId' element={<Pomodoro />} />
+                                            <Route path='/pomodoro' element={<Pomodoro />} />
+                                            <Route path='/projects' element={<Projects />} />
+                                            <Route path='/calendar' element={<Calendar />} />
+                                            <Route path='/notes' element={<Notes openNote={false} />} />
+                                            <Route path='/notes/:noteId' element={<Notes openNote={true} />} />
+                                            <Route path='/home' element={<Home />} />
+                                            <Route path='/home/settings' element={<Home settings={true} />} />
+                                            <Route path='/profile' element={<Profile />} />
+                                            <Route path='/notifications' element={<Notifications />} />
+                                            <Route path='/forum' element={<ForumWrapper />} />
+                                        </Routes>
+                                    )}
+                                    {!isDesktop && !user.isAdmin && (
                                         <ChatProvider>
                                             <Routes>
                                                 <Route path='/chat' element={<ChatBox chatId={null} />} />

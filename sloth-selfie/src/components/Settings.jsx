@@ -15,6 +15,7 @@ const Settings = () => {
         const response = await apiService('/user/logout', 'POST');
         if (response.success) setUser(null);
         else NewSwal.fire({ title: 'Error logging out', icon: 'error', text: response.message});
+        setSettings(false);
 
         navigate('/login');
     }

@@ -29,7 +29,7 @@ function getCursorPosition(event) {
 }
 
 const AuthPage = ({ formType = 'login' }) => {
-    const { fetchUserData } = useContext(AuthContext);
+    const { fetchUserData, user } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [currentFormType, setcurrentFormType] = useState(formType);
@@ -46,9 +46,11 @@ const AuthPage = ({ formType = 'login' }) => {
         if (currentFormType === 'login' && validateLogin(userInfo.username, userInfo.password)) {
             const response = await apiService('/user/login', 'POST', { username: userInfo.username, password: userInfo.password });
             if (response && response.success) {
-                console.log('User logged in');
-                await fetchUserData();
-                navigate('/home');
+                const newUser = await fetchUserData();
+
+                if (newUser.isAdmin) navigate('/admin');
+                else navigate('/home');
+
             } else {
                 console.error('Error logging in:', response);
                 NewSwal.fire({ title: 'Login failed', icon: 'error', text: response.message});
