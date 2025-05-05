@@ -45,6 +45,7 @@ html, body {
 
 .modal {
     background-color: rgba(0,0,0,0.5);
+    z-index: 1101;
 }
 
 /* css form */
@@ -157,14 +158,6 @@ html, body {
 
 .blue:hover {
     background-color: #3e4dac;
-}
-
-.button-cool {
-    background-color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 0.3rem;
-    width: 100%;
 }
 
 /* animations */

@@ -110,15 +110,15 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                             </button>
                         </div>
                         {showSelectNotification === index && (
-                            <div className='notification-select position-absolute end-0 top-100 rounded shadow-sm z-2'>
-                                <button className='button-cool' onClick={() => {handleModifyNotification(index, 'type', 'default'); setShowSelectNotification(null)}} >
-                                    <span>default</span>
-                                </button>
-                                <button className='button-cool' onClick={() => {handleModifyNotification(index, 'type', 'repeat'); setShowSelectNotification(null)}} >
-                                    <span>repeat</span>
-                                </button>
-                            </div>
-                        )}
+                        <div className='notification-select position-absolute end-0 top-100 rounded shadow-sm z-2'>
+                            <button onClick={() => {handleModifyNotification(index, 'type', 'default'); setShowSelectNotification(null)}} >
+                                <span>default</span>
+                            </button>
+                            <button onClick={() => {handleModifyNotification(index, 'type', 'repeat'); setShowSelectNotification(null)}} >
+                                <span>repeat</span>
+                            </button>
+                        </div>
+                    )}
                     </div>
                     {notif.type === 'default' ? (
                         <NotificationDefault notif={notif} index={index} handleModifyNotification={handleModifyNotification} />

@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { MapPin } from 'lucide-react'
 import L from 'leaflet';
 import '../styles/GeolocalizationInput.css';
 
 import { NewSwal } from '../utils/swalUtils';
+import { reverseAddress } from '../utils/mapUtils';
 
 const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
     const mapRef = useRef(null);
@@ -10,7 +12,6 @@ const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
     const [addressInput, setAddressInput] = useState('');
     const [mapInitialized, setMapInitialized] = useState(false);
     const [position, setPosition] = useState(null);
-    const [showCurrent, setShowCurrent] = useState(false);
 
     const icon = L.icon({
         iconUrl: 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png',
@@ -35,6 +36,9 @@ const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
             const { lat, lon } = data[0];
             const position = [parseFloat(lat), parseFloat(lon)];
             setPosition(position);
+            
+            const address = await reverseAddress(position);
+            setAddressInput(address);
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: 'Address not found' });
     }
 
@@ -55,20 +59,14 @@ const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
         setPosition(null);
     }
 
-    const getCurrentPosition = () => {
-        navigator.geolocation.getCurrentPosition((position) => {
+    const getCurrentPosition = async () => {
+        navigator.geolocation.getCurrentPosition(async (position) => {
             setPosition([position.coords.latitude, position.coords.longitude]);
-            setAddressInput([position.coords.latitude, position.coords.longitude]);
+            const address = await reverseAddress([position.coords.latitude, position.coords.longitude]);
+            setAddressInput(address);
         });
     };
 
-    const handleFocus = () => setShowCurrent(true);
-    const handleBlur = () => {
-        setTimeout(() => {
-            setShowCurrent(false);
-        }, 300);
-    }
-    
     useEffect(() => {
         if (!showGeo){
             if (mapRef.current) {
@@ -84,7 +82,6 @@ const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
 
     useEffect(() => {
         if (position && showGeo && !mapInitialized) {
-            console.log('sono qui');
             const container = document.getElementById('map-modal');
             if (!container) return;
         
@@ -124,7 +121,7 @@ const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
                         <h5>Search for a location</h5>
                         <div className='row mb-2'>
                             <label htmlFor='address' className='col-form-label ms-1'>Address:</label>
-                            <div className='col-9'>
+                            <div className='col-9 position-relative'>
                                 <input 
                                     type='text' 
                                     id='address' 
@@ -132,17 +129,11 @@ const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
                                     placeholder='Enter address' 
                                     autoComplete='off' 
                                     value={addressInput} 
-                                    onChange={(e) => setAddressInput(e.target.value)} 
-                                    onFocus={handleFocus} 
-                                    onBlur={handleBlur}
+                                    onChange={(e) => setAddressInput(e.target.value)}
                                 />
-                                {showCurrent && (
-                                    <div className='d-flex justify-content-start align-items-center flex-column border border-1 rounded-2 border-secondary-subtle p-2'>
-                                        <button className='button-cool' onClick={getCurrentPosition}>
-                                            Current position
-                                        </button>
-                                    </div>
-                                )}
+                                <div className='position-absolute map-pin'>
+                                    <MapPin size={20} color='#777' onClick={() => getCurrentPosition()} />
+                                </div>
                             </div>
                             <div className='col-3'>
                                 <button className='button-clean green' onClick={() => handleAddressInput()}>Search</button>

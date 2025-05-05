@@ -3,10 +3,12 @@ import React, { useState, createContext, useContext, useEffect } from 'react';
 import { apiService } from '../services/apiService';
 import { useIsDesktop, bufferToBase64 } from '../utils/utils';
 import { AuthContext } from './AuthContext';
+import { TimeMachineContext } from './TimeMachineContext';
 
 const ChatContext = createContext();
 
 const ChatProvider = ({ children }) => {
+    const { refreshKey } = useContext(TimeMachineContext);
     const isDesktop = useIsDesktop();
     const { user } = useContext(AuthContext);
     const [chats, setChats] = useState([]);
@@ -52,7 +54,7 @@ const ChatProvider = ({ children }) => {
             await Promise.all(transformedData.map(async (chat) => {
                 const response2 = await apiService(`/user/profile/${chat.otherParticipant._id}`);
                 if (response2.success) {
-                    onlineUsers[chat.otherParticipant._id] = response2.user.isOnline;22222
+                    onlineUsers[chat.otherParticipant._id] = response2.user.isOnline;
                 } else {
                     console.error('Error fetching user status:', response2);
                 }
@@ -66,7 +68,7 @@ const ChatProvider = ({ children }) => {
 
     useEffect(() => {
         if (user?._id) fetchChats();
-    }, [user?._id]);
+    }, [user?._id, refreshKey]);
 
     return (
         <ChatContext.Provider value={{
