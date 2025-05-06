@@ -4,12 +4,9 @@ const User = require('../models/userModel');
 
 const { getCurrentNow } = require('../services/timeMachineService');
 
-const now = getCurrentNow();
-
 // Create a new chat
 const createChat = async (req, res) => {
     const { username2 } = req.body;
-    //const { participants } = req.body;
 
     try {
         const user = await User.findOne({ username: req.session.username });
@@ -24,7 +21,7 @@ const createChat = async (req, res) => {
         const newChat = await Chat.create({
             isDirectMessage: true,
             participants: [user._id, user2._id],
-            createdAt: now
+            createdAt: getCurrentNow()
         });
 
         res.status(201).json({ success: true, newChat });
@@ -36,6 +33,8 @@ const createChat = async (req, res) => {
 
 // Get all chats
 const getChats = async (req, res) => {
+    const now = getCurrentNow();
+
     try {
         const user = await User.findOne({ username: req.session.username });
         const chats = await Chat.find({ participants: user._id, createdAt: { $lte: now } }).populate('participants lastMessage');
@@ -64,6 +63,7 @@ const getChats = async (req, res) => {
 
 // Get all messages in a chat
 const getMessages = async (req, res) => {
+    const now = getCurrentNow();
     const { chatId } = req.params;
 
     try {

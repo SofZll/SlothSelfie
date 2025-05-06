@@ -1,6 +1,5 @@
 import React, { useState, useContext  } from 'react';
 import '../styles/setting.css';
-import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
 import { CustomizationContext } from '../contexts/PreviewContext';
 
@@ -42,6 +41,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="calendarOption"
+                                    aria-label="show Calendar"
                                     value="showCalendar"
                                     checked={customizations.calendar === 'showCalendar'}
                                     onChange={() => handleCustomizationChange('calendar', 'showCalendar')}
@@ -52,6 +52,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="calendarOption"
+                                    aria-label="show Events List"
                                     value="showEventsList"
                                     checked={customizations.calendar === 'showEventsList'}
                                     onChange={() => handleCustomizationChange('calendar', 'showEventsList')}
@@ -62,6 +63,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="calendarOption"
+                                    aria-label="show Activities List"
                                     value="showActivitiesList"
                                     checked={customizations.calendar === 'showActivitiesList'}
                                     onChange={() => handleCustomizationChange('calendar', 'showActivitiesList')}
@@ -72,6 +74,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="calendarOption"
+                                    aria-label="show Tasks List"
                                     value="showTasksList"
                                     checked={customizations.calendar === 'showTasksList'}
                                     onChange={() => handleCustomizationChange('calendar', 'showTasksList')}
@@ -90,6 +93,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="notesOption"
+                                    aria-label="list of notes"
                                     value="listOfNotes"
                                     checked={customizations.notes === 'listOfNotes'}
                                     onChange={() => handleCustomizationChange('notes', 'listOfNotes')}
@@ -100,6 +104,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="notesOption"
+                                    aria-label="last note"
                                     value="lastNote"
                                     checked={customizations.notes === 'lastNote'}
                                     onChange={() => handleCustomizationChange('notes', 'lastNote')}
@@ -110,6 +115,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="notesOption"
+                                    aria-label="add a note"
                                     value="addNote"
                                     checked={customizations.notes === 'addNote'}
                                     onChange={() => handleCustomizationChange('notes', 'addNote')}
@@ -128,6 +134,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="pomodoroOption"
+                                    aria-label="quick start"
                                     value="quickStart"
                                     checked={customizations.pomodoro === 'quickStart'}
                                     onChange={() => handleCustomizationChange('pomodoro', 'quickStart')}
@@ -138,6 +145,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="pomodoroOption"
+                                    aria-label='list of pomodoros todo'
                                     value="listOfPomodoros"
                                     checked={customizations.pomodoro === 'listOfPomodoros'}
                                     onChange={() => handleCustomizationChange('pomodoro', 'listOfPomodoros')}
@@ -148,6 +156,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="pomodoroOption"
+                                    aria-label='last pomodoro'
                                     value="lastPomodoro"
                                     checked={customizations.pomodoro === 'lastPomodoro'}
                                     onChange={() => handleCustomizationChange('pomodoro', 'lastPomodoro')}
@@ -158,6 +167,7 @@ function PreviewSetUp(props) {
                                 <input
                                     type="radio"
                                     name="pomodoroOption"
+                                    aria-label="pomodoros stats"
                                     value="stats"
                                     checked={customizations.pomodoro === 'stats'}
                                     onChange={() => handleCustomizationChange('pomodoro', 'stats')}
@@ -212,16 +222,44 @@ function PreviewSetUp(props) {
 
     return (
         <div className='d-flex position-relative rounded-3 mb-5 p-3 bg-white card-settings'>
-            <button className='btn position-absolute end-0 top-0' onClick={handleSetUp} alt='exit'>
+            <button type='button' aria-label='close' className='btn position-absolute end-0 top-0' onClick={handleSetUp}>
                 <X size={36} color='#555B6E' strokeWidth={1.75} />
             </button>
             
             <div className='d-flex flex-row w-100'>
                 <div className='d-flex flex-column border-end r-col'>
-                    <Button text='Calendar' alt='calendar' onClick={() => handleSetting('calendar')} />
-                    <Button text='Notes' alt='notes' onClick={() => handleSetting('notes')} />
-                    <Button text='Pomodoro' alt='pomodoro' onClick={() => handleSetting('pomodoro')} />
-                    <Button text='Projects' alt='projects' onClick={() => handleSetting('projects')} />
+                    <button
+                        type='button' 
+                        aria-label='calendar'
+                        onClick={() => handleSetting('calendar')} 
+                        className={`bookmark-btn ${isSetting === 'calendar' ? 'active' : 'inactive'}`}
+                    >
+                        Calendar
+                    </button>
+                    <button
+                        type='button'
+                        aria-label='notes'
+                        onClick={() => handleSetting('notes')} 
+                        className={`bookmark-btn ${isSetting === 'notes' ? 'active' : 'inactive'}`}
+                    >
+                        Notes
+                    </button>
+                    <button
+                        type='button'
+                        aria-label='pomodoro'
+                        onClick={() => handleSetting('pomodoro')} 
+                        className={`bookmark-btn ${isSetting === 'pomodoro' ? 'active' : 'inactive'}`}
+                    >
+                        Pomodoro
+                    </button>
+                    <button
+                        type='button'
+                        aria-label='projects'
+                        onClick={() => handleSetting('projects')} 
+                        className={`bookmark-btn ${isSetting === 'projects' ? 'active' : 'inactive'}`}
+                    >
+                        Projects
+                    </button>
                 </div>
 
                 <div className='cd-flex flex-column l-col'>

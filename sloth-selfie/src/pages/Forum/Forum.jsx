@@ -3,6 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import '../../styles/Forum.css';
 import { useForumContext } from '../../contexts/ForumContext';
 import { AuthContext } from '../../contexts/AuthContext';
+import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import PostInput from './PostInput';
 import PostsList from './PostsList';
 
@@ -10,8 +11,8 @@ import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { bufferToBase64 } from '../../utils/utils';
 
-
 const Forum = () => {
+    const { refreshKey } = useContext(TimeMachineContext);
     const { user } = useContext(AuthContext);
     const { setPosts, inputImage, setInputImage, setShowMap, latitude, longitude, newCommentText, setNewCommentText, newPostText, setNewPostText, selectedPostId } = useForumContext();
 
@@ -83,7 +84,7 @@ const Forum = () => {
 
     useEffect(() => {
         fetchPosts();
-    }, [user?._id]);
+    }, [refreshKey]);
 
     return (
         <div className='d-flex flex-column w-100 align-items-center forum'>

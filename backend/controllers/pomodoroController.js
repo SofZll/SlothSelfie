@@ -2,14 +2,16 @@
 const User = require('../models/userModel');
 const Pomodoro = require('../models/pomodoroModel');
 
+const { getCurrentNow } = require('../services/timeMachineService');
+
 const getPomodori = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
 
     try {
-        const pomodori = await Pomodoro.find({ user: user._id })
+        const pomodori = await Pomodoro.find({ user: user._id, createdAt: { $lte: now } })
             .populate('user', 'username');
-
 
         res.status(200).json({success: true, pomodori });
     } catch (error) {
@@ -21,9 +23,10 @@ const getPomodori = async (req, res) => {
 const getPlannedPomodori = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
 
     try {
-        const pomodori = await Pomodoro.find({ user: user._id, deadline: { $ne: null }, finished: false })
+        const pomodori = await Pomodoro.find({ user: user._id, deadline: { $ne: null }, finished: false, createdAt: { $lte: now } })
             .populate('user', 'username');
 
         res.status(200).json({ success: true, pomodori });
@@ -36,11 +39,14 @@ const getPlannedPomodori = async (req, res) => {
 const getLastsPomodori = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
 
     try {
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-        const pomodori = await Pomodoro.find({ user: user._id, finished: false, started: true }).sort({ updatedAt: -1 }).limit(5)
+        const pomodori = await Pomodoro.find({ user: user._id, finished: false, started: true, createdAt: { $lte: now } })
+            .sort({ updatedAt: -1 })
+            .limit(5)
 
         if (!pomodori) return res.status(404).json({ success: false, message: 'Pomodori not found' });
         
@@ -70,6 +76,8 @@ const newPomodoro = async (req, res) => {
             started: false,
             finished: false,
             studiedTime: 0,
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
         const pomodoro = await newPomodoro.save();
         res.status(201).json({ success: true, pomodoro });
@@ -91,11 +99,13 @@ const addPomodoro = async (req, res) => {
             breakTime,
             cycles,
             started,
-            finished
+            finished,
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
 
         if (started) {
-            if (finished) newPomodoro.finishedDate = new Date();
+            if (finished) newPomodoro.finishedDate = getCurrentNow();
 
             const { isStudyTime, cyclesLeft, additionalCycles } = req.body;
             newPomodoro.isStudyTime = isStudyTime;
@@ -121,7 +131,8 @@ const editPomodoro = async (req, res) => {
             studyTime,
             breakTime,
             cycles,
-            deadline: new Date(deadline) 
+            deadline: new Date(deadline),
+            updatedAt: getCurrentNow()
         }, { new: true });
 
         if (!pomodoro) {
@@ -155,6 +166,7 @@ const deletePomodoro = async (req, res) => {
 const updateCycles = async (req, res) => {
     const { pomodoroId } = req.params;
     const { cyclesLeft, isStudyTime, studiedTime, finished } = req.body;
+    const now = getCurrentNow();
 
     try {
         const pomodoro = await Pomodoro.findByIdAndUpdate(pomodoroId, {
@@ -162,8 +174,9 @@ const updateCycles = async (req, res) => {
             isStudyTime,
             studiedTime,
             finished,
-            finishedDate: finished ? new Date() : null,
-            started: true
+            finishedDate: finished ? now : null,
+            started: true,
+            updatedAt: now
         }, { new: true });
 
         if (!pomodoro) {
@@ -185,7 +198,8 @@ const addAdditionalCycle = async (req, res) => {
         const pomodoro = await Pomodoro.findByIdAndUpdate(pomodoroId, {
             additionalCycles,
             finished: false,
-            finishedDate: null
+            finishedDate: null,
+            updatedAt: getCurrentNow()
         }, { new: true });
 
         if (!pomodoro) {
@@ -203,6 +217,7 @@ const getPomodoroById = async (req, res) => {
     const { pomodoroId } = req.params;
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
 
     try {
         const pomodoro = await Pomodoro.findById(pomodoroId)
@@ -216,6 +231,10 @@ const getPomodoroById = async (req, res) => {
             return res.status(403).json({ success: false, message: 'Unauthorized access' });
         }
 
+        if (pomodoro.createdAt > now) {
+            return res.status(403).json({ success: false, message: 'Pomodoro not started yet' });
+        }
+
         res.status(200).json({ success: true, pomodoro });
     } catch (error) {
         console.error('Error fetching pomodoro:', error);
@@ -226,9 +245,10 @@ const getPomodoroById = async (req, res) => {
 const totalStudiedTime = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
 
     try {
-        const pomodori = await Pomodoro.find({ user: user._id, started: true });
+        const pomodori = await Pomodoro.find({ user: user._id, started: true, createdAt: { $lte: now } })
 
         if (pomodori.length === 0) return res.status(200).json({ success: true, totalStudiedTime: 0 });
     
@@ -242,13 +262,16 @@ const totalStudiedTime = async (req, res) => {
     }
 }
 
+
+//time machine ?????????/
 const timePomodoriMonths = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
 
     try {
-        const thisMonth = new Date().getMonth();
-        const thisYear = new Date().getFullYear();
+        const thisMonth = now.getMonth();
+        const thisYear = now.getFullYear();
 
         const timePerMonth = await Pomodoro.aggregate([
             { $match: { user: user._id, finished: true } },

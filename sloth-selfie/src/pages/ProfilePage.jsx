@@ -8,11 +8,14 @@ import { validateEmail, validatePhoneNumber } from '../utils/validation';
 import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
 import { AuthContext } from '../contexts/AuthContext';
+import { TimeMachineContext } from '../contexts/TimeMachineContext';
 import SettingsButton from '../components/SettingsButton';
 
 const ProfilePage = () => {
     const { user, setUser } = useContext(AuthContext);
+    const { getVirtualNow } = useContext(TimeMachineContext);
 
+    const virtualNow = getVirtualNow();
     const isDesktop = useIsDesktop();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
@@ -48,7 +51,7 @@ const ProfilePage = () => {
 
     useEffect(() => {
         const checkConditions = () => {
-            if (user.name && user.email && validateEmail(user.email) && (!user.phoneNumber || validatePhoneNumber(user.phoneNumber)) && user.birthday && new Date(user.birthday) <= new Date()) setConditionsMet(true);
+            if (user.name && user.email && validateEmail(user.email) && (!user.phoneNumber || validatePhoneNumber(user.phoneNumber)) && user.birthday && new Date(user.birthday) <= new Date(virtualNow)) setConditionsMet(true);
             else setConditionsMet(false);
         }
         checkConditions();
@@ -116,7 +119,7 @@ const ProfilePage = () => {
                                     <div className='col-8'>
                                         <input type='date' className='form-control' id='birthday' name='birthday' value={user.birthday} onChange={(e) => setUser({ ...user, birthday: e.target.value })}/>
                                         <div>
-                                            {user.birthday && new Date(user.birthday) > new Date() && (
+                                            {user.birthday && new Date(user.birthday) > new Date(virtualNow) && (
                                                 <div className="text-danger small mt-1">
                                                     Birthday cannot be in the future
                                                 </div>

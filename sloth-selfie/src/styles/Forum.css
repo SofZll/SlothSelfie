@@ -50,11 +50,11 @@
 }
 
 .post-text.bigger2 {
-    height: 16.5rem;
+    height: 17rem;
 }
 
 .post-text.bigger2 textarea{
-    height: 4.5rem;
+    height: 5.7rem;
 }
 
 .post-input {
@@ -89,18 +89,16 @@
     left: 3.6rem;
 }
 
-/* */
 .delete-map {
-    bottom: 145px;
-    left: 220px;
+    bottom: 160px;
+    left: 225px;
     z-index: 1000;
 }
 
-/* */
 .link-map {
     font-size: 12px;
-    text-align: left;
-    margin: 5px 20px;
+    text-align: center;
+    margin: 5px 30px;
 }
 
 /* */

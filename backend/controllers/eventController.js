@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 
 const { findUserId } = require('../utils/utils');
 const { sendExportEmail } = require('../utils/utils');
-const { createEvent } = require('ics'); // Import the library for iCalendar generation
+const { createEvent } = require('ics'); // owImport the library for iCalendar generation
+const { getCurrentNow } = require('../services/timeMachineService');
 
 const ical = require('node-ical');
 const fs = require('fs');
@@ -13,6 +14,7 @@ const { RRule } = require('rrule');
 
 
 const getEvents = async (req, res) => {
+  const now = getCurrentNow();
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
 
@@ -24,15 +26,22 @@ const getEvents = async (req, res) => {
       $or: [
         { user: user._id },
         { sharedWith: user._id }
-      ]
+      ],
+      createdAt: { $lte: now }
     }).populate('sharedWith', 'username')
-    .populate('user', 'username');
+    .populate('user', 'username')
+    .lean();
 
     console.log('Fetched events:', events); // Log the fetched events for debugging
 
+    const transformedEvents = events.map(event => {
+      return {
+        ...event,
+        sharedWith: event.sharedWith.map(user => user.username),
+      }
+    });
 
-
-    res.status(200).json({ success: true, events });
+    res.status(200).json({ success: true, events: transformedEvents });
   } catch (error) {
     console.error('Error fetching events:', error);
     res.status(500).json({ success: false, message: error.message });
@@ -65,6 +74,8 @@ const newEvent = async (title, user, type, startDate, endDate, allDay, eventLoca
       type,
       repeatFrequency,
       isInProject,
+      createdAt: getCurrentNow(),
+      updatedAt: getCurrentNow()
     });
 
     if (eventLocation) newEvent.eventLocation = eventLocation;
@@ -202,6 +213,7 @@ const editEvent = async (Id, title, type, startDate, endDate, allDay, eventLocat
     event.repeatFrequency = repeatFrequency;
     event.repeatEndDate = repeatEndDate;
     event.repeatTimes = repeatTimes;
+    event.updatedAt = getCurrentNow();
 
     if (repeatFrequency === 'none') event.fatherId = null;
     else event.fatherId = fatherId;
@@ -224,6 +236,8 @@ const updateNoDateEvent = async (Id, title, type, eventLocation, sharedWith, isI
     event.eventLocation = eventLocation;
     event.sharedWith = sharedWith;
     event.isInProject = isInProject;
+    event.updatedAt = getCurrentNow();
+    
     await event.save();
     return ({ success: true, event });
   } catch (error) {

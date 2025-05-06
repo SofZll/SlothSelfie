@@ -6,10 +6,12 @@ const Event = require('../models/eventModel');
 const { combineDateTime } = require('../utils/utils');
 const { getScheduledJobs, snoozeJob } = require('../services/jobService');
 const { calculateNotificationTime, getRepeatInterval } = require('../services/notificationService');
+const { getCurrentNow } = require('../services/timeMachineService');
 
 const setNotifications = async (req, res) => {
     const { type, elementId, notifications } = req.body;
     const userId = req.session.userId;
+    const now = getCurrentNow();
     
     if (!notifications || notifications.length === 0) return res.status(400).json({ success: false, message: 'No notifications provided' });
 
@@ -39,8 +41,10 @@ const setNotifications = async (req, res) => {
                 before: notification.before,
                 variant: notification.variant,
                 time: isDefault ? notification.time : undefined,
-                from: !isDefault ? combineDateTime(notification.fromDate, notification.fromTime) : new Date(),
-                to: to
+                from: !isDefault ? combineDateTime(notification.fromDate, notification.fromTime) : now,
+                to: to,
+                createdAt: now,
+                updatedAt: now
             }
         });
 
@@ -90,11 +94,12 @@ const getScheduledNotifications = async (req, res) => {
 const getNotifications = async (req, res) => {
     const { elementId } = req.params;
     const userId = req.session.userId;
+    const now = getCurrentNow();
 
     if (!elementId) return res.status(400).json({ success: false, message: 'No element ID provided' });
 
     try {
-        const notifications = await Notification.find({ element: elementId, user: userId })
+        const notifications = await Notification.find({ element: elementId, user: userId, createdAt: { $lte: now } })
             .populate('user', 'username')
             .sort({ createdAt: -1 });
 
@@ -173,7 +178,8 @@ const updateNotification = async (req, res) => {
             before,
             time: isDefault ? time : undefined,
             from: !isDefault ? combineDateTime(fromDate, fromTime) : undefined,
-            to: to
+            to: to,
+            updatedAt: getCurrentNow()
         }, { new: true });
 
         // recalculate triggerAt

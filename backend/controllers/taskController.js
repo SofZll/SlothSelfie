@@ -2,20 +2,23 @@
 const Task = require('../models/taskModel');
 const User = require('../models/userModel');
 const Note = require('../models/noteModel');
-const {sendExportEmail} = require('../utils/utils');
+const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
+const { getCurrentNow } = require('../services/timeMachineService');
 
 // fetch all tasks
 const getTasks = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
     
     try {
         const tasks = await Task.find({
             $or: [
                 { user: user._id },
                 { sharedWith: user._id }
-            ]
+            ],
+            createdAt: { $lte: now }
         })
         .populate('user', 'username')
         .populate('sharedWith', 'username')
@@ -49,6 +52,7 @@ const editTask = async (req, res) => {
         task.title = title;
         task.deadline = deadline;
         task.completed = completed;
+        task.updatedAt = getCurrentNow();
 
         const updatedTask = await task.save();
         updatedTask.sharedWith = updatedTask.sharedWith.map(user => user.username);
@@ -70,6 +74,8 @@ const markTaskCompleted = async (req, res) => {
         }
 
         task.completed = !task.completed;
+        task.updatedAt = getCurrentNow();
+
         const updatedTask = await task.save();
         res.status(200).json({ success: true, task: updatedTask });
     } catch (error) {
@@ -143,7 +149,7 @@ const addTasks = async (tasks, user, sharedWith) => {
 
     try {
         for (let i = 0; i < tasks.length; i++) {
-            const task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id });
+            const task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id, createdAt: getCurrentNow(), updatedAt: getCurrentNow() });
             if (tasks[i].deadline) task.deadline = tasks[i].deadline;
             if (sharedWith.length > 0) task.sharedWith = sharedWith;
 
@@ -170,6 +176,7 @@ const editTasks = async (tasks, users) => {
             task.deadline = tasks[i].deadline;
             task.completed = tasks[i].completed;
             task.sharedWith = users;
+            task.updatedAt = getCurrentNow();
 
             const updatedTask = await task.save();
             if (!updatedTask) return false;

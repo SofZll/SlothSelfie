@@ -1,6 +1,8 @@
 const NoAvailability = require('../models/noAvailabilityModel');
 const User = require('../models/userModel');
 
+const { getCurrentNow } = require('../services/timeMachineService');
+
 //Fetch user's no availability time intervals
 const getNoAvailability = async (req, res) => {
     const userName = req.session.username;
@@ -9,7 +11,7 @@ const getNoAvailability = async (req, res) => {
     try {
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-        const noAvailability = await NoAvailability.find({ user: user._id })
+        const noAvailability = await NoAvailability.find({ user: user._id, createdAt: { $lte: getCurrentNow() } })
         .populate('user', 'username')
         .sort({ startDate: 1 });
 
@@ -43,7 +45,9 @@ const addSingleNoAvailability = async (user, startDate, endDate, days, repeatFre
             startDate,
             endDate,
             days,
-            repeatFrequency
+            repeatFrequency,
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
 
         if (fatherId) newNoAvailabilityInstance.fatherId = fatherId;
@@ -145,6 +149,8 @@ const editNoAvailability = async (id, startDate, endDate, days, repeatFrequency,
         nA2update.endDate = endDate;
         nA2update.days = days;
         nA2update.repeatFrequency = repeatFrequency;
+        nA2update.updatedAt = getCurrentNow();
+        
         if (repeatFrequency === 'none') {
             nA2update.fatherId = null;
             nA2update.numberOfOccurrences = 0;

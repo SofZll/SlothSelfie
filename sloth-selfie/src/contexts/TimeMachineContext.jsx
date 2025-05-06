@@ -27,7 +27,7 @@ const TimeMachineProvider = ({ children }) => {
                     localStorage.setItem('timeMachineState', JSON.stringify({
                         isActive: response.state,
                         virtualNow: new Date(response.virtualNow)
-                    }));
+                    }));            
                 } else {
                     const savedState = localStorage.getItem('timeMachineState');
                     if (savedState) {
@@ -59,11 +59,17 @@ const TimeMachineProvider = ({ children }) => {
     }, []);
 
     const getVirtualNow = () => new Date(virtualNowRef.current);
+    
+    const setVirtualNow = (newDate) => {
+        virtualNowRef.current = new Date(newDate);
+        triggerRefresh();
+    }
+
     const getCurrentDate = () => dateFromDate(virtualNowRef.current);
     const getCurrentTime = () => timeFromDate(virtualNowRef.current);
 
     return (
-        <TimeMachineContext.Provider value={{ machineOpen, setMachineOpen, getVirtualNow, setVirtualNow: (newDate) => { virtualNowRef.current = new Date(newDate); }, isActive, setIsActive, getCurrentDate, getCurrentTime, refreshKey, triggerRefresh }}>
+        <TimeMachineContext.Provider value={{ machineOpen, setMachineOpen, getVirtualNow, setVirtualNow, isActive, setIsActive, getCurrentDate, getCurrentTime, refreshKey, triggerRefresh }}>
             {children}
         </TimeMachineContext.Provider>
     );

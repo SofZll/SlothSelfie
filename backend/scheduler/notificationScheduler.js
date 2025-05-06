@@ -13,7 +13,8 @@ const startVirtualScheduler = () => {
         const activeNotifications = await Notification.find({
             type: { $ne: 'now' },
             from: { $lte: now },
-            to: { $gte: now }
+            to: { $gte: now },
+            createdAt: { $lte: now },
         });
 
         if (!activeNotifications || activeNotifications.length === 0) return;
@@ -45,7 +46,6 @@ const shouldSendNotification = async (notification, now) => {
 
     const user = await User.findById(notification.user);
     if (!user || user.disableNotifications.all) {
-        console.log(`User ${notification.user} not found or has notifications disabled.`);
         return false;
     }
 

@@ -69,9 +69,9 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 //todo: tm
-const calculateTime = (d) => {
+const calculateTime = (d, getVirtualNow) => {
     if (!d) return '';
-    const now = new Date();
+    const now = getVirtualNow();
     const date = new Date(d);
     const diff = Math.abs(now - date);
     const seconds = Math.floor(diff / 1000);

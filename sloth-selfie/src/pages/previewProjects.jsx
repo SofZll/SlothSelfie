@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from 'react-router-dom';
 import '../styles/Previews.css';
 import '../styles/App.css';
@@ -7,14 +7,17 @@ import GanttChartView from '../components/GanttChartView';
 
 import { AuthContext } from '../contexts/AuthContext';
 import { useCalendar } from "../contexts/CalendarContext";
+import { TimeMachineContext } from "../contexts/TimeMachineContext";
 import { apiService } from '../services/apiService';
 
 //TODO CAMBIARE PATH DEL FETCH SUL SERVER
 
 const PreviewProjects= ({ viewType }) => {
-    const { user } = React.useContext(AuthContext);
+    const { user } = useContext(AuthContext);
+    const { getVirtualNow } = useContext(TimeMachineContext);
     const { activities, setActivities } = useCalendar();
 
+    const virtualNow = getVirtualNow();
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null); // State to store the selected project
     const navigate = useNavigate();  
@@ -115,7 +118,7 @@ const PreviewProjects= ({ viewType }) => {
                         {activities.length > 0 ? (
                            activities.map((activity, index) => {
                             const deadlineDate = new Date(activity.deadline);
-                            const today = new Date();   //TODO: TIMEMACHINE DATE
+                            const today = new Date(virtualNow);
                             today.setHours(0, 0, 0, 0); // reset time, we compare only the date
         
                             // Check if the activity is overdue

@@ -24,38 +24,44 @@ const TimeMachinePopup = () => {
             return;
         }
 
-        const dateTime = new Date(`${inputDate}T${inputTime}`);
-        if (dateTime < virtualNow) setAnimationDirection('backward');
-        else setAnimationDirection('forward');
-        
-        setTimeout(() => {
-            setAnimationDirection(null);
-            setMachineOpen(false);
-            triggerRefresh();
-        }, 1700);
-
-        setVirtualNow(dateTime);
-
         const response = await apiService('/time/set', 'POST', { date: inputDate, time: inputTime });
         if (response.success) {
-            console.log('Time set successfully:', response);
-        } else {
-            console.error('Error setting time');
-            NewSwal.fire({ icon: 'error', title: 'Oops...', text: 'Error setting time' });
-        }
+            const dateTime = new Date(`${inputDate}T${inputTime}`);
+            if (dateTime < virtualNow) setAnimationDirection('backward');
+            else setAnimationDirection('forward');
+            
+            setTimeout(() => {
+                setAnimationDirection(null);
+                setMachineOpen(false);
+                triggerRefresh();
+                if (window.location.pathname === '/projects') {
+                    window.location.reload();
+                }
+            }, 1500);
+
+            setVirtualNow(dateTime);
+        } else NewSwal.fire({ icon: 'error', title: 'Oops...', text: 'Error setting time' });
     }
 
     const handleResetTime = async () => {
         const response = await apiService('/time/reset', 'POST');
         if (response.success) {
-            console.log('Time reset successfully:', response);
+            if (virtualNow < new Date()) setAnimationDirection('forward');
+            else setAnimationDirection('backward');
+            
+            setTimeout(() => {
+                setAnimationDirection(null);
+                setMachineOpen(false);
+                triggerRefresh();
+                if (window.location.pathname === '/projects') {
+                    window.location.reload();
+                }
+            }, 1500);
+            
             setVirtualNow(new Date());
             setInputDate('');
             setInputTime('');
-        } else {
-            console.error('Error resetting time');
-            NewSwal.fire({ icon: 'error', title: 'Oops...', text: 'Error resetting time' });
-        }
+        } else NewSwal.fire({ icon: 'error', title: 'Oops...', text: 'Error resetting time' });
     }
 
     return (
