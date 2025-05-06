@@ -1,6 +1,5 @@
 import React, { useState, useContext  } from 'react';
 import '../styles/setting.css';
-import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
 import { CustomizationContext } from '../contexts/PreviewContext';
 
