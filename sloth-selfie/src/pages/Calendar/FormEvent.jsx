@@ -5,20 +5,23 @@ import { toastWarning, NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { AuthContext } from '../../contexts/AuthContext';
+import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import { generateTimeOptions } from '../../utils/utils';
 import ShareInput from '../../components/ShareInput';
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormEvent = () => {
-    
+    const { getVirtualNow } = useContext(TimeMachineContext);
     const { event, setEvent, events, setEvents, resetEvent, selected, resetSelected, notifications, setNotifications, setConditionsMet, conditionsMet } = useCalendar();
-    const [deletePopUp, setDeletePopUp] = useState(false);
     const { user } = useContext(AuthContext);
+
+    const virtualNow = getVirtualNow();
+    const [deletePopUp, setDeletePopUp] = useState(false);
     const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     const startTimeWarning = (time) => {
-        const startDate = new Date();
+        const startDate = new Date(virtualNow);
         if (time !== '') {
             startDate.setHours(event.time.split(':')[0], event.time.split(':')[1]);
             if (event.type === 'work') {
@@ -36,7 +39,7 @@ const FormEvent = () => {
     }
 
     const endTimeWarning = (time, duration) => {
-        const startDate = new Date();
+        const startDate = new Date(virtualNow);
         if (time !== '') {
             startDate.setHours(event.time.split(':')[0], event.time.split(':')[1]);
             if (duration) {

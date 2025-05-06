@@ -1,6 +1,5 @@
 //TODO: QUANDO TRASFERISCI SUL SERVER CAMBIA I PATH DEI FETCH nei file projects.js, projectsView.js, projectsHandleActivities.js, projectsHandleActivitiesUtils.js
 
-//TODO, TIME MACHINE DATE, in projectsHandleActivities e projectsHandleActivitiesUtils.js utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
 //(es di link ad un file online, es: https://example.com/files/note.txt) V 
 
 // Function to get the logged user username
@@ -842,6 +841,22 @@ async function toggleProjectForm() {
         document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close view button
         document.getElementById("activity-container").style.display = "none";
         document.getElementById("closeActivityViewBtn").style.display = "none"; // Hides the close view button
+    }
+}
+
+// time machine functions
+async function getCurrentNow() {
+    try {
+        const response = await fetch("http://localhost:8000/api/time/state", {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+        console.log("Current time:", data.virtualNow);
+        return new Date(data.virtualNow);
+    } catch (error) {
+        console.error("Error fetching current time:", error);
+        return new Date();
     }
 }
 

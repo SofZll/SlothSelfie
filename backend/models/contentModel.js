@@ -12,10 +12,6 @@ const contentSchema = new mongoose.Schema({
         enum: ['post', 'comment'],
         required: true,
     },
-    date: {
-        type: Date,
-        required: true,
-    },
     text: {
         type: String,
         required: true,

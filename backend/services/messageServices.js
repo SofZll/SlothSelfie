@@ -2,14 +2,14 @@ const Chat = require('../models/chatModel');
 const Message = require('../models/messageModel');
 const User = require('../models/userModel');
 
+const { getCurrentNow } = require('../services/timeMachineService');
+
 const createMessage = async (message) => {
     const { chat, sender, content } = message;
-    console.log('Message content:', content);
     const user = await User.findById(sender._id);
     const foundChat = await Chat.findById(chat._id);
-    console.log('Found chat:', foundChat);
-    console.log('Found user:', user);
-
+    const now = getCurrentNow();
+    
     if (!foundChat || !user) {
         console.error('Chat or user not found');
         return;
@@ -17,15 +17,16 @@ const createMessage = async (message) => {
 
     const statusArray = foundChat.participants.map((participant) => ({
         user: participant._id,
-        status: participant._id.equals(user.id) ? 'read' : 'sent',
-        timestamp: new Date(),
+        status: participant._id.equals(user.id) ? 'read' : 'sent'
     }));
 
     const newMessage = new Message({
         chat: foundChat._id,
         sender: user._id,
         content: { text: content.text },
-        status: statusArray
+        status: statusArray,
+        createdAt: now,
+        updatedAt: now
     });
 
     console.log('New message:', newMessage);
@@ -33,7 +34,7 @@ const createMessage = async (message) => {
     console.log('Message saved:', savedMessage);
 
     foundChat.lastMessage = savedMessage._id;
-    foundChat.lastMessageAt = new Date();
+    foundChat.lastMessageAt = now;
     await foundChat.save();
 
     return await Message.findById(savedMessage._id)
@@ -69,7 +70,7 @@ const markRead = async (chatId, userId) => {
             {
                 $set: {
                     'status.$[elem].status': 'read',
-                    'status.$[elem].timestamp': new Date()
+                    'status.$[elem].timestamp': getCurrentNow()
                 }
             },
             {

@@ -30,10 +30,13 @@ async function updateActivitiesStatus(activities) {
             }
         }
         // Check the activity deadline and if it is Overdue or Abandoned
-        const [isLate, isAbandoned, isAbandonedNoParticipants] = checkOverdueAbandoned(activity);
+        const [isLate, isAbandoned, isAbandonedNoParticipants] = await checkOverdueAbandoned(activity);
+        console.log("isLate:", isLate);
 
         if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
             asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
+        } else if (!isLate && !isAbandoned && !isAbandonedNoParticipants) {
+            asyncOperations.push(updateActivityStatus(activity._id, "Active"));
         }
 
         if (isAbandoned || isAbandonedNoParticipants) {
@@ -481,18 +484,26 @@ async function handleSubphaseMacro(macroActivity, phaseSubphase, parentPhase, ty
 }
 
 // Function to check if the activity is overdue or abandoned in handleActivities
-function checkOverdueAbandoned(activity) {
-    let today = new Date();       //TODO, TIME MACHINE DATE
-                today.setHours(0, 0, 0, 0);    //we only compare the day, not the hours
-                let deadline = new Date(activity.deadline);
+async function checkOverdueAbandoned(activity) {   
+    let today = await getCurrentNow();
+    today.setHours(0, 0, 0, 0);    //we only compare the day, not the hours
+    let deadline = new Date(activity.deadline);
 
-                let isLate = today > deadline && !activity.output; // Overdue without output
-                let isAbandoned = today - deadline > 7 * 24 * 60 * 60 * 1000; // Overdue since last 7 days
-                //if the activity has no members assigned, it is abandoned
-                let isAbandonedNoParticipants = false;
-                if (activity.sharedWith.length === 0) {
-                    isAbandonedNoParticipants = true;
-                }
+    let isLate = false;
+    if (today > deadline && !activity.output) {
+        isLate = true; // Overdue without output
+    }
+
+    let isAbandoned = false;
+    if (today - deadline > 7 * 24 * 60 * 60 * 1000) {
+        isAbandoned = true; // Overdue since last 7 days
+    }
+
+    //if the activity has no members assigned, it is abandoned
+    let isAbandonedNoParticipants = false;
+    if (activity.sharedWith.length === 0) {
+        isAbandonedNoParticipants = true;
+    }
     return [ isLate, isAbandoned, isAbandonedNoParticipants ];
 }
 

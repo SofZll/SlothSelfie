@@ -38,6 +38,8 @@ const phaseSubphaseSchema = new mongoose.Schema({
         ref: "Activity"
     }] // activities that are inside phase/subphase
     
+}, {
+    timestamps: true,
 });
 
 const PhaseSubphase = mongoose.model("PhaseSubphase", phaseSubphaseSchema);

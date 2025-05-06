@@ -19,7 +19,6 @@ const createPost = async (req, res) => {
         const newPost = new Content({
             author: user._id,
             type: 'post',
-            date: new Date().toISOString(),
             text: text,
             image: image ? { data: image.buffer, contentType: image.mimetype } : null,
             location: {
@@ -28,6 +27,7 @@ const createPost = async (req, res) => {
             },
             comments: [],
             createdAt: now,
+            updatedAt: now
         });
 
         const savedPost = await newPost.save();
@@ -43,21 +43,23 @@ const createComment = async (req, res) => {
     const now = getCurrentNow();
     const userId = req.session.userId;
     const { text, postId } = req.body;
-    const post = await Content.findById(postId);
 
     if (!userId || !text || !postId) return res.status(400).json({ success: false, message: 'Missing required fields'})
 
     try {
+        const post = await Content.findById(postId);
+        if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         const newComment = new Content({
             author: user._id,
             type: 'comment',
-            date: new Date().toISOString(),
             text: text,
             associatedPost: post._id,
             createdAt: now,
+            updatedAt: now
         });
 
         const savedComment = await newComment.save();
@@ -100,6 +102,7 @@ const getPosts = async (req, res) => {
 
 // Update content
 const updateContent = async (req, res) => {
+    const now = getCurrentNow();
     const { contentId } = req.params;
     const { likes } = req.body;
 
