@@ -33,14 +33,16 @@ async function updateActivitiesStatus(activities) {
         const [isLate, isAbandoned, isAbandonedNoParticipants] = await checkOverdueAbandoned(activity);
         console.log("isLate:", isLate);
 
-        if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
-            asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
-        } else if (!isLate && !isAbandoned && !isAbandonedNoParticipants) {
-            //if the activity is not overdue, we set the status as Active if it has input, otherwise we set it as Not_Activatable
-            if (activity.input && activity.status !== "Active") {
-                asyncOperations.push(updateActivityStatus(activity._id, "Active"));
-            } else if (!activity.input && activity.status !== "Not_Activatable") {
-                asyncOperations.push(updateActivityStatus(activity._id, "Not_Activatable"));
+        if(activity.status !== "Completed"){
+            if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
+                asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
+            } else if (!isLate && !isAbandoned && !isAbandonedNoParticipants) {
+                //if the activity is not overdue, we set the status as Active if it has input, otherwise we set it as Not_Activatable
+                if (activity.input && activity.status !== "Active") {
+                    asyncOperations.push(updateActivityStatus(activity._id, "Active"));
+                } else if (!activity.input && activity.status !== "Not_Activatable") {
+                    asyncOperations.push(updateActivityStatus(activity._id, "Not_Activatable"));
+                }
             }
         }
             
