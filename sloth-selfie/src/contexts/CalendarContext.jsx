@@ -175,11 +175,6 @@ export const CalendarProvider = ({ children }) => {
     // disable save button if conditions are not met
     const [conditionsMet, setConditionsMet] = useState(false);
 
-    const [selectedRooms, setSelectedRooms] = useState([]);
-    const [rooms, setRooms] = useState([]);
-
-    const [selectedDevices, setSelectedDevices] = useState([]);
-    const [devices, setDevices] = useState([]);
 
     return (
         <CalendarContext.Provider 
@@ -188,9 +183,7 @@ export const CalendarProvider = ({ children }) => {
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
                 selected, setSelected, select, back, resetSelected,
                 notifications, setNotifications, fetchNotifications,
-                conditionsMet, setConditionsMet, 
-                rooms, setRooms, selectedRooms, setSelectedRooms,
-                devices, setDevices, selectedDevices, setSelectedDevices }}>
+                conditionsMet, setConditionsMet }}>
 
             {children}
             

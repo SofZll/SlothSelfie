@@ -258,6 +258,25 @@ const switchNotification = async (req, res) => {
     }
 };
 
+// Get the tools of the user
+const getUsersTools = async (req, res) => {
+    try {
+        const rooms = await User.find({ isRoom: true });
+        const devices = await User.find({ isDevice: true });
+
+        if (!rooms && !devices) {
+            return res.status(404).json({ success: false, message: 'No tools found' });
+        }
+
+        res.status(200).json({ success: true, rooms, devices });
+    } catch (error) {
+        console.error('Error fetching tools:', error);
+        res.status(500).json({ success: false, message: 'Error fetching tools' });
+    }
+}
+
+
+
 module.exports = {
     loginUser,
     registerUser,
@@ -270,5 +289,6 @@ module.exports = {
     checkAuth,
     getUserIdFromUsername,
     updateUserPreferences,
-    switchNotification
+    switchNotification,
+    getUsersTools
 };

@@ -9,12 +9,15 @@ import FormEvent from './FormEvent';
 import FormNoAvailability from './FormNoAvailability';
 import FormTask from './FormTask';
 import FormPomodoro from './FormPomodoro';
+import FormRoom from './FormRoom';
+import FormDevice from './FormDevice';
 import Button from '../../components/Button';
 import ScrollList from '../../components/ScrollList';
 
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
 import { useIsDesktop } from '../../utils/utils';
+import { AuthContext } from '../../contexts/AuthContext';
 
 import { apiService } from '../../services/apiService';
 
@@ -22,6 +25,7 @@ const FormCalendar = () => {
 
     const { activities, selected, select, addImportedEvents, activity, event } = useCalendar();
     const { task } = useTask();
+    const { user } = React.useContext(AuthContext);
     const isDesktop = useIsDesktop();
 
     // Function to handle the upload of .ics files as events
@@ -98,12 +102,22 @@ const FormCalendar = () => {
             <SelectionCalendarLayout>
                 {selected.selection === '...' && (
                     <div className='d-flex flex-column col-11 col-lg-8 align-items-center py-3'>
-                        <Button text='Activity' alt='new activity' onClick={() => select('activity', false)} />
-                        <Button text='Event' alt='new event' onClick={() => select('event', false)} />
-                        <Button text='no Availability' alt='no availability' onClick={() => select('no availability', false)} />
-                        {/* Button to import an event as .ics files */}
-                        <input id='ics-upload' type='file' accept='.ics' multiple onChange={handleICSUpload} style={{ display: 'none' }}/>
-                        <Button text='Import .ics' alt='import ics' onClick={() => document.getElementById('ics-upload').click()} />
+                        {user.isAdmin ? (
+                            <div className='d-flex flex-column w-100'>
+                                <Button text='no Availability' alt='no availability' onClick={() => select('no availability', false)} />
+                                <Button text='Room' alt='room' onClick={() => select('room', false)} />
+                                <Button text='Device' alt='device' onClick={() => select('device', false)} />
+                            </div>
+                        ) : (
+                            <div className='d-flex flex-column w-100'>
+                                <Button text='Activity' alt='new activity' onClick={() => select('activity', false)} />
+                                <Button text='Event' alt='new event' onClick={() => select('event', false)} />
+                                <Button text='no Availability' alt='no availability' onClick={() => select('no availability', false)} />
+                                {/* Button to import an event as .ics files */}
+                                <input id='ics-upload' type='file' accept='.ics' multiple onChange={handleICSUpload} style={{ display: 'none' }}/>
+                                <Button text='Import .ics' alt='import ics' onClick={() => document.getElementById('ics-upload').click()} />
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -134,6 +148,18 @@ const FormCalendar = () => {
                 {selected.selection === 'pomodoro' && (
                     <div className="formPopup w-100">
                         <FormPomodoro />
+                    </div>
+                )}
+
+                {selected.selection === 'room' && (
+                    <div className="formPopup w-100">
+                        <FormRoom />
+                    </div>
+                )}
+
+                {selected.selection === 'device' && (
+                    <div className="formPopup w-100">
+                        <FormDevice />
                     </div>
                 )}
 
