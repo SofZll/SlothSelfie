@@ -11,11 +11,5 @@ router.get('/notifications/:elementId', getNotifications);
 router.delete('/notification/:notificationId', deleteNotification);
 router.put('/notification/snooze/:notificationId', snoozeNotification);
 router.put('/notification/:notificationId', updateNotification);
-/*
-router.get('/notification/get-notifications', getNotifications);
-router.put('/notification/read-notif/:notifId', markNotificationAsRead);
-router.put('/notification/status-notif/:notifId', markNotificationStatus);
-router.put('/notification/close-all', markAllAsRead);
-*/
 
 module.exports = router;

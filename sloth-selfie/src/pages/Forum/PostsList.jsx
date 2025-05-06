@@ -135,7 +135,7 @@ const PostsList = ({ handleNewContent }) => {
                                         <img src={post.author.imageUrl} alt='user' />
                                         <h3>{post.author.username}</h3>
                                     </div>
-                                    <p>{calculateTime(post.date, getVirtualNow)}</p>
+                                    <p>{calculateTime(post.createdAt, getVirtualNow)}</p>
                                 </div>
                                 <p>{post.text}</p>
                                 {post.image && <img className='post-image' src={post.image} alt='post' />}
@@ -171,7 +171,7 @@ const PostsList = ({ handleNewContent }) => {
                                         <div key={comment._id} className='rounded-3 px-3 py-2 shadow-sm comment'>
                                             <div className='comment-title'>
                                                 <h4>{comment.author.username}</h4>
-                                                <p>{calculateTime(comment.date, getVirtualNow)}</p>
+                                                <p>{calculateTime(comment.createdAt, getVirtualNow)}</p>
                                             </div>
                                             <p>{comment.text}</p>
                                             <span className={isLiked(comment) ? 'liked' : ''} onClick={() => handleLike(post._id, true, comment._id)}>

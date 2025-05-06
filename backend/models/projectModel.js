@@ -26,16 +26,8 @@ const projectSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'PhaseSubphase'
     }],
-
-    createdAt: {
-        type: Date,
-        default: Date.now 
-    },
-
-    updatedAt: {
-        type: Date, 
-        default: Date.now 
-    }
+}, {
+    timestamps: true,
 });
 
 const Project = mongoose.model('Project', projectSchema);

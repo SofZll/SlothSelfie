@@ -496,7 +496,7 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
         let blockedDependenciesIds = blockedDependencies.map(dep => dep._id);
 
         // Check if the activity is overdue, comparing with today's date
-        let today = new Date();         //TODO, TIME MACHINE DATE
+        let today = await getCurrentNow();
         today.setHours(0, 0, 0, 0);    //we only compare the day, not the hours
         let deadlineDate = new Date(activity.deadline);
 

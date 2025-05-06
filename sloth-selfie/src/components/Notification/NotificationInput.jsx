@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { BellPlus, X, ChevronDown } from 'lucide-react';
 import { NewSwal } from '../../utils/swalUtils';
 
@@ -9,11 +9,14 @@ import NotificationDefault from './NotificationDefault';
 import NotificationRepeat from './NotificationRepeat';
 
 import { apiService } from '../../services/apiService';
+import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 
 const NotificationInput = ({ notifications, setNotifications }) => {
+    const { getVirtualNow } = useContext(TimeMachineContext);
     const [showSelectNotification, setShowSelectNotification] = useState(null);
 
     const handleAddNotification = () => {
+        const virtualNow = getVirtualNow();
         const type = 'default';
         const newNotification = {
             type: type,
@@ -26,8 +29,8 @@ const NotificationInput = ({ notifications, setNotifications }) => {
             ...(type === 'default' ? {
                 time: '08:00',
             } : {
-                fromDate: dateFromDate(new Date()),
-                fromTime: timeFromDate(new Date()),
+                fromDate: dateFromDate(virtualNow),
+                fromTime: timeFromDate(virtualNow),
             })
         };
         if (newNotification) {
@@ -56,6 +59,7 @@ const NotificationInput = ({ notifications, setNotifications }) => {
     };
 
     const handleModifyNotification = (index, field, value) => {
+        const virtualNow = getVirtualNow();
         const updatedNotifications = [...notifications];
         
         if (field === 'type') {
@@ -72,8 +76,8 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                     fromDate: undefined,
                     fromTime: undefined
                 } : {
-                    fromDate: dateFromDate(new Date()),
-                    fromTime: timeFromDate(new Date()),
+                    fromDate: dateFromDate(virtualNow),
+                    fromTime: timeFromDate(virtualNow),
                     time: undefined
                 })
             };
