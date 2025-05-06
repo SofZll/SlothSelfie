@@ -175,10 +175,20 @@ const updateNoAvailability = async (req, res) => {
         if (!nA2update) return res.status(404).json({ success: false, message: 'No availability not found' });
 
         if (repeatFrequency === 'none') {
+            if( nA2update.repeatFrequency !== 'none') {
+                const listNoAvailability = await NoAvailability.find({ fatherId: nA2update.fatherId });
+                for (let i = 1; i < listNoAvailability.length; i++) {
+                    await NoAvailability.findByIdAndDelete(listNoAvailability[i]._id);
+                }
 
-            const response = await editNoAvailability(noAvailabilityId, new Date(startDate), new Date(endDate), days, repeatFrequency);
-            if (!response.success) res.status(400).json({ success: false, message: response.message });
-            else res.status(200).json({ success: true, noAvailability: response.response });
+                const response = await editNoAvailability(listNoAvailability[0]._id, new Date(startDate), new Date(endDate), days, repeatFrequency);
+                if (!response.success) return res.status(400).json({ success: false, message: response.message });
+                else return res.status(200).json({ success: true, noAvailability: response.response });
+            } else {
+                const response = await editNoAvailability(noAvailabilityId, new Date(startDate), new Date(endDate), days, repeatFrequency);
+                if (!response.success) res.status(400).json({ success: false, message: response.message });
+                else res.status(200).json({ success: true, noAvailability: response.response });
+            }
         } else {
             
             const listNoAvailability = await NoAvailability.find({ fatherId: nA2update.fatherId }).sort({ startDate: 1 });

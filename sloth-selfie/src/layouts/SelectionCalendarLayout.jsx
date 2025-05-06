@@ -33,7 +33,7 @@ const SelectionCalendarLayout = ({children}) => {
                 </div>
             )}
             <div className='d-flex justify-content-between my-3'>
-                {selected.add || selected.selection === '...' && (
+                {(selected.add || selected.selection === '...') && (
                     <div className='fs-5'>
                         Add a new {selected.selection}
                     </div>

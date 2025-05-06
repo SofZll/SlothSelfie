@@ -18,6 +18,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
 import { usePomodoro } from '../../contexts/PomodoroContext';
+import { useTools } from '../../contexts/ToolsContext';
 
 import { apiService } from '../../services/apiService';
 
@@ -34,8 +35,9 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { event, setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, rooms, setRooms, selectedRooms, setSelectedRooms, devices, setDevices, selectedDevices, setSelectedDevices } = useCalendar();
+    const { event, setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
+    const { rooms, devices, setRooms, setDevices, selectedRooms, setSelectedRooms, selectedDevices, setSelectedDevices } = useTools();
     const { setPlannedPomodori, plannedPomodori, setSettingsPomodoro } = usePomodoro();
 
     const [show, setShow] = useState('plans');
@@ -45,40 +47,15 @@ const Planner = () => {
     const roomOptions = [
         { value: 'all', label: 'All' },
         { value: 'none', label: 'None' },
-        ...rooms.map(room => ({ value: room._id, label: room.name }))
+        ...rooms.map(room => ({ value: room._id, label: room.username }))
     ];
 
     const deviceOptions = [
         { value: 'all', label: 'All' },
         { value: 'none', label: 'None' },
-        ...devices.map(device => ({ value: device._id, label: device.name }))
+        ...devices.map(device => ({ value: device._id, label: device.username }))
     ];
 
-
-    const fetchEvents = async () => {
-        const response = await apiService('/events', 'GET');
-        if (response.success) setEvents(response.events);
-    }
-
-    const fetchActivities = async () => {
-        const response = await apiService('/activities', 'GET');
-        if (response.success) setActivities(response.activities);
-    }
-
-    const fetchTasks = async () => {
-        const response = await apiService('/tasks', 'GET');
-        if (response.success) setTasks(response.tasks);
-    }
-
-    const fetchPomodoros = async () => {
-        const response = await apiService('/pomodori/todo', 'GET');
-        if (response.success) setPlannedPomodori(response.pomodori);
-    }
-
-    const fetchNoAvailability = async () => {
-        const response = await apiService('/no-availabilities', 'GET');
-        if (response.success) setAvailabilities(response.noAvailability);
-    }
 
     const normalizeData = useCallback((datas, type) => {
         if (!Array.isArray(datas)) return [];
@@ -269,11 +246,46 @@ const Planner = () => {
     }), [now]);
 
     useEffect(() => {
+
+        const fetchEvents = async () => {
+            const response = await apiService('/events', 'GET');
+            if (response.success) setEvents(response.events);
+        }
+    
+        const fetchActivities = async () => {
+            const response = await apiService('/activities', 'GET');
+            if (response.success) setActivities(response.activities);
+        }
+    
+        const fetchTasks = async () => {
+            const response = await apiService('/tasks', 'GET');
+            if (response.success) setTasks(response.tasks);
+        }
+    
+        const fetchPomodoros = async () => {
+            const response = await apiService('/pomodori/todo', 'GET');
+            if (response.success) setPlannedPomodori(response.pomodori);
+        }
+    
+        const fetchNoAvailability = async () => {
+            const response = await apiService('/no-availabilities', 'GET');
+            if (response.success) setAvailabilities(response.noAvailability);
+        }
+
+        const fetchTools = async () => {
+            const response = await apiService('/users/tools', 'GET');
+            if (response.success) {
+                setRooms(response.rooms);
+                setDevices(response.devices);
+            }
+        }
+
         fetchActivities();
         fetchEvents();
         fetchTasks();
         fetchPomodoros();
         fetchNoAvailability();
+        fetchTools();
     }, [user, show, refreshKey]);
 
     useEffect(() => {
