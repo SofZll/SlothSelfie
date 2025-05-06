@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
 import { NewSwal } from '../utils/swalUtils';
@@ -6,8 +6,10 @@ import { NewSwal } from '../utils/swalUtils';
 import '../styles/Notifications.css';
 import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
+import { TimeMachineContext } from '../contexts/TimeMachineContext';
 
 const Notifications = () => {
+    const { refreshKey } = useContext(TimeMachineContext);
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
 
@@ -41,7 +43,7 @@ const Notifications = () => {
 
     useEffect(() => {
         fetchNotifications();
-    }, []);
+    }, [refreshKey]);
     
     return (
         <MainLayout>

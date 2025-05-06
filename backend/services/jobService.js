@@ -14,7 +14,8 @@ const getScheduledJobs = async (userId, hours = 24) => {
         user: user._id,
         type: { $ne: 'now' },
         triggerAt: { $gte: now, $lte: limit },
-        status: 'active'
+        status: 'active',
+        createdAt: { $lte: now },
     }).populate('element');
 
     const jobs = await Promise.all(notifications.map(async (notif) => {
@@ -40,6 +41,7 @@ const getScheduledJobs = async (userId, hours = 24) => {
 }
 
 const snoozeJob = async (notificationId, snoozeTime) => {
+    const now = getCurrentNow();
     const notification = await Notification.findById(notificationId);
     if (!notification) throw new Error('Notification not found');
 
@@ -47,13 +49,14 @@ const snoozeJob = async (notificationId, snoozeTime) => {
     // let the user know that he can snooze only 3 times
     if (notification.snoozeSettings.count >= 3) throw new Error('You can snooze only 3 times');
     
-    const snoozeUntil = new Date((notification.triggerAt || new Date()).getTime() + snoozeTime * 60 * 1000);
+    const snoozeUntil = new Date((notification.triggerAt || now).getTime() + snoozeTime * 60 * 1000);
 
     if (notification.type === 'default'){
         notification.triggerAt = snoozeUntil;
         notification.snoozeSettings.until = snoozeUntil;
         notification.snoozeSettings.count += 1;
         notification.snooze = true;
+        notification.updatedAt = now;
         await notification.save();
     } else if (notification.type === 'repeat') {
         const timeString = snoozeUntil.toTimeString().slice(0, 5);
@@ -73,12 +76,15 @@ const snoozeJob = async (notificationId, snoozeTime) => {
             },
             mode: notification.mode,
             status: 'active',
+            createdAt: now,
+            updatedAt: now
         });
 
         notification.snooze = true;
         notification.status = 'inactive';
         notification.snoozeSettings.count += 1;
         notification.snoozeSettings.until = snoozeUntil;
+        notification.updatedAt = now;
         await notification.save();
     }
 }

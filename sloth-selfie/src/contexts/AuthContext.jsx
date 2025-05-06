@@ -34,7 +34,7 @@ const AuthProvider = ({ children }) => {
             if (!userRef.current || userRef.current._id !== newUser._id) {
                 userRef.current = newUser;
                 setUser(newUser);
-            } else setUser(newUser);
+            } else setUser(userRef.current);
 
             return newUser;
         } else {

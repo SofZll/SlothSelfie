@@ -13,8 +13,7 @@ const { getCurrentNow } = require('../services/timeMachineService');
 const createActivity = async (req, res) => {
     const userName = req.session.username;
     const { title, deadline, completed, sharedWith} = req.body;
-    const now = getCurrentNow();
-    
+
     try {
         const user = await User.findOne({ username: userName });
 
@@ -24,7 +23,7 @@ const createActivity = async (req, res) => {
             sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
         }
 
-        const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), createdAt: now });
+        const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), createdAt: getCurrentNow(), updatedAt: getCurrentNow() });
         const savedActivity = await activity.save();
 
         const notifications = sharedWithUsers.map(sharedUser => ({
@@ -35,7 +34,9 @@ const createActivity = async (req, res) => {
             mode: {
                 system: true,
                 email: true,
-            }
+            },
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         }));
 
         const createdNotifications = await Notification.insertMany(notifications);
@@ -97,12 +98,17 @@ const getActivities = async (req, res) => {
 
 // Fetching a single activity
 const getActivity = async (req, res) => {
+    const now = getCurrentNow();
     const {activityId} = req.params;
     try {
         const activity = await Activity.findById(activityId).populate('sharedWith', 'username');
         if (!activity) {
             return res.status(404).json({ success: false, message: "Activity not found" });
         }
+        if (activity.createdAt > now) {
+            return res.status(403).json({ success: false, message: "You cannot access an activity in the future" });
+        }
+
         res.status(200).json({ success: true, activity });
     } catch (error) {
         console.error('Error fetching activity:', error);
@@ -116,7 +122,6 @@ const updateActivity = async (req, res) => {
     const { activity } = req.body;
     const { title, deadline, completed, sharedWith, status } = activity;
     const userName = req.session.username;
-    const now = getCurrentNow();
 
     try {
         const user = await User.findOne({ username: userName });
@@ -130,8 +135,6 @@ const updateActivity = async (req, res) => {
         const activity = await Activity.findById(activityId);
         if (!activity) return res.status(404).json({ success: false, message: "Activity not found" });
 
-        if (activity.createdAt > now) return res.status(403).json({ success: false, message: "You cannot update an activity in the future" });
-        
         const isAuthor = activity.user.toString() === user._id.toString();
         const isSharedWith = activity.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
 
@@ -153,6 +156,8 @@ const updateActivity = async (req, res) => {
 
             if (status === 'declined') updateData.sharedWith = activity.sharedWith.filter(sharedUser => sharedUser._id.toString() !== user._id.toString());
         }
+
+        updateData.updatedAt = getCurrentNow();
 
         const updatedActivity = await Activity.findByIdAndUpdate(
             activityId,
@@ -240,14 +245,12 @@ async function exportActivity(req, res){
     }
 }
 
-// time machine fino a qui per ora
-
 /* Project functions */
 //Function to create a note associated to the input/output of the activity
 async function createNoteAsInputOrOutput(req, res) {
-    try {
-        const { activityId, content, userName, type } = req.body;
+    const { activityId, content, userName, type } = req.body;
 
+    try {
         //find the user from the username:
         const user = await User.findOne({ username: userName });
         console.log(userName);
@@ -272,6 +275,8 @@ async function createNoteAsInputOrOutput(req, res) {
             noteAccess: "shared", // only for members
             allowedUsers: allowedUsernames,
             isInProject: true, // to differentiate between normal notes and project-activity notes
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
         const savedNote = await newNote.save();
 
@@ -312,6 +317,7 @@ async function updateOutputAsNote(req, res) {
         //we update the content and the user of the note
         note.content = content;
         note.user = user;
+        note.updatedAt = getCurrentNow();
 
         const savedNote = await note.save();
 
@@ -341,6 +347,8 @@ async function updateActivityStatus(req, res) {
 
         // Update the status of the activity
         activity.status = status;
+        activity.updatedAt = getCurrentNow();
+
         await activity.save();
 
         res.status(200).json({ success: true, message: "Activity status updated successfully", activity });
@@ -464,7 +472,9 @@ async function adjustOrContractActivitySchedule(req, res) {
                     mode: {
                         system: true,
                         email: true,
-                    }
+                    },
+                    createdAt: getCurrentNow(),
+                    updatedAt: getCurrentNow(),
                 });
                 await sendNotificationNow(notification);
                 console.log(`Notifying user ${user.username} about schedule change for activity ${activity._id}`);

@@ -2,10 +2,13 @@ import React, { createContext, useContext, useState }  from 'react';
 
 import { apiService } from '../services/apiService';
 import { NewSwal } from '../utils/swalUtils';
+import { TimeMachineContext } from './TimeMachineContext';
 
 const PomodoroContext = createContext();
 
 export const PomodoroProvider = ({ children }) => {
+    const { getVirtualNow } = useContext(TimeMachineContext);
+    const virtualNow = getVirtualNow();
 
     const [settingsPomodoro, setSettingsPomodoro] = useState({
         _id: '',
@@ -36,7 +39,7 @@ export const PomodoroProvider = ({ children }) => {
         started: false,
         finished: false,
         studiedTime: 0,
-        deadline: new Date(),
+        deadline: new Date(virtualNow)
     });
 
     const [play, setPlay] = useState(false);
@@ -136,7 +139,7 @@ export const PomodoroProvider = ({ children }) => {
             started: false,
             finished: false,
             studiedTime: 0,
-            deadline: new Date(),
+            deadline: new Date(virtualNow)
         });
 
         resetAnimation(settingsPomodoro.studyTime);

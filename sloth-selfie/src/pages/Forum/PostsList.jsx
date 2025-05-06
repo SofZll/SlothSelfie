@@ -3,17 +3,21 @@ import iconHeartEmpty from '../../assets/icons/heart-empty.svg';
 import iconHeartFull from '../../assets/icons/heart-full.svg';
 
 import { AuthContext } from '../../contexts/AuthContext';
+import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import { useForumContext } from '../../contexts/ForumContext';
 import MapPreview from './MapPreview';
 
 import { calculateTime } from '../../utils/utils';
+import { reverseAddress } from '../../utils/mapUtils';
 import { apiService } from '../../services/apiService';
 
 const PostsList = ({ handleNewContent }) => {
     const { user } = useContext(AuthContext);
+    const { getVirtualNow } = useContext(TimeMachineContext);
     const { posts, setPosts, newCommentText, setNewCommentText, toggleModal, sortingOption, sortingOptions, setSortingOption, selectedPostId, setSelectedPostId } = useForumContext();
 
     const [visiblePosts, setVisiblePosts] = useState(3);
+    const [postAddresses, setPostAddresses] = useState({});
 
     const isLiked = (item) => {return item.likes.includes(user._id)};
 
@@ -90,6 +94,27 @@ const PostsList = ({ handleNewContent }) => {
 
     const postsToShow = sortedPosts.slice(0, visiblePosts);
 
+    const getAddress = async (coordinates) => {
+        const address = await reverseAddress(coordinates);
+        return address;
+    }
+
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            const addresses = {};
+            for (const post of posts) {
+                if (post.location.latitude && post.location.longitude) {
+                    const coordinates = [post.location.latitude, post.location.longitude];
+                    const address = await getAddress(coordinates);
+                    addresses[post._id] = address;
+                }
+            }
+            setPostAddresses(addresses);
+        };
+
+        fetchAddresses();
+    }, [posts]);
+
     return (
         <div className='w-100 pb-3 flex-column gap-3 posts-list'>
             <div className='d-flex justify-content-center gap-2 my-2'>
@@ -110,15 +135,15 @@ const PostsList = ({ handleNewContent }) => {
                                         <img src={post.author.imageUrl} alt='user' />
                                         <h3>{post.author.username}</h3>
                                     </div>
-                                    <p>{calculateTime(post.date)}</p>
+                                    <p>{calculateTime(post.createdAt, getVirtualNow)}</p>
                                 </div>
                                 <p>{post.text}</p>
                                 {post.image && <img className='post-image' src={post.image} alt='post' />}
                                 {post.location.latitude && post.location.longitude && (
-                                    <>
-                                        <a href={`https://www.google.com/maps?q=${post.location.latitude},${post.location.longitude}`} className='link-map' target='_blank' rel='noopener noreferrer'>Open on Google maps</a>
+                                    <div className='d-flex justify-content-center align-items-center gap-2 flex-column mt-2'>
+                                        <a href={`https://www.google.com/maps?q=${post.location.latitude},${post.location.longitude}`} className='link-map' target='_blank' rel='noopener noreferrer'>{postAddresses[post._id] || 'Loading address...'}</a>
                                         <MapPreview center={[post.location.latitude, post.location.longitude]} id={post._id} isPost='true' />
-                                    </>
+                                    </div>
                                 )}
                                 <div className='post-functions'>
                                     <span className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post._id)}>
@@ -146,7 +171,7 @@ const PostsList = ({ handleNewContent }) => {
                                         <div key={comment._id} className='rounded-3 px-3 py-2 shadow-sm comment'>
                                             <div className='comment-title'>
                                                 <h4>{comment.author.username}</h4>
-                                                <p>{calculateTime(comment.date)}</p>
+                                                <p>{calculateTime(comment.createdAt, getVirtualNow)}</p>
                                             </div>
                                             <p>{comment.text}</p>
                                             <span className={isLiked(comment) ? 'liked' : ''} onClick={() => handleLike(post._id, true, comment._id)}>

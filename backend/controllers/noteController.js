@@ -10,8 +10,7 @@ const createNote = async (req, res) => {
     const { title, category, content, tasks, noteAccess, sharedWith } = req.body;
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-    const now = getCurrentNow();
-
+    
     try {
         const users = await findUserId(sharedWith);
 
@@ -22,8 +21,8 @@ const createNote = async (req, res) => {
             content: content || '',
             noteAccess,
             sharedWith: noteAccess === 'shared' ? users : [],
-            createdAt: now,
-            updatedAt: now
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
         
         if (tasks) note.tasks = await addTasks(tasks, user, users);
@@ -81,8 +80,6 @@ const getNote = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
 
-        console.log('Note:', note);
-        console.log('Current time:', now);
         if (note.createdAt > now) return res.status(403).json({ success: false, message: 'Note not found' }); //MI DA 403 FORBIDDEN
 
         res.status(200).json({ success: true, note });
@@ -96,8 +93,7 @@ const getNote = async (req, res) => {
 const updateNote = async (req, res) => {
     const { noteId } = req.params;
     const { title, user, category, content, tasks, addedTasks, deletedTasks, noteAccess, sharedWith } = req.body;
-    const now = getCurrentNow();
-
+    
     try {
         const note = await Note.findById(noteId);
         const users = await findUserId(sharedWith);
@@ -128,7 +124,7 @@ const updateNote = async (req, res) => {
         note.category = category;
         note.content = content;
         note.noteAccess = noteAccess;
-        note.updatedAt = now;
+        note.updatedAt = getCurrentNow();
         note.sharedWith = noteAccess === 'shared' ? users : [];
 
         const updatedNote = await note.save();
