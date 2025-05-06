@@ -20,6 +20,32 @@
   width: 10rem;
 }
 
+/* bookmark */
+.bookmark-btn {
+  all: unset;
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+  border-radius: 10px 0 0 10px;
+  font-weight: 600;
+  text-align: center;
+  background-color: #e0e0e0;
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.bookmark-btn.active {
+  background-color: #ffffff;
+  color: #000;
+  border-right: 4px solid transparent;
+}
+
+.bookmark-btn.inactive {
+  background-color: #e0e0e0;
+  color: #777;
+}
+
 /*preview options*/
 .radio-group {
     display: flex;
