@@ -26,13 +26,19 @@ const getEvents = async (req, res) => {
         { sharedWith: user._id }
       ]
     }).populate('sharedWith', 'username')
-    .populate('user', 'username');
+    .populate('user', 'username')
+    .lean();
 
     console.log('Fetched events:', events); // Log the fetched events for debugging
 
+    const transformedEvents = events.map(event => {
+      return {
+        ...event,
+        sharedWith: event.sharedWith.map(user => user.username),
+      }
+    });
 
-
-    res.status(200).json({ success: true, events });
+    res.status(200).json({ success: true, events: transformedEvents });
   } catch (error) {
     console.error('Error fetching events:', error);
     res.status(500).json({ success: false, message: error.message });
