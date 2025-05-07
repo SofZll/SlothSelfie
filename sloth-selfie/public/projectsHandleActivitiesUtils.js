@@ -33,7 +33,7 @@ async function updateActivitiesStatus(activities) {
         const [isLate, isAbandoned, isAbandonedNoParticipants] = await checkOverdueAbandoned(activity);
         console.log("isLate:", isLate);
 
-        if(activity.status !== "Completed"){
+        if(activity.status !== "Completed" &&  activity.status !== "Reactivated") {
             if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
                 asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
             } else if (!isLate && !isAbandoned && !isAbandonedNoParticipants) {
@@ -43,13 +43,11 @@ async function updateActivitiesStatus(activities) {
                 } else if (!activity.input && activity.status !== "Not_Activatable") {
                     asyncOperations.push(updateActivityStatus(activity._id, "Not_Activatable"));
                 }
-            }
-        }
-            
-
-        if (isAbandoned || isAbandonedNoParticipants) {
-            if (activity.status !== "Abandoned") {
-                asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
+            }     
+            if (isAbandoned || isAbandonedNoParticipants) {
+                if (activity.status !== "Abandoned") {
+                    asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
+                }
             }
         }
         //if members are re-added, and the activity is not overdue since last 7 days, the activity will be Not_Activatable in case of no input, Activatable otherwise, Active if it has output also
