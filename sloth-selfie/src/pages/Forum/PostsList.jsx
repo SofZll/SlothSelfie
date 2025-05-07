@@ -146,7 +146,7 @@ const PostsList = ({ handleNewContent }) => {
                                     </div>
                                 )}
                                 <div className='post-functions'>
-                                    <span className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post._id)}>
+                                    <span role="button" aria-label="Like" title='Like' className={isLiked(post) ? 'liked' : ''} onClick={() => handleLike(post._id)}>
                                         {post.likes ? post.likes.length : 0}
                                         <img
                                             id={`heart-icon-post-${post._id}`}
@@ -155,8 +155,8 @@ const PostsList = ({ handleNewContent }) => {
                                             className='heart-icon'
                                         />
                                     </span>
-                                    <span onClick={() => handleComments(post._id)}>{calculateComments(post.comments)}</span>
-                                    <span onClick={() => toggleModal(post)}>share</span>
+                                    <span role="button" aria-label="Comments section" title='Comments section' onClick={() => handleComments(post._id)}>{calculateComments(post.comments)}</span>
+                                    <span role="button" aria-label="Share" onClick={() => toggleModal(post)}>share</span>
                                 </div>
                                 <div className={`d-flex flex-column gap-3 post-comments ${selectedPostId === post._id ? 'show' : ''}`}>
                                     <div className='d-flex justify-content-center align-items-center gap-2 new-comment'>
@@ -165,7 +165,7 @@ const PostsList = ({ handleNewContent }) => {
                                             value={newCommentText}
                                             onChange={(e) => setNewCommentText(e.target.value)}
                                         />
-                                        <button className='button-clean green' onClick={() => handleNewContent(true)}>Post</button>
+                                        <button type='button' aria-label='Post' className='button-clean green' onClick={() => handleNewContent(true)}>Post</button>
                                     </div>
                                     {post.comments.map((comment) => (
                                         <div key={comment._id} className='rounded-3 px-3 py-2 shadow-sm comment'>
@@ -192,7 +192,7 @@ const PostsList = ({ handleNewContent }) => {
                         <p>No posts to show</p>
                     )}
                     {visiblePosts < posts.length && (
-                        <button className='load-more-btn' onClick={loadPosts}>
+                        <button type='button' aria-label='load more' className='load-more-btn' onClick={loadPosts}>
                             Load more
                         </button>
                     )}

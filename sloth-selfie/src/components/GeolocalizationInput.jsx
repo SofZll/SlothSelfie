@@ -115,7 +115,7 @@ const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
                 <div className='modal-content' >
                     <div className='modal-header'>
                         <h1 className='modal-title fs-5' >Geolocalization</h1>
-                        <button type='button' className='btn-close' aria-label='Close' onClick={() => resetMap()}></button>
+                        <button type='button' className='btn-close' aria-label='Close' title='Close' onClick={() => resetMap()}></button>
                     </div>
                     <div className='modal-body container'>
                         <h5>Search for a location</h5>
@@ -132,11 +132,13 @@ const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
                                     onChange={(e) => setAddressInput(e.target.value)}
                                 />
                                 <div className='position-absolute map-pin'>
-                                    <MapPin size={20} color='#777' onClick={() => getCurrentPosition()} />
+                                    <span role="button" aria-label="Select your position" title="Select your position">
+                                        <MapPin size={20} color='#777' onClick={() => getCurrentPosition()} />
+                                    </span>
                                 </div>
                             </div>
                             <div className='col-3'>
-                                <button className='button-clean green' onClick={() => handleAddressInput()}>Search</button>
+                                <button type='button' aria-label='Search address' className='button-clean green' onClick={() => handleAddressInput()}>Search</button>
                             </div>
                         </div>
                         <div className='d-flex justify-content-center align-items-center'>
@@ -144,7 +146,7 @@ const GeolocalizationInput = ({ showGeo, setShowGeo, setInputMap }) => {
                         </div>
                     </div>
                     <div className='modal-footer'>
-                        <button className='btn btn-outline-primary' onClick={() => handleAddMap()}>Add</button>
+                        <button type='button' aria-label='Add address' className='btn btn-outline-primary' onClick={() => handleAddMap()}>Add</button>
                     </div>
                 </div>
             </div>

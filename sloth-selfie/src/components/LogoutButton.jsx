@@ -21,7 +21,7 @@ const LogoutButton = () => {
     }
 
     return (
-        <button className='btn position-fixed top-0 end-0 p-3' onClick={handleLogout}>
+        <button type='button' aria-label='Logout' className='btn position-fixed top-0 end-0 p-3' onClick={handleLogout}>
             <LogOut size='25' strokeWidth='1.75' color='#244476' />
         </button>
     );
