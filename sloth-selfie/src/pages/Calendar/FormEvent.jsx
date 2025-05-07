@@ -403,13 +403,13 @@ const FormEvent = () => {
             
             <div className='d-flex align-items-center justify-content-center bg-white'>
                 {!event.isInProject && (
-                    <button type='button' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
+                    <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
                         {selected.edit ? 'edit' : 'save'}
                     </button>
                 )}
 
                 {selected.edit && !event.isInProject && (
-                    <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                    <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
                         delete
                     </button>
                 )}

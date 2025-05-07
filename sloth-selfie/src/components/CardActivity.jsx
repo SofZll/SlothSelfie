@@ -52,7 +52,7 @@ const CardActivity = ({ Activity, smallView }) => {
             <div className='row w-100 d-flex align-items-center'>
                 {Activity.response !== 'pending' && !Activity.project && (
                     <div className='col col-6 d-flex justify-content-center'>
-                        <button type='button' className={`btn btn-outline-secondary ${Activity.completed && 'btn-active'}`} onClick={() => markComplete()}>
+                        <button type='button' aria-label='completed-toComplete' className={`btn btn-outline-secondary ${Activity.completed && 'btn-active'}`} onClick={() => markComplete()}>
                             {Activity.completed ? 'Completed' : 'to Complete'}
                         </button>
                     </div>
@@ -67,12 +67,12 @@ const CardActivity = ({ Activity, smallView }) => {
             {Activity.response === 'pending' && !Activity.project && (
                 <div className='row w-100 d-flex align-items-center'>
                     <div className='col col-6 d-flex justify-content-center'>
-                        <button type='button' className='btn btn-success' onClick={() => handleResponse('accepted')}>
+                        <button type='button' aria-label='Accept' className='btn btn-success' onClick={() => handleResponse('accepted')}>
                             Accept
                         </button>
                     </div>
                     <div className='col col-6 d-flex justify-content-center'>
-                        <button type='button' className='btn btn-danger' onClick={() => handleResponse('declined')}>
+                        <button type='button' aria-label='Decline' className='btn btn-danger' onClick={() => handleResponse('declined')}>
                             Decline
                         </button>
                     </div>
@@ -80,7 +80,7 @@ const CardActivity = ({ Activity, smallView }) => {
             )}
 
             {!Activity.project && Activity.response !== 'pending' && (
-                <button className='btn position-absolute top-0 end-0 p-0' onClick={() => selectActivity()}>
+                <button type='button' aria-label='Edit' title='Edit' className='btn position-absolute top-0 end-0 p-0' onClick={() => selectActivity()}>
                     <Pen size={20} color='#244476' strokeWidth={1.25} />
                 </button>
             )}

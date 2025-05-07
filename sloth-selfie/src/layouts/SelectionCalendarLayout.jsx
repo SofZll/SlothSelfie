@@ -27,7 +27,7 @@ const SelectionCalendarLayout = ({children}) => {
         <div className='d-flex flex-column w-100 my-md-3 bg-white border p-3 pt-2 rounded position-relative'>
             {(isDesktop && (selected.selection === '...' && !selected.edit)) && (
                 <div className='position-absolute end-0 top-25 translate-middle-y mt-4 me-3'>
-                    <button className='btn rounded-circle p-1 m-0' onClick={() => setCalendarSettings(!calendarSettings)}>
+                    <button type='button' aria-label='Settings' title='Settings' className='btn rounded-circle p-1 m-0' onClick={() => setCalendarSettings(!calendarSettings)}>
                         <Settings size={30} color='#888' strokeWidth='1.75' />
                     </button>
                 </div>
@@ -53,13 +53,13 @@ const SelectionCalendarLayout = ({children}) => {
 
                 <div>
                     {selected.selection !== '...' ? (
-                        <button className='btn py-0 m-0' onClick={() => back()} alt='back'>
+                        <button type='button' aria-label='Back' title='Back' className='btn py-0 m-0' onClick={() => back()}>
                             <MoveLeft size={25} color='#555B6E' strokeWidth={1.75} />
                         </button>
                     ) : (
                         <>
                             {!isDesktop && (
-                                <button className='btn' onClick={() => resetSelected()} alt='exit'>
+                                <button type='button' aria-label='Exit' title='Exit' className='btn' onClick={() => resetSelected()}>
                                     <X size={25} color='#555B6E' strokeWidth={1.75} />
                                 </button>
                             )}
