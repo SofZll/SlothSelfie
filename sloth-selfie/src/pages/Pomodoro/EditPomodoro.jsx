@@ -91,7 +91,7 @@ const EditPomodoro = () => {
             
             <div className='row m-3 d-flex justify-content-center'>
                 <div className='col-6 m-0 ps-0'>
-                    <Button text='save' alt='save' onClick={editPomodoto} />
+                    <Button text='save' aria-label='save' onClick={editPomodoto} />
                 </div>
             </div>
         </div>
