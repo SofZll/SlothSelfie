@@ -157,23 +157,23 @@ const FormActivity = () => {
 
             {(activity.response === 'pending' && !activity.project) ? (
                 <div className='d-flex align-items-center justify-content-center'>
-                    <button type='button' className='btn btn-success' onClick={() => handleResponse('accepted')}>
+                    <button type='button' aria-label='Accept' className='btn btn-success' onClick={() => handleResponse('accepted')}>
                         Accept
                     </button>
-                    <button type='button' className='btn btn-danger' onClick={() => handleResponse('declined')}>
+                    <button type='button' aria-label='Decline' className='btn btn-danger' onClick={() => handleResponse('declined')}>
                         Decline
                     </button>
                 </div>
             ) : (
                 <div className='d-flex align-items-center justify-content-center'>
                     {!activity.project && (
-                        <button type='button' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()} >
+                        <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()} >
                             {selected.edit ? 'edit' : 'save'}
                         </button>
                     )}
 
                     {selected.edit && !activity.project && (
-                        <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                        <button type='button' aria-label='Delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
                             delete
                         </button>
                     )}

@@ -132,13 +132,13 @@ const FormNote = () => {
                 {isDesktop ? (
                     <>
                     {selected.edit && 
-                        <button type='button' aria-label='Close' title='Close' className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                        <button type='button' aria-label='Close' title='Close' className='btn p-0' onClick={() => resetSelected()}>
                             <X size={25} color='#555B6E' strokeWidth={1.75} />
                         </button>
                     }
                     </>
                 ) : (
-                    <button type='button' aria-label='Close' title='Close' className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                    <button type='button' aria-label='Close' title='Close' className='btn p-0' onClick={() => resetSelected()}>
                         <X size={25} color='#555B6E' strokeWidth={1.75} />
                     </button>
                 )}
