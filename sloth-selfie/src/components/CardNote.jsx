@@ -88,11 +88,11 @@ const CardNote = ({ Note }) => {
                             {Note.content.length > 100 && (
                                 <>
                                 {isExpanded ? (
-                                    <button className='btn btn-link p-0' onClick={() => setIsExpanded(false)}>
+                                    <button type='button' aria-label='Collapse' title='Collapse' className='btn btn-link p-0' onClick={() => setIsExpanded(false)}>
                                         <ChevronUp size={20} color='#244476' strokeWidth={1.5} />
                                     </button>
                                 ) : (
-                                    <button className='btn btn-link p-0' onClick={() => setIsExpanded(true)}>
+                                    <button type='button' aria-label='Expand' title='Expand' className='btn btn-link p-0' onClick={() => setIsExpanded(true)}>
                                         <ChevronDown size={20} color='#244476' strokeWidth={1.5} />
                                     </button>
                                 )}
@@ -141,24 +141,24 @@ const CardNote = ({ Note }) => {
             </div> 
 
             {!Note.isInProject && (
-                <button className='btn position-absolute top-0 end-0' onClick={() => selectNote()}>
+                <button type='button' aria-label='Edit' title='Edit' className='btn position-absolute top-0 end-0' onClick={() => selectNote()}>
                     <Pen size={20} color='#244476' strokeWidth={1.6} />
                 </button>
             )}
 
             <div className='d-flex w-100 position-absolute justify-content-between bottom-0 start-0'>
-                <button className='btn' onClick={() => openNote()}>
+                <button type='button' aria-label='Maximize' title='Maximize' className='btn' onClick={() => openNote()}>
                     <Maximize2 size={20} color='#244476' strokeWidth={1.6} />
                 </button>
 
                 <div className='d-inline'>
                 {!Note.isInProject && (
                     <>
-                        <button className='btn' onClick={() => duplicateNote()}>
+                        <button type='button' aria-label='Duplicate' title='Duplicate' className='btn' onClick={() => duplicateNote()}>
                             <Layers2 size={23} color='#244476' strokeWidth={1.6} />
                         </button>
 
-                        <button className='btn' onClick={() => setDeletePopUp({show: true, note: Note})}>
+                        <button type='button' aria-label='Delete' title='Delete' className='btn' onClick={() => setDeletePopUp({show: true, note: Note})}>
                             <Trash2 size={23} color='#244476' strokeWidth={1.6} />
                         </button>
                     </>

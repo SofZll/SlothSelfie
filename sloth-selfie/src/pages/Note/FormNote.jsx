@@ -115,9 +115,9 @@ const FormNote = () => {
                 )}
 
                 <div className='d-flex align-items-center justify-content-center'>
-                    <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                    <button type='button' aria-label='save or edit' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                     {selected.edit && (
-                        <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp({show: true, note: note})}>delete</button>
+                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp({show: true, note: note})}>delete</button>
                     )}
                 </div>
 
@@ -132,13 +132,13 @@ const FormNote = () => {
                 {isDesktop ? (
                     <>
                     {selected.edit && 
-                        <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                        <button type='button' aria-label='Close' title='Close' className='btn p-0' onClick={() => resetSelected()} alt='exit'>
                             <X size={25} color='#555B6E' strokeWidth={1.75} />
                         </button>
                     }
                     </>
                 ) : (
-                    <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                    <button type='button' aria-label='Close' title='Close' className='btn p-0' onClick={() => resetSelected()} alt='exit'>
                         <X size={25} color='#555B6E' strokeWidth={1.75} />
                     </button>
                 )}
