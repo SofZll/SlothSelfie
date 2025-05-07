@@ -76,7 +76,7 @@ const ProfilePage = () => {
                         <input type='file' id='file-input' style={{display: 'none'}} onChange={handleEditImage}/>
                     </div>
 
-                    <button className='button-clean white mt-3' onClick={() => setShowProfile(!showProfile)}>
+                    <button type='button' aria-label='hideExpandsProfile' className='button-clean white mt-3' onClick={() => setShowProfile(!showProfile)}>
                         {showProfile ? 'Hide': 'Expands'}
                     </button>
                     <div className={`col profile-info ${showProfile ? 'show' : ''}`}>
@@ -165,22 +165,22 @@ const ProfilePage = () => {
                     </div>
                     {isEditing ? (
                         <div className='d-flex justify-content-center gap-3 w-100'>
-                            <button className={`button-clean button-edit green ${showProfile ? 'show' : ''}`} disabled={!conditionsMet} onClick={handleSaveChanges}>Save changes</button>
-                            <button className={`button-clean button-edit red ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(false)}>Cancel</button>
+                            <button type='button' aria-label='saveChanges' className={`button-clean button-edit green ${showProfile ? 'show' : ''}`} disabled={!conditionsMet} onClick={handleSaveChanges}>Save changes</button>
+                            <button type='button' aria-label='cancel' className={`button-clean button-edit red ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(false)}>Cancel</button>
                         </div>
                     ):(
                         <div className='d-flex justify-content-center gap-3 w-100'>
-                            <button className={`button-clean button-edit green ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(true)}>Edit profile</button>
+                            <button type='button' aria-label='editProfile' className={`button-clean button-edit green ${showProfile ? 'show' : ''}`} onClick={() => setIsEditing(true)}>Edit profile</button>
                         </div>
                     )}
                 </div>
                 {!isDesktop && (
                     <>
                         <div className='d-flex justify-content-center flex-shrink-0 w-100 mt-4 mb-1'>
-                            <button className='button-large teal w-100' onClick={() => navigate('/forum')}>FORUM</button>
+                            <button type='button' aria-label='Forum' className='button-large teal w-100' onClick={() => navigate('/forum')}>FORUM</button>
                         </div>
                         <div className='d-flex justify-content-center flex-shrink-0 w-100 mt-2 mb-1'>
-                            <button className='button-large blue w-100' onClick={() => navigate('/chat')}>CHAT</button>
+                            <button type='button' aria-label='Chat' className='button-large blue w-100' onClick={() => navigate('/chat')}>CHAT</button>
                         </div>
                     </>
                 )}

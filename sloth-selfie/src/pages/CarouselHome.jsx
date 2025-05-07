@@ -63,16 +63,16 @@ const CarouselHome = (props) => {
       {...handlers} style={{ touchAction: 'pan-y' }}>
 
       <div className='d-none d-md-flex justify-content-center divBtn4icon'>
-          <button onClick={() => handleGoToSlide(0)} className={`btn-preview  ${goToSlide === 0 ? 'active' : ''}`} alt='calendar'>
+          <button onClick={() => handleGoToSlide(0)} className={`btn-preview  ${goToSlide === 0 ? 'active' : ''}`} type='button' aria-label='calendar' title='Calendar'>
             <Calendar1 size={36} color='#ffffff' strokeWidth={1.75} />
           </button>
-          <button onClick={() => handleGoToSlide(1)} className={`btn-preview  ${goToSlide === 1 ? 'active' : ''}`} alt='notes'>
+          <button onClick={() => handleGoToSlide(1)} className={`btn-preview  ${goToSlide === 1 ? 'active' : ''}`} type='button' aria-label='notes' title='Notes'>
             <NotebookPen size={36} color='#ffffff' strokeWidth={1.75} />
           </button>
-          <button onClick={() => handleGoToSlide(2)} className={`btn-preview  ${goToSlide === 2 ? 'active' : ''}`} alt='pomodoro'>
+          <button onClick={() => handleGoToSlide(2)} className={`btn-preview  ${goToSlide === 2 ? 'active' : ''}`} type='button' aria-label='pomodoro' title='Pomodoro'>
             <img src={iconTomato} alt='icon' className='icon-up'/>
           </button>
-          <button onClick={() => handleGoToSlide(3)} className={`btn-preview  ${goToSlide === 3 ? 'active' : ''}`} alt='projects'>
+          <button onClick={() => handleGoToSlide(3)} className={`btn-preview  ${goToSlide === 3 ? 'active' : ''}`} type='button' aria-label='projects' title='Projects'>
             <Presentation size={36} color='#ffffff' strokeWidth={1.75} />
           </button>
       </div>
@@ -86,13 +86,13 @@ const CarouselHome = (props) => {
       />
       
       <div className='d-flex justify-content-around'>
-        <button onClick={handlePrev} className='btn' alt='previous'>
+        <button onClick={handlePrev} className='btn' type='button' aria-label='previous' title='Previous slide'>
           <MoveLeft size={36} color='#ffffff' strokeWidth={1.75} />
         </button>
-        <button onClick={handleSetUp} className='btn' alt='settings'>
+        <button onClick={handleSetUp} className='btn' type='button' aria-label='settings' title='Settings'>
           <Settings size={36} color='#ffffff' strokeWidth={1.75} />
         </button>
-        <button onClick={handleNext} className='btn' alt='next'>
+        <button onClick={handleNext} className='btn' type='button' aria-label='next' title='Next slide'>
           <MoveRight size={36} color='#ffffff' strokeWidth={1.75} />
         </button>
       </div>

@@ -150,7 +150,7 @@ const renderPomodoroPreview = () => {
       {renderPomodoroPreview()}
       <div className="divBtn">
         <Link to="/pomodoro" onClick={handleLinkClick("/pomodoro")}>
-          <button className="btn btn-main blue">Manage Pomodoro</button>
+          <button type='button' aria-label='managePomodoro' className="btn btn-main blue">Manage Pomodoro</button>
         </Link>
       </div>
     </>
