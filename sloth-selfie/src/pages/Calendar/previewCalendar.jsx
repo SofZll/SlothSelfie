@@ -234,7 +234,7 @@ useEffect(() => {
             {renderCalendar()}
             <div className="divBtn">
                 <Link to="/calendar" onClick={handleLinkClick('/calendar')}>
-                    <button className="btn btn-main blue" >Manage Calendar</button>
+                    <button type='button' aria-label='manageCalendar' className="btn btn-main blue" >Manage Calendar</button>
                 </Link>
             </div>
         </div>

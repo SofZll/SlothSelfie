@@ -42,7 +42,7 @@ const Settings = () => {
                 <div className='modal-content'>
                     <div className='modal-header'>
                         <h1 className='modal-title fs-5' id='exampleModalLabel'>Settings</h1>
-                        <button type='button' className='btn-close' aria-label='Close' onClick={() => setSettings(!settings)}></button>
+                        <button type='button' className='btn-close' aria-label='Close' title='Close' onClick={() => setSettings(!settings)}></button>
                     </div>
                     <div className='modal-body container'>
                         <div className='row'>
@@ -73,7 +73,7 @@ const Settings = () => {
                         </div>
                     </div>
                     <div className='modal-footer'>
-                        <button type='button' className='btn btn-danger fw-medium' onClick={() => handleLogout()}>
+                        <button type='button' className='btn btn-danger fw-medium' aria-label='logout' onClick={() => handleLogout()}>
                             <LogOut size={19} /> Log out
                         </button>
                     </div>

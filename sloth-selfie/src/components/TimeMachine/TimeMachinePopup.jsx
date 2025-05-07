@@ -72,7 +72,7 @@ const TimeMachinePopup = () => {
                     <div className='modal-content'>
                         <div className='modal-header'>
                             <h5 className='modal-title'>Time Machine</h5>
-                            <button type='button' className='close' onClick={() => setMachineOpen(false)}>
+                            <button type='button' aria-label='close' title='Close' className='close' onClick={() => setMachineOpen(false)}>
                                 <span>&times;</span>
                             </button>
                         </div>
@@ -96,8 +96,8 @@ const TimeMachinePopup = () => {
                             </div>
                         </div>
                         <div className='modal-footer'>
-                            <button onClick={handleResetTime} className='btn btn-reset btn-clean d-block'>Reset time</button>
-                            <button onClick={handleSetTime} className='btn btn-submit btn-clean d-block'>Change time</button>
+                            <button type='button' aria-label='resetTime' onClick={handleResetTime} className='btn btn-reset btn-clean d-block'>Reset time</button>
+                            <button type='button' aria-label='changeTime' onClick={handleSetTime} className='btn btn-submit btn-clean d-block'>Change time</button>
                         </div>
                     </div>
                 </div>

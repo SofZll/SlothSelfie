@@ -15,7 +15,7 @@ const TimeMachineButton = () => {
     return (
         <>
             <div className='time-machine'>
-                <button className='time-machine-button' onClick={() => setMachineOpen(prevState => !prevState)}>
+                <button type='button' aria-label='timeMachine' title='Time Machine settings' className='time-machine-button' onClick={() => setMachineOpen(prevState => !prevState)}>
                     <p className='time' style={{ color }}>{currentTime}</p>
                     <p className='date' style={{ color }}>{currentDate}</p>
                 </button>
