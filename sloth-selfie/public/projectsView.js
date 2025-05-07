@@ -473,6 +473,9 @@ function addMacroActivityRow(tbody, macroActivity, className = "") {
     const toggleButton = document.createElement("button");
     toggleButton.textContent = "-";
     toggleButton.style.marginRight = "5px";
+    toggleButton.setAttribute("type", "button");
+    toggleButton.setAttribute("aria-label", "Expand-Contract activities");
+    toggleButton.setAttribute("title", "Expand-Contract activities");
 
     // Unique class for related activities
     const macroIdClass = `activities-of-${macroActivity._id}`;
