@@ -104,7 +104,7 @@ const PopUpPlanPomodoro = ({ edit }) => {
             </div>
 
             <div className='d-flex align-items-center justify-content-center'>
-                <button className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => submitPomodoroCalendar()}>
+                <button type='button' aria-label='Save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => submitPomodoroCalendar()}>
                     save
                 </button>
             </div>

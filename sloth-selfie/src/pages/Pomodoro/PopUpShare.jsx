@@ -58,7 +58,7 @@ const PopUpShare = () => {
 
                     <div className='border-top border-secondary d-flex w-100 mt-3'></div>
                     <div className='d-flex w-100 mt-3 justify-content-center'>
-                        <button className='btn btn-outline-light' style={{ backgroundColor: '#244476' }} onClick={() => exitRoom()}>
+                        <button type='button' aria-label='Leave Room' className='btn btn-outline-light' style={{ backgroundColor: '#244476' }} onClick={() => exitRoom()}>
                             Leave Room
                         </button>
                     </div>
@@ -66,7 +66,7 @@ const PopUpShare = () => {
             ) : (
                 <div className='d-flex flex-column w-100'>
                     <div className='d-flex w-100 mt-4'>Create a New Room</div>
-                    <button className='btn' onClick={() => newRoom()}>
+                    <button type='button' aria-label='New room' title='New room' className='btn' onClick={() => newRoom()}>
                         <CircleFadingPlus size='30' color='#244476' strokeWidth='2' />
                     </button>
 
@@ -79,7 +79,7 @@ const PopUpShare = () => {
                             value={socketData.room}
                             onChange={(e) => setSocketData({ ...socketData, room: e.target.value })} />
 
-                        <button className='btn ms-0 ps-1' onClick={() => enterRoom()}>
+                        <button type='button' aria-label='Search a room' title='Search a room' className='btn ms-0 ps-1' onClick={() => enterRoom()}>
                             <SearchCheck size='30' color='#244476' strokeWidth='2' />
                         </button>
                     </div>
