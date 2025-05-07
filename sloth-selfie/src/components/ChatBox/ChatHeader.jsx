@@ -10,7 +10,7 @@ const ChatHeader = () => {
             {selectedChat ? (
                 <>
                     <div className='d-flex align-items-center gap-3 justify-content-start ps-3 chat-selected-header'>
-                        <span onClick={(e) => { e.stopPropagation(); setSelectedChat(null); }}>Back</span>
+                        <span role="button" aria-label="Go back to chat list" onClick={(e) => { e.stopPropagation(); setSelectedChat(null); }}>Back</span>
                         <div className='d-flex align-items-center position-relative'>
                             <img src={selectedChat.otherParticipant.image} alt='profile' className='rounded-circle me-2'/>
                             {onlineUsers[selectedChat.otherParticipant._id] && (
