@@ -30,7 +30,7 @@ const Note = () => {
 
                 <div className='d-flex w-100 justify-content-between align-items-center mt-3 mt-md-5'>
                     <h1 className='sloth-blue mx-3'>{note.title}</h1>
-                    <button className='btn' onClick={() => back()}>
+                    <button type='button' aria-label='Go back' title='Go back' className='btn' onClick={() => back()}>
                         <MoveLeft size={30} color='#244476' strokeWidth={1.75} />
                     </button>
                 </div>
@@ -81,7 +81,7 @@ const Note = () => {
                     <div className='d-flex flex-column m-3 border rounded p-3 text-break' style={{ maxHeight: '300px' }}>
                         <div className='d-flex justify-content-between align-items-center opacity-50'>
 
-                            <button className='btn p-1' onClick={() => setOpenShare(!openShare)}>
+                            <button type='button' aria-label='Expand-Collapse' title='Expand-Collapse' className='btn p-1' onClick={() => setOpenShare(!openShare)}>
                                 {openShare ? (
                                     <ChevronUp size={20} strokeWidth={1.5} />
                                 ) : (

@@ -49,8 +49,10 @@ const CopyButton = ({ Note, Code }) => {
             )}
             
             <button
+                type="button"
                 style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
                 aria-label="Copy text"
+                title="Copy text"
                 onClick={() => handleCopy()}
             >
                 {copied ? <FaCheck color="#244476" /> : <FaCopy color="#244476" />}
