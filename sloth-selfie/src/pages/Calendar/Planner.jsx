@@ -221,6 +221,7 @@ const Planner = () => {
     }
 
     const handleChange = (selectedOptions, type) => {
+        console.log('selectedOptions', selectedOptions);
         if (!selectedOptions) {
             if (type === 'room') setSelectedRooms([]);
             else if (type === 'device') setSelectedDevices([]);
@@ -289,9 +290,22 @@ const Planner = () => {
     }, [user, show, refreshKey]);
 
     useEffect(() => {
-        if (show === 'plans') setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
-        else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
-        else if (show === 'no availability') setListNormal([...normalizeData(availabilities, 'no availability')]);
+        if (show === 'plans') {
+            if (!user.isAdmin) {
+                setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
+            } else {
+                setListNormal([...selectedRooms.map(room => {normalizeData(room.events, 'event')}), ...selectedDevices.map(device => {normalizeData(device.events, 'event')})]);
+            }
+        } else if (show === 'tools') {
+            setListNormal([...selectedRooms.map(room => {normalizeData(room.events, 'event')}), ...selectedDevices.map(device => {normalizeData(device.events, 'event')}), ...selectedRooms.map(room => {normalizeData(room.availabilities, 'no availability')}), ...selectedDevices.map(device => {normalizeData(device.availabilities, 'no availability')})]);
+        } else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
+        else if (show === 'no availability') {
+            if (!user.isAdmin) {
+                setListNormal([...normalizeData(availabilities, 'no availability')]);
+            } else {
+                setListNormal([...selectedRooms.map(room => {normalizeData(room.availabilities, 'no availability')}), ...selectedDevices.map(device => {normalizeData(device.availabilities, 'no availability')})]);
+            }
+        }
     }, [activities, events, tasks, availabilities, show, plannedPomodori]);
 
     useEffect(() => {
@@ -339,7 +353,7 @@ const Planner = () => {
                                 classNamePrefix='rooms'
                                 options={roomOptions}
                                 value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
-                                onChange={handleChange}
+                                onChange={(e) => handleChange(e.target.selectedValues, 'room')}
                                 placeholder={`${selectedRooms.length} room${selectedRooms.length !== 1 ? 's' : ''}`}
                                 />
                             </div>
@@ -349,7 +363,7 @@ const Planner = () => {
                                 classNamePrefix='rooms'
                                 options={deviceOptions}
                                 value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
-                                onChange={handleChange}
+                                onChange={(e) => handleChange(e.target.selectedValues, 'device')}
                                 placeholder={`${selectedDevices.length} device${selectedDevices.length !== 1 ? 's' : ''}`}
                                 />
                             </div>

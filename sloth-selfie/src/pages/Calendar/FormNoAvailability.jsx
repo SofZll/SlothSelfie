@@ -83,8 +83,8 @@ const FormNoAvailability = () => {
         if (response.success) {
             NewSwal.fire({ title: selected.edit ? 'Availability edited' : 'Availability added', icon: 'success', text: selected.edit ? 'Availability edited successfully' : 'Availability added successfully'});
             if (selected.edit) {
-                if (availability.repeatFrequency === 'none') setAvailabilities(availabilities.map(a => a._id === availability._id ? response.noAvailability : a));
-                else setAvailabilities([...availabilities.filter(a => a.fatherId !== availability.fatherId), ...response.listNoAvailability]);
+                if (availability.repeatFrequency === 'none') setAvailabilities([...availabilities.filter(a => a._id !== availability._id && a.fatherId !== availability.fatherId), { ...response.noAvailability }]);
+                else setAvailabilities([...availabilities.filter(a => a.fatherId !== availability.fatherId && a._id !== availability._id), ...response.listNoAvailability]);
             }
             else setAvailabilities([...availabilities, ...(availability.repeatFrequency !== 'none' ? response.listNoAvailability : [response.noAvailability])]);
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
