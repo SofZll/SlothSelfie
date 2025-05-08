@@ -9,7 +9,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 
 const ChatList = () => {
     const navigate = useNavigate();
-    const { chats, selectedChat, setSelectedChat, onlineUsers, searchTerm, isDesktop } = useChat();
+    const { chats, selectedChat, setSelectedChat, onlineUsers, searchTerm, isDesktop, fetchChat } = useChat();
     const { user } = useContext(AuthContext);
 
     const filteredChats = useMemo(() => {
@@ -18,39 +18,7 @@ const ChatList = () => {
         );
     }, [chats, searchTerm]);
 
-    const handleChatClick = async (chatId) => {
-        const response = await apiService(`/chat/${chatId}`);
-        if (response.success) {
-            const existingChat = chats.find(chat => chat._id === chatId);
-            let messages = response.messages || [];
-            if (messages.length > 0) {
-                const transformedMessages = messages.map(message => {
-                    return {
-                        ...message,
-                        createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
-                    };
-                });
-                messages = transformedMessages;
-            }
-
-            setSelectedChat({
-                ...existingChat,
-                messages: messages,
-            });
-
-            chats.forEach(chat => {
-                if (chat._id === chatId) chat.unreadCount = 0;
-            });   
-
-            socket.emit('mark-read', {
-                chatId: chatId,
-                userId: user._id
-            });
-        } else {
-            console.error('Error fetching chat:', response);
-            NewSwal.fire({ icon: 'error', title: 'Errore', text: response.message });
-        }
-    }
+    const handleChatClick = async (chatId) => fetchChat(chatId);
 
     useEffect(() => {
         if (!isDesktop && selectedChat) {
