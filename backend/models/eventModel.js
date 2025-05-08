@@ -75,12 +75,6 @@ const eventSchema = new mongoose.Schema({
         required: true,
         default: false,
     },
-
-    pomodoro: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Pomodoro',
-        default: null
-    }
 }, { timestamps: true });
 
 const Event = mongoose.model('Event', eventSchema);

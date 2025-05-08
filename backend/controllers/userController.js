@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
-const Event = require('../models/eventModel');
+const { getToolEvents } = require('../controllers/eventController');
+const { getNoAvailabilitiesTool } = require('../controllers/noAvailabilityController');
 
 // TODO: implement the possibility to change the password
 
@@ -267,6 +268,39 @@ const getUsersTools = async (req, res) => {
 
         if (!rooms && !devices) {
             return res.status(404).json({ success: false, message: 'No tools found' });
+        }
+
+        // Get the events and no availability for each room and device
+        for (const room of rooms) {
+            const events = await getToolEvents(room._id);
+            const availabilities = await getNoAvailabilitiesTool(room._id);
+            if (events.success) room.events = events.events;
+            else {
+                room.events = [];
+                console.log('Error fetching events for room:', room._id);
+            }
+
+            if (availabilities.success) room.availabilities = availabilities.noAvailability;
+            else {
+                room.availabilities = [];
+                console.log('Error fetching availabilities for room:', room._id);
+            }
+        }
+
+        for (const device of devices) {
+            const events = await getToolEvents(device._id);
+            const availabilities = await getNoAvailabilitiesTool(device._id);
+            if (events.success) device.events = events.events;
+            else {
+                device.events = [];
+                console.log('Error fetching events for device:', device._id);
+            }
+
+            if (availabilities.success) device.availabilities = availabilities.noAvailability;
+            else {
+                device.availabilities = [];
+                console.log('Error fetching availabilities for device:', device._id);
+            }
         }
 
 
