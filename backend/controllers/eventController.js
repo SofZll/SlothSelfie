@@ -305,20 +305,28 @@ const updateEvent = async (req, res) => {
         } else return res.status(404).json({ success: false, message: 'No events found to edit' });
       } else {
 
-        let startDateDifference, endDateDifference, addition;
+        let startDateDifference, endDateDifference, additionStartDate, additionEndDate;
 
         if (event.startDate.getTime() < new Date(startDate).getTime()) {
           startDateDifference = new Date(startDate).getTime() - event.startDate.getTime();
-          endDateDifference = new Date(endDate).getTime() - event.endDate.getTime();
-          addition = true;
+          additionStartDate = true;
         } else if (event.startDate.getTime() === new Date(startDate).getTime()) {
           startDateDifference = 0;
-          endDateDifference = 0;
-          addition = false;
+          additionStartDate = false;
         } else {
           startDateDifference = event.startDate.getTime() - new Date(startDate).getTime();
+          additionStartDate = false;
+        }
+
+        if (event.endDate.getTime() < new Date(endDate).getTime()) {
+          endDateDifference = new Date(endDate).getTime() - event.endDate.getTime();
+          additionEndDate = true;
+        } else if (event.endDate.getTime() === new Date(endDate).getTime()) {
+          endDateDifference = 0;
+          additionEndDate = false;
+        } else {
           endDateDifference = event.endDate.getTime() - new Date(endDate).getTime();
-          addition = false;
+          additionEndDate = false;
         }
 
         let gap = 1;
@@ -335,15 +343,14 @@ const updateEvent = async (req, res) => {
           ]
         }).sort({ startDate: 1 });
 
-        console.log('Events to edit:', events2edit);
         if (events2edit.length === 0) return res.status(404).json({ success: false, message: 'No events found to edit' });
 
     
         if (repeatTimes) {
 
           for (let i = 0; i < repeatTimes; i++) {
-            const newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( addition ? + startDateDifference : - startDateDifference));
-            const newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( addition ? + endDateDifference : - endDateDifference));
+            const newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( additionStartDate ? + startDateDifference : - startDateDifference));
+            const newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( additionEndDate ? + endDateDifference : - endDateDifference));
 
             if (i >= events2edit.length) {
               const responseEvent = await newEvent(title, user, type, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
@@ -367,8 +374,8 @@ const updateEvent = async (req, res) => {
           }
         } else if (repeatEndDate) {
           let count = 0;
-          let newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + ( addition ? + startDateDifference : - startDateDifference));
-          let newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + ( addition ? + endDateDifference : - startDateDifference));
+          let newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + ( additionStartDate ? + startDateDifference : - startDateDifference));
+          let newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + ( additionEndDate ? + endDateDifference : - startDateDifference));
           while (newStartDate <= (new Date(repeatEndDate).setHours(23, 59, 59, 999))) {
 
             if (count >= events2edit.length) {
@@ -384,8 +391,8 @@ const updateEvent = async (req, res) => {
               } else events.push(response.event);
             }
             count++;
-            newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + (count * gap * 1000 * 60 * 60 * 24) + ( addition ? + startDateDifference : - startDateDifference));
-            newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (count * gap * 1000 * 60 * 60 * 24) + ( addition ? + endDateDifference : - endDateDifference));
+            newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + (count * gap * 1000 * 60 * 60 * 24) + ( additionStartDate ? + startDateDifference : - startDateDifference));
+            newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (count * gap * 1000 * 60 * 60 * 24) + ( additionEndDate ? + endDateDifference : - endDateDifference));
           }
 
           if (count < events2edit.length) {

@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
+const Event = require('../models/eventModel');
 
 // TODO: implement the possibility to change the password
 
@@ -261,12 +262,13 @@ const switchNotification = async (req, res) => {
 // Get the tools of the user
 const getUsersTools = async (req, res) => {
     try {
-        const rooms = await User.find({ isRoom: true });
-        const devices = await User.find({ isDevice: true });
+        const rooms = await User.find({ isRoom: true }).lean();
+        const devices = await User.find({ isDevice: true }).lean();
 
         if (!rooms && !devices) {
             return res.status(404).json({ success: false, message: 'No tools found' });
         }
+
 
         res.status(200).json({ success: true, rooms, devices });
     } catch (error) {
@@ -275,6 +277,115 @@ const getUsersTools = async (req, res) => {
     }
 }
 
+// Add a room
+const addRoom = async (req, res) => {
+    const { userId } = req.session;
+    const { username, dayHours, freeDays } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        } else if (!user.isAdmin) {
+            return res.status(400).json({ success: false, message: 'User is not an admin' });
+        }
+
+        const room = new User({ username, isRoom: true, password: user.password, dayHours, freeDays, workingHours: dayHours });
+        await room.save();
+
+        res.status(201).json({ success: true, room });
+    } catch (error) {
+        console.error('Error adding room:', error);
+        res.status(500).json({ success: false, message: 'Error adding room' });
+    }   
+}
+
+// Add a device
+const addDevice = async (req, res) => {
+    const { userId } = req.session;
+    const { username, dayHours, freeDays } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        } else if (!user.isAdmin) {
+            return res.status(400).json({ success: false, message: 'User is not an admin' });
+        }
+
+        const device = new User({ username, isDevice: true, password: user.password, dayHours, freeDays, workingHours: dayHours });
+        await device.save();
+
+        res.status(201).json({ success: true, device });
+    } catch (error) {
+        console.error('Error adding device:', error);
+        res.status(500).json({ success: false, message: 'Error adding device' });
+    }
+}
+
+// Edit a room
+const editRoom = async (req, res) => {
+    const { userId } = req.session;
+    const { roomId } = req.params;
+    const { username, dayHours, freeDays } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        } else if (!user.isAdmin) {
+            return res.status(400).json({ success: false, message: 'User is not an admin' });
+        }
+
+        const room = await User.findById(roomId);
+        if (!room) {
+            return res.status(404).json({ success: false, message: 'Room not found' });
+        }
+
+        room.username = username;
+        room.dayHours = dayHours;
+        room.freeDays = freeDays;
+        room.workingHours = dayHours;
+        await room.save();
+
+        res.status(200).json({ success: true, room });
+    } catch (error) {
+        console.error('Error editing room:', error);
+        res.status(500).json({ success: false, message: 'Error editing room' });
+    }
+}
+
+// Edit a device
+const editDevice = async (req, res) => {
+    const { userId } = req.session;
+    const { deviceId } = req.params;
+    const { username, dayHours, freeDays } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        } else if (!user.isAdmin) {
+            return res.status(400).json({ success: false, message: 'User is not an admin' });
+        }
+
+        const device = await User.findById(deviceId);
+        if (!device) {
+            return res.status(404).json({ success: false, message: 'Device not found' });
+        }
+
+        device.username = username;
+        device.dayHours = dayHours;
+        device.freeDays = freeDays;
+        device.workingHours = dayHours;
+        await device.save();
+
+        res.status(200).json({ success: true, device });
+    } catch (error) {
+        console.error('Error editing device:', error);
+        res.status(500).json({ success: false, message: 'Error editing device' });
+    }
+}
 
 
 module.exports = {
@@ -290,5 +401,9 @@ module.exports = {
     getUserIdFromUsername,
     updateUserPreferences,
     switchNotification,
-    getUsersTools
+    getUsersTools,
+    addRoom,
+    addDevice,
+    editRoom,
+    editDevice,
 };
