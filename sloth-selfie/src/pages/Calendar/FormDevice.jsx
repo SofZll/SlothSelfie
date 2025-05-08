@@ -5,6 +5,7 @@ import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { useTools } from '../../contexts/ToolsContext';
 import { useCalendar } from '../../contexts/CalendarContext';
+import { generateTimeOptions } from '../../utils/utils';
 
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 
@@ -14,8 +15,14 @@ const FormDevice = () => {
 
     const [showDeletePopUp, setShowDeletePopUp] = useState(false);
 
+    const setDaysOff = (selectedValue) => {
+        const isAlreadySelected = device.freeDays.includes(selectedValue);
+        if (isAlreadySelected) setDevice({ ...device, freeDays: device.freeDays.filter((day) => day !== selectedValue) });
+        else setDevice({ ...device, freeDays: [...device.freeDays, selectedValue] });
+    };
+
     const handleSubmit = async () => {
-        const response = await apiService('/user/devices', (selected.edit ? 'PUT' : 'POST'), device);
+        const response = await apiService(`/user/device${selected.edit ? `/${device._id}` : ''}`, selected.edit ? 'PUT' : 'POST', device);
         if (response.success) {
             if (selected.edit) {
                 setDevices([...devices.filter((d) => d._id !== response.device._id), { ...response.device }]);
@@ -42,8 +49,14 @@ const FormDevice = () => {
     useEffect(() => {
         if (!device.username || device.username.length <= 0) {
             setConditionsMet(false);
-        } else setConditionsMet(true);
-    }, [device.username]);
+        } else if (device.dayHours.startTime === '' || device.dayHours.endTime === '') {
+            setConditionsMet(false);
+        } else if (device.dayHours.startTime === device.dayHours.endTime) {
+            setConditionsMet(false);
+        } else {
+            setConditionsMet(true);
+        }
+    }, [device.username, device.dayHours.startTime, device.dayHours.endTime]);
 
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden'>
@@ -54,6 +67,41 @@ const FormDevice = () => {
                         value={device.name}
                         onChange={(e) => setDevice({ ...device, username: e.target.value })}
                         placeholder='Enter device name' />
+                </div>
+            </div>
+            <div className='row py-2 '>
+                <div className='col-6'>
+                    <label htmlFor='startTime' className='form-label'>Available from</label>
+                    <select className='form-select' id='startTime'
+                        value={device.dayHours.startTime}
+                        onChange={(e) => setDevice({ ...device, dayHours: { ...device.dayHours, startTime: e.target.value } })}>
+                        {generateTimeOptions().map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className='col-6'>
+                    <label htmlFor='endTime' className='form-label'>Available until</label>
+                    <select className='form-select' id='endTime'
+                        value={device.dayHours.endTime}
+                        onChange={(e) => setDevice({ ...device, dayHours: { ...device.dayHours, endTime: e.target.value } })}>
+                        {generateTimeOptions().map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+            <div className='row py-2 '>
+                <div className='col-8'>
+                    <label htmlFor='daysOff' className='form-label'>Days off</label>
+                    <select className='form-select' id='daysOff'
+                        value={device.freeDays}
+                        onChange={(e) => setDaysOff(e.target.value)}
+                        multiple>
+                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+                            <option key={day} value={day}>{day}</option>
+                        ))}
+                    </select>
                 </div>
             </div>
 

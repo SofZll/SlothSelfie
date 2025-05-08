@@ -11,7 +11,7 @@ const SelectionCalendarLayout = ({children}) => {
 
     const isDesktop = useIsDesktop();
     const { selected, resetSelected, back, resetActivity, resetEvent, resetAvailability } = useCalendar();
-    const { calendarSettings, setCalendarSettings } = useContext(AuthContext);
+    const { calendarSettings, setCalendarSettings, user } = useContext(AuthContext);
     const { resetTask } = useTask();
 
     useEffect(() => {
@@ -25,7 +25,7 @@ const SelectionCalendarLayout = ({children}) => {
 
     return (
         <div className='d-flex flex-column w-100 my-md-3 bg-white border p-3 pt-2 rounded position-relative'>
-            {(isDesktop && (selected.selection === '...' && !selected.edit)) && (
+            {(isDesktop && (selected.selection === '...' && !selected.edit && !user.isAdmin)) && (
                 <div className='position-absolute end-0 top-25 translate-middle-y mt-4 me-3'>
                     <button type='button' aria-label='Settings' title='Settings' className='btn rounded-circle p-1 m-0' onClick={() => setCalendarSettings(!calendarSettings)}>
                         <Settings size={30} color='#888' strokeWidth='1.75' />

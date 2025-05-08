@@ -5,6 +5,7 @@ import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { useTools } from '../../contexts/ToolsContext';
 import { useCalendar } from '../../contexts/CalendarContext';
+import { generateTimeOptions } from '../../utils/utils';
 
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 
@@ -14,8 +15,14 @@ const FormRoom = () => {
 
     const [showDeletePopUp, setShowDeletePopUp] = useState(false);
 
+    const setDaysOff = (selectedValue) => {
+        const isAlreadySelected = room.freeDays.includes(selectedValue);
+        if (isAlreadySelected) setRoom({ ...room, freeDays: room.freeDays.filter((day) => day !== selectedValue) });
+        else setRoom({ ...room, freeDays: [...room.freeDays, selectedValue] });
+    };
+
     const handleSubmit = async () => {
-        const response = await apiService('/user/rooms', (selected.edit ? 'PUT' : 'POST'), room);
+        const response = await apiService(`/user/room${selected.edit ? `/${room._id}` : ''}`, selected.edit ? 'PUT' : 'POST', room);
         if (response.success) {
             if (selected.edit) {
                 setRooms([...rooms.filter((r) => r._id !== response.room._id), { ...response.room }]);
@@ -42,13 +49,17 @@ const FormRoom = () => {
     useEffect(() => {
         if (!room.username || room.username.length <= 0) {
             setConditionsMet(false);
+        } else if (room.dayHours.start === '' || room.dayHours.end === '') {
+            setConditionsMet(false);
+        } else if (room.dayHours.start === room.dayHours.end) {
+            setConditionsMet(false);
         } else setConditionsMet(true);
-    }, [room.username]);
+    }, [room.username, room.dayHours.start, room.dayHours.end]);
 
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden'>
             <div className='row py-2 '>
-                <div className='col-6'>
+                <div className='col-8'>
                     <label htmlFor='name' className='form-label'>Room name</label>
                     <input type='text' className='form-control' id='name'
                         value={room.name}
@@ -56,6 +67,43 @@ const FormRoom = () => {
                         placeholder='Enter room name' />
                 </div>
             </div>
+            <div className='row py-2 '>
+                <div className='col-6 d-flex align-items-stretch justify-content-between flex-column'>
+                    <label htmlFor='startWorkingHour'>Opening Time</label>
+                    <select id='startWorkingHour' className='form-select'
+                        value={room.dayHours.start}
+                        onChange={(e) => setRoom({ ...room, dayHours: { ...room.dayHours, start: e.target.value } })}>
+                        {generateTimeOptions().map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className='col-6 d-flex align-items-stretch justify-content-between flex-column'>
+                    <label htmlFor='endWorkingHour'>Closing Time</label>
+                    <select id='endWorkingHour' className='form-select'
+                        value={room.dayHours.end}
+                        onChange={(e) => setRoom({ ...room, dayHours: { ...room.dayHours, end: e.target.value } })}>
+                        {generateTimeOptions().map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
+            <div className='row py-2 '>
+                <div className='col-8 d-flex align-items-stretch justify-content-between flex-column'>
+                    <label htmlFor='daysOff'>Closed Days</label>
+                    <select id='daysOff' className='form-select'
+                        multiple
+                        value={room.freeDays}
+                        onChange={(e) => setDaysOff(e.target.value)}>
+                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+                            <option key={day} value={day}>{day}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
 
             <div className='d-flex align-items-center justify-content-center'>
                 <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()} >

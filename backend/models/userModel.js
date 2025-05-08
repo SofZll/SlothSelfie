@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const fs = require('fs').promises;
 const path = require('path');
-const { all } = require('../routes/userRoutes');
 const defaultImagePath = path.join(__dirname, '../media/img/defaultImage.jpg');
 
 const userSchema = new mongoose.Schema({
@@ -15,7 +14,6 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        unique: true,
     },
     password: {
         type: String,

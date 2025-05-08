@@ -62,7 +62,7 @@
 }
 
 .roomsDesktop__menu-list {
-  height: 70px;
+  max-height: 250px;
   overflow-y: auto;
 }
 
