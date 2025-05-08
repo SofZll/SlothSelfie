@@ -15,9 +15,9 @@ router.get('/pomodoro/:pomodoroId', getPomodoroById);
 router.post('/pomodoro', addPomodoro);
 router.post('/pomodoro/calendar', newPomodoro);
 
-router.put('/pomodoro/:pomodoroId', editPomodoro);
 router.put('/pomodoro/update-cycles/:pomodoroId', updateCycles);
 router.put('/pomodoro/add-additional-cycle/:pomodoroId', addAdditionalCycle);
+router.put('/pomodoro/:pomodoroId', editPomodoro);
 
 router.delete('/pomodoro/:pomodoroId', deletePomodoro);
 

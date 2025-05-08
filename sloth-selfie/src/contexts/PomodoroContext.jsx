@@ -105,11 +105,13 @@ export const PomodoroProvider = ({ children }) => {
             
     }
 
-    const addCycle = () => {
-        setSettingsPomodoro({ ...settingsPomodoro, additionalCycles: settingsPomodoro.additionalCycles + 1 });
-        setPomodoro({ ...pomodoro, cyclesLeft: pomodoro.cyclesLeft + 1, finished: false });
-        const response = apiService(`/pomodoro/add-additional-cycle/${pomodoro._id}`, 'PUT', settingsPomodoro);
+    const addCycle = async () => {
+        const response = await apiService(`/pomodoro/add-additional-cycle/${pomodoro._id}`, 'PUT', { additionalCycles: settingsPomodoro.additionalCycles + 1 });
         if (!response.success) console.log('Error adding additional cycle', response.message);
+        else {
+            setSettingsPomodoro({ ...settingsPomodoro, additionalCycles: response.pomodoro.additionalCycles });
+            setPomodoro({ ...pomodoro, cyclesLeft: pomodoro.cyclesLeft + 1, finished: false });
+        }
     }
 
     const resetPomodoro = () => {
