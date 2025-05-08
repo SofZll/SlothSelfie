@@ -162,7 +162,7 @@ const PreviewProjects= ({ viewType }) => {
         <div className="inCard">
             {renderProjects()}
                 <div className="divBtn">
-                    <button className="btn btn-main blue" onClick={manageProjects}>Manage Projects</button>
+                    <button type='button' aria-label='manageProjects' className="btn btn-main blue" onClick={manageProjects}>Manage Projects</button>
                 </div>
         </div>
     );

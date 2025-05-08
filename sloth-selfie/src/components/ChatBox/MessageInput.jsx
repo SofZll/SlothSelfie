@@ -36,7 +36,7 @@ const MessageInput = () => {
     return (
         <div className='d-flex gap-2 p-2 chat-input'>
             <input type='text' className='form-control p-2' placeholder='Scrivi un messaggio' value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
-            <button className='chat-input-button' onClick={handleSendMessage}>Invia</button>
+            <button type='button' aria-label='sendMessage' title='Send' className='chat-input-button' onClick={handleSendMessage}>Invia</button>
         </div>
     )
 }

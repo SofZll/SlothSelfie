@@ -44,7 +44,7 @@ const ShareInput = ({ receivers, setReceivers }) => {
             <div className='d-flex flex-column align-items-center'>
                 <div className='d-flex w-100 justify-content-between align-items-center mb-3'>
                     <input type='text' className='form-control me-2 input-receiver' id='receivers' placeholder='Enter receivers username' value={receiverInput} onChange={(e) => setReceiverInput(e.target.value)} onKeyDown={enterKey} />
-                    <button type='button' className='button-clean yellow' onClick={addReceiver}>
+                    <button type='button' aria-label='addReceiver' className='button-clean yellow' onClick={addReceiver}>
                         Add
                     </button>
                 </div>
@@ -53,7 +53,7 @@ const ShareInput = ({ receivers, setReceivers }) => {
                         <div key={index} className={`badge bg-secondary d-flex align-items-center ${
                                 removingIndex === index ? 'fade-out' : 'fade-in'}`}>
                             {receiver}
-                            <button type='button' className='btn-close btn-close-white ms-2 close-small' onClick={() => removeReceiver(index)} />
+                            <button type='button' aria-label='removeReceiver' title='Remove receiver' className='btn-close btn-close-white ms-2 close-small' onClick={() => removeReceiver(index)} />
                         </div>
                     ))}
                 </div>

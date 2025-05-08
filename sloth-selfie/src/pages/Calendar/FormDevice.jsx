@@ -106,10 +106,10 @@ const FormDevice = () => {
             </div>
 
             <div className='d-flex align-items-center justify-content-center'>
-                <button className='btn btn-primary mx-2' onClick={handleSubmit} disabled={!conditionsMet}>
+                <button type='button' aria-label='edit-save' className='btn btn-primary mx-2' onClick={handleSubmit} disabled={!conditionsMet}>
                     {selected.edit ? 'edit' : 'save'}
                 </button>
-                {selected.edit && <button className='btn btn-danger mx-2' onClick={() => setShowDeletePopUp(true)}>Delete Device</button>}
+                {selected.edit && <button type='button' aria-label='delete device' className='btn btn-danger mx-2' onClick={() => setShowDeletePopUp(true)}>Delete Device</button>}
             </div>
             
             {showDeletePopUp && (

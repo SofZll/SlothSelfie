@@ -54,18 +54,18 @@ const FormPomodoro = () => {
                     </div>
                     
                     <div className='d-flex align-items-center justify-content-center'>
-                        <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => goToPomodoro()}>
+                        <button type='button' aria-label='start' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => goToPomodoro()}>
                             start
                         </button>
                     </div>
 
-                    <button className='btn position-absolute bottom-0 end-0 m-0' onClick={() => setSelected({ ...selected, edit: true })}>
+                    <button type='button' aria-label='edit' title='Edit' className='btn position-absolute bottom-0 end-0 m-0' onClick={() => setSelected({ ...selected, edit: true })}>
                         <Pen size='20' color='#244476' strokeWidth='1.5' />
                     </button>
                 </div>
             )}
 
-            <button className='btn position-absolute bottom-0 start-0 m-0' onClick={() => setDeletePopUp(true)}>
+            <button type='button' aria-label='edit' title='Delete' className='btn position-absolute bottom-0 start-0 m-0' onClick={() => setDeletePopUp(true)}>
                 <Trash2 size='20' color='#244476' strokeWidth='1.5' />
             </button>
 

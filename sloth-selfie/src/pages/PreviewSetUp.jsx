@@ -222,7 +222,7 @@ function PreviewSetUp(props) {
 
     return (
         <div className='d-flex position-relative rounded-3 mb-5 p-3 bg-white card-settings'>
-            <button type='button' aria-label='close' className='btn position-absolute end-0 top-0' onClick={handleSetUp}>
+            <button type='button' aria-label='close' title='close' className='btn position-absolute end-0 top-0' onClick={handleSetUp}>
                 <X size={36} color='#555B6E' strokeWidth={1.75} />
             </button>
             

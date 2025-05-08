@@ -104,18 +104,18 @@ const FormCalendar = () => {
                     <div className='d-flex flex-column col-11 col-lg-8 align-items-center py-3'>
                         {user.isAdmin ? (
                             <div className='d-flex flex-column w-100'>
-                                <Button text='no Availability' alt='no availability' onClick={() => select('no availability', false)} />
-                                <Button text='Room' alt='room' onClick={() => select('room', false)} />
-                                <Button text='Device' alt='device' onClick={() => select('device', false)} />
+                                <Button text='no Availability' aria-label='no availability' onClick={() => select('no availability', false)} />
+                                <Button text='Room' aria-label='room' onClick={() => select('room', false)} />
+                                <Button text='Device' aria-label='device' onClick={() => select('device', false)} />
                             </div>
                         ) : (
                             <div className='d-flex flex-column w-100'>
-                                <Button text='Activity' alt='new activity' onClick={() => select('activity', false)} />
-                                <Button text='Event' alt='new event' onClick={() => select('event', false)} />
-                                <Button text='no Availability' alt='no availability' onClick={() => select('no availability', false)} />
+                                <Button text='Activity' aria-label='new activity' onClick={() => select('activity', false)} />
+                                <Button text='Event' aria-label='new event' onClick={() => select('event', false)} />
+                                <Button text='no Availability' aria-label='no availability' onClick={() => select('no availability', false)} />
                                 {/* Button to import an event as .ics files */}
                                 <input id='ics-upload' type='file' accept='.ics' multiple onChange={handleICSUpload} style={{ display: 'none' }}/>
-                                <Button text='Import .ics' alt='import ics' onClick={() => document.getElementById('ics-upload').click()} />
+                                <Button text='Import .ics' aria-label='import ics' onClick={() => document.getElementById('ics-upload').click()} />
                             </div>
                         )}
                     </div>
@@ -164,7 +164,7 @@ const FormCalendar = () => {
                 )}
 
                 {selected.edit && (selected.selection === 'activity' || selected.selection === 'event' || selected.selection === 'task') && (
-                    <button className='btn position-absolute bottom-0 start-0 m-1 p-1 bg-white shadow-sm' onClick={() => exportData()}>
+                    <button type='button' aria-label='Export data' title='Export data' className='btn position-absolute bottom-0 start-0 m-1 p-1 bg-white shadow-sm' onClick={() => exportData()}>
                         <Download size='27' color='#555B6E' strokeWidth='1.75' />
                     </button>
                 )}

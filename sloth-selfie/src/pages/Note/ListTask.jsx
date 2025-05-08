@@ -61,7 +61,7 @@ const ListTask = () => {
                     onChange={(e) => setDeadline(e.target.value)} />
                 </div>
                 <div className='col-2'>
-                    <button type='button' className='btn p-0' onClick={() => addTask()}>
+                    <button type='button' aria-label='Add task' title='Add task' className='btn p-0' onClick={() => addTask()}>
                         <Plus size={20} color='#555B6E' strokeWidth={1.75} />
                     </button>
                 </div>
@@ -81,7 +81,7 @@ const ListTask = () => {
                                 </div>
                             )}
                             <div>
-                                <button type='button' className='btn p-0' onClick={() => deleteLocalTask(t)}>
+                                <button type='button' aria-label='Remove task' title='Remove task' className='btn p-0' onClick={() => deleteLocalTask(t)}>
                                     <X size={20} color='#555B6E' strokeWidth={1.75} />
                                 </button>
                             </div>
@@ -104,7 +104,7 @@ const ListTask = () => {
                                 </div>
                             )}
                             <div>
-                                <button type='button' className='btn p-0' onClick={() => deleteExistingTask(t)}>
+                                <button type='button' aria-label='Remove task' title='Remove task' className='btn p-0' onClick={() => deleteExistingTask(t)}>
                                     <X size={20} color='#555B6E' strokeWidth={1.75} />
                                 </button>
                             </div>

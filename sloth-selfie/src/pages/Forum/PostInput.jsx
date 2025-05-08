@@ -61,14 +61,20 @@ const PostInput = ({ handleNewContent }) => {
                     </>
                 )}
                 <div className='position-absolute d-flex justify-content-start align-items-center flex-row gap-3 post-input'>
-                    <Camera className='input-icon' onClick={() => !chosen && cameraClick()} />
+                    <span role="button" aria-label="Choose a picture" title="Choose a picture">
+                        <Camera className='input-icon' onClick={() => !chosen && cameraClick()} />
+                    </span>
                     <input id='cameraInput' type='file' accept='image/*' capture='environment' onChange={(e) => inputChange(e, setInputImage)} style={{ display: 'none' }} />
-                    <Image className='input-icon' onClick={() => !chosen && imageClick()} />
+                    <span role="button" aria-label="Choose an image" title="Choose an image">
+                        <Image className='input-icon' onClick={() => !chosen && imageClick()} />
+                    </span>
                     <input id='imageInput' type='file' accept='image/*' onChange={(e) => inputChange(e, setInputImage)} style={{ display: 'none' }} />
-                    <MapPin className='input-icon' onClick={() => !chosen && mapsClick()} />
+                    <span role="button" aria-label="Select a position" title="Select a position">
+                        <MapPin className='input-icon' onClick={() => !chosen && mapsClick()} />
+                    </span>
                 </div>
             </div>
-            <button className='button-clean green' onClick={() => {handleNewContent(); setChosen(false)}}>Post</button>
+            <button type='button' aria-label='Post' className='button-clean green' onClick={() => {handleNewContent(); setChosen(false)}}>Post</button>
         </div>
     )
 }

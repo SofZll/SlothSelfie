@@ -105,7 +105,7 @@ const ChatBox = () => {
     const chatContent = (
         <div className={`d-relative flex-column message-container ${isDesktop ? 'desktop' : ''} `}>
             {isDesktop ? (
-                <button className='pe-auto message-button' onClick={() => setIsOpen(prevState => !prevState)}>
+                <button type='button' aria-label='Chats' title='Chats' className='pe-auto message-button' onClick={() => setIsOpen(prevState => !prevState)}>
                     <ChatHeader />
                 </button>
             ) : (

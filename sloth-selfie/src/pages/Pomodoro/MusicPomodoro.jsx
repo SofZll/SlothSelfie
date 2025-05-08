@@ -218,7 +218,7 @@ const MusicPomodoro = () => {
                         )}
                     </div>
                         
-                    <button className='ps-1 p-3 rounded-start-0 rounded-end-5 bg-sloth-blue m-0 btn-hover' onClick={() => setOpen(!open)}>
+                    <button type='button' aria-label='Your Music' title='Your Music' className='ps-1 p-3 rounded-start-0 rounded-end-5 bg-sloth-blue m-0 btn-hover' onClick={() => setOpen(!open)}>
                         {open ? (
                             <X size='30' color='#ffff' strokeWidth='1.5' />
                         ) : (

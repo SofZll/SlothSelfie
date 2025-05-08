@@ -33,29 +33,29 @@ const TimerPomodoroMini = () => {
 
             {pomodoro.finished ? (
                 <div className='d-flex justify-content-around align-items-center w-100'>
-                    <button className='btn m-0 p-1' onClick={() => handleClick(resetPomodoro)}>
+                    <button type='button' aria-label='Reset' title='Reset' className='btn m-0 p-1' onClick={() => handleClick(resetPomodoro)}>
                         <RotateCcw size='20' strokeWidth='1.5' />
                     </button>
 
-                    <button className='btn m-0 p-1' onClick={() => handleClick(newPomodoro)}>
+                    <button type='button' aria-label='New pomodoro' title='New pomodoro' className='btn m-0 p-1' onClick={() => handleClick(newPomodoro)}>
                         <CircleStop size='20' strokeWidth='1.5' />
                     </button>
 
-                    <button className='btn m-0 p-1' onClick={() => handleClick(addCycle)}>
+                    <button type='button' aria-label='Add cycle' title='Add cycle' className='btn m-0 p-1' onClick={() => handleClick(addCycle)}>
                         <CirclePlus size='20' strokeWidth='1.5' />
                     </button>
                 </div>
             ) : (
                 <div className='d-flex justify-content-around align-items-center w-100'>
-                    <button className='btn m-0 p-1' onClick={() => handleClick(skipBack)}>
+                    <button type='button' aria-label='Skip back' title='Skip back' className='btn m-0 p-1' onClick={() => handleClick(skipBack)}>
                         <SkipBack size='20' strokeWidth='1.5' />
                     </button>
 
-                    <button className='btn m-0 p-1' onClick={() => setPlay(!play)}>
+                    <button type='button' aria-label='Play' title='Play' className='btn m-0 p-1' onClick={() => setPlay(!play)}>
                         {play ? <CirclePause size='20' strokeWidth='1.5' /> : <CirclePlay size='20' strokeWidth='1.5' />}
                     </button>
 
-                    <button className='btn m-0 p-1' onClick={() => handleClick(skipTime)}>
+                    <button type='button' aria-label='Next cycle' title='Next cycle' className='btn m-0 p-1' onClick={() => handleClick(skipTime)}>
                         <SkipForward size='20' strokeWidth='1.5' />
                     </button>
                 </div>

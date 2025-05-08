@@ -9,7 +9,7 @@ const SettingsButton = ({ dark, isCalendar = false }) => {
     const { setCalendarSettings, calendarSettings, setSettings, settings } = useContext(AuthContext);
 
     return (
-        <button className='btn rounded-circle p-1 m-0' onClick={() => {
+        <button className='btn rounded-circle p-1 m-0' type='button' aria-label='settings' title='Settings' onClick={() => {
             if (isCalendar) setCalendarSettings(!calendarSettings);
             else setSettings(!settings);
         }}>

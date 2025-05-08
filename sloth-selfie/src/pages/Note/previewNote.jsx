@@ -100,7 +100,7 @@ const  PreviewNote = ({ viewType }) => {
                 </div>
                 <div className="divBtn">
                     <Link to="/notes" onClick={handleLinkClick('/notes')}>
-                        <button className="btn btn-main blue">Manage Notes</button>
+                        <button type='button' aria-label='manageNotes' className="btn btn-main blue">Manage Notes</button>
                     </Link>
                 </div>
             </div>

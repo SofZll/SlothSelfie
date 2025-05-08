@@ -11,7 +11,7 @@ const NotificationButton = () => {
 
     return (
         <div className='notification-wrapper'>
-            <button className='notification-button' onClick={() => navigate('/notifications')}>
+            <button type='button' aria-label='notifications' title='Notifications' className='notification-button' onClick={() => navigate('/notifications')}>
                 <BellRing size={27} color={ color } />
             </button>
         </div>
