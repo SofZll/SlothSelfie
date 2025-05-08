@@ -3,10 +3,9 @@ import { Plus, Settings } from 'lucide-react';
 
 import { useIsDesktop } from '../utils/utils';
 import { AuthContext } from '../contexts/AuthContext';
-import SettingsCalendar from '../components/SettingsCalendar';
 
 const PlusLayout = ({ children, clickCall, selected, popUp, isCalendar = false }) => {
-    const { calendarSettings, setCalendarSettings } = useContext(AuthContext);
+    const { calendarSettings, setCalendarSettings, user } = useContext(AuthContext);
     const isDesktop = useIsDesktop();
 
     return (
@@ -14,7 +13,7 @@ const PlusLayout = ({ children, clickCall, selected, popUp, isCalendar = false }
 
             {!isDesktop && (
                 <>
-                    {isCalendar && (
+                    {isCalendar && !user.isAdmin && (
                         <button type='button' aria-label='settings' title='settings' className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-settings pop-up' onClick={() => setCalendarSettings(!calendarSettings)}>
                             <Settings size={36} color='#fafafa' strokeWidth={1.75} />
                         </button>

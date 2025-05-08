@@ -11,6 +11,12 @@ export const ToolsProvider = ({ children }) => {
         _id: '',
         username: '',
         events: [],
+        availabilities: [],
+        dayHours: {
+            start: '',
+            end: ''
+        },
+        freeDays: []
     });
 
     const resetRoom = () => {
@@ -18,6 +24,12 @@ export const ToolsProvider = ({ children }) => {
             _id: '',
             username: '',
             events: [],
+            availabilities: [],
+            dayHours: {
+                start: '',
+                end: ''
+            },
+            freeDays: []
         });
     }
 
@@ -27,6 +39,12 @@ export const ToolsProvider = ({ children }) => {
         _id: '',
         username: '',
         events: [],
+        availabilities: [],
+        dayHours: {
+            start: '',
+            end: ''
+        },
+        freeDays: []
     });
 
     const resetDevice = () => {
@@ -34,6 +52,12 @@ export const ToolsProvider = ({ children }) => {
             _id: '',
             username: '',
             events: [],
+            availabilities: [],
+            dayHours: {
+                start: '',
+                end: ''
+            },
+            freeDays: []
         });
     }
 

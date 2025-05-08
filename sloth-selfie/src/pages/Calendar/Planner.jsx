@@ -47,13 +47,11 @@ const Planner = () => {
 
     const roomOptions = [
         { value: 'all', label: 'All' },
-        { value: 'none', label: 'None' },
         ...rooms.map(room => ({ value: room._id, label: room.username }))
     ];
 
     const deviceOptions = [
         { value: 'all', label: 'All' },
-        { value: 'none', label: 'None' },
         ...devices.map(device => ({ value: device._id, label: device.username }))
     ];
 
@@ -222,6 +220,7 @@ const Planner = () => {
     }
 
     const handleChange = (selectedOptions, type) => {
+        console.log('selectedOptions', selectedOptions);
         if (!selectedOptions) {
             if (type === 'room') setSelectedRooms([]);
             else if (type === 'device') setSelectedDevices([]);
@@ -233,13 +232,10 @@ const Planner = () => {
             if (type === 'room') return setSelectedRooms([...rooms.map(room => room._id)]);
             else if (type === 'device') return setSelectedDevices([...devices.map(device => device._id)]);
         }
-        if (selectedValues.includes('none')) {
-            if (type === 'room') return setSelectedRooms([]);
-            else if (type === 'device') return setSelectedDevices([]);
-        }
 
-        if (type === 'room') setSelectedRooms(selectedValues.filter(value => value !== 'all' && value !== 'none'));
-        else if (type === 'device') setSelectedDevices(selectedValues.filter(value => value !== 'all' && value !== 'none'));
+        if (type === 'room') setSelectedRooms(selectedValues.filter(value => value !== 'all'));
+        else if (type === 'device') setSelectedDevices(selectedValues.filter(value => value !== 'all'));
+
     }
 
     const dayPropGetter = useCallback((date) => ({
@@ -280,10 +276,29 @@ const Planner = () => {
     }, [user, show, refreshKey]);
 
     useEffect(() => {
-        if (show === 'plans') setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
-        else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
-        else if (show === 'no availability') setListNormal([...normalizeData(availabilities, 'no availability')]);
-    }, [activities, events, tasks, availabilities, show, plannedPomodori]);
+        if (show === 'plans') {
+            if (!user.isAdmin) {
+                setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
+            } else {
+                setListNormal([...selectedRooms.map(room => {normalizeData(room.events, 'event')}), ...selectedDevices.map(device => {normalizeData(device.events, 'event')})]);
+            }
+        } else if (show === 'tools') {
+            const selectedRoomObjects = rooms.filter(room => selectedRooms.includes(room._id));
+            const selectedDeviceObjects = devices.filter(device => selectedDevices.includes(device._id));
+
+            const selectedEvents = [...selectedRoomObjects.flatMap(room => room.events), ...selectedDeviceObjects.flatMap(device => device.events)];
+            const selectedAvailabilities = [...selectedRoomObjects.flatMap(room => room.availabilities), ...selectedDeviceObjects.flatMap(device => device.availabilities)];
+            setListNormal([...normalizeData(selectedEvents, 'event'), ...normalizeData(selectedAvailabilities, 'no availability')]);
+            
+        } else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
+        else if (show === 'no availability') {
+            if (!user.isAdmin) {
+                setListNormal([...normalizeData(availabilities, 'no availability')]);
+            } else {
+                setListNormal([...selectedRooms.map(room => {normalizeData(room.availabilities, 'no availability')}), ...selectedDevices.map(device => {normalizeData(device.availabilities, 'no availability')})]);
+            }
+        }
+    }, [activities, events, tasks, availabilities, show, plannedPomodori, rooms, devices, selectedRooms, selectedDevices, user.isAdmin]);
 
     useEffect(() => {
         if (notifications.length > 0) {
@@ -333,21 +348,23 @@ const Planner = () => {
                             <div className='col-6 mt-2'>
                                 <Select
                                 isMulti
+                                menuPlacement='auto'
                                 classNamePrefix='rooms'
                                 options={roomOptions}
                                 value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
-                                onChange={handleChange}
-                                placeholder={`${selectedRooms.length} room${selectedRooms.length !== 1 ? 's' : ''}`}
+                                onChange={(selectedOptions) => handleChange(selectedOptions, 'room')}
+                                placeholder={'0 rooms'}
                                 />
                             </div>
                             <div className='col-6 mt-2'>
                                 <Select
                                 isMulti
+                                menuPlacement='auto'
                                 classNamePrefix='rooms'
                                 options={deviceOptions}
                                 value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
-                                onChange={handleChange}
-                                placeholder={`${selectedDevices.length} device${selectedDevices.length !== 1 ? 's' : ''}`}
+                                onChange={(selectedOptions) => handleChange(selectedOptions, 'device')}
+                                placeholder={'0 devices'}
                                 />
                             </div>
                         </div>
@@ -395,21 +412,23 @@ const Planner = () => {
                             <div className='col-6'>
                                 <Select
                                 isMulti
+                                menuPlacement='auto'
                                 classNamePrefix='roomsDesktop'
                                 options={roomOptions}
                                 value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
-                                onChange={handleChange}
-                                placeholder={`${selectedRooms.length} room${selectedRooms.length !== 1 ? 's' : ''}`}
+                                onChange={(selectedOptions) => handleChange(selectedOptions, 'room')}
+                                placeholder={'0 rooms'}
                                 />
                             </div>
                             <div className='col-6'>
                                 <Select
                                 isMulti
+                                menuPlacement='auto'
                                 classNamePrefix='devicesDesktop'
                                 options={deviceOptions}
                                 value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
-                                onChange={handleChange}
-                                placeholder={`${selectedDevices.length} device${selectedDevices.length !== 1 ? 's' : ''}`}
+                                onChange={(selectedOptions) => handleChange(selectedOptions, 'device')}
+                                placeholder={'0 devices'}
                                 />
                             </div>
                         </div>

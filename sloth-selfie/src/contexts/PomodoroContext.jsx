@@ -80,7 +80,7 @@ export const PomodoroProvider = ({ children }) => {
                 editTimeAnimation(settingsPomodoro.breakTime);
 
                 const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
-                if (!response.success) console.log(response);
+                if (!response.success) console.log('Error updating pomodoro', response.message);
 
             } else {
                 setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true});
@@ -91,7 +91,6 @@ export const PomodoroProvider = ({ children }) => {
         } else {
             if (!pomodoro.started) {
                 if (pomodoro._id) {
-                    console.log('Updating pomodoro');
                     const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
                     if (!response.success) console.log('Error updating pomodoro', response.message);
                     else setPomodoro({ ...pomodoro, started: true });
@@ -105,11 +104,13 @@ export const PomodoroProvider = ({ children }) => {
             
     }
 
-    const addCycle = () => {
-        setSettingsPomodoro({ ...settingsPomodoro, additionalCycles: settingsPomodoro.additionalCycles + 1 });
-        setPomodoro({ ...pomodoro, cyclesLeft: pomodoro.cyclesLeft + 1, finished: false });
-        const response = apiService(`/pomodoro/add-additional-cycle/${pomodoro._id}`, 'PUT', settingsPomodoro);
+    const addCycle = async () => {
+        const response = await apiService(`/pomodoro/add-additional-cycle/${pomodoro._id}`, 'PUT', { additionalCycles: settingsPomodoro.additionalCycles + 1 });
         if (!response.success) console.log('Error adding additional cycle', response.message);
+        else {
+            setSettingsPomodoro({ ...settingsPomodoro, additionalCycles: response.pomodoro.additionalCycles });
+            setPomodoro({ ...pomodoro, cyclesLeft: pomodoro.cyclesLeft + 1, finished: false });
+        }
     }
 
     const resetPomodoro = () => {
