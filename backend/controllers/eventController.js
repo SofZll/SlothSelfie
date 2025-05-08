@@ -654,11 +654,36 @@ const importEvents = async (req, res) => {
   }
 };
 
+const getToolEvents = async (toolId) => {
+  try {
+    const events = await Event.find({ sharedWith: toolId })
+      .populate('user', 'username')
+      .populate('sharedWith', 'username')
+      .populate('user', 'username')
+      .lean();
+
+    if (!events) return { success: false, message: 'No events found' };
+
+    const transformedEvents = events.map(event => {
+      return {
+        ...event,
+        sharedWith: event.sharedWith.map(user => user.username),
+      }
+    });
+
+    return { success: true, events: transformedEvents };
+  } catch (error) {
+    console.error('Error fetching tool events:', error);
+    return { success: false, message: error.message };
+  }
+}
+
 module.exports = {
   getEvents,
   createNewEvent,
   updateEvent,
   deleteEvent,
   exportEvent,
-  importEvents
+  importEvents,
+  getToolEvents,
 };

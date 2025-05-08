@@ -80,7 +80,7 @@ export const PomodoroProvider = ({ children }) => {
                 editTimeAnimation(settingsPomodoro.breakTime);
 
                 const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
-                if (!response.success) console.log(response);
+                if (!response.success) console.log('Error updating pomodoro', response.message);
 
             } else {
                 setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true});
@@ -91,7 +91,6 @@ export const PomodoroProvider = ({ children }) => {
         } else {
             if (!pomodoro.started) {
                 if (pomodoro._id) {
-                    console.log('Updating pomodoro');
                     const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
                     if (!response.success) console.log('Error updating pomodoro', response.message);
                     else setPomodoro({ ...pomodoro, started: true });

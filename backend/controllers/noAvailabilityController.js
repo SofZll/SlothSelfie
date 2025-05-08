@@ -300,10 +300,26 @@ const deleteNoAvailability = async (req, res) => {
     }
 };
 
+//Fetch no availability for tool
+const getNoAvailabilitiesTool = async (toolId) => {
+    try {
+        const noAvailability = await NoAvailability.find({ user: toolId, createdAt: { $lte: getCurrentNow() } })
+        .populate('user', 'username')
+        .lean();
+
+        if (!noAvailability) return ({ success: false, message: 'No availability not found' });
+        return ({ success: true, noAvailability });
+    } catch (error) {
+        console.error('Error fetching no availability:', error);
+        return ({ success: false, message: 'Error fetching no availability' });
+    }
+}
+
 module.exports = {
     getNoAvailability,
     addNoAvailability,
     updateNoAvailability,
-    deleteNoAvailability
+    deleteNoAvailability,
+    getNoAvailabilitiesTool,
 };
 
