@@ -140,19 +140,19 @@ const TimerPomodoro = () => {
 
             <div className='d-flex flex-column w-100 h-100 justify-content-around align-items-center'>
                 <div className='d-flex col-md-6 col-10 justify-content-between'>
-                    <button className='btn' onClick={() => setPopUp({ ...popUp, share: !popUp.share, open: !popUp.open })}>
+                    <button type='button' aria-label='Share' title='Share' className='btn' onClick={() => setPopUp({ ...popUp, share: !popUp.share, open: !popUp.open })}>
                         <Share size='30' color='#244476' strokeWidth='1.5' />
                     </button>
 
-                    <button className='btn' onClick={() => setPopUp({ ...popUp, calendar: !popUp.calendar, open: !popUp.open })}>
+                    <button type='button' aria-label='Add to calendar' title='Add to Calendar' className='btn' onClick={() => setPopUp({ ...popUp, calendar: !popUp.calendar, open: !popUp.open })}>
                         <CalendarPlus size='30' color='#244476' strokeWidth='1.5' />
                     </button>
                     
-                    <button className='btn' onClick={() => setPopUp({ ...popUp, stats: !popUp.stats, open: !popUp.open })}>
+                    <button type='button' aria-label='Stats' title='Stats' className='btn' onClick={() => setPopUp({ ...popUp, stats: !popUp.stats, open: !popUp.open })}>
                         <ChartLine size='32' color='#244476' strokeWidth='1.6' />
                     </button>
 
-                    <button className='btn' onClick={() => setPopUp({ ...popUp, music: !popUp.music, open: !popUp.open })}>
+                    <button type='button' aria-label='Music' title='Music' className='btn' onClick={() => setPopUp({ ...popUp, music: !popUp.music, open: !popUp.open })}>
                         <Music size='30' color='#244476' strokeWidth='1.5' />
                     </button>
                 </div>
@@ -202,36 +202,36 @@ const TimerPomodoro = () => {
                 </div>
 
                 <div className='d-flex col-md-6 col-10 justify-content-between'>
-                    <button className='btn' onClick={() => setPopUp({ ...popUp, edit: !popUp.edit, open: !popUp.open })}>
+                    <button type='button' aria-label='Edit' title='Edit' className='btn' onClick={() => setPopUp({ ...popUp, edit: !popUp.edit, open: !popUp.open })}>
                         <Pen size='30' color='#244476' strokeWidth='1.5' />
                     </button>
 
                     {pomodoro.finished ? (
-                        <button className='btn' onClick={() => handleClick(resetPomodoro, 'reset pomodoro')}>
+                        <button type='button' aria-label='Reset' title='Reset' className='btn' onClick={() => handleClick(resetPomodoro, 'reset pomodoro')}>
                             <RotateCcw size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     ) : (
-                        <button className='btn' onClick={() => handleClick(skipBack, 'skip back')}>
+                        <button type='button' aria-label='Skip back' title='Skip back' className='btn' onClick={() => handleClick(skipBack, 'skip back')}>
                             <SkipBack size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     )}
 
                     {pomodoro.finished ? (
-                        <button className='btn' onClick={() => handleClick(newPomodoro, 'new pomodoro')}>
+                        <button type='button' aria-label='new Pomodoro' title='New pomodoro' className='btn' onClick={() => handleClick(newPomodoro, 'new pomodoro')}>
                             <CircleStop size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     ) : (
-                        <button className='btn' onClick={() => handlePlay()}>
+                        <button type='button' aria-label='Play' title='Play' className='btn' onClick={() => handlePlay()}>
                             {play ? <CirclePause size='30' color='#244476' strokeWidth='1.5' /> : <CirclePlay size='30' color='#244476' strokeWidth='1.5' />}
                         </button>
                     )}
 
                     {pomodoro.finished ? (
-                        <button className='btn' onClick={() => handleClick(addCycle, 'add cycle')}>
+                        <button type='button' aria-label='Add cycle' title='Add cycle' className='btn' onClick={() => handleClick(addCycle, 'add cycle')}>
                             <CirclePlus size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     ) : (
-                        <button className='btn' onClick={() => handleClick(skipTime, 'skip time')}>
+                        <button type='button' aria-label='Next cycle' title='Next cycle' className='btn' onClick={() => handleClick(skipTime, 'skip time')}>
                             <SkipForward size='30' color='#244476' strokeWidth='1.5' />
                         </button>
                     )}

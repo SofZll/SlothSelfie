@@ -106,19 +106,19 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                     <div className='d-flex justify-content-between align-items-center mb-3 position-relative'>
                         <strong>Notification {index + 1}</strong>
                         <div>
-                            <button className='btn btn-sm btn-outline-secondary me-2' onClick={() => setShowSelectNotification(showSelectNotification === index ? null : index)}>
+                            <button type='button' aria-label='Select notification' title='Select notification' className='btn btn-sm btn-outline-secondary me-2' onClick={() => setShowSelectNotification(showSelectNotification === index ? null : index)}>
                                 <ChevronDown size={16} />
                             </button>
-                            <button className='btn btn-sm btn-outline-danger' onClick={() => handleRemoveNotification(index)}>
+                            <button type='button' aria-label='Remove notification' title='Remove notification' className='btn btn-sm btn-outline-danger' onClick={() => handleRemoveNotification(index)}>
                                 <X size={16} />
                             </button>
                         </div>
                         {showSelectNotification === index && (
                         <div className='notification-select position-absolute end-0 top-100 rounded shadow-sm z-2'>
-                            <button onClick={() => {handleModifyNotification(index, 'type', 'default'); setShowSelectNotification(null)}} >
+                            <button type='button' aria-label='Setto default type' title='Set to default type' onClick={() => {handleModifyNotification(index, 'type', 'default'); setShowSelectNotification(null)}} >
                                 <span>default</span>
                             </button>
-                            <button onClick={() => {handleModifyNotification(index, 'type', 'repeat'); setShowSelectNotification(null)}} >
+                            <button type='button' aria-label='Set to repeat type' title='Set to repeat type' onClick={() => {handleModifyNotification(index, 'type', 'repeat'); setShowSelectNotification(null)}} >
                                 <span>repeat</span>
                             </button>
                         </div>
@@ -150,7 +150,7 @@ const NotificationInput = ({ notifications, setNotifications }) => {
             ))}
             {notifications.length < 5 && (
                 <div className='col-12 d-flex justify-content-center'>
-                    <button className='button-clean button-transparent' onClick={handleAddNotification}>
+                    <button type='button' aria-label='Add new notification' title='Add new notification' className='button-clean button-transparent' onClick={handleAddNotification}>
                         <BellPlus />
                     </button>
                 </div>

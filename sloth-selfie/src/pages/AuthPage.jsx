@@ -105,7 +105,7 @@ const AuthPage = ({ formType = 'login' }) => {
                             <label htmlFor='password'>Password</label>
                         </div>
                         <div className='form-group-auth col-16'>
-                            <button type='submit' className='login-button'>
+                            <button type='submit' aria-label='Login' className='login-button'>
                                 {currentFormType === 'login' ? 'LOGIN' : 'REGISTER'}
                             </button>
                         </div>

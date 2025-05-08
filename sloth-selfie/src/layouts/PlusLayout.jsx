@@ -14,12 +14,12 @@ const PlusLayout = ({ children, clickCall, selected, popUp, isCalendar = false }
             {!isDesktop && (
                 <>
                     {isCalendar && !user.isAdmin && (
-                        <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-settings pop-up' alt='settings' onClick={() => setCalendarSettings(!calendarSettings)}>
+                        <button type='button' aria-label='settings' title='settings' className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-settings pop-up' onClick={() => setCalendarSettings(!calendarSettings)}>
                             <Settings size={36} color='#fafafa' strokeWidth={1.75} />
                         </button>
                     )}
                     
-                    <button className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-plus pop-up' alt='add' onClick={() => clickCall()}>
+                    <button type='button' aria-label='add' title='add' className='btn-main rounded-circle p-2 position-fixed end-0 mx-3 btn-plus pop-up' onClick={() => clickCall()}>
                         <Plus size={36} color='#fafafa' strokeWidth={1.75} />
                     </button>
 
