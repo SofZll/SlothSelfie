@@ -25,10 +25,10 @@ const FormDevice = () => {
         const response = await apiService(`/user/device${selected.edit ? `/${device._id}` : ''}`, selected.edit ? 'PUT' : 'POST', device);
         if (response.success) {
             if (selected.edit) {
-                setDevices([...devices.filter((d) => d._id !== response.device._id), { ...response.device }]);
+                setDevices([...devices.filter((d) => d._id !== response.device._id), { ...response.device, type: 'device' }]);
                 NewSwal.fire({ title: 'Device edited', icon: 'success', text: 'Device edited successfully'});
             } else {
-                setDevices([...devices, { ...device }]);
+                setDevices([...devices, { ...response.device, type: 'device' }]);
                 NewSwal.fire({ title: 'Device created', icon: 'success', text: 'Device created successfully'});
             }
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });
@@ -49,14 +49,14 @@ const FormDevice = () => {
     useEffect(() => {
         if (!device.username || device.username.length <= 0) {
             setConditionsMet(false);
-        } else if (device.dayHours.startTime === '' || device.dayHours.endTime === '') {
+        } else if (device.dayHours.start === '' || device.dayHours.end === '') {
             setConditionsMet(false);
-        } else if (device.dayHours.startTime === device.dayHours.endTime) {
+        } else if (device.dayHours.start === device.dayHours.end) {
             setConditionsMet(false);
         } else {
             setConditionsMet(true);
         }
-    }, [device.username, device.dayHours.startTime, device.dayHours.endTime]);
+    }, [device.username, device.dayHours.start, device.dayHours.end]);
 
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden'>
@@ -71,20 +71,20 @@ const FormDevice = () => {
             </div>
             <div className='row py-2 '>
                 <div className='col-6'>
-                    <label htmlFor='startTime' className='form-label'>Available from</label>
-                    <select className='form-select' id='startTime'
-                        value={device.dayHours.startTime}
-                        onChange={(e) => setDevice({ ...device, dayHours: { ...device.dayHours, startTime: e.target.value } })}>
+                    <label htmlFor='start' className='form-label'>Available from</label>
+                    <select className='form-select' id='start'
+                        value={device.dayHours.start}
+                        onChange={(e) => setDevice({ ...device, dayHours: { ...device.dayHours, start: e.target.value } })}>
                         {generateTimeOptions().map(option => (
                             <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
                     </select>
                 </div>
                 <div className='col-6'>
-                    <label htmlFor='endTime' className='form-label'>Available until</label>
-                    <select className='form-select' id='endTime'
-                        value={device.dayHours.endTime}
-                        onChange={(e) => setDevice({ ...device, dayHours: { ...device.dayHours, endTime: e.target.value } })}>
+                    <label htmlFor='end' className='form-label'>Available until</label>
+                    <select className='form-select' id='end'
+                        value={device.dayHours.end}
+                        onChange={(e) => setDevice({ ...device, dayHours: { ...device.dayHours, end: e.target.value } })}>
                         {generateTimeOptions().map(option => (
                             <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
