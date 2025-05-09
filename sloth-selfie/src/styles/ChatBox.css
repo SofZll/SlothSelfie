@@ -71,6 +71,11 @@
     height: 2.5rem;
 }
 
+.chat-content {
+    width: 100%;
+    overflow: hidden;
+}
+
 .chat-content h6,
 .chat-content p {
     margin: 0;
@@ -78,6 +83,8 @@
 
 .chat-content p {
     color: #5c5c5c;
+    max-width: 90%;
+    overflow: hidden;
 }
 
 .chat-username {
@@ -135,7 +142,6 @@
 
 .chat-selected-messages.desktop {
     background-color: #f0f0f0;
-    flex: 1;
     height: 15rem;
 }
 
@@ -214,8 +220,8 @@
         width: 20rem;
         display: none;
         transition: max-height 0.4s ease-in-out;
-        flex: 1;
         overflow-y: auto;
         max-height: 17rem;
+        min-height: 17rem;
     }
 }

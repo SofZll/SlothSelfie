@@ -187,6 +187,11 @@
     border-radius: 50%;
 }
 
+.author-link {
+    text-decoration: none;
+    color: #1C274C;
+}
+
 .post-functions {
     font-size: 15px;
 }
