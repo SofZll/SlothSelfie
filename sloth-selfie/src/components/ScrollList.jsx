@@ -11,7 +11,7 @@ const ScrollList = ({ CardList, smallView, activity }) => {
                     {CardList.map((card, index) => (
                         <div key={index} className='d-flex flex-column w-100 p-md-3 p-2'>
                             {activity ? (
-                                <CardActivity activity={card} smallView={smallView} />
+                                <CardActivity Activity={card} smallView={smallView} />
                             ) : (
                                 <CardTool tool={card} smallView={smallView} />
                             )}
