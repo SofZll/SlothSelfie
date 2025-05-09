@@ -40,7 +40,7 @@ const ShareInput = ({ receivers, setReceivers }) => {
     };
 
     return (
-        <div className='container my-2 p-0 justify-content-start'>
+        <div className='container my-2 ms-2 p-0 justify-content-start'>
             <div className='d-flex flex-column align-items-center'>
                 <div className='d-flex w-100 justify-content-between align-items-center mb-3'>
                     <input type='text' className='form-control me-2 input-receiver' id='receivers' placeholder='Enter receivers username' value={receiverInput} onChange={(e) => setReceiverInput(e.target.value)} onKeyDown={enterKey} />

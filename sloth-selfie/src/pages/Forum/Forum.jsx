@@ -6,6 +6,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import PostInput from './PostInput';
 import PostsList from './PostsList';
+import { LoadingPageDark } from '../LoadingPage';
 
 import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
@@ -15,6 +16,8 @@ const Forum = () => {
     const { refreshKey } = useContext(TimeMachineContext);
     const { user } = useContext(AuthContext);
     const { setPosts, inputImage, setInputImage, setShowMap, latitude, longitude, newCommentText, setNewCommentText, newPostText, setNewPostText, selectedPostId } = useForumContext();
+
+    const [loading, setLoading] = useState(true);
 
     const handleNewContent = async (isComment = false) => {
         if (!isComment) {
@@ -61,30 +64,40 @@ const Forum = () => {
     };
 
     const fetchPosts = async () => {
-        const response = await apiService('/forum/posts');
-        console.log('Posts:', response);
-        if (response.success && response.posts.length > 0) {
-            const transformedPosts = await Promise.all(response.posts.map(async (post) => {
-                if (post.author.image?.data?.data) {
-                    const buffer = post.author.image.data.data;
-                    const base64Image = `data:${post.author.image.contentType};base64,${bufferToBase64(buffer)}`;
-                    post.author.imageUrl = base64Image;
-                }
-                if (post.image?.data?.data) {
-                    const buffer = post.image.data.data;
-                    const base64Image = `data:${post.image.contentType};base64,${bufferToBase64(buffer)}`;
-                    post.image = base64Image;
-                }
-                return post;
-            }));
+        try {
+            setLoading(true);
 
-            setPosts(transformedPosts);
-        } else setPosts([]);
+            const response = await apiService('/forum/posts');
+            if (response.success && response.posts.length > 0) {
+                const transformedPosts = await Promise.all(response.posts.map(async (post) => {
+                    if (post.author.image?.data?.data) {
+                        const buffer = post.author.image.data.data;
+                        const base64Image = `data:${post.author.image.contentType};base64,${bufferToBase64(buffer)}`;
+                        post.author.imageUrl = base64Image;
+                    }
+                    if (post.image?.data?.data) {
+                        const buffer = post.image.data.data;
+                        const base64Image = `data:${post.image.contentType};base64,${bufferToBase64(buffer)}`;
+                        post.image = base64Image;
+                    }
+                    return post;
+                }));
+
+                setPosts(transformedPosts);
+            } else setPosts([]);
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+            setPosts([]);
+        } finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {
         fetchPosts();
     }, [refreshKey]);
+
+    if (loading) return <LoadingPageDark />;
 
     return (
         <div className='d-flex flex-column w-100 align-items-center forum'>

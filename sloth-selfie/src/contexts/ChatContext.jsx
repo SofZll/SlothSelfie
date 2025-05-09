@@ -4,6 +4,9 @@ import { apiService } from '../services/apiService';
 import { useIsDesktop, bufferToBase64 } from '../utils/utils';
 import { AuthContext } from './AuthContext';
 import { TimeMachineContext } from './TimeMachineContext';
+import { NewSwal } from '../utils/swalUtils';
+
+import socket from '../services/socket/socket';
 
 const ChatContext = createContext();
 
@@ -16,7 +19,7 @@ const ChatProvider = ({ children }) => {
     const [onlineUsers, setOnlineUsers] = useState({});
     const [newMessage, setNewMessage] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-
+    
     const fetchChats = async () => {
         const response = await apiService('/chat', 'GET');
         if (response.success) {
@@ -66,8 +69,43 @@ const ChatProvider = ({ children }) => {
         }
     }
 
+    const fetchChat = async (chatId) => {
+        const response = await apiService(`/chat/${chatId}`);
+        if (response.success) {
+            const existingChat = chats.find(chat => chat._id === chatId);
+            let messages = response.messages || [];
+            if (messages.length > 0) {
+                const transformedMessages = messages.map(message => {
+                    return {
+                        ...message,
+                        createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
+                    };
+                });
+                messages = transformedMessages;
+            }
+
+            setSelectedChat({
+                ...existingChat,
+                messages: messages,
+            });
+
+            chats.forEach(chat => {
+                if (chat._id === chatId) chat.unreadCount = 0;
+            });   
+
+            socket.emit('mark-read', {
+                chatId: chatId,
+                userId: user._id
+            });
+        } else {
+            console.error('Error fetching chat:', response);
+            NewSwal.fire({ icon: 'error', title: 'Errore', text: response.message });
+        }
+    }
+
     useEffect(() => {
         if (user?._id) fetchChats();
+        if (selectedChat) fetchChat(selectedChat._id);
     }, [user?._id, refreshKey]);
 
     return (
@@ -79,6 +117,7 @@ const ChatProvider = ({ children }) => {
             onlineUsers,
             setOnlineUsers,
             fetchChats,
+            fetchChat,
             isDesktop,
             newMessage,
             setNewMessage,

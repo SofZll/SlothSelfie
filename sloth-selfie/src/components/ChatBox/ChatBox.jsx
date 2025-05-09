@@ -5,6 +5,7 @@ import '../../styles/ChatBox.css';
 import socket from '../../services/socket/socket';
 import { AuthContext } from '../../contexts/AuthContext';
 import { useChat } from '../../contexts/ChatContext';
+import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import MainLayout from '../../layouts/MainLayout';
 
 import ChatHeader from './ChatHeader';
@@ -15,7 +16,8 @@ import ChatSearch from './ChatSearch';
 
 const ChatBox = () => {
     const { user } = useContext(AuthContext);
-    const { chats, setChats, selectedChat, setSelectedChat, setOnlineUsers, fetchChats, isDesktop } = useChat();
+    const { chats, setChats, selectedChat, setSelectedChat, setOnlineUsers, fetchChat, isDesktop } = useChat();
+    const { refreshKey } = useContext(TimeMachineContext);
     const { chatId } = useParams();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -25,9 +27,10 @@ const ChatBox = () => {
             const matchedChat = chats.find(chat => chat.otherParticipant.username === chatId);
             if (matchedChat) {
                 setSelectedChat(matchedChat);
+                fetchChat(matchedChat._id);
             }
         }
-    }, [chatId, chats, setSelectedChat]);
+    }, [chatId, chats, setSelectedChat, refreshKey]);
 
     useEffect(() => {
         if (!user?._id) return;

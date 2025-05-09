@@ -4,7 +4,7 @@ import { useChat } from '../../contexts/ChatContext';
 import { AuthContext } from '../../contexts/AuthContext';
 
 const MessageList = () => {
-    const { selectedChat } = useChat();
+    const { selectedChat, isDesktop } = useChat();
     const { user } = useContext(AuthContext);
     const messagesEndRef = useRef(null);
 
@@ -15,7 +15,7 @@ const MessageList = () => {
     }, [selectedChat]);
     
     return (
-        <div className='d-flex flex-column overflow-y-auto p-1 chat-selected-messages'>
+        <div className={`d-flex flex-column overflow-y-auto p-1 chat-selected-messages ${isDesktop ? 'desktop' : 'bg-white'}`}>
             {selectedChat.messages?.length > 0 ? (
                 <>
                     {selectedChat.messages.map((message, index) => (

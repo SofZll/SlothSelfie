@@ -6,15 +6,25 @@ import CardNote from '../../components/CardNote';
 
 import { apiService } from '../../services/apiService';
 import { useNote } from '../../contexts/NoteContext';
+import { LoadingPageDark } from '../LoadingPage';
 
 const GridNotes = () => {
 
     const { selected, setSelected, notes, setNotes, filters, setFilters } = useNote();
     const [filtedNotes, setFilteredNotes] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const fetchNotes = async () => {
-        const response = await apiService('/notes', 'GET');
-        if (response.success) setNotes(response.notes);
+        try {
+            setLoading(true);
+            const response = await apiService('/notes', 'GET');
+            if (response.success) setNotes(response.notes);
+            else setNotes([]);
+        } catch (error) {
+            console.error('Error fetching notes:', error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const filterNotes = () => {
@@ -85,9 +95,11 @@ const GridNotes = () => {
                         </div>
                     ))
                 ) : (
-                    <div className='col-12'>
-                        <h3>No notes found</h3>
-                    </div>
+                    loading ? <LoadingPageDark /> : (
+                        <div className='col-12'>
+                            <h3>No notes found</h3>
+                        </div>
+                    )
                 )}
             </div>
         </PlusLayout>

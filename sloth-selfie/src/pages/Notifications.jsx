@@ -7,23 +7,32 @@ import '../styles/Notifications.css';
 import MainLayout from '../layouts/MainLayout';
 import { apiService } from '../services/apiService';
 import { TimeMachineContext } from '../contexts/TimeMachineContext';
+import { LoadingPageDark } from './LoadingPage';
 
 const Notifications = () => {
     const { refreshKey } = useContext(TimeMachineContext);
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const fetchNotifications = async () => {
-        const response = await apiService('/notifications/upcoming');
-        if (response.success) {
-            setNotifications(response.notifications.map(notification => {
-                return {
-                    ...notification,
-                    triggerAt: new Date(notification.triggerAt).toISOString(),
-                }
-            }));
-        } else setNotifications([]);
-        console.log('Notifications:', response);
+        try {
+            setLoading(true);
+            const response = await apiService('/notifications/upcoming');
+            if (response.success) {
+                setNotifications(response.notifications.map(notification => {
+                    return {
+                        ...notification,
+                        triggerAt: new Date(notification.triggerAt).toISOString(),
+                    }
+                }));
+            } else setNotifications([]);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            NewSwal.fire({ title: 'Error', icon: 'error', text: 'Failed to fetch notifications' });
+        } finally {
+            setLoading(false);
+        }
     }
 
     const HandleSnoozeNotif = (index) => async () => {
@@ -82,7 +91,7 @@ const Notifications = () => {
                         ))}
                     </div>
                 ) : (
-                    <p className='ps-2'>Nessuna notifica pianificata.</p>
+                    loading ? <LoadingPageDark /> : <p className='ps-2'>Nessuna notifica pianificata.</p>
                 )}
             </div>
         </MainLayout>
