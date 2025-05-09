@@ -59,7 +59,7 @@ const Planner = () => {
     const normalizeData = useCallback((datas, type) => {
         if (!Array.isArray(datas)) return [];
 
-        if (type === 'no availability') {
+        if (type === 'no availability' || type === 'no availability tool') {
 
             return datas.map((data) => {
                 return {
@@ -70,9 +70,10 @@ const Planner = () => {
                     end: new Date(data.endDate),
                     type: 'no availability',
                     allDay: data.days,
+                    tool: type === 'no availability tool',
                 };
             });
-        } else if (type === 'event') {
+        } else if (type === 'event' || type === 'event tool') {
             return datas.map((data) => {
                 return {
                     _id: data._id,
@@ -88,6 +89,7 @@ const Planner = () => {
                     type: 'event',
                     inProject: data.isInProject,
                     allDay: data.allDay,
+                    tool: type === 'event tool',
                 };
             });
         } else {
@@ -120,20 +122,19 @@ const Planner = () => {
         } else if (item.type === 'event') {
             const e = events.find(ev => ev._id === item._id);
             if (e.allDay) {
-                setEvent({ ...e, duration: (new Date(e.endDate).getDate() - new Date(e.startDate).getDate() + 1), time: '', isPreciseTime: false, fatherId: e.fatherId || '', repeatMode: (e.repeatTimes && e.repeatTimes > 0) ? 'ntimes' : 'until'});
+                setEvent({ ...e, duration: (new Date(e.endDate).getDate() - new Date(e.startDate).getDate() + 1), time: '', isPreciseTime: false, fatherId: e.fatherId || '', repeatMode: (e.repeatTimes && e.repeatTimes > 0) ? 'ntimes' : 'until', tool: item.tool });
             } else {
                 const minutes = [0, 15, 30, 45];
                 const time = timeFromDate(new Date(e.startDate));
-                setEvent({ ...e, time, duration: (new Date(e.endDate).getHours() - new Date(e.startDate).getHours()), isPreciseTime: !minutes.includes(new Date(e.startDate).getMinutes()), fatherId: e.fatherId || '', repeatMode: (e.repeatTimes && e.repeatTimes > 0) ? 'ntimes' : 'until'});
+                setEvent({ ...e, time, duration: (new Date(e.endDate).getHours() - new Date(e.startDate).getHours()), isPreciseTime: !minutes.includes(new Date(e.startDate).getMinutes()), fatherId: e.fatherId || '', repeatMode: (e.repeatTimes && e.repeatTimes > 0) ? 'ntimes' : 'until', tool: item.tool });
             }
             await fetchNotifications({ elementId: item._id });
-            console.log('event', event );
         } else if (item.type === 'task') {
             setTask({...tasks.find(t => t._id === item._id)});
         } else if (item.type === 'no availability') {
             const na = availabilities.find(na => na._id === item._id);
-            if (na.days) setAvailability({ ...na});
-            else setAvailability({ ...na, startTime: timeFromDate(new Date(na.startDate)), duration: (new Date(na.endDate) - new Date(na.startDate)) / (1000 * 60 * 60) });
+            if (na.days) setAvailability({ ...na, tool: item.tool});
+            else setAvailability({ ...na, startTime: timeFromDate(new Date(na.startDate)), duration: (new Date(na.endDate) - new Date(na.startDate)) / (1000 * 60 * 60), tool: item.tool });
         } else if (item.type === 'pomodoro') {
             const p = plannedPomodori.find(p => p._id === item._id);
             await setSettingsPomodoro({ ...p });
@@ -220,7 +221,6 @@ const Planner = () => {
     }
 
     const handleChange = (selectedOptions, type) => {
-        console.log('selectedOptions', selectedOptions);
         if (!selectedOptions) {
             if (type === 'room') setSelectedRooms([]);
             else if (type === 'device') setSelectedDevices([]);
@@ -236,6 +236,16 @@ const Planner = () => {
         if (type === 'room') setSelectedRooms(selectedValues.filter(value => value !== 'all'));
         else if (type === 'device') setSelectedDevices(selectedValues.filter(value => value !== 'all'));
 
+        if (user.isAdmin) {
+            const selectedRoomObjects = rooms.filter(room => selectedValues.includes(room._id));
+            const selectedDeviceObjects = devices.filter(device => selectedValues.includes(device._id));
+                
+            const selectedEvents = [...selectedRoomObjects.flatMap(room => room.events), ...selectedDeviceObjects.flatMap(device => device.events)];
+            const selectedAvailabilities = [...selectedRoomObjects.flatMap(room => room.availabilities), ...selectedDeviceObjects.flatMap(device => device.availabilities)];
+
+            setEvents(selectedEvents);
+            setAvailabilities(selectedAvailabilities);
+        }
     }
 
     const dayPropGetter = useCallback((date) => ({
@@ -247,23 +257,31 @@ const Planner = () => {
             setLoading(true);
     
             try {
-                const [activitiesResponse, eventsResponse, tasksResponse, pomodorosResponse, noAvailabilityResponse, toolsResponse] = await Promise.all([
-                    apiService('/activities', 'GET'),
-                    apiService('/events', 'GET'),
-                    apiService('/tasks', 'GET'),
-                    apiService('/pomodori/todo', 'GET'),
-                    apiService('/no-availabilities', 'GET'),
-                    apiService('/users/tools', 'GET')
-                ]);
-    
-                if (activitiesResponse.success) setActivities(activitiesResponse.activities);
-                if (eventsResponse.success) setEvents(eventsResponse.events);
-                if (tasksResponse.success) setTasks(tasksResponse.tasks);
-                if (pomodorosResponse.success) setPlannedPomodori(pomodorosResponse.pomodori);
-                if (noAvailabilityResponse.success) setAvailabilities(noAvailabilityResponse.noAvailability);
-                if (toolsResponse.success) {
-                    setRooms(toolsResponse.rooms);
-                    setDevices(toolsResponse.devices);
+                if (user.isAdmin) {
+                    const response = await apiService('/users/tools', 'GET');
+                    if (response.success) {
+                        setRooms(response.rooms);
+                        setDevices(response.devices);
+                    }
+                } else {
+                    const [activitiesResponse, eventsResponse, tasksResponse, pomodorosResponse, noAvailabilityResponse, toolsResponse] = await Promise.all([
+                        apiService('/activities', 'GET'),
+                        apiService('/events', 'GET'),
+                        apiService('/tasks', 'GET'),
+                        apiService('/pomodori/todo', 'GET'),
+                        apiService('/no-availabilities', 'GET'),
+                        apiService('/users/tools', 'GET')
+                    ]);
+
+                    if (activitiesResponse.success) setActivities(activitiesResponse.activities);
+                    if (eventsResponse.success) setEvents(eventsResponse.events);
+                    if (tasksResponse.success) setTasks(tasksResponse.tasks);
+                    if (pomodorosResponse.success) setPlannedPomodori(pomodorosResponse.pomodori);
+                    if (noAvailabilityResponse.success) setAvailabilities(noAvailabilityResponse.noAvailability);
+                    if (toolsResponse.success) {
+                        setRooms(toolsResponse.rooms);
+                        setDevices(toolsResponse.devices);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -280,7 +298,7 @@ const Planner = () => {
             if (!user.isAdmin) {
                 setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
             } else {
-                setListNormal([...selectedRooms.map(room => {normalizeData(room.events, 'event')}), ...selectedDevices.map(device => {normalizeData(device.events, 'event')})]);
+                setListNormal([...normalizeData(events, 'event')]);
             }
         } else if (show === 'tools') {
             const selectedRoomObjects = rooms.filter(room => selectedRooms.includes(room._id));
@@ -288,8 +306,8 @@ const Planner = () => {
 
             const selectedEvents = [...selectedRoomObjects.flatMap(room => room.events), ...selectedDeviceObjects.flatMap(device => device.events)];
             const selectedAvailabilities = [...selectedRoomObjects.flatMap(room => room.availabilities), ...selectedDeviceObjects.flatMap(device => device.availabilities)];
-            setListNormal([...normalizeData(selectedEvents, 'event'), ...normalizeData(selectedAvailabilities, 'no availability')]);
-            
+            setListNormal([...normalizeData(selectedEvents, 'event tool'), ...normalizeData(selectedAvailabilities, 'no availability tool')]);
+
         } else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
         else if (show === 'no availability') {
             if (!user.isAdmin) {
@@ -435,7 +453,7 @@ const Planner = () => {
                     )}
                 </div>
             ) : (
-                <ScrollList CardList={activities} smallView={true} />
+                <ScrollList CardList={user.isAdmin ? [...rooms, ...devices] : activities} smallView={true} activity={!user.isAdmin} />
             )}
         </PlusLayout>
     )

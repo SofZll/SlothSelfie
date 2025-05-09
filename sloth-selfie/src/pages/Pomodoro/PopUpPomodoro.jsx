@@ -18,7 +18,7 @@ const PopUpPomodoro = () => {
 
     return (
 
-        <div className='d-flex justify-content-center align-items-center position-fixed pop-up bg-white  border border-secondary rounded'>
+        <div className='d-flex justify-content-center align-items-center position-fixed pop-up bg-white  border border-secondary rounded' style={{ minWidth: '300px' }}>
             <div className='modal-dialog custom-modal'>
                 <div className='modal-content p-3'>
 

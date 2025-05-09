@@ -18,6 +18,7 @@ import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
 import { useIsDesktop } from '../../utils/utils';
 import { AuthContext } from '../../contexts/AuthContext';
+import { useTools } from '../../contexts/ToolsContext';
 
 import { apiService } from '../../services/apiService';
 
@@ -25,6 +26,7 @@ const FormCalendar = () => {
 
     const { activities, selected, select, addImportedEvents, activity, event } = useCalendar();
     const { task } = useTask();
+    const { rooms, devices } = useTools();
     const { user } = React.useContext(AuthContext);
     const isDesktop = useIsDesktop();
 
@@ -96,7 +98,7 @@ const FormCalendar = () => {
         <div className='d-flex flex-column w-100 h-100 overflow-y-auto overflow-x-hidden position-relative'>
 
             {isDesktop && (
-                <ScrollList CardList={activities} smallView={false} />
+                <ScrollList CardList={user.isAdmin ? [...rooms, ...devices] : activities} smallView={false} activity={!user.isAdmin} />
             )}
 
             <SelectionCalendarLayout>
@@ -164,7 +166,7 @@ const FormCalendar = () => {
                 )}
 
                 {selected.edit && (selected.selection === 'activity' || selected.selection === 'event' || selected.selection === 'task') && (
-                    <button type='button' aria-label='Export data' title='Export data' className='btn position-absolute bottom-0 start-0 m-1 p-1 bg-white shadow-sm' onClick={() => exportData()}>
+                    <button type='button' aria-label='Export data' title='Export data' className='btn position-absolute bottom-0 end-0 m-1 p-1 bg-white shadow-sm' onClick={() => exportData()}>
                         <Download size='27' color='#555B6E' strokeWidth='1.75' />
                     </button>
                 )}

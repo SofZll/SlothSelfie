@@ -59,6 +59,7 @@ export const CalendarProvider = ({ children }) => {
         sharedWith: [],
         isInProject: false,
         fatherId: '',
+        tool: false,
     });
 
     const [events, setEvents] = useState([]);
@@ -87,6 +88,7 @@ export const CalendarProvider = ({ children }) => {
             sharedWith: [],
             isInProject: false,
             fatherId: '',
+            tool: false,
         });
     }
 
@@ -101,6 +103,7 @@ export const CalendarProvider = ({ children }) => {
         repeatFrequency: 'none',
         numberOfOccurrences: 0,
         fatherId: '',
+        tool: false,
     });
 
     const [availabilities, setAvailabilities] = useState([]);
@@ -116,6 +119,7 @@ export const CalendarProvider = ({ children }) => {
             repeatFrequency: 'none',
             numberOfOccurrences: 0,
             fatherId: '',
+            tool: false,
         });
     }
 
