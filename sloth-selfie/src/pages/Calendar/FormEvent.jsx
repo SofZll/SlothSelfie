@@ -205,6 +205,8 @@ const FormEvent = () => {
             setConditionsMet(false); 
         } else if (event.type === '') {
             setConditionsMet(false);
+        } else if (user.isAdmin) {
+            setConditionsMet(false);
         } else setConditionsMet(true);
         
         if (event.repeatFrequency !== 'none') {
@@ -229,23 +231,30 @@ const FormEvent = () => {
                         placeholder='Event title'
                         value={event.title}
                         onChange={(e) => setEvent({...event, title: e.target.value})}
-                        disabled={event.isInProject}
+                        disabled={event.isInProject || event.tool}
                         required />
                 </div>
 
-                <div className='col-6'>
-                    <label htmlFor='type' className='form-label'>Event Type</label>
-                    <select className='form-select' id='type'
-                    value={event.type}
-                    disabled={event.isInProject}
-                    onChange={(e) => setEvent({...event, type: e.target.value})}>
-                        <option value=''>Select type</option>
-                        <option value='personal'>Personal</option>
-                        <option value='work'>Work</option>
-                        <option value='social'>Social</option>
-                        <option value='other'>Other</option>
-                    </select>
-                </div>
+                {event.tool ? (
+                    <div className='col-6'>
+                        owner:
+                        <div className='d-inline-block fst-italic ms-2' style={{ color: '#244476' }}>{event.user.username}</div>
+                    </div>
+                ) : (
+                    <div className='col-6'>
+                        <label htmlFor='type' className='form-label'>Event Type</label>
+                        <select className='form-select' id='type'
+                        value={event.type}
+                        disabled={event.isInProject}
+                        onChange={(e) => setEvent({...event, type: e.target.value})}>
+                            <option value=''>Select type</option>
+                            <option value='personal'>Personal</option>
+                            <option value='work'>Work</option>
+                            <option value='social'>Social</option>
+                            <option value='other'>Other</option>
+                        </select>
+                    </div>
+                )}
             </div>
 
             <div className='row py-2 d-flex align-items-end'>
@@ -253,7 +262,7 @@ const FormEvent = () => {
                     <label htmlFor='date' className='form-label'>Date</label>
                     <input type='Date' className='form-control' id='date'
                     value={event.startDate ? new Date(event.startDate).toLocaleDateString('en-CA') : ''}
-                    disabled={event.isInProject}
+                    disabled={event.isInProject || event.tool}
                     onChange={(e) => setStartDate(e.target.value)}
                     required />
                 </div>
@@ -262,7 +271,7 @@ const FormEvent = () => {
                     <input
                         className='form-check-input' type='checkbox' id='allDay'
                         checked={event.allDay}
-                        disabled={event.isInProject}
+                        disabled={event.isInProject || event.tool}
                         onChange={(e) => setAllDay(e.target.checked)} />
                     <label className='form-check-label' htmlFor='allDay'>All Day</label>
                 </div>
@@ -278,13 +287,13 @@ const FormEvent = () => {
                             <input type='time' className='form-control' id='time'
                             placeholder='Event time'
                             value={event.time}
-                            disabled={event.isInProject}
+                            disabled={event.isInProject || event.tool}
                             onChange={(e) => setStartTime(e.target.value)}
                             required />
                         ) : (
                             <select className='form-select' id='time'
                             value={event.time || ''}
-                            disabled={event.isInProject}
+                            disabled={event.isInProject || event.tool}
                             onChange={(e) => setStartTime(e.target.value)} required>
                                 <option value=''>Select time</option>
                                 {generateTimeOptions().map(option => (
@@ -299,6 +308,7 @@ const FormEvent = () => {
                         <input
                             className='form-check-input' type='checkbox' id='isPreciseTime'
                             checked={event.isPreciseTime}
+                            disabled={event.isInProject || event.tool}
                             onChange={(e) => setEvent({...event, isPreciseTime: e.target.checked})} />
                         <label className='form-check-label' htmlFor='isPreciseTime'>Precise Time</label>
                     </div>
@@ -313,7 +323,7 @@ const FormEvent = () => {
                     placeholder={event.allDay ? 'Duration in days' : 'Duration in hours'}
                     min={0}
                     value={event.duration || ''}
-                    disabled={event.isInProject}
+                    disabled={event.isInProject || event.tool}
                     onChange={(e) => setEndDate(e.target.value)}
                     required />
                 </div>
@@ -324,7 +334,7 @@ const FormEvent = () => {
                     <label htmlFor='repeatFrequency' className='form-label'>Frequency</label>
                     <select className='form-select' id='repeatFrequency'
                     value={event.repeatFrequency}
-                    disabled={event.isInProject}
+                    disabled={event.isInProject || event.tool}
                     onChange={(e) => setEvent({...event, repeatFrequency: e.target.value})}>
                         <option value='none'>No repetition</option>
                         <option value='daily'>Daily</option>
@@ -341,7 +351,7 @@ const FormEvent = () => {
                         <label htmlFor='repeatMode' className='form-label'>Mode</label>
                         <select className='form-select' id='repeatMode'
                         value={event.repeatMode || ''}
-                        disabled={event.isInProject}
+                        disabled={event.isInProject || event.tool}
                         onChange={(e) => setEvent({...event, repeatMode: e.target.value, repeatTimes: 0, repeatEndDate: null})}>
                             <option value='ntimes'>Repeat N times</option>
                             <option value='until'>Repeat until</option>
@@ -355,7 +365,7 @@ const FormEvent = () => {
                             placeholder='Number of repetitions'
                             min={0}
                             value={event.repeatTimes || ''}
-                            disabled={event.isInProject}
+                            disabled={event.isInProject || event.tool}
                             onChange={(e) => setEvent({...event, repeatTimes: parseInt(e.target.value)})} 
                             required />
                         </div>
@@ -364,7 +374,7 @@ const FormEvent = () => {
                             <label htmlFor='repeatEndDate' className='form-label'>End Date</label>
                             <input type='Date' className='form-control' id='repeatEndDate'
                             value={event.repeatEndDate ? new Date(event.repeatEndDate).toLocaleDateString('en-CA') : ''}
-                            disabled={event.isInProject}
+                            disabled={event.isInProject || event.tool}
                             onChange={(e) => setEvent({...event, repeatEndDate: e.target.value})}
                             required />
                         </div>
@@ -377,7 +387,7 @@ const FormEvent = () => {
                     <label htmlFor='eventLocation' className='form-label'>Location</label>
                     <select className='form-select' id='eventLocation'
                     value={event.eventLocation}
-                    disabled={event.isInProject}
+                    disabled={event.isInProject || event.tool}
                     onChange={(e) => setEvent({...event, eventLocation: e.target.value})}>
                         <option value=''>Not specified</option>
                         <option value='physical'>Physical</option>
@@ -386,34 +396,38 @@ const FormEvent = () => {
                 </div>
             </div>
 
-            <div className='row py-2'>
-                <div className='col-12'>
-                    <label htmlFor='share' className='form-label'>Share with</label>
-                    <ShareInput receivers={event.sharedWith} setReceivers={(receivers) => setEvent({...event, sharedWith: receivers})} />
-                </div>
-            </div>
+            {!(event.isInProject || event.tool) && (
+                <>
+                    <div className='row py-2'>
+                        <div className='col-12'>
+                            <label htmlFor='share' className='form-label'>Share with</label>
+                            <ShareInput receivers={event.sharedWith} setReceivers={(receivers) => setEvent({...event, sharedWith: receivers})} />
+                        </div>
+                    </div>
 
-            <div className='row py-2'>
-                <div className='col-12 justify-content-center align-items-center d-flex'>
-                <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
-                </div>
-            </div>
-            
-            
-            
-            <div className='d-flex align-items-center justify-content-center bg-white'>
-                {!event.isInProject && (
-                    <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
-                        {selected.edit ? 'edit' : 'save'}
-                    </button>
-                )}
+                    <div className='row py-2'>
+                        <div className='col-12 justify-content-center align-items-center d-flex'>
+                        <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div className='d-flex align-items-center justify-content-center bg-white'>
+                        {!event.isInProject && (
+                            <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
+                                {selected.edit ? 'edit' : 'save'}
+                            </button>
+                        )}
 
-                {selected.edit && !event.isInProject && (
-                    <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
-                        delete
-                    </button>
-                )}
-            </div>
+                        {selected.edit && !event.isInProject && (
+                            <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                                delete
+                            </button>
+                        )}
+                    </div>
+                </>
+            )}
 
             {deletePopUp && (
                 <DeletePopUpLayout handleDelete={() => deleteEvent()} handleClose={() => setDeletePopUp(false)}>
