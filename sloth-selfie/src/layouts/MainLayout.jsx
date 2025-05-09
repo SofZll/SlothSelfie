@@ -26,9 +26,7 @@ const MainLayout = ({ children }) => {
                     {isDesktop ? (
                         <>
                             <DesktopNav />
-                            <ChatProvider >
-                                <ChatBox />
-                            </ChatProvider>
+                            <ChatBox />
                         </>
                     ) : (
                         <>

@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import iconHeartEmpty from '../../assets/icons/heart-empty.svg';
 import iconHeartFull from '../../assets/icons/heart-full.svg';
 
 import { AuthContext } from '../../contexts/AuthContext';
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
+import { useChat } from '../../contexts/ChatContext';
 import { useForumContext } from '../../contexts/ForumContext';
 import MapPreview from './MapPreview';
 
-import { calculateTime } from '../../utils/utils';
+import { calculateTime, useIsDesktop } from '../../utils/utils';
 import { reverseAddress } from '../../utils/mapUtils';
 import { apiService } from '../../services/apiService';
 
@@ -15,7 +17,9 @@ const PostsList = ({ handleNewContent }) => {
     const { user } = useContext(AuthContext);
     const { getVirtualNow } = useContext(TimeMachineContext);
     const { posts, setPosts, newCommentText, setNewCommentText, toggleModal, sortingOption, sortingOptions, setSortingOption, selectedPostId, setSelectedPostId } = useForumContext();
+    const { openChat } = useChat();
 
+    const isDesktop = useIsDesktop();
     const [visiblePosts, setVisiblePosts] = useState(3);
     const [postAddresses, setPostAddresses] = useState({});
 
@@ -115,6 +119,8 @@ const PostsList = ({ handleNewContent }) => {
         fetchAddresses();
     }, [posts]);
 
+    if (isDesktop === null) return null;
+
     return (
         <div className='w-100 pb-3 flex-column gap-3 posts-list'>
             <div className='d-flex justify-content-center gap-2 my-2'>
@@ -131,10 +137,17 @@ const PostsList = ({ handleNewContent }) => {
                         postsToShow.map((post) => (
                             <div key={post._id} className='rounded-3 shadow-sm p-2 post'>
                                 <div className='post-title'>
-                                    <div className='d-flex align-items-center gap-2'>
-                                        <img src={post.author.imageUrl} alt='user' />
-                                        <h3>{post.author.username}</h3>
-                                    </div>
+                                    {isDesktop ? (
+                                        <div className='d-flex align-items-center gap-2 author-link' role='button' onClick={() => openChat(post.author.username)}>
+                                            <img src={post.author.imageUrl} alt='user' />
+                                            <h3>{post.author.username}</h3>
+                                        </div>
+                                    ) : (
+                                        <Link to={`/chat/${post.author.username}`} className="d-flex align-items-center gap-2 author-link">
+                                            <img src={post.author.imageUrl} alt='user' />
+                                            <h3>{post.author.username}</h3>
+                                        </Link>
+                                    )}
                                     <p>{calculateTime(post.createdAt, getVirtualNow)}</p>
                                 </div>
                                 <p>{post.text}</p>

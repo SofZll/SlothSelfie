@@ -19,12 +19,15 @@ const createChat = async (req, res) => {
         if (existingChat) return res.status(400).json({ success: false, message: 'Chat already exists', chat: existingChat });
 
         const newChat = await Chat.create({
-            isDirectMessage: true,
             participants: [user._id, user2._id],
-            createdAt: getCurrentNow()
+            lastMessage: null,
+            createdAt: getCurrentNow(),
         });
+        if (!newChat) return res.status(400).json({ success: false, message: 'Error creating chat' });
 
-        res.status(201).json({ success: true, newChat });
+        const chatPopulated = await Chat.findById(newChat._id).populate('participants');
+
+        res.status(201).json({ success: true, chat: chatPopulated });
     } catch (error) {
         console.error('Error creating chat:', error);
         res.status(400).json({ success: false, message: error.message });
