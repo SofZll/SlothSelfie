@@ -16,11 +16,9 @@ import ChatSearch from './ChatSearch';
 
 const ChatBox = () => {
     const { user } = useContext(AuthContext);
-    const { chats, setChats, selectedChat, setSelectedChat, setOnlineUsers, fetchChat, isDesktop } = useChat();
+    const { chats, setChats, selectedChat, setSelectedChat, setOnlineUsers, fetchChat, isDesktop, isOpen, setIsOpen } = useChat();
     const { refreshKey } = useContext(TimeMachineContext);
     const { chatId } = useParams();
-
-    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         if (chatId) {

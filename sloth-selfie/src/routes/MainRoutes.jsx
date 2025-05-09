@@ -24,49 +24,49 @@ const MainRoutes = () => {
     const { user } = useContext(AuthContext);
     const isDesktop = useIsDesktop();
 
+    const protectedRoutes = [];
+
+    if (user?.isAdmin) {
+        protectedRoutes.push(
+            <Route key="admin" path="/admin" element={<Calendar />} />
+        );
+    } else if (user) {
+        protectedRoutes.push(
+            <Route key="pomodoroId" path="/pomodoro/:pomodoroId" element={<Pomodoro />} />,
+            <Route key="pomodoro" path="/pomodoro" element={<Pomodoro />} />,
+            <Route key="projects" path="/projects" element={<Projects />} />,
+            <Route key="calendar" path="/calendar" element={<Calendar />} />,
+            <Route key="notes" path="/notes" element={<Notes openNote={false} />} />,
+            <Route key="noteId" path="/notes/:noteId" element={<Notes openNote={true} />} />,
+            <Route key="home" path="/home" element={<Home />} />,
+            <Route key="homeSettings" path="/home/settings" element={<Home settings={true} />} />,
+            <Route key="profile" path="/profile" element={<Profile />} />,
+            <Route key="notifications" path="/notifications" element={<Notifications />} />,
+            <Route key="forum" path="/forum" element={<ForumWrapper />} />
+        );
+
+        if (!isDesktop) {
+            protectedRoutes.push(
+                <Route key="chat" path="/chat" element={<ChatBox chatId={null} />} />,
+                <Route key="chatId" path="/chat/:chatId" element={<ChatBox />} />
+            );
+        }
+    }
+
     return (
         <Router>
             <Suspense fallback={<LoadingPageLight />}>
                 <StyleProvider>
-                    <Routes>
-                        <Route path='/' element={<Navigate to={user ? (user.isAdmin ? '/admin' : '/home') : '/login'} />} />
-                        <Route path='/login' element={<AuthPage formType='login' />} />
-                        <Route path='/register' element={<AuthPage formType='register' />} />
-                        <Route
-                            path='/*'
-                            element={
-                                <ProtectedRoute >   
-                                    {user?.isAdmin ? (
-                                        <Routes>
-                                            <Route path='/admin' element={<Calendar />} />
-                                        </Routes>
-                                    ) : (
-                                        <Routes>
-                                            <Route path='/pomodoro/:pomodoroId' element={<Pomodoro />} />
-                                            <Route path='/pomodoro' element={<Pomodoro />} />
-                                            <Route path='/projects' element={<Projects />} />
-                                            <Route path='/calendar' element={<Calendar />} />
-                                            <Route path='/notes' element={<Notes openNote={false} />} />
-                                            <Route path='/notes/:noteId' element={<Notes openNote={true} />} />
-                                            <Route path='/home' element={<Home />} />
-                                            <Route path='/home/settings' element={<Home settings={true} />} />
-                                            <Route path='/profile' element={<Profile />} />
-                                            <Route path='/notifications' element={<Notifications />} />
-                                            <Route path='/forum' element={<ForumWrapper />} />
-                                        </Routes>
-                                    )}
-                                    {!isDesktop && !user.isAdmin && (
-                                        <ChatProvider>
-                                            <Routes>
-                                                <Route path='/chat' element={<ChatBox chatId={null} />} />
-                                                <Route path='/chat/:chatId' element={<ChatBox />} />
-                                            </Routes>
-                                        </ChatProvider>
-                                    )}
-                                </ProtectedRoute>
-                            }
-                        />
-                    </Routes>
+                    <ChatProvider>
+                        <Routes>
+                            <Route path='/' element={<Navigate to={user ? (user.isAdmin ? '/admin' : '/home') : '/login'} />} />
+                            <Route path='/login' element={<AuthPage formType='login' />} />
+                            <Route path='/register' element={<AuthPage formType='register' />} />
+                            <Route element={<ProtectedRoute />}>
+                                {protectedRoutes}
+                            </Route>
+                        </Routes>
+                    </ChatProvider>
                 </StyleProvider>
             </Suspense>
         </Router>

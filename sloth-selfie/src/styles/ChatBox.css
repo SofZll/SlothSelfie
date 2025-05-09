@@ -135,7 +135,6 @@
 
 .chat-selected-messages.desktop {
     background-color: #f0f0f0;
-    flex: 1;
     height: 15rem;
 }
 
@@ -214,8 +213,8 @@
         width: 20rem;
         display: none;
         transition: max-height 0.4s ease-in-out;
-        flex: 1;
         overflow-y: auto;
         max-height: 17rem;
+        min-height: 17rem;
     }
 }

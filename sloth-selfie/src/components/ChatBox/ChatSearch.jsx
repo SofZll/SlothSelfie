@@ -1,27 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Plus, Undo2 } from 'lucide-react';
-import { NewSwal } from '../../utils/swalUtils';
 
-import { apiService } from '../../services/apiService';
 import { useChat } from '../../contexts/ChatContext';
 import ShareInput from '../ShareInput';
 
 const ChatSearch = () => {
-    const { fetchChats, setSearchTerm } = useChat();
-    const [showShareInput, setShowShareInput] = useState(false);
-    const [participants, setParticipants] = useState([]);
-
-    const handleNewChat = async () => {
-        const response = await apiService('/chat/', 'POST', {username2: participants[0] });
-        if (response.success) {
-            fetchChats();
-            setShowShareInput(false);
-        } else {
-            console.error('Error creating chat:', response);
-            NewSwal.fire({ icon: 'error', title: 'Errore', text: response.message });
-        }
-    }
-
+    const { setSearchTerm, handleNewChat, participants, setParticipants, showShareInput, setShowShareInput } = useChat();
+    
     return (
         <>
             {!showShareInput ? (
@@ -32,7 +17,7 @@ const ChatSearch = () => {
             ) : (
                 <div className='d-flex flex-row'>
                     <ShareInput receivers={participants} setReceivers={setParticipants} />
-                    {participants.length > 0 ? <button type='button' aria-label='createChat' className='button-clean green my-2 ' onClick={handleNewChat}>Create</button> : <button type='button' aria-label='Undo' title='Undo' className='new-chat-button d-flex align-items-start mt-3' onClick={() => setShowShareInput (!showShareInput)}><Undo2 /></button>}
+                    {participants.length > 0 ? <button type='button' aria-label='createChat' className='button-clean green my-2 mx-2' onClick={() => handleNewChat()}>Create</button> : <button type='button' aria-label='Undo' title='Undo' className='new-chat-button d-flex align-items-start mt-3' onClick={() => setShowShareInput (!showShareInput)}><Undo2 /></button>}
                 </div>
             )}
         </>
