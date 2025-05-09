@@ -21,6 +21,10 @@
     font-size: 14px;
 }
 
+.white {
+    color: #ffffff;
+}
+
 /*hides scrollbar*/
 
 ::-webkit-scrollbar {

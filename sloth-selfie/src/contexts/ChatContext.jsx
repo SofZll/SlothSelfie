@@ -140,10 +140,12 @@ const ChatProvider = ({ children }) => {
         }
     }
 
-    const openChat = async (username) => {
-        const chat = chats.find(chat => chat.otherParticipant.username === username);
-        if (chat) await fetchChat(chat._id);
-        else if (username !== user.username) await handleNewChat(username);
+    const openChat = async (username = null) => {
+        if (username){
+            const chat = chats.find(chat => chat.otherParticipant.username === username);
+            if (chat) await fetchChat(chat._id);
+            else if (username !== user.username) await handleNewChat(username);
+        }
         setNewMessage('');
         setIsOpen(true);
     }

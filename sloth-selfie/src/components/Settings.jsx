@@ -41,7 +41,7 @@ const Settings = () => {
             <div className='modal-dialog modal-dialog-centered'>
                 <div className='modal-content'>
                     <div className='modal-header'>
-                        <h1 className='modal-title fs-5' id='exampleModalLabel'>Settings</h1>
+                        <h1 className='modal-title fs-5'>Settings</h1>
                         <button type='button' className='btn-close' aria-label='Close' title='Close' onClick={() => setSettings(!settings)}></button>
                     </div>
                     <div className='modal-body container'>
