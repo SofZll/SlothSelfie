@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import iconHeartEmpty from '../../assets/icons/heart-empty.svg';
 import iconHeartFull from '../../assets/icons/heart-full.svg';
 
@@ -12,22 +12,29 @@ import MapPreview from './MapPreview';
 import { calculateTime, useIsDesktop } from '../../utils/utils';
 import { reverseAddress } from '../../utils/mapUtils';
 import { apiService } from '../../services/apiService';
+import ShareModal from '../../components/ShareModal';
 
 const PostsList = ({ handleNewContent }) => {
     const { user } = useContext(AuthContext);
     const { getVirtualNow } = useContext(TimeMachineContext);
-    const { posts, setPosts, newCommentText, setNewCommentText, toggleModal, sortingOption, sortingOptions, setSortingOption, selectedPostId, setSelectedPostId } = useForumContext();
+    const { posts, setPosts, newCommentText, setNewCommentText, sortingOption, sortingOptions, setSortingOption, selectedPostId, setSelectedPostId } = useForumContext();
     const { openChat } = useChat();
 
     const isDesktop = useIsDesktop();
+    const location = useLocation();
     const [visiblePosts, setVisiblePosts] = useState(3);
     const [postAddresses, setPostAddresses] = useState({});
+    const [openShareModal, setOpenShareModal] = useState(false);
+
+    const queryParams = new URLSearchParams(location.search);
+    const scrollToId = queryParams.get('id');
+    const postRefs = useRef({});
+
 
     const isLiked = (item) => {return item.likes.includes(user._id)};
 
     const handleLike = async (postId, isComment = false, commentId = null) => {
         const post = posts.find(post => post._id === postId);
-        console.log('likes:', post);
 
         let element, type;
         if (isComment) {
@@ -80,7 +87,7 @@ const PostsList = ({ handleNewContent }) => {
     };
 
     const handleSorting = (option, posts) => {
-        const postsCopy = [...posts]; // Crea una copia dell'array originale
+        const postsCopy = [...posts];
     
         if (option === 'mostRecent') {
             return postsCopy.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -103,6 +110,12 @@ const PostsList = ({ handleNewContent }) => {
         return address;
     }
 
+    const handleShare = (postId) => {
+        const currentPath = `http://localhost:3000/forum`;
+        const newPath = `${currentPath}#${postId}`;
+        setOpenShareModal(newPath);
+    }
+
     useEffect(() => {
         const fetchAddresses = async () => {
             const addresses = {};
@@ -118,6 +131,31 @@ const PostsList = ({ handleNewContent }) => {
 
         fetchAddresses();
     }, [posts]);
+
+    useEffect(() => {
+        const scrollToPostFromHash = async () => {
+            const hash = window.location.hash?.substring(1);
+            if (!hash) return;
+    
+            let retries = 10;
+            while (retries > 0 && !document.getElementById(`post-${hash}`)) {
+                const index = sortedPosts.findIndex(p => p._id === hash);
+                if (index >= visiblePosts) {
+                    setVisiblePosts(v => v + 3);
+                }
+                await new Promise(res => setTimeout(res, 100));
+                retries--;
+            }
+    
+            const el = document.getElementById(`post-${hash}`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+                setSelectedPostId(hash);
+            }
+        };
+    
+        scrollToPostFromHash();
+    }, [visiblePosts, sortedPosts]);
 
     if (isDesktop === null) return null;
 
@@ -135,7 +173,7 @@ const PostsList = ({ handleNewContent }) => {
                 <>
                     {postsToShow.length > 0 ? (
                         postsToShow.map((post) => (
-                            <div key={post._id} className='rounded-3 shadow-sm p-2 post'>
+                            <div key={post._id} id={`post-${post._id}`} className='rounded-3 shadow-sm p-2 post' ref={(el) => (postRefs.current[post._id] = el)}>
                                 <div className='post-title'>
                                     {isDesktop ? (
                                         <div className='d-flex align-items-center gap-2 author-link' role='button' onClick={() => openChat(post.author.username)}>
@@ -169,7 +207,7 @@ const PostsList = ({ handleNewContent }) => {
                                         />
                                     </span>
                                     <span role="button" aria-label="Comments section" title='Comments section' onClick={() => handleComments(post._id)}>{calculateComments(post.comments)}</span>
-                                    <span role="button" aria-label="Share" onClick={() => toggleModal(post)}>share</span>
+                                    <span role="button" aria-label="Share" onClick={() => handleShare(post._id)} title='Share'>Share</span>
                                 </div>
                                 <div className={`d-flex flex-column gap-3 post-comments ${selectedPostId === post._id ? 'show' : ''}`}>
                                     <div className='d-flex justify-content-center align-items-center gap-2 new-comment'>
@@ -213,6 +251,7 @@ const PostsList = ({ handleNewContent }) => {
             ) : (
                 <p>No posts to show</p>
             )}
+            <ShareModal openShareModal={openShareModal} setOpenShareModal={setOpenShareModal} />
         </div>
     );
 }

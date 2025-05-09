@@ -71,6 +71,11 @@
     height: 2.5rem;
 }
 
+.chat-content {
+    width: 100%;
+    overflow: hidden;
+}
+
 .chat-content h6,
 .chat-content p {
     margin: 0;
@@ -78,6 +83,8 @@
 
 .chat-content p {
     color: #5c5c5c;
+    max-width: 90%;
+    overflow: hidden;
 }
 
 .chat-username {
