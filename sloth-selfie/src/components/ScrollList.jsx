@@ -1,7 +1,8 @@
 import React from 'react';
 import CardActivity from './CardActivity';
+import CardTool from './CardTool';
 
-const ScrollList = ({ CardList, smallView }) => {
+const ScrollList = ({ CardList, smallView, activity }) => {
 
     return (
         <>
@@ -9,7 +10,11 @@ const ScrollList = ({ CardList, smallView }) => {
                 <div className='d-flex flex-column mx-md-0 m-2 overflow-y-auto overflow-x-hidden bg-white border rounded w-100' style={{ maxHeight: '30vmin' }}>
                     {CardList.map((card, index) => (
                         <div key={index} className='d-flex flex-column w-100 p-md-3 p-2'>
-                            <CardActivity Activity={card} smallView={smallView} />
+                            {activity ? (
+                                <CardActivity activity={card} smallView={smallView} />
+                            ) : (
+                                <CardTool tool={card} smallView={smallView} />
+                            )}
                         </div>
                     ))}
                 </div>

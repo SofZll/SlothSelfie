@@ -285,6 +285,7 @@ const getUsersTools = async (req, res) => {
                 room.availabilities = [];
                 console.log('Error fetching availabilities for room:', room._id);
             }
+            room.type = 'room';
         }
 
         for (const device of devices) {
@@ -301,6 +302,7 @@ const getUsersTools = async (req, res) => {
                 device.availabilities = [];
                 console.log('Error fetching availabilities for device:', device._id);
             }
+            device.type = 'device';
         }
 
 
