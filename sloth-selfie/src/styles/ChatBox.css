@@ -1,14 +1,8 @@
 .message-container {
-    width: 95%;
+    width: 100%;
     height: 100%;
-    margin-top: 10rem;
-    margin-left: 70px; /*for desktop zoom*/
-}
-
-@media screen and (max-width: 700px) and (hover: none) { /*for mobile*/
-    .message-container {
-        margin-left: 0;
-    }   
+    padding-top: 8vh;
+    padding-bottom: 12vh;
 }
 
 .message-container.desktop {
@@ -22,6 +16,7 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     z-index: 800;
     overflow: hidden;
+    padding: 0;
 }
 
 .message-button {
@@ -46,15 +41,13 @@
     background-color: #fff;
     color: #333;
     border: none;
-    max-height: 17rem;
     overflow: hidden;
     height: 100%;
 }
 
 .message-box.open {
     display: flex;
-    height: 17rem;
-    max-height: 17rem;
+    height: 100%;
 }
 
 .new-chat-button {
@@ -134,9 +127,16 @@
 }
 
 .chat-selected-messages {
-    background-color: #f0f0f0;
+    background-color: #fcfcfc;
     min-height: 0;
+    height: 90%;
+    overflow-y: auto;
+}
+
+.chat-selected-messages.desktop {
+    background-color: #f0f0f0;
     flex: 1;
+    height: 15rem;
 }
 
 .chat-selected-messages::-webkit-scrollbar {
@@ -187,7 +187,7 @@
 .chat-input {
     position: sticky;
     bottom: 0;
-    background-color: #f1f1f1;
+    background-color: #f8f8f8;
     border-top: 1px solid #ddd;
     flex-shrink: 0;
 }
@@ -216,5 +216,6 @@
         transition: max-height 0.4s ease-in-out;
         flex: 1;
         overflow-y: auto;
+        max-height: 17rem;
     }
 }
