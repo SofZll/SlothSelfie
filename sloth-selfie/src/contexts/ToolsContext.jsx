@@ -61,6 +61,9 @@ export const ToolsProvider = ({ children }) => {
         });
     }
 
+    const [toolEvents, setToolEvents] = useState([]);
+    const [toolAvailabilities, setToolAvailabilities] = useState([]);
+
     return (
         <ToolsContext.Provider value={{
             rooms, setRooms,
@@ -68,7 +71,8 @@ export const ToolsProvider = ({ children }) => {
             room, setRoom, resetRoom,
             devices, setDevices,
             selectedDevices, setSelectedDevices,
-            device, setDevice, resetDevice
+            device, setDevice, resetDevice,
+            toolEvents, setToolEvents, toolAvailabilities, setToolAvailabilities
         }}>
             {children}
         </ToolsContext.Provider>

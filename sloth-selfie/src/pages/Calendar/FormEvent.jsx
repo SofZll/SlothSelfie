@@ -5,6 +5,7 @@ import { toastWarning, NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { AuthContext } from '../../contexts/AuthContext';
+import { useTools } from '../../contexts/ToolsContext';
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import { generateTimeOptions } from '../../utils/utils';
 import ShareInput from '../../components/ShareInput';
@@ -15,6 +16,7 @@ const FormEvent = () => {
     const { getVirtualNow } = useContext(TimeMachineContext);
     const { event, setEvent, events, setEvents, resetEvent, selected, resetSelected, notifications, setNotifications, setConditionsMet, conditionsMet } = useCalendar();
     const { user } = useContext(AuthContext);
+    const { toolEvents, setToolEvents, setRooms, setDevices } = useTools();
 
     const virtualNow = getVirtualNow();
     const [deletePopUp, setDeletePopUp] = useState(false);
@@ -144,16 +146,12 @@ const FormEvent = () => {
     const setAllDay = (allDay) => {
         if (!event.startDate) setEvent({ ...event, allDay });
         else if (!event.duration || (!allDay && event.time === '')) {
-            console.log('time', event.time);
             const start = calcStartDate(event.startDate, allDay, event.time);
             setEvent({ ...event, allDay, startDate: start });
         }
         else {
-            console.log('time', event.time);
             const start = calcStartDate(event.startDate, allDay, event.time);
             const end = calcEndDate(start, allDay, event.duration);
-            console.log('start', start);
-            console.log('end', end);
             setEvent({ ...event, allDay, startDate: start, endDate: end });
         }
     }
@@ -188,9 +186,18 @@ const FormEvent = () => {
         const response = await apiService(`/event/${event._id}`, 'DELETE', event);
         if (response.success) {
             NewSwal.fire({ title: 'Event deleted', icon: 'success', text: 'Event deleted successfully'});
-            if (event.repeatFrequency === 'none') setEvents(events.filter(evt => evt._id !== event._id));
-            else setEvents(events.filter(evt => evt.fatherId !== event.fatherId));
-            
+            if (user.isAdmin) {
+                if (event.repeatFrequency === 'none') setToolEvents(toolEvents.filter(evt => evt._id !== event._id));
+                else setToolEvents(toolEvents.filter(evt => evt.fatherId !== event.fatherId));
+                const response = await apiService('/users/tools', 'GET');
+                if (response.success) {
+                    setRooms(response.rooms);
+                    setDevices(response.devices);
+                }
+            } else {
+                if (event.repeatFrequency === 'none') setEvents(events.filter(evt => evt._id !== event._id));
+                else setEvents(events.filter(evt => evt.fatherId !== event.fatherId));
+            }
         } else NewSwal.fire({ title: 'Error deleting event', icon: 'error', text: response.message});
             
         setDeletePopUp(false);
@@ -410,24 +417,23 @@ const FormEvent = () => {
                         <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
                         </div>
                     </div>
-                    
-                    
-                    
-                    <div className='d-flex align-items-center justify-content-center bg-white'>
-                        {!event.isInProject && (
-                            <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
-                                {selected.edit ? 'edit' : 'save'}
-                            </button>
-                        )}
-
-                        {selected.edit && !event.isInProject && (
-                            <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
-                                delete
-                            </button>
-                        )}
-                    </div>
                 </>
             )}
+                    
+            
+            <div className='d-flex align-items-center justify-content-center bg-white'>
+                {!(event.isInProject || event.tool) && (
+                    <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
+                        {selected.edit ? 'edit' : 'save'}
+                    </button>
+                )}
+
+                {selected.edit && !event.isInProject && (user.isAdmin || !event.tool) && (
+                    <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                        delete
+                    </button>
+                )}
+            </div>
 
             {deletePopUp && (
                 <DeletePopUpLayout handleDelete={() => deleteEvent()} handleClose={() => setDeletePopUp(false)}>
