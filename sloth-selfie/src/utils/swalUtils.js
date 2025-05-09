@@ -1,7 +1,7 @@
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.css';
 
-const Toast = Swal.mixin({
+export const Toast = Swal.mixin({
     toast: true,
     position: 'top-end',
     showConfirmButton: false,
