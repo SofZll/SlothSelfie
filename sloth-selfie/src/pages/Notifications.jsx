@@ -48,12 +48,7 @@ const Notifications = () => {
     }
 
     const handleNotificationClick = (notif) => {
-        let path = '';
-        if (notif.elementType === 'Activity') {
-            path = 'https://slothselfie.com/calendar/activity#' + notif.element._id + '#' + notif._id;
-        } else if (notif.elementType === 'Event') {
-            path = 'https://slothselfie.com/calendar/event#' + notif.element._id + '#' + notif._id;
-        }
+        const path = `/calendar?type=${notif.elementType}&element=${notif.element._id}`;
         navigate(path);
     }
 
@@ -76,9 +71,9 @@ const Notifications = () => {
                         {notifications.map((notif, index) => (
                             <div key={index} className="bg-white border shadow-sm p-3 rounded-2">
                                 <div className='d-flex flex-column gap-2'>
-                                    <p>
+                                    <p className='cursor-pointer' onClick={() => handleNotificationClick(notif)}>
                                         {notif.elementType === 'Activity' ? '📝 Activity: ' : '📅 Event: '}
-                                        <strong onClick={() => handleNotificationClick(notif._id)}>{notif.element.title}</strong>
+                                        <strong>{notif.element.title}</strong>
                                     </p>
                                     {notif.type === 'repeat' && <p className='text-secondary'>Type: {notif.type} every {notif.before} {notif.variant}</p>}
                                     {notif.type === 'default' && <p className='text-secondary'>Type: {notif.before} {notif.variant} before</p>}

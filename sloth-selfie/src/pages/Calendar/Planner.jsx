@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-calendar/dist/Calendar.css';
@@ -26,6 +27,7 @@ import { LoadingPageDark } from '../LoadingPage';
 const Planner = () => {
     const { getVirtualNow, refreshKey } = useContext(TimeMachineContext);
     const now = getVirtualNow();
+    const location = useLocation();
       
     const [calendarView, setCalendarView] = useState('month');
     const [date, setDate] = useState(getVirtualNow());
@@ -306,6 +308,36 @@ const Planner = () => {
     
         fetchData();
     }, [user, show, refreshKey]);
+
+    useEffect(() => {
+        if (!activities.length || !events.length) return;
+
+        const openELement = async () => {
+            const params = new URLSearchParams(location.search);
+            const type = params.get('type');
+            const id = params.get('element');
+
+            if (type && id) {
+                if (type === 'Activity') {
+                    const activity = activities.find(a => a._id === id);
+                    if (activity) {
+                        setActivity({ ...activity });
+                        console.log('activity', activity);
+                        setSelected({ selection: 'activity', edit: true, add: false, popup: true });
+                    }
+                } else if (type === 'Event') {
+                    const event = events.find(e => e._id === id);
+                    if (event) {
+                        setEvent({ ...event, duration: (new Date(event.endDate).getDate() - new Date(event.startDate).getDate() + 1), time: '', isPreciseTime: false, fatherId: event.fatherId || '', repeatMode: (event.repeatTimes && event.repeatTimes > 0) ? 'ntimes' : 'until' });
+                        setSelected({ selection: 'event', edit: true, add: false, popup: true });
+                    }
+                } // aggiungere task e pomodoro
+                await fetchNotifications({ elementId: id });
+            }
+        }
+
+        openELement();
+    }, [location, activities, events]);
 
     useEffect(() => {
         if (show === 'plans') {
