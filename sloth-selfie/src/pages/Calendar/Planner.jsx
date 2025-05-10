@@ -282,6 +282,13 @@ const Planner = () => {
                         setRooms(toolsResponse.rooms);
                         setDevices(toolsResponse.devices);
                     }
+
+                    console.log('Activities:', activitiesResponse.activities);
+                    console.log('Events:', eventsResponse.events);
+                    console.log('Tasks:', tasksResponse.tasks);
+                    console.log('Pomodoros:', pomodorosResponse.pomodori);
+                    console.log('No Availability:', noAvailabilityResponse.noAvailability);
+                    console.log('Rooms:', toolsResponse.rooms);
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);

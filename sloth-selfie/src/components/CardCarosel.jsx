@@ -110,17 +110,17 @@ const CardCarosel = ({ title, settingKey }) => {
                 <TaskProvider>
                     <PomodoroProvider>
                         <animated.div
-                            className='card d-flex flex-column justify-content-evenly align-items-center'
+                            className='card d-flex flex-column justify-content-evenly align-items-center py-4'
                             style={props3}
                             onMouseEnter={() => setShown(true)}
                             onMouseLeave={() => setShown(false)}
                         >   
-                            <h2>{title}</h2>
+                            <h3 className='grandstander-normal'>{title}</h3>
                             {customizations[settingKey] === 'showCalendar' ? (
                                     renderLegend()
                             ) : (
                                 <>
-                                    <p>{currentTitle}</p>
+                                    <h6>{currentTitle}</h6>
                                 </>
                             )}
                             

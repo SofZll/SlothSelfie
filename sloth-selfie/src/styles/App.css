@@ -1,8 +1,19 @@
 /* global variables */
 
-:root {
-    --hover-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --hover-lift: translateY(-1px);
+body {
+    font-family: 'Roboto', sans-serif;
+    -ms-overflow-style: none;
+}
+
+* {
+    font-family: inherit;
+}
+
+.grandstander-normal {
+    font-family: "Grandstander", cursive;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
 }
 
 .bg-sloth-blue {
@@ -25,6 +36,21 @@
     color: #ffffff;
 }
 
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* home page */
+
+.inCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    height: auto;
+}
+
 /*hides scrollbar*/
 
 ::-webkit-scrollbar {
@@ -33,10 +59,6 @@
 
 html {
     scrollbar-width: none;
-}
-
-body {
-    -ms-overflow-style: none;
 }
 
 html, body {
@@ -58,7 +80,6 @@ html, body {
     align-items: center;
     height: auto;
     min-height: 60vh;
-    font-family: Arial, sans-serif;
 }
 
 .loading-page-light {
@@ -129,15 +150,9 @@ html, body {
     line-height: 1.4;
     border-radius: 0.3rem;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     color: #1a1a1a;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     background-color: transparent;
-}
-
-.button-clean:hover {
-    transform: var(--hover-lift);
-    box-shadow: var(--hover-shadow);
 }
 
 .button-clean:disabled,

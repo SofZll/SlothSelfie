@@ -2,10 +2,10 @@
 
 /*Calendar view*/
 .react-calendar {
-    max-height: 210px;
+    height: auto;
     overflow-y: auto;
     width: 90%;
-    margin: 0 auto;
+    margin: 1.5rem auto;
     border-radius: 8px;
   }
   
@@ -103,15 +103,16 @@
   
   /* List used for preview events/activities/tasks/notes/projects/pomodoro */
   .scrollable-list {
-    width: 100%;
+    width: 87%;
     max-width: 600px;
     margin: 0 auto;
     padding: 15px;
     overflow-y: auto;
-    max-height: 200px;
-    border-radius: 10px;
+    max-height: 270px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f8f9fa;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    background-color: white;
   }
   
   .event-card {
@@ -186,12 +187,24 @@
 /*Projects selection list*/
 .project-list li {
   cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  border-radius: 5px;
+  margin: 0.3rem 0;
+  background-color: #f6f6f6;
+  transition: background-color 0.3s;
+}
+
+.project-list li:hover {
+  background-color: #e0e0e0;
 }
 
 /*Gantt*/
 
 .gantt-box {
-  width: 75vh;
+  width: 87%;
+  max-width: 600px;
+  margin: 0 auto;
+  height: auto;
 }
 
 /*disable default gantt actions to prevent default behavior*/
@@ -210,28 +223,17 @@ g.handle,
   cursor: default;
 }
 
-#gantt-chart-card {
-  width: 80%;
-  max-width: 200px;
+.gantt-chart-card {
+  height: auto;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 15px;
-  overflow-x: auto;
-  overflow-y: auto;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 #gantt-container {
+  border: 1px solid #ccc;
+  border-radius: 8px;
   width: 100%;
-  max-height: 300px;
+  height: auto;
   overflow-x: auto;
   overflow-y: auto;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .gantt-box {
-    max-width: 300px;
-    max-height: 250px;
-  }
 }

@@ -96,7 +96,7 @@ const renderPomodoroPreview = () => {
       // Verify if the pomodoroList has elements
       if (pomodoroList.length > 0) {
         return (
-            <div className="scrollable-list">
+            <div className='scrollable-list'>
               {pomodoroList.map((pomodoro, index) => (
                 <div key={index} className={`event-card event-border-yellow`} >
                   <b>{pomodoro.title}</b> cycles: {pomodoro.cycles} - studyTime: {formatTime(pomodoro.studyTime)} - breakTime: {formatTime(pomodoro.breakTime)}
@@ -106,9 +106,9 @@ const renderPomodoroPreview = () => {
         );
       } else {
         return (
-          <div className="scrollable-list">
-            <div className="div-postit">
-              <h2>No pomodoros yet!</h2>
+          <div className='scrollable-list'>
+            <div className='div-postit'>
+              <h4>No pomodoros yet!</h4>
             </div>
         </div>
         );
@@ -116,7 +116,7 @@ const renderPomodoroPreview = () => {
 
     case 'stats':
       return (
-        <div className="containerPreview d-flex flex-column align-items-center stats-preview-scroll">
+        <div className='containerPreview d-flex flex-column align-items-center stats-preview-scroll'>
       <StatsPomodoro />
     </div>
       );
@@ -134,9 +134,9 @@ const renderPomodoroPreview = () => {
         );
       } else {
         return (
-          <div className="scrollable-list">
-          <div className="div-postit">
-            <h2>No pomodoros yet!</h2>
+          <div className='scrollable-list'>
+          <div className='div-postit'>
+            <h4>No pomodoros yet!</h4>
           </div>
         </div>
         );
@@ -148,9 +148,9 @@ const renderPomodoroPreview = () => {
   return (
     <>
       {renderPomodoroPreview()}
-      <div className="divBtn">
-        <Link to="/pomodoro" onClick={handleLinkClick("/pomodoro")}>
-          <button type='button' aria-label='managePomodoro' className="btn btn-main blue">Manage Pomodoro</button>
+      <div className='divBtn'>
+        <Link to='/pomodoro' onClick={handleLinkClick('/pomodoro')}>
+          <button type='button' aria-label='managePomodoro' className='button-clean blue'>Manage Pomodoro</button>
         </Link>
       </div>
     </>

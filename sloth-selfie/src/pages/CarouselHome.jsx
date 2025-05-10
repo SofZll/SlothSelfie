@@ -17,19 +17,19 @@ const CarouselHome = (props) => {
   const cards = useMemo(() => [
     {
       key: 1,
-      content: (<CardCarosel title='Calendar' settingKey='calendar'  />)
+      content: (<CardCarosel title='CALENDAR' settingKey='calendar'  />)
     },
     {
       key: 2,
-      content: (<CardCarosel title='Notes' settingKey='notes' />)
+      content: (<CardCarosel title='NOTES' settingKey='notes' />)
     },
     {
       key: 3,
-      content: (<CardCarosel title='Pomodoro' settingKey='pomodoro' />)
+      content: (<CardCarosel title='POMODORO' settingKey='pomodoro' />)
     },
     {
       key: 4,
-      content: (<CardCarosel title='Projects' settingKey='projects' />)
+      content: (<CardCarosel title='PROJECTS' settingKey='projects' />)
     }
   ], []);
 
