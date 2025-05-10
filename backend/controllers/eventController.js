@@ -98,9 +98,15 @@ const newEvent = async (title, user, type, startDate, endDate, allDay, eventLoca
 
     const event = await Event.findById(saveEvent._id)
     .populate('sharedWith', 'username')
-    .populate('user', 'username');
+    .populate('user', 'username')
+    .lean();
 
-    return ({ success: true, event });
+    const transformedEvent = {
+      ...event,
+      sharedWith: event.sharedWith.map(user => user.username),
+    };
+
+    return ({ success: true, event: transformedEvent });
   } catch (error) {
     console.error('Error creating event:', error);
     return ({ success: false, message: error.message });
@@ -218,8 +224,19 @@ const editEvent = async (Id, title, type, startDate, endDate, allDay, eventLocat
     if (repeatFrequency === 'none') event.fatherId = null;
     else event.fatherId = fatherId;
 
-    await event.save();
-    return ({ success: true, event });
+    await event.save()
+
+    const savedEvent = await Event.findById(Id)
+    .populate('sharedWith', 'username')
+    .populate('user', 'username')
+    .lean();
+
+    const transformedEvent = {
+      ...savedEvent,
+      sharedWith: savedEvent.sharedWith.map(user => user.username),
+    };
+
+    return ({ success: true, event: transformedEvent });
   } catch (error) {
     console.error('Error editing event:', error);
     return ({ success: false, message: error.message });
@@ -239,7 +256,18 @@ const updateNoDateEvent = async (Id, title, type, eventLocation, sharedWith, isI
     event.updatedAt = getCurrentNow();
     
     await event.save();
-    return ({ success: true, event });
+
+    const savedEvent = await Event.findById(Id)
+    .populate('sharedWith', 'username')
+    .populate('user', 'username')
+    .lean();
+
+    const transformedEvent = {
+      ...savedEvent,
+      sharedWith: savedEvent.sharedWith.map(user => user.username),
+    };
+
+    return ({ success: true, event: transformedEvent });
   } catch (error) {
     console.error('Error editing event:', error);
     return ({ success: false, message: error.message });
@@ -419,12 +447,37 @@ const deleteEvent = async (req, res) => {
   const {eventId} = req.params;
   
   try {
-    const event = await Event.findById(eventId);
+    const event = await Event.findById(eventId)
+    .populate({
+      path: 'sharedWith',
+      select: 'isRoom isDevice'
+    })
+    .lean();
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
     
     if (event.user.toString() === user._id.toString()) {
       if (event.repeatFrequency === 'none') await event.deleteOne();
       else await Event.deleteMany({ fatherId: event.fatherId });
+
+
+    } else if (user.isAdmin) {
+      if (event.repeatFrequency === 'none') {
+        const sharedUsers = event.sharedWith.filter(sharedUser => !sharedUser.isRoom && !sharedUser.isDevice).map(sharedUser => sharedUser._id);
+        await Event.findByIdAndUpdate(eventId, { sharedWith: sharedUsers}, { new: true });
+      } else {
+        const events = await Event.find({ fatherId: event.fatherId })
+        .populate({
+          path: 'sharedWith',
+          select: 'isRoom isDevice'
+        })
+        .lean();
+
+        for (let i = 0; i < events.length; i++) {
+          const sharedUsers = events[i].sharedWith.filter(sharedUser => !sharedUser.isRoom && !sharedUser.isDevice).map(sharedUser => sharedUser._id);
+          await Event.findByIdAndUpdate(events[i]._id, { sharedWith: sharedUsers}, { new: true });
+        }
+      }
+    
     } else {
       if (event.repeatFrequency === 'none') {
         event.sharedWith = event.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
