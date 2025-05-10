@@ -22,16 +22,17 @@ const Settings = () => {
 
     const handleSwitch = async (e, field) => {
         const value = e.target.checked;
+        
+        setUser((prevUser) => ({
+            ...prevUser,
+            disableNotifications: {
+                ...prevUser.disableNotifications,
+                [field]: value,
+            },
+        }));
 
         const response = await apiService('/user/disable-notifications', 'PUT', { field, value });
         if (response.success) {
-            setUser((prevUser) => ({
-                ...prevUser,
-                disableNotifications: {
-                    ...prevUser.disableNotifications,
-                    [field]: value,
-                },
-            }));
             console.log('Disable notifications', response.disableNotifications);
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });
     }
