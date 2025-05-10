@@ -56,6 +56,10 @@ export const CalendarProvider = ({ children }) => {
         repeatTimes: 0,
         repeatEndDate: null,
         eventLocation: '',
+        eventLocationDetails: {
+            latitude: null,
+            longitude: null,
+        },
         sharedWith: [],
         isInProject: false,
         fatherId: '',
@@ -85,6 +89,10 @@ export const CalendarProvider = ({ children }) => {
             repeatEndDate: null,
             repeatTimes: 0,
             eventLocation: '',
+            eventLocationDetails: {
+                latitude: null,
+                longitude: null,
+            },
             sharedWith: [],
             isInProject: false,
             fatherId: '',
