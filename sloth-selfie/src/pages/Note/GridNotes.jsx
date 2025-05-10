@@ -97,7 +97,7 @@ const GridNotes = () => {
                 ) : (
                     loading ? <LoadingPageDark /> : (
                         <div className='col-12'>
-                            <h3>No notes found</h3>
+                            <h4>No notes found</h4>
                         </div>
                     )
                 )}

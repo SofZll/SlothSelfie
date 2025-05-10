@@ -7,10 +7,7 @@ import { StyleContext } from '../../contexts/StyleContext';
 const TimeMachineButton = () => {
     const { color } = useContext(StyleContext);
 
-    const { machineOpen, setMachineOpen, getCurrentTime, getCurrentDate } = useContext(TimeMachineContext);
-
-    const currentTime = getCurrentTime();
-    const currentDate = getCurrentDate();
+    const { machineOpen, setMachineOpen, currentDate, currentTime } = useContext(TimeMachineContext);
 
     return (
         <>

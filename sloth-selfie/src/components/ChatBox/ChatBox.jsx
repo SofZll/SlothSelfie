@@ -7,6 +7,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import { useChat } from '../../contexts/ChatContext';
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import MainLayout from '../../layouts/MainLayout';
+import { Toast } from '../../utils/swalUtils';
 
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
@@ -60,6 +61,23 @@ const ChatBox = () => {
                     });
                     return updatedChats;
                 });
+
+                Toast.fire({
+                    icon: 'info',
+                    title: `New message from ${message.sender.username}`,
+                    showCancelButton: true,
+                    showConfirmButton: true,
+                    confirmButtonText: 'View',
+                    cancelButtonText: 'Ignore',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const matchedChat = chats.find(chat => chat._id === message.chat._id);
+                        if (matchedChat) {
+                            setSelectedChat(matchedChat);
+                            setIsOpen(true);
+                        }
+                    }
+                });
             }
             setChats((prevChats) => {
                 let found = false;
@@ -104,7 +122,7 @@ const ChatBox = () => {
     }, [user?._id, selectedChat?._id, setChats, setOnlineUsers]);
 
     const chatContent = (
-        <div className={`d-relative flex-column message-container ${isDesktop ? 'desktop' : ''} `}>
+        <div className={`d-relative flex-column message-container ${isDesktop ? 'desktop' : ''} ${isOpen ? 'open' : ''}`}>
             {isDesktop ? (
                 <button type='button' aria-label='Chats' title='Chats' className='pe-auto message-button' onClick={() => setIsOpen(prevState => !prevState)}>
                     <ChatHeader />
