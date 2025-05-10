@@ -8,6 +8,7 @@ import { useChat } from '../../contexts/ChatContext';
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import MainLayout from '../../layouts/MainLayout';
 import { Toast } from '../../utils/swalUtils';
+import { messageSound } from '../../utils/soundsUtils';
 
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
@@ -39,6 +40,7 @@ const ChatBox = () => {
         };
 
         const handleReceiveMessage = (message) => {
+            messageSound();
             if (selectedChat?._id === message.chat._id) {
                 setSelectedChat((prevChat) => {
                     const updatedMessages = [...prevChat.messages, {
