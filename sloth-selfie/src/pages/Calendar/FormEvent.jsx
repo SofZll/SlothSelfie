@@ -207,10 +207,6 @@ const FormEvent = () => {
     }
 
     useEffect(() => {
-        console.log(event, 'eeeeeeeeeeeeee');
-    }, [event]);
-
-    useEffect(() => {
         if (!event.title || !event.startDate || !event.endDate || !event.duration || event.duration <= 0) {
             setConditionsMet(false);
         } else if (!event.allDay && event.time === '') {

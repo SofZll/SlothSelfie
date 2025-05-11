@@ -235,37 +235,38 @@ const Planner = () => {
     }
 
     useEffect(() => {
-        const sr = roomOptions.filter(opt => selectedRooms.includes(opt.value));
-        const sd = deviceOptions.filter(opt => selectedDevices.includes(opt.value));
+        const sr = rooms.filter(opt => selectedRooms.includes(opt._id));
+        const sd = devices.filter(opt => selectedDevices.includes(opt._id));
+
         const eventsSelected = [];
         const availabilitiesSelected = [];
+        const eventsId = new Set();
+        const availabilitiesId = new Set();
+
         for (let i = 0; i < sr.length; i++) {
-            const ev = sr[i].events.map(e => {
-                if(availabilitiesSelected.includes(e)) return e;
-            });
-            const na = sr[i].availabilities.map(a => {
-                if(availabilitiesSelected.includes(a)) return a;
-            });
+            const ev = sr[i].events.filter(e => !eventsId.has(e._id));
+            const na = sr[i].availabilities.filter(a => !availabilitiesId.has(a._id));
+        
+            ev.forEach(e => eventsId.add(e._id));
+            na.forEach(a => availabilitiesId.add(a._id));
+            
             eventsSelected.push(...ev);
             availabilitiesSelected.push(...na);
         }
 
         for (let i = 0; i < sd.length; i++) {
-            const ev = sd[i].events.map(e => {
-                if(availabilitiesSelected.includes(e)) return e;
-            });
-            const na = sd[i].availabilities.map(a => {
-                if(availabilitiesSelected.includes(a)) return a;
-            });
+            const ev = sd[i].events.filter(e => !eventsId.has(e._id));
+            const na = sd[i].availabilities.filter(a => !availabilitiesId.has(a._id));
+        
+            ev.forEach(e => eventsId.add(e._id));
+            na.forEach(a => availabilitiesId.add(a._id));
+            
             eventsSelected.push(...ev);
             availabilitiesSelected.push(...na);
         }
 
-        console.log('eventsSelected', eventsSelected);
-        console.log('availabilitiesSelected', availabilitiesSelected);
         setToolEvents([...eventsSelected]);
         setToolAvailabilities([...availabilitiesSelected]);
-
 
     }, [selectedRooms, selectedDevices]);
 
