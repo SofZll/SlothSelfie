@@ -11,6 +11,7 @@ import { generateTimeOptions } from '../../utils/utils';
 import ShareInput from '../../components/ShareInput';
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 import NotificationInput from '../../components/Notification/NotificationInput';
+import SliderPriority from '../../components/SliderPriority';
 
 const FormEvent = () => {
     const { getVirtualNow } = useContext(TimeMachineContext);
@@ -206,6 +207,10 @@ const FormEvent = () => {
     }
 
     useEffect(() => {
+        console.log(event, 'eeeeeeeeeeeeee');
+    }, [event]);
+
+    useEffect(() => {
         if (!event.title || !event.startDate || !event.endDate || !event.duration || event.duration <= 0) {
             setConditionsMet(false);
         } else if (!event.allDay && event.time === '') {
@@ -213,6 +218,8 @@ const FormEvent = () => {
         } else if (event.type === '') {
             setConditionsMet(false);
         } else if (user.isAdmin) {
+            setConditionsMet(false);
+        } else if (event.isInProject) {
             setConditionsMet(false);
         } else setConditionsMet(true);
         
@@ -262,6 +269,13 @@ const FormEvent = () => {
                         </select>
                     </div>
                 )}
+            </div>
+
+            <div className='row py-2'>
+                <div className='col-12'>
+                    <label htmlFor='priority' className='form-label'>Priority</label>
+                    <SliderPriority />
+                </div>
             </div>
 
             <div className='row py-2 d-flex align-items-end'>
