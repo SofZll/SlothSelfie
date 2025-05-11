@@ -60,6 +60,7 @@ export const CalendarProvider = ({ children }) => {
         isInProject: false,
         fatherId: '',
         tool: false,
+        priority: 0,
     });
 
     const [events, setEvents] = useState([]);
@@ -89,6 +90,7 @@ export const CalendarProvider = ({ children }) => {
             isInProject: false,
             fatherId: '',
             tool: false,
+            priority: 0,
         });
     }
 
