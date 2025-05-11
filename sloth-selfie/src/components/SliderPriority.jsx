@@ -54,8 +54,10 @@ const SliderPriority = () => {
     const [data, setData] = useState({});
 
     const handleChange = (event, newValue) => {
-        if (selected.selection === 'event') {
-            setEvent({ ...data, priority: newValue });
+        if (!(event.isInProject || event.tool)) {
+            if (selected.selection === 'event') {
+                setEvent({ ...data, priority: newValue });
+            }
         }
     };
 
@@ -66,7 +68,7 @@ const SliderPriority = () => {
     }, []);
  
     return (
-        <div className='d-flex flex-column w-100 py-2 px-4'>
+        <div className={`d-flex flex-column w-100 py-2 px-4 ${event.isInProject || event.tool ? 'opacity-50' : ''}`}>
             <SliderStyled
                 value={event.priority}
                 onChange={handleChange}
