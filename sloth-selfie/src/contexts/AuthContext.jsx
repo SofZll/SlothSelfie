@@ -1,5 +1,5 @@
 import React, { useState, useRef, createContext, useEffect } from 'react';
-import { toastInfo } from '../utils/swalUtils';
+import { toastInfo, toastWarning } from '../utils/swalUtils';
 
 import socket from '../services/socket/socket';
 import { apiService } from '../services/apiService';
@@ -112,9 +112,16 @@ const AuthProvider = ({ children }) => {
     useEffect(() => {
         if (!user?._id || Notification.permission !== 'granted') return;
 
-        const handler = ({ title, body, notificationId }) => {
-            console.log('Notification received:', { title, body, notificationId });
-            toastInfo(title, body);
+        const handler = ({ title, body, notificationId, elementId, elementType, urgency }) => {
+            console.log('Notification received:', { title, body, notificationId, elementId, urgency });
+            let link = '';
+            if (urgency) {
+                link = `/calendar?type=Activity&element=${elementId}`;
+                toastWarning(title, body, link);
+            } else {
+                link = `/calendar?type=${elementType}&element=${elementId}`;
+                toastInfo(title, body, link);
+            }
             notificationSound();
         };
         socket.on('system-notification', handler);

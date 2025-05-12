@@ -45,12 +45,8 @@ const notificationSchema = new mongoose.Schema({
     urgencySettings: {
         frequency: {
             type: String,
-            enum: ['5min', '10min', '15min', '30min'],
-            default: '10min'
-        },
-        max: {
-            type: Number,
-            default: 3
+            enum: ['1h', '6h', '1d'],
+            default: '1d'
         }
     },
 
@@ -102,9 +98,6 @@ const notificationSchema = new mongoose.Schema({
     time: {
         type: String,
         match: /^([01]\d|2[0-3]):([0-5]\d)$/,
-        required: function() {
-            return this.type === 'default';
-        }
     },
 
     from: {
@@ -124,7 +117,6 @@ const notificationSchema = new mongoose.Schema({
     lastSentAt: {
         type: Date,
         default: null,
-        required: this.type === 'repeat'
     },
 
     status: {
