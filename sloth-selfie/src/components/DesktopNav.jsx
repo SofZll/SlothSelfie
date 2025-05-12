@@ -8,7 +8,6 @@ import SettingsButton from './SettingsButton';
 //TODO: va messo abbosto l'iconna del panino
 const DesktopNav = () => {
     const { user } = useContext(AuthContext);
-    console.log(user);
     const [isOpen, setIsOpen] = useState(false);
 
     const handleStateChange = (state) => {
@@ -44,7 +43,7 @@ const DesktopNav = () => {
                             <Link to='/profile' onClick={closeMenu} className='profile-link'>Profile</Link>
                         </div>
 
-                        <div className='position-absolute end-0 top-0 translate-middle-y'>
+                        <div className='position-absolute end-0 top-0 mt-1 translate-middle-y'>
                             <SettingsButton dark={false} />
                         </div>
                     </div>

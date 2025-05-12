@@ -30,7 +30,6 @@ const PostsList = ({ handleNewContent }) => {
     const scrollToId = queryParams.get('id');
     const postRefs = useRef({});
 
-
     const isLiked = (item) => {return item.likes.includes(user._id)};
 
     const handleLike = async (postId, isComment = false, commentId = null) => {
@@ -111,8 +110,8 @@ const PostsList = ({ handleNewContent }) => {
     }
 
     const handleShare = (postId) => {
-        const currentPath = `http://localhost:3000/forum`;
-        const newPath = `${currentPath}#${postId}`;
+        const path = location.pathname;
+        const newPath = `${path}#${postId}`;
         setOpenShareModal(newPath);
     }
 
@@ -134,7 +133,7 @@ const PostsList = ({ handleNewContent }) => {
 
     useEffect(() => {
         const scrollToPostFromHash = async () => {
-            const hash = window.location.hash?.substring(1);
+            const hash = location.hash.substring(1);
             if (!hash) return;
     
             let retries = 10;

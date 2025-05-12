@@ -142,11 +142,7 @@ const GanttChartView = ({ projectId }) => {
   if (!project) return <div>Loading...</div>;
 
   return (
-    <div>
-      <div style={{ display: "flex" }}>
-        <div id="gantt-container"></div>
-      </div>
-    </div>
+    <div id="gantt-container"></div>
   );
 };
 

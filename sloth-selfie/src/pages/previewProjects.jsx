@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Previews.css';
 import '../styles/App.css';
@@ -6,8 +6,8 @@ import '../styles/App.css';
 import GanttChartView from '../components/GanttChartView';
 
 import { AuthContext } from '../contexts/AuthContext';
-import { useCalendar } from "../contexts/CalendarContext";
-import { TimeMachineContext } from "../contexts/TimeMachineContext";
+import { useCalendar } from '../contexts/CalendarContext';
+import { TimeMachineContext } from '../contexts/TimeMachineContext';
 import { apiService } from '../services/apiService';
 
 //TODO CAMBIARE PATH DEL FETCH SUL SERVER
@@ -75,9 +75,9 @@ const PreviewProjects= ({ viewType }) => {
     // Function to choose a project for the Gantt chart
     const chooseProject = () => {
         return (
-            <div className="project-selection">
-                <h2>Select a project for the Gantt chart</h2>
-                <ul className="project-list">
+            <div className='d-flex flex-column gap-1'>
+                <h6>Select a project for the Gantt chart</h6>
+                <ul className='project-list'>
                     {projects.map((project) => (
                         <li key={project._id} onClick={() => setSelectedProject(project)}>
                             {project.title}
@@ -92,29 +92,29 @@ const PreviewProjects= ({ viewType }) => {
     const renderProjects = () => {
         if (projects.length === 0) {
             return (
-                <div className="scrollable-list">
-                    <div className="div-postit">
-                        <h2>No projects available.</h2>
+                <div className='scrollable-list'>
+                    <div className='div-postit'>
+                        <h4>No projects available.</h4>
                     </div>
                 </div>
             );
         }
         switch (viewType) {
-            case "list":
+            case 'list':
                 default:
                 return (
-                    <div className="scrollable-list">
+                    <div className='scrollable-list'>
                         {projects.map((project, index) => (
                             <div key={project._id} className={`event-card event-border-orange`}>
-                            <strong>{project.title}</strong> - Owner: {project.owner.username}, Members: {project.members.map(m => m.username).join(", ")}
+                            <strong>{project.title}</strong> - Owner: {project.owner.username}, Members: {project.members.map(m => m.username).join(', ')}
                         </div>
                             ))}
                     </div>
                 );
 
-            case "recentDeadlines":
+            case 'recentDeadlines':
                 return (
-                    <div className="scrollable-list">
+                    <div className='scrollable-list'>
                         {activities.length > 0 ? (
                            activities.map((activity, index) => {
                             const deadlineDate = new Date(activity.deadline);
@@ -123,29 +123,29 @@ const PreviewProjects= ({ viewType }) => {
         
                             // Check if the activity is overdue
                             const isOverdue = deadlineDate < today;
-                            const borderColorClass = isOverdue ? "event-border-red" : "event-border-aqua";
+                            const borderColorClass = isOverdue ? 'event-border-red' : 'event-border-aqua';
         
                             return (
                                 <div key={index} className={`event-card ${borderColorClass}`}>
                                     <strong>{activity.title}</strong> 
                                     (Project: {activity.projectTitle}) - Due: {deadlineDate.toLocaleDateString()} 
-                                    - Members: {activity.sharedWith.map(m => m.username).join(", ")}
+                                    - Members: {activity.sharedWith.map(m => m.username).join(', ')}
                                 </div>
                             );
                         })
                         ) : (
-                            <div className="div-postit">
-                                <h2>No upcoming deadlines.</h2>
+                            <div className='div-postit'>
+                                <h4>No upcoming deadlines.</h4>
                             </div>
                         )}
                     </div>
                 );
 
-            case "ganttChart":
+            case 'ganttChart':
                 return (
-                    <div className="scrollable-list gantt-box">
+                    <div className='gantt-box'>
                         {selectedProject ? (
-                            <div className="event-card event-border-orange gantt-chart-card">
+                            <div className='gantt-chart-card'>
                                 <h5>{selectedProject.title}</h5>
                                 {/*render the Gantt chart for the selected project */}
                                 <GanttChartView projectId={selectedProject._id} />
@@ -159,12 +159,12 @@ const PreviewProjects= ({ viewType }) => {
     };
 
     return (
-        <div className="inCard">
+        <>
             {renderProjects()}
-                <div className="divBtn">
-                    <button type='button' aria-label='manageProjects' className="btn btn-main blue" onClick={manageProjects}>Manage Projects</button>
-                </div>
-        </div>
+            <div className='divBtn'>
+                <button type='button' aria-label='manageProjects' className='button-clean blue' onClick={manageProjects}>Manage Projects</button>
+            </div>
+        </>
     );
 };
 

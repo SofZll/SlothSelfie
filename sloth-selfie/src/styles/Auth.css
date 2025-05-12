@@ -116,9 +116,9 @@
 .eye-cover1 {
     position: absolute;
     width: 20px;
-    height: 8px;
-    top: -25px;
-    left: 59px;
+    height: 10px;
+    top: -27px;
+    left: 55px;
     border-radius: 30%;
     z-index: 20;
 }
@@ -126,9 +126,9 @@
 .eye-cover2 {
     position: absolute;
     width: 20px;
-    height: 8px;
-    top: -23px;
-    left: 88px;
+    height: 10px;
+    top: -25px;
+    left: 85px;
     border-radius: 30%;
     z-index: 20;
 }

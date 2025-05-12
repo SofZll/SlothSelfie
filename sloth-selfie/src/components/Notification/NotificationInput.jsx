@@ -130,13 +130,13 @@ const NotificationInput = ({ notifications, setNotifications }) => {
                         <NotificationRepeat notif={notif} index={index} handleModifyNotification={handleModifyNotification}/>
                     )}
                     <div className='mb-2 d-flex flex-row justify-content-around pt-2'>
-                        <div class='form-check'>
+                        <div className='form-check'>
                             <input type='checkbox' className='form-check-input' role='switch' id='mail' checked={notif.mode.email} onChange={(e) => handleModifyNotification(index, 'email', e.target.checked)} />
-                            <label className='form-check-label' for='mail'>email</label>
+                            <label className='form-check-label' htmlFor='mail'>email</label>
                         </div>
-                        <div class='form-check'>
+                        <div className='form-check'>
                             <input type='checkbox' className='form-check-input' role='switch' id='system' checked={notif.mode.system} onChange={(e) => handleModifyNotification(index, 'system', e.target.checked)} />
-                            <label className='form-check-label' for='system'>system</label>
+                            <label className='form-check-label' htmlFor='system'>system</label>
                         </div>
                     </div>
                     <div className='mb-2'>

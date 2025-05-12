@@ -48,7 +48,7 @@ const getEvents = async (req, res) => {
   }
 };
 
-const newEvent = async (title, user, type, priority, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
+const newEvent = async (title, user, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
 
   try {
     if (!user) return ({ success: false, message: 'User not found' });
@@ -80,6 +80,7 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
     });
 
     if (eventLocation) newEvent.eventLocation = eventLocation;
+    if (eventLocationDetails) newEvent.eventLocationDetails = eventLocationDetails;
 
     if (repeatFrequency !== 'none') {
       if (fatherId) newEvent.fatherId = fatherId;
@@ -116,14 +117,14 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
 
 const createNewEvent = async (req, res) => {
   const userName = req.session.username;
-  const { title, type, priority, startDate, endDate, allDay, repeatFrequency, repeatEndDate, repeatTimes, eventLocation, sharedWith, isInProject} = req.body;
+  const { title, type, priority, startDate, endDate, allDay, repeatFrequency, repeatEndDate, repeatTimes, eventLocation, eventLocationDetails, sharedWith, isInProject} = req.body;
 
   try {
     const user = await User.findOne({ username: userName });
     const users = await findUserId(sharedWith);
 
     if (repeatFrequency === 'none') {
-      const event = await newEvent(title, user, type, priority, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
+      const event = await newEvent(title, user, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency);
       if (event.success) {
         res.status(201).json({ success: true, event: event.event });
       } else {
@@ -146,7 +147,7 @@ const createNewEvent = async (req, res) => {
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          const event = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -165,7 +166,7 @@ const createNewEvent = async (req, res) => {
           newStartDate.setDate(newStartDate.getDate() + (i * gap));
           newEndDate.setDate(newEndDate.getDate() + (i * gap));
 
-          const event = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          const event = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
           if (event.success) events.push(event.event);
           else {
             res.status(400).json({ success: false, message: event.message });
@@ -190,7 +191,7 @@ const createNewEvent = async (req, res) => {
   }
 }
 
-const editEvent = async (Id, title, type, priority, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
+const editEvent = async (Id, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
 
   try {
     const event = await Event.findById(Id);
@@ -216,6 +217,7 @@ const editEvent = async (Id, title, type, priority, startDate, endDate, allDay, 
     event.endDate = endDate;
     event.allDay = allDay;
     event.eventLocation = eventLocation;
+    event.eventLocationDetails = eventLocationDetails;
     event.sharedWith = sharedWith;
     event.isInProject = isInProject;
     event.repeatFrequency = repeatFrequency;
@@ -282,7 +284,9 @@ const updateEvent = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
   const { eventId } = req.params;
-  const { title, type, priority, startDate, endDate, allDay, eventLocation, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId } = req.body;
+
+  const { title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId } = req.body;
+
 
   try {
     const users = await findUserId(sharedWith);
@@ -297,7 +301,7 @@ const updateEvent = async (req, res) => {
             await events[i].deleteOne();
           }
 
-          const response = await editEvent(events[0]._id, title, type, priority, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
+          const response = await editEvent(events[0]._id, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency);
           if (response.success) {
             res.status(200).json({ success: true, event: response.event });
             return;
@@ -308,7 +312,7 @@ const updateEvent = async (req, res) => {
         }
       }
     
-      const response = await editEvent(eventId, title, type, priority, startDate, endDate, allDay, eventLocation, users, isInProject, repeatFrequency);
+      const response = await editEvent(eventId, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency);
       if (response.success) {
         res.status(200).json({ success: true, event: response.event });
       } else {
@@ -325,7 +329,7 @@ const updateEvent = async (req, res) => {
         const events2edit = await Event.find({ fatherId: fatherId });
         if (events2edit.length > 0) {
           for (let i = 0; i < events2edit.length; i++) {
-            const response = await updateNoDateEvent(events2edit[i]._id, title, type, priority, eventLocation, users, isInProject);
+            const response = await updateNoDateEvent(events2edit[i]._id, title, type, priority, eventLocation, eventLocationDetails, users, isInProject);
 
             if (!response.success) {
               res.status(400).json({ success: false, message: response.message });
@@ -384,13 +388,13 @@ const updateEvent = async (req, res) => {
             const newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( additionEndDate ? + endDateDifference : - endDateDifference));
 
             if (i >= events2edit.length) {
-              const responseEvent = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+              const responseEvent = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
               if (responseEvent.success) events.push(responseEvent.event);
               else {
                 return res.status(400).json({ success: false, message: responseEvent.message });
               }
             } else {
-              const response = await editEvent(events2edit[i]._id, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+              const response = await editEvent(events2edit[i]._id, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
               if (!response.success) {
                 res.status(400).json({ success: false, message: response.message });
                 return;
@@ -410,12 +414,12 @@ const updateEvent = async (req, res) => {
           while (newStartDate <= (new Date(repeatEndDate).setHours(23, 59, 59, 999))) {
 
             if (count >= events2edit.length) {
-              const responseEvent = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+              const responseEvent = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
               if (responseEvent.success) events.push(responseEvent.event);
               else return res.status(400).json({ success: false, message: responseEvent.message });
 
             } else {
-              const response = await editEvent(events2edit[count]._id, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+              const response = await editEvent(events2edit[count]._id, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
               if (!response.success) {
                 res.status(400).json({ success: false, message: response.message });
                 return;

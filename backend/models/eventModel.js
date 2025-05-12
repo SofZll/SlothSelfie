@@ -77,6 +77,17 @@ const eventSchema = new mongoose.Schema({
         default: null,
     },
 
+    eventLocationDetails: {
+        latitude: {
+            type: Number,
+            default: null,
+        },
+        longitude: {
+            type: Number,
+            default: null,
+        },
+    },
+
     isInProject: {  //used to differentiate between normal events and project-activity events
         type: Boolean,
         required: true,

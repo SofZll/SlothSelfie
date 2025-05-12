@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
 
@@ -6,8 +6,8 @@ import '../../styles/Previews.css';
 import '../../styles/App.css';
 
 import { AuthContext } from '../../contexts/AuthContext';
-import { useCalendar } from "../../contexts/CalendarContext";
-import { TimeMachineContext } from "../../contexts/TimeMachineContext";
+import { useCalendar } from '../../contexts/CalendarContext';
+import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 
 import { apiService } from '../../services/apiService';
 
@@ -62,10 +62,10 @@ const PreviewCalendar = ({ viewType }) => {
     useEffect(() => {
         if (events.length > 0) {
             const today = new Date(now);
-            const formattedToday = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+            const formattedToday = today.toISOString().split('T')[0]; // 'YYYY-MM-DD'
         
             const todayFilteredEvents = events.filter(ev => {
-                const eventDate = new Date(ev.startDate).toISOString().split('T')[0]; // "YYYY-MM-DD"
+                const eventDate = new Date(ev.startDate).toISOString().split('T')[0]; // 'YYYY-MM-DD'
                 return eventDate === formattedToday;
             });
         
@@ -130,8 +130,8 @@ useEffect(() => {
                     {eventFound && (
                         <span className={`event-indicator ${eventFound.isInProject ? 'event-dot-orange' : 'event-dot-blue'}`}></span>
                     )}
-                    {activityFound && <span className="event-indicator event-dot-aqua"></span>}
-                    {taskFound && <span className="event-indicator event-dot-lightgreen"></span>}
+                    {activityFound && <span className='event-indicator event-dot-aqua'></span>}
+                    {taskFound && <span className='event-indicator event-dot-lightgreen'></span>}
                 </>
             );
         }
@@ -146,17 +146,17 @@ useEffect(() => {
     };
 
     const getEventBorderClass = (event) => {
-        if (event.isInProject) return "event-border-orange";
-        return "event-border-blue";
+        if (event.isInProject) return 'event-border-orange';
+        return 'event-border-blue';
     };
 
     const renderCalendar = () => {
         switch (viewType) {
-            case "calendar":
+            case 'calendar':
                 return <Calendar value={new Date(now)} tileContent={tileContent} tileClassName={tileClassName} />;
-            case "events":
+            case 'events':
                 return (
-                    <div className="scrollable-list EventShow">
+                    <div className='scrollable-list EventShow'>
                         {todayEvents.length > 0 ? (
                             todayEvents.map((event) => {
                                 const startDate = new Date(event.startDate);
@@ -172,52 +172,52 @@ useEffect(() => {
                                 );
                             })
                         ) : (
-                            <div className="div-postit">
-                                 <h2>No events today!</h2>
+                            <div className='div-postit'>
+                                 <h4>No events today!</h4>
                             </div>
                         )}
                     </div>
                 );
-            case "activities":
+            case 'activities':
                 return (
-                    <div className="scrollable-list ActivityShow">
+                    <div className='scrollable-list ActivityShow'>
                         {todayActivities.length > 0 ? (
                             todayActivities.map((activity) => {
                                 const tmpNow = new Date(now);
                                 const activityDate = new Date(activity.deadline);
                                 const isOverdue = activityDate < tmpNow.setHours(0, 0, 0, 0); // check if overdue
                                 return (
-                                    <div key={activity._id} className={`event-card ${isOverdue ? "event-border-red" : "event-border-aqua"}`}>
+                                    <div key={activity._id} className={`event-card ${isOverdue ? 'event-border-red' : 'event-border-aqua'}`}>
                                         <b>{activity.title}</b>
                                         <p>Due: {activityDate.toLocaleDateString()}</p>
                                     </div>
                                 );
                             })
                         ) : (
-                            <div className="div-postit">
-                                <h2>No activities deadlines this week!</h2>
+                            <div className='div-postit'>
+                                <h4>No activities deadlines this week!</h4>
                             </div>
                         )}
                     </div>
                 );
-            case "tasks":
+            case 'tasks':
                 return (
-                    <div className="scrollable-list TaskShow">
+                    <div className='scrollable-list TaskShow'>
                         {todayTasks.length > 0 ? (
                             todayTasks.map((task) => {
                                 const tmpNow = new Date(now);
                                 const taskDate = new Date(task.deadline);
                                 const isOverdue = taskDate < tmpNow.setHours(0, 0, 0, 0); // check if overdue
                                 return (
-                                    <div key={task._id} className={`event-card ${isOverdue ? "event-border-red" : "event-border-lightgreen"}`}>
+                                    <div key={task._id} className={`event-card ${isOverdue ? 'event-border-red' : 'event-border-lightgreen'}`}>
                                         <b>{task.title}</b>
                                         <p>Due: {taskDate.toLocaleDateString()}</p>
                                     </div>
                                 );
                             })
                         ) : (
-                            <div className="div-postit">
-                                <h2>No tasks deadlines this week!</h2>
+                            <div className='div-postit'>
+                                <h4>No tasks deadlines this week!</h4>
                             </div>
                         )}
                     </div>
@@ -229,15 +229,14 @@ useEffect(() => {
     };
 
     return (
-
-        <div className="inCard">
+        <>
             {renderCalendar()}
-            <div className="divBtn">
-                <Link to="/calendar" onClick={handleLinkClick('/calendar')}>
-                    <button type='button' aria-label='manageCalendar' className="btn btn-main blue" >Manage Calendar</button>
+            <div className='divBtn'>
+                <Link to='/calendar' onClick={handleLinkClick('/calendar')}>
+                    <button type='button' aria-label='manageCalendar' className='button-clean blue' >Manage Calendar</button>
                 </Link>
             </div>
-        </div>
+        </>
     );
     
 };
