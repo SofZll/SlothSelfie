@@ -33,14 +33,17 @@ const CardCarosel = ({ title, settingKey }) => {
     const titleMap = {
         showEventsList: "Today's Events List",
         showActivitiesList: "This week's Activities List",
+        showTasksList: "This week's Tasks List",
         listOfNotes: 'Notes List',
         lastNote: 'Most recent Note',
+        addNote: 'Add a Note',
         quickStart: 'Quick Start',
         listOfPomodoros: 'Pomodoros ToDo List',
         lastPomodoro: 'Last Pomodoro',
         stats: 'Pomodoros Stats',
         listOfProjects: 'Projects List',
-        recentProjectsDeadlines: 'Upcoming Deadlines'
+        recentProjectsDeadlines: 'Upcoming Deadlines',
+        projectGanttChart: 'Project Gantt Chart'
     };
 
     //Get the personalized title

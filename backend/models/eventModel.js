@@ -43,6 +43,13 @@ const eventSchema = new mongoose.Schema({
         default: 'personal',
         required: true,
     },
+    priority: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5,
+        required: true,
+    },
 
     repeatFrequency: {
         type: String,

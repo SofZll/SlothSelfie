@@ -226,35 +226,50 @@ const Planner = () => {
 
     }
 
-    const handleChange = (type) => (newValue, actionMeta) => {
-        console.log('Selected:', newValue, 'Action:', actionMeta);
-        if (actionMeta.action === 'select-option') {
-            if (type === 'room') {
-                setSelectedRooms([...newValue.map(room => room.value)]);
-            } else if (type === 'device') {
-                setSelectedDevices([...newValue.map(device => device.value)]);
-            }
-        } else if (actionMeta.action === 'clear') {
-            if (type === 'room') {
-                setSelectedRooms([]);
-            } else if (type === 'device') {
-                setSelectedDevices([]);
-            }
-        } else if (actionMeta.action === 'remove-value' || actionMeta.action === 'pop-value') {
-            if (type === 'room') {
-                setSelectedRooms([...newValue.map(room => room.value)]);
-            } else if (type === 'device') {
-                setSelectedDevices([...newValue.map(device => device.value)]);
-            }
+    const handleChange = (type) => (newValue) => {
+        const listId = newValue.map(item => item.value);
+       
+        if (type === 'room') {
+            setSelectedRooms([...listId]);
+        } else if (type === 'device') {
+            setSelectedDevices([...listId]);
         }
-
-
-
     }
 
     useEffect(() => {
-        console.log('Selected rooms:', selectedRooms);
-        console.log('Selected devices:', selectedDevices);
+        const sr = rooms.filter(opt => selectedRooms.includes(opt._id));
+        const sd = devices.filter(opt => selectedDevices.includes(opt._id));
+
+        const eventsSelected = [];
+        const availabilitiesSelected = [];
+        const eventsId = new Set();
+        const availabilitiesId = new Set();
+
+        for (let i = 0; i < sr.length; i++) {
+            const ev = sr[i].events.filter(e => !eventsId.has(e._id));
+            const na = sr[i].availabilities.filter(a => !availabilitiesId.has(a._id));
+        
+            ev.forEach(e => eventsId.add(e._id));
+            na.forEach(a => availabilitiesId.add(a._id));
+            
+            eventsSelected.push(...ev);
+            availabilitiesSelected.push(...na);
+        }
+
+        for (let i = 0; i < sd.length; i++) {
+            const ev = sd[i].events.filter(e => !eventsId.has(e._id));
+            const na = sd[i].availabilities.filter(a => !availabilitiesId.has(a._id));
+        
+            ev.forEach(e => eventsId.add(e._id));
+            na.forEach(a => availabilitiesId.add(a._id));
+            
+            eventsSelected.push(...ev);
+            availabilitiesSelected.push(...na);
+        }
+
+        setToolEvents([...eventsSelected]);
+        setToolAvailabilities([...availabilitiesSelected]);
+
     }, [selectedRooms, selectedDevices]);
 
     const dayPropGetter = useCallback((date) => ({
