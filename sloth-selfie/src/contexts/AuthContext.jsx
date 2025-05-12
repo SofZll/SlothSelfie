@@ -4,6 +4,7 @@ import { toastInfo } from '../utils/swalUtils';
 import socket from '../services/socket/socket';
 import { apiService } from '../services/apiService';
 import { bufferToBase64, urlBase64ToUint8Array } from '../utils/utils';
+import { notificationSound } from '../utils/soundsUtils';
 
 const AuthContext = createContext();
 
@@ -114,6 +115,7 @@ const AuthProvider = ({ children }) => {
         const handler = ({ title, body, notificationId }) => {
             console.log('Notification received:', { title, body, notificationId });
             toastInfo(title, body);
+            notificationSound();
         };
         socket.on('system-notification', handler);
 

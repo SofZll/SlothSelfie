@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import CardNote from "../../components/CardNote";
-import FormNote from "../../pages/Note/FormNote";
+import CardNote from '../../components/CardNote';
+import FormNote from '../../pages/Note/FormNote';
 import '../../styles/Previews.css';
 
 import { apiService } from '../../services/apiService';
-import { useNote } from "../../contexts/NoteContext";
+import { useNote } from '../../contexts/NoteContext';
 import { AuthContext } from '../../contexts/AuthContext';
 
 
@@ -15,7 +15,7 @@ const  PreviewNote = ({ viewType }) => {
     const { notes, setNotes } = useNote();
     const { user } = React.useContext(AuthContext);
 
-    const [showForm, setShowForm] = useState(viewType === "add");
+    const [showForm, setShowForm] = useState(viewType === 'add');
 
     const handleLinkClick = (path) => (event) => {
         event.preventDefault();
@@ -51,18 +51,18 @@ const  PreviewNote = ({ viewType }) => {
     useEffect(() => {
         if (notes.length > 0) {
             const limitedNotes = notes.slice(0, 10); // Limit to 10 notes
-            if (viewType === "all" && notes !== limitedNotes) {
+            if (viewType === 'all' && notes !== limitedNotes) {
                 setNotes(limitedNotes);
-            } else if (viewType === "latest" && (notes[0] !== limitedNotes[0] || notes.length > 1)) {
+            } else if (viewType === 'latest' && (notes[0] !== limitedNotes[0] || notes.length > 1)) {
                 setNotes([limitedNotes[0]]);
-            }else if (viewType === "add" && notes.length > 0) {
+            }else if (viewType === 'add' && notes.length > 0) {
                 setNotes([]);
             }
         }
     }, [notes, viewType, setNotes]);
 
     useEffect(() => {
-        if (viewType === "add") {
+        if (viewType === 'add') {
             setShowForm(true);
         } else {
             setShowForm(false);
@@ -73,19 +73,19 @@ const  PreviewNote = ({ viewType }) => {
         return (
             <>
                 {showForm && (
-                    <div className="event-card note-border-green">
+                    <div className='event-card note-border-green'>
                         <FormNote/>
                     </div>
                 )}
                 {notes.length > 0 ? (
                     notes.map((note) => (
-                        <div key={note._id} className="event-card note-border-yellow">
+                        <div key={note._id} className='event-card note-border-yellow'>
                             <CardNote Note={note} />
                         </div>
                     ))
                 ) : !showForm ? (
-                    <div className="div-postit">
-                        <h2>No notes yet!</h2>
+                    <div className='div-postit'>
+                        <h4>No notes yet!</h4>
                     </div>
                 ) : null}
             </>
@@ -93,18 +93,16 @@ const  PreviewNote = ({ viewType }) => {
     };
 
     return (
-        <div className="inCard">
-            <div className="notes-section">
-                <div className="scrollable-list">
-                    {renderNotes()}
-                </div>
-                <div className="divBtn">
-                    <Link to="/notes" onClick={handleLinkClick('/notes')}>
-                        <button type='button' aria-label='manageNotes' className="btn btn-main blue">Manage Notes</button>
-                    </Link>
-                </div>
+        <>
+            <div className='scrollable-list'>
+                {renderNotes()}
             </div>
-        </div>
+            <div className='divBtn'>
+                <Link to='/notes' onClick={handleLinkClick('/notes')}>
+                    <button type='button' aria-label='manageNotes' className='button-clean blue'>Manage Notes</button>
+                </Link>
+            </div>
+        </>
     );
 };
 

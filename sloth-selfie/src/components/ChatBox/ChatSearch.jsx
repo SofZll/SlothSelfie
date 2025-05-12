@@ -15,9 +15,9 @@ const ChatSearch = () => {
                     <button type='button' aria-label='Add' title='Add chat' className='new-chat-button d-flex align-items-center' onClick={() => setShowShareInput (!showShareInput)}><Plus /></button>
                 </div>
             ) : (
-                <div className='d-flex flex-row'>
+                <div className='d-flex flex-row p-2'>
                     <ShareInput receivers={participants} setReceivers={setParticipants} />
-                    {participants.length > 0 ? <button type='button' aria-label='createChat' className='button-clean green my-2 mx-2' onClick={() => handleNewChat()}>Create</button> : <button type='button' aria-label='Undo' title='Undo' className='new-chat-button d-flex align-items-start mt-3' onClick={() => setShowShareInput (!showShareInput)}><Undo2 /></button>}
+                    {participants.length > 0 ? <button type='button' aria-label='createChat' className='button-clean green mb-5 ms-2' onClick={() => handleNewChat()}>Create</button> : <button type='button' aria-label='Undo' title='Undo' className='new-chat-button d-flex align-items-start mt-2' onClick={() => setShowShareInput (!showShareInput)}><Undo2 /></button>}
                 </div>
             )}
         </>

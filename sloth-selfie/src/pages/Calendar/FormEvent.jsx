@@ -1,17 +1,20 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { MapPin } from 'lucide-react';
 
 import { toastWarning, NewSwal } from '../../utils/swalUtils';
+import { generateTimeOptions } from '../../utils/utils';
+import { reverseAddress } from '../../utils/mapUtils';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { AuthContext } from '../../contexts/AuthContext';
 import { useTools } from '../../contexts/ToolsContext';
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
-import { generateTimeOptions } from '../../utils/utils';
 import ShareInput from '../../components/ShareInput';
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 import NotificationInput from '../../components/Notification/NotificationInput';
 import SliderPriority from '../../components/SliderPriority';
+import GeolocalizationInput from '../../components/GeolocalizationInput';
 
 const FormEvent = () => {
     const { getVirtualNow } = useContext(TimeMachineContext);
@@ -21,6 +24,8 @@ const FormEvent = () => {
 
     const virtualNow = getVirtualNow();
     const [deletePopUp, setDeletePopUp] = useState(false);
+    const [showGeo, setShowGeo] = useState(false);
+    const [inputMap, setInputMap] = useState(null);
     const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     const startTimeWarning = (time) => {
@@ -230,6 +235,34 @@ const FormEvent = () => {
         }
     }, [event.title, event.startDate, event.endDate, event.duration, event.allDay, event.time, event.repeatFrequency, event.repeatMode, event.repeatTimes, event.repeatEndDate]);
 
+    useEffect(() => {
+        const setPosition = async () => {
+            if (event.eventLocation === 'physical' && inputMap) {
+                if (inputMap[0] !== undefined && inputMap[1] !== undefined) {
+                    const address = await reverseAddress([inputMap[0], inputMap[1]]);
+                    if (inputMap.address !== address) {
+                        const updatedMap = { ...inputMap, address };
+                        setEvent({ ...event, eventLocationDetails: { latitude: inputMap[0], longitude: inputMap[1] } });
+                        setInputMap(updatedMap);
+                    }
+                }
+            } else if (event.eventLocation === 'physical' && event.eventLocationDetails && typeof event.eventLocationDetails.latitude === 'number' && typeof event.eventLocationDetails.longitude === 'number') {
+                const { latitude, longitude } = event.eventLocationDetails;
+                if (latitude !== undefined && longitude !== undefined) {
+                    const address = await reverseAddress([latitude, longitude]);
+
+                    if (!inputMap || inputMap.latitude !== latitude || inputMap.longitude !== longitude) {
+                        const updatedMap = { latitude, longitude, address };
+                        setInputMap(updatedMap);
+                    }
+                }
+            }
+        }
+        console.log('event', event);
+        console.log('inputMap', inputMap);
+        console.log('eventLocationDetails', event.eventLocationDetails);
+        setPosition();
+    }, [inputMap, event]);
 
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden' style={{ maxHeight: '70vh' }}>
@@ -413,6 +446,19 @@ const FormEvent = () => {
                 </div>
             </div>
 
+            {event.eventLocation === 'physical' && (
+                <div className='row py-2'>
+                    <div className='col col-10'>
+                        <label htmlFor='eventLocationDetails' className='form-label'>Location address</label>
+                        <input type='text' className='form-control' id='eventLocationDetails' value={inputMap?.address || ''} disabled={true} />
+                    </div>
+                    <div className='col col-2 d-flex justify-content-center align-items-center pt-4 mt-1 ps-0'>
+                        <MapPin size={23} color={'#000'} onClick={() => setShowGeo(true)} className='cursor-pointer' />
+                    </div>
+                </div>
+            )}
+
+
             {!(event.isInProject || event.tool) && (
                 <>
                     <div className='row py-2'>
@@ -467,7 +513,7 @@ const FormEvent = () => {
                     </div>
                 </DeletePopUpLayout>
             )}
-
+            {showGeo && (<GeolocalizationInput showGeo={showGeo} setShowGeo={setShowGeo} setInputMap={setInputMap} />)}
         </div>
     )
 }

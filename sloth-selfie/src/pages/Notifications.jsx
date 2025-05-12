@@ -35,7 +35,7 @@ const Notifications = () => {
         }
     }
 
-    const HandleSnoozeNotif = (index) => async () => {
+    const handleSnoozeNotif = (index) => async () => {
         const snoozeTime = new Date(notifications[index].triggerAt);
         const snoozeInterval = 10;
         snoozeTime.setMinutes(snoozeTime.getMinutes() + snoozeInterval);
@@ -45,6 +45,11 @@ const Notifications = () => {
             setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
             window.location.reload();
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
+    }
+
+    const handleNotificationClick = (notif) => {
+        const path = `/calendar?type=${notif.elementType}&element=${notif.element._id}`;
+        navigate(path);
     }
 
     // TODO: spostare in utils
@@ -66,9 +71,9 @@ const Notifications = () => {
                         {notifications.map((notif, index) => (
                             <div key={index} className="bg-white border shadow-sm p-3 rounded-2">
                                 <div className='d-flex flex-column gap-2'>
-                                    <p>
+                                    <p className='cursor-pointer' onClick={() => handleNotificationClick(notif)}>
                                         {notif.elementType === 'Activity' ? '📝 Activity: ' : '📅 Event: '}
-                                        <strong onClick={() => navigate('/d')}>{notif.element.title}</strong>
+                                        <strong>{notif.element.title}</strong>
                                     </p>
                                     {notif.type === 'repeat' && <p className='text-secondary'>Type: {notif.type} every {notif.before} {notif.variant}</p>}
                                     {notif.type === 'default' && <p className='text-secondary'>Type: {notif.before} {notif.variant} before</p>}
@@ -77,16 +82,10 @@ const Notifications = () => {
                                     <div className="d-flex gap-2 mt-1">
                                         {notif.urgency && <span className="d-flex items-center gap-1"><AlertTriangle size={16} /> Urgente</span>}
                                         {/* permettere all'utente di selezionare il tempo di snooze */}
-                                        <button className='btn btn-outline-success' onClick={HandleSnoozeNotif(index)}>Postpone 10 minutes</button>
+                                        <button className='btn btn-outline-success' onClick={handleSnoozeNotif(notif)}>Postpone 10 minutes</button>
                                         {notif.type === 'repeat' && <button className='btn btn-outline-warning'>Skip this one</button>}
                                     </div>
                                 </div>
-                                {/*
-                                <div className="d-flex mt-4 gap-3">
-                                    {notif.mode.system && <Monitor size={20} title="Notifica di sistema" />}
-                                    {notif.mode.email && <Mail size={20} title="Email" />}
-                                </div>
-                                */}
                             </div>
                         ))}
                     </div>

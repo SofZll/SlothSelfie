@@ -8,10 +8,8 @@ import ClockAnimation from './ClockAnimation';
 // TODO: il resto delle funzioni
 
 const TimeMachinePopup = () => {
-    const { setMachineOpen, getVirtualNow, setVirtualNow, getCurrentTime, getCurrentDate, triggerRefresh } = useContext(TimeMachineContext);
+    const { setMachineOpen, getVirtualNow, setVirtualNow, currentTime, currentDate, triggerRefresh } = useContext(TimeMachineContext);
 
-    const currentTime = getCurrentTime();
-    const currentDate = getCurrentDate();
     const virtualNow = getVirtualNow();
     const [inputTime, setInputTime] = useState('');
     const [inputDate, setInputDate] = useState('');

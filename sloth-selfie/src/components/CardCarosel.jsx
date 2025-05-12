@@ -33,14 +33,17 @@ const CardCarosel = ({ title, settingKey }) => {
     const titleMap = {
         showEventsList: "Today's Events List",
         showActivitiesList: "This week's Activities List",
+        showTasksList: "This week's Tasks List",
         listOfNotes: 'Notes List',
         lastNote: 'Most recent Note',
+        addNote: 'Add a Note',
         quickStart: 'Quick Start',
         listOfPomodoros: 'Pomodoros ToDo List',
         lastPomodoro: 'Last Pomodoro',
         stats: 'Pomodoros Stats',
         listOfProjects: 'Projects List',
-        recentProjectsDeadlines: 'Upcoming Deadlines'
+        recentProjectsDeadlines: 'Upcoming Deadlines',
+        projectGanttChart: 'Project Gantt Chart'
     };
 
     //Get the personalized title
@@ -110,17 +113,17 @@ const CardCarosel = ({ title, settingKey }) => {
                 <TaskProvider>
                     <PomodoroProvider>
                         <animated.div
-                            className='card d-flex flex-column justify-content-evenly align-items-center'
+                            className='card d-flex flex-column justify-content-evenly align-items-center py-4'
                             style={props3}
                             onMouseEnter={() => setShown(true)}
                             onMouseLeave={() => setShown(false)}
                         >   
-                            <h2>{title}</h2>
+                            <h3 className='grandstander-normal'>{title}</h3>
                             {customizations[settingKey] === 'showCalendar' ? (
                                     renderLegend()
                             ) : (
                                 <>
-                                    <p>{currentTitle}</p>
+                                    <h6>{currentTitle}</h6>
                                 </>
                             )}
                             

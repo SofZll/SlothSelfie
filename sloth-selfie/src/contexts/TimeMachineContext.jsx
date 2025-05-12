@@ -9,6 +9,8 @@ const TimeMachineContext = createContext();
 const TimeMachineProvider = ({ children }) => {
     const [isActive, setIsActive] = useState(false);
     const [machineOpen, setMachineOpen] = useState(false);
+    const [currentDate, setCurrentDate] = useState(null);
+    const [currentTime, setCurrentTime] = useState(null);
     const virtualNowRef = useRef(new Date());
 
     const [refreshKey, setRefreshKey] = useState(0);
@@ -53,6 +55,8 @@ const TimeMachineProvider = ({ children }) => {
     useEffect(() => {
         const interval = setInterval(() => {
             virtualNowRef.current = new Date(virtualNowRef.current.getTime() + 1000);
+            setCurrentDate(dateFromDate(virtualNowRef.current));
+            setCurrentTime(timeFromDate(virtualNowRef.current));
         }, 1000);
     
         return () => clearInterval(interval);
@@ -65,11 +69,19 @@ const TimeMachineProvider = ({ children }) => {
         triggerRefresh();
     }
 
-    const getCurrentDate = () => dateFromDate(virtualNowRef.current);
-    const getCurrentTime = () => timeFromDate(virtualNowRef.current);
-
     return (
-        <TimeMachineContext.Provider value={{ machineOpen, setMachineOpen, getVirtualNow, setVirtualNow, isActive, setIsActive, getCurrentDate, getCurrentTime, refreshKey, triggerRefresh }}>
+        <TimeMachineContext.Provider value={{ 
+            machineOpen, 
+            setMachineOpen, 
+            getVirtualNow, 
+            setVirtualNow, 
+            isActive, 
+            setIsActive, 
+            currentDate,
+            currentTime,
+            refreshKey, 
+            triggerRefresh 
+        }}>
             {children}
         </TimeMachineContext.Provider>
     );
