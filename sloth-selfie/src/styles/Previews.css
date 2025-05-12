@@ -2,7 +2,6 @@
 
 /*Calendar view*/
 .react-calendar {
-    height: auto;
     overflow-y: auto;
     width: 90%;
     margin: 1.5rem auto;
