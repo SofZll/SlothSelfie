@@ -65,7 +65,7 @@ const SliderPriority = () => {
         if (selected.selection === 'event') {
             setData(event);
         }
-    }, []);
+    }, [event]);
  
     return (
         <div className={`d-flex flex-column w-100 py-2 px-4 ${event.isInProject || event.tool ? 'opacity-50' : ''}`}>

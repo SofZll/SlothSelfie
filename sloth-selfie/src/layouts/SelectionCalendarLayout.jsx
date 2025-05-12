@@ -68,7 +68,7 @@ const SelectionCalendarLayout = ({children}) => {
                 </div>
             </div>
 
-            <main className='d-flex justify-content-center form-popup position-relative'>{children}</main>
+            <main className='d-flex w-100 justify-content-center form-popup position-relative'>{children}</main>
 
             
 

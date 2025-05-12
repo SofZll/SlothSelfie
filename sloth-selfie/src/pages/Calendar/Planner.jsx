@@ -38,12 +38,11 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, loading, setLoading } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, show, setShow, loading, setLoading } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
     const { rooms, devices, setRooms, setDevices, selectedRooms, setSelectedRooms, selectedDevices, setSelectedDevices, toolEvents, setToolEvents, toolAvailabilities, setToolAvailabilities } = useTools();
     const { setPlannedPomodori, plannedPomodori, setSettingsPomodoro } = usePomodoro();
 
-    const [show, setShow] = useState('plans');
 
     const [listNormal, setListNormal] = useState([]);
 
@@ -64,7 +63,7 @@ const Planner = () => {
             return datas.map((data) => {
                 return {
                     _id: data._id,
-                    title: 'No Availability for group events',
+                    title: data.title || 'No Availability for group events',
                     user: data.user,
                     start: new Date(data.startDate),
                     end: new Date(data.endDate),
@@ -243,34 +242,29 @@ const Planner = () => {
         const eventsSelected = [];
         const availabilitiesSelected = [];
         const eventsId = new Set();
-        const availabilitiesId = new Set();
 
         for (let i = 0; i < sr.length; i++) {
             const ev = sr[i].events.filter(e => !eventsId.has(e._id));
-            const na = sr[i].availabilities.filter(a => !availabilitiesId.has(a._id));
         
             ev.forEach(e => eventsId.add(e._id));
-            na.forEach(a => availabilitiesId.add(a._id));
             
             eventsSelected.push(...ev);
-            availabilitiesSelected.push(...na);
+            availabilitiesSelected.push(...sr[i].availabilities.map(na => ({ ...na, title: `${sr[i].username} no Availability` })));
         }
 
         for (let i = 0; i < sd.length; i++) {
             const ev = sd[i].events.filter(e => !eventsId.has(e._id));
-            const na = sd[i].availabilities.filter(a => !availabilitiesId.has(a._id));
         
             ev.forEach(e => eventsId.add(e._id));
-            na.forEach(a => availabilitiesId.add(a._id));
             
             eventsSelected.push(...ev);
-            availabilitiesSelected.push(...na);
+            availabilitiesSelected.push(...sd[i].availabilities.map(na => ({ ...na, title: `${sd[i].username} no Availability` })));
         }
 
         setToolEvents([...eventsSelected]);
         setToolAvailabilities([...availabilitiesSelected]);
 
-    }, [selectedRooms, selectedDevices]);
+    }, [selectedRooms, selectedDevices, rooms, devices]);
 
     const dayPropGetter = useCallback((date) => ({
         className: moment(date).isSame(now, 'day') ? 'virtual-day' : ''
@@ -508,7 +502,7 @@ const Planner = () => {
                     )}
                 </div>
             ) : (
-                <ScrollList CardList={user.isAdmin ? [...rooms, ...devices] : activities} smallView={true} activity={!user.isAdmin} />
+                <ScrollList CardList={(user.isAdmin || show === 'tools') ? [...rooms, ...devices] : activities} smallView={true} activity={!(user.isAdmin || show === 'tools')} />
             )}
         </PlusLayout>
     )
