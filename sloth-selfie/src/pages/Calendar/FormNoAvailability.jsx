@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import Select from 'react-select';
 
 import { NewSwal } from '../../utils/swalUtils';
 
@@ -7,10 +8,14 @@ import { apiService } from '../../services/apiService';
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 
 import { useCalendar } from '../../contexts/CalendarContext';
+import { useTools } from '../../contexts/ToolsContext';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const FormNoAvailability = () => {
 
-    const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, resetSelected, setConditionsMet, conditionsMet } = useCalendar();
+    const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, resetSelected, setConditionsMet, conditionsMet, show } = useCalendar();
+    const { selectedRooms, setSelectedRooms, selectedDevices, setSelectedDevices, rooms, devices, setRooms, setDevices } = useTools();
+    const { user } = useContext(AuthContext);
     const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setStartDate = (date) => {
@@ -55,6 +60,23 @@ const FormNoAvailability = () => {
         }
     }
 
+    const roomOptions = [
+        ...rooms.map(room => ({ value: room._id, label: room.username }))
+    ];
+
+    const deviceOptions = [
+        ...devices.map(device => ({ value: device._id, label: device.username }))
+    ];
+
+    const handleChange = (type) => (newValue) => {
+        const listId = newValue.map(item => item.value);
+       
+        if (type === 'room') {
+            setSelectedRooms([...listId]);
+        } else if (type === 'device') {
+            setSelectedDevices([...listId]);
+        }
+    }
 
     const handleSubmit = async () => {
         
@@ -78,15 +100,34 @@ const FormNoAvailability = () => {
             }
         }
 
-        const response = await apiService(`/no-availability/${selected.edit ? availability._id : ''}`, selected.edit ? 'PUT' : 'POST', availability);
+        const response = await apiService(`/no-availability/${selected.edit ? availability._id : ''}`, selected.edit ? 'PUT' : 'POST', {...availability, tools: (user.isAdmin ? [...selectedRooms, ...selectedDevices] : [])});
+
+        console.log('tools', selectedRooms, selectedDevices);
 
         if (response.success) {
             NewSwal.fire({ title: selected.edit ? 'Availability edited' : 'Availability added', icon: 'success', text: selected.edit ? 'Availability edited successfully' : 'Availability added successfully'});
             if (selected.edit) {
-                if (availability.repeatFrequency === 'none') setAvailabilities([...availabilities.filter(a => a._id !== availability._id && a.fatherId !== availability.fatherId), { ...response.noAvailability }]);
-                else setAvailabilities([...availabilities.filter(a => a.fatherId !== availability.fatherId && a._id !== availability._id), ...response.listNoAvailability]);
+                if (user.isAdmin) {
+                    const response = await apiService('/users/tools', 'GET');
+                    if (response.success) {
+                        setRooms(response.rooms);
+                        setDevices(response.devices);
+                    }
+                } else {
+                    setAvailabilities([...availabilities.filter(a => a.fatherId !== availability.fatherId && a._id !== availability._id), ...response.listNoAvailability]);
+                }
             }
-            else setAvailabilities([...availabilities, ...(availability.repeatFrequency !== 'none' ? response.listNoAvailability : [response.noAvailability])]);
+            else {
+                if (user.isAdmin) {
+                    const response = await apiService('/users/tools', 'GET');
+                    if (response.success) {
+                        setRooms(response.rooms);
+                        setDevices(response.devices);
+                    }
+                } else {
+                    setAvailabilities([...availabilities, ...response.listNoAvailability]);
+                }
+            }
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
 
         resetAvailability();
@@ -97,11 +138,20 @@ const FormNoAvailability = () => {
         const response = await apiService(`/no-availability/${availability._id}`, 'DELETE');
         if (response.success) {
             NewSwal.fire({ title: 'Availability deleted', icon: 'success', text: 'Availability deleted successfully'});
-            if (availability.repeatFrequency === 'none') setAvailabilities(availabilities.filter(a => a._id !== availability._id));
-            else setAvailabilities(availabilities.filter(a => a.fatherId !== availability._id && a._id !== availability._id));
+            if (user.isAdmin) {
+                const response = await apiService('/users/tools', 'GET');
+                if (response.success) {
+                    setRooms(response.rooms);
+                    setDevices(response.devices);
+                }
+            } else {
+                if (availability.repeatFrequency === 'none') setAvailabilities(availabilities.filter(a => a._id !== availability._id));
+                else setAvailabilities(availabilities.filter(a => a.fatherId !== availability._id && a._id !== availability._id));
+            }
         } else NewSwal.fire({ title: 'Error deleting availability', icon: 'error', text: response.message});
         resetAvailability();
         resetSelected();
+        setDeletePopUp(false);
     }
 
     useEffect(() => {
@@ -120,12 +170,53 @@ const FormNoAvailability = () => {
 
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden'>
+            {(user.isAdmin || show === 'tools') && (
+                <div className='row py-2'>
+                    {selected.edit ? (
+                        <div className='col-12'>
+                            <div className='d-inline-block form-label'>
+                                Tool: 
+                            </div>
+                            <div className='d-inline-flex ms-2 fst-italic fw-semibold sloth-blue'>
+                                {availability.title.split(" no Availability")[0]}
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                        <div className='col-6'>
+                            <label htmlFor='room' className='form-label'>Room</label>
+                            <Select
+                            isMulti
+                            classNamePrefix='rooms'
+                            options={roomOptions}
+                            value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
+                            onChange={handleChange('room')}
+                            placeholder={'0 rooms'}
+                            />
+                        </div>
+                        <div className='col-6'>
+                            <label htmlFor='devices' className='form-label'>Devices</label>
+                            <Select
+                            isMulti
+                            classNamePrefix='devices'
+                            options={deviceOptions}
+                            value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
+                            onChange={handleChange('device')}
+                            placeholder={'0 devices'}
+                            />
+                        </div>
+                        </>
+                    )}
+                </div>
+            )}
+            
             <div className='row py-2'>
                 <div className='col-6'>
                     <label htmlFor='startDate' className='form-label'>Start Date</label>
                     <input type='date' className='form-control' id='startDate'
                         value={new Date(availability.startDate).toLocaleDateString('en-CA')}
                         onChange={(e) => setStartDate(e.target.value)}
+                        disabled={!user.isAdmin}
                         required />
                 </div>
                 {availability.days ? (
@@ -134,6 +225,7 @@ const FormNoAvailability = () => {
                         <input type='date' className='form-control' id='endDate'
                         value={new Date(availability.endDate).toLocaleDateString('en-CA')}
                         onChange={(e) => setEndDate(e.target.value)}
+                        disabled={!user.isAdmin}
                         required />
                     </div>
                 ) : (
@@ -141,6 +233,7 @@ const FormNoAvailability = () => {
                         <label htmlFor='time' className='form-label'>Time</label>
                         <select className='form-select' id='time'
                         value={availability.startTime}
+                        disabled={!user.isAdmin}
                         onChange={(e) => setStartTime(e.target.value)}>
                             <option value=''>Select time</option>
                             {generateTimeOptions().map(option => (
@@ -155,6 +248,7 @@ const FormNoAvailability = () => {
                 <div className='col col-auto form-check form-switch ms-3'>
                     <input className='form-check-input' type='checkbox' id='days'
                         checked={!availability.days}
+                        disabled={!user.isAdmin}
                         onChange={(e) => setAvailability({ ...availability, days: !e.target.checked })} />
                     <label className='form-check-label' htmlFor='days'>it lasts hours</label>
                 </div>
@@ -167,6 +261,7 @@ const FormNoAvailability = () => {
                         <input type='number' className='form-control' id='duration'
                         placeholder='Duration in hours'
                         value={availability.duration}
+                        disabled={!user.isAdmin}
                         onChange={(e) => setEndTime(e.target.value)}
                         min={1}
                         required />
@@ -179,6 +274,7 @@ const FormNoAvailability = () => {
                     <label htmlFor='repeatFrequency' className='form-label'>Repeat Frequency</label>
                     <select className='form-select' name='repeatFrequency'
                     value={availability.repeatFrequency}
+                    disabled={!user.isAdmin}
                     onChange={(e) => setAvailability({ ...availability, repeatFrequency: e.target.value })}>
                         <option value='none'>None</option>
                         <option value='daily'>Daily</option>
@@ -192,6 +288,7 @@ const FormNoAvailability = () => {
                         <label htmlFor='numberOfOccurrences' className='form-label'>Number of Occurrences</label>
                         <input type='number' className='form-control' id='numberOfOccurrences'
                         placeholder='Number of occurrences'
+                        disabled={!user.isAdmin}
                         value={availability.numberOfOccurrences}
                         onChange={(e) => setAvailability({ ...availability, numberOfOccurrences: e.target.value })}
                         min={1}
@@ -200,12 +297,14 @@ const FormNoAvailability = () => {
                 )}
             </div>
 
-            <div className='d-flex align-items-center justify-content-center'>
-                <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
-                {selected.edit && (
-                    <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
-                )}
-            </div>
+            {user.isAdmin && (
+                <div className='d-flex align-items-center justify-content-center'>
+                    <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                    {selected.edit && (
+                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
+                    )}
+                </div>
+            )}
 
             {deletePopUp && (
                 <DeletePopUpLayout handleDelete={() => deleteAvailability()} handleClose={() => setDeletePopUp(false)}>

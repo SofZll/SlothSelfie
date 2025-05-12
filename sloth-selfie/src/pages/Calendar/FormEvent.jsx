@@ -193,9 +193,7 @@ const FormEvent = () => {
         if (response.success) {
             NewSwal.fire({ title: 'Event deleted', icon: 'success', text: 'Event deleted successfully'});
             if (user.isAdmin) {
-                if (event.repeatFrequency === 'none') setToolEvents(toolEvents.filter(evt => evt._id !== event._id));
-                else setToolEvents(toolEvents.filter(evt => evt.fatherId !== event.fatherId));
-                const response = await apiService('/users/tools', 'GET');
+               const response = await apiService('/users/tools', 'GET');
                 if (response.success) {
                     setRooms(response.rooms);
                     setDevices(response.devices);
