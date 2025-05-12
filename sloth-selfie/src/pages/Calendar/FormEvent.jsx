@@ -258,9 +258,6 @@ const FormEvent = () => {
                 }
             }
         }
-        console.log('event', event);
-        console.log('inputMap', inputMap);
-        console.log('eventLocationDetails', event.eventLocationDetails);
         setPosition();
     }, [inputMap, event]);
 
