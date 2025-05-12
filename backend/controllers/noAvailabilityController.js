@@ -59,65 +59,79 @@ const addSingleNoAvailability = async (user, startDate, endDate, days, repeatFre
         console.error('Error adding no availability:', error);
         return ({ success: false, message: 'Error adding no availability' });
     }
-};
-        
+};                          
+            
 
 
 //Add new no availability for group events
 const addNoAvailability = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-    const { startDate, endDate, days, repeatFrequency, numberOfOccurrences } = req.body;
+    const { startDate, endDate, days, repeatFrequency, numberOfOccurrences, tools } = req.body;
 
     try {
-        
-        if (repeatFrequency === 'none') {
-            const response = await addSingleNoAvailability(user, startDate, endDate, days, repeatFrequency);
-            if (!response.success) res.status(400).json({ success: false, message: response.message });
-            else res.status(200).json({ success: true, noAvailability: response.response });
 
-        } else {
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        const users = [];
 
-            const listNoAvailability = [];
-            let gap = 1;
-            let fatherId = null;
-
-            if (repeatFrequency === 'weekly') gap = 7;
-            else if (repeatFrequency === 'monthly') gap = 30;
-            else if (repeatFrequency === 'yearly') gap = 365;
-
-            for (let i = 0; i < numberOfOccurrences; i++) {
-
-                const start = new Date(startDate);
-                start.setDate(start.getDate() + (i * gap));
-                const end = new Date(endDate);
-                end.setDate(end.getDate() + (i * gap));
-                console.log('start', start);
-                console.log('end', end);
-
-                const response = await addSingleNoAvailability(user, start, end, days, repeatFrequency, numberOfOccurrences, fatherId);
-
-                if (!response.success) {
-                    res.status(400).json({ success: false, message: response.message });
-                    if (i !== 0) await NoAvailability.deleteMany({ 
-                        $or: [
-                            { fatherId: fatherId }
-                        ]
-                    });
-                    return;
-                }
-
-                console.log('response', response);
-
-                if (i === 0) {
-                    fatherId = response.response._id;
-                    await NoAvailability.findByIdAndUpdate(fatherId, { fatherId: fatherId });
-                }
-                listNoAvailability.push(response.response);
+        if (user.isAdmin) {
+            for (let i = 0; i < tools.length; i++) {
+                const tool = await User.findById(tools[i]);
+                console.log('tool', tool);
+                if (!tool) return res.status(404).json({ success: false, message: 'Tool not found' });
+                users.push(tool);
             }
-
-            res.status(200).json({ success: true, listNoAvailability });
+        } else {
+            users.push(user);
         }
+        
+        const listNoAvailability = [];
+
+        for (let j = 0; j < users.length; j++) {
+        
+            if (repeatFrequency === 'none') {
+                const response = await addSingleNoAvailability(users[j], startDate, endDate, days, repeatFrequency);
+                if (!response.success) return res.status(400).json({ success: false, message: response.message });
+                else listNoAvailability.push(response.response);
+
+            } else {
+
+                let gap = 1;
+                let fatherId = null;
+
+                if (repeatFrequency === 'weekly') gap = 7;
+                else if (repeatFrequency === 'monthly') gap = 30;
+                else if (repeatFrequency === 'yearly') gap = 365;
+
+                for (let i = 0; i < numberOfOccurrences; i++) {
+
+                    const start = new Date(startDate);
+                    start.setDate(start.getDate() + (i * gap));
+                    const end = new Date(endDate);
+                    end.setDate(end.getDate() + (i * gap));
+                    console.log('start', start);
+                    console.log('end', end);
+
+                    const response = await addSingleNoAvailability(users[j], start, end, days, repeatFrequency, numberOfOccurrences, fatherId);
+
+                    if (!response.success) {
+                        if (i !== 0) await NoAvailability.deleteMany({ 
+                            $or: [
+                                { fatherId: fatherId }
+                            ]
+                        });
+                        return res.status(400).json({ success: false, message: response.message });
+                    }
+
+                    if (i === 0) {
+                        fatherId = response.response._id;
+                        await NoAvailability.findByIdAndUpdate(fatherId, { fatherId: fatherId });
+                    }
+                    listNoAvailability.push(response.response);
+                }
+            }
+        }
+        res.status(200).json({ success: true, listNoAvailability });
     } catch (error) {
         console.error('Error adding no availability:', error);
         res.status(500).json({ success: false, message: 'Error adding no availability' });
@@ -176,9 +190,9 @@ const updateNoAvailability = async (req, res) => {
 
     try {
         const nA2update = await NoAvailability.findById(noAvailabilityId);
-        console.log('nA2update', nA2update);
-
         if (!nA2update) return res.status(404).json({ success: false, message: 'No availability not found' });
+        
+        const updatedNoAvailability = [];
 
         if (repeatFrequency === 'none') {
             if( nA2update.repeatFrequency !== 'none') {
@@ -189,18 +203,16 @@ const updateNoAvailability = async (req, res) => {
 
                 const response = await editNoAvailability(listNoAvailability[0]._id, new Date(startDate), new Date(endDate), days, repeatFrequency);
                 if (!response.success) return res.status(400).json({ success: false, message: response.message });
-                else return res.status(200).json({ success: true, noAvailability: response.response });
+                else updatedNoAvailability.push(response.response);
             } else {
                 const response = await editNoAvailability(noAvailabilityId, new Date(startDate), new Date(endDate), days, repeatFrequency);
                 if (!response.success) res.status(400).json({ success: false, message: response.message });
-                else res.status(200).json({ success: true, noAvailability: response.response });
+                else updatedNoAvailability.push(response.response);
             }
         } else {
 
             const noAvailability = await NoAvailability.findById(noAvailabilityId);
             if (!noAvailability) return res.status(404).json({ success: false, message: 'No availability not found' });
-            
-            const updatedNoAvailability = [];
 
             let gap = 1;
 
@@ -268,10 +280,9 @@ const updateNoAvailability = async (req, res) => {
                     await NoAvailability.findByIdAndDelete(listNoAvailability[i]._id);
                 }
             }
-
-
-            res.status(200).json({ success: true, listNoAvailability: updatedNoAvailability });
         }
+
+        res.status(200).json({ success: true, listNoAvailability: updatedNoAvailability });
     } catch (error) {
         console.error('Error updating no availability:', error);
         res.status(500).json({ success: false, message: 'Error updating no availability' });

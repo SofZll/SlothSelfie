@@ -11,6 +11,7 @@ const { getCurrentNow } = require('../services/timeMachineService');
 const ical = require('node-ical');
 const fs = require('fs');
 const { RRule } = require('rrule');
+const { find } = require('../models/noAvailabilityModel');
 
 
 const getEvents = async (req, res) => {
@@ -298,7 +299,7 @@ const updateEvent = async (req, res) => {
         if (event.repeatFrequency !== 'none') {
           const events = await Event.find({ fatherId: event.fatherId });
           for (let i = 1; i < events.length; i++) {
-            await events[i].deleteOne();
+            await Event.findByIdAndDelete(events[i]._id);
           }
 
           const response = await editEvent(events[0]._id, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency);
@@ -404,7 +405,7 @@ const updateEvent = async (req, res) => {
 
           if (repeatTimes < events2edit.length) {
             for (let i = repeatTimes; i < events2edit.length; i++) {
-              await events2edit[i].deleteOne();
+              await Event.findByIdAndDelete(events2edit[i]._id);
             }
           }
         } else if (repeatEndDate) {
@@ -432,7 +433,7 @@ const updateEvent = async (req, res) => {
 
           if (count < events2edit.length) {
             for (let i = count; i < events2edit.length; i++) {
-              await events2edit[i].deleteOne();
+              await Event.findByIdAndDelete(events2edit[i]._id);
             }
           }
         } else {
@@ -463,7 +464,7 @@ const deleteEvent = async (req, res) => {
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
     
     if (event.user.toString() === user._id.toString()) {
-      if (event.repeatFrequency === 'none') await event.deleteOne();
+      if (event.repeatFrequency === 'none') await Event.findByIdAndDelete(eventId);
       else await Event.deleteMany({ fatherId: event.fatherId });
 
 
