@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema({
         outsideDayHours: {
             type: Boolean,
             default: true
+        },
+        urgency: {
+            type: Boolean,
+            default: false
         }
     },
 

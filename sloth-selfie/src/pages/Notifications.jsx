@@ -27,6 +27,7 @@ const Notifications = () => {
                     }
                 }));
             } else setNotifications([]);
+            console.log('Notifications:', response);
         } catch (error) {
             console.error('Error fetching notifications:', error);
             NewSwal.fire({ title: 'Error', icon: 'error', text: 'Failed to fetch notifications' });

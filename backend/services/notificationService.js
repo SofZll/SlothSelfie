@@ -18,11 +18,13 @@ const sendSystemNotification = async (notification) => {
 
     let element;
     if (notification.elementType === 'Activity') element = await Activity.findById(notification.element);
-    else if (notification.elementType === 'Event') element = await Element.findById(notification.element);
+    else if (notification.elementType === 'Event') element = await Event.findById(notification.element);
 
     let body = '';
     if (notification.type != 'now') {
         body = `il tuo ${notification.elementType} "${element.title}" scade il ${new Date(notification.to).toLocaleString()}`;
+    } else if (notification.urgency === true) {
+        body = `la tua attività "${element.title}" è in ritardo!!`; 
     } else {
         body = `il tuo ${notification.elementType} "${element.title}" è stato modificato`;
     }
@@ -31,10 +33,12 @@ const sendSystemNotification = async (notification) => {
         title: element.title,
         body,
         notificationId: notification.id,
+        elementId: notification.element,
+        elementType: notification.elementType,
         url: 'http://localhost:3000',
+        urgency: notification.urgency,
     };
 
-    console.log('user:', user);
     io.to(user.id).emit('system-notification', payload);
     console.log('Sending system notification:', payload);
 
@@ -54,10 +58,6 @@ const sendSystemNotification = async (notification) => {
             .then(() => console.log('Notification sent'))
             .catch(error => console.error('Error sending notification:', error));
     });
-
-    if (notification.type === 'default') {
-        await Notification.findByIdAndUpdate(notification._id, { status: 'inactive' });
-    }
 }
 
 const sendEmailNotification = async (notification) => {
@@ -127,10 +127,6 @@ const sendEmailNotification = async (notification) => {
         if (error) console.log(error);
         else console.log('Email sent: ' + info.response);
     });
-
-    if (notification.type === 'default') {
-        await Notification.findByIdAndUpdate(notification._id, { status: 'inactive' });
-    }
 }
 
 const calculateNotificationTime = (notification) => {
@@ -168,9 +164,48 @@ const getRepeatInterval = (notification) => {
     }
 }
 
+const getTriggerAt = (notification, now) => {
+    let triggerAt = null;
+    if (notification.type === 'repeat') {
+        const start = new Date(notification.from);
+        const interval = getRepeatInterval(notification);
+        const timeSinceStart = now - start;
+        const intervalsPassed = Math.floor(timeSinceStart / interval);
+        const nextTrigger = new Date(start.getTime() + (intervalsPassed + 1) * interval);
+        triggerAt = nextTrigger;
+    } else if (notification.type === 'default') {
+        triggerAt = calculateNotificationTime(notification);
+    }
+
+    return triggerAt;
+}
+
+const getUrgencyFrequency = (deadline, now) => {
+    const elapsedMs = now.getTime() - new Date(deadline).getTime();
+
+    const hour = 60 * 60 * 1000;
+    const day = 24 * hour;
+
+    if (elapsedMs < day) return day;
+    else if (elapsedMs < 2 * day) return 6 * hour;
+    else return hour;
+};
+
+const checkUrgency = (lastSentAt, deadline, now) => {
+    const freqMs = getUrgencyFrequency(deadline, now);
+
+    if (now.getTime() < lastSentAt.getTime()) {
+        return now.getTime() - new Date(deadline).getTime() >= freqMs;
+    }
+
+    return now.getTime() - lastSentAt.getTime() >= freqMs;
+};
+
 module.exports = {
     sendSystemNotification,
     sendEmailNotification,
     calculateNotificationTime,
-    getRepeatInterval
+    getRepeatInterval,
+    getTriggerAt,
+    checkUrgency
 };
