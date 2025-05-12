@@ -13,6 +13,7 @@ import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import ShareInput from '../../components/ShareInput';
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 import NotificationInput from '../../components/Notification/NotificationInput';
+import SliderPriority from '../../components/SliderPriority';
 import GeolocalizationInput from '../../components/GeolocalizationInput';
 
 const FormEvent = () => {
@@ -219,6 +220,8 @@ const FormEvent = () => {
             setConditionsMet(false);
         } else if (user.isAdmin) {
             setConditionsMet(false);
+        } else if (event.isInProject) {
+            setConditionsMet(false);
         } else setConditionsMet(true);
         
         if (event.repeatFrequency !== 'none') {
@@ -295,6 +298,13 @@ const FormEvent = () => {
                         </select>
                     </div>
                 )}
+            </div>
+
+            <div className='row py-2'>
+                <div className='col-12'>
+                    <label htmlFor='priority' className='form-label'>Priority</label>
+                    <SliderPriority />
+                </div>
             </div>
 
             <div className='row py-2 d-flex align-items-end'>
