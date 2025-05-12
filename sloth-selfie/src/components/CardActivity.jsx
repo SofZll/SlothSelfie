@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 
 import { apiService } from '../services/apiService';
 import { useCalendar } from '../contexts/CalendarContext';
@@ -29,6 +29,7 @@ const CardActivity = ({ Activity, smallView }) => {
         else console.error('Error updating activity response:', response);
     }
 
+    
     return (
         <div className='d-flex flex-column w-100 align-items-center border rounded shadow-sm p-md-3 p-1 position-relative'>
             

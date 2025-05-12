@@ -191,7 +191,7 @@ const deleteActivity = async (req, res) => {
         if (activity.user.toString() !== user._id.toString()) {
             activity.sharedWith = activity.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
             await activity.save();
-        } else await activity.deleteOne();
+        } else await Activity.findByIdAndDelete(activityId);
 
         res.status(200).json({ success: true, message: "Activity deleted successfully" });
     } catch (error) {

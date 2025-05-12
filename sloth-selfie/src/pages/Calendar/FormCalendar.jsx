@@ -24,7 +24,7 @@ import { apiService } from '../../services/apiService';
 
 const FormCalendar = () => {
 
-    const { activities, selected, select, addImportedEvents, activity, event } = useCalendar();
+    const { activities, selected, select, addImportedEvents, activity, event, show } = useCalendar();
     const { task } = useTask();
     const { rooms, devices } = useTools();
     const { user } = React.useContext(AuthContext);
@@ -98,7 +98,7 @@ const FormCalendar = () => {
         <div className='d-flex flex-column w-100 h-100 overflow-y-auto overflow-x-hidden position-relative'>
 
             {isDesktop && (
-                <ScrollList CardList={user.isAdmin ? [...rooms, ...devices] : activities} smallView={false} activity={!user.isAdmin} />
+                <ScrollList CardList={(user.isAdmin || show === 'tools') ? [...rooms, ...devices] : activities} smallView={false} activity={!(user.isAdmin || show === 'tools')} />
             )}
 
             <SelectionCalendarLayout>
