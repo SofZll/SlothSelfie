@@ -11,6 +11,7 @@ const CardTool = ({ tool, smallView }) => {
     const { setSelected } = useCalendar();
     const { setRoom, setDevice } = useTools();
     const { user } = useContext(AuthContext);
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     const selectTool = () => {
         if (tool.type === 'room') {
@@ -19,6 +20,32 @@ const CardTool = ({ tool, smallView }) => {
             setDevice({ ...tool });
         }
         setSelected({ selection: tool.type, edit: true, add: false, popup: true });
+    }
+
+    function formatDays(activeDays) {
+        const activeIndices = days
+        .map((day, index) => activeDays.includes(day) ? index : -1)
+        .filter(index => index !== -1);
+        
+        if (activeIndices.length === 0) return '';
+        
+        let ranges = [];
+        let start = activeIndices[0];
+        let prev = start;
+        
+        for (let i = 1; i < activeIndices.length; i++) {
+            if (activeIndices[i] === prev + 1) {
+                prev = activeIndices[i];
+            } else {
+                ranges.push(start === prev ? days[start] : `${days[start]}-${days[prev]}`);
+                start = activeIndices[i];
+                prev = start;
+            }
+        }
+        
+        ranges.push(start === prev ? days[start] : `${days[start]}-${days[prev]}`);
+        
+        return ranges.join(', ');
     }
 
     return (
@@ -33,7 +60,26 @@ const CardTool = ({ tool, smallView }) => {
                 </div>
             </div>
 
-            {!smallView && (
+            {smallView ? (
+                <div className='d-flex flex-column w-100 p-2'>
+                    <div className='d-flex w-100 flex-column'>
+                        <div className='d-inline-block'>Open:</div>
+                        <div className='d-flex w-100 fst-italic justify-content-center'>
+                            {tool.dayHours.start} - {tool.dayHours.end}
+                        </div>
+                        <div className='d-flex w-100 fst-italic justify-content-center'>
+                            {tool.freeDays.length > 0 ?
+                                (tool.freeDays.length === 7 ?
+                                    'Always closed'
+                                :
+                                    formatDays(days.filter((day, index) => !tool.freeDays.includes(day)))
+                                )
+                            : 'Always open'}
+                        </div>
+                    </div>
+                </div>
+
+            ) : (
                 <div className='d-flex flex-column w-100 p-2'>
                     <div className='d-flex w-100'>
                         <div className='d-inline-block'>Open:</div>

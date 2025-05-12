@@ -38,12 +38,11 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, loading, setLoading } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, show, setShow, loading, setLoading } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
     const { rooms, devices, setRooms, setDevices, selectedRooms, setSelectedRooms, selectedDevices, setSelectedDevices, toolEvents, setToolEvents, toolAvailabilities, setToolAvailabilities } = useTools();
     const { setPlannedPomodori, plannedPomodori, setSettingsPomodoro } = usePomodoro();
 
-    const [show, setShow] = useState('plans');
 
     const [listNormal, setListNormal] = useState([]);
 
@@ -508,7 +507,7 @@ const Planner = () => {
                     )}
                 </div>
             ) : (
-                <ScrollList CardList={user.isAdmin ? [...rooms, ...devices] : activities} smallView={true} activity={!user.isAdmin} />
+                <ScrollList CardList={(user.isAdmin || show === 'tools') ? [...rooms, ...devices] : activities} smallView={true} activity={!(user.isAdmin || show === 'tools')} />
             )}
         </PlusLayout>
     )
