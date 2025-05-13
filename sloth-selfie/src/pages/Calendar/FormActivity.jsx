@@ -27,6 +27,7 @@ const FormActivity = () => {
                 const notificationPromises = notifications.map(async notification =>{
                     if (notification._id) {
                         const response = await apiService(`/notification/${notification._id}`, 'PUT', notification);
+
                         if (response.success) return response.notification;
                         else NewSwal.fire({ title: 'Error editing notification', icon: 'error', text: response.message});
                     } else {
@@ -35,11 +36,9 @@ const FormActivity = () => {
                             elementId: activity._id,
                             notifications: [notification]
                         });
+                        
                         if (response.success) return response.notification;
-                        else {
-                            console.log('Error adding notification', response.message);
-                            NewSwal.fire({ title: 'Error adding notification', icon: 'error', text: response.message});
-                        }
+                        else NewSwal.fire({ title: 'Error adding notification', icon: 'error', text: response.message});
                     }
                 });
 

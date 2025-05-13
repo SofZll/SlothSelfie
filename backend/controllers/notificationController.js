@@ -23,6 +23,8 @@ const setNotifications = async (req, res) => {
         } else if (type === 'Event') {
             element = await Event.findById(elementId);
             to = element.endDate;
+            console.log('Event end date:', to);
+            console.log('Event ID:', elementId);
         }
         if (!element) return res.status(404).json({ success: false, message: 'Element not found' });
 
@@ -38,11 +40,12 @@ const setNotifications = async (req, res) => {
                 elementType: type,
                 type: notification.type,
                 mode: notification.mode,
-                before: notification.before,
+                before: notification.before,    
                 variant: notification.variant,
                 time: isDefault ? notification.time : undefined,
                 from: !isDefault ? combineDateTime(notification.fromDate, notification.fromTime) : now,
                 to: to,
+                lastSentAt: isDefault ? undefined : now,
                 createdAt: now,
                 updatedAt: now
             }
@@ -51,18 +54,6 @@ const setNotifications = async (req, res) => {
         console.log('New notifications:', newNotifications);
 
         const savedNotifications = await Notification.insertMany(newNotifications);
-
-        for (const notification of savedNotifications) {
-            if (notification.type === 'default') {
-                notification.triggerAt = calculateNotificationTime(notification);
-            } else if (notification.type === 'repeat') {
-                const lastSent = notification.from;
-                const interval = getRepeatInterval(notification);
-                notification.triggerAt = new Date(lastSent.getTime() + interval);
-            }
-            notification.status = 'active';
-            await notification.save();
-        }
 
         res.status(201).json({ success: true, message: 'Notifications created successfully', notifications: savedNotifications });
     } catch (error) {
@@ -99,9 +90,14 @@ const getNotifications = async (req, res) => {
     if (!elementId) return res.status(400).json({ success: false, message: 'No element ID provided' });
 
     try {
-        const notifications = await Notification.find({ element: elementId, user: userId, createdAt: { $lte: now } })
-            .populate('user', 'username')
-            .sort({ createdAt: -1 });
+        const notifications = await Notification.find({ 
+            element: elementId, 
+            user: userId, 
+            createdAt: { $lte: now },
+            urgency: { $ne: true },
+        })
+        .populate('user', 'username')
+        .sort({ createdAt: -1 });
 
         if (!notifications) return res.status(404).json({ success: false, message: 'No notifications found' });
 
@@ -181,16 +177,7 @@ const updateNotification = async (req, res) => {
             to: to,
             updatedAt: getCurrentNow()
         }, { new: true });
-
-        // recalculate triggerAt
-        if (updatedNotification.type === 'default') {
-            updatedNotification.triggerAt = calculateNotificationTime(updatedNotification);
-        } else if (updatedNotification.type === 'repeat') {
-            const lastSent = updatedNotification.from;
-            const interval = getRepeatInterval(updatedNotification);
-            updatedNotification.triggerAt = new Date(lastSent.getTime() + interval);
-        }
-        updatedNotification.status = 'active';
+s
         await updatedNotification.save();
 
         res.status(200).json({ success: true, message: 'Notification updated successfully', notification: updatedNotification });

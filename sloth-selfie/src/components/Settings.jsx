@@ -64,6 +64,10 @@ const Settings = () => {
                                 <input className='form-check-input' type='checkbox' role='switch' id='switchEmail' checked={user.disableNotifications.email} onChange={(e) => handleSwitch(e, 'email')} disabled={user.disableNotifications.all} />
                             </div>
                             <div className='form-check form-switch col-12 ps-0 my-1'>
+                                <label className='form-check-label col-12' htmlFor='switchUrgency'>Urgency notifications</label>
+                                <input className='form-check-input' type='checkbox' role='switch' id='switchUrgency' checked={user.disableNotifications.urgency} onChange={(e) => handleSwitch(e, 'urgency')} disabled={user.disableNotifications.all} />
+                            </div>
+                            <div className='form-check form-switch col-12 ps-0 my-1'>
                                 <label className='form-check-label col-12' htmlFor='switchWork'>Work notifications outside working hours</label>
                                 <input className='form-check-input' type='checkbox' role='switch' id='switchWork' checked={user.disableNotifications.outsideWorkingHours} onChange={(e) => handleSwitch(e, 'outsideWorkingHours')} disabled={user.disableNotifications.all} />
                             </div>

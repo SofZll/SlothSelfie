@@ -91,7 +91,7 @@ const updateUsers = async () => {
 
         // Aggiorna tutti gli utenti che non hanno il campo `disableNotifications`
         const result = await User.updateMany(
-            { disableNotifications: { $type: 'bool' } }, // Filtra gli utenti con `disableNotifications` booleano
+            {}, // Nessun filtro, aggiorna tutti gli utenti
             {
                 $set: {
                     disableNotifications: {
@@ -100,9 +100,11 @@ const updateUsers = async () => {
                         system: false,
                         outsideWorkingHours: true,
                         outsideDayHours: true,
-                    }
+                        urgency: false,
+                    },
                 }
-            }
+            },
+            { upsert: false } // Non crea nuovi documenti, aggiorna solo quelli esistenti
         );
 
         console.log(`Updated ${result.modifiedCount} users.`);
@@ -116,4 +118,4 @@ const updateUsers = async () => {
 
 //updateIsAdminUndefined();
 //createAdmin();
-//updateUsers();
+updateUsers();

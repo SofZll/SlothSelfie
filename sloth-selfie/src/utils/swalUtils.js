@@ -21,19 +21,26 @@ export const NewSwal = Swal.mixin({
     confirmButtonText: 'OK',
 });
 
-export const toastInfo = (title, body) => {
+export const toastInfo = (title, body, link = null) => {
+    const html = link
+        ? `<div>${body}<br><a href="${link}" style="color: #007bff; text-decoration: underline;" target="_blank">Vai al dettaglio</a></div>`
+        : body;
+    
     Toast.fire({
         icon: 'info',
         title: title,
-        text: body, //TODO: da cambiare in futuro con il link dellevento e dellattivita
-        html: `${body} <a href="http://localhost:3000/notifications" style="color: #3085d6; text-decoration: underline;">View Notifications</a>`,
+        html: html,
     });
 };
 
-export const toastWarning = (title, body) => {
+export const toastWarning = (title, body, link = null) => {
+    const html = link
+        ? `<div>${body}<br><a href="${link}" style="color: #dc3545; text-decoration: underline;" target="_blank">Vai al dettaglio</a></div>`
+        : body;
+
     Toast.fire({
         icon: 'warning',
         title: title,
-        text: body,
+        html: html,
     });
 };

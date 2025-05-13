@@ -224,7 +224,7 @@ const editEvent = async (Id, title, type, priority, startDate, endDate, allDay, 
   }
 }
 
-const updateNoDateEvent = async (Id, title, type, priority, eventLocation, sharedWith, isInProject) => {
+const updateNoDateEvent = async (Id, title, type, priority, eventLocation, eventLocationDetails, sharedWith, isInProject) => {
   try {
     const event = await Event.findById(Id);
     if (!event) return ({ success: false, message: 'Event not found' });
@@ -233,6 +233,7 @@ const updateNoDateEvent = async (Id, title, type, priority, eventLocation, share
     event.type = type;
     event.priority = priority;
     event.eventLocation = eventLocation;
+    event.eventLocationDetails = eventLocationDetails;
     event.sharedWith = sharedWith;
     event.isInProject = isInProject;
     event.updatedAt = getCurrentNow();
