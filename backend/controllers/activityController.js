@@ -31,6 +31,7 @@ const createActivity = async (req, res) => {
             element: savedActivity._id,
             elementType: 'Activity',
             type: 'now',
+            text: `You have a new activity: ${savedActivity.title}`,
             mode: {
                 system: true,
                 email: true,
@@ -253,7 +254,6 @@ async function createNoteAsInputOrOutput(req, res) {
     try {
         //find the user from the username:
         const user = await User.findOne({ username: userName });
-        console.log(userName);
 
         //find the activity
         const activity = await Activity.findById(activityId);
@@ -305,7 +305,6 @@ async function updateOutputAsNote(req, res) {
 
         //find the user from the username:
         const user = await User.findOne({ username: userName });
-        console.log(userName);
 
         //find the activity
         const activity = await Activity.findById(activityId);
@@ -467,6 +466,7 @@ async function adjustOrContractActivitySchedule(req, res) {
                     element: activity._id,
                     elementType: 'Activity',
                     type: 'now',
+                    text: `The schedule of the activity ${activity.title} has been adjusted/contracted. New start date: ${activity.startDate.toISOString().split('T')[0]}, new deadline: ${activity.deadline.toISOString().split('T')[0]}`,
                     mode: {
                         system: true,
                         email: true,
@@ -475,9 +475,7 @@ async function adjustOrContractActivitySchedule(req, res) {
                     updatedAt: getCurrentNow(),
                 });
                 await sendNotificationNow(user, notification);
-                console.log(`Notifying user ${user.username} about schedule change for activity ${activity._id}`);
             }
-            console.log(`Notifying users about schedule change for activity ${activity._id}:`, usersToNotify);
         }
 
         res.status(200).json({ success: true, message: "Schedule adjusted/contracted successfully" ,

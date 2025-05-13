@@ -20,18 +20,9 @@ const sendSystemNotification = async (notification) => {
     if (notification.elementType === 'Activity') element = await Activity.findById(notification.element);
     else if (notification.elementType === 'Event') element = await Event.findById(notification.element);
 
-    let body = '';
-    if (notification.type != 'now') {
-        body = `il tuo ${notification.elementType} "${element.title}" scade il ${new Date(notification.to).toLocaleString()}`;
-    } else if (notification.urgency === true) {
-        body = `la tua attività "${element.title}" è in ritardo!!`; 
-    } else {
-        body = `il tuo ${notification.elementType} "${element.title}" è stato modificato`;
-    }
-
     const payload = {
         title: element.title,
-        body,
+        body: notification.text,
         notificationId: notification.id,
         elementId: notification.element,
         elementType: notification.elementType,
@@ -53,7 +44,6 @@ const sendSystemNotification = async (notification) => {
     subscriptions.forEach(subscription => {
         const pushPayload = JSON.stringify(payload);
 
-        console.log('subscription:', subscription);
         webPush.sendNotification(subscription.subscription, pushPayload)
             .then(() => console.log('Notification sent'))
             .catch(error => console.error('Error sending notification:', error));

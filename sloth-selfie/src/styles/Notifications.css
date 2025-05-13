@@ -1,7 +1,16 @@
 .notifications-container {
     max-width: 60rem;
+    padding-top: 10vh !important;
+}
+
+.notifications-container.desktop {
+    padding-top: 12vh !important;
 }
 
 .notifications-container p {
     margin: 0;
+}
+
+.small-text {
+    font-size: 0.9rem;
 }
