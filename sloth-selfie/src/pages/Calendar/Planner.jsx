@@ -59,6 +59,7 @@ const Planner = () => {
         if (!Array.isArray(datas)) return [];
 
         if (type === 'no availability' || type === 'no availability tool') {
+            console.log(datas, 'aaaaaaa');
 
             return datas.map((data) => {
                 return {
@@ -69,7 +70,7 @@ const Planner = () => {
                     end: new Date(data.endDate),
                     type: 'no availability',
                     allDay: data.days,
-                    tool: (type === 'no availability tool' || user.isAdmin),
+                    tool: type === 'no availability tool',
                 };
             });
         } else if (type === 'event' || type === 'event tool') {
@@ -88,7 +89,7 @@ const Planner = () => {
                     type: 'event',
                     inProject: data.isInProject,
                     allDay: data.allDay,
-                    tool: type === 'event tool' || user.isAdmin,
+                    tool: type === 'event tool',
                 };
             });
         } else {
@@ -300,13 +301,6 @@ const Planner = () => {
                         setRooms(toolsResponse.rooms);
                         setDevices(toolsResponse.devices);
                     }
-
-                    console.log('Activities:', activitiesResponse.activities);
-                    console.log('Events:', eventsResponse.events);
-                    console.log('Tasks:', tasksResponse.tasks);
-                    console.log('Pomodoros:', pomodorosResponse.pomodori);
-                    console.log('No Availability:', noAvailabilityResponse.noAvailability);
-                    console.log('Rooms:', toolsResponse.rooms);
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -353,7 +347,7 @@ const Planner = () => {
             if (!user.isAdmin) {
                 setListNormal([...normalizeData(activities, 'activity'), ...normalizeData(events, 'event'), ...normalizeData(tasks, 'task')]);
             } else {
-                setListNormal([...normalizeData(toolEvents, 'event')]);
+                setListNormal([...normalizeData(toolEvents, 'event tool')]);
             }
         } else if (show === 'tools') {
             setListNormal([...normalizeData(toolEvents, 'event tool'), ...normalizeData(toolAvailabilities, 'no availability tool')]);
@@ -362,7 +356,7 @@ const Planner = () => {
             if (!user.isAdmin) {
                 setListNormal([...normalizeData(availabilities, 'no availability')]);
             } else {
-                setListNormal([...normalizeData(toolAvailabilities, 'no availability')]);
+                setListNormal([...normalizeData(toolAvailabilities, 'no availability tool')]);
             }
         }
     }, [activities, events, tasks, availabilities, show, plannedPomodori, rooms, devices, selectedRooms, selectedDevices, user.isAdmin, toolEvents, toolAvailabilities]);
@@ -386,7 +380,6 @@ const Planner = () => {
     }, [notifications]);
 
     if (loading) {
-        console.log('Loading...');
         return (
             <LoadingPageDark />
         )
