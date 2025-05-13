@@ -2,7 +2,6 @@ import React from 'react';
 
 import { usePomodoro } from '../../contexts/PomodoroContext';
 import { useMusic } from '../../contexts/MusicContext';
-import { CalendarProvider } from '../../contexts/CalendarContext';
 
 import EditPomodoro from './EditPomodoro';
 import PopUpShare from './PopUpShare';
@@ -18,7 +17,7 @@ const PopUpPomodoro = () => {
 
     return (
 
-        <div className='d-flex justify-content-center align-items-center position-fixed pop-up bg-white  border border-secondary rounded' style={{ minWidth: '300px' }}>
+        <div className='d-flex justify-content-center align-items-center position-fixed pop-up bg-white  border border-secondary rounded' style={{ minWidth: '350px' }}>
             <div className='modal-dialog custom-modal'>
                 <div className='modal-content p-3'>
 
@@ -49,10 +48,9 @@ const PopUpPomodoro = () => {
                             <PopUpShare />
                         )}
 
+                        
                         {popUp.calendar && (
-                            <CalendarProvider>
-                                <PopUpPlanPomodoro edit={false} />
-                            </CalendarProvider>
+                            <PopUpPlanPomodoro edit={false} />
                         )}
 
                         {popUp.music && (

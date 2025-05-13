@@ -54,17 +54,6 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
   try {
     if (!user) return ({ success: false, message: 'User not found' });
 
-    const listSameDate = await Event.find({
-      $or: [
-        { startDate: { $gte: startDate, $lte: endDate } },
-        { endDate: { $gte: startDate, $lte: endDate } },
-        { startDate: { $lte: startDate }, endDate: { $gte: endDate } }
-      ],
-      user: user._id
-    });
-
-    if (listSameDate.length > 0) return ({ success: false, message: 'Event already exists in this time slot' });
-
     const newEvent = new Event({
       title,
       user: user._id,
@@ -197,19 +186,6 @@ const editEvent = async (Id, title, type, priority, startDate, endDate, allDay, 
   try {
     const event = await Event.findById(Id);
     if (!event) return ({ success: false, message: 'Event not found' });
-
-    const listSameDate = await Event.find({
-      $or: [
-        { startDate: { $gte: startDate, $lte: endDate } },
-        { endDate: { $gte: startDate, $lte: endDate } },
-        { startDate: { $lte: startDate }, endDate: { $gte: endDate } }
-      ],
-      user: event.user,
-      _id: { $ne: Id },
-      fatherId: { $ne: event.fatherId }
-    });
-
-    if (listSameDate.length > 0) return ({ success: false, message: 'Event already exists in this time slot' });
 
     event.title = title;
     event.type = type;
