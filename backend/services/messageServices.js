@@ -29,9 +29,7 @@ const createMessage = async (message) => {
         updatedAt: now
     });
 
-    console.log('New message:', newMessage);
     const savedMessage = await newMessage.save();
-    console.log('Message saved:', savedMessage);
 
     foundChat.lastMessage = savedMessage._id;
     foundChat.lastMessageAt = now;
@@ -82,8 +80,7 @@ const markRead = async (chatId, userId) => {
                 ]
             }
         );
-
-        console.log('Messaggi aggiornati:', result.modifiedCount);
+        
         return result;
     } catch (error) {
         console.error('Errore in markRead:', error);

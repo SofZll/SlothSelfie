@@ -7,7 +7,7 @@ const User = require('../models/userModel');
 
 const socketHandler = (io) => {
 
-    io.on('connection', (socket) => {
+    io.on('connection', async (socket) => {
         console.log('A user connected:', socket.id);
         const userId = socket.request.session.userId;
         if (!userId) {
@@ -20,7 +20,7 @@ const socketHandler = (io) => {
         userSocketMap.get(userId).add(socket.id);
 
         if (userSocketMap.get(userId).size == 1) {
-            User.findByIdAndUpdate(userId, { isOnline: true })
+            await User.findByIdAndUpdate(userId, { isOnline: true })
             io.emit('status-change', { userId, isOnline: true });
         }
 
@@ -28,12 +28,12 @@ const socketHandler = (io) => {
         socket.join(userId);
         console.log('User joined room:', userId);
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', async () => {
             if (userSocketMap.get(userId)) {
                 userSocketMap.get(userId).delete(socket.id);
                 if (userSocketMap.get(userId).size == 0) {
                     userSocketMap.delete(userId);
-                    User.findByIdAndUpdate(userId, { isOnline: false });
+                    await User.findByIdAndUpdate(userId, { isOnline: false });
                     io.emit('status-change', { userId, isOnline: false });
                     console.log('User disconnected:', socket.id);
                 } else {

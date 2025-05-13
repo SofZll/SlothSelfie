@@ -2,7 +2,7 @@ const User = require('../models/userModel');
 const Notification = require('../models/notificationModel');
 
 const { getCurrentNow } = require('./timeMachineService');
-const { calculateNotificationTime, getRepeatInterval, getTriggerAt } = require('./notificationService');
+const { getTriggerAt } = require('./notificationService');
 
 const getScheduledJobs = async (userId, hours = 24) => {
     const now = getCurrentNow();
@@ -22,7 +22,6 @@ const getScheduledJobs = async (userId, hours = 24) => {
 
     const jobs = await Promise.all(notifications.map(async (notif) => {
         const triggerAt = new Date(getTriggerAt(notif, now));
-        console.log('Trigger at:', triggerAt);
 
         if (triggerAt > limit || triggerAt < now) return null;
 
@@ -43,7 +42,6 @@ const getScheduledJobs = async (userId, hours = 24) => {
         };
     }));
 
-    console.log('Scheduled jobs:', jobs);
     return jobs.filter(job => job !== null);
 }
 
@@ -52,7 +50,6 @@ const snoozeJob = async (notificationId, snoozeTime) => {
     const notification = await Notification.findById(notificationId);
     if (!notification) throw new Error('Notification not found');
 
-    console.log('Snoozing notification:', notification);
     // let the user know that he can snooze only 3 times
     if (notification.snoozeSettings.count >= 3) throw new Error('You can snooze only 3 times');
 

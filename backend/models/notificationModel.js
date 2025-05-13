@@ -25,6 +25,11 @@ const notificationSchema = new mongoose.Schema({
         required: true
     },
 
+    text: {
+        type: String,
+        default: 'You have a new notification'
+    },
+
     mode: {
         email: {
             type: Boolean,

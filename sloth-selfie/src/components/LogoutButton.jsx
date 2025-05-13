@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../contexts/AuthContext';
 import { apiService } from '../services/apiService';
+import socket from '../services/socket/socket';
 
 import { LogOut } from 'lucide-react';
 import { NewSwal } from '../utils/swalUtils';
@@ -15,6 +16,7 @@ const LogoutButton = () => {
         const response = await apiService('/user/logout', 'POST');
         if (response.success) {
             setUser(null);
+            socket.disconnect();
         } else NewSwal.fire({ title: 'Error logging out', icon: 'error', text: response.message});
 
         navigate('/login');

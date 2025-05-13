@@ -31,6 +31,7 @@ const createActivity = async (req, res) => {
             element: savedActivity._id,
             elementType: 'Activity',
             type: 'now',
+            text: `You have a new activity: ${savedActivity.title}`,
             mode: {
                 system: true,
                 email: true,
@@ -41,7 +42,7 @@ const createActivity = async (req, res) => {
 
         const createdNotifications = await Notification.insertMany(notifications);
         for (const notification of createdNotifications) {
-            await sendNotificationNow(notification);
+            await sendNotificationNow(user, notification);
         }
 
         const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
@@ -253,7 +254,6 @@ async function createNoteAsInputOrOutput(req, res) {
     try {
         //find the user from the username:
         const user = await User.findOne({ username: userName });
-        console.log(userName);
 
         //find the activity
         const activity = await Activity.findById(activityId);
@@ -305,7 +305,6 @@ async function updateOutputAsNote(req, res) {
 
         //find the user from the username:
         const user = await User.findOne({ username: userName });
-        console.log(userName);
 
         //find the activity
         const activity = await Activity.findById(activityId);
@@ -462,13 +461,12 @@ async function adjustOrContractActivitySchedule(req, res) {
         for (const activity of activities) {
             const usersToNotify = await User.find({ _id: { $in: activity.sharedWith } });
             for (const user of usersToNotify) {
-                console.log('user:', user);
-                console.log('activity:', activity);
                 const notification = await Notification.create({
                     user: user._id,
                     element: activity._id,
                     elementType: 'Activity',
                     type: 'now',
+                    text: `The schedule of the activity ${activity.title} has been adjusted/contracted. New start date: ${activity.startDate.toISOString().split('T')[0]}, new deadline: ${activity.deadline.toISOString().split('T')[0]}`,
                     mode: {
                         system: true,
                         email: true,
@@ -476,10 +474,8 @@ async function adjustOrContractActivitySchedule(req, res) {
                     createdAt: getCurrentNow(),
                     updatedAt: getCurrentNow(),
                 });
-                await sendNotificationNow(notification);
-                console.log(`Notifying user ${user.username} about schedule change for activity ${activity._id}`);
+                await sendNotificationNow(user, notification);
             }
-            console.log(`Notifying users about schedule change for activity ${activity._id}:`, usersToNotify);
         }
 
         res.status(200).json({ success: true, message: "Schedule adjusted/contracted successfully" ,

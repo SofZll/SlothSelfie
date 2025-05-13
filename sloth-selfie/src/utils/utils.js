@@ -86,4 +86,6 @@ const calculateTime = (d, getVirtualNow) => {
     return `${seconds} seconds ago`;
 };
 
-export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime, dateFromDate, timeFromDate, urlBase64ToUint8Array, calculateTime };
+const formatDate = (dateStr) => new Date(dateStr).toLocaleString('it-IT');
+
+export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime, dateFromDate, timeFromDate, urlBase64ToUint8Array, calculateTime, formatDate };
