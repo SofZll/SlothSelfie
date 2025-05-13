@@ -124,25 +124,25 @@ const FormCalendar = () => {
                 )}
 
                 {selected.selection === 'activity' && (
-                    <div className="formPopup">
+                    <div className="formPopup w-100">
                         <FormActivity />
                     </div>
                 )}
 
                 {selected.selection === 'event' && (
-                    <div className="formPopup">
+                    <div className="formPopup w-100">
                         <FormEvent />
                     </div>
                 )}
 
                 {selected.selection === 'no availability' && (
-                    <div className="formPopup">
+                    <div className="formPopup w-100">
                         <FormNoAvailability />
                     </div>
                 )}
 
                 {selected.selection === 'task' && (
-                    <div className="formPopup">
+                    <div className="formPopup w-100">
                         <FormTask />
                     </div>
                 )}
