@@ -98,6 +98,7 @@ export const PomodoroProvider = ({ children }) => {
                     const response = await apiService('/pomodoro', 'POST', {...pomodoro, ...settingsPomodoro});
                     if (!response.success) console.log('Error creating pomodoro', response.message);
                     else {
+                        console.log('Pomodoro created', response.pomodoro);
                         setPomodoro({ ...pomodoro, _id: response.pomodoro._id, started: true });
                         setSettingsPomodoro({ ...settingsPomodoro, _id: response.pomodoro._id, title: response.pomodoro.title });
                     }
@@ -174,9 +175,11 @@ export const PomodoroProvider = ({ children }) => {
         setSettingsPomodoro({ ...settingsPomodoro, studyTime, breakTime, cycles});
         editTimeAnimation( pomodoro.isStudyTime ? studyTime : breakTime );
         
-        const response = await apiService(`/pomodoro/${pomodoro._id}`, 'PUT', settingsPomodoro);
-        if (response.success) NewSwal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated'});
-        else NewSwal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro settings'});
+        if (pomodoro._id) {
+            const response = await apiService(`/pomodoro/${pomodoro._id}`, 'PUT', { studyTime, breakTime, cycles, deadline: new Date(pomodoro.deadline) });
+            if (response.success) NewSwal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated'});
+            else NewSwal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro settings'});
+        }
     }
 
     const skipTime = async () => {
