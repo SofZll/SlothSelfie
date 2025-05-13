@@ -6,6 +6,7 @@ import { NewSwal } from '../utils/swalUtils';
 
 import { AuthContext } from '../contexts/AuthContext';
 import { apiService } from '../services/apiService';
+import socket from '../services/socket/socket';
 
 const Settings = () => {
     const navigate = useNavigate();
@@ -13,8 +14,10 @@ const Settings = () => {
 
     const handleLogout = async () => {
         const response = await apiService('/user/logout', 'POST');
-        if (response.success) setUser(null);
-        else NewSwal.fire({ title: 'Error logging out', icon: 'error', text: response.message});
+        if (response.success) {
+            setUser(null);
+            socket.disconnect();
+        } else NewSwal.fire({ title: 'Error logging out', icon: 'error', text: response.message});
         setSettings(false);
 
         navigate('/login');
