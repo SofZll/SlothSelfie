@@ -69,7 +69,7 @@ const Planner = () => {
                     end: new Date(data.endDate),
                     type: 'no availability',
                     allDay: data.days,
-                    tool: type === 'no availability tool' || user.isAdmin,
+                    tool: (type === 'no availability tool' || user.isAdmin),
                 };
             });
         } else if (type === 'event' || type === 'event tool') {
