@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { AnimationPencil } from './AnimationPencil';
 import PopUpPomodoro from './PopUpPomodoro';
@@ -21,11 +21,12 @@ const TimerPomodoro = () => {
         settingsPomodoro, setSettingsPomodoro, resetSettingsPomodoro,
         increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, skipTime, skipBack,
         popUp, setPopUp,
-        editTimeAnimation, resetAnimation,
+        resetAnimation,
         socketData, setSocketData, resetPopUp } = usePomodoro();
 
     const { pomodoroId } = useParams();
     const navigate = useNavigate();
+    const [startStudiedTime, setStartStudiedTime] = useState(0);
 
     
     const handlePlay = () => {
@@ -42,6 +43,62 @@ const TimerPomodoro = () => {
             setPlay(false);
         }
     }
+
+    const createSession = async () => {
+        if (!pomodoro._id) {
+            console.log('Creating pomodoro', {...settingsPomodoro, title: 'Pomodoro shared'});
+            const response = await apiService('/pomodoro', 'POST', {...settingsPomodoro, title: 'Pomodoro shared'});
+            if (response.success) {
+                console.log('Pomodoro created successfully', response);
+                setSettingsPomodoro({...settingsPomodoro, _id: response.pomodoro._id, title: 'Pomodoro shared'});
+                setPomodoro({...pomodoro, _id: response.pomodoro._id, title: 'Pomodoro shared'});
+            } else console.log('Error creating pomodoro ', response.message);
+        }
+    }
+
+    const addJoinedPomodoro = async (data) => {
+        setStartStudiedTime(data.pomodoro.studiedTime);
+        console.log(data, 'data');
+        const response = await apiService('/pomodoro', 'POST', {...data.settingsPomodoro, title: 'Pomodoro shared'});
+        if (response.success) {
+            console.log('Pomodoro created successfully', response);
+            setSettingsPomodoro(response.pomodoro);
+            const result = await apiService(`/pomodoro/update-cycles/${response.pomodoro._id}`, 'PUT', {...data.pomodoro, studiedTime: data.pomodoro.studiedTime - startStudiedTime});
+
+            if (!result.success) console.log('Error adding pomodoro to the database ', result.message);
+            else {
+                setPomodoro({...data.pomodoro, studiedTime: data.pomodoro.studiedTime - startStudiedTime});
+                console.log('Pomodoro created successfully', response);
+            }
+        } else console.log('Error creating pomodoro ', response.message);
+    }
+
+    const saveNextCycle = async (data) => {
+        const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'PUT', {...data.pomodoro, studiedTime: data.pomodoro.studiedTime - startStudiedTime});
+        if (!response.success) console.log('Error updating pomodoro ', response.message);
+    }
+
+    const updateData = async (data) => {
+        if(data.settingsPomodoro.additionalCycles !== settingsPomodoro.additionalCycles) {
+            const response = await apiService(`/pomodoro/add-additional-cycle/${settingsPomodoro._id}`, 'PUT', {additionalCycles: data.settingsPomodoro.additionalCycles});
+            if (!response.success) console.log('Error updating pomodoro ', response.message);
+            else setSettingsPomodoro({...settingsPomodoro, additionalCycles: data.settingsPomodoro.additionalCycles, finished: false});
+        }
+
+        if (data.settingsPomodoro.cycles !== settingsPomodoro.cycles || data.settingsPomodoro.studyTime !== settingsPomodoro.studyTime || data.settingsPomodoro.breakTime !== settingsPomodoro.breakTime) {
+            const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'PUT', {...data.settingsPomodoro, title: 'Pomodoro shared'});
+            if (!response.success) console.log('Error updating pomodoro ', response.message);
+            else setSettingsPomodoro({...settingsPomodoro, studyTime: data.pomodoro.studyTime, breakTime: data.pomodoro.breakTime, cycles: data.pomodoro.cycles});
+        }
+        
+        const response = await apiService(`/pomodoro/update-cycles/${settingsPomodoro._id}`, 'PUT', {...data.pomodoro, studiedTime: data.pomodoro.studiedTime - startStudiedTime});
+        if (!response.success) console.log('Error updating pomodoro ', response.message);
+        else {
+            setPomodoro({...pomodoro, ...data.pomodoro});
+            console.log('Pomodoro updated successfully', response);
+        }
+    }
+
     
     useEffect(() => {
         if (!socketData.inShare) {
@@ -59,13 +116,15 @@ const TimerPomodoro = () => {
 
         socket.on('session created', ({ sessionCode }) => {
             setSocketData({ inShare: true, room: sessionCode, peopleInSession: 1 });
+            createSession();
+            console.log('Session created with code: ', sessionCode);
         });
 
         socket.on('session joined', (data) => {
             setSocketData({ ...socketData, inShare: true, peopleInSession: data.peopleInSession });
-            setSettingsPomodoro(data.settingsPomodoro);
-            setPomodoro({...data.pomodoro});
             setPlay(data.play);
+            console.log('Session joined with code: ', data.sessionCode);
+            addJoinedPomodoro(data);
         });
 
         socket.on('number of people', ({ peopleInSession }) => {
@@ -77,8 +136,7 @@ const TimerPomodoro = () => {
         });
 
         socket.on('updated data session', (data) => {
-            setSettingsPomodoro({...data.settingsPomodoro});
-            setPomodoro({...data.pomodoro});
+            updateData(data);
             setPlay(false);
         });
 
@@ -94,14 +152,28 @@ const TimerPomodoro = () => {
         });
 
         socket.on('passing time', async (data) => {
-            setPomodoro({...data.pomodoro});
+            setPomodoro({...data.pomodoro, studiedTime: data.pomodoro.studiedTime - startStudiedTime});
         });
 
         socket.on('end cycle', async (data) => {
             const newPomodoroData = await data.pomodoro;
-            setPomodoro({...newPomodoroData});
+            setPomodoro({...newPomodoroData, studiedTime: newPomodoroData.studiedTime - startStudiedTime});
             setPlay(false);
+            saveNextCycle(data);
         });
+
+        return () => {
+            socket.off('session created');
+            socket.off('session joined');
+            socket.off('number of people');
+            socket.off('play');
+            socket.off('updated data session');
+            socket.off('session closed');
+            socket.off('error');
+            socket.off('passing time');
+            socket.off('end cycle');
+        }
+
     }, [socketData, setSocketData, setSettingsPomodoro, setPomodoro, setPlay, resetPopUp]);
 
     //get the id of the pomodoro from the url

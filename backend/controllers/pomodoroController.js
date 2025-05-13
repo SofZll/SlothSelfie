@@ -90,10 +90,11 @@ const newPomodoro = async (req, res) => {
 const addPomodoro = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-    const { studyTime, breakTime, cycles, started, finished } = req.body;
+    const { studyTime, breakTime, cycles, started, finished, title } = req.body;
 
     try {
         const newPomodoro = new Pomodoro({
+            title: title || 'Pomodoro',
             user: user._id,
             studyTime,
             breakTime,
@@ -131,7 +132,7 @@ const editPomodoro = async (req, res) => {
             studyTime,
             breakTime,
             cycles,
-            deadline: new Date(deadline),
+            deadline: deadline ? new Date(deadline) : null,
             updatedAt: getCurrentNow()
         }, { new: true });
 
