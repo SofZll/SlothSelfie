@@ -35,9 +35,9 @@ const EditPomodoro = () => {
     }
 
     const editPomodoto = () => {
-        if (edit.study <= 1 || edit.break <= 1 || edit.cicles <= 1) NewSwal.fire({icon: 'error', title: 'Error', text: 'All fields must be greater than 1'});
+        if (edit.study < 1 || edit.break < 1 || edit.cicles < 1) NewSwal.fire({icon: 'error', title: 'Error', text: 'All fields must be greater than 0'});
         else {
-            if (socketData.inShare) socket.emit('edit pomodoro', { study: edit.study*60, break: edit.break*60, cicles: edit.cicles });
+            if (socketData.inShare) socket.emit('edit pomodoro', { study: edit.study*60, breakTime: edit.break*60, cicles: edit.cicles });
             else editSettingsPomodoro(edit.study*60, edit.break*60, edit.cicles);
             resetPopUp();
         }

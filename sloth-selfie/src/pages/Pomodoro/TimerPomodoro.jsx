@@ -45,7 +45,7 @@ const TimerPomodoro = () => {
     }
 
     const createSession = async () => {
-        if (!pomodoro._id) {
+        if (!pomodoro._id || pomodoro._id === '') {
             console.log('Creating pomodoro', {...settingsPomodoro, title: 'Pomodoro shared'});
             const response = await apiService('/pomodoro', 'POST', {...settingsPomodoro, title: 'Pomodoro shared'});
             if (response.success) {
@@ -86,9 +86,9 @@ const TimerPomodoro = () => {
         }
 
         if (data.settingsPomodoro.cycles !== settingsPomodoro.cycles || data.settingsPomodoro.studyTime !== settingsPomodoro.studyTime || data.settingsPomodoro.breakTime !== settingsPomodoro.breakTime) {
-            const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'PUT', {...data.settingsPomodoro, title: 'Pomodoro shared'});
+            const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'PUT', {...data.settingsPomodoro, title: 'Pomodoro shared', deadline: settingsPomodoro.deadline});
             if (!response.success) console.log('Error updating pomodoro ', response.message);
-            else setSettingsPomodoro({...settingsPomodoro, studyTime: data.pomodoro.studyTime, breakTime: data.pomodoro.breakTime, cycles: data.pomodoro.cycles});
+            else setSettingsPomodoro({...settingsPomodoro, studyTime: data.settingsPomodoro.studyTime, breakTime: data.settingsPomodoro.breakTime, cycles: data.settingsPomodoro.cycles});
         }
         
         const response = await apiService(`/pomodoro/update-cycles/${settingsPomodoro._id}`, 'PUT', {...data.pomodoro, studiedTime: data.pomodoro.studiedTime - startStudiedTime});
@@ -101,14 +101,25 @@ const TimerPomodoro = () => {
 
     
     useEffect(() => {
-        if (!socketData.inShare) {
-            if (play) {
+        if (!socketData.inShare && play) {
+            let start = performance.now();
+            let prevElapsed = 0;
+            let frameId;
 
-                const interval = setInterval(() => {
-                    increasePomodoroTime();
-                }, 1000);
-                return () => clearInterval(interval);
-            }
+            const tick = async (now) => {
+                const elapsed = Math.floor((now - start) / 1000);
+
+                if (elapsed > prevElapsed) {
+                    prevElapsed = elapsed;
+                    await increasePomodoroTime();
+                }
+
+                frameId = requestAnimationFrame(tick);
+            };
+
+            frameId = requestAnimationFrame(tick);
+
+            return () => cancelAnimationFrame(frameId);
         }
     }, [play, socketData.inShare, increasePomodoroTime]);
 
