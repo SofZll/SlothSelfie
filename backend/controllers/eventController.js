@@ -1,12 +1,15 @@
 // eventController.js
 const Event = require('../models/eventModel');
 const User = require('../models/userModel');
+const Notification = require('../models/notificationModel');
 const mongoose = require('mongoose');
 
 const { findUserId } = require('../utils/utils');
 const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // owImport the library for iCalendar generation
 const { getCurrentNow } = require('../services/timeMachineService');
+const { checkAvailability } = require('../services/noAvailabilityService');
+const { sendNotificationNow } = require('../scheduler/notificationScheduler');
 
 const ical = require('node-ical');
 const fs = require('fs');
@@ -36,8 +39,13 @@ const getEvents = async (req, res) => {
     console.log('Fetched events:', events); // Log the fetched events for debugging
 
     const transformedEvents = events.map(event => {
+      const isSharedWith = event.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
+
+      const response = isSharedWith ? event.responses?.find(r => r.user?.toString() === user._id.toString())?.status || 'pending' : undefined;
+
       return {
         ...event,
+        ...(isSharedWith && { response }),
         sharedWith: event.sharedWith.map(user => user.username),
       }
     });
@@ -80,22 +88,53 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
       else return ({ success: false, message: 'Repeat frequency is set but no end date or number of occurrences provided' });
     }
 
-    saveEvent = await newEvent.save();
+    const savedEvent = await newEvent.save();
 
     if (repeatFrequency !== 'none' && !fatherId) {
-      const event = await Event.findById(saveEvent._id);
-      event.fatherId = saveEvent._id;
-      await event.save();
+      savedEvent.fatherId = savedEvent._id;
+      await savedEvent.save();
     }
 
-    const event = await Event.findById(saveEvent._id)
-    .populate('sharedWith', 'username')
-    .populate('user', 'username')
-    .lean();
+    const receivers = savedEvent.sharedWith.filter(u => !u.isRoom && !u.isDevice);
+
+    for (const receiver of receivers) {
+      const available = await checkAvailability(receiver._id, savedEvent.startDate, savedEvent.endDate);
+
+      if (available) {
+        savedEvent.responses.push({ user: receiver._id, status: 'pending' });
+      } else {
+        savedEvent.responses.push({ user: receiver._id, status: 'declined' });
+        savedEvent.sharedWith = savedEvent.sharedWith.filter(
+          u => u._id.toString() !== receiver._id.toString()
+        );
+      }
+
+      const notification = await Notification.create({
+        user: receiver._id,
+        element: savedEvent._id,
+        elementType: 'Event',
+        type: 'now',
+        mode: {
+          system: true,
+          email: true,
+        },
+        createdAt: getCurrentNow(),
+        updatedAt: getCurrentNow()
+      });
+
+      await sendNotificationNow(user, notification);
+    }
+
+    await savedEvent.save();
+
+    const event = await Event.findById(savedEvent._id)
+      .populate('sharedWith', '_id username')
+      .populate('user', 'username')
+      .lean();
 
     const transformedEvent = {
       ...event,
-      sharedWith: event.sharedWith.map(user => user.username),
+      sharedWith: event.sharedWith.map(u => u.username),
     };
 
     return ({ success: true, event: transformedEvent });
@@ -181,7 +220,7 @@ const createNewEvent = async (req, res) => {
   }
 }
 
-const editEvent = async (Id, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
+const editEvent = async (Id, user, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, status, repeatEndDate, repeatTimes, fatherId) => {
 
   try {
     const event = await Event.findById(Id);
@@ -204,6 +243,16 @@ const editEvent = async (Id, title, type, priority, startDate, endDate, allDay, 
 
     if (repeatFrequency === 'none') event.fatherId = null;
     else event.fatherId = fatherId;
+
+    const isSharedWith = event.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
+    if (isSharedWith && status) {
+      const responseIndex = event.responses.findIndex(r => r.user.toString() === user._id.toString());
+
+      if (responseIndex !== -1) event.responses[responseIndex].status = status;
+      else event.responses.push({ user: user, status });
+
+      if (status === 'declined') event.sharedWith = event.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+    }
 
     await event.save()
 
@@ -263,7 +312,7 @@ const updateEvent = async (req, res) => {
   const user = await User.findOne({ username: userName });
   const { eventId } = req.params;
 
-  const { title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId } = req.body;
+  const { title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId, status } = req.body;
 
 
   try {
@@ -279,7 +328,7 @@ const updateEvent = async (req, res) => {
             await Event.findByIdAndDelete(events[i]._id);
           }
 
-          const response = await editEvent(events[0]._id, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency);
+          const response = await editEvent(events[0]._id, user, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, status);
           if (response.success) {
             res.status(200).json({ success: true, event: response.event });
             return;
@@ -290,7 +339,7 @@ const updateEvent = async (req, res) => {
         }
       }
     
-      const response = await editEvent(eventId, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency);
+      const response = await editEvent(eventId, user, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, status);
       if (response.success) {
         res.status(200).json({ success: true, event: response.event });
       } else {
@@ -366,13 +415,13 @@ const updateEvent = async (req, res) => {
             const newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( additionEndDate ? + endDateDifference : - endDateDifference));
 
             if (i >= events2edit.length) {
-              const responseEvent = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+              const responseEvent = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, status, repeatEndDate, repeatTimes, fatherId);
               if (responseEvent.success) events.push(responseEvent.event);
               else {
                 return res.status(400).json({ success: false, message: responseEvent.message });
               }
             } else {
-              const response = await editEvent(events2edit[i]._id, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+              const response = await editEvent(events2edit[i]._id, user, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, status, repeatEndDate, repeatTimes, fatherId);
               if (!response.success) {
                 res.status(400).json({ success: false, message: response.message });
                 return;
@@ -397,7 +446,7 @@ const updateEvent = async (req, res) => {
               else return res.status(400).json({ success: false, message: responseEvent.message });
 
             } else {
-              const response = await editEvent(events2edit[count]._id, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+              const response = await editEvent(events2edit[count]._id, user, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId, status);
               if (!response.success) {
                 res.status(400).json({ success: false, message: response.message });
                 return;

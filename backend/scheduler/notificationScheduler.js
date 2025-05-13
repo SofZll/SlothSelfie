@@ -2,12 +2,11 @@ const Notification = require('../models/notificationModel');
 const User = require('../models/userModel');
 const Event = require('../models/eventModel');
 const Activity = require('../models/activityModel');
-const noAvailability = require('../models/noAvailabilityModel');
 
 const { sendSystemNotification, sendEmailNotification, calculateNotificationTime, getRepeatInterval, checkUrgency } = require('../services/notificationService');
 const { getCurrentNow } = require('../services/timeMachineService');
 
-const INTERVAL = 10000; // 10 seconds
+const INTERVAL = 15000; // 15 seconds
 
 const startVirtualScheduler = () => {
     setInterval(async () => {
@@ -15,6 +14,7 @@ const startVirtualScheduler = () => {
         const activeNotifications = await Notification.find({
             type: { $ne: 'now' },
             from: { $lte: now },
+            to: { $gte: now },
             createdAt: { $lte: now },
             urgency: { $ne: true }
         });
@@ -239,7 +239,7 @@ const shouldSendNotification = async (notification, now, user) => {
     return false;
 }
 
-const sendNotificationNow = async (notification) => {
+const sendNotificationNow = async (user, notification) => {
     if (notification.mode.system && !user.disableNotifications.system) await sendSystemNotification(notification);
     if (notification.mode.email && !user.disableNotifications.email) await sendEmailNotification(notification);
     notification.status = 'inactive';

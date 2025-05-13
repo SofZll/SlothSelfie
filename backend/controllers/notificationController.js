@@ -95,6 +95,7 @@ const getNotifications = async (req, res) => {
             user: userId, 
             createdAt: { $lte: now },
             urgency: { $ne: true },
+            type: { $ne: 'now' }
         })
         .populate('user', 'username')
         .sort({ createdAt: -1 });

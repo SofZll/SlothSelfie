@@ -71,7 +71,7 @@ const sendEmailNotification = async (notification) => {
 
     let element;
     if (notification.elementType === 'Activity') element = await Activity.findById(notification.element);
-    else if (notification.elementType === 'Event') element = await Element.findById(notification.element);
+    else if (notification.elementType === 'Event') element = await Event.findById(notification.element);
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',

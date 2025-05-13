@@ -16,11 +16,15 @@ const eventSchema = new mongoose.Schema({
         ref: 'User',
     }],
 
-    status: [{
-        type: String,
-        enum: ['accepted', 'declined', 'waiting'],
-        required: function() {
-            return this.sharedWith.length > 1;
+    responses: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        status: {
+            type: String,
+            enum: ['accepted', 'declined', 'pending'],
+            default: 'pending'
         }
     }],
 
