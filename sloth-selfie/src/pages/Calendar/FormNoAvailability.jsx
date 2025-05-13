@@ -171,7 +171,7 @@ const FormNoAvailability = () => {
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden'>
             {(user.isAdmin || show === 'tools') && (
-                <div className='row py-2'>
+                <div className='row py-2 w-100'>
                     {selected.edit ? (
                         <div className='col-12'>
                             <div className='d-inline-block form-label'>
@@ -210,13 +210,13 @@ const FormNoAvailability = () => {
                 </div>
             )}
             
-            <div className='row py-2'>
+            <div className='row py-2 w-100'>
                 <div className='col-6'>
                     <label htmlFor='startDate' className='form-label'>Start Date</label>
                     <input type='date' className='form-control' id='startDate'
                         value={new Date(availability.startDate).toLocaleDateString('en-CA')}
                         onChange={(e) => setStartDate(e.target.value)}
-                        disabled={!user.isAdmin}
+                        disabled={availability.tool}
                         required />
                 </div>
                 {availability.days ? (
@@ -225,7 +225,7 @@ const FormNoAvailability = () => {
                         <input type='date' className='form-control' id='endDate'
                         value={new Date(availability.endDate).toLocaleDateString('en-CA')}
                         onChange={(e) => setEndDate(e.target.value)}
-                        disabled={!user.isAdmin}
+                        disabled={availability.tool}
                         required />
                     </div>
                 ) : (
@@ -233,7 +233,7 @@ const FormNoAvailability = () => {
                         <label htmlFor='time' className='form-label'>Time</label>
                         <select className='form-select' id='time'
                         value={availability.startTime}
-                        disabled={!user.isAdmin}
+                        disabled={availability.tool}
                         onChange={(e) => setStartTime(e.target.value)}>
                             <option value=''>Select time</option>
                             {generateTimeOptions().map(option => (
@@ -244,24 +244,24 @@ const FormNoAvailability = () => {
                 )}
             </div>
 
-            <div className='row py-2'>
+            <div className='row py-2 w-100'>
                 <div className='col col-auto form-check form-switch ms-3'>
                     <input className='form-check-input' type='checkbox' id='days'
                         checked={!availability.days}
-                        disabled={!user.isAdmin}
+                        disabled={availability.tool}
                         onChange={(e) => setAvailability({ ...availability, days: !e.target.checked })} />
                     <label className='form-check-label' htmlFor='days'>it lasts hours</label>
                 </div>
             </div>
 
             {!availability.days && (
-                <div className='row py-2'>
+                <div className='row py-2 w-100'>
                     <div className='col-10'>
                         <label htmlFor='duration' className='form-label'>Duration</label>
                         <input type='number' className='form-control' id='duration'
                         placeholder='Duration in hours'
                         value={availability.duration}
-                        disabled={!user.isAdmin}
+                        disabled={availability.tool}
                         onChange={(e) => setEndTime(e.target.value)}
                         min={1}
                         required />
@@ -269,12 +269,12 @@ const FormNoAvailability = () => {
                 </div>
             )}
 
-            <div className='row py-2'>
+            <div className='row py-2 w-100'>
                 <div className='col col-6'>
                     <label htmlFor='repeatFrequency' className='form-label'>Repeat Frequency</label>
                     <select className='form-select' name='repeatFrequency'
                     value={availability.repeatFrequency}
-                    disabled={!user.isAdmin}
+                    disabled={availability.tool}
                     onChange={(e) => setAvailability({ ...availability, repeatFrequency: e.target.value })}>
                         <option value='none'>None</option>
                         <option value='daily'>Daily</option>
@@ -288,7 +288,7 @@ const FormNoAvailability = () => {
                         <label htmlFor='numberOfOccurrences' className='form-label'>Number of Occurrences</label>
                         <input type='number' className='form-control' id='numberOfOccurrences'
                         placeholder='Number of occurrences'
-                        disabled={!user.isAdmin}
+                        disabled={availability.tool}
                         value={availability.numberOfOccurrences}
                         onChange={(e) => setAvailability({ ...availability, numberOfOccurrences: e.target.value })}
                         min={1}
@@ -297,7 +297,7 @@ const FormNoAvailability = () => {
                 )}
             </div>
 
-            {user.isAdmin && (
+            {!availability.tool && (
                 <div className='d-flex align-items-center justify-content-center'>
                     <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                     {selected.edit && (
