@@ -55,6 +55,7 @@ const AuthProvider = ({ children }) => {
                 const response = await apiService('/user/check-auth');
                 if (response.success) {
                     await fetchUserData();
+                    socket.connect();
                 } else {
                     console.error('Error checking auth:', response);
                     userRef.current = null;

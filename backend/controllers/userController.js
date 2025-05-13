@@ -126,16 +126,9 @@ const getUserProfile = async (req, res) => {
     let userId = req.params.userId;
 
     try {
-        
         if (!userId || userId === 'undefined') {
             userId = req.session.userId;
         }
-        console.log('Requested URL:', req.originalUrl);
-        console.log('params:', req.params);
-        console.log("Requested userId:", req.params.userId);
-        console.log("Session userId:", req.session.userId);
-        console.log("Final userId to search:", userId);
-
 
         if (!userId) {
             return res.status(400).json({ success: false, message: 'UserId not found' });

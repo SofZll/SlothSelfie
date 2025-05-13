@@ -21,13 +21,6 @@ io.use((socket, next) => {
     session(socket.request, {}, next);
 });
 
-io.on('connection', (socket) => {
-    console.log('Client connected');
-    socket.on('disconnect', () => {
-        console.log('Client disconnected');
-    });
-});
-
 //locale:
 // Configura CORS per accettare richieste dal frontend locale
 app.use(cors);
