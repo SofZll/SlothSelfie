@@ -517,7 +517,7 @@ const FormEvent = () => {
                     
             
             <div className='d-flex align-items-center justify-content-center bg-white'>
-                {!(event.isInProject || event.tool) && (
+                {!(event.isInProject || event.tool ) && (
                     <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
                         {selected.edit ? 'edit' : 'save'}
                     </button>
