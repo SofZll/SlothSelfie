@@ -162,6 +162,31 @@ const FormEvent = () => {
         }
     }
 
+    const handleNotifications = (eventId, notifications) => {
+        const notificationPromises = notifications.map(async (notification) => {
+            if (notification._id) {
+                const response = await apiService(`/notification/${notification._id}`, 'PUT', notification);
+                if (!response.success) {
+                    NewSwal.fire({ title: 'Error updating notification', icon: 'error', text: response.message });
+                }
+                return response.notification;
+            } else {
+                const response = await apiService('/notification', 'POST', {
+                    type: 'Event',
+                    elementId: eventId,
+                    notifications: [notification],
+                });
+                if (!response.success) {
+                    NewSwal.fire({ title: 'Error creating notification', icon: 'error', text: response.message });
+                }
+                return response.notification;
+            }
+        });
+    
+        setNotifications([]);
+        return Promise.all(notificationPromises);
+    };
+
     const handleSubmit = async () => {
         if (event.repeatFrequency !== 'none') {
 
@@ -182,7 +207,21 @@ const FormEvent = () => {
             if (event.repeatFrequency === 'none') {
                 if (selected.edit) setEvents([...events.filter(evt => evt._id !== event._id && evt.fatherId !== event.fatherId), response.event]);
                 else setEvents([...events, response.event]);
-            } else setEvents([...events.filter(evt => evt.fatherId !== response.events[0].fatherId && evt._id !== response.events[0]._id), ...response.events]);
+                
+                if (notifications.length > 0) {
+                    const response = await handleNotifications(response.event._id, notifications);
+                    console.log('response', response);
+                }
+            } else {
+                setEvents([...events.filter(evt => evt.fatherId !== response.events[0].fatherId && evt._id !== response.events[0]._id), ...response.events]);
+
+                if (notifications.length > 0) {
+                    for (const event of response.events) {
+                        const response = await handleNotifications(event._id, notifications);
+                        console.log('response', response);
+                    }
+                }
+            }
         } else NewSwal.fire({ title: 'Error saving event', icon: 'error', text: response.message});
         resetEvent();
         resetSelected();
@@ -203,6 +242,11 @@ const FormEvent = () => {
                 else setEvents(events.filter(evt => evt.fatherId !== event.fatherId));
             }
         } else NewSwal.fire({ title: 'Error deleting event', icon: 'error', text: response.message});
+
+        notifications.forEach(notification => {
+            apiService(`/notification/${notification._id}`, 'DELETE');
+            setNotifications([]);
+        });
             
         setDeletePopUp(false);
         resetSelected();
@@ -465,7 +509,7 @@ const FormEvent = () => {
 
                     <div className='row py-2'>
                         <div className='col-12 justify-content-center align-items-center d-flex'>
-                        <NotificationInput notifications={notifications} setNotifications={setNotifications}/>
+                        <NotificationInput notifications={notifications} setNotifications={setNotifications} noRepeat={true} />
                         </div>
                     </div>
                 </>
