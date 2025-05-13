@@ -2,6 +2,7 @@ const Notification = require('../models/notificationModel');
 const User = require('../models/userModel');
 const Event = require('../models/eventModel');
 const Activity = require('../models/activityModel');
+const noAvailability = require('../models/noAvailabilityModel');
 
 const { sendSystemNotification, sendEmailNotification, calculateNotificationTime, getRepeatInterval, checkUrgency } = require('../services/notificationService');
 const { getCurrentNow } = require('../services/timeMachineService');
@@ -105,7 +106,7 @@ const startVirtualScheduler = () => {
 
 const disabledNotification = async (notification, user) => {
     const now = getCurrentNow();
-    
+
     if (user.disableNotifications.all) {
         return true;
     }

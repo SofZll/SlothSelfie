@@ -102,7 +102,7 @@ const NotificationInput = ({ notifications, setNotifications }) => {
     return (
         <div className='d-flex flex-column align-items-center px-0'>
             {notifications.map((notif, index) => (
-                <div className='notification-card card mb-3 p-3'>
+                <div key={notif._id || `notif-${index}`} className='notification-card card mb-3 p-3'>
                     <div className='d-flex justify-content-between align-items-center mb-3 position-relative'>
                         <strong>Notification {index + 1}</strong>
                         <div>
