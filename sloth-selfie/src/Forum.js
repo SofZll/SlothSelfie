@@ -72,7 +72,6 @@ function ForumFunction({ username }) {
 
             if (response.ok){
                 const data = await response.json();
-                console.log('Posts:', data.posts);
 
                 const processedPosts = data.posts.map(post => {
                     if (post.author.image?.data?.data) {

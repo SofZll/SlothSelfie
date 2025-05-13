@@ -8,6 +8,8 @@ import AuthLayout from '../layouts/AuthLayout';
 import { apiService } from '../services/apiService';
 import { AuthContext } from '../contexts/AuthContext';
 
+import socket from '../services/socket/socket';
+
 // TODO: choose a library for icons react-icons or lucide-rect
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -29,7 +31,7 @@ function getCursorPosition(event) {
 }
 
 const AuthPage = ({ formType = 'login' }) => {
-    const { fetchUserData, user } = useContext(AuthContext);
+    const { fetchUserData } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [currentFormType, setcurrentFormType] = useState(formType);
@@ -47,6 +49,7 @@ const AuthPage = ({ formType = 'login' }) => {
             const response = await apiService('/user/login', 'POST', { username: userInfo.username, password: userInfo.password });
             if (response && response.success) {
                 const newUser = await fetchUserData();
+                socket.connect();
 
                 if (newUser.isAdmin) navigate('/admin');
                 else navigate('/home');

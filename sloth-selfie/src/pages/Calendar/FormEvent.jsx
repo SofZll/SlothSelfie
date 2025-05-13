@@ -227,6 +227,16 @@ const FormEvent = () => {
         resetSelected();
     }
 
+    const handleResponse = async (status) => {
+        const response = await apiService(`/event/${event._id}`, 'PUT', { ...event, status });
+        if (response.success) {
+            setEvents(events.map(evt => evt._id === event._id ? { ...evt, response: status } : evt));
+            if (status === 'declined') setEvents(events.filter(evt => evt._id !== event._id));
+            resetSelected();
+        }
+        else console.error('Error updating event response:', response);
+    }
+
     const deleteEvent = async () => {
         const response = await apiService(`/event/${event._id}`, 'DELETE', event);
         if (response.success) {
@@ -515,20 +525,30 @@ const FormEvent = () => {
                 </>
             )}
                     
-            
-            <div className='d-flex align-items-center justify-content-center bg-white'>
-                {!(event.isInProject || event.tool ) && (
-                    <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
-                        {selected.edit ? 'edit' : 'save'}
+            {(event.response === 'pending') ? (
+                <div className='d-flex align-items-center justify-content-center'>
+                    <button type='button' aria-label='Accept' className='btn btn-success' onClick={() => handleResponse('accepted')}>
+                        Accept
                     </button>
-                )}
+                    <button type='button' aria-label='Decline' className='btn btn-danger' onClick={() => handleResponse('declined')}>
+                        Decline
+                    </button>
+                </div>
+            ) : (
+                <div className='d-flex align-items-center justify-content-center bg-white'>
+                    {!(event.isInProject || event.tool) && (
+                        <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>
+                            {selected.edit ? 'edit' : 'save'}
+                        </button>
+                    )}
 
-                {selected.edit && !event.isInProject && (user.isAdmin || !event.tool) && (
-                    <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
-                        delete
-                    </button>
-                )}
-            </div>
+                    {selected.edit && !event.isInProject && (user.isAdmin || !event.tool) && (
+                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                            delete
+                        </button>
+                    )}
+                </div>
+            )}
 
             {deletePopUp && (
                 <DeletePopUpLayout handleDelete={() => deleteEvent()} handleClose={() => setDeletePopUp(false)}>
