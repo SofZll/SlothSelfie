@@ -22,9 +22,9 @@ import { usePomodoro } from '../../contexts/PomodoroContext';
 import { useTools } from '../../contexts/ToolsContext';
 
 import { apiService } from '../../services/apiService';
-import { LoadingPageDark } from '../LoadingPage';
 
 const Planner = () => {
+    console.log('Planner');
     const { getVirtualNow, refreshKey } = useContext(TimeMachineContext);
     const now = getVirtualNow();
     const location = useLocation();
@@ -38,7 +38,7 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, show, setShow, loading, setLoading } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, show, setShow } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
     const { rooms, devices, setRooms, setDevices, selectedRooms, setSelectedRooms, selectedDevices, setSelectedDevices, toolEvents, setToolEvents, toolAvailabilities, setToolAvailabilities } = useTools();
     const { setPlannedPomodori, plannedPomodori, setSettingsPomodoro } = usePomodoro();
@@ -272,51 +272,51 @@ const Planner = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true);
-    
-            try {
-                if (user.isAdmin) {
-                    const response = await apiService('/users/tools', 'GET');
-                    if (response.success) {
-                        setRooms(response.rooms);
-                        setDevices(response.devices);
-                    }
-                } else {
-                    const [activitiesResponse, eventsResponse, tasksResponse, pomodorosResponse, noAvailabilityResponse, toolsResponse] = await Promise.all([
-                        apiService('/activities', 'GET'),
-                        apiService('/events', 'GET'),
-                        apiService('/tasks', 'GET'),
-                        apiService('/pomodori/todo', 'GET'),
-                        apiService('/no-availabilities', 'GET'),
-                        apiService('/users/tools', 'GET')
-                    ]);
-
-                    if (activitiesResponse.success) setActivities(activitiesResponse.activities);
-                    if (eventsResponse.success) setEvents(eventsResponse.events);
-                    if (tasksResponse.success) setTasks(tasksResponse.tasks);
-                    if (pomodorosResponse.success) setPlannedPomodori(pomodorosResponse.pomodori);
-                    if (noAvailabilityResponse.success) setAvailabilities(noAvailabilityResponse.noAvailability);
-                    if (toolsResponse.success) {
-                        setRooms(toolsResponse.rooms);
-                        setDevices(toolsResponse.devices);
-                    }
-
-                    console.log('Activities:', activitiesResponse.activities);
-                    console.log('Events:', eventsResponse.events);
-                    console.log('Tasks:', tasksResponse.tasks);
-                    console.log('Pomodoros:', pomodorosResponse.pomodori);
-                    console.log('No Availability:', noAvailabilityResponse.noAvailability);
-                    console.log('Rooms:', toolsResponse.rooms);
+            if (user.isAdmin) {
+                const response = await apiService('/users/tools', 'GET');
+                if (response.success) {
+                    setRooms(response.rooms);
+                    setDevices(response.devices);
                 }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setLoading(false);
+            } else {
+                const [activitiesResponse, eventsResponse, tasksResponse, pomodorosResponse, noAvailabilityResponse, toolsResponse] = await Promise.all([
+                    apiService('/activities', 'GET'),
+                    apiService('/events', 'GET'),
+                    apiService('/tasks', 'GET'),
+                    apiService('/pomodori/todo', 'GET'),
+                    apiService('/no-availabilities', 'GET'),
+                    apiService('/users/tools', 'GET')
+                ]);
+
+                if (activitiesResponse.success) setActivities(activitiesResponse.activities);
+                if (eventsResponse.success) setEvents(eventsResponse.events);
+                if (tasksResponse.success) setTasks(tasksResponse.tasks);
+                if (pomodorosResponse.success) setPlannedPomodori(pomodorosResponse.pomodori);
+                if (noAvailabilityResponse.success) setAvailabilities(noAvailabilityResponse.noAvailability);
+                if (toolsResponse.success) {
+                    setRooms(toolsResponse.rooms);
+                    setDevices(toolsResponse.devices);
+                }
+
+                console.log('Activities:', activitiesResponse.activities);
+                console.log('Events:', eventsResponse.events);
+                console.log('Tasks:', tasksResponse.tasks);
+                console.log('Pomodoros:', pomodorosResponse.pomodori);
+                console.log('No Availability:', noAvailabilityResponse.noAvailability);
+                console.log('Rooms:', toolsResponse.rooms);
             }
         };
     
         fetchData();
-    }, [user, show, refreshKey]);
+    }, [user, refreshKey]);
+
+    useEffect(() => {
+        console.log('refreshKey', refreshKey);
+    }, [refreshKey]);
+
+    useEffect(() => {
+        console.log('user', user);
+    }, [user]);
 
     useEffect(() => {
         if (!activities.length || !events.length) return;
@@ -384,13 +384,6 @@ const Planner = () => {
 
         // TODO: check validity of activity and event
     }, [notifications]);
-
-    if (loading) {
-        console.log('Loading...');
-        return (
-            <LoadingPageDark />
-        )
-    }
 
     return (
         <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popup: true })} selected={selected.popup} popUp={<FormCalendar />} isCalendar={true}>

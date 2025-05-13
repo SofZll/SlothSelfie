@@ -10,8 +10,6 @@ export const CalendarProvider = ({ children }) => {
     const { getVirtualNow } = useContext(TimeMachineContext);
     const now = new Date(getVirtualNow());
 
-    const [loading, setLoading] = useState(false);
-
     //Activity state
     const [activity, setActivity] = useState({
         _id: '',
@@ -65,6 +63,7 @@ export const CalendarProvider = ({ children }) => {
         fatherId: '',
         tool: false,
         priority: 0,
+        response: '',
     });
 
     const [events, setEvents] = useState([]);
@@ -99,6 +98,7 @@ export const CalendarProvider = ({ children }) => {
             fatherId: '',
             tool: false,
             priority: 0,
+            response: '',
         });
     }
 
@@ -201,7 +201,7 @@ export const CalendarProvider = ({ children }) => {
                 selected, setSelected, select, back, resetSelected,
                 show, setShow,
                 notifications, setNotifications, fetchNotifications,
-                conditionsMet, setConditionsMet, loading, setLoading}}>
+                conditionsMet, setConditionsMet}}>
 
             {children}
             

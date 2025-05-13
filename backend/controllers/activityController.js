@@ -41,7 +41,7 @@ const createActivity = async (req, res) => {
 
         const createdNotifications = await Notification.insertMany(notifications);
         for (const notification of createdNotifications) {
-            await sendNotificationNow(notification);
+            await sendNotificationNow(user, notification);
         }
 
         const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
@@ -462,8 +462,6 @@ async function adjustOrContractActivitySchedule(req, res) {
         for (const activity of activities) {
             const usersToNotify = await User.find({ _id: { $in: activity.sharedWith } });
             for (const user of usersToNotify) {
-                console.log('user:', user);
-                console.log('activity:', activity);
                 const notification = await Notification.create({
                     user: user._id,
                     element: activity._id,
@@ -476,7 +474,7 @@ async function adjustOrContractActivitySchedule(req, res) {
                     createdAt: getCurrentNow(),
                     updatedAt: getCurrentNow(),
                 });
-                await sendNotificationNow(notification);
+                await sendNotificationNow(user, notification);
                 console.log(`Notifying user ${user.username} about schedule change for activity ${activity._id}`);
             }
             console.log(`Notifying users about schedule change for activity ${activity._id}:`, usersToNotify);

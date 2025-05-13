@@ -78,7 +78,7 @@ const FormActivity = () => {
     const handleResponse = async (status) => {
         const response = await apiService(`/activity/${activity._id}`, 'PUT', { ...activity, status });
         if (response.success) {
-            setActivities(activities.map(act => act._id === activity._id ? { ...act, response } : act));
+            setActivities(activities.map(act => act._id === activity._id ? { ...act, response: status } : act));
             if (status === 'declined') setActivities(activities.filter(act => act._id !== activity._id));
         }
         else console.error('Error updating activity response:', response);
