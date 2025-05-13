@@ -97,7 +97,10 @@ export const PomodoroProvider = ({ children }) => {
                 } else {
                     const response = await apiService('/pomodoro', 'POST', {...pomodoro, ...settingsPomodoro});
                     if (!response.success) console.log('Error creating pomodoro', response.message);
-                    else setPomodoro({ ...pomodoro, _id: response.pomodoro._id, started: true });
+                    else {
+                        setPomodoro({ ...pomodoro, _id: response.pomodoro._id, started: true });
+                        setSettingsPomodoro({ ...settingsPomodoro, _id: response.pomodoro._id, title: response.pomodoro.title });
+                    }
                 }
             } else setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1, studiedTime: pomodoro.studiedTime + 1 });
         }

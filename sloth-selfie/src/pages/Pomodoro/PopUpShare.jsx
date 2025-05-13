@@ -11,19 +11,11 @@ const PopUpShare = () => {
 
     const newRoom = () => {
         setPlay(false);
-        socket.connect();
-        socket.emit('create session', { settingsPomodoro, pomodoro, play });
-        return () => {
-            socket.disconnect();
-        }
+        socket.emit('create session', { settingsPomodoro, pomodoro, play: false });
     }
 
     const enterRoom = () => {
-        socket.connect();
         socket.emit('join session', { room: socketData.room });
-        return () => {
-            socket.disconnect();
-        }
     }
 
     const exitRoom = () => {
