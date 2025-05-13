@@ -16,7 +16,6 @@ const loginUser = async (req, res) => {
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
-        console.log('isMatch:', isMatch);
         if (!isMatch) {
             return res.status(401).json({ success: false, message: 'Invalid password' });
         }
@@ -133,7 +132,7 @@ const getUserProfile = async (req, res) => {
         if (!userId) {
             return res.status(400).json({ success: false, message: 'UserId not found' });
         }
-        console.log('UserId:', userId);
+
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
@@ -149,7 +148,7 @@ const getUserProfile = async (req, res) => {
 const getUsername = async (req, res) => {
     try {
         const username = req.session.username;
-        console.log('Username:', username);
+        
         if (!username) {
             return res.status(400).json({ success: false, message: 'Username not found' });
         }
@@ -164,7 +163,7 @@ const getUsername = async (req, res) => {
 const getUserId = async (req, res) => {
     try {
         const userId = req.session.userId;
-        console.log('UserId:', userId);
+        
         if (!userId) {
             return res.status(400).json({ success: false, message: 'UserId not found' });
         }
@@ -236,7 +235,6 @@ const updateUserPreferences = async (req, res) => {
 const switchNotification = async (req, res) => {
     const { userId } = req.session;
     const { field, value } = req.body;
-    console.log('SwitchNotification - field:', field, 'value:', value);
 
     try {
         const user = await User.findById(userId);
@@ -244,8 +242,7 @@ const switchNotification = async (req, res) => {
 
         // disable notifications
         user.disableNotifications[field] = value;
-        console.log('SwitchNotification - user.disableNotifications:', user.disableNotifications);
-
+        
         await user.save();
         res.json({ success: true, disableNotifications: user.disableNotifications });
     } catch (error) {

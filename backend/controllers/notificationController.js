@@ -23,8 +23,6 @@ const setNotifications = async (req, res) => {
         } else if (type === 'Event') {
             element = await Event.findById(elementId);
             to = element.endDate;
-            console.log('Event end date:', to);
-            console.log('Event ID:', elementId);
         }
         if (!element) return res.status(404).json({ success: false, message: 'Element not found' });
 
@@ -51,8 +49,6 @@ const setNotifications = async (req, res) => {
             }
         });
 
-        console.log('New notifications:', newNotifications);
-
         const savedNotifications = await Notification.insertMany(newNotifications);
 
         res.status(201).json({ success: true, message: 'Notifications created successfully', notifications: savedNotifications });
@@ -73,11 +69,47 @@ const getScheduledNotifications = async (req, res) => {
         const filteredNotifications = scheduledNotifications.filter(n => n && n.triggerAt && n.status === 'active');
         filteredNotifications.sort((a, b) => new Date(a.triggerAt) - new Date(b.triggerAt));
 
-        console.log('Scheduled notifications:', scheduledNotifications);
-        
         res.status(200).json({ success: true, notifications: scheduledNotifications });
     } catch (error) {
         console.error('Error fetching scheduled notifications:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+const getPastNotifications = async (req, res) => {
+    const userId = req.session.userId;
+    const now = getCurrentNow();
+
+    try {
+        const notifications = await Notification.find({
+            user: userId,
+            createdAt: { $lte: now },
+            $or: [
+                { type: 'default', status: 'inactive' },
+                { type: 'repeat', lastSentAt: { $lte: now } },
+                { type: 'now' }
+            ]
+        })
+        .populate('element')
+        .sort({ createdAt: -1 });
+
+        if (!notifications) return res.status(404).json({ success: false, message: 'No notifications found' });
+
+        const notificationsSelected = notifications.map(notification => {
+            return {
+                _id: notification._id,
+                type: notification.type,
+                mode: notification.mode,
+                element: notification.element,
+                elementType: notification.elementType,
+                text: notification.text,
+                urgency: notification.urgency,
+            }
+        });
+
+        res.status(200).json({ success: true, notifications: notificationsSelected });
+    } catch (error) {
+        console.error('Error fetching past notifications:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 }
@@ -191,8 +223,6 @@ const snoozeNotification = async (req, res) => {
     const { notificationId } = req.params;
     const { snoozeInterval = 10 } = req.body;
 
-    console.log('Snooze time:', snoozeInterval);
-    console.log('Notification ID:', notificationId);
     if (!notificationId) return res.status(400).json({ success: 'false', message: 'No notification ID provided' });
     if (!snoozeInterval) return res.status(400).json({ success: 'false', message: 'Snooze time is required' });
 
@@ -210,5 +240,6 @@ module.exports = {
     deleteNotification, 
     updateNotification,
     getScheduledNotifications,
-    snoozeNotification
+    snoozeNotification,
+    getPastNotifications
 };

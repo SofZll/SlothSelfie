@@ -14,8 +14,6 @@ const { sendNotificationNow } = require('../scheduler/notificationScheduler');
 const ical = require('node-ical');
 const fs = require('fs');
 const { RRule } = require('rrule');
-const { find } = require('../models/noAvailabilityModel');
-
 
 const getEvents = async (req, res) => {
   const now = getCurrentNow();
@@ -35,8 +33,6 @@ const getEvents = async (req, res) => {
     }).populate('sharedWith', 'username')
     .populate('user', 'username')
     .lean();
-
-    console.log('Fetched events:', events); // Log the fetched events for debugging
 
     const transformedEvents = events.map(event => {
       const isSharedWith = event.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
@@ -99,14 +95,15 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
 
     for (const receiver of receivers) {
       const available = await checkAvailability(receiver._id, savedEvent.startDate, savedEvent.endDate);
+      let text = '';
 
       if (available) {
         savedEvent.responses.push({ user: receiver._id, status: 'pending' });
+        text = `You have been invited to the event: "${savedEvent.title}" on ${savedEvent.startDate.toLocaleString()}`;
       } else {
         savedEvent.responses.push({ user: receiver._id, status: 'declined' });
-        savedEvent.sharedWith = savedEvent.sharedWith.filter(
-          u => u._id.toString() !== receiver._id.toString()
-        );
+        savedEvent.sharedWith = savedEvent.sharedWith.filter(u => u._id.toString() !== receiver._id.toString());
+        text = `You have been invited to the event: "${savedEvent.title}" on ${savedEvent.startDate.toLocaleString()} but you are not available.`;
       }
 
       const notification = await Notification.create({
@@ -114,6 +111,7 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
         element: savedEvent._id,
         elementType: 'Event',
         type: 'now',
+        text,
         mode: {
           system: true,
           email: true,
