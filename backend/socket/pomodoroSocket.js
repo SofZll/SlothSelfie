@@ -14,7 +14,6 @@ const pomodoroSocket = {
             if (!session) return;
 
             const { settingsPomodoro, pomodoro } = session;
-            console.log('Passing time:', pomodoro.timeLeft, pomodoro.isStudyTime);
             if (pomodoro.timeLeft <= 0) {
                 if (pomodoro.isStudyTime) {
                     pomodoro.timeLeft = settingsPomodoro.breakTime;
