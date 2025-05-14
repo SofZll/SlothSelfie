@@ -125,6 +125,7 @@
 .nav-mobile {
     flex-direction: row;
     width: 100%;
+    padding: 0.9rem 1rem;
 }
 
 @media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {

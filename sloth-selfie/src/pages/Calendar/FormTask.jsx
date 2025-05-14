@@ -76,7 +76,7 @@ const FormTask = () => {
             </div>
 
             <div className='row py-2'>
-                <div className='col-12'>
+                <div className='col-12 mb-3'>
                     <label htmlFor='sharedWith' className='form-label'>Shared with</label>
                     <ShareInput receivers={task.sharedWith} setReceivers={(receivers) => setTask({...task, sharedWith: receivers})} />
                 </div>

@@ -140,7 +140,7 @@ const FormActivity = () => {
             {activity.response !== 'pending' && !activity.project && (
                 <div>
                     <div className='row'>
-                        <div className='col-12'>
+                        <div className='col-12 mb-3'>
                             <label htmlFor='share' className='form-label'>Share with</label>
                             <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, sharedWith: receivers})} />
                         </div>
