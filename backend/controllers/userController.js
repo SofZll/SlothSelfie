@@ -198,6 +198,10 @@ const getUserIdFromUsername = async (req, res) => {
         const user = await User.findOne({ username: username });
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
+        if (user.isRoom) return res.status(400).json({ success: true, isTool: true, message: 'User is a room' });
+        if (user.isDevice) return res.status(400).json({ success: true, isTool: true, message: 'User is a device' });
+        if (user.isAdmin) return res.status(400).json({ success: true, isAdmin: true, message: 'User is an administrator' });
+
         // Restituisci l'ID dell'utente
         res.status(200).json({ success: true, userId: user._id.toString() });
     } catch (error) {

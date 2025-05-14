@@ -513,7 +513,7 @@ const FormEvent = () => {
                     <div className='row py-2'>
                         <div className='col-12'>
                             <label htmlFor='share' className='form-label'>Share with</label>
-                            <ShareInput receivers={event.sharedWith} setReceivers={(receivers) => setEvent({...event, sharedWith: receivers})} />
+                            <ShareInput receivers={event.sharedWith} setReceivers={(receivers) => setEvent({...event, sharedWith: receivers})} event={true} />
                         </div>
                     </div>
 

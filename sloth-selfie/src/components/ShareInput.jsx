@@ -4,7 +4,7 @@ import { NewSwal } from '../utils/swalUtils';
 
 import { apiService } from '../services/apiService';
 
-const ShareInput = ({ receivers, setReceivers }) => {
+const ShareInput = ({ receivers, setReceivers, event }) => {
     const [receiverInput, setReceiverInput] = useState('');
     const [removingIndex, setRemovingIndex] = useState(null);
 
@@ -14,6 +14,16 @@ const ShareInput = ({ receivers, setReceivers }) => {
                 const response = await apiService(`/user/${receiverInput.trim()}`, 'GET');
                 if (!response.success) {
                     NewSwal.fire('Utente non trovato', '', 'warning');
+                    return;
+                }
+
+                if (response.isAdmin) {
+                    NewSwal.fire('Non puoi condividere con un admin', '', 'warning');
+                    return;
+                }
+
+                if (!event && response.isTool) {
+                    NewSwal.fire('Non puoi condividere con un utente risorsa', '', 'warning');
                     return;
                 }
 
