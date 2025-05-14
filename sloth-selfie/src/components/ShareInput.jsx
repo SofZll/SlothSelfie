@@ -13,24 +13,19 @@ const ShareInput = ({ receivers, setReceivers, event }) => {
             if (!receivers.includes(receiverInput.trim())) {
                 const response = await apiService(`/user/${receiverInput.trim()}`, 'GET');
                 if (!response.success) {
-                    NewSwal.fire('Utente non trovato', '', 'warning');
-                    return;
-                }
-
-                if (response.isAdmin) {
-                    NewSwal.fire('Non puoi condividere con un admin', '', 'warning');
+                    NewSwal.fire(response.message, '', 'warning');
                     return;
                 }
 
                 if (!event && response.isTool) {
-                    NewSwal.fire('Non puoi condividere con un utente risorsa', '', 'warning');
+                    NewSwal.fire(response.message, '', 'warning');
                     return;
                 }
 
                 setReceivers([...receivers, receiverInput.trim()]);
                 setReceiverInput('');
             } else {
-                NewSwal.fire('Utente già inserito', '', 'warning');
+                NewSwal.fire('User already selected', '', 'warning');
             }
         }
     };
