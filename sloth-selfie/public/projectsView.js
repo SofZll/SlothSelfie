@@ -169,7 +169,7 @@ function setupSorting(project) {
 // Function to view the project as a list
 async function viewAsList(projectId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
         const data = await response.json();
         if (!data.success) {
             throw new Error('Failed to fetch project');
@@ -212,7 +212,7 @@ async function viewAsList(projectId) {
 // Function to view the project as a Gantt chart with a hierarchy sidebar
 async function viewAsGantt(projectId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
         const data = await response.json();
         if (!data.success) {
             throw new Error('Failed to fetch project');

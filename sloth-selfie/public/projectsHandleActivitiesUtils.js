@@ -240,7 +240,7 @@ async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
     try{
 
         //get the activity
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const activityData = await response.json();
         if (!activityData.success) {
             throw new Error('Failed to fetch activity data');
@@ -308,7 +308,7 @@ async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
 async function adjustMacroButtons(macroId) {
     try{
         //get the macroactivity
-        const response = await fetch(`http://localhost:8000/api/activity/${macroId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${macroId}`);
         const activityData = await response.json();
         if (!activityData.success) {
             throw new Error('Failed to fetch activity data');
@@ -353,7 +353,7 @@ async function adjustMacroButtons(macroId) {
 async function checkChildren(phaseSubphase) {
     try{
         //get the phaseSubphase of the activity
-        const response = await fetch(`http://localhost:8000/api/phaseSubphase/${phaseSubphase}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/phaseSubphase/${phaseSubphase}`);
         const phaseSubphaseres = await response.json();
         if (!phaseSubphaseres.success) {
             throw new Error('Failed to fetch phaseSubphase data');
@@ -368,7 +368,7 @@ async function checkChildren(phaseSubphase) {
             //we get the subphases of the phase
             for(const subphaseId of phaseSubphaseData.subphases) {
                 //get the subphase
-                const response2 = await fetch(`http://localhost:8000/api/phaseSubphase/${subphaseId}`);
+                const response2 = await fetch(`https://site232453.tw.cs.unibo.it/api/phaseSubphase/${subphaseId}`);
                 const subphaseres = await response2.json();
                 if (!subphaseres.success) {
                     throw new Error('Failed to fetch subphase data');
@@ -523,7 +523,7 @@ async function adjustDatesOfDependentActivities(dependentActivitiesIds) {
     for (const depId of activityIdsArray) {
         try {
             // Get the activity
-            let response = await fetch(`http://localhost:8000/api/activity/${depId}`);
+            let response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${depId}`);
             let activityData = await response.json();
             if (!activityData.success) {
                 throw new Error('Failed to fetch activity data');
@@ -565,7 +565,7 @@ function updateMacroDeadlinesInDOM(updatedMacros) {
 //Function to delete a note by its id (used for input/output dependency if the output is rejected)
 async function deleteNoteById(noteId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/note/${noteId}`, {
             method: "DELETE",
             credentials: "include",
         });

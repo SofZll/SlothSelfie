@@ -17,7 +17,7 @@ async function handleActivities(projectId) {
             return;
         }
 
-        const projectResponse = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const projectResponse = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
         const data = await projectResponse.json();
         if (!data.success) {
             throw new Error('Failed to fetch project');
@@ -55,7 +55,7 @@ async function handleActivities(projectId) {
         await updateActivitiesStatus(activities);
 
         //refetch after the update
-        const refreshedProject = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const refreshedProject = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
         if (!refreshedProject.ok) {
             throw new Error("Failed to fetch the refreshed project data.");
         }
@@ -155,7 +155,7 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         let userLogged = await getLoggedUser();
 
         try {
-            const response = await fetch("http://localhost:8000/api/activity/inputOutput", {
+            const response = await fetch("https://site232453.tw.cs.unibo.it/api/activity/inputOutput", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -198,7 +198,7 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
         let userLogged = await getLoggedUser();
 
         try {
-            const response = await fetch("http://localhost:8000/api/activity/inputOutput", {
+            const response = await fetch("https://site232453.tw.cs.unibo.it/api/activity/inputOutput", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -233,7 +233,7 @@ async function insertActivityInputOutput(activityId, fieldType, isDependency = f
 async function insertMacroInputOutput(activityId, fieldType, value = "") {
     let userLogged = await getLoggedUser();
     //get the activity
-    const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+    const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
     const data = await response.json();
     if (!data.success) {
         throw new Error('Failed to fetch activity');
@@ -248,7 +248,7 @@ async function insertMacroInputOutput(activityId, fieldType, value = "") {
         if(!activity.input){
             try{
             //insert the input in the macroactivity input field
-            const response = await fetch("http://localhost:8000/api/activity/inputOutput", {
+            const response = await fetch("https://site232453.tw.cs.unibo.it/api/activity/inputOutput", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -273,7 +273,7 @@ async function insertMacroInputOutput(activityId, fieldType, value = "") {
             if(!activity.output || activity.output === null){
                 try{
                     //insert the output in the macroactivity output field
-                    const response = await fetch("http://localhost:8000/api/activity/inputOutput", {
+                    const response = await fetch("https://site232453.tw.cs.unibo.it/api/activity/inputOutput", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -302,7 +302,7 @@ async function insertMacroInputOutput(activityId, fieldType, value = "") {
 async function checkAndUpdateMacroStatus(activityId, type) {
     try {
         //get the activity
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const data = await response.json();
         if (!data.success) {
             throw new Error('Failed to fetch activity');
@@ -314,7 +314,7 @@ async function checkAndUpdateMacroStatus(activityId, type) {
         }
 
         //get the phaseSubphase of the activity
-        const responseData = await fetch(`http://localhost:8000/api/phaseSubphase/${activity.phaseSubphase}`);
+        const responseData = await fetch(`https://site232453.tw.cs.unibo.it/api/phaseSubphase/${activity.phaseSubphase}`);
         const phaseSubphaseData = await responseData.json();
         if (!phaseSubphaseData.success) {
             throw new Error('Failed to fetch phaseSubphase');
@@ -334,7 +334,7 @@ async function checkAndUpdateMacroStatus(activityId, type) {
             // we get the parentPhase
             let parentPhase = null;
             if (phaseSubphase.parentPhase) {
-                const parentResponseres = await fetch(`http://localhost:8000/api/phaseSubphase/${phaseSubphase.parentPhase}`);
+                const parentResponseres = await fetch(`https://site232453.tw.cs.unibo.it/api/phaseSubphase/${phaseSubphase.parentPhase}`);
                 const parentResponse = await parentResponseres.json();
                 if (!parentResponse.success) {
                     throw new Error('Failed to fetch parent phaseSubphase');
@@ -352,7 +352,7 @@ async function checkAndUpdateMacroStatus(activityId, type) {
 // Function to update activity status
 async function updateActivityStatus(activityId, newStatus) {
     try {
-        const response = await fetch(`http://localhost:8000/api/activity/status/${activityId}`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/status/${activityId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
@@ -377,7 +377,7 @@ async function updateActivityStatus(activityId, newStatus) {
 async function activatableActivity(activityId, newStatus) {
     try {
         //get the activity
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const data = await response.json();
 
         if (!data.success) {
@@ -405,7 +405,7 @@ async function activatableActivity(activityId, newStatus) {
 async function startActivity(activityId, newStatus) {
     try {
         //get the activity
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const activity = await response.json();
 
         if (!activity) {
@@ -437,7 +437,7 @@ async function startActivity(activityId, newStatus) {
 async function completeActivity(activityId, newStatus) {
     try {
         //get the activity
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const activity = await response.json();
 
         if (!activity) {
@@ -473,7 +473,7 @@ async function completeActivity(activityId, newStatus) {
 async function checkOptionsForCompleteActivityDep(activityId, userDecision = false) {
     try {
         // Get the activity
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const data = await response.json();
         if (!data.success) {
             throw new Error('Failed to fetch activity');
@@ -548,7 +548,7 @@ async function checkOptionsForCompleteActivityDep(activityId, userDecision = fal
 async function reactivateActivity(activityId, newStatus) {
     try {
         //get the activity
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const data = await response.json();
         if (!data.success) {
             throw new Error('Failed to fetch activity');
@@ -582,7 +582,7 @@ async function reactivateActivity(activityId, newStatus) {
                 inputField.value = "";
 
                 //we get the dependent activity
-                const response = await fetch(`http://localhost:8000/api/activity/${dependent._id}`);
+                const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${dependent._id}`);
                 const dependentActivityData = await response.json();
                 if (!dependentActivityData.success) {
                     throw new Error('Failed to fetch dependent activity');
@@ -607,7 +607,7 @@ async function reactivateActivity(activityId, newStatus) {
         //if the user is the owner of the project, but is not a member of the activity, we will not activate the saveUpdatedOutput nor the abandon button 
         let userLogged = await getLoggedUser();
         //get the project of the activity
-        const projectResponse = await fetch(`http://localhost:8000/api/project/${activity.project}`);
+        const projectResponse = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${activity.project}`);
         const projectData = await projectResponse.json();
         if (!projectData.success) {
             throw new Error('Failed to fetch project');
@@ -659,7 +659,7 @@ async function handleOwnerDecision(activityId, decision, dependentActivitiesIds,
         await adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, decision);
 
         // Update the dependent activities
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const data = await response.json();
         if (!data.success) {
             throw new Error('Failed to fetch activity');
@@ -695,7 +695,7 @@ async function handleOwnerDecision(activityId, decision, dependentActivitiesIds,
 // Function to get the dependent activities of an activity
 async function getDependentActivities(activityId) {
     // Get the activity
-    const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+    const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
     const data = await response.json();
     if (!data.success) {
         throw new Error('Failed to fetch activity');
@@ -705,7 +705,7 @@ async function getDependentActivities(activityId) {
 
 
     // Get the entire project to find all activities
-    const projectResponse = await fetch(`http://localhost:8000/api/project/${activity.project}`);
+    const projectResponse = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${activity.project}`);
     const projectdata = await projectResponse.json();
     if (!projectdata.success) {
         throw new Error('Failed to fetch project');
@@ -753,7 +753,7 @@ async function updateDependentActivities(activityId, activity, onlyBlocked = fal
 
 // Function to adjust or contract the schedule of an activity
 async function adjustOrContractActivitySchedule(activityId, dependentActivitiesIds, delay, action) {
-    const res = await fetch(`http://localhost:8000/api/activity/${activityId}/schedule`, {
+    const res = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}/schedule`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dependentActivitiesIds, delay, action }) // action is "contract" or "delay"
@@ -784,7 +784,7 @@ async function updateOutputNote(activityId) {
         let userLogged = await getLoggedUser();
 
         //get the activity output note, if it is preent, update it, else create it
-        const responseActivity = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const responseActivity = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const activityData = await responseActivity.json();
         if (!activityData.success) {
             throw new Error('Failed to fetch activity');
@@ -792,7 +792,7 @@ async function updateOutputNote(activityId) {
         const activity = activityData.activity;
 
         //get the output note
-        const responseNote = await fetch(`http://localhost:8000/api/note/get/${activity.output}`);
+        const responseNote = await fetch(`https://site232453.tw.cs.unibo.it/api/note/get/${activity.output}`);
         const noteData = await responseNote.json();
         if (!noteData.success) {
             throw new Error('Failed to fetch note');
@@ -800,7 +800,7 @@ async function updateOutputNote(activityId) {
         const note = noteData.note;
         if (!note) {
             // If the note is not present, create it
-            const response = await fetch(`http://localhost:8000/api/activity/inputOutput`, {
+            const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/inputOutput`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -824,7 +824,7 @@ async function updateOutputNote(activityId) {
         }else{
 
             // Update the output note
-            const response = await fetch(`http://localhost:8000/api/activity/output/update`, {
+            const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/output/update`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -858,7 +858,7 @@ async function updateOutputNote(activityId) {
 //Function to get the content of the output note
 async function getOutputContent(noteId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/note/get/${noteId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/note/get/${noteId}`);
         const outputData = await response.json();
         if (!outputData.success) {
             throw new Error('Failed to fetch output note');
@@ -876,7 +876,7 @@ async function abandonActivity(activityId) {
         const userLogged = await getLoggedUser();
 
         // Get the activity
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
         const activity = await response.json();
 
         if (!activity) {
@@ -888,7 +888,7 @@ async function abandonActivity(activityId) {
         let updatedSharedWith = activity.sharedWith.filter(user => user !== userLogged);
 
         // Update the activity with the new sharedWith
-        await fetch(`http://localhost:8000/api/activity/${activityId}`, {
+        await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
