@@ -20,7 +20,7 @@ const createActivity = async (req, res) => {
         let sharedWithUsers = [];
         sharedWithUsers.push(user);
         if (sharedWith && Array.isArray(sharedWith)) {
-            sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
+            sharedWithUsers = await User.find({ username: { $in: sharedWith }, isDevice: { $ne: true }, isRoom: { $ne: true }, isAdmin: false }).select('_id');
         }
 
         const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), createdAt: getCurrentNow(), updatedAt: getCurrentNow() });
@@ -130,7 +130,7 @@ const updateActivity = async (req, res) => {
         // get the users to share the activity with
         let sharedWithUsers = [];
         if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
-            sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
+            sharedWithUsers = await User.find({ username: { $in: sharedWith }, isDevice: { $ne: true }, isRoom: { $ne: true }, isAdmin: false }).select('username');
         }
 
         const activity = await Activity.findById(activityId);

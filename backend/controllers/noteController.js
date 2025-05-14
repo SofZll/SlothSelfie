@@ -2,7 +2,6 @@ const Note = require('../models/noteModel');
 const User = require('../models/userModel');
 
 const { addTasks, editTasks, deleteTasks, deleteUserFromShareWith } = require('./taskController');
-const { findUserId } = require('../utils/utils');
 const { getCurrentNow } = require('../services/timeMachineService');
 
 // Create a new note
@@ -12,7 +11,10 @@ const createNote = async (req, res) => {
     const user = await User.findOne({ username: userName });
     
     try {
-        const users = await findUserId(sharedWith);
+        let sharedWithUsers = [];
+        if (sharedWith && Array.isArray(sharedWith)) {
+            sharedWithUsers = await User.find({ username: { $in: sharedWith }, isDevice: { $ne: true }, isRoom: { $ne: true }, isAdmin: false }).select('_id');
+        }
 
         const note = new Note({
             title,
@@ -20,12 +22,12 @@ const createNote = async (req, res) => {
             category,
             content: content || '',
             noteAccess,
-            sharedWith: noteAccess === 'shared' ? users : [],
+            sharedWith: noteAccess === 'shared' ? sharedWithUsers : [],
             createdAt: getCurrentNow(),
             updatedAt: getCurrentNow()
         });
         
-        if (tasks) note.tasks = await addTasks(tasks, user, users);
+        if (tasks) note.tasks = await addTasks(tasks, user, sharedWithUsers);
 
         const savedNote = await note.save()
 
@@ -96,7 +98,10 @@ const updateNote = async (req, res) => {
     
     try {
         const note = await Note.findById(noteId);
-        const users = await findUserId(sharedWith);
+        let sharedWithUsers = [];
+        if (sharedWith && Array.isArray(sharedWith)) {
+            sharedWithUsers = await User.find({ username: { $in: sharedWith }, isDevice: { $ne: true }, isRoom: { $ne: true }, isAdmin: false }).select('_id');
+        }
         const userId = await User.findOne({ username: user});
 
         if (!note) {
@@ -109,13 +114,13 @@ const updateNote = async (req, res) => {
         }
 
         if (addedTasks) {
-            const response = await addTasks(addedTasks, userId, users);
+            const response = await addTasks(addedTasks, userId, sharedWithUsers);
             if (!response) return res.status(500).json({ success: false, message: 'Error adding tasks' });
             else note.tasks = response;
         }
 
         if (tasks) {
-            const response = await editTasks(tasks, users);
+            const response = await editTasks(tasks, sharedWithUsers);
             if (!response) return res.status(500).json({ success: false, message: 'Error editing tasks' });
             else note.tasks.push(...response);
         }
@@ -125,7 +130,7 @@ const updateNote = async (req, res) => {
         note.content = content;
         note.noteAccess = noteAccess;
         note.updatedAt = getCurrentNow();
-        note.sharedWith = noteAccess === 'shared' ? users : [];
+        note.sharedWith = noteAccess === 'shared' ? sharedWithUsers : [];
 
         const updatedNote = await note.save();
 
