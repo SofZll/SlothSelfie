@@ -22,7 +22,7 @@ const ChatHeader = () => {
                     </div>
                 </div>
             ) : (
-                <h5 className={`${isDesktop ? 'fs-5 m-0' : 'ps-3 m-0 py-3 bg-white'}`}>Chat</h5>
+                <h5 className={`${isDesktop ? 'fs-5 m-0' : 'ps-3 m-0 py-3 background-light'}`}>Chat</h5>
             )}
         </>
     )

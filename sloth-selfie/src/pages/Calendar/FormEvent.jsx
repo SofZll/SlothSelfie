@@ -511,7 +511,7 @@ const FormEvent = () => {
             {!(event.isInProject || event.tool) && (
                 <>
                     <div className='row py-2'>
-                        <div className='col-12'>
+                        <div className='col-12 mb-3'>
                             <label htmlFor='share' className='form-label'>Share with</label>
                             <ShareInput receivers={event.sharedWith} setReceivers={(receivers) => setEvent({...event, sharedWith: receivers})} />
                         </div>
