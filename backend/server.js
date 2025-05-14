@@ -41,21 +41,25 @@ app.use((req, res, next) => {
 app.use(routes);
 
 //serve static files from public folder in sloth-selfie
-app.use(express.static(path.join(__dirname, '..', 'sloth-selfie', 'public')));
+//app.use(express.static(path.join(__dirname, '..', 'sloth-selfie', 'public')));
 
-app.get('/projects', (req, res) => {
+/*app.get('/projects', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'sloth-selfie', 'public', 'projects.html'));
-});
+});*/
 
 // Static files from frontend
-// const frontendPath = path.join(global.rootDir, '..', 'frontend/build');
+const frontendPath = path.join(global.rootDir, '..', 'frontend/build');
 //locale:
-const frontendPath = path.join(global.rootDir, '..', 'sloth-selfie/build');
+//const frontendPath = path.join(global.rootDir, '..', 'sloth-selfie/build');
 
 app.use(express.static(frontendPath));
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+app.get('/projects', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'projects.html'));
 });
 
 socketHandler(io);
