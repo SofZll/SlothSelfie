@@ -87,7 +87,7 @@ const GridNotes = () => {
                 </div>
             </div>
 
-            <div className='row p-2 d-flex w-100 h-75 overflow-y-auto border rounded shadow m-3'>
+            <div className='row p-2 d-flex w-100 h-75 overflow-y-auto border rounded shadow-sm m-3'>
                 {filtedNotes.length > 0 ? (
                     filtedNotes.map((note, index) => (
                         <div key={index} className='col-12 col-md-6 col-lg-4 my-1'>

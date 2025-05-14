@@ -2,13 +2,15 @@
     height: auto;
     max-height: 100vh;
     overflow-y: auto;
-    padding-bottom: 2rem;
+    padding-top: calc(0.8rem + 3rem + 1rem);
+    padding-bottom: calc(0.9rem + 1rem + 2rem);
 }
 
 .profile p {
     font-size: 0.95rem;
     text-align: left;
     margin: 0;
+    z-index: 1;
 }
 
 .profile-container {
@@ -17,8 +19,8 @@
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-width: 28rem;
-    width: 93%;
-    margin-top: 5rem;
+    width: 90%;
+    margin: 0 auto;
 }
 
 .profile-container h2 {
@@ -94,14 +96,14 @@
     color: #fff;
 }
 
-/*popup*/
-
-
-
-/* TODO: cambiare*/
 @media screen and (min-width: 700px){
+    .profile {
+        padding-top: calc(2rem + 3rem + 3rem);
+        padding-bottom: 1rem;
+    }
+
     .profile-container {
-        margin-bottom: 1rem;
+        padding-bottom: 1rem;
     }
 
     .button-large {
