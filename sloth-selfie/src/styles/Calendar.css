@@ -4,7 +4,7 @@
 }
 
 .btn-settings {
-  bottom: 17.8vh;
+  bottom: calc(10vh + 4.5rem);
 }
 
 .pop-up {
@@ -23,8 +23,8 @@
 }
 
 .planner {
-  margin-top: 9vh;
-  height: 80%;
+  padding-top: calc(0.8rem + 3rem + 1rem);
+  padding-bottom: calc(0.9rem + 1rem + 2rem);
 }
 
 .activity-title {
