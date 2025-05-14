@@ -649,8 +649,10 @@ const importEvents = async (req, res) => {
     const importedEvents = [];
 
     for (const file of files) {
-      const filePath = file.path;  // Path to the file
-      const data = ical.parseFile(filePath);  // Parsing file .ics
+      //Read the content of the file from the buffer as a string
+      const icsContent = file.buffer.toString('utf8');
+      // Parse the ICS content
+      const data = ical.parseICS(icsContent);
       console.log('Parsed data:', data);  // Log the parsed data for debugging
 
       for (const key in data) {
@@ -728,7 +730,6 @@ const importEvents = async (req, res) => {
         }
       }
 
-      fs.unlinkSync(file.path); // delete the file after parsing
     }
 
     res.status(200).json({ message: 'Import OK', importedEvents });
