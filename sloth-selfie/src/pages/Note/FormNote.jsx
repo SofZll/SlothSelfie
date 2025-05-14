@@ -107,7 +107,7 @@ const FormNote = () => {
 
                 {note.noteAccess === 'shared' && (
                     <div className='row py-2'>
-                        <div className='col-12'>
+                        <div className='col-12 mb-3'>
                             <label htmlFor='receivers' className='form-label'>Share with</label>
                             <ShareInput receivers={note.sharedWith} setReceivers={(receivers) => setNote({...note, sharedWith: receivers})} />
                         </div>

@@ -10,8 +10,8 @@ const Header = () => {
     const { color } = useContext(StyleContext);
 
     return (
-        <header className='d-flex justify-content-center align-items-center p-4 position-fixed top-0 start-50 translate-middle-x gap-3 cursor-pointer' onClick={() => navigate('/home')}>
-            <h1 className='text-nowrap pe-1 grandstander-normal' style={{ color }}>
+        <header className={`header ${color == '#222D52' ? 'background-light' : ''}`} onClick={() => navigate('/home')}>
+            <h1 className='text-nowrap pe-1 mb-0 mt-2 grandstander-normal' style={{ color }}>
                 SLOTH SELFIE
             </h1>
 

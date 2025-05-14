@@ -59,8 +59,8 @@ const ProfilePage = () => {
 
     return (
         <MainLayout>
-            <div className='profile d-flex align-items-center justify-content-center flex-column w-100 p-0'>
-                <div className='profile-container d-flex align-items-center justify-content-center flex-column m-2 p-3'>
+            <div className='profile d-flex align-items-center flex-column w-100'>
+                <div className='profile-container d-flex align-items-center justify-content-center flex-column p-3'>
                     <div className='d-flex justify-content-center position-relative w-100'>
                         <h2 className='h-auto py-2 mb-3'>{user.username}</h2>
 
