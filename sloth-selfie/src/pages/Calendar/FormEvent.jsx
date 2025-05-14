@@ -323,7 +323,7 @@ const FormEvent = () => {
                         placeholder='Event title'
                         value={event.title}
                         onChange={(e) => setEvent({...event, title: e.target.value})}
-                        disabled={event.isInProject || event.tool}
+                        disabled={event.isInProject || event.tool || event.response === 'pending'}
                         required />
                 </div>
 
@@ -337,7 +337,7 @@ const FormEvent = () => {
                         <label htmlFor='type' className='form-label'>Event Type</label>
                         <select className='form-select' id='type'
                         value={event.type}
-                        disabled={event.isInProject}
+                        disabled={event.isInProject || event.response === 'pending'}
                         onChange={(e) => setEvent({...event, type: e.target.value})}>
                             <option value=''>Select type</option>
                             <option value='personal'>Personal</option>
@@ -361,7 +361,7 @@ const FormEvent = () => {
                     <label htmlFor='date' className='form-label'>Date</label>
                     <input type='Date' className='form-control' id='date'
                     value={event.startDate ? new Date(event.startDate).toLocaleDateString('en-CA') : ''}
-                    disabled={event.isInProject || event.tool}
+                    disabled={event.isInProject || event.tool || event.response === 'pending'}
                     onChange={(e) => setStartDate(e.target.value)}
                     required />
                 </div>
@@ -370,7 +370,7 @@ const FormEvent = () => {
                     <input
                         className='form-check-input' type='checkbox' id='allDay'
                         checked={event.allDay}
-                        disabled={event.isInProject || event.tool}
+                        disabled={event.isInProject || event.tool || event.response === 'pending'}
                         onChange={(e) => setAllDay(e.target.checked)} />
                     <label className='form-check-label' htmlFor='allDay'>All Day</label>
                 </div>
@@ -386,13 +386,13 @@ const FormEvent = () => {
                             <input type='time' className='form-control' id='time'
                             placeholder='Event time'
                             value={event.time}
-                            disabled={event.isInProject || event.tool}
+                            disabled={event.isInProject || event.tool || event.response === 'pending'}
                             onChange={(e) => setStartTime(e.target.value)}
                             required />
                         ) : (
                             <select className='form-select' id='time'
                             value={event.time || ''}
-                            disabled={event.isInProject || event.tool}
+                            disabled={event.isInProject || event.tool || event.response === 'pending'}
                             onChange={(e) => setStartTime(e.target.value)} required>
                                 <option value=''>Select time</option>
                                 {generateTimeOptions().map(option => (
@@ -407,7 +407,7 @@ const FormEvent = () => {
                         <input
                             className='form-check-input' type='checkbox' id='isPreciseTime'
                             checked={event.isPreciseTime}
-                            disabled={event.isInProject || event.tool}
+                            disabled={event.isInProject || event.tool || event.response === 'pending'}
                             onChange={(e) => setEvent({...event, isPreciseTime: e.target.checked})} />
                         <label className='form-check-label' htmlFor='isPreciseTime'>Precise Time</label>
                     </div>
@@ -422,7 +422,7 @@ const FormEvent = () => {
                     placeholder={event.allDay ? 'Duration in days' : 'Duration in hours'}
                     min={0}
                     value={event.duration || ''}
-                    disabled={event.isInProject || event.tool}
+                    disabled={event.isInProject || event.tool || event.response === 'pending'}
                     onChange={(e) => setEndDate(e.target.value)}
                     required />
                 </div>
@@ -433,7 +433,7 @@ const FormEvent = () => {
                     <label htmlFor='repeatFrequency' className='form-label'>Frequency</label>
                     <select className='form-select' id='repeatFrequency'
                     value={event.repeatFrequency}
-                    disabled={event.isInProject || event.tool}
+                    disabled={event.isInProject || event.tool || event.response === 'pending'}
                     onChange={(e) => setEvent({...event, repeatFrequency: e.target.value})}>
                         <option value='none'>No repetition</option>
                         <option value='daily'>Daily</option>
@@ -450,7 +450,7 @@ const FormEvent = () => {
                         <label htmlFor='repeatMode' className='form-label'>Mode</label>
                         <select className='form-select' id='repeatMode'
                         value={event.repeatMode || ''}
-                        disabled={event.isInProject || event.tool}
+                        disabled={event.isInProject || event.tool || event.response === 'pending'}
                         onChange={(e) => setEvent({...event, repeatMode: e.target.value, repeatTimes: 0, repeatEndDate: null})}>
                             <option value='ntimes'>Repeat N times</option>
                             <option value='until'>Repeat until</option>
@@ -464,7 +464,7 @@ const FormEvent = () => {
                             placeholder='Number of repetitions'
                             min={0}
                             value={event.repeatTimes || ''}
-                            disabled={event.isInProject || event.tool}
+                            disabled={event.isInProject || event.tool || event.response === 'pending'}
                             onChange={(e) => setEvent({...event, repeatTimes: parseInt(e.target.value)})} 
                             required />
                         </div>
@@ -473,7 +473,7 @@ const FormEvent = () => {
                             <label htmlFor='repeatEndDate' className='form-label'>End Date</label>
                             <input type='Date' className='form-control' id='repeatEndDate'
                             value={event.repeatEndDate ? new Date(event.repeatEndDate).toLocaleDateString('en-CA') : ''}
-                            disabled={event.isInProject || event.tool}
+                            disabled={event.isInProject || event.tool || event.response === 'pending'}
                             onChange={(e) => setEvent({...event, repeatEndDate: e.target.value})}
                             required />
                         </div>
@@ -486,7 +486,7 @@ const FormEvent = () => {
                     <label htmlFor='eventLocation' className='form-label'>Location</label>
                     <select className='form-select' id='eventLocation'
                     value={event.eventLocation}
-                    disabled={event.isInProject || event.tool}
+                    disabled={event.isInProject || event.tool || event.response === 'pending'}
                     onChange={(e) => setEvent({...event, eventLocation: e.target.value})}>
                         <option value=''>Not specified</option>
                         <option value='physical'>Physical</option>
@@ -501,14 +501,14 @@ const FormEvent = () => {
                         <label htmlFor='eventLocationDetails' className='form-label'>Location address</label>
                         <input type='text' className='form-control' id='eventLocationDetails' value={inputMap?.address || ''} disabled={true} />
                     </div>
-                    <div className='col col-2 d-flex justify-content-center align-items-center pt-4 mt-1 ps-0'>
-                        <MapPin size={23} color={'#000'} onClick={() => setShowGeo(true)} className='cursor-pointer' />
+                    <div className={`col col-2 d-flex justify-content-center align-items-center pt-4 mt-1 ps-0 ${event.isInProject || event.tool || event.response === 'pending' ? 'opacity-50' : ''}`}>
+                        <MapPin size={23} color={'#000'} onClick={() => setShowGeo(!(event.isInProject || event.tool || event.response === 'pending'))} className='cursor-pointer' />
                     </div>
                 </div>
             )}
 
 
-            {!(event.isInProject || event.tool) && (
+            {!(event.isInProject || event.tool || event.response === 'pending') && (
                 <>
                     <div className='row py-2'>
                         <div className='col-12 mb-3'>
