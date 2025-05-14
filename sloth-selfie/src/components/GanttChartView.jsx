@@ -8,7 +8,7 @@ const GanttChartView = ({ projectId }) => {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
         const data = await response.json();
         if (!data.success) {
             throw new Error('Failed to fetch project');

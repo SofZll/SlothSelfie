@@ -15,6 +15,6 @@ self.addEventListener('notificationclick', event => {
     event.notification.close();
 
     event.waitUntil(
-    clients.openWindow('https://localhost:3000')
+    clients.openWindow('https://site232453.tw.cs.unibo.it')
     );
 });

@@ -5,7 +5,7 @@
 // Function to get the logged user username
 async function getLoggedUser() {
     try {
-        const response = await fetch("http://localhost:8000/api/user/profile", {
+        const response = await fetch("https://site232453.tw.cs.unibo.it/api/user/profile", {
             method: "GET",
             credentials: "include",
         });
@@ -36,7 +36,7 @@ async function loadProjects() {
                         <p>Loading, please wait...</p>
                     </div>`;
     try {
-        const response = await fetch(`http://localhost:8000/api/projects`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/projects`, {
             method: "GET",
             credentials: "include",
             headers: {
@@ -196,7 +196,7 @@ async function saveOrUpdateProject(event) {
         let response;
         if (projectId) {
             // Update the existing project, PUT
-            response = await fetch(`http://localhost:8000/api/project/${projectId}`, {
+            response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -206,7 +206,7 @@ async function saveOrUpdateProject(event) {
             });
         } else {
             // Save the new project, POST
-            response = await fetch(`http://localhost:8000/api/project`, {
+            response = await fetch(`https://site232453.tw.cs.unibo.it/api/project`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -485,7 +485,7 @@ async function closeActivityForm(button) {
 // function to remove a phase from the backend
 async function removePhaseFromBackend(projectId, phaseId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}/remove-phase`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}/remove-phase`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId, phaseId })
@@ -507,7 +507,7 @@ async function removePhaseFromBackend(projectId, phaseId) {
 // function to remove a subphase from the backend
 async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}/remove-subphase`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}/remove-subphase`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId, phaseId, subphaseId })
@@ -529,7 +529,7 @@ async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
 //function to remove an activity from the backend
 async function removeActivityFromBackend(projectId, phaseId, subphaseId, activityId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}/remove-activity`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}/remove-activity`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId, phaseId, subphaseId, activityId })
@@ -562,7 +562,7 @@ async function deleteProject(projectId) {
 
         // DELETE request to remove the project
         try {
-            const response = await fetch(`http://localhost:8000/api/project/${projectId}`, {
+            const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`, {
                 method: "DELETE",
                 credentials: 'include',
             });
@@ -646,7 +646,7 @@ function fillActivityFields(activityDiv, activity, projectActors, parentId, pare
 //function to fill the form and edit a project
 async function editProject(projectId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
         const data = await response.json();
 
         if (!data.success) {
@@ -847,7 +847,7 @@ async function toggleProjectForm() {
 // time machine functions
 async function getCurrentNow() {
     try {
-        const response = await fetch("http://localhost:8000/api/time/state", {
+        const response = await fetch("https://site232453.tw.cs.unibo.it/api/time/state", {
             method: "GET",
             credentials: "include",
         });

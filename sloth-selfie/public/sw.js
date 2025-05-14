@@ -22,6 +22,6 @@ self.addEventListener('push', function(event) {
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
     event.waitUntil(
-        clients.openWindow('http://localhost:3000')
+        clients.openWindow('https://site232453.tw.cs.unibo.it')
     );
 });

@@ -1,4 +1,5 @@
-const BASE_URL = 'http://localhost:3000/api';
+//const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = 'https://site232453.tw.cs.unibo.it/api';
 
 // General API service to make requests to the server
 const apiService = async (endpoint, method = 'GET', body = null) => {
