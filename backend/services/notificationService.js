@@ -26,7 +26,8 @@ const sendSystemNotification = async (notification) => {
         notificationId: notification.id,
         elementId: notification.element,
         elementType: notification.elementType,
-        url: 'http://localhost:3000',
+        //url: 'http://localhost:3000',
+        url: 'https://site232453.tw.cs.unibo.it',
         urgency: notification.urgency,
     };
 
@@ -86,7 +87,7 @@ const sendEmailNotification = async (notification) => {
                     <li><strong>Location:</strong> ${element.eventLocation}</li>
                 </ul>
                 <p>Make sure to be there! </p>
-                <p><a href="http://localhost:3000" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Event Details on Sloth Selfie</a></p>
+                <p><a href="https://site232453.tw.cs.unibo.it" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Event Details on Sloth Selfie</a></p>
             </div>
         `;
     } else if (notification.elementType === 'Activity') {
@@ -101,7 +102,7 @@ const sendEmailNotification = async (notification) => {
                     <li><strong>Completed:</strong> ${element.completed ? 'Yes' : 'No'}</li>
                 </ul>
                 <p>Make sure to complete the activity on time! </p>
-                <p><a href="http://localhost:3000" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Activity Details on Sloth Selfie</a></p>
+                <p><a href="https://site232453.tw.cs.unibo.it" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Activity Details on Sloth Selfie</a></p>
             </div>
         `;
     }

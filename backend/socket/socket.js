@@ -3,7 +3,8 @@ let io;
 const init = (server) => {
     io = require('socket.io')(server, {
         cors: {
-            origin: 'http://localhost:3000', 
+            //origin: 'http://localhost:3000', 
+            origin: 'https://site232453.tw.cs.unibo.it',
             methods: ['GET', 'POST'],
             allowedHeaders: ['Content-Type', 'Authorization'],
             credentials: true
