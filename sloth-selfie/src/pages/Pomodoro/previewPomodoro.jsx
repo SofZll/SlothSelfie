@@ -19,20 +19,35 @@ const PreviewPomodoro = ({ viewType }) => {
   const {
     pomodoro,
     play,
-    setPlay,
     increasePomodoroTime,
-    resetPomodoro,
-    animation
   } = usePomodoro();
 
   useEffect(() => {
-    let timer;
-    if (play && !pomodoro.finished) {
-      timer = setInterval(() => {
-        increasePomodoroTime();
-      }, 1000);
+    if (play) {
+      let start = performance.now();
+      let prevElapsed = 0;
+      let frameId;
+      let active = true;
+
+      const tick = async (now) => {
+        if (!active) return;
+        const elapsed = Math.floor((now - start) / 1000);
+
+        if (elapsed > prevElapsed) {
+          prevElapsed = elapsed;
+          await increasePomodoroTime();
+        }
+
+        frameId = requestAnimationFrame(tick);
+      };
+
+      frameId = requestAnimationFrame(tick);
+
+      return () => {
+        active = false;
+        cancelAnimationFrame(frameId);
+      }
     }
-    return () => clearInterval(timer);
   }, [play, pomodoro]);
 
   // animation page

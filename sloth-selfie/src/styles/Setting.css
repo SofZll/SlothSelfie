@@ -1,19 +1,16 @@
 .card-settings {
-    width: 90%;
-    max-width: 600px;
-    min-height: 270px;
+  width: 90%;
+  height: 80%;
+  max-width: 600px;
+  max-height: 500px;
 }
 
 .r-col {
-    width: 40%;
+  width: 40%;
 }
 
 .l-col {
-    width: 60%;
-}
-
-.customization-options h5 {
-    text-align: center;
+  width: 60%;
 }
 
 .button-logout {
@@ -48,22 +45,30 @@
 
 /*preview options*/
 .radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 2rem;
-    margin-left: 3rem;
-  }
-  
-  .radio-option {
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  margin-left: 3rem;
+}
 
-  .radio-option input[type="radio"] {
-    transform: scale(1.5);
-    margin-right: 0.5rem;
+.radio-option {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.radio-option input[type="radio"] {
+  transform: scale(1.5);
+  margin-right: 0.5rem;
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+  .card-settings {
+    margin-top: 30px;
+    width: 70%;
+    height: 90%;
+    min-height: 285px;
   }
-  
+}

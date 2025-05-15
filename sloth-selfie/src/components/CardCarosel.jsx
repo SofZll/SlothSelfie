@@ -4,7 +4,6 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 
 import { CustomizationContext } from '../contexts/PreviewContext';
-import {AuthContext} from '../contexts/AuthContext';
 import { CalendarProvider } from '../contexts/CalendarContext';
 import { NoteProvider } from '../contexts/NoteContext';
 import { TaskProvider } from '../contexts/TaskContext';
@@ -19,7 +18,6 @@ import PreviewProjects from '../pages/previewProjects';
 
 const CardCarosel = ({ title, settingKey }) => {
     const { customizations } = useContext(CustomizationContext);
-    const { user } = useContext(AuthContext);
     const [show, setShown] = useState(false);
 
     const props3 = useSpring({
@@ -31,13 +29,12 @@ const CardCarosel = ({ title, settingKey }) => {
 
     //Map the setting key to the personalized title
     const titleMap = {
-        showEventsList: "Today's Events List",
-        showActivitiesList: "This week's Activities List",
-        showTasksList: "This week's Tasks List",
+        showEventsList: `Today's Events List`,
+        showActivitiesList: `This week's Activities List`,
+        showTasksList: `This week's Tasks List`,
         listOfNotes: 'Notes List',
         lastNote: 'Most recent Note',
         addNote: 'Add a Note',
-        quickStart: 'Quick Start',
         listOfPomodoros: 'Pomodoros ToDo List',
         lastPomodoro: 'Last Pomodoro',
         stats: 'Pomodoros Stats',
@@ -47,7 +44,7 @@ const CardCarosel = ({ title, settingKey }) => {
     };
 
     //Get the personalized title
-    const currentTitle = titleMap[customizations[settingKey]] || title;
+    const currentTitle = titleMap[customizations[settingKey]];
 
     //Function to render the content based on the setting key
     const renderContent = () => {

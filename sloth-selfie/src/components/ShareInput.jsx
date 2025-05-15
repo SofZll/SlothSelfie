@@ -4,7 +4,7 @@ import { NewSwal } from '../utils/swalUtils';
 
 import { apiService } from '../services/apiService';
 
-const ShareInput = ({ receivers, setReceivers }) => {
+const ShareInput = ({ receivers, setReceivers, event }) => {
     const [receiverInput, setReceiverInput] = useState('');
     const [removingIndex, setRemovingIndex] = useState(null);
 
@@ -13,14 +13,19 @@ const ShareInput = ({ receivers, setReceivers }) => {
             if (!receivers.includes(receiverInput.trim())) {
                 const response = await apiService(`/user/${receiverInput.trim()}`, 'GET');
                 if (!response.success) {
-                    NewSwal.fire('Utente non trovato', '', 'warning');
+                    NewSwal.fire(response.message, '', 'warning');
+                    return;
+                }
+
+                if (!event && response.isTool) {
+                    NewSwal.fire(response.message, '', 'warning');
                     return;
                 }
 
                 setReceivers([...receivers, receiverInput.trim()]);
                 setReceiverInput('');
             } else {
-                NewSwal.fire('Utente già inserito', '', 'warning');
+                NewSwal.fire('User already selected', '', 'warning');
             }
         }
     };
