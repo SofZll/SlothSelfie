@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const routes = require('./routes/index');
 const path = require('path');
 const connectDB = require('./config/db');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 const socketHandler = require('./socket/socketHandler');
 const socket = require('./socket/socket');
 const app = express();

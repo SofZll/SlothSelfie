@@ -1,9 +1,7 @@
 const nodemailer = require('nodemailer');
-const { getIO } = require('../socket/socket');
-const userSocketMap = require('../socket/userSocketMap');
 const User = require('../models/userModel');
-const Notification = require('../models/notificationModel');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const calculateDate = (date, minusTime) => {
     const newDate = new Date(date);

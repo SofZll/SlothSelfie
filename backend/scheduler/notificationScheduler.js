@@ -138,7 +138,6 @@ const shouldSendNotification = async (notification, now, user) => {
     }
 
     if (disabledNotification(notification, user)) {
-        console.log(`Notification ${notification._id.toString()} disabled.`);
         return false;
     }
 
@@ -240,9 +239,9 @@ const shouldSendNotification = async (notification, now, user) => {
     return false;
 }
 
-const sendNotificationNow = async (user, notification) => {
+const sendNotificationNow = async (user, notification, invitation = false, modification = false) => {
     if (notification.mode.system && !user.disableNotifications.system) await sendSystemNotification(notification);
-    if (notification.mode.email && !user.disableNotifications.email) await sendEmailNotification(notification);
+    if (notification.mode.email && !user.disableNotifications.email) await sendEmailNotification(notification, invitation, modification);
     notification.status = 'inactive';
 
     await notification.save();

@@ -120,7 +120,7 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
         updatedAt: getCurrentNow()
       });
 
-      await sendNotificationNow(user, notification);
+      await sendNotificationNow(user, notification, invitation = true);
     }
 
     await savedEvent.save();

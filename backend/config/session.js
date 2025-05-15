@@ -1,24 +1,9 @@
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-const mongoCredentials = {
-    user: "site232453",
-    pwd: "au8Eevai",
-    site: "mongo_site232453"
-};
-
-/*
-const mongoCredentials = {
-    user: "kaorijiang",
-    pwd: "dWFd3wNQCJQksWEs",
-    site: "cluster0.ynn63.mongodb.net",
-    dbname: "slothselfie"
-};
-*/
-
-const dbName = 'slothselfie';
-const uri = `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/${dbName}?authSource=admin&writeConcern=majority`;
+const uri = process.env.MONGO_URI;
 
 module.exports = session({
     secret: process.env.SESSION_SECRET || 'defaultsecret',

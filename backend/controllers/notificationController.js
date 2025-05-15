@@ -90,7 +90,7 @@ const getPastNotifications = async (req, res) => {
                 { type: 'now' }
             ]
         })
-        .populate('element')
+        .populate('element', 'title startDate endDate deadline')
         .sort({ createdAt: -1 });
 
         if (!notifications) return res.status(404).json({ success: false, message: 'No notifications found' });

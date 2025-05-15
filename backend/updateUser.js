@@ -1,16 +1,11 @@
 const mongoose = require('mongoose');
 const User = require('./models/userModel'); // Percorso del modello utente
+const Notification = require('./models/notificationModel'); // Percorso del modello notifica
 const bcrypt = require('bcrypt');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const mongoCredentials = {
-    user: "kaorijiang",
-    pwd: "dWFd3wNQCJQksWEs",
-    site: "cluster0.ynn63.mongodb.net",
-    dbname: "slothselfie"
-};
-
-const dbName = 'slothselfie';
-const uri = `mongodb+srv://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/${dbName}?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = process.env.MONGO_URI;
 
 const connectDB = async () => {
     try {
@@ -116,6 +111,27 @@ const updateUsers = async () => {
     }
 };
 
+const updateNotification = async () => {
+    try {
+        // Connetti al database
+        await connectDB();
+
+        console.log('Connected to the database.');
+
+        //elimina le notifiche che hanno come element: null
+        const result = await Notification.deleteMany(
+            { element: null }
+        );
+        console.log(`Deleted ${result.deletedCount} notifications.`);
+    } catch (error) {
+        console.error('Error updating users:', error);
+    } finally {
+        // Disconnetti dal database
+        mongoose.connection.close();
+    }
+};
+
+
 //updateIsAdminUndefined();
 //createAdmin();
-updateUsers();
+updateNotification();
