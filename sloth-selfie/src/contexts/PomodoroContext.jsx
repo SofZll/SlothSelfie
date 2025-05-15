@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState }  from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 
 import { apiService } from '../services/apiService';
 import { NewSwal } from '../utils/swalUtils';
@@ -9,6 +9,7 @@ const PomodoroContext = createContext();
 export const PomodoroProvider = ({ children }) => {
     const { getVirtualNow } = useContext(TimeMachineContext);
     const virtualNow = getVirtualNow();
+    const isCreatingRef = useRef(false);
 
     const [settingsPomodoro, setSettingsPomodoro] = useState({
         _id: '',
@@ -48,7 +49,7 @@ export const PomodoroProvider = ({ children }) => {
         reset: false,
         pencilTime: `${30*60}s`,
         lineTime: `${(30*60*0.8)}s`,
-        delayGo: `${(30*60*0.2)}s`,
+        delayGo: `${(30*60*0.1)}s`,
         delayBack: `${(30*60*0.1)}s`,
     });
 
@@ -67,12 +68,16 @@ export const PomodoroProvider = ({ children }) => {
             reset: false,
             pencilTime: `${time}s`,
             lineTime: `${(time*0.8)}s`,
-            delayGo: `${(time*0.3)}s`,
+            delayGo: `${(time*0.2)}s`,
             delayBack: `${(time*0.1)}s`,
         });
     }
 
     const increasePomodoroTime = async () => {
+        if (isCreatingRef.current) return;
+
+        isCreatingRef.current = true;
+
         if (pomodoro.timeLeft <= 0) {
             if (pomodoro.isStudyTime) {
                 if (pomodoro.cyclesLeft - 1 <= 0) setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.breakTime, cyclesLeft: 0, isStudyTime: false, finished: true, studiedTime: pomodoro.studiedTime + 1});
@@ -91,22 +96,28 @@ export const PomodoroProvider = ({ children }) => {
         } else {
             if (!pomodoro.started) {
                 if (pomodoro._id) {
-                    const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
+                    const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', { ...pomodoro, started: true });
                     if (!response.success) console.log('Error updating pomodoro', response.message);
                     else setPomodoro({ ...pomodoro, started: true });
                 } else {
-                    const response = await apiService('/pomodoro', 'POST', {...pomodoro, ...settingsPomodoro});
+                    const response = await apiService('/pomodoro', 'POST', {...pomodoro, started: true, ...settingsPomodoro});
                     if (!response.success) console.log('Error creating pomodoro', response.message);
                     else {
+                        setPomodoro(prev => ({ ...prev, _id: response.pomodoro._id, started: true }));
+                        setSettingsPomodoro(prev => ({
+                            ...prev,
+                            _id: response.pomodoro._id,
+                            title: response.pomodoro.title
+                        }));
                         console.log('Pomodoro created', response.pomodoro);
-                        setPomodoro({ ...pomodoro, _id: response.pomodoro._id, started: true });
-                        setSettingsPomodoro({ ...settingsPomodoro, _id: response.pomodoro._id, title: response.pomodoro.title });
                     }
                 }
             } else setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1, studiedTime: pomodoro.studiedTime + 1 });
         }
+
+        isCreatingRef.current = false;
             
-    }
+    };
 
     const addCycle = async () => {
         const response = await apiService(`/pomodoro/add-additional-cycle/${pomodoro._id}`, 'PUT', { additionalCycles: settingsPomodoro.additionalCycles + 1 });
@@ -177,7 +188,7 @@ export const PomodoroProvider = ({ children }) => {
         
         if (pomodoro._id) {
             const response = await apiService(`/pomodoro/${pomodoro._id}`, 'PUT', { studyTime, breakTime, cycles, deadline: new Date(pomodoro.deadline) });
-            if (response.success) NewSwal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated'});
+            if (response.success) new NewSwal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated'});
             else NewSwal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro settings'});
         }
     }

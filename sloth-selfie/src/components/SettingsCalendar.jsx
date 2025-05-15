@@ -20,10 +20,12 @@ const SettingsCalendar = () => {
 
     const handleSaveSettings = async () => {
         const response = await apiService('/user/edit-schedule', 'PUT', {daysOff, workingHours, dayHour});
-        if (response.success){
-            NewSwal({ title: 'Success', text: 'Settings saved correctly!', icon: 'success'});
+        if (response.success) {
+            new NewSwal({ title: 'Success', text: 'Settings saved correctly!', icon: 'success'});
             setUser({ ...user, workingHours: {...response.workingHours}, freeDays: [...response.freeDays], dayHours: {...response.dayHours} });
         } else NewSwal({ title: 'Error', text: 'There was an issue saving your settings. Please try again.', icon: 'error'});
+
+        setCalendarSettings(false);
     }
 
     const selectDaysOff = (selectedValue) => {
