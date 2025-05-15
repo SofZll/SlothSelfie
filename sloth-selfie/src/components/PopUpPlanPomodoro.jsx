@@ -21,7 +21,7 @@ const PopUpPlanPomodoro = ({ edit }) => {
         if(edit) {
             const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'PUT', settingsPomodoro);
             if (response.success) {
-                NewSwal({ icon: 'success', title: 'Success', text: 'Pomodoro updated successfully'});
+                new NewSwal({ icon: 'success', title: 'Success', text: 'Pomodoro updated successfully'});
                 setPlannedPomodori(plannedPomodori.map(p => p._id === settingsPomodoro._id ? settingsPomodoro : p));
             } else NewSwal({ icon: 'error', title: 'Error', text: 'Error updating pomodoro'});
         } else {

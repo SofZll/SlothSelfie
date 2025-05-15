@@ -101,12 +101,15 @@ const TimerPomodoro = () => {
 
     
     useEffect(() => {
+        
         if (!socketData.inShare && play) {
             let start = performance.now();
             let prevElapsed = 0;
             let frameId;
+            let active = true;
 
             const tick = async (now) => {
+                if (!active) return;
                 const elapsed = Math.floor((now - start) / 1000);
 
                 if (elapsed > prevElapsed) {
@@ -119,9 +122,12 @@ const TimerPomodoro = () => {
 
             frameId = requestAnimationFrame(tick);
 
-            return () => cancelAnimationFrame(frameId);
+            return () => {
+                active = false;
+                cancelAnimationFrame(frameId);
+            }
         }
-    }, [play, socketData.inShare, increasePomodoroTime]);
+    }, [play, socketData.inShare, pomodoro]);
 
     useEffect(() => {
 

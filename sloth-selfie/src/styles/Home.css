@@ -52,4 +52,23 @@
     .divBtn4icon {
         display: none !important;
     }
+
+    .divBtn {
+        margin: 2px 0 5px 0 !important;
+    }
+
+    .menu-div {
+        height: 100% !important;
+    }
+
+    .card {
+        padding: 0 !important;
+        min-height: 300px;
+        height: 80vh;
+    }
+
+    .card h3 {
+        font-size: 1.25rem;
+        margin: 10px 0 0 0;
+    }
 }

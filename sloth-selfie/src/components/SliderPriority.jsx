@@ -54,7 +54,7 @@ const SliderPriority = () => {
     const [data, setData] = useState({});
 
     const handleChange = (event, newValue) => {
-        if (!(data.isInProject || data.tool)) {
+        if (!(data.isInProject || data.tool || data.response === 'pending')) { 
             if (selected.selection === 'event') {
                 setEvent({ ...data, priority: newValue });
             }

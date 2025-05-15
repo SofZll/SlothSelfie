@@ -270,3 +270,9 @@ html, body {
         padding-left: 0;
     } 
 }
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .header {
+        display: none;
+    }
+}

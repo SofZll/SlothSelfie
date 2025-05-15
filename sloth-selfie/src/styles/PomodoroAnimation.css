@@ -146,11 +146,11 @@
     10%{transform:translatex(-150px) rotate(40deg) translatey(-50px)}
     20%{transform:translatex(-175px) rotate(0deg) translatey(-17px)}
     90%{transform:translatex(70px)  rotate(40deg) translatey(-4px)}
-    100%{transform:translatex(87px) rotate(30deg) translatey(-10px)}
+    100%{transform:translatex(89px) rotate(30deg) translatey(-9px)}
 }
 
 @keyframes animationBreakPencil {
-    0%{transform:translatex(87px)  rotate(30deg) translatey(-10px)}
+    0%{transform:translatex(89px)  rotate(30deg) translatey(-8px)}
     5%{transform:rotate(30deg) translatey(-80px)}
     10%{transform:translatex(87px) rotate(220deg) translatey(-10px)}
     90%{transform:translatex(-145px) rotate(220deg) translatey(-10px)}
