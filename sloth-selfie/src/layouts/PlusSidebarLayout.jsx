@@ -10,7 +10,7 @@ const PlusSidebarLayout = ({ childrenMain, childrenSide }) => {
 
     return (
         <MainLayout>
-            <div className='d-flex w-100 h-100'>
+            <div className='d-flex w-100 h-100 overflow-hidden justify-content-center align-items-center'>
                 <div className='col planner overflow-hidden'>
                     {childrenMain}
                 </div>

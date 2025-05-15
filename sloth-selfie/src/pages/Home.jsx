@@ -14,7 +14,7 @@ const Home = ({ settings = false }) => {
     return (
         <CustomizationProvider>
             <MainLayout>
-                <div className='d-flex h-75 w-100 justify-content-center'>
+                <div className='d-flex h-75 w-100 justify-content-center menu-div'>
                     {inSettings ? (
                         <PreviewSetUp setSetUp={setInSettings} />
                     ) : (

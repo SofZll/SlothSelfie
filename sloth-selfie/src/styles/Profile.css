@@ -2,7 +2,7 @@
     height: auto;
     max-height: 100vh;
     overflow-y: auto;
-    padding-top: calc(0.8rem + 3rem + 1rem);
+    padding-top: calc(2rem + 0.5rem + calc(1.375rem + 1.5vw) + 1rem);
     padding-bottom: calc(0.9rem + 1rem + 2rem);
 }
 
