@@ -204,6 +204,7 @@
   max-width: 600px;
   margin: 0 auto;
   height: auto;
+  overflow-y: auto;
 }
 
 /*disable default gantt actions to prevent default behavior*/
