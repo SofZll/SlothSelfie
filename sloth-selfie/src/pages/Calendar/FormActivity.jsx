@@ -22,7 +22,7 @@ const FormActivity = () => {
     const handleSubmit = async () => {
         if (selected.edit) {
             console.log('Editing activity', activity);
-            const response = await apiService(`/activity/${activity._id}`, 'PUT', { activity, notifications });
+            const response = await apiService(`/activity/${activity._id}`, 'PUT', activity);
             if (response.success){
                 const notificationPromises = notifications.map(async notification =>{
                     if (notification._id) {

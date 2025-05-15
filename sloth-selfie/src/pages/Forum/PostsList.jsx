@@ -26,8 +26,6 @@ const PostsList = ({ handleNewContent }) => {
     const [postAddresses, setPostAddresses] = useState({});
     const [openShareModal, setOpenShareModal] = useState(false);
 
-    const queryParams = new URLSearchParams(location.search);
-    const scrollToId = queryParams.get('id');
     const postRefs = useRef({});
 
     const isLiked = (item) => {return item.likes.includes(user._id)};
@@ -51,10 +49,6 @@ const PostsList = ({ handleNewContent }) => {
             element.likes = element.likes ? [...element.likes, user._id] : [user._id];
         }
 
-        const response = await apiService(`/forum/${element._id}`, 'PUT', { likes: element.likes });
-        if (response.success) console.log('element updated');
-        else console.log('Error updating element');
-
         const heartIcon = document.querySelector(`#heart-icon-${type}-${element._id}`);
         heartIcon.classList.remove('animate');
         void heartIcon.offsetWidth;
@@ -75,6 +69,10 @@ const PostsList = ({ handleNewContent }) => {
             }
             return post;
         }));
+
+        const response = await apiService(`/forum/${element._id}`, 'PUT', { likes: element.likes });
+        if (response.success) console.log('element updated');
+        else console.log('Error updating element');
     };
 
     const handleComments = (postId) => setSelectedPostId(selectedPostId === postId ? null : postId);

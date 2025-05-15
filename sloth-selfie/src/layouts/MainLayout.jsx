@@ -8,7 +8,6 @@ import DesktopNav from '../components/DesktopNav'
 import MobileNav from '../components/MobileNav'
 import Header from '../components/Header'
 import TimeMachineButton from '../components/TimeMachine/TimeMachineButton';
-import { ChatProvider } from '../contexts/ChatContext';
 import ChatBox from '../components/ChatBox/ChatBox';
 import NotificationButton from '../components/NotificationButton';
 import Settings from '../components/Settings'

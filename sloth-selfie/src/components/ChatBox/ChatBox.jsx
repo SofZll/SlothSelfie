@@ -1,14 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 
 import '../../styles/ChatBox.css';
-import socket from '../../services/socket/socket';
-import { AuthContext } from '../../contexts/AuthContext';
 import { useChat } from '../../contexts/ChatContext';
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import MainLayout from '../../layouts/MainLayout';
-import { Toast } from '../../utils/swalUtils';
-import { messageSound } from '../../utils/soundsUtils';
 
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
@@ -17,8 +13,7 @@ import ChatList from './ChatList';
 import ChatSearch from './ChatSearch';
 
 const ChatBox = () => {
-    const { user } = useContext(AuthContext);
-    const { chats, setChats, selectedChat, setSelectedChat, setOnlineUsers, fetchChat, isDesktop, isOpen, setIsOpen } = useChat();
+    const { chats, selectedChat, setSelectedChat, fetchChat, isDesktop, isOpen, setIsOpen } = useChat();
     const { refreshKey } = useContext(TimeMachineContext);
     const { chatId } = useParams();
 
@@ -31,97 +26,6 @@ const ChatBox = () => {
             }
         }
     }, [chatId, chats, setSelectedChat, refreshKey]);
-
-    useEffect(() => {
-        if (!user?._id) return;
-        
-        const handleStatusChange = ({ userId, isOnline }) => {
-            setOnlineUsers(prev => ({ ...prev, [userId]: isOnline }));
-        };
-
-        const handleReceiveMessage = (message) => {
-            messageSound();
-            if (selectedChat?._id === message.chat._id) {
-                setSelectedChat((prevChat) => {
-                    const updatedMessages = [...prevChat.messages, {
-                        ...message,
-                        createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
-                    }];
-                    updatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                    return { ...prevChat, messages: updatedMessages };
-                });
-            } else {
-                setChats((prevChats) => {
-                    const updatedChats = prevChats.map((chat) => {
-                        if (chat._id === message.chat._id) {
-                            return {
-                                ...chat,
-                                unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
-                            };
-                        }
-                        return chat;
-                    });
-                    return updatedChats;
-                });
-
-                Toast.fire({
-                    icon: 'info',
-                    title: `New message from ${message.sender.username}`,
-                    showCancelButton: true,
-                    showConfirmButton: true,
-                    confirmButtonText: 'View',
-                    cancelButtonText: 'Ignore',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const matchedChat = chats.find(chat => chat._id === message.chat._id);
-                        if (matchedChat) {
-                            setSelectedChat(matchedChat);
-                            setIsOpen(true);
-                        }
-                    }
-                });
-            }
-            setChats((prevChats) => {
-                let found = false;
-                const updatedChats = prevChats.map((chat) => {
-                    if (chat._id === message.chat._id) {
-                        found = true;
-                        return {
-                            ...chat,
-                            lastMessage: {
-                                ...message,
-                                createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
-                            },
-                        };
-                    }
-                    return chat;
-                });
-                
-                if (!found) {
-                    const newChat = {
-                        _id: message.chat._id,
-                        otherParticipant: message.sender,
-                        lastMessage: {
-                            ...message,
-                            createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
-                        },
-                        createdAt: message.createdAt,
-                    };
-                    updatedChats.push(newChat);
-                }
-        
-                return updatedChats;
-            });
-        };
-
-        socket.on('status-change', handleStatusChange);
-        socket.on('receive-message', handleReceiveMessage);
-
-        return () => {
-            socket.off('status-change');
-            socket.off('receive-message');
-        };
-    }, [user?._id, selectedChat?._id, setChats, setOnlineUsers]);
 
     const chatContent = (
         <div className={`d-relative flex-column message-container ${isDesktop ? 'desktop' : ''} ${isOpen ? 'open' : ''}`}>

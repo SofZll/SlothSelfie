@@ -46,15 +46,19 @@ const NotificationsHistory = ({ loading, setLoading, refreshKey, handleNotificat
                             <div className='d-flex flex-column gap-2'>
                                 <p className='cursor-pointer' onClick={() => handleNotificationClick(notif)}>
                                     {notif.elementType === 'Activity' ? '📝 Activity: ' : '📅 Event: '}
-                                    <strong>{notif.element.title}</strong>
+                                    <strong>{notif.element ? notif.element.title : 'Unknown'}</strong>
                                 </p>
-                                {notif.elementType === 'Activity' ? (
-                                    <p className='text-secondary small-text'>Deadline: {formatDate(notif.element.deadline)}</p>
+                                {notif.element ? (
+                                    notif.elementType === 'Activity' ? (
+                                        <p className='text-secondary small-text'>Deadline: {formatDate(notif.element.deadline)}</p>
+                                    ) : (
+                                        <>
+                                            <p className='text-secondary small-text'>Start Date: {formatDate(notif.element.startDate)}</p>
+                                            <p className='text-secondary small-text'>End Date: {formatDate(notif.element.endDate)}</p>
+                                        </>
+                                    )
                                 ) : (
-                                    <>
-                                        <p className='text-secondary small-text'>Start Date: {formatDate(notif.element.startDate)}</p>
-                                        <p className='text-secondary small-text'>End Date: {formatDate(notif.element.endDate)}</p>
-                                    </>
+                                    <p className='text-secondary small-text'>Details not available</p>
                                 )}
                                 <p>{notif.text}</p>
                                 <div className='d-flex gap-2 mt-1'>
