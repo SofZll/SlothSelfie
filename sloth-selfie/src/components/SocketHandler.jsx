@@ -1,13 +1,13 @@
 import { useEffect, useContext } from 'react';
-import { useChat } from '../context/ChatContext';
-import { authContext } from '../context/AuthContext';
+import { useChat } from '../contexts/ChatContext';
+import { AuthContext } from '../contexts/AuthContext';
 import socket from '../services/socket/socket';
 import { notificationSound, messageSound } from '../utils/soundsUtils';
-import { toastInfo, toastWarning } from '../utils/swalUtils';
+import { toastInfo, toastWarning, Toast } from '../utils/swalUtils';
 
 const SocketHandler = () => {
-    const { user } = useContext(authContext);
-    const { selectedChat, setSelectedChat, setOnlineUsers, setChats } = useChat();
+    const { user } = useContext(AuthContext);
+    const { selectedChat, setSelectedChat, setOnlineUsers, chats, setChats, setIsOpen } = useChat();
 
     useEffect(() => {
         if (!user?._id) return;
