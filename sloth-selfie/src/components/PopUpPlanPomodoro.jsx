@@ -26,7 +26,7 @@ const PopUpPlanPomodoro = ({ edit }) => {
             } else NewSwal({ icon: 'error', title: 'Error', text: 'Error updating pomodoro'});
         } else {
             const response = await apiService('/pomodoro/calendar', 'POST', settingsPomodoro);
-            if (response.success) NewSwal({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully'});
+            if (response.success) new NewSwal({ icon: 'success', title: 'Success', text: 'Pomodoro added successfully'});
             else NewSwal({ icon: 'error', title: 'Error', text: 'Error adding pomodoro'});
         }
 
