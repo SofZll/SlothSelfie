@@ -1,16 +1,11 @@
 import React, { useMemo , useEffect, useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { NewSwal } from '../../utils/swalUtils';
 
-import { apiService } from '../../services/apiService';
-import socket from '../../services/socket/socket';
 import { useChat } from '../../contexts/ChatContext';
-import { AuthContext } from '../../contexts/AuthContext';
 
 const ChatList = () => {
     const navigate = useNavigate();
-    const { chats, selectedChat, setSelectedChat, onlineUsers, searchTerm, isDesktop, fetchChat } = useChat();
-    const { user } = useContext(AuthContext);
+    const { chats, selectedChat, onlineUsers, searchTerm, isDesktop, fetchChat } = useChat();
 
     const filteredChats = useMemo(() => {
         return chats.filter(chat => 

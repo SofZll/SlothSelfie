@@ -1,10 +1,8 @@
 import React, { useState, useRef, createContext, useEffect } from 'react';
-import { toastInfo, toastWarning } from '../utils/swalUtils';
 
 import socket from '../services/socket/socket';
 import { apiService } from '../services/apiService';
 import { bufferToBase64, urlBase64ToUint8Array } from '../utils/utils';
-import { notificationSound } from '../utils/soundsUtils';
 
 const AuthContext = createContext();
 
@@ -103,31 +101,6 @@ const AuthProvider = ({ children }) => {
                 console.error('SW/Push error:', err);
             }
         })();
-    }, [user]);
-
-    useEffect(() => {
-        if (user?._id) socket.connect();
-        else socket.disconnect();
-    }, [user]);
-
-    useEffect(() => {
-        if (!user?._id || Notification.permission !== 'granted') return;
-
-        const handler = ({ title, body, notificationId, elementId, elementType, urgency }) => {
-            console.log('Notification received:', { title, body, notificationId, elementId, urgency });
-            let link = '';
-            if (urgency) {
-                link = `/calendar?type=Activity&element=${elementId}`;
-                toastWarning(title, body, link);
-            } else {
-                link = `/calendar?type=${elementType}&element=${elementId}`;
-                toastInfo(title, body, link);
-            }
-            notificationSound();
-        };
-        socket.on('system-notification', handler);
-
-        return () => socket.off('system-notification', handler);
     }, [user]);
 
     return (
