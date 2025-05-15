@@ -10,7 +10,7 @@ const Header = () => {
     const { color } = useContext(StyleContext);
 
     return (
-        <header className={`header ${color == '#222D52' ? 'background-light' : ''}`} onClick={() => navigate('/home')}>
+        <header className={`header landscape ${color === '#222D52' ? 'background-light' : ''}`} onClick={() => navigate('/home')}>
             <h1 className='text-nowrap pe-1 mb-0 mt-2 grandstander-normal' style={{ color }}>
                 SLOTH SELFIE
             </h1>

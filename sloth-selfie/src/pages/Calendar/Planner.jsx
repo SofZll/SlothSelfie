@@ -428,7 +428,7 @@ const Planner = () => {
 
             
 
-            <div className='d-flex justify-content-center align-items-center w-100 h-75 pt-3'>
+            <div className='d-flex justify-content-center align-items-center w-100 h-100 pt-3'>
                 <DnDCalendar
                     localizer={localizer}
                     events={listNormal}

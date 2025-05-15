@@ -17,3 +17,11 @@
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: move;
 }
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+
+    .notification-button {
+        left: 5rem;
+        top: 2rem;
+    }
+}
