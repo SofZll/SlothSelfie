@@ -6,6 +6,7 @@ const User = require('../models/userModel');
 const webPush = require('web-push');
 const nodemailer = require('nodemailer');
 const { getIO } = require('../socket/socket');
+const { getEventProgrammedEmail, getActivityProgrammedEmail, getElementInvitationEmail, getElementModificationEmail } = require('../utils/emailTemplates');
 
 const sendSystemNotification = async (notification) => {
     // internal notification
@@ -51,7 +52,7 @@ const sendSystemNotification = async (notification) => {
     });
 }
 
-const sendEmailNotification = async (notification) => {
+const sendEmailNotification = async (notification, invitation, modification) => {
     console.log('Sending email notification:', notification);
 
     const receiver = await User.findById(notification.user);
@@ -74,37 +75,14 @@ const sendEmailNotification = async (notification) => {
 
     let subjectContent, htmlContent;
 
-    if (notification.elementType === 'Event') {
-        subjectContent = `Friendly Reminder: The Event ${element.title} is Coming Up!`;
-        htmlContent = `
-            <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-                <h2 style="color: #4CAF50;">📅 Reminder: ${element.title}</h2>
-                <p>Hey <strong>${receiver.username}</strong>,</p>
-                <p>Your event is coming up soon! Here are the details:</p>
-                <ul>
-                    <li><strong>Date:</strong> ${element.date}</li>
-                    <li><strong>Time:</strong> ${element.time}</li>
-                    <li><strong>Location:</strong> ${element.eventLocation}</li>
-                </ul>
-                <p>Make sure to be there! </p>
-                <p><a href="https://site232453.tw.cs.unibo.it" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Event Details on Sloth Selfie</a></p>
-            </div>
-        `;
+    if (invitation) {
+        ({ subjectContent, htmlContent } = getElementInvitationEmail(element, notification.elementType, receiver));
+    } else if (modification) {
+        ({ subjectContent, htmlContent } = getElementModificationEmail(element, notification.elementType));
+    } else if (notification.elementType === 'Event') {
+        ({ subjectContent, htmlContent } = getEventProgrammedEmail(element, receiver));
     } else if (notification.elementType === 'Activity') {
-        subjectContent = `Friendly Reminder: The Activity ${element.title} Deadline is Approaching!`;
-        htmlContent = `
-            <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-                <h2 style="color: #4CAF50;">📅 Reminder: ${element.title}</h2>
-                <p>Hey <strong>${receiver.username}</strong>,</p>
-                <p>Your activity deadline is approaching! Here are the details:</p>
-                <ul>
-                    <li><strong>Deadline:</strong> ${element.deadline}</li>
-                    <li><strong>Completed:</strong> ${element.completed ? 'Yes' : 'No'}</li>
-                </ul>
-                <p>Make sure to complete the activity on time! </p>
-                <p><a href="https://site232453.tw.cs.unibo.it" style="display:inline-block; background-color:#4CAF50; color:white; text-decoration:none; padding:10px 20px; border-radius:5px;">View Activity Details on Sloth Selfie</a></p>
-            </div>
-        `;
+        ({ subjectContent, htmlContent } = getActivityProgrammedEmail(element, receiver));
     }
 
     const mailOptions = {

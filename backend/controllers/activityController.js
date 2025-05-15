@@ -26,28 +26,28 @@ const createActivity = async (req, res) => {
         const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), createdAt: getCurrentNow(), updatedAt: getCurrentNow() });
         const savedActivity = await activity.save();
 
-        const notifications = sharedWithUsers.map(sharedUser => ({
-            user: sharedUser._id,
-            element: savedActivity._id,
-            elementType: 'Activity',
-            type: 'now',
-            text: `You have a new activity: ${savedActivity.title}`,
-            mode: {
-                system: true,
-                email: true,
-            },
-            createdAt: getCurrentNow(),
-            updatedAt: getCurrentNow()
-        }));
+        const receivers = savedActivity.sharedWith.map(sharedUser => sharedUser._id);
 
-        const createdNotifications = await Notification.insertMany(notifications);
-        for (const notification of createdNotifications) {
-            await sendNotificationNow(user, notification);
+        for (const receiver of receivers) {
+            const notification = await Notification.create({
+                user: receiver,
+                element: savedActivity._id,
+                elementType: 'Activity',
+                type: 'now',
+                text: `You have been invited to a new activity: ${savedActivity.title}`,
+                mode: {
+                    system: true,
+                    email: true,
+                },
+                createdAt: getCurrentNow(),
+                updatedAt: getCurrentNow()
+            });
+            await sendNotificationNow(user, notification, invitation = true);
         }
 
-        const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
+        const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username').lean();
         const modifiedActivity = {
-            ...populatedActivity._doc,
+            ...populatedActivity,
             sharedWith: populatedActivity.sharedWith.map(sharedUser => sharedUser.username),
         };
 
@@ -120,8 +120,7 @@ const getActivity = async (req, res) => {
 // Updating an activity
 const updateActivity = async (req, res) => {
     const { activityId } = req.params; 
-    const { activity } = req.body;
-    const { title, deadline, completed, sharedWith, status } = activity;
+    const { title, deadline, completed, sharedWith, status } = req.body;
     const userName = req.session.username;
 
     try {
@@ -474,7 +473,7 @@ async function adjustOrContractActivitySchedule(req, res) {
                     createdAt: getCurrentNow(),
                     updatedAt: getCurrentNow(),
                 });
-                await sendNotificationNow(user, notification);
+                await sendNotificationNow(user, notification, modification = true);
             }
         }
 
