@@ -12,12 +12,12 @@ function NewApp() {
     
     return (
         <AuthProvider>
-            <ChatProvider>
-                <TimeMachineProvider>
+            <TimeMachineProvider>
+                <ChatProvider>
                     <SocketHandler />
                     <MainRoutes />
-                </TimeMachineProvider>
-            </ChatProvider>
+                </ChatProvider>
+            </TimeMachineProvider>
         </AuthProvider>
     );
 }
