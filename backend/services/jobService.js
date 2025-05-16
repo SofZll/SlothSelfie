@@ -22,6 +22,7 @@ const getScheduledJobs = async (userId, hours = 24) => {
 
     const jobs = await Promise.all(notifications.map(async (notif) => {
         const triggerAt = new Date(getTriggerAt(notif, now));
+        console.log('Trigger at:', triggerAt);
 
         if (triggerAt > limit || triggerAt < now) return null;
 

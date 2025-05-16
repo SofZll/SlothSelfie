@@ -146,6 +146,8 @@ const getTriggerAt = (notification, now) => {
         triggerAt = calculateNotificationTime(notification);
     }
 
+    triggerAt.getHours
+
     return triggerAt;
 }
 
