@@ -76,7 +76,7 @@ async function renderActivities(activities, userLogged, isOwner) {
     let activityContainer = document.getElementById("activity-container");
     let closeBtn = document.getElementById("closeActivityViewBtn");
 
-    let content = `<h2>Project Activities</h2>`;
+    let content = `<h3>Project Activities</h3>`;
 
     if (activities.length === 0) {
         content += `<p>No activities assigned to you.</p>`;

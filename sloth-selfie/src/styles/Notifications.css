@@ -14,3 +14,10 @@
 .small-text {
     font-size: 0.9rem;
 }
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .notifications-container {
+        padding-top: 5rem !important;
+        padding-left: 4rem !important;
+    }
+}

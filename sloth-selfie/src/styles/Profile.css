@@ -110,3 +110,19 @@
         max-width: 40rem;
     }
 }
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .profile {
+        padding-top: 4rem;
+        padding-bottom: 1rem;
+        padding-left: 4rem;
+    }
+
+    .profile-container {
+        padding-bottom: 1rem;
+    }
+
+    .button-large {
+        max-width: 40rem;
+    }
+}

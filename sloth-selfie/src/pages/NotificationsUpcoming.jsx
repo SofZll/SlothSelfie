@@ -11,15 +11,15 @@ const NotificationsUpcoming = ({ loading, setLoading, refreshKey, handleNotifica
     const [notifications, setNotifications] = useState([]);
 
     const handleSnoozeNotif = (index) => async () => {
+        console.log('notifications:', notifications);
+        console.log('Snooze time:', new Date(notifications[index].triggerAt));
         const snoozeTime = new Date(notifications[index].triggerAt);
         const snoozeInterval = 10;
         snoozeTime.setMinutes(snoozeTime.getMinutes() + snoozeInterval);
+        setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
         
         const response = await apiService(`/notification/snooze/${notifications[index]._id}`, 'PUT', { snoozeInterval });
-        if (response.success) {
-            setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
-            window.location.reload();
-        } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
+        if (!response.success) NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
     }
 
     const fetchNotifications = async () => {
@@ -69,7 +69,7 @@ const NotificationsUpcoming = ({ loading, setLoading, refreshKey, handleNotifica
                                 <div className='d-flex gap-2 mt-1'>
                                     {notif.urgency && <span className='d-flex items-center gap-1'><AlertTriangle size={16} /> Urgente</span>}
                                     {/* permettere all'utente di selezionare il tempo di snooze */}
-                                    <button className='btn btn-outline-success' onClick={handleSnoozeNotif(notif)}>Postpone 10 minutes</button>
+                                    <button className='btn btn-outline-success' onClick={handleSnoozeNotif(index)}>Postpone 10 minutes</button>
                                     {notif.type === 'repeat' && <button className='btn btn-outline-warning'>Skip this one</button>}
                                 </div>
                             </div>
