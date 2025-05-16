@@ -86,7 +86,7 @@ const startVirtualScheduler = () => {
 
                     const shouldSend = checkUrgency(notification.lastSentAt, activity.deadline, now);
 
-                    if (shouldSend && !disabledNotification(notification, user) && !user.disableNotifications.urgency) {
+                    if (shouldSend && await !disabledNotification(notification, user) && !user.disableNotifications.urgency) {
                         try {
                             if (notification.mode.system && !user.disableNotifications.system) await sendSystemNotification(notification);
                             if (notification.mode.email && !user.disableNotifications.email) await sendEmailNotification(notification);
@@ -129,6 +129,8 @@ const disabledNotification = async (notification, user) => {
             return true;
         }
     }
+
+    return false;
 }
 
 const shouldSendNotification = async (notification, now, user) => {
@@ -137,7 +139,7 @@ const shouldSendNotification = async (notification, now, user) => {
         await notification.save();
     }
 
-    if (disabledNotification(notification, user)) {
+    if (await disabledNotification(notification, user)) {
         console.log(`Notification ${notification._id.toString()} disabled.`);
         return false;
     }

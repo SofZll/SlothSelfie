@@ -24,7 +24,7 @@ const Notifications = () => {
     
     return (
         <MainLayout>
-            <div className={`notifications-container ${isDesktop ? 'desktop' : ''} p-2 h-75 d-flex flex-column h-100`}>
+            <div className={`notifications-container ${isDesktop ? 'desktop' : ''} p-3 h-75 d-flex flex-column h-100`}>
                 <div className='d-flex justify-content-around align-items-center mb-2'>
                     <button type='button' className={`btn w-100 p-2 ${showHistory ? 'btn-light bg-white border' : 'btn-primary'}`} onClick={() => setShowHistory(false)}>Upcoming</button>
                     <button type='button' className={`btn w-100 p-2 ${showHistory ? 'btn-secondary' : 'btn-light bg-white border'}`} onClick={() => setShowHistory(true)}>History</button>

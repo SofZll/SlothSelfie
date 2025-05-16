@@ -10,7 +10,7 @@ const Projects = () => {
                 title='Projects'
                 style={{
                     width: '100%',
-                    height: '80vh',
+                    height: '100vh',
                     border: 'none',
                     overflow: 'auto',
                     justifyContent: 'center',
