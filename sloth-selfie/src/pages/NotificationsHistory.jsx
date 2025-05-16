@@ -11,7 +11,7 @@ import { apiService } from '../services/apiService';
 // se levento viene declined in quanto dentro a una no availability
 // le notifiche di urgency
 
-const NotificationsHistory = ({ loading, setLoading, refreshKey, handleNotificationClick }) => {
+const NotificationsHistory = ({ loading, setLoading, refreshKey, handleNotificationClick, showHistory }) => {
     const [notifications, setNotifications] = useState([]);
 
     const fetchNotifications = async () => {
@@ -31,12 +31,12 @@ const NotificationsHistory = ({ loading, setLoading, refreshKey, handleNotificat
 
     useEffect(() => {
         fetchNotifications();
-    }, [refreshKey]);
+    }, [refreshKey, showHistory]);
 
     return (
         <>
             <div className='mb-4 bg-white p-3 border rounded-2'>
-                <h4 className='grandstander-normal'>NOTIFICATIONS HISTORY</h4>
+                <h4>NOTIFICATIONS HISTORY</h4>
                 <p className='px-2 fs-6 text-secondary'>* Here you can view the past notifications, such ad the creation of a group event or the declining of an event due to a no availability.</p>
             </div>
             {notifications.length > 0 ? (

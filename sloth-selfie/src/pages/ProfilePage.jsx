@@ -41,11 +41,19 @@ const ProfilePage = () => {
 
     const handleSaveChanges = async (e) => {
         e.preventDefault();
-
-        const response = await apiService('/user/edit-profile', 'POST', user);
+        const userData = {
+            name: user.name,
+            username: user.username,
+            email: user.email,
+            birthday: user.birthday,
+            phoneNumber: user.phoneNumber,
+            gender: user.gender
+        };
+        setIsEditing(false);
+        
+        const response = await apiService('/user/edit-profile', 'POST', userData);
         if (response.success) {
             console.log('Profile updated successfully');
-            setIsEditing(false);
         } else NewSwal.fire({ title: 'Error updating profile', icon: 'error', text: response.message});
     }
 

@@ -30,9 +30,9 @@ const Notifications = () => {
                     <button type='button' className={`btn w-100 p-2 ${showHistory ? 'btn-secondary' : 'btn-light bg-white border'}`} onClick={() => setShowHistory(true)}>History</button>
                 </div>
                 {showHistory ? (
-                    <NotificationsHistory loading={loading} setLoading={setLoading} refreshKey={refreshKey} handleNotificationClick={handleNotificationClick} />
+                    <NotificationsHistory loading={loading} setLoading={setLoading} refreshKey={refreshKey} handleNotificationClick={handleNotificationClick} showHistory={showHistory} />
                 ) : (
-                    <NotificationsUpcoming loading={loading} setLoading={setLoading} refreshKey={refreshKey} handleNotificationClick={handleNotificationClick} />
+                    <NotificationsUpcoming loading={loading} setLoading={setLoading} refreshKey={refreshKey} handleNotificationClick={handleNotificationClick} showHistory={showHistory} />
                 )}
             </div>
         </MainLayout>
