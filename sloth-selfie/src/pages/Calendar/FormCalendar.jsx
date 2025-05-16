@@ -95,9 +95,9 @@ const FormCalendar = () => {
 
 
     return (
-        <div className='d-flex flex-column w-100 h-100 overflow-y-auto overflow-x-hidden position-relative'>
+        <div className='d-flex flex-column w-100'>
 
-            {isDesktop && (
+            {isDesktop && selected.selection === '...' && (
                 <ScrollList CardList={(user.isAdmin || show === 'tools') ? [...rooms, ...devices] : activities} smallView={false} activity={!(user.isAdmin || show === 'tools')} />
             )}
 
