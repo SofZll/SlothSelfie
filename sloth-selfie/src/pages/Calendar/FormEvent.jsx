@@ -209,16 +209,16 @@ const FormEvent = () => {
                 else setEvents([...events, response.event]);
                 
                 if (notifications.length > 0) {
-                    const response = await handleNotifications(response.event._id, notifications);
-                    console.log('response', response);
+                    const response2 = await handleNotifications(response.event._id, notifications);
+                    console.log('response', response2);
                 }
             } else {
                 setEvents([...events.filter(evt => evt.fatherId !== response.events[0].fatherId && evt._id !== response.events[0]._id), ...response.events]);
 
                 if (notifications.length > 0) {
                     for (const event of response.events) {
-                        const response = await handleNotifications(event._id, notifications);
-                        console.log('response', response);
+                        const response2 = await handleNotifications(event._id, notifications);
+                        console.log('response', response2);
                     }
                 }
             }

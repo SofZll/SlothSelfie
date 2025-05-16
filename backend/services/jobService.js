@@ -62,15 +62,16 @@ const snoozeJob = async (notificationId, snoozeTime) => {
         snoozeUntil = new Date(triggerAt.getTime() + snoozeTime * 60 * 1000);
     }
 
+    const timeString = snoozeUntil.toTimeString().slice(0, 5);
+
     if (notification.type === 'default'){
         notification.snoozeSettings.until = snoozeUntil;
         notification.snoozeSettings.count += 1;
         notification.snooze = true;
+        notification.time = timeString;
         notification.updatedAt = now;
         await notification.save();
     } else if (notification.type === 'repeat') {
-        const timeString = snoozeUntil.toTimeString().slice(0, 5);
-
         await Notification.create({
             user: notification.user,
             element: notification.element,
