@@ -525,7 +525,7 @@ const FormEvent = () => {
                 </>
             )}
                     
-            {(event.response === 'pending') ? (
+            {(event.response === 'pending' && !event.isInProject) ? (
                 <div className='d-flex align-items-center justify-content-center'>
                     <button type='button' aria-label='Accept' className='btn btn-success' onClick={() => handleResponse('accepted')}>
                         Accept
