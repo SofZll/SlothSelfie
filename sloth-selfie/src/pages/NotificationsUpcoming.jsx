@@ -7,19 +7,17 @@ import { formatDate } from '../utils/utils';
 import { LoadingPageDark } from './LoadingPage';
 import { apiService } from '../services/apiService';
 
-const NotificationsUpcoming = ({ loading, setLoading, refreshKey, handleNotificationClick }) => {
+const NotificationsUpcoming = ({ loading, setLoading, refreshKey, handleNotificationClick, showHistory }) => {
     const [notifications, setNotifications] = useState([]);
 
     const handleSnoozeNotif = (index) => async () => {
         const snoozeTime = new Date(notifications[index].triggerAt);
         const snoozeInterval = 10;
         snoozeTime.setMinutes(snoozeTime.getMinutes() + snoozeInterval);
-        
+        setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
+
         const response = await apiService(`/notification/snooze/${notifications[index]._id}`, 'PUT', { snoozeInterval });
-        if (response.success) {
-            setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
-            window.location.reload();
-        } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
+        if (!response.success) NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
     }
 
     const fetchNotifications = async () => {
@@ -45,12 +43,12 @@ const NotificationsUpcoming = ({ loading, setLoading, refreshKey, handleNotifica
 
     useEffect(() => {
         fetchNotifications();
-    }, [refreshKey]);
+    }, [refreshKey, showHistory]);
 
     return (
         <>
             <div className='mb-4 bg-white p-3 border rounded-2'>
-                <h4 className='grandstander-normal'>UPCOMING NOTIFICATIONS</h4>
+                <h4>UPCOMING NOTIFICATIONS</h4>
                 <p className='px-2 fs-6 text-secondary'>* Here you can view the upcoming notifications and snooze them, to modify or to delete them you have to go to the activity or event page.</p>
             </div>
             {notifications.length > 0 ? (
@@ -70,7 +68,6 @@ const NotificationsUpcoming = ({ loading, setLoading, refreshKey, handleNotifica
                                     {notif.urgency && <span className='d-flex items-center gap-1'><AlertTriangle size={16} /> Urgente</span>}
                                     {/* permettere all'utente di selezionare il tempo di snooze */}
                                     <button className='btn btn-outline-success' onClick={handleSnoozeNotif(notif)}>Postpone 10 minutes</button>
-                                    {notif.type === 'repeat' && <button className='btn btn-outline-warning'>Skip this one</button>}
                                 </div>
                             </div>
                         </div>
