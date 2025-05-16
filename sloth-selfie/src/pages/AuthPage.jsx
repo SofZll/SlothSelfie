@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import authSloth from '../assets/icons/authSloth.png';
 import { NewSwal } from '../utils/swalUtils';
 
 import { validateLogin, validateRegistration } from '../utils/validation.js'
@@ -13,22 +12,6 @@ import socket from '../services/socket/socket';
 // TODO: choose a library for icons react-icons or lucide-rect
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-
-function getCursorPosition(event) {
-    const x = (event.clientX * 100) / window.innerWidth + "%";
-    const y = (event.clientY * 100) / window.innerHeight + "%";
-  
-    const eyes1 = document.getElementById("eyes1");
-    const eyes2 = document.getElementById("eyes2");
-  
-    eyes1.style.left = x;
-    eyes1.style.top = y;
-    eyes1.style.transform = `translate(-${x}, -${y})`;
-  
-    eyes2.style.left = x;
-    eyes2.style.top = y;
-    eyes2.style.transform = `translate(-${x}, -${y})`;
-}
 
 const AuthPage = ({ formType = 'login' }) => {
     const { fetchUserData } = useContext(AuthContext);
@@ -73,15 +56,8 @@ const AuthPage = ({ formType = 'login' }) => {
 
     return (
         <AuthLayout>
-            <div className='container-auth' onMouseMove={(e) => getCursorPosition(e)}>
-                <img src={authSloth} alt='authSloth' className='auth-sloth' />
-                <div className='eye-cover1'>
-                    <div id='eyes1'></div>
-                </div>
-                <div className='eye-cover2'>
-                    <div id='eyes2'></div>
-                </div>
-                <div className={`col login-box ${currentFormType === 'register' ? 'registration-form' : 'login-form'}`}>
+            <div className='container-auth'>
+                <div className={`col login-box mx-3 ${currentFormType === 'register' ? 'registration-form' : 'login-form'}`}>
                     <h1 className='login-title'>{currentFormType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
                     <form className='row g-3' onSubmit={handleSubmit}>
                         {currentFormType === 'register' && (
