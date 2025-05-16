@@ -14,6 +14,7 @@ const MusicPomodoro = () => {
     const [open, setOpen] = useState(false);
     const API_KEY = 'AIzaSyBuHaqwn5504921fUmkd0b3qQy2EWUmae8';
     const [accessToken, setAccessToken] = useState(null);
+    const [tokenExpiry, setTokenExpiry] = useState(null);
 
     const extractYoutubeId = (input) => {
         const regexURL = /(?:https:\/\/www\.youtube\.com\/watch\?v=|https:\/\/youtu\.be\/)([a-zA-Z0-9_-]+)/;
@@ -56,20 +57,37 @@ const MusicPomodoro = () => {
     }
 
     const getSpotifyToken = async () => {
-        const clientId = '879b1c64cc8848ed85b7803f760d0938';
-        const clientSecret = '0cb63378ee0b4c2baf369bd50c024388';
-    
-        const response = await axios.post('https://accounts.spotify.com/api/token',
-            new URLSearchParams({ grant_type: 'client_credentials' }),
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+        try {
+            const clientId = '879b1c64cc8848ed85b7803f760d0938';
+            const clientSecret = '0cb63378ee0b4c2baf369bd50c024388';
+        
+            const response = await axios.post('https://accounts.spotify.com/api/token',
+                new URLSearchParams({ grant_type: 'client_credentials' }),
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+                    }
                 }
-            }
-        );
-    
-        return response.data.access_token;
+            );
+
+            const expiryTime = new Date().getTime() + (response.data.expires_in * 1000);
+            setTokenExpiry(expiryTime);
+
+            return response.data.access_token;
+        } catch (error) {
+            console.error('Error fetching Spotify token:', error);
+            NewSwal.fire({ icon: 'error', title: 'Spotify Error', text: 'Failed to fetch Spotify token' });
+        }
+    };
+
+    const ensureValidToken = async () => {
+        if (!accessToken || (tokenExpiry && new Date().getTime() > tokenExpiry)) {
+            const newToken = await getSpotifyToken();
+            setAccessToken(newToken);
+            return newToken;
+        }
+        return accessToken;
     };
     
 
@@ -104,45 +122,47 @@ const MusicPomodoro = () => {
     };
 
     const searchSpotify = async () => {
-        if (!accessToken) setAccessToken(await getSpotifyToken());
 
-        const trackId = extractSpotifyId(music.url);
-
-        if (!trackId) {
-            return NewSwal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Spotify URL' });
-        }
-    
-        let type = "";
-        switch (trackId[0]) {
-            case 1:
-            case 2:
-                type = "track";
-                break;
-            case 3:
-                type = "playlist";
-                break;
-            case 4:
-                type = "album";
-                break;
-            case 5:
-                type = "show";
-                break;
-            case 6:
-                type = "episode";
-                break;
-            case 7:
-            case 8:
-                type = "artist";
-                break;
-            default:
-                return NewSwal.fire({ icon: 'error', title: 'Invalid Type' });
-        }
-    
         try {
+            const validToken = await ensureValidToken();
+
+            const trackId = extractSpotifyId(music.url);
+
+            if (!trackId) {
+                return NewSwal.fire({ icon: 'error', title: 'Invalid URL', text: 'Please enter a valid Spotify URL' });
+            }
+    
+            let type = "";
+            switch (trackId[0]) {
+                case 1:
+                case 2:
+                    type = "track";
+                    break;
+                case 3:
+                    type = "playlist";
+                    break;
+                case 4:
+                    type = "album";
+                    break;
+                case 5:
+                    type = "show";
+                    break;
+                case 6:
+                    type = "episode";
+                    break;
+                case 7:
+                case 8:
+                    type = "artist";
+                    break;
+                default:
+                    return NewSwal.fire({ icon: 'error', title: 'Invalid Type' });
+            }
+            
             const response = await axios.get(`https://api.spotify.com/v1/${type}s/${trackId[1]}`, {
                 headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                }
+                    Authorization: `Bearer ${validToken}`,
+                },
+                params: { market: 'IT' }
             });
     
             let title = "";
@@ -172,12 +192,30 @@ const MusicPomodoro = () => {
                 selected: true,
                 search: false,
                 url: '',
-                title: title // ← aggiungi il titolo!
+                title: title
             });
     
         } catch (err) {
             console.error(err);
-            NewSwal.fire({ icon: 'error', title: 'Spotify Error', text: 'Failed to fetch content from Spotify' });
+            if (err.response?.status === 401) {
+                try {
+                    const newToken = await getSpotifyToken();
+                    setAccessToken(newToken);
+                    await searchSpotify();
+                } catch (retryError) {
+                    NewSwal.fire({ 
+                        icon: 'error', 
+                        title: 'Spotify Error', 
+                        text: 'Failed to authenticate with Spotify. Please try again later.' 
+                    });
+                }
+            } else {
+                NewSwal.fire({ 
+                    icon: 'error', 
+                    title: 'Spotify Error', 
+                    text: err.response?.data?.error?.message || 'Failed to fetch content from Spotify' 
+                });
+            }
         }
     }
 
