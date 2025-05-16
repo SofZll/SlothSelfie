@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
+const Event = require('../models/eventModel');
 const { getToolEvents } = require('../controllers/eventController');
 const { getNoAvailabilitiesTool } = require('../controllers/noAvailabilityController');
 
@@ -112,6 +113,32 @@ const editProfile = async (req, res) => {
         user.phoneNumber = phoneNumber;
         user.gender = gender;
         await user.save();
+
+        // birthday for the following 5 years
+        const now = new Date();
+        const birthdayDate = new Date(birthday);
+        const userBirthdayMonth = birthdayDate.getMonth();
+        const userBirthdayDay = birthdayDate.getDate();
+
+        await Event.deleteMany({ user: user._id, title: 'Birthday' });
+
+        for (let i = 0; i < 5; i++) {
+            const year = now.getFullYear() + i;
+            const eventDate = new Date(year, userBirthdayMonth, userBirthdayDay);
+
+            const newBirthdayEvent = new Event({
+                title: 'Birthday',
+                user: user._id,
+                startDate: eventDate,
+                endDate: eventDate,
+                allDay: true,
+                type: 'personal',
+                priority: 5
+            });
+
+            console.log('New birthday event:', newBirthdayEvent);
+            await newBirthdayEvent.save();
+        }
 
         res.status(200).json({ success: true, message: 'Profile updated successfully' });
     } catch (error) {
