@@ -380,7 +380,7 @@ const Planner = () => {
     }, [notifications]);
 
     return (
-        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popup: true })} selected={selected.popup} popUp={<FormCalendar />} isCalendar={true}>
+        <PlusLayout clickCall={() => setSelected({ edit:false, add: true, popup: true, selection: '...' })} selected={selected.popup} popUp={<FormCalendar />} isCalendar={true}>
 
             <SettingsCalendar />
 

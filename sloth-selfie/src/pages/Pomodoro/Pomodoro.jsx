@@ -16,7 +16,7 @@ const Pomodoro = () => {
             <MusicProvider>
                 <CalendarProvider>
                     <MainLayout>
-                        <div className='d-flex w-100 h-75 justify-content-center align-items-around position-relative overflow-auto'>
+                        <div className='d-flex w-100 h-100 justify-content-center align-items-around position-relative overflow-auto div-pomodoro'>
                             <TimerPomodoro />
 
                         </div>

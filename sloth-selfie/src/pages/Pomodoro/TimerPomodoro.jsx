@@ -222,13 +222,13 @@ const TimerPomodoro = () => {
         <div className='d-flex flex-column w-100 h-100 justify-content-around align-items-center position-relative'>
 
             { popUp.open && (
-                <div className='d-flex justify-content-center align-items-center position-absolute pop-up w-100 h-100 start-0 top-0 bg-light bg-opacity-75' style={{ zIndex: 1000 }}>
+                <div className='d-flex justify-content-center align-items-center bg-dark vw-100 vh-100 bg-opacity-25 fixed-top' style={{ zIndex: 1000 }}>
                     <PopUpPomodoro />
                 </div>
             )}
 
-            <div className='d-flex flex-column w-100 h-100 justify-content-around align-items-center'>
-                <div className='d-flex col-md-6 col-10 justify-content-between'>
+            <div className='d-flex flex-column w-100 h-100 justify-content-around align-items-center div-timer'>
+                <div className='d-flex justify-content-between div-btns'>
                     <button type='button' aria-label='Share' title='Share' className='btn' onClick={() => setPopUp({ ...popUp, share: !popUp.share, open: !popUp.open })}>
                         <Share size='30' color='#244476' strokeWidth='1.5' />
                     </button>
@@ -246,51 +246,55 @@ const TimerPomodoro = () => {
                     </button>
                 </div>
 
-                <div className='d-flex justify-content-center'>
-                    {pomodoro.finished ? (
-                        <>
-                            Congratulation! <br /> You have studied for {formatTime(pomodoro.studiedTime)} minutes
-                        </>
-                    ) : (
-                        <>
-                        {pomodoro.started ? (
+                <div className='d-flex flex-column justify-content-center'>
+
+                    <div className='d-flex justify-content-center'>
+                        {pomodoro.finished ? (
                             <>
-                                You still have {formatTime(pomodoro.timeLeft)} minutes {pomodoro.isStudyTime ? 'to study' : 'in your break'}
+                                Congratulation! <br /> You have studied for {formatTime(pomodoro.studiedTime)} minutes
                             </>
                         ) : (
                             <>
-                                Let's start a new Pomodoro session
+                            {pomodoro.started ? (
+                                <>
+                                    You still have {formatTime(pomodoro.timeLeft)} minutes {pomodoro.isStudyTime ? 'to study' : 'in your break'}
+                                </>
+                            ) : (
+                                <>
+                                    Let's start a new Pomodoro session
+                                </>
+                            )}
                             </>
                         )}
-                        </>
-                    )}
-                </div>
+                    </div>
 
-                <div className='d-flex justify-content-center'>
-                    <AnimationPencil />
-                </div>
+                    <div className='d-flex justify-content-center'>
+                        <AnimationPencil />
+                    </div>
 
-                <div className='d-flex justify-content-center'>
-                    {pomodoro.finished ? (
-                        <>
-                            Reset or add a cycle to your Pomodoro session
-                        </>
-                    ) : (
-                        <>
-                        {pomodoro.started ? (
+                    <div className='d-flex justify-content-center'>
+                        {pomodoro.finished ? (
                             <>
-                                Cycle {settingsPomodoro.cycles + settingsPomodoro.additionalCycles - pomodoro.cyclesLeft + 1} of {settingsPomodoro.cycles + settingsPomodoro.additionalCycles}
+                                Reset or add a cycle to your Pomodoro session
                             </>
                         ) : (
                             <>
-                                Press play to start the Pomodoro session
+                            {pomodoro.started ? (
+                                <>
+                                    Cycle {settingsPomodoro.cycles + settingsPomodoro.additionalCycles - pomodoro.cyclesLeft + 1} of {settingsPomodoro.cycles + settingsPomodoro.additionalCycles}
+                                </>
+                            ) : (
+                                <>
+                                    Press play to start the Pomodoro session
+                                </>
+                            )}
                             </>
                         )}
-                        </>
-                    )}
+                    </div>
+
                 </div>
 
-                <div className='d-flex col-md-6 col-10 justify-content-between'>
+                <div className='d-flex justify-content-between div-btns'>
                     <button type='button' aria-label='Edit' title='Edit' className='btn' onClick={() => setPopUp({ ...popUp, edit: !popUp.edit, open: !popUp.open })}>
                         <Pen size='30' color='#244476' strokeWidth='1.5' />
                     </button>

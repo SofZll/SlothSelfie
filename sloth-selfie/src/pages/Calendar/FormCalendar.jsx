@@ -95,7 +95,7 @@ const FormCalendar = () => {
 
 
     return (
-        <div className='d-flex flex-column w-100'>
+        <div className='d-flex flex-column w-100 h-100'>
 
             {isDesktop && selected.selection === '...' && (
                 <ScrollList CardList={(user.isAdmin || show === 'tools') ? [...rooms, ...devices] : activities} smallView={false} activity={!(user.isAdmin || show === 'tools')} />
@@ -105,13 +105,13 @@ const FormCalendar = () => {
                 {selected.selection === '...' && (
                     <div className='d-flex flex-column col-11 col-lg-8 align-items-center py-3'>
                         {user.isAdmin ? (
-                            <div className='d-flex flex-column w-100'>
+                            <div className='d-flex flex-column w-100 overflow-y-auto'>
                                 <Button text='no Availability' aria-label='no availability' onClick={() => select('no availability', false)} />
                                 <Button text='Room' aria-label='room' onClick={() => select('room', false)} />
                                 <Button text='Device' aria-label='device' onClick={() => select('device', false)} />
                             </div>
                         ) : (
-                            <div className='d-flex flex-column w-100'>
+                            <div className='d-flex flex-column w-100 overflow-y-auto'>
                                 <Button text='Activity' aria-label='new activity' onClick={() => select('activity', false)} />
                                 <Button text='Event' aria-label='new event' onClick={() => select('event', false)} />
                                 <Button text='no Availability' aria-label='no availability' onClick={() => select('no availability', false)} />
