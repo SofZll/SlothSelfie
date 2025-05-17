@@ -1,4 +1,6 @@
 import { useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useIsDesktop } from '../utils/utils';
 import { useChat } from '../contexts/ChatContext';
 import { AuthContext } from '../contexts/AuthContext';
 import socket from '../services/socket/socket';
@@ -7,7 +9,9 @@ import { toastInfo, toastWarning, Toast } from '../utils/swalUtils';
 
 const SocketHandler = () => {
     const { user } = useContext(AuthContext);
-    const { selectedChat, setSelectedChat, setOnlineUsers, chats, setChats, setIsOpen } = useChat();
+    const { selectedChat, setSelectedChat, setOnlineUsers, chats, setChats, setIsOpen, openChat } = useChat();
+    const isDesktop = useIsDesktop();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!user?._id) return;
@@ -17,28 +21,29 @@ const SocketHandler = () => {
         };
 
         const handleReceiveMessage = (message) => {
-            messageSound();
+            if (message.sender._id !== user._id){
+                messageSound();
 
-            Toast.fire({
-                icon: 'info',
-                title: `New message from ${message.sender.username}`,
-                showCancelButton: true,
-                showConfirmButton: true,
-                confirmButtonText: 'View',
-                cancelButtonText: 'Ignore',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const matchedChat = chats.find(chat => chat._id === message.chat._id);
-                    if (matchedChat) {
-                        setSelectedChat(matchedChat);
-                        setIsOpen(true);
+                Toast.fire({
+                    icon: 'info',
+                    title: `New message from ${message.sender.username}`,
+                    showCancelButton: true,
+                    showConfirmButton: true,
+                    confirmButtonText: 'View',
+                    cancelButtonText: 'Ignore',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const matchedChat = chats.find(chat => chat._id === message.chat._id);
+                        if (matchedChat) {
+                            if (isDesktop) openChat(matchedChat.otherParticipant.username);
+                            else navigate(`/chat/${matchedChat.otherParticipant.username}`);
+                        }
                     }
-                }
-            });
-
-            if (!selectedChat || !message.chat) return;
+                });
+            }
 
             if (selectedChat?._id === message.chat._id) {
+                console.log('Message received in selected chat:', message);
                 setSelectedChat((prevChat) => {
                     const updatedMessages = [...prevChat.messages, {
                         ...message,
@@ -48,6 +53,7 @@ const SocketHandler = () => {
                     return { ...prevChat, messages: updatedMessages };
                 });
             } else {
+                console.log('Message received in other chat:', message);
                 setChats((prevChats) => {
                     const updatedChats = prevChats.map((chat) => {
                         if (chat._id === message.chat._id) {
@@ -101,7 +107,7 @@ const SocketHandler = () => {
             socket.off('status-change');
             socket.off('receive-message');
         };
-    }, [user?._id, selectedChat?._id, setChats, setOnlineUsers]);
+    }, [user?._id, selectedChat, setChats, setOnlineUsers]);
 
     useEffect(() => {
         if (!user?._id || Notification.permission !== 'granted') return;

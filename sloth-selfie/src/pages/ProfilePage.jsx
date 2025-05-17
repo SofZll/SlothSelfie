@@ -59,7 +59,7 @@ const ProfilePage = () => {
 
     useEffect(() => {
         const checkConditions = () => {
-            if (user.name && user.email && validateEmail(user.email) && (!user.phoneNumber || validatePhoneNumber(user.phoneNumber)) && user.birthday && new Date(user.birthday) <= new Date(virtualNow)) setConditionsMet(true);
+            if (user.name && user.email && validateEmail(user.email) && (!user.phoneNumber || validatePhoneNumber(user.phoneNumber)) && (!user.birthday || new Date(user.birthday) <= new Date(virtualNow))) setConditionsMet(true);
             else setConditionsMet(false);
         }
         checkConditions();
