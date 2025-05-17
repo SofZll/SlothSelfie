@@ -134,7 +134,7 @@ const disabledNotification = async (notification, user) => {
 }
 
 const shouldSendNotification = async (notification, now, user) => {
-    if (notification.status === 'inactive' && getCurrentNow() < notification.to) {
+    if (notification.status === 'inactive' && getCurrentNow() < notification.to && notification.snooze === false) {
         notification.status = 'active';
         await notification.save();
     }
@@ -180,6 +180,7 @@ const shouldSendNotification = async (notification, now, user) => {
         notification.snooze = false;
         notification.snoozeSettings.until = null;
         notification.snoozeSettings.count = 0;
+        notification.status = 'active';
         await notification.save();
         
         return true;

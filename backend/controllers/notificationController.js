@@ -5,7 +5,6 @@ const Event = require('../models/eventModel');
 
 const { combineDateTime } = require('../utils/utils');
 const { getScheduledJobs, snoozeJob } = require('../services/jobService');
-const { calculateNotificationTime, getRepeatInterval } = require('../services/notificationService');
 const { getCurrentNow } = require('../services/timeMachineService');
 
 const setNotifications = async (req, res) => {
@@ -128,7 +127,12 @@ const getNotifications = async (req, res) => {
             user: userId, 
             createdAt: { $lte: now },
             urgency: { $ne: true },
-            type: { $ne: 'now' }
+            type: { $ne: 'now' },
+            status: 'active',
+            $or: [
+                { type: { $ne: 'default' } },
+                { type: 'default', snoozeFather: null }
+            ]
         })
         .populate('user', 'username')
         .sort({ createdAt: -1 });
@@ -211,7 +215,6 @@ const updateNotification = async (req, res) => {
             to: to,
             updatedAt: getCurrentNow()
         }, { new: true });
-s
         await updatedNotification.save();
 
         res.status(200).json({ success: true, message: 'Notification updated successfully', notification: updatedNotification });

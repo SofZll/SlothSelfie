@@ -22,10 +22,15 @@ const TimeMachinePopup = () => {
             return;
         }
 
-        const response = await apiService('/time/set', 'POST', { date: inputDate, time: inputTime });
+        const localDate = new Date(`${inputDate}T${inputTime}`);
+        const utcDate = localDate.toISOString();
+        
+        const response = await apiService('/time/set', 'POST', { 
+            dateTime: utcDate
+        });
+
         if (response.success) {
-            const dateTime = new Date(`${inputDate}T${inputTime}`);
-            if (dateTime < virtualNow) setAnimationDirection('backward');
+            if (utcDate < virtualNow) setAnimationDirection('backward');
             else setAnimationDirection('forward');
             
             setTimeout(() => {
@@ -37,7 +42,7 @@ const TimeMachinePopup = () => {
                 }
             }, 1500);
 
-            setVirtualNow(dateTime);
+            setVirtualNow(utcDate);
         } else NewSwal.fire({ icon: 'error', title: 'Oops...', text: 'Error setting time' });
     }
 

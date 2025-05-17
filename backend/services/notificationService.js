@@ -99,19 +99,30 @@ const sendEmailNotification = async (notification, invitation, modification) => 
 }
 
 const calculateNotificationTime = (notification) => {
-    const notificationTime = new Date(notification.to);
-
-    switch (notification.variant) {
-        case 'day':
-            notificationTime.setDate(notificationTime.getDate() - notification.before);
-            break;
-        case 'week':
-            notificationTime.setDate(notificationTime.getDate() - (notification.before * 7));
-            break;
+    if (notification.snoozeSettings?.until) {
+        return new Date(notification.snoozeSettings.until);
     }
 
-    const [hours, minutes] = notification.time.split(':');
-    notificationTime.setHours(hours, minutes, 0, 0);
+    if (!notification.to) return null;
+
+    const notificationTime = new Date(notification.to);
+
+    if (notification.variant) {
+        switch (notification.variant) {
+            case 'day':
+                notificationTime.setDate(notificationTime.getDate() - notification.before);
+                break;
+            case 'week':
+                notificationTime.setDate(notificationTime.getDate() - (notification.before * 7));
+                break;
+        }
+
+        if (notification.time) {
+            const [hours, minutes] = notification.time.split(':').map(Number);
+
+            notificationTime.setHours(hours - 2, minutes, 0, 0);
+        }
+    }
 
     return notificationTime;
 }
@@ -145,8 +156,6 @@ const getTriggerAt = (notification, now) => {
     } else if (notification.type === 'default') {
         triggerAt = calculateNotificationTime(notification);
     }
-
-    triggerAt.getHours
 
     return triggerAt;
 }

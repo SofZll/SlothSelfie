@@ -20,7 +20,11 @@ const getScheduledJobs = async (userId, hours = 24) => {
         createdAt: { $lte: now },
     }).populate('element');
 
-    const jobs = await Promise.all(notifications.map(async (notif) => {
+    const filtered = notifications.filter(notif => {
+        return !(notif.type === 'repeat' && notif.status === 'inactive' && notif.snooze);
+    });
+
+    const jobs = await Promise.all(filtered.map(async (notif) => {
         const triggerAt = new Date(getTriggerAt(notif, now));
         console.log('Trigger at:', triggerAt);
 
@@ -62,7 +66,11 @@ const snoozeJob = async (notificationId, snoozeTime) => {
         snoozeUntil = new Date(triggerAt.getTime() + snoozeTime * 60 * 1000);
     }
 
-    const timeString = snoozeUntil.toTimeString().slice(0, 5);
+    const timeString = snoozeUntil.toLocaleTimeString('it-IT', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Europe/Rome'
+    });
 
     if (notification.type === 'default'){
         notification.snoozeSettings.until = snoozeUntil;
@@ -72,12 +80,14 @@ const snoozeJob = async (notificationId, snoozeTime) => {
         notification.updatedAt = now;
         await notification.save();
     } else if (notification.type === 'repeat') {
-        await Notification.create({
+        const snoozeNotif = await Notification.create({
             user: notification.user,
             element: notification.element,
             elementType: notification.elementType,
             type: 'default',
             time: timeString,
+            from: notification.from,
+            to: notification.to,
             urgency: notification.urgency,
             snoozeFather: notification._id,
             snoozeSettings: {
@@ -89,6 +99,8 @@ const snoozeJob = async (notificationId, snoozeTime) => {
             createdAt: now,
             updatedAt: now
         });
+
+        console.log('Snoozed notification:', snoozeNotif);
 
         notification.snooze = true;
         notification.status = 'inactive';

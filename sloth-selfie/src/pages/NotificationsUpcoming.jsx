@@ -16,10 +16,13 @@ const NotificationsUpcoming = ({ loading, setLoading, refreshKey, handleNotifica
         const snoozeTime = new Date(notifications[index].triggerAt);
         const snoozeInterval = 10;
         snoozeTime.setMinutes(snoozeTime.getMinutes() + snoozeInterval);
-        setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
         
         const response = await apiService(`/notification/snooze/${notifications[index]._id}`, 'PUT', { snoozeInterval });
         if (!response.success) NewSwal.fire({ title: 'Error', icon: 'error', text: response.message});
+        else {
+            setNotifications(notifications.map((notif, i) => i === index ? { ...notif, triggerAt: snoozeTime.toISOString() } : notif));
+            window.location.reload();
+        }
     }
 
     const fetchNotifications = async () => {
