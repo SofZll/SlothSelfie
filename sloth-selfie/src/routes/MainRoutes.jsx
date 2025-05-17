@@ -18,6 +18,7 @@ import ForumWrapper from '../pages/Forum/ForumWrapper';
 import AuthPage from '../pages/AuthPage';
 import { LoadingPageLight } from '../pages/LoadingPage';
 import { ChatProvider } from '../contexts/ChatContext';
+import SocketHandler from '../components/SocketHandler';
 
 // TODO: implement note id and calendar id */
 const MainRoutes = () => {
@@ -58,6 +59,7 @@ const MainRoutes = () => {
             <Suspense fallback={<LoadingPageLight />}>
                 <StyleProvider>
                     <ChatProvider>
+                        { user &&  <SocketHandler /> }
                         <Routes>
                             <Route path='/' element={<Navigate to={user ? (user.isAdmin ? '/admin' : '/home') : '/login'} />} />
                             <Route path='/login' element={<AuthPage formType='login' />} />
