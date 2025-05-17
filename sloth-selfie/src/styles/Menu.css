@@ -128,6 +128,13 @@
     padding: 0.9rem 1rem;
 }
 
+@media screen and (max-height: 630px) {
+    .bm-item {
+        font-size: 1.2rem;
+    }
+
+}
+
 @media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
     .bm-menu {
         font-size: 1rem;

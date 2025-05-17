@@ -24,7 +24,7 @@ const SelectionCalendarLayout = ({children}) => {
     }, [selected.selection]);
 
     return (
-        <div className='d-flex flex-column w-100 my-md-3 bg-white border p-3 pt-2 rounded position-relative'>
+        <div className='d-flex flex-column w-100 my-md-3 bg-white border p-3 pt-2 form-popup rounded position-relative'>
             {(isDesktop && (selected.selection === '...' && !selected.edit && !user.isAdmin)) && (
                 <div className='position-absolute end-0 top-25 translate-middle-y mt-4 me-3'>
                     <button type='button' aria-label='Settings' title='Settings' className='btn rounded-circle p-1 m-0' onClick={() => setCalendarSettings(!calendarSettings)}>
@@ -32,7 +32,7 @@ const SelectionCalendarLayout = ({children}) => {
                     </button>
                 </div>
             )}
-            <div className='d-flex justify-content-between my-3'>
+            <div className='d-flex justify-content-between mt-3'>
                 {(selected.add || selected.selection === '...') && (
                     <div className='fs-5'>
                         Add a new {selected.selection}
@@ -68,7 +68,7 @@ const SelectionCalendarLayout = ({children}) => {
                 </div>
             </div>
 
-            <main className='d-flex w-100 justify-content-center form-popup position-relative'>{children}</main>
+            <main className='d-flex w-100 justify-content-center overflow-hidden position-relative'>{children}</main>
 
             
 
