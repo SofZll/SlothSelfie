@@ -21,17 +21,14 @@ const calculateDate = (date, minusTime) => {
 };
 
 const combineDateTime = (date, time) => {
-    const dateParts = date.split('-');
-    const timeParts = time.split(':');
+    const [year, month, day] = date.split('-').map(Number);
+    const [hours, minutes] = time.split(':').map(Number);
 
-    const year = parseInt(dateParts[0]);
-    const month = parseInt(dateParts[1]) - 1;
-    const day = parseInt(dateParts[2]);
-    const hour = parseInt(timeParts[0]);
-    const minute = parseInt(timeParts[1]);
+    const newDate = new Date(year, month - 1, day, hours, minutes);
+    newDate.setHours(newDate.getHours() - 2);
 
-    return new Date(year, month, day, hour, minute);
-}
+    return newDate;
+};
 
 const findUserId = async (usernames) => {
     if (!usernames || usernames.length === 0) return [];

@@ -1,13 +1,10 @@
 const { setTimeMachine, resetTimeMachine, isActive, getCurrentNow } = require('../services/timeMachineService');
 
-const { combineDateTime } = require('../utils/utils');
-
 //function to set the time in the TimeMachine
 const setTime = async (req, res) => {
-    const { date, time } = req.body;
+    const { dateTime } = req.body;
 
     try {
-        const dateTime = combineDateTime(date, time);
         if (!dateTime) return res.status(400).json({ success: false, message: 'Invalid date or time format' });
 
         setTimeMachine(dateTime);

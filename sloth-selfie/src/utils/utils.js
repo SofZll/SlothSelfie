@@ -38,7 +38,12 @@ const formatTime = (time) => {
 const dateFromDate = (date) => {
     if (!date || !(date instanceof Date)) return '';
     try {
-        return date.toISOString().split('T')[0];
+        return date.toLocaleDateString('it-IT', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            timeZone: 'Europe/Rome'
+        }).split('/').reverse().join('-');
     } catch (e) {
         return '';
     }
@@ -47,7 +52,12 @@ const dateFromDate = (date) => {
 const timeFromDate = (date) => {
     if (!date || !(date instanceof Date)) return '00:00';
     try {
-        return date.toTimeString().substr(0, 5);
+        return date.toLocaleTimeString('it-IT', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Europe/Rome'
+        });
     } catch (e) {
         return '00:00';
     }
@@ -69,7 +79,6 @@ function urlBase64ToUint8Array(base64String) {
     return outputArr;
 }
 
-//todo: tm
 const calculateTime = (d, getVirtualNow) => {
     if (!d) return '';
     const now = getVirtualNow();

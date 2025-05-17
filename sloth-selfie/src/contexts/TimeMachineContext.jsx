@@ -55,8 +55,8 @@ const TimeMachineProvider = ({ children }) => {
     useEffect(() => {
         const interval = setInterval(() => {
             virtualNowRef.current = new Date(virtualNowRef.current.getTime() + 1000);
-            setCurrentDate(dateFromDate(virtualNowRef.current));
-            setCurrentTime(timeFromDate(virtualNowRef.current));
+            setCurrentDate(virtualNowRef.current.toLocaleDateString());
+            setCurrentTime(virtualNowRef.current.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         }, 1000);
     
         return () => clearInterval(interval);
@@ -67,6 +67,7 @@ const TimeMachineProvider = ({ children }) => {
     const setVirtualNow = (newDate) => {
         virtualNowRef.current = new Date(newDate);
         triggerRefresh();
+        console.log('Virtual now set to:', virtualNowRef.current);
     }
 
     return (
