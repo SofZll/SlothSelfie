@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState }  from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { dateFromDate, timeFromDate } from '../utils/utils';
 import { apiService } from '../services/apiService';
@@ -9,6 +10,8 @@ const CalendarContext = createContext();
 export const CalendarProvider = ({ children }) => {
     const { getVirtualNow } = useContext(TimeMachineContext);
     const now = new Date(getVirtualNow());
+    const location = useLocation();
+    const navigate = useNavigate();
 
     //Activity state
     const [activity, setActivity] = useState({
@@ -151,8 +154,10 @@ export const CalendarProvider = ({ children }) => {
     }
 
     const back = () => {
-        if (selected.edit) resetSelected();
-        else {
+        if (selected.edit) {
+            resetSelected();
+            navigate(location.pathname, { replace: true });
+        } else {
             setSelected({
                 ...selected,
                 selection: '...',
