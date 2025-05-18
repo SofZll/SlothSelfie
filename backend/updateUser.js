@@ -134,4 +134,48 @@ const updateNotification = async () => {
 
 //updateIsAdminUndefined();
 //createAdmin();
-updateNotification();
+//updateNotification();
+
+const dropProblematicIndex = async () => {
+    try {
+        await connectDB();
+        console.log('Connected to the database.');
+
+        const userCollection = mongoose.connection.db.collection('users');
+
+        const indexes = await userCollection.indexes();
+        console.log('Current indexes:', indexes);
+
+        const result = await userCollection.dropIndex('email_1');
+        console.log('Index dropped successfully:', result);
+    } catch (error) {
+        console.error('Error dropping index:', error);
+    } finally {
+        // Disconnetti dal database
+        mongoose.connection.close();
+    }
+};
+
+//dropProblematicIndex();
+
+const listIndexes = async () => {
+    try {
+        await connectDB();
+        const userCollection = mongoose.connection.db.collection('users');
+        const notificationCollection = mongoose.connection.db.collection('notifications');
+        // Ottieni gli indici della collezione utenti
+        const userIndexes = await userCollection.indexes();
+        console.log('Indici della collezione utenti:');
+        console.log(JSON.stringify(userIndexes, null, 2));
+        // Ottieni gli indici della collezione notifiche
+        const notificationIndexes = await notificationCollection.indexes();
+        console.log('Indici della collezione notifiche:');
+        console.log(JSON.stringify(notificationIndexes, null, 2));
+    } catch (error) {
+        console.error('Errore nel recupero degli indici:', error);
+    } finally {
+        mongoose.connection.close();
+    }
+};
+
+listIndexes();

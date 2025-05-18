@@ -1,0 +1,267 @@
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+
+import { apiService } from '../services/apiService';
+import { NewSwal } from '../utils/swalUtils';
+import { TimeMachineContext } from './TimeMachineContext';
+
+const PomodoroContext = createContext();
+
+export const PomodoroProvider = ({ children }) => {
+    const { getVirtualNow } = useContext(TimeMachineContext);
+    const virtualNow = getVirtualNow();
+    const isCreatingRef = useRef(false);
+
+    const [settingsPomodoro, setSettingsPomodoro] = useState({
+        _id: '',
+        title: 'Pomodoro',
+        studyTime: 30*60,
+        breakTime: 5*60,
+        cycles: 5,
+        additionalCycles: 0
+    });
+
+    const resetSettingsPomodoro = () => {
+        setSettingsPomodoro({
+            _id: '',
+            title: 'Pomodoro',
+            studyTime: 30*60,
+            breakTime: 5*60,
+            cycles: 5,
+            additionalCycles: 0
+        });
+    };
+
+    const [pomodoro, setPomodoro] = useState({
+        _id: '',
+        title: 'Pomodoro',
+        timeLeft: 30*60,
+        cyclesLeft: 5,
+        isStudyTime: true,
+        started: false,
+        finished: false,
+        studiedTime: 0,
+        deadline: new Date(virtualNow)
+    });
+
+    const [play, setPlay] = useState(false);
+
+    const [animation, setAnimation] = useState({
+        reset: false,
+        pencilTime: `${30*60}s`,
+        lineTime: `${(30*60*0.8)}s`,
+        delayGo: `${(30*60*0.1)}s`,
+        delayBack: `${(30*60*0.1)}s`,
+    });
+
+    const resetAnimation = (time) => {
+        setAnimation({
+            reset: true,
+            pencilTime: `${time}s`,
+            lineTime: `${(time*0.8)}s`,
+            delayGo: `${(time*0.2)}s`,
+            delayBack: `${(time*0.1)}s`,
+        });
+    }
+
+    const editTimeAnimation = (time) => {
+        setAnimation({
+            reset: false,
+            pencilTime: `${time}s`,
+            lineTime: `${(time*0.8)}s`,
+            delayGo: `${(time*0.2)}s`,
+            delayBack: `${(time*0.1)}s`,
+        });
+    }
+
+    const increasePomodoroTime = async () => {
+        if (isCreatingRef.current) return;
+
+        isCreatingRef.current = true;
+
+        if (pomodoro.timeLeft <= 0) {
+            if (pomodoro.isStudyTime) {
+                if (pomodoro.cyclesLeft - 1 <= 0) setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.breakTime, cyclesLeft: 0, isStudyTime: false, finished: true, studiedTime: pomodoro.studiedTime + 1});
+                else setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.breakTime, cyclesLeft: pomodoro.cyclesLeft - 1, isStudyTime: false, studiedTime: pomodoro.studiedTime + 1});
+                editTimeAnimation(settingsPomodoro.breakTime);
+
+                const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
+                if (!response.success) console.log('Error updating pomodoro', response.message);
+
+            } else {
+                setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true});
+                editTimeAnimation(settingsPomodoro.studyTime);
+            }
+            setPlay(false);
+
+        } else {
+            if (!pomodoro.started) {
+                if (pomodoro._id) {
+                    const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', { ...pomodoro, started: true });
+                    if (!response.success) console.log('Error updating pomodoro', response.message);
+                    else setPomodoro({ ...pomodoro, started: true });
+                } else {
+                    const response = await apiService('/pomodoro', 'POST', {...pomodoro, started: true, ...settingsPomodoro});
+                    if (!response.success) console.log('Error creating pomodoro', response.message);
+                    else {
+                        setPomodoro(prev => ({ ...prev, _id: response.pomodoro._id, started: true }));
+                        setSettingsPomodoro(prev => ({
+                            ...prev,
+                            _id: response.pomodoro._id,
+                            title: response.pomodoro.title
+                        }));
+                        console.log('Pomodoro created', response.pomodoro);
+                    }
+                }
+            } else setPomodoro({ ...pomodoro, timeLeft: pomodoro.timeLeft - 1, studiedTime: pomodoro.studiedTime + 1 });
+        }
+
+        isCreatingRef.current = false;
+            
+    };
+
+    const addCycle = async () => {
+        const response = await apiService(`/pomodoro/add-additional-cycle/${pomodoro._id}`, 'PUT', { additionalCycles: settingsPomodoro.additionalCycles + 1 });
+        if (!response.success) console.log('Error adding additional cycle', response.message);
+        else {
+            setSettingsPomodoro({ ...settingsPomodoro, additionalCycles: response.pomodoro.additionalCycles });
+            setPomodoro({ ...pomodoro, cyclesLeft: pomodoro.cyclesLeft + 1, finished: false });
+        }
+    }
+
+    const resetPomodoro = () => {
+        const { studyTime, cycles } = settingsPomodoro;
+        setSettingsPomodoro({ ...settingsPomodoro, additionalCycles: 0 });
+
+        setPomodoro({
+            ...pomodoro,
+            timeLeft: studyTime,
+            cyclesLeft: cycles,
+            isStudyTime: true,
+            finished: false
+        });
+
+        resetAnimation(studyTime);
+    }
+
+    const newPomodoro = () => {
+        setSettingsPomodoro({ studyTime: 60*30, breakTime: 60*5, cycles: 5, additionalCycles: 0 });
+
+        setPomodoro({
+            _id: '',
+            title: 'Pomodoro',
+            timeLeft: settingsPomodoro.studyTime,
+            cyclesLeft: settingsPomodoro.cycles,
+            isStudyTime: true,
+            started: false,
+            finished: false,
+            studiedTime: 0,
+            deadline: new Date(virtualNow)
+        });
+
+        resetAnimation(settingsPomodoro.studyTime);
+    }
+
+    const editSettingsPomodoro = async (studyTime, breakTime, cycles) => {
+        if (settingsPomodoro.cycles - pomodoro.cyclesLeft > cycles) {
+            setPomodoro({ ...pomodoro, timeLeft: studyTime, cyclesLeft: cycles, isStudyTime: true, finished: true });
+            setAnimation({ ...animation, reset: true });
+        } else {
+            setPomodoro({ ...pomodoro, cyclesLeft: cycles - (settingsPomodoro.cycles - pomodoro.cyclesLeft) });
+
+            if (pomodoro.isStudyTime) {
+                if (settingsPomodoro.studyTime - pomodoro.timeLeft > studyTime) {
+                    setPomodoro({ ...pomodoro, timeLeft: breakTime, cyclesLeft: pomodoro.cyclesLeft - 1, isStudyTime: false });
+                    setAnimation({ ...animation, reset: true });
+                    if(pomodoro.cyclesLeft === 0) setPomodoro({ ...pomodoro, finished: true });
+                }
+                else setPomodoro({ ...pomodoro, timeLeft: studyTime - (settingsPomodoro.studyTime - pomodoro.timeLeft) });
+            } else {
+                if (settingsPomodoro.breakTime - pomodoro.timeLeft > breakTime) {
+                    setPomodoro({ ...pomodoro, timeLeft: studyTime, isStudyTime: true });
+                    setAnimation({ ...animation, reset: true });
+                } else setPomodoro({ ...pomodoro, timeLeft: breakTime - (settingsPomodoro.breakTime - pomodoro.timeLeft) });
+            }
+        }
+
+        setSettingsPomodoro({ ...settingsPomodoro, studyTime, breakTime, cycles});
+        editTimeAnimation( pomodoro.isStudyTime ? studyTime : breakTime );
+        
+        if (pomodoro._id) {
+            const response = await apiService(`/pomodoro/${pomodoro._id}`, 'PUT', { studyTime, breakTime, cycles, deadline: new Date(pomodoro.deadline) });
+            if (response.success) new NewSwal.fire({ icon: 'success', title: 'Success', text: 'Pomodoro settings updated'});
+            else NewSwal.fire({ icon: 'error', title: 'Error', text: 'Error updating pomodoro settings'});
+        }
+    }
+
+    const skipTime = async () => {
+        if (pomodoro.isStudyTime) {
+            if(pomodoro.cyclesLeft - 1 === 0) setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true, started: true, finished: true });
+            else setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.breakTime, cyclesLeft: pomodoro.cyclesLeft - 1, isStudyTime: false, started: true });
+        } else setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true });
+
+        resetAnimation(pomodoro.isStudyTime ? settingsPomodoro.studyTime : settingsPomodoro.breakTime);
+        if (pomodoro._id) {
+            const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
+            if (!response.success) console.log('Error updating pomodoro', response.message);
+        }
+    }
+
+    const skipBack = async () => {
+        if (pomodoro.isStudyTime) {
+            if (pomodoro.timeLeft < settingsPomodoro.studyTime) setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime });
+            else if (pomodoro.cyclesLeft === settingsPomodoro.cycles) setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime});
+            else setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.breakTime, cyclesLeft: pomodoro.cyclesLeft + 1, isStudyTime: false});
+        } else {
+            if (pomodoro.timeLeft < settingsPomodoro.breakTime) setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.breakTime });
+            else setPomodoro({ ...pomodoro, timeLeft: settingsPomodoro.studyTime, isStudyTime: true });
+        }
+
+        resetAnimation(pomodoro.isStudyTime ? settingsPomodoro.studyTime : settingsPomodoro.breakTime);
+        if (pomodoro._id) {
+            const response = await apiService(`/pomodoro/update-cycles/${pomodoro._id}`, 'PUT', pomodoro)
+            if (!response.success) console.log('Error updating pomodoro', response.message);
+        }
+    }
+
+    const [popUp, setPopUp] = useState({
+        open: false,
+        share: false,
+        edit: false,
+        calendar: false,
+        music: false,
+    })
+
+    const resetPopUp = () => {
+        setPopUp({
+            open: false,
+            share: false,
+            edit: false,
+            calendar: false,
+            music: false,
+            stats: false,
+        })
+    }
+
+    const [socketData, setSocketData] = useState({
+        room: '',
+        inShare: false,
+        peopleInSession: 0,
+    })
+
+
+    const [plannedPomodori, setPlannedPomodori] = useState([]);
+
+    return (
+        <PomodoroContext.Provider
+            value={{ play, setPlay, 
+            pomodoro, setPomodoro, settingsPomodoro, setSettingsPomodoro, resetSettingsPomodoro, increasePomodoroTime, addCycle, resetPomodoro, newPomodoro, editSettingsPomodoro, skipTime, skipBack,
+            animation, setAnimation, resetAnimation, editTimeAnimation,
+            popUp, setPopUp, resetPopUp,
+            plannedPomodori, setPlannedPomodori,
+            socketData, setSocketData }}>
+            {children}
+        </PomodoroContext.Provider>
+    );
+}
+
+export const usePomodoro = () => useContext(PomodoroContext);

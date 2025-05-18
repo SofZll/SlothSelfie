@@ -1,0 +1,561 @@
+/*** Preview Home ***/
+
+/*
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 10vmin;
+  height: 90%;
+  margin: 0;
+  justify-content: space-evenly;
+}
+*/
+
+.tomatoPrew {
+  width: 100%;
+  height: 100%;
+}
+
+.containerRed,
+.containerYellow {
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  display: flex;
+  width: 40vmin;
+}
+
+.counterRed,
+.counterYellow {
+  padding-top: 3vmin;
+  color: #f9f9f9;
+  font-size: 12vmin;
+  position: absolute;
+}
+
+/*
+.container p {
+  margin-bottom: 0;
+}
+  */
+
+/*** Pomodoro page ***/
+
+.div-pomodoro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  height: 100%;
+  width: 100%;
+}
+
+.pomodoro {
+  display: none;
+  align-items: start;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 10vh;
+}
+
+.pomodoro-timer {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: start;
+  justify-content: space-around;
+  width: 98%;
+  height: 80vh;
+}
+
+.select-pomodoro {
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  max-width: 500px;
+  padding-bottom: 11vh;
+}
+
+.song-container,
+.pomodoro-container,
+.stats-container {
+display: flex;
+flex-direction: column;
+align-items: center;
+margin: 10px 0;
+border-radius: 8px;
+width: 98%;
+}
+
+.song-container {
+  position: relative;
+}
+
+
+.pomodoro-container {
+  height: 60%;
+  justify-content: space-around;
+  align-self: center;
+}
+
+.song-container,
+.stats-container {
+  justify-content: center;
+  border: 1px solid #555B6E;
+  border-radius: 5px;
+  background-color: #ccc;
+  align-self: center;
+}
+
+.input-cycles-div,
+.input-timer-div {
+  margin: 20px;
+}
+
+.input-studio-div,
+.input-break-div,
+.total-time-div,
+.total-cycles-div {
+display: flex;
+flex-direction: row;
+align-items: baseline;
+justify-content: space-around;
+}
+
+.suggested-cycles-div {
+  display: none;
+  flex-direction: column;
+  margin: 20px 0;
+}
+
+.pomodoro-timers-options,
+.pomodoro-total-time-option {
+  display: none;
+}
+
+.suggested-cycles,
+.settings-choice {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  border-radius: 5px;
+  border: 1px solid #555B6E;
+  margin: 10px 0;
+  width: 100%;
+  padding: 10px;
+}
+
+.suggested-cycles {
+  align-items: start;
+}
+
+.settings-choice {
+  align-items: center;
+  height: 75px;
+}
+
+.suggested-cycles:hover,
+.settings-choice:hover {
+  opacity: 0.8;
+}
+
+.btn-tomato-start {
+  display: none;
+}
+
+.btn-tomato {
+  width: 150px;
+}
+
+.btn-back {
+  display: none;
+}
+
+.btnSearch,
+.btnCross,
+.btnBack,
+.btnSettingTomato,
+.btnClose,
+.btnStats,
+.btnSendWhatsApp,
+.btnSendTelegram {
+  background-color: inherit;
+  border: none;
+  padding: 5px;
+  border-radius: 5px
+}
+
+.btnSearch:hover,
+.btnSearch:active,
+.btnCross:hover,
+.btnCross:active,
+.btnBack:hover,
+.btnBack:active,
+.btnSettingTomato:hover,
+.btnSettingTomato:active,
+.btnStats:hover,
+.btnStats:active,
+.btnSendWhatsApp:hover,
+.btnSendWhatsApp:active,
+.btnSendTelegram:hover,
+.btnSendTelegram:active {
+  background-color: #F39252;
+}
+
+.iconCross {
+  height: 27vh;
+  max-height: 37px;
+}
+
+.iconYoutube,
+.iconAdd,
+.iconStats,
+.iconShare {
+  height: 25vh;
+  max-height: 35px;
+}
+
+.iconSpotify,
+.iconEdit,
+.iconReset,
+.iconWhatsApp,
+.iconTelegram {
+  height: 20vh;
+  max-height: 30px;
+}
+
+
+.iconPlay,
+.iconStop,
+.iconSkip{
+  height: 16vh;
+  max-height: 26px;
+
+}
+
+
+.videoYoutube,
+.searchYoutube,
+.youtube,
+.selectSpotify {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+}
+
+
+.titleYoutubeVideo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  padding: 10px;
+}
+
+
+.btnBack,
+.btnClose,
+.btnCross {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 3;
+}
+
+.youtube,
+.selectSpotify {
+  padding: 10px;
+}
+
+.videoYoutube h2,
+.searchYoutube h2,
+.songSpotify h2 {
+  margin: 0;
+  font-size: 4vmin;
+}
+
+
+.videoYoutube iframe {
+  width: 90%;
+  aspect-ratio: 16/9;
+}
+
+.spotify {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.songSpotify {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+  justify-content: space-between;
+  margin: 10px 0;
+  width: 95%;
+}
+
+.spotify iframe {
+  border-radius: 12px;
+  width: 80%;
+  height: 90%;
+  margin: 10px 0;
+}
+
+.songSpotify form,
+.searchYoutube form {
+  display: flex;
+  flex-direction: row;
+  max-width: 98%;
+}
+
+.songSpotify form input,
+.searchYoutube form input {
+  display: flex;
+  max-width: 75%;
+}
+
+.edit-popup,
+.send-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  background-color: #555B6E;
+  color: #f9f9f9;
+  border-radius: 8px;
+  position: fixed;
+  top: auto;
+  left: 10%;
+  width: 80%;
+  min-height: 50vh;
+  padding: 15px 10px;
+  z-index: 2;
+}
+
+.edit-popup form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 40vh;
+  max-width: 500px;
+  justify-content: space-around;
+}
+
+
+.edit-popup form label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 85%;
+}
+
+.edit-popup form label input {
+  width: 60%;
+}
+
+.animation {
+  display: flex;
+  height: 27vh;
+  width: 100%;
+  justify-content: end;
+}
+
+.divCode {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.divCode p {
+  margin-right: 10px;
+}
+
+hr {
+  background-color: #f9f9f9;
+  height: 1px;
+  width: 85%;
+  border-radius: 10px;
+}
+
+@media screen and (min-width: 769px){
+  .containerRed,
+  .containerYellow {
+    width: 30vmin;
+  }
+
+  .counterRed,
+  .counterYellow {
+    padding-top: 3vmin;
+    font-size: 9vmin;
+  }
+  /*
+  .container {
+    justify-content: space-around;
+    height: 100%;
+    padding-bottom: 3vmin;
+  }
+  */
+
+  .pomodoro-timer {
+    flex-direction: row;
+  }
+
+  .pomodoro-container {
+    width: 50%;
+    height: 90%;
+    padding: 0 20px;
+    margin: 0;
+  }
+
+  .song-container,
+  .stats-container {
+    width: 25%;
+    height: 90%;
+    padding: 5px;
+    margin: 0;
+  }
+
+  .song-container h2 {
+    font-size: 1.2rem;
+  }
+
+  .youtube {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+  }
+
+  .spotify iframe{
+    width: 90%;
+    height: 95%;
+  }
+
+  .iconCross {
+    height: 2.5vmin;
+  }
+
+  .edit-popup,
+  .send-popup {
+    width: 45%;
+    left: auto;
+    top: 15vh;
+    height: 72vh;
+  }
+}
+
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+  .div-pomodoro {
+    margin-top: 10px;
+  }
+
+  .div-pomodoro h2 {
+    font-size: 1.5rem;
+  }
+
+  .containerRed,
+  .containerYellow {
+    width: 30vmin;
+  }
+
+  .counterRed,
+  .counterYellow {
+    padding-top: 3vmin;
+    font-size: 9vmin;
+  }
+
+  /*
+  .container {
+    justify-content: space-around;
+    padding-bottom: 3vmin;
+  }
+  */
+
+  .pomodoro-timer {
+    flex-direction: row;
+    height: 100vh;
+  }
+
+  .pomodoro-container {
+    width: 50%;
+    height: 95%;
+    padding: 0 20px;
+    margin: 0;
+  }
+
+  .song-container,
+  .stats-container {
+    width: 25%;
+    height: 90%;
+    padding: 5px;
+    margin: 0;
+  }
+
+  .song-container h2 {
+    font-size: 1.2rem;
+  }
+
+  .youtube {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+  }
+
+  .spotify iframe{
+    width: 90%;
+    height: 95%;
+  }
+
+  .iconCross {
+    height: 5vmin;
+  }
+
+  .edit-popup,
+  .send-popup {
+    width: 40%;
+    left: auto;
+    top: 5vh;
+    height: 90vh;
+  }
+
+
+  .animation {
+    height: 50vh;
+  }
+}
+
+
+@media screen and (max-height: 700px) and (orientation: portrait) {
+  /*
+  .container p {
+    display: none;
+  }
+  */
+
+  hr {
+    display: none;
+  }
+
+  .send-popup h2 {
+    font-size: 5vmin;
+  }
+
+  .send-popup * {
+    font-size: 4vmin;
+    margin: 2px;
+  }
+
+  .iconCross {
+    height: 8vmin;
+  }
+}
