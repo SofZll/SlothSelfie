@@ -59,6 +59,27 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
   try {
     if (!user) return ({ success: false, message: 'User not found' });
 
+    const roomsDevices = [];
+    const receivers = [];
+    for (const userId of sharedWith) {
+      const user = await User.findById(userId._id);
+      if (!user) continue;
+      if (user.isRoom || user.isDevice) roomsDevices.push(user);
+      else receivers.push(user);
+    }
+
+    if (roomsDevices.length > 0) {
+      for (const roomDevice of roomsDevices) {
+        const available = await checkAvailability(roomDevice._id, startDate, endDate);
+        if (available) {
+          console.log(`Room/Device ${roomDevice.username} is available`);
+        } else {
+          console.error(`Room/Device ${roomDevice.username} is not available`);
+          return { success: false, message: `Room/Device ${roomDevice.username} is not available` };
+        }
+      }
+    }
+
     const newEvent = new Event({
       title,
       user: user._id,
@@ -73,6 +94,19 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
       createdAt: getCurrentNow(),
       updatedAt: getCurrentNow()
     });
+
+    for (const roomDevice of roomsDevices) {
+      newEvent.responses.push({ user: roomDevice._id, status: 'accepted' });
+      const noAvailability = await NoAvailability.create({
+        user: roomDevice._id,
+        startDate: newEvent.startDate,
+        endDate: newEvent.endDate,
+        days: false,
+        repeatFrequency: 'none',
+        event: newEvent._id
+      });
+      await noAvailability.save();
+    }
 
     if (eventLocation) newEvent.eventLocation = eventLocation;
     if (eventLocationDetails) newEvent.eventLocationDetails = eventLocationDetails;
@@ -90,38 +124,6 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
     if (repeatFrequency !== 'none' && !fatherId) {
       savedEvent.fatherId = savedEvent._id;
       await savedEvent.save();
-    }
-
-    const roomsDevices = [];
-    const receivers = [];
-    for (const userId of sharedWith) {
-      const user = await User.findById(userId._id);
-      if (!user) continue;
-      if (user.isRoom || user.isDevice) roomsDevices.push(user);
-      else receivers.push(user);
-    }
-
-    if (roomsDevices.length > 0) {
-      for (const roomDevice of roomsDevices) {
-        const roomDeviceUser = await User.findById(roomDevice._id);
-        if (!roomDeviceUser) continue;
-        const available = await checkAvailability(roomDevice._id, savedEvent.startDate, savedEvent.endDate);
-        if (available) {
-          savedEvent.responses.push({ user: roomDevice._id, status: 'accepted' });
-          const noAvailability = await NoAvailability.create({
-            user: roomDevice._id,
-            startDate: savedEvent.startDate,
-            endDate: savedEvent.endDate,
-            days: false,
-            repeatFrequency: 'none',
-          });
-          await noAvailability.save();
-          console.log(`Room/Device ${roomDeviceUser.username} is available`);
-        } else {
-          console.error(`Room/Device ${roomDeviceUser.username} is not available`);
-          return { success: false, message: `Room/Device ${roomDeviceUser.username} is not available` };
-        }
-      }
     }
 
     for (const receiver of receivers) {
@@ -522,9 +524,15 @@ const deleteEvent = async (req, res) => {
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
     
     if (event.user.toString() === user._id.toString()) {
-      if (event.repeatFrequency === 'none') await Event.findByIdAndDelete(eventId);
-      else await Event.deleteMany({ fatherId: event.fatherId });
-
+      if (event.repeatFrequency === 'none') {
+        await Event.findByIdAndDelete(eventId);
+        await NoAvailability.deleteMany({ event: eventId });
+      } else {
+        await Event.deleteMany({ fatherId: event.fatherId });
+        const eventsToDelete = await Event.find({ fatherId: event.fatherId }, '_id');
+        const eventIds = eventsToDelete.map(e => e._id);
+        await NoAvailability.deleteMany({ event: { $in: eventIds } });
+      }
 
     } else if (user.isAdmin) {
       if (event.repeatFrequency === 'none') {

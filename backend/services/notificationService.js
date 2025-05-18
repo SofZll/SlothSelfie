@@ -171,14 +171,15 @@ const getUrgencyFrequency = (deadline, now) => {
     else return hour;
 };
 
-const checkUrgency = (lastSentAt, deadline, now) => {
+const getLastSlotTime = (deadline, now) => {
     const freqMs = getUrgencyFrequency(deadline, now);
+    const deadlineTime = new Date(deadline).getTime();
+    const nowTime = now.getTime();
 
-    if (now.getTime() < lastSentAt.getTime()) {
-        return now.getTime() - new Date(deadline).getTime() >= freqMs;
-    }
+    const slotsSinceDeadline = Math.floor((nowTime - deadlineTime) / freqMs);
+    const slotTime = deadlineTime + slotsSinceDeadline * freqMs;
 
-    return now.getTime() - lastSentAt.getTime() >= freqMs;
+    return new Date(slotTime);
 };
 
 module.exports = {
@@ -187,5 +188,6 @@ module.exports = {
     calculateNotificationTime,
     getRepeatInterval,
     getTriggerAt,
-    checkUrgency
+    getUrgencyFrequency,
+    getLastSlotTime
 };

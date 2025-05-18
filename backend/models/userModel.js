@@ -84,13 +84,13 @@ const userSchema = new mongoose.Schema({
     },
 
     workingHours: {
-        start: { type: String, required: true, default: '09:00' },
-        end: { type: String, required: true, default: '17:00' },
+        start: { type: String, required: true, default: '07:00' },
+        end: { type: String, required: true, default: '19:00' },
     },
 
     dayHours: {
-        start: { type: String, required: true, default: '08:00' },
-        end: { type: String, required: true, default: '23:59' },
+        start: { type: String, required: true, default: '06:00' },
+        end: { type: String, required: true, default: '21:59' },
     },
 
     freeDays: {
@@ -108,7 +108,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre('save', async function (next) {
     try {
-        if (this.isNew && !this.image.data) {
+        if (this.isNew && !this.image.data && !this.isRoom && !this.isDevice) {
             // Only set default if new user and no image provided
             const defaultImgData = await fs.readFile(defaultImagePath);
             console.log("Default image data length:", defaultImgData.length);

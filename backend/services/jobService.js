@@ -1,8 +1,9 @@
 const User = require('../models/userModel');
 const Notification = require('../models/notificationModel');
+const Activity = require('../models/activityModel');
 
 const { getCurrentNow } = require('./timeMachineService');
-const { getTriggerAt } = require('./notificationService');
+const { getTriggerAt, getUrgencyFrequency } = require('./notificationService');
 
 const getScheduledJobs = async (userId, hours = 24) => {
     const now = getCurrentNow();

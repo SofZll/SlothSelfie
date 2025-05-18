@@ -30,6 +30,10 @@ const noAvailabilitySchema = new mongoose.Schema({
     fatherId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'NoAvailability',
+    },
+    event: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Event',
     }
 }, { timestamps: true });
 

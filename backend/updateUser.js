@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('./models/userModel'); // Percorso del modello utente
 const Notification = require('./models/notificationModel'); // Percorso del modello notifica
+const NoAvailability = require('./models/noAvailabilityModel'); // Percorso del modello noAvailability
 const bcrypt = require('bcrypt');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
@@ -178,4 +179,45 @@ const listIndexes = async () => {
     }
 };
 
-listIndexes();
+//listIndexes();
+
+const deleteAllAvailability = async () => {
+    try {
+        await connectDB();
+        console.log('Connected to the database.');
+
+        // Elimina tutti i documenti nella collezione NoAvailability
+        const result = await NoAvailability.deleteMany({});
+        console.log(`Deleted ${result.deletedCount} documents from NoAvailability collection.`);
+    } catch (error) {
+        console.error('Error deleting documents:', error);
+    }
+    finally {
+        // Disconnetti dal database
+        mongoose.connection.close();
+    }
+}
+
+//deleteAllAvailability();
+
+const deleteRoomDeviceImages = async () => {
+    try {
+        await connectDB();
+        console.log('Connected to the database.');
+
+        // elimina in tutti i user isDevice o isRoom il campo image.data
+        const result = await User.updateMany(
+            { $or: [{ isDevice: true }, { isRoom: true }] },
+            { $unset: { "image.data": "" } }
+        );
+
+        console.log(`Deleted ${result.modifiedCount} documents from NoAvailability collection.`);
+    } catch (error) {
+        console.error('Error deleting documents:', error);
+    }
+    finally {
+        // Disconnetti dal database
+        mongoose.connection.close();
+    }
+}
+deleteRoomDeviceImages();
