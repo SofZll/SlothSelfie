@@ -17,6 +17,10 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ success: false, message: 'User not found' });
         }
 
+        if (user.isRoom || user.isDevice) {
+            return res.status(401).json({ success: false, message: 'User is a room or device' });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ success: false, message: 'Invalid password' });
