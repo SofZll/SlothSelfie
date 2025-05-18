@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { NewSwal } from '../utils/swalUtils';
 
-import { generateTimeOptions } from '../utils/utils';
+import { generateTimeOptions, addHoursToTime } from '../utils/utils';
 import { AuthContext } from '../contexts/AuthContext';
 import { apiService } from '../services/apiService';
 
@@ -19,10 +19,21 @@ const SettingsCalendar = () => {
     });
 
     const handleSaveSettings = async () => {
-        const response = await apiService('/user/edit-schedule', 'PUT', {daysOff, workingHours, dayHour});
+        const response = await apiService('/user/edit-schedule', 'PUT', {
+            daysOff, 
+            //add 2 hours to the start and end of the working hours
+            workingHours: {
+                start: addHoursToTime(workingHours.start, -2),
+                end: addHoursToTime(workingHours.end, -2),
+            },
+            dayHour: {
+                start: addHoursToTime(dayHour.start, -2),
+                end: addHoursToTime(dayHour.end, -2),
+            }
+        });
         if (response.success) {
             new NewSwal({ title: 'Success', text: 'Settings saved correctly!', icon: 'success'});
-            setUser({ ...user, workingHours: {...response.workingHours}, freeDays: [...response.freeDays], dayHours: {...response.dayHours} });
+            setUser({ ...user, workingHours: workingHours, freeDays: [...response.freeDays], dayHours: {...response.dayHours} });
         } else NewSwal({ title: 'Error', text: 'There was an issue saving your settings. Please try again.', icon: 'error'});
 
         setCalendarSettings(false);
@@ -38,12 +49,12 @@ const SettingsCalendar = () => {
     useEffect(() => {
         if (user) {
             setWorkingHours({
-                start: user.workingHours.start,
-                end: user.workingHours.end,
+                start: addHoursToTime(user.workingHours.start, 2),
+                end: addHoursToTime(user.workingHours.end, 2),
             });
             setDayHour({
-                start: user.dayHours.start,
-                end: user.dayHours.end,
+                start: addHoursToTime(user.dayHours.start, 2),
+                end: addHoursToTime(user.dayHours.end, 2),
             });
             setDaysOff(user.freeDays);
         }

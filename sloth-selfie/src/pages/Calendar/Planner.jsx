@@ -7,7 +7,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
 import Select from 'react-select';
 
-import { useIsDesktop, timeFromDate } from '../../utils/utils';
+import { useIsDesktop, timeFromDate, addHoursToTime } from '../../utils/utils';
 import { validateNotification } from '../../utils/validation';
 import ScrollList from '../../components/ScrollList';
 import SettingsCalendar from '../../components/SettingsCalendar';
@@ -277,17 +277,31 @@ const Planner = () => {
             if (user.isAdmin) {
                 const response = await apiService('/users/tools', 'GET');
                 if (response.success) {
-                    setRooms(response.rooms);
-                    setDevices(response.devices);
+                    const updatedRooms = response.rooms.map(room => ({
+                        ...room,
+                        dayHours: {
+                            start: addHoursToTime(room.dayHours.start, 2),
+                            end: addHoursToTime(room.dayHours.end, 2),
+                        }
+                    }));
+                    setRooms(updatedRooms);
+                    
+                    const updatedDevices = response.devices.map(device => ({
+                        ...device,
+                        dayHours: {
+                            start: addHoursToTime(device.dayHours.start, 2),
+                            end: addHoursToTime(device.dayHours.end, 2),
+                        }
+                    }));
+                    setDevices(updatedDevices);
                 }
             } else {
-                const [activitiesResponse, eventsResponse, tasksResponse, pomodorosResponse, noAvailabilityResponse, toolsResponse] = await Promise.all([
+                const [activitiesResponse, eventsResponse, tasksResponse, pomodorosResponse, noAvailabilityResponse] = await Promise.all([
                     apiService('/activities', 'GET'),
                     apiService('/events', 'GET'),
                     apiService('/tasks', 'GET'),
                     apiService('/pomodori/todo', 'GET'),
                     apiService('/no-availabilities', 'GET'),
-                    apiService('/users/tools', 'GET')
                 ]);
 
                 if (activitiesResponse.success) setActivities(activitiesResponse.activities);
@@ -295,10 +309,6 @@ const Planner = () => {
                 if (tasksResponse.success) setTasks(tasksResponse.tasks);
                 if (pomodorosResponse.success) setPlannedPomodori(pomodorosResponse.pomodori);
                 if (noAvailabilityResponse.success) setAvailabilities(noAvailabilityResponse.noAvailability);
-                if (toolsResponse.success) {
-                    setRooms(toolsResponse.rooms);
-                    setDevices(toolsResponse.devices);
-                }
             }
         };
     

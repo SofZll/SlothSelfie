@@ -95,6 +95,13 @@ const calculateTime = (d, getVirtualNow) => {
     return `${seconds} seconds ago`;
 };
 
+const addHoursToTime = (time, hours) => {
+    //time is in format HH:mm
+    const date = new Date(`1970-01-01T${time}:00`);
+    date.setHours(date.getHours() + hours);
+    return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', hour12: false });
+};
+
 const formatDate = (dateStr) => new Date(dateStr).toLocaleString('it-IT');
 
-export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime, dateFromDate, timeFromDate, urlBase64ToUint8Array, calculateTime, formatDate };
+export { useIsDesktop, useIsMobileLandscape, generateTimeOptions, bufferToBase64, formatTime, dateFromDate, timeFromDate, urlBase64ToUint8Array, calculateTime, formatDate, addHoursToTime };

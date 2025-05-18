@@ -70,7 +70,6 @@ const NotificationsUpcoming = ({ loading, setLoading, refreshKey, handleNotifica
                                 <p className='text-secondary'>{notif.elementType === 'Activity' ? 'Deadline: ' : 'Date: '}{formatDate(notif.to)}</p>
                                 <p>Next notification at: {formatDate(notif.triggerAt)}</p>
                                 <div className='d-flex gap-2 mt-1'>
-                                    {notif.urgency && <span className='d-flex items-center gap-1'><AlertTriangle size={16} /> Urgente</span>}
                                     {/* permettere all'utente di selezionare il tempo di snooze */}
                                     <button className='btn btn-outline-success' onClick={handleSnoozeNotif(index)}>Postpone 10 minutes</button>
                                 </div>
