@@ -5,7 +5,7 @@ import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { useTools } from '../../contexts/ToolsContext';
 import { useCalendar } from '../../contexts/CalendarContext';
-import { generateTimeOptions } from '../../utils/utils';
+import { addHoursToTime, generateTimeOptions } from '../../utils/utils';
 
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 
@@ -22,13 +22,27 @@ const FormRoom = () => {
     };
 
     const handleSubmit = async () => {
-        const response = await apiService(`/user/room${selected.edit ? `/${room._id}` : ''}`, selected.edit ? 'PUT' : 'POST', room);
+        const roomData = {
+            ...room,
+            dayHours: {
+                start: addHoursToTime(room.dayHours.start, -2),
+                end: addHoursToTime(room.dayHours.end, -2),
+            }
+        }
+        const response = await apiService(`/user/room${selected.edit ? `/${room._id}` : ''}`, selected.edit ? 'PUT' : 'POST', roomData);
         if (response.success) {
+            const updatedRoom = {
+                ...response.room,
+                dayHours: {
+                    start: addHoursToTime(response.room.dayHours.start, 2),
+                    end: addHoursToTime(response.room.dayHours.end, 2),
+                }
+            }
             if (selected.edit) {
-                setRooms([...rooms.filter((r) => r._id !== response.room._id), { ...response.room, type: 'room' }]);
+                setRooms([...rooms.filter((r) => r._id !== response.room._id), { ...updatedRoom, type: 'room' }]);
                 NewSwal.fire({ title: 'Room edited', icon: 'success', text: 'Room edited successfully'});
             } else {
-                setRooms([...rooms, { ...response.room, type: 'room' }]);
+                setRooms([...rooms, { ...updatedRoom, type: 'room' }]);
                 NewSwal.fire({ title: 'Room created', icon: 'success', text: 'Room created successfully'});
             }
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });

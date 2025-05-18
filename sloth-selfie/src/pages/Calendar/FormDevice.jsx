@@ -5,7 +5,7 @@ import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { useTools } from '../../contexts/ToolsContext';
 import { useCalendar } from '../../contexts/CalendarContext';
-import { generateTimeOptions } from '../../utils/utils';
+import { addHoursToTime, generateTimeOptions } from '../../utils/utils';
 
 import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 
@@ -22,13 +22,27 @@ const FormDevice = () => {
     };
 
     const handleSubmit = async () => {
-        const response = await apiService(`/user/device${selected.edit ? `/${device._id}` : ''}`, selected.edit ? 'PUT' : 'POST', device);
+        const deviceData = {
+            ...device,
+            dayHours: {
+                start: addHoursToTime(device.dayHours.start, -2),
+                end: addHoursToTime(device.dayHours.end, -2),
+            }
+        }
+        const response = await apiService(`/user/device${selected.edit ? `/${device._id}` : ''}`, selected.edit ? 'PUT' : 'POST', deviceData);
         if (response.success) {
+            const updatedDevice = {
+                ...response.device,
+                dayHours: {
+                    start: addHoursToTime(response.device.dayHours.start, 2),
+                    end: addHoursToTime(response.device.dayHours.end, 2),
+                }
+            }
             if (selected.edit) {
-                setDevices([...devices.filter((d) => d._id !== response.device._id), { ...response.device, type: 'device' }]);
+                setDevices([...devices.filter((d) => d._id !== response.device._id), { ...updatedDevice, type: 'device' }]);
                 NewSwal.fire({ title: 'Device edited', icon: 'success', text: 'Device edited successfully'});
             } else {
-                setDevices([...devices, { ...response.device, type: 'device' }]);
+                setDevices([...devices, { ...updatedDevice, type: 'device' }]);
                 NewSwal.fire({ title: 'Device created', icon: 'success', text: 'Device created successfully'});
             }
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });
