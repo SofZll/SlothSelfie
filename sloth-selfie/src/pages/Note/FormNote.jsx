@@ -41,6 +41,11 @@ const FormNote = () => {
         
     }
 
+    const openDeletePopUp = () => {
+        resetSelected();
+        setDeletePopUp({show: true, note: note});
+    }
+
     useEffect(() => {
         if (!selected.edit) {
             resetNote();
@@ -117,7 +122,7 @@ const FormNote = () => {
                 <div className='d-flex align-items-center justify-content-center'>
                     <button type='button' aria-label='save or edit' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                     {selected.edit && (
-                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp({show: true, note: note})}>delete</button>
+                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => openDeletePopUp()}>delete</button>
                     )}
                 </div>
 

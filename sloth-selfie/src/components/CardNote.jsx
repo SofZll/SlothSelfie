@@ -18,14 +18,14 @@ const CardNote = ({ Note }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const previewContent = Note.content.length > 100 ? Note.content.substring(0, 100) : Note.content;
 
-    const { selected, setSelected, note, setNote, notes, setNotes, deletePopUp, setDeletePopUp } = useNote();
+    const { setSelected, setNote, notes, setNotes, deletePopUp, setDeletePopUp } = useNote();
     const navigate = useNavigate();
 
     const selectNote = () => {
         
         if (Note.tasks) setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username ), tasks: Note.tasks.map(t => ({ ...t, deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : null })), addedTasks: [], deletedTasks: [] });
         else setNote({ ...Note, user: Note.user.username, sharedWith: Note.sharedWith.map(u => u.username) });
-        setSelected({ ...selected, edit: true, add: false, popUp: true });
+        setSelected({ edit: true, add: false, popUp: true });
     }
 
     const completeTask = async (task) => {
