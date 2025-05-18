@@ -24,7 +24,7 @@ const FormDevice = () => {
                 setDevices([...devices.filter((d) => d._id !== response.device._id), { ...response.device, type: 'device' }]);
                 NewSwal.fire({ title: 'Device edited', icon: 'success', text: 'Device edited successfully'});
             } else {
-                setDevices([...devices, { ...response.device, type: 'device' }]);
+                setDevices([...devices, { ...response.device, type: 'device', events: [], availabilities: [] }]);
                 NewSwal.fire({ title: 'Device created', icon: 'success', text: 'Device created successfully'});
             }
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });

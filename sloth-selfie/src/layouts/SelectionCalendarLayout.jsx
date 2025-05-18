@@ -4,6 +4,7 @@ import { X, MoveLeft, Settings } from 'lucide-react';
 import { useCalendar } from '../contexts/CalendarContext';
 import { AuthContext } from '../contexts/AuthContext';
 import { useTask } from '../contexts/TaskContext';
+import { useTools } from '../contexts/ToolsContext';
 
 import { useIsDesktop } from '../utils/utils';
 
@@ -13,6 +14,7 @@ const SelectionCalendarLayout = ({children}) => {
     const { selected, resetSelected, back, resetActivity, resetEvent, resetAvailability } = useCalendar();
     const { calendarSettings, setCalendarSettings, user } = useContext(AuthContext);
     const { resetTask } = useTask();
+    const { resetRoom, resetDevice } = useTools();
 
     useEffect(() => {
         if (selected.selection === '...') {
@@ -20,6 +22,8 @@ const SelectionCalendarLayout = ({children}) => {
             resetEvent();
             resetAvailability();
             resetTask();
+            resetRoom();
+            resetDevice();
         }
     }, [selected.selection]);
 
