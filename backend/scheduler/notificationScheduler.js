@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 const Event = require('../models/eventModel');
 const Activity = require('../models/activityModel');
 
-const { sendSystemNotification, sendEmailNotification, calculateNotificationTime, getRepeatInterval, checkUrgency } = require('../services/notificationService');
+const { sendSystemNotification, sendEmailNotification, calculateNotificationTime, getRepeatInterval, getLastSlotTime } = require('../services/notificationService');
 const { getCurrentNow } = require('../services/timeMachineService');
 
 const INTERVAL = 15000; // 15 seconds
@@ -74,8 +74,9 @@ const startVirtualScheduler = () => {
                         createdAt: now,
                         updatedAt: now
                     });
-
                     await newNotification.save();
+                    const user = await User.findById(activity.user);
+                    await sendNotificationNow(user, newNotification);
                     console.log(`Urgent notification for activity ${activity._id.toString()} created.`);
                 } else {
                     const user = await User.findById(notification.user);
@@ -84,14 +85,16 @@ const startVirtualScheduler = () => {
                         continue;
                     }
 
-                    const shouldSend = checkUrgency(notification.lastSentAt, activity.deadline, now);
-
-                    if (shouldSend && await !disabledNotification(notification, user) && !user.disableNotifications.urgency) {
+                    const lastSentAt = getLastSlotTime(activity.deadline, now);
+                    const shouldSend = now >= lastSentAt && now - lastSentAt < INTERVAL;
+                    const isDisabled = await disabledNotification(notification, user);
+                    
+                    if (shouldSend && !isDisabled && !user.disableNotifications.urgency) {
                         try {
                             if (notification.mode.system && !user.disableNotifications.system) await sendSystemNotification(notification);
                             if (notification.mode.email && !user.disableNotifications.email) await sendEmailNotification(notification);
                 
-                            notification.lastSentAt = now;
+                            notification.lastSentAt = getLastSlotTime(activity.deadline, now);
                             await notification.save();
                 
                             console.log(`Urgency reminder for activity ${activity._id.toString()} resent.`);

@@ -9,21 +9,17 @@ const checkAvailability = async (userId, eventStartDate, eventEndDate) => {
     const noAvailability = await NoAvailability.find({
         user: userId,
         $or: [
-            { startDate: { $gte: eventStartDate, $lte: eventEndDate } },
-            { endDate: { $gte: eventStartDate, $lte: eventEndDate } },
-            { startDate: { $lte: eventStartDate }, endDate: { $gte: eventEndDate } }
+            { startDate: { $gt: eventStartDate, $lt: eventEndDate } },
+            { endDate: { $gt: eventStartDate, $lt: eventEndDate } },
+            { startDate: { $lt: eventStartDate }, endDate: { $gt: eventEndDate } }
         ]
     });
-
-    console.log('No Availability:', noAvailability);
-    console.log('Event startdate:', eventStartDate);
-    console.log('Event enddate:', eventEndDate);
 
     if (noAvailability.length > 0) return false;
 
     if (user.isRoom || user.isDevice) {
         const freeDays = user.freeDays || [];
-        const dayHours = user.dayHours || { start: '08:00', end: '23:59' };
+        const dayHours = user.dayHours || { start: '06:00', end: '21:59' };
 
         let current = new Date(eventStartDate);
         const end = new Date(eventEndDate);
@@ -44,24 +40,23 @@ const checkAvailability = async (userId, eventStartDate, eventEndDate) => {
 
             let rangeStart, rangeEnd;
             if (current.toDateString() === new Date(eventStartDate).toDateString()) {
-                rangeStart = eventStartDate;
+                rangeStart = new Date(eventStartDate);
             } else {
                 rangeStart = new Date(current);
                 rangeStart.setHours(0, 0, 0, 0);
             }
 
             if (current.toDateString() === new Date(eventEndDate).toDateString()) {
-                rangeEnd = eventEndDate;
+                rangeEnd = new Date(eventEndDate);
             } else {
                 rangeEnd = new Date(current);
                 rangeEnd.setHours(23, 59, 59, 999);
             }
-            console.log('Range Start:', rangeStart);
-            console.log('Range End:', rangeEnd);
-            console.log('Available Start:', availableStart);
-            console.log('Available End:', availableEnd);
-            if (rangeStart < availableStart || rangeEnd > availableEnd) return false;
-
+            
+            if (rangeStart < availableStart || rangeEnd > availableEnd) {
+                console.log('Not available: rangeStart < availableStart || rangeEnd > availableEnd');
+                return false;
+            }
             current.setDate(current.getDate() + 1);
             current.setHours(0, 0, 0, 0);
         }

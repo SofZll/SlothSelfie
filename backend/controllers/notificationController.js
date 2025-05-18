@@ -86,6 +86,7 @@ const getPastNotifications = async (req, res) => {
             createdAt: { $lte: now },
             $or: [
                 { type: 'default', status: 'inactive' },
+                { type: 'default', urgency: true, lastSentAt: { $lte: now } },
                 { type: 'repeat', lastSentAt: { $lte: now } },
                 { type: 'now' }
             ]
