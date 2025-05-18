@@ -24,7 +24,8 @@ const FormRoom = () => {
                 setRooms([...rooms.filter((r) => r._id !== response.room._id), { ...response.room, type: 'room' }]);
                 NewSwal.fire({ title: 'Room edited', icon: 'success', text: 'Room edited successfully'});
             } else {
-                setRooms([...rooms, { ...response.room, type: 'room' }]);
+                console.log('response', response);
+                setRooms([...rooms, { ...response.room, type: 'room', events: [], availabilities: [] }]);
                 NewSwal.fire({ title: 'Room created', icon: 'success', text: 'Room created successfully'});
             }
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });
