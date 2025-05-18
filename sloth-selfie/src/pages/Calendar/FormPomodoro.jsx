@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { NewSwal } from '../../utils/swalUtils';
 import { Pen, Trash2 } from 'lucide-react';
@@ -8,15 +8,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { useCalendar } from '../../contexts/CalendarContext';
 import { usePomodoro } from '../../contexts/PomodoroContext';
-import DeletePopUpLayout from '../../layouts/DeletePopUpLayout'; 
 import PopUpPlanPomodoro from '../../components/PopUpPlanPomodoro';
 
 
 const FormPomodoro = () => {
 
-    const { selected, setSelected, resetSelected } = useCalendar();
+    const { selected, setSelected, resetSelected, deletePopUp, setDeletePopUp } = useCalendar();
     const { plannedPomodori, setPlannedPomodori, settingsPomodoro, resetSettingsPomodoro } = usePomodoro();
-    const [deletePopUp, setDeletePopUp] = useState(false);
 
     const navigate = useNavigate();
 
@@ -27,16 +25,26 @@ const FormPomodoro = () => {
     }
 
     const deletePomodoro = async () => {
-        const response = await apiService(`/pomodoro/${settingsPomodoro._id}`, 'DELETE');
+        const response = await apiService(`/pomodoro/${deletePopUp.toShow._id}`, 'DELETE');
         if (response.success) {
             NewSwal({ title: 'Success', icon: 'success', text: 'Pomodoro deleted successfully'});
-            setPlannedPomodori(plannedPomodori.filter(p => p._id !== settingsPomodoro._id));
+            setPlannedPomodori(plannedPomodori.filter(p => p._id !== deletePopUp.toShow._id));
         } else NewSwal({ title: 'Error', icon: 'error', text: 'Error deleting pomodoro'});
 
-        setDeletePopUp(false);
-        resetSettingsPomodoro();
+        setDeletePopUp({ toCall: false, type: '', show: false, toShow: {} });
         resetSelected();
     }
+
+    const openDeletePopUp = () => {
+        setDeletePopUp({ ...deletePopUp, toShow: settingsPomodoro, type: 'pomodoro', show: true });
+        resetSettingsPomodoro();
+    }
+
+    useEffect(() => {
+        if (deletePopUp.toCall && deletePopUp.type === 'pomodoro') {
+            deletePomodoro();
+        }
+    }, [deletePopUp.toCall]);
     
     return (
         <div className='d-flex w-100 justify-content-center align-items-center position-relative  overflow-x-hidden'>
@@ -65,25 +73,9 @@ const FormPomodoro = () => {
                 </div>
             )}
 
-            <button type='button' aria-label='edit' title='Delete' className='btn position-absolute bottom-0 start-0 m-0' onClick={() => setDeletePopUp(true)}>
+            <button type='button' aria-label='edit' title='Delete' className='btn position-absolute bottom-0 start-0 m-0' onClick={() => openDeletePopUp()}>
                 <Trash2 size='20' color='#244476' strokeWidth='1.5' />
             </button>
-
-            {deletePopUp && (
-                <DeletePopUpLayout handleDelete={() => deletePomodoro()} handleClose={() => setDeletePopUp(false)}>
-                    <div className='d-flex flex-column text-start'>
-                        Are you sure you want to delete this pomodoro?
-                    </div>
-
-                    <div className='fs-5 fw-bold text-center'>Planned {settingsPomodoro.title}</div>
-
-                    <div className='d-flex flex-column mt-3'>
-                        <div className='d-flex fst-italic'> Total Study Time: {settingsPomodoro.studyTime * settingsPomodoro.cycles/60} min</div>
-                        <div className='d-flex fst-italic'> Deadline:</div>
-                        <div className='d-flex fst-italic text-center pt-1'>{new Date(settingsPomodoro.deadline).toLocaleDateString('en-CA')}</div>
-                    </div>
-                </DeletePopUpLayout>
-            )}
 
         </div>
     )

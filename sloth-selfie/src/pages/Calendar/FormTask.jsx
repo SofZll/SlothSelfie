@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { NewSwal } from '../../utils/swalUtils';
 
@@ -6,13 +6,11 @@ import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
 import ShareInput from '../../components/ShareInput';
-import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 
 const FormTask = () => {
 
     const { task, setTask, tasks, setTasks, resetTask } = useTask();
-    const { resetSelected, setConditionsMet, conditionsMet } = useCalendar();
-    const [deletePopUp, setDeletePopUp] = useState(false);
+    const { resetSelected, setConditionsMet, conditionsMet, setDeletePopUp, deletePopUp } = useCalendar();
 
     const handleSubmit = async () => {
         const response = await apiService(`/task/${task._id}`, 'PUT', task);
@@ -28,19 +26,30 @@ const FormTask = () => {
 
     const deleteTask = async () => {
         setDeletePopUp(false);
-        const response = await apiService(`/task/${task._id}`, 'DELETE');
+        const response = await apiService(`/task/${deletePopUp.toShow._id}`, 'DELETE');
         if (response.success) {
             NewSwal.fire({ title: 'Task deleted', icon: 'success', text: 'Task deleted successfully'});
-            setTasks(tasks.filter(tsk => tsk._id !== task._id));
-            resetTask();
+            setTasks(tasks.filter(tsk => tsk._id !== deletePopUp.toShow._id));
         } else NewSwal.fire({ title: 'Error deleting task', icon: 'error', text: response.message});
+        setDeletePopUp({ toCall: false, type: '', show: false, toShow: {} });
         resetSelected();
+    }
+
+    const openDeletePopUp = () => {
+        setDeletePopUp({ ...deletePopUp, toShow: task, type: 'task', show: true });
+        resetTask();
     }
 
     useEffect(() => {
         if (task.title) setConditionsMet(true);
         else setConditionsMet(false);
     }, [task.title]);
+
+    useEffect(() => {
+        if (deletePopUp.toCall && deletePopUp.type === 'task') {
+            deleteTask();
+        }
+    }, [deletePopUp.toCall]);
 
 
     return (
@@ -84,23 +93,8 @@ const FormTask = () => {
             
             <div className='d-flex align-items-center justify-content-center'>
                 <button type='button' aria-label='edit' className='btn-main rounded shadow-sm mt-4'  disabled={!conditionsMet} onClick={() => handleSubmit()}>edit</button>
-                <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
+                <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => openDeletePopUp()}>delete</button>
             </div>
-
-            {deletePopUp && (
-                <DeletePopUpLayout handleDelete={() => deleteTask()} handleClose={() => setDeletePopUp(false)}>
-                    <div className='d-flex flex-column text-start'>
-                        Are you sure you want to delete this task?
-                    </div>
-                    <div className='d-flex flex-column'>
-                        <div className='fst-italic fw-bold' style={{ color: '#244476' }}>{task.title}</div>
-                        <div className='d-flex w-100 justify-content-between'>
-                            <div className='fst-italic' style={{ color: '#244476' }}>{new Date(task.deadline).toLocaleDateString()}</div>
-                            <div className='fw-medium' style={{ color: '#244476' }}>{task.completed ? 'Completed' : 'to complte'}</div>
-                        </div>
-                    </div>
-                </DeletePopUpLayout>
-            )}
 
         </div>
     )
