@@ -15,8 +15,10 @@ const CardTool = ({ tool, smallView }) => {
 
     const selectTool = () => {
         if (tool.type === 'room') {
+            console.log('room', tool);
             setRoom({ ...tool });
         } else if (tool.type === 'device') {
+            console.log('device', tool);
             setDevice({ ...tool });
         }
         setSelected({ selection: tool.type, edit: true, add: false, popup: true });
