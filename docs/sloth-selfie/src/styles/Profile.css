@@ -1,0 +1,128 @@
+.profile {
+    height: auto;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding-top: calc(2rem + 0.5rem + calc(1.375rem + 1.5vw) + 1rem);
+    padding-bottom: calc(0.9rem + 1rem + 2rem);
+}
+
+.profile p {
+    font-size: 0.95rem;
+    text-align: left;
+    margin: 0;
+    z-index: 1;
+}
+
+.profile-container {
+    position: relative;
+    background-color: #e7e7e7;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 28rem;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.profile-container h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    height: 1rem;
+}
+
+.profile-image {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    border: 3px solid #FFF;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+    padding: 0 20px;
+    opacity: 0;
+    margin: 0;
+    color: #000;
+    background-color: #FAF9F9;
+}
+
+.profile-info.show {
+    max-height: 400px;
+    padding: 10px 0;
+    opacity: 1;
+    border-radius: 10px;
+    margin: 15px 0 15px 0;
+}
+
+.profile-info p {
+    padding-left: 1.4rem;
+}
+
+.button-large {
+    height: 4rem;
+    font-size: 1.2rem;
+    color: #FFF;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 0;
+}
+
+.button-edit {
+    opacity: 0;
+    max-height: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transition: opacity 0.5s ease, max-height 0.5s ease, visibility 0s 0.5s;
+}
+
+.button-edit.show {
+    max-height: 50px;
+    opacity: 1;
+    visibility: visible;
+    display: inline-block;
+    transition: opacity 0.5s ease, max-height 0.5s ease;
+    border: none;
+    color: #fff;
+}
+
+@media screen and (min-width: 700px){
+    .profile {
+        padding-top: calc(2rem + 3rem + 3rem);
+        padding-bottom: 1rem;
+    }
+
+    .profile-container {
+        padding-bottom: 1rem;
+    }
+
+    .button-large {
+        max-width: 40rem;
+    }
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .profile {
+        padding-top: 4rem;
+        padding-bottom: 1rem;
+        padding-left: 4rem;
+    }
+
+    .profile-container {
+        padding-bottom: 1rem;
+    }
+
+    .button-large {
+        max-width: 40rem;
+    }
+}

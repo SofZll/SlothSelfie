@@ -1,0 +1,322 @@
+
+.calendar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.calendar label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 87%;
+    text-align: left;
+}
+
+.calendar input {
+    height: 40px;
+}
+
+.calendar .centered-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 70%;
+}
+
+.calendar .centered-label input {
+    height: 15px;
+}
+
+.div-calendar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.calendar-main {
+    height: 60vh;
+}
+
+.selecting-view {
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+}
+
+.activity-event-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.activity-event-container > .btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: inherit;
+}
+
+.activity-event-container > .btn:active,
+.activity-event-container > .btn:hover {
+    background-color: #f39252;
+}
+
+/* Events */
+.container-events-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 20px 0 11vh 0;
+}
+
+.container-events-add form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 4px;
+}
+
+.container-events-add input {
+    width: 70%;
+}
+
+.repeat-div,
+.time-filter{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.repeat-div {
+    flex-direction: column;
+    width: 100%;
+}
+
+.time-filter {
+    flex-direction: row;
+    width: 87%;
+}
+
+.time-filter label {
+    margin: 0;
+}
+
+.time-filter input {
+    height: 15px;
+}
+
+.time-filter-not-select {
+    height: 40px !important;
+}
+
+/* Activities */
+.container-activity-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 20px 0 11vh 0;
+}
+
+.container-activity-add input {
+    width: 75%;
+}
+
+.container-activity-add input[type="checkbox"],
+.container-events-add input[type="checkbox"] {
+    width: 15px;
+}
+
+.activities-list {
+    flex: 1;
+    padding-top: 20px;
+    margin: 0;
+    width: 100%;
+}
+  
+.scrollable-Card-list {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 90%;
+    height: 30vh;
+    overflow-y: auto;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.container-activity-add form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.activities-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+  
+.activity-card {
+    padding: 2vmin;
+    margin: 10px 0;
+    width: 95%;
+    align-items: center;
+    white-space: normal;
+    box-shadow: #555B6E 0px 0px 7px;
+    word-wrap: break-word;
+    border-radius: 5px;
+}
+
+.rbc-addons-dnd.rbc-calendar {
+    width: 90%;
+}
+
+/* For larger screens */
+@media screen and (min-width: 700px){
+    .calendar {
+        flex-direction: row;
+        align-items: start;
+    }
+  
+    .div-calendar-container{
+        padding: 20px 0 0 0;
+        width: 60%;
+        height: 80%;
+    }
+
+    .activity-event-container {
+        width: 40%;
+    }
+
+    .selecting-view {
+        width: 40%;
+        margin: 0;
+        padding-top: 50px;
+    }
+      
+    .container-activity-add,
+    .container-events-add  {
+        padding: 20px 0 0 0;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .scrollable-Card-list {
+        height: 40vh;
+    }
+
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .calendar {
+        flex-direction: row;
+        align-items: start;
+        width: 98%;
+    }
+  
+    .div-calendar-container {
+        padding: 20px 0 0 0;
+        height: 100%;
+        width: 50%;
+        justify-content: center;
+    }
+
+    .container-activity-add,
+    .container-events-add {
+        padding: 20px 0 0 0;
+        width: 50%;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    input {
+        width: 50%;
+    }
+
+    label {
+        margin: 0;
+    }
+      
+    .scrollable-Card-list {
+        height: 40vh;
+    }
+
+    .calendar-main {
+        height: 90vh;
+    }
+
+}
+
+/* calendar preview */
+
+.parallel-lists {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    overflow-x: auto; 
+    max-height: 10vh;
+}
+
+.scrollableCalendar-list {
+    flex: 1;
+    max-width: 48%;
+    overflow-y: auto;
+    max-height: 200px;
+}
+
+.EventShow {
+    border: 2px solid #2b59b6;
+    box-shadow: #2b59b6 0px 0px 10px;
+}
+
+.ActivityShow {
+    border: 2px solid #ffA500;
+    box-shadow: #ffA500 0px 0px 10px;
+}
+
+.event-color {
+    color: #2b59b6;
+}
+
+.activity-color {
+    color: #ffA500;
+}
+
+/* Media query for mobile */
+@media (max-width: 768px) {
+    .parallel-lists {
+        gap: 5px;
+    }
+
+    .scrollableCalendar-list {
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .parallel-lists {
+        gap: 5px;
+        max-height: 6vh;
+    }
+
+    .scrollableCalendar-list {
+        max-height: 150px;
+    }
+}

@@ -164,7 +164,6 @@ const shouldSendNotification = async (notification, now, user) => {
             const nowTime = new Date(now);
         
             if (nowTime < startTime || nowTime > endTime) {
-                console.log(`Notification ${notification._id.toString()} skipped, outside working hours.`);
                 return false;
             }
         }
@@ -173,7 +172,6 @@ const shouldSendNotification = async (notification, now, user) => {
     if (notification.snooze && notification.type === 'repeat') {
         const snoozeUntil = new Date(notification.snoozeSettings.until);
         if (now < snoozeUntil || notification.status === 'inactive') {
-            console.log(`Notification ${notification._id.toString()} snoozed until ${snoozeUntil}`);
             return false;
         }
 

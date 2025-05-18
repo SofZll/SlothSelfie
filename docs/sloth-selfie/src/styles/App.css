@@ -1,0 +1,278 @@
+/* global variables */
+
+body {
+    font-family: 'Roboto', sans-serif;
+    -ms-overflow-style: none;
+}
+
+* {
+    font-family: inherit;
+}
+
+.header {
+    display: flex;
+    z-index: 1;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 1rem 1rem; /* pt-4 px-4 pb-2 */
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 1rem;
+    cursor: pointer;
+}
+
+.background-light {
+    background-color: #FAF9F9;
+}
+
+.grandstander-normal {
+    font-family: "Grandstander", cursive;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+}
+
+.bg-sloth-blue {
+    background-color: #244476;
+}
+
+.sloth-blue {
+    color: #244476;
+}
+
+.outline-sloth-blue {
+    border: 1px solid #244476;
+}
+
+.fs-small {
+    font-size: 14px;
+}
+
+.white {
+    color: #ffffff;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* home page */
+
+.inCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    height: auto;
+}
+
+/*hides scrollbar*/
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+html {
+    scrollbar-width: none;
+}
+
+html, body {
+    overflow: hidden;
+    height: 100%;
+}
+
+.hr-settings {
+    margin: 0;
+    width: 93%;
+}
+
+/* loading page */
+
+.loading-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    min-height: 60vh;
+}
+
+.loading-page-light {
+    color: #fdffff;
+}
+
+.loading-page-dark {
+    color: #222D52;
+}
+
+.loading-page p {
+    font-size: 18px;
+    margin: 0;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+/* modal */
+
+.modal {
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1101;
+}
+
+/* css form */
+
+.form-group input, 
+.form-group select {
+    margin: 0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+
+.form-group label {
+    text-align: right;
+    font-size: 1rem;
+}
+
+.form-group input:read-only {
+    background-color: #e7e7e7;
+}
+
+.formPopup {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+/* buttons */
+
+.button-clean {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    text-align: center;
+    user-select: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.94rem;
+    line-height: 1.4;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    color: #1a1a1a;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    background-color: transparent;
+}
+
+.button-clean:disabled,
+.button-clean[disabled]{
+    background-color: #ccc!important;
+    color: #999 !important;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.button-clean.red {
+    background-color: #ef5350;
+    color: white;
+}
+
+.button-clean.red:hover {
+    background-color: #e53935;
+}
+
+.button-clean.green {
+    background-color: #66bb6a;
+    color: white;
+}
+
+.button-clean.green:hover {
+    background-color: #4caf50;
+}
+
+.button-clean.yellow {
+    background-color: #f4d03f;
+    color: white;
+}
+
+.button-clean.yellow:hover {
+    background-color: #efc725;
+}
+
+.button-clean.white {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+}
+
+.button-clean.white:hover {
+    background-color: #f5f5f5;
+    border-color: #d0d0d0;
+}
+
+.teal {
+    background-color: #6ebbb3;
+    color: white;
+}
+
+.teal:hover {
+    background-color: #0ba798;
+}
+
+.blue {
+    background-color: #5664b7;
+    color: white;
+}
+
+.blue:hover {
+    background-color: #3e4dac;
+}
+
+/* animations */
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@media screen and (max-width: 700px) and (hover: none) { /*for mobile*/
+    .shifter {
+        padding-left: 0;
+    } 
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+    .header {
+        display: none;
+    }
+}
