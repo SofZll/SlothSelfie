@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 
-const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, getUserId, checkAuth, getUserIdFromUsername, updateUserPreferences, switchNotification, getUsersTools, addRoom, addDevice, editRoom, editDevice } = require('../controllers/userController');
+const { loginUser, registerUser, logoutUser, editImage, editProfile, getUserProfile, getUsername, getUserId, checkAuth, getUserIdFromUsername, updateUserPreferences, switchNotification, getUsersTools, addRoom, addDevice, editRoom, editDevice, deleteRoom, deleteDevice } = require('../controllers/userController');
 
 const router = express.Router();
 
@@ -26,6 +26,9 @@ router.put('/user/device/:deviceId', editDevice);
 router.put('/user/edit-schedule', updateUserPreferences);
 
 router.get('/user/:username', getUserIdFromUsername);
-router.get('/users/tools', getUsersTools); 
+router.get('/users/tools', getUsersTools);
+
+router.delete('/user/room/:roomId', deleteRoom);
+router.delete('/user/device/:deviceId', deleteDevice);
 
 module.exports = router;

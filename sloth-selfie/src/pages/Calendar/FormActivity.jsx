@@ -106,78 +106,81 @@ const FormActivity = () => {
     }, [activity.title]);
 
     return (
-        <div className='d-flex flex-column w-100 overflow-x-hidden' style={{ maxHeight: '70vh' }}>
-            <div className='row py-2 '>
-                <div className='col-6'>
-                    <label htmlFor='title' className='form-label'>Title</label>
-                    <input
-                        type='text' className='form-control' id='title'
-                        placeholder='Activity title'
-                        value={activity.title}
-                        disabled={activity.project || activity.response === 'pending'}
-                        onChange={(e) => setActivity({...activity, title: e.target.value})} />
-                </div>
-
-                <div className='col-6'>
-                    <label htmlFor='deadline' className='form-label'>Deadline</label>
-                    <input type='date' className='form-control' id='deadline'
-                    disabled={activity.project || activity.response === 'pending'}
-                    value={activity.deadline ? (new Date(activity.deadline)).toLocaleDateString('en-CA') : ''}
-                    onChange={(e) => setDeadline(e.target.value)} />
-                </div>
-            </div>
-
-            <div className='row d-flex justify-content-center py-2'>
-                <div className='col col-auto form-check'>
-                    <input className='form-check-input' type='checkbox' role='switch' id='completed'
-                        value={activity.completed}
-                        disabled={activity.project || activity.response === 'pending'}
-                        onChange={(e) => setActivity({...activity, completed: e.target.checked})} />
-                    <label className='form-check-label' htmlFor='completed'>Completed</label>
-                </div>
-            </div>
-
-            {activity.response !== 'pending' && !activity.project && (
-                <div>
-                    <div className='row'>
-                        <div className='col-12 mb-3'>
-                            <label htmlFor='share' className='form-label'>Share with</label>
-                            <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, sharedWith: receivers})} />
-                        </div>
+        <>
+            <div className='d-flex flex-column w-100 overflow-x-hidden' style={{ maxHeight: '70vh' }}>
+                <div className='row py-2 '>
+                    <div className='col-6'>
+                        <label htmlFor='title' className='form-label'>Title</label>
+                        <input
+                            type='text' className='form-control' id='title'
+                            placeholder='Activity title'
+                            value={activity.title}
+                            disabled={activity.project || activity.response === 'pending'}
+                            onChange={(e) => setActivity({...activity, title: e.target.value})} />
                     </div>
 
-                    <div className='row'>
-                        <div className='col-12 justify-content-center align-items-center d-flex'>
-                            <NotificationInput notifications={notifications} setNotifications={setNotifications} />
-                        </div>
+                    <div className='col-6'>
+                        <label htmlFor='deadline' className='form-label'>Deadline</label>
+                        <input type='date' className='form-control' id='deadline'
+                        disabled={activity.project || activity.response === 'pending'}
+                        value={activity.deadline ? (new Date(activity.deadline)).toLocaleDateString('en-CA') : ''}
+                        onChange={(e) => setDeadline(e.target.value)} />
                     </div>
                 </div>
-            )}
 
-            {(activity.response === 'pending' && !activity.project) ? (
-                <div className='d-flex align-items-center justify-content-center'>
-                    <button type='button' aria-label='Accept' className='btn btn-success' onClick={() => handleResponse('accepted')}>
-                        Accept
-                    </button>
-                    <button type='button' aria-label='Decline' className='btn btn-danger' onClick={() => handleResponse('declined')}>
-                        Decline
-                    </button>
+                <div className='row d-flex justify-content-center py-2'>
+                    <div className='col col-auto form-check'>
+                        <input className='form-check-input' type='checkbox' role='switch' id='completed'
+                            value={activity.completed}
+                            disabled={activity.project || activity.response === 'pending'}
+                            onChange={(e) => setActivity({...activity, completed: e.target.checked})} />
+                        <label className='form-check-label' htmlFor='completed'>Completed</label>
+                    </div>
                 </div>
-            ) : (
-                <div className='d-flex align-items-center justify-content-center'>
-                    {!activity.project && (
-                        <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()} >
-                            {selected.edit ? 'edit' : 'save'}
-                        </button>
-                    )}
 
-                    {selected.edit && !activity.project && (
-                        <button type='button' aria-label='Delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
-                            delete
+                {activity.response !== 'pending' && !activity.project && (
+                    <div>
+                        <div className='row'>
+                            <div className='col-12 mb-3'>
+                                <label htmlFor='share' className='form-label'>Share with</label>
+                                <ShareInput receivers={activity.sharedWith} setReceivers={(receivers) => setActivity({...activity, sharedWith: receivers})} />
+                            </div>
+                        </div>
+
+                        <div className='row'>
+                            <div className='col-12 justify-content-center align-items-center d-flex'>
+                                <NotificationInput notifications={notifications} setNotifications={setNotifications} />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {(activity.response === 'pending' && !activity.project) ? (
+                    <div className='d-flex align-items-center justify-content-center'>
+                        <button type='button' aria-label='Accept' className='btn btn-success' onClick={() => handleResponse('accepted')}>
+                            Accept
                         </button>
-                    )}
-                </div>
-            )}
+                        <button type='button' aria-label='Decline' className='btn btn-danger' onClick={() => handleResponse('declined')}>
+                            Decline
+                        </button>
+                    </div>
+                ) : (
+                    <div className='d-flex align-items-center justify-content-center'>
+                        {!activity.project && (
+                            <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()} >
+                                {selected.edit ? 'edit' : 'save'}
+                            </button>
+                        )}
+
+                        {selected.edit && !activity.project && (
+                            <button type='button' aria-label='Delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                                delete
+                            </button>
+                        )}
+                    </div>
+                )}
+
+            </div>
 
             {deletePopUp && (
                 <DeletePopUpLayout handleDelete={() => deleteActivity()} handleClose={() => setDeletePopUp(false)}>
@@ -195,9 +198,8 @@ const FormActivity = () => {
                     </div>
                 </DeletePopUpLayout>
             )}
-            
+        </>
 
-        </div>
     )
 }
 

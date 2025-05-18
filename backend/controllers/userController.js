@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
+const Event = require('../models/eventModel');
+const NoAvailability = require('../models/noAvailabilityModel');
 const { getToolEvents } = require('../controllers/eventController');
 const { getNoAvailabilitiesTool } = require('../controllers/noAvailabilityController');
 
@@ -198,8 +200,8 @@ const getUserIdFromUsername = async (req, res) => {
         const user = await User.findOne({ username: username });
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-        if (user.isRoom) return res.status(400).json({ success: true, isTool: true, message: 'User is a room' });
-        if (user.isDevice) return res.status(400).json({ success: true, isTool: true, message: 'User is a device' });
+        if (user.isRoom) return res.status(200).json({ success: true, isTool: true, message: 'User is a room' });
+        if (user.isDevice) return res.status(200).json({ success: true, isTool: true, message: 'User is a device' });
         
         if (user.isAdmin) return res.status(400).json({ success: false, message: 'User is an administrator' });
 
@@ -418,6 +420,74 @@ const editDevice = async (req, res) => {
     }
 }
 
+// Delete a room
+const deleteRoom = async (req, res) => {
+    const { roomId } = req.params;
+
+    try {
+        const room = await User.findById(roomId);
+        if (!room) {
+            return res.status(404).json({ success: false, message: 'Room not found' });
+        }
+
+        const events = await getToolEvents(room._id);
+        const availabilities = await getNoAvailabilitiesTool(room._id);
+
+        if (events.success) {
+            for (const event of events.events) {
+                await Event.findByIdAndUpdate(event._id, { $pull: { sharedWith: room._id } });
+            }
+        } else return res.status(404).json({ success: false, message: 'Events not found' });
+
+        if (availabilities.success) {
+            for (const availability of availabilities.noAvailability) {
+                await NoAvailability.findByIdAndDelete(availability._id);
+            }
+        } else return res.status(404).json({ success: false, message: 'No availabilities not found' });
+
+        await User.findByIdAndDelete(roomId);
+
+        res.status(200).json({ success: true, message: 'Room deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting room:', error);
+        res.status(500).json({ success: false, message: 'Error deleting room' });
+    }
+}
+
+// Delete a device
+const deleteDevice = async (req, res) => {
+    const { deviceId } = req.params;
+
+    try {
+        const device = await User.findById(deviceId);
+        if (!device) {
+            return res.status(404).json({ success: false, message: 'Device not found' });
+        }
+
+        const events = await getToolEvents(device._id);
+        const availabilities = await getNoAvailabilitiesTool(device._id);
+
+        if (events.success) {
+            for (const event of events.events) {
+                await Event.findByIdAndUpdate(event._id, { $pull: { sharedWith: device._id } });
+            }
+        } else return res.status(404).json({ success: false, message: 'Events not found' });
+
+        if (availabilities.success) {
+            for (const availability of availabilities.noAvailability) {
+                await NoAvailability.findByIdAndDelete(availability._id);
+            }
+        } else return res.status(404).json({ success: false, message: 'No availabilities not found' });
+
+        await User.findByIdAndDelete(deviceId);
+
+        res.status(200).json({ success: true, message: 'Device deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting device:', error);
+        res.status(500).json({ success: false, message: 'Error deleting device' });
+    }
+}
+
 
 module.exports = {
     loginUser,
@@ -437,4 +507,6 @@ module.exports = {
     addDevice,
     editRoom,
     editDevice,
+    deleteRoom,
+    deleteDevice,
 };
