@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-calendar/dist/Calendar.css';
@@ -28,6 +28,7 @@ const Planner = () => {
     const { getVirtualNow, refreshKey } = useContext(TimeMachineContext);
     const now = getVirtualNow();
     const location = useLocation();
+    const navigate = useNavigate();
       
     const [calendarView, setCalendarView] = useState('month');
     const [date, setDate] = useState(getVirtualNow());
@@ -305,20 +306,14 @@ const Planner = () => {
     }, [user, refreshKey]);
 
     useEffect(() => {
-        console.log('refreshKey', refreshKey);
-    }, [refreshKey]);
-
-    useEffect(() => {
-        console.log('user', user);
-    }, [user]);
-
-    useEffect(() => {
         if (!activities.length || !events.length) return;
 
         const openELement = async () => {
             const params = new URLSearchParams(location.search);
             const type = params.get('type');
             const id = params.get('element');
+            console.log('type', type);
+            console.log('id', id);
 
             if (type && id) {
                 if (type === 'Activity') {
@@ -327,13 +322,14 @@ const Planner = () => {
                         setActivity({ ...activity });
                         console.log('activity', activity);
                         setSelected({ selection: 'activity', edit: true, add: false, popup: true });
-                    }
+                    } else navigate(location.pathname, { replace: true });
                 } else if (type === 'Event') {
                     const event = events.find(e => e._id === id);
                     if (event) {
-                        setEvent({ ...event, duration: (new Date(event.endDate).getDate() - new Date(event.startDate).getDate() + 1), time: '', isPreciseTime: false, fatherId: event.fatherId || '', repeatMode: (event.repeatTimes && event.repeatTimes > 0) ? 'ntimes' : 'until' });
+                        setEvent({ ...event });
+                        console.log('event', event);
                         setSelected({ selection: 'event', edit: true, add: false, popup: true });
-                    }
+                    } else navigate(location.pathname, { replace: true });
                 } // aggiungere task e pomodoro
                 await fetchNotifications({ elementId: id });
             }

@@ -2,6 +2,7 @@
 const Event = require('../models/eventModel');
 const User = require('../models/userModel');
 const Notification = require('../models/notificationModel');
+const NoAvailability = require('../models/noAvailabilityModel');
 const mongoose = require('mongoose');
 
 const { findUserId } = require('../utils/utils');
@@ -91,9 +92,42 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
       await savedEvent.save();
     }
 
-    const receivers = savedEvent.sharedWith.filter(u => !u.isRoom && !u.isDevice);
+    const roomsDevices = [];
+    const receivers = [];
+    for (const userId of sharedWith) {
+      const user = await User.findById(userId._id);
+      if (!user) continue;
+      if (user.isRoom || user.isDevice) roomsDevices.push(user);
+      else receivers.push(user);
+    }
+
+    if (roomsDevices.length > 0) {
+      for (const roomDevice of roomsDevices) {
+        const roomDeviceUser = await User.findById(roomDevice._id);
+        if (!roomDeviceUser) continue;
+        const available = await checkAvailability(roomDevice._id, savedEvent.startDate, savedEvent.endDate);
+        if (available) {
+          savedEvent.responses.push({ user: roomDevice._id, status: 'accepted' });
+          const noAvailability = await NoAvailability.create({
+            user: roomDevice._id,
+            startDate: savedEvent.startDate,
+            endDate: savedEvent.endDate,
+            days: false,
+            repeatFrequency: 'none',
+          });
+          await noAvailability.save();
+          console.log(`Room/Device ${roomDeviceUser.username} is available`);
+        } else {
+          console.error(`Room/Device ${roomDeviceUser.username} is not available`);
+          return { success: false, message: `Room/Device ${roomDeviceUser.username} is not available` };
+        }
+      }
+    }
 
     for (const receiver of receivers) {
+      const receiverUser = await User.findById(receiver._id);
+      if (!receiverUser) continue;
+
       const available = await checkAvailability(receiver._id, savedEvent.startDate, savedEvent.endDate);
       let text = '';
 

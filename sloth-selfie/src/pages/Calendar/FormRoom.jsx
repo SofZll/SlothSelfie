@@ -37,7 +37,7 @@ const FormRoom = () => {
     }
 
     const deleteRoom = async () => {
-        const response = await apiService(`/user/rooms/${room._id}`, 'DELETE');
+        const response = await apiService(`/user/room/${room._id}`, 'DELETE');
         if (response.success) {
             setRooms([...rooms.filter((r) => r._id !== room._id)]);
             NewSwal.fire({ title: 'Room deleted', icon: 'success', text: 'Room deleted successfully'});
@@ -56,13 +56,18 @@ const FormRoom = () => {
         } else setConditionsMet(true);
     }, [room.username, room.dayHours.start, room.dayHours.end]);
 
+    useEffect(() => {
+        console.log('Room:', room);
+        console.log('Selected:', selected);
+    }, [room, selected]);
+
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden'>
             <div className='row py-2 '>
                 <div className='col-8'>
                     <label htmlFor='name' className='form-label'>Room name</label>
                     <input type='text' className='form-control' id='name'
-                        value={room.name}
+                        value={room.username}
                         onChange={(e) => setRoom({ ...room, username: e.target.value })}
                         placeholder='Enter room name' />
                 </div>

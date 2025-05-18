@@ -37,7 +37,7 @@ const FormDevice = () => {
     }
 
     const deleteDevice = async () => {
-        const response = await apiService(`/user/devices/${device._id}`, 'DELETE');
+        const response = await apiService(`/user/device/${device._id}`, 'DELETE');
         if (response.success) {
             setDevices([...devices.filter((d) => d._id !== device._id)]);
             NewSwal.fire({ title: 'Device deleted', icon: 'success', text: 'Device deleted successfully'});
@@ -64,7 +64,7 @@ const FormDevice = () => {
                 <div className='col-6'>
                     <label htmlFor='name' className='form-label'>Device name</label>
                     <input type='text' className='form-control' id='name'
-                        value={device.name}
+                        value={device.username}
                         onChange={(e) => setDevice({ ...device, username: e.target.value })}
                         placeholder='Enter device name' />
                 </div>
