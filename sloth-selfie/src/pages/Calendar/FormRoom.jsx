@@ -21,10 +21,10 @@ const FormRoom = () => {
         const response = await apiService(`/user/room${selected.edit ? `/${room._id}` : ''}`, selected.edit ? 'PUT' : 'POST', room);
         if (response.success) {
             if (selected.edit) {
+                console.log('response', response);
                 setRooms([...rooms.filter((r) => r._id !== response.room._id), { ...response.room, type: 'room' }]);
                 NewSwal.fire({ title: 'Room edited', icon: 'success', text: 'Room edited successfully'});
             } else {
-                console.log('response', response);
                 setRooms([...rooms, { ...response.room, type: 'room', events: [], availabilities: [] }]);
                 NewSwal.fire({ title: 'Room created', icon: 'success', text: 'Room created successfully'});
             }
