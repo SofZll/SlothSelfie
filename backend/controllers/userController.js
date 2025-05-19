@@ -4,6 +4,7 @@ const Event = require('../models/eventModel');
 const NoAvailability = require('../models/noAvailabilityModel');
 const { getToolEvents } = require('../controllers/eventController');
 const { getNoAvailabilitiesTool } = require('../controllers/noAvailabilityController');
+const { checkAvailability } = require('../services/noAvailabilityService');
 
 // TODO: implement the possibility to change the password
 
@@ -385,7 +386,23 @@ const editRoom = async (req, res) => {
         room.workingHours = dayHours;
         await room.save();
 
-        res.status(200).json({ success: true, room });
+        const events = await Event.find({ sharedWith: room._id });
+        const eventsOk = [];
+        for (const event of events) {
+            const isValid = await checkAvailability(room._id, event.startDate, event.endDate);
+            if (!isValid) {
+                event.status = 'declined';
+                await event.save();
+            } else {
+                eventsOk.push(event);
+            }
+        }
+
+        const availabilities = await NoAvailability.find({ user: room._id });
+
+        const leanRoom = await User.findById(roomId).lean();
+
+        res.status(200).json({ success: true, room: { ...leanRoom, events: eventsOk, availabilities: availabilities } });
     } catch (error) {
         console.error('Error editing room:', error);
         res.status(500).json({ success: false, message: 'Error editing room' });
@@ -417,7 +434,22 @@ const editDevice = async (req, res) => {
         device.workingHours = dayHours;
         await device.save();
 
-        res.status(200).json({ success: true, device });
+        const events = await Event.find({ sharedWith: device._id });
+        const eventsOk = [];
+        for (const event of events) {
+            const isValid = await checkAvailability(device._id, event.startDate, event.endDate);
+            if (!isValid) {
+                event.status = 'declined';
+                await event.save();
+            } else {
+                eventsOk.push(event);
+            }
+        }
+        const availabilities = await NoAvailability.find({ user: device._id });
+
+        const leanDevice = await User.findById(deviceId).lean();
+
+        res.status(200).json({ success: true, device: { ...leanDevice, events: eventsOk, availabilities: availabilities } });
     } catch (error) {
         console.error('Error editing device:', error);
         res.status(500).json({ success: false, message: 'Error editing device' });
