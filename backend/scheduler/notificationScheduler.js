@@ -64,7 +64,7 @@ const startVirtualScheduler = () => {
                         elementType: 'Activity',
                         type: 'default',
                         text: `Activity ${activity.title} is overdue!`,
-                        mode: { system: true, email: false },
+                        mode: { system: true, email: true },
                         urgency: true,
                         urgencySettings: { frequency: '1d' },
                         from: now,

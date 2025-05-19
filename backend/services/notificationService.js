@@ -6,7 +6,7 @@ const User = require('../models/userModel');
 const webPush = require('web-push');
 const nodemailer = require('nodemailer');
 const { getIO } = require('../socket/socket');
-const { getEventProgrammedEmail, getActivityProgrammedEmail, getElementInvitationEmail, getElementModificationEmail } = require('../utils/emailTemplates');
+const { getEventProgrammedEmail, getActivityProgrammedEmail, getElementInvitationEmail, getElementModificationEmail, getUrgencyEmail } = require('../utils/emailTemplates');
 
 const sendSystemNotification = async (notification) => {
     // internal notification
@@ -62,8 +62,8 @@ const sendEmailNotification = async (notification, invitation, modification) => 
     }
 
     let element;
-    if (notification.elementType === 'Activity') element = await Activity.findById(notification.element);
-    else if (notification.elementType === 'Event') element = await Event.findById(notification.element);
+    if (notification.elementType === 'Activity') element = await Activity.findById(notification.element).populate('user username').populate('sharedWith username');
+    else if (notification.elementType === 'Event') element = await Event.findById(notification.element).populate('user username').populate('sharedWith username');
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -79,6 +79,8 @@ const sendEmailNotification = async (notification, invitation, modification) => 
         ({ subjectContent, htmlContent } = getElementInvitationEmail(element, notification.elementType, receiver));
     } else if (modification) {
         ({ subjectContent, htmlContent } = getElementModificationEmail(element, notification.elementType));
+    } else if (notification.urgency) {
+        ({ subjectContent, htmlContent } = getUrgencyEmail(element, receiver));
     } else if (notification.elementType === 'Event') {
         ({ subjectContent, htmlContent } = getEventProgrammedEmail(element, receiver));
     } else if (notification.elementType === 'Activity') {
