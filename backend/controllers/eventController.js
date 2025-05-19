@@ -278,26 +278,83 @@ const editEvent = async (Id, user, title, type, priority, startDate, endDate, al
     if (repeatFrequency === 'none') event.fatherId = null;
     else event.fatherId = fatherId;
 
-    const isSharedWith = event.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
-    if (isSharedWith && status) {
-      const responseIndex = event.responses.findIndex(r => r.user.toString() === user._id.toString());
+    const savedEvent = await event.save();
 
-      if (responseIndex !== -1) event.responses[responseIndex].status = status;
-      else event.responses.push({ user: user, status });
-
-      if (status === 'declined') event.sharedWith = event.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+    const roomsDevices = [];
+    const receivers = [];
+    for (const userId of sharedWith) {
+      const user = await User.findById(userId._id);
+      if (!user) continue;
+      if (user.isRoom || user.isDevice) roomsDevices.push(user);
+      else receivers.push(user);
     }
 
-    await event.save()
+    if (roomsDevices.length > 0) {
+      for (const roomDevice of roomsDevices) {
+        const roomDeviceUser = await User.findById(roomDevice._id);
+        if (!roomDeviceUser) continue;
+        const available = await checkAvailability(roomDevice._id, savedEvent.startDate, savedEvent.endDate);
+        if (available) {
+          savedEvent.responses.push({ user: roomDevice._id, status: 'accepted' });
+          const noAvailability = await NoAvailability.create({
+            user: roomDevice._id,
+            startDate: savedEvent.startDate,
+            endDate: savedEvent.endDate,
+            days: false,
+            repeatFrequency: 'none',
+          });
+          await noAvailability.save();
+          console.log(`Room/Device ${roomDeviceUser.username} is available`);
+        } else {
+          console.error(`Room/Device ${roomDeviceUser.username} is not available`);
+          return { success: false, message: `Room/Device ${roomDeviceUser.username} is not available` };
+        }
+      }
+    }
 
-    const savedEvent = await Event.findById(Id)
+    for (const receiver of receivers) {
+      const receiverUser = await User.findById(receiver._id);
+      if (!receiverUser) continue;
+
+      const available = await checkAvailability(receiver._id, savedEvent.startDate, savedEvent.endDate);
+      let text = '';
+
+      if (available) {
+        savedEvent.responses.push({ user: receiver._id, status: 'pending' });
+        text = `You have been invited to the event: "${savedEvent.title}" on ${savedEvent.startDate.toLocaleString()}`;
+      } else {
+        savedEvent.responses.push({ user: receiver._id, status: 'declined' });
+        savedEvent.sharedWith = savedEvent.sharedWith.filter(u => u._id.toString() !== receiver._id.toString());
+        text = `You have been invited to the event: "${savedEvent.title}" on ${savedEvent.startDate.toLocaleString()} but you are not available.`;
+      }
+
+      const notification = await Notification.create({
+        user: receiver._id,
+        element: savedEvent._id,
+        elementType: 'Event',
+        type: 'now',
+        text,
+        mode: {
+          system: true,
+          email: true,
+        },
+        createdAt: getCurrentNow(),
+        updatedAt: getCurrentNow()
+      });
+
+      await sendNotificationNow(user, notification);
+    }
+
+    await savedEvent.save();
+
+    const updatedEvent = await Event.findById(Id)
     .populate('sharedWith', 'username')
     .populate('user', 'username')
     .lean();
 
     const transformedEvent = {
-      ...savedEvent,
-      sharedWith: savedEvent.sharedWith.map(user => user.username),
+      ...updatedEvent,
+      sharedWith: updatedEvent.sharedWith.map(user => user.username),
     };
 
     return ({ success: true, event: transformedEvent });
@@ -385,8 +442,7 @@ const updateEvent = async (req, res) => {
 
       const events = [];
 
-      if (new Date(event.startDate).getTime() === new Date(startDate).getTime() && new Date(event.endDate).getTime() === new Date(endDate).getTime() && event.allDay === allDay && event.repeatFrequency === repeatFrequency && new Date(event.repeatEndDate).getTime() === new Date(repeatEndDate).getTime() && event.repeatTimes === repeatTimes) {
-
+      if (new Date(event.startDate).getTime() === new Date(startDate).getTime() && new Date(event.endDate).getTime() === new Date(endDate).getTime() && event.allDay === allDay && event.repeatFrequency === repeatFrequency && new Date(event.repeatEndDate).getTime() === new Date(repeatEndDate).getTime() && event.repeatTimes === repeatTimes && event.sharedWith.length === users.length && event.sharedWith.every(user => users.some(u => u._id.toString() === user._id.toString()))) {
         const events2edit = await Event.find({ fatherId: fatherId });
         if (events2edit.length > 0) {
           for (let i = 0; i < events2edit.length; i++) {

@@ -24,7 +24,7 @@ import { apiService } from '../../services/apiService';
 
 const FormCalendar = () => {
 
-    const { activities, selected, select, addImportedEvents, activity, event, show } = useCalendar();
+    const { activities, selected, select, addImportedEvents, activity, event, show, deletePopUp } = useCalendar();
     const { task } = useTask();
     const { rooms, devices } = useTools();
     const { user } = React.useContext(AuthContext);
@@ -172,6 +172,7 @@ const FormCalendar = () => {
                 )}
 
             </SelectionCalendarLayout>
+
         </div>
     )
 }

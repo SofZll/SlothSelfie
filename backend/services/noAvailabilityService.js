@@ -1,6 +1,5 @@
 const NoAvailability = require('../models/noAvailabilityModel');
 const User = require('../models/userModel');
-const Event = require('../models/eventModel');
 
 const checkAvailability = async (userId, eventStartDate, eventEndDate) => {
     const user = await User.findById(userId);
