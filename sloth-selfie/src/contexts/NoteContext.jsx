@@ -43,7 +43,7 @@ export const NoteProvider = ({ children }) => {
     const resetSelected = () => {
         setSelected({
             edit: false,
-            add: false,
+            add: true,
             popUp: false
         });
     }
