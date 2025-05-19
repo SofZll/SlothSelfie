@@ -11,19 +11,17 @@ import { AuthContext } from '../../contexts/AuthContext';
 import { useTools } from '../../contexts/ToolsContext';
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import ShareInput from '../../components/ShareInput';
-import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 import NotificationInput from '../../components/Notification/NotificationInput';
 import SliderPriority from '../../components/SliderPriority';
 import GeolocalizationInput from '../../components/GeolocalizationInput';
 
 const FormEvent = () => {
     const { getVirtualNow } = useContext(TimeMachineContext);
-    const { event, setEvent, events, setEvents, resetEvent, selected, resetSelected, notifications, setNotifications, setConditionsMet, conditionsMet } = useCalendar();
+    const { event, setEvent, events, setEvents, resetEvent, selected, resetSelected, notifications, setNotifications, setConditionsMet, conditionsMet, deletePopUp, setDeletePopUp } = useCalendar();
     const { user } = useContext(AuthContext);
     const { toolEvents, setToolEvents, setRooms, setDevices } = useTools();
 
     const virtualNow = getVirtualNow();
-    const [deletePopUp, setDeletePopUp] = useState(false);
     const [showGeo, setShowGeo] = useState(false);
     const [inputMap, setInputMap] = useState(null);
     const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -238,7 +236,7 @@ const FormEvent = () => {
     }
 
     const deleteEvent = async () => {
-        const response = await apiService(`/event/${event._id}`, 'DELETE', event);
+        const response = await apiService(`/event/${deletePopUp.toShow._id}`, 'DELETE');
         if (response.success) {
             NewSwal.fire({ title: 'Event deleted', icon: 'success', text: 'Event deleted successfully'});
             if (user.isAdmin) {
@@ -248,8 +246,8 @@ const FormEvent = () => {
                     setDevices(response.devices);
                 }
             } else {
-                if (event.repeatFrequency === 'none') setEvents(events.filter(evt => evt._id !== event._id));
-                else setEvents(events.filter(evt => evt.fatherId !== event.fatherId));
+                if (deletePopUp.toShow.repeatFrequency === 'none') setEvents(events.filter(evt => evt._id !== deletePopUp.toShow._id));
+                else setEvents(events.filter(evt => evt.fatherId !== deletePopUp.toShow.fatherId));
             }
         } else NewSwal.fire({ title: 'Error deleting event', icon: 'error', text: response.message});
 
@@ -257,11 +255,20 @@ const FormEvent = () => {
             apiService(`/notification/${notification._id}`, 'DELETE');
             setNotifications([]);
         });
-            
-        setDeletePopUp(false);
+        setDeletePopUp({ toCall: false, type: '', show: false, toShow: {} });
         resetSelected();
+    }
+
+    const openDeletePopUp = () => {
+        setDeletePopUp({ ...deletePopUp, toShow: event, type: 'event', show: true });
         resetEvent();
     }
+
+    useEffect(() => {
+        if (deletePopUp.toCall && deletePopUp.type === 'event') {
+            deleteEvent();
+        }
+    }, [deletePopUp.toCall]);
 
     useEffect(() => {
         if (!event.title || !event.startDate || !event.endDate || !event.duration || event.duration <= 0) {
@@ -543,35 +550,13 @@ const FormEvent = () => {
                     )}
 
                     {selected.edit && !event.isInProject && (user.isAdmin || !event.tool) && (
-                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => openDeletePopUp()}>
                             delete
                         </button>
                     )}
                 </div>
             )}
 
-            {deletePopUp && (
-                <DeletePopUpLayout handleDelete={() => deleteEvent()} handleClose={() => setDeletePopUp(false)}>
-                    <div className='d-flex flex-column text-start'>
-                        Are you sure you want to delete this {event.repeatFrequency !== 'none' ? 'recurring event' : 'event'}?
-                    </div>
-                    <div className='d-flex flex-column'>
-                        <div className='fst-italic fw-bold' style={{ color: '#244476' }}>{event.title}</div>
-                        <div className='fst-italic' style={{ color: '#244476' }}>start: {new Date(event.startDate).toLocaleDateString()}</div>
-                        <div className='fst-italic' style={{ color: '#244476' }}>end: {new Date(event.endDate).toLocaleDateString()}</div>
-
-                        {event.repeatFrequency !== 'none' && (
-                            <>
-                            {event.repeatMode === 'ntimes' ? (
-                                <div className='fst-italic' style={{ color: '#244476' }}>repeat {event.repeatTimes} times</div>
-                            ) : (
-                                <div className='fst-italic' style={{ color: '#244476' }}>repeat until {new Date(event.repeatEndDate).toLocaleDateString()}</div>
-                            )}
-                            </>
-                        )}
-                    </div>
-                </DeletePopUpLayout>
-            )}
             {showGeo && (<GeolocalizationInput showGeo={showGeo} setShowGeo={setShowGeo} setInputMap={setInputMap} />)}
         </div>
     )

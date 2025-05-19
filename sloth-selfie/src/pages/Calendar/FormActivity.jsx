@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { NewSwal } from '../../utils/swalUtils';
 
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import ShareInput from '../../components/ShareInput';
-import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 import NotificationInput from '../../components/Notification/NotificationInput';
 
 const FormActivity = () => {
 
-    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications, conditionsMet, setConditionsMet } = useCalendar();
-    const [deletePopUp, setDeletePopUp] = useState(false);
+    const { activity, setActivity, activities, setActivities, resetActivity, selected, resetSelected, notifications, setNotifications, conditionsMet, setConditionsMet, deletePopUp, setDeletePopUp } = useCalendar();
 
     const setDeadline = (date) => {
         const newDate = new Date(date);
@@ -85,25 +83,38 @@ const FormActivity = () => {
     }
 
     const deleteActivity = async () => {
-        setDeletePopUp(false);
-        const response = await apiService(`/activity/${activity._id}`, 'DELETE');
+        const response = await apiService(`/activity/${deletePopUp.toShow._id}`, 'DELETE');
         if (response.success) {
             NewSwal.fire({ title: 'Activity deleted', icon: 'success', text: 'Activity deleted successfully'});
-            setActivities(activities.filter(act => act._id !== activity._id));
-            resetActivity();
+            setActivities(activities.filter(act => act._id !== deletePopUp.toShow._id));    
         } else NewSwal.fire({ title: 'Error deleting activity', icon: 'error', text: response.message});
-        resetSelected();
 
         notifications.forEach(notification => {
             apiService(`/notification/${notification._id}`, 'DELETE');
             setNotifications([]);
         });
+        
+        setDeletePopUp({ toCall: false, type: '', show: false, toShow: {} });
+        console.log('Activity deleted', deletePopUp.toShow);
+        resetSelected();
+    }
+
+    const openDelete = () => {
+        setDeletePopUp({ type: 'activity', show: true, toShow: activity, toCall: false });
+        resetActivity();
     }
 
     useEffect(() => {
         if (activity.title) setConditionsMet(true);
         else setConditionsMet(false);
     }, [activity.title]);
+
+    useEffect(() => {
+        if (deletePopUp.toCall && deletePopUp.type === 'activity') {
+            console.log('Deleting activity', deletePopUp.toShow);
+            deleteActivity();
+        }
+    }, [deletePopUp.toCall, deletePopUp.type]);
 
     return (
         <>
@@ -173,7 +184,7 @@ const FormActivity = () => {
                         )}
 
                         {selected.edit && !activity.project && (
-                            <button type='button' aria-label='Delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>
+                            <button type='button' aria-label='Delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => openDelete()}>
                                 delete
                             </button>
                         )}
@@ -181,23 +192,6 @@ const FormActivity = () => {
                 )}
 
             </div>
-
-            {deletePopUp && (
-                <DeletePopUpLayout handleDelete={() => deleteActivity()} handleClose={() => setDeletePopUp(false)}>
-                    <div className='d-flex flex-column text-start'>
-                        Are you sure you want to delete this activity?
-                    </div>
-                    <div className='d-flex flex-column'>
-                        <div className='fst-italic fw-bold' style={{ color: '#244476' }}>{activity.title}</div>
-                        <div className='d-flex w-100 justify-content-between'>
-                            {activity.deadline && (
-                                <div className='fst-italic' style={{ color: '#244476' }}>{new Date(activity.deadline).toLocaleDateString()}</div>
-                            )}
-                            <div className='fw-medium' style={{ color: '#244476' }}>{activity.completed ? 'Completed' : 'to complte'}</div>
-                        </div>
-                    </div>
-                </DeletePopUpLayout>
-            )}
         </>
 
     )

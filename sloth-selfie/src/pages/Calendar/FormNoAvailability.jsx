@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import Select from 'react-select';
 
 import { NewSwal } from '../../utils/swalUtils';
 
 import { generateTimeOptions } from '../../utils/utils';
 import { apiService } from '../../services/apiService';
-import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
 
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTools } from '../../contexts/ToolsContext';
@@ -13,10 +12,9 @@ import { AuthContext } from '../../contexts/AuthContext';
 
 const FormNoAvailability = () => {
 
-    const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, resetSelected, setConditionsMet, conditionsMet, show } = useCalendar();
+    const { availability, setAvailability, availabilities, setAvailabilities, resetAvailability, selected, resetSelected, setConditionsMet, conditionsMet, deletePopUp, setDeletePopUp } = useCalendar();
     const { selectedRooms, setSelectedRooms, selectedDevices, setSelectedDevices, rooms, devices, setRooms, setDevices } = useTools();
     const { user } = useContext(AuthContext);
-    const [deletePopUp, setDeletePopUp] = useState(false);
 
     const setStartDate = (date) => {
         const newDate = new Date(date);
@@ -133,7 +131,7 @@ const FormNoAvailability = () => {
     }
 
     const deleteAvailability = async () => {
-        const response = await apiService(`/no-availability/${availability._id}`, 'DELETE');
+        const response = await apiService(`/no-availability/${deletePopUp.toShow._id}`, 'DELETE');
         if (response.success) {
             NewSwal.fire({ title: 'Availability deleted', icon: 'success', text: 'Availability deleted successfully'});
             if (user.isAdmin) {
@@ -143,14 +141,24 @@ const FormNoAvailability = () => {
                     setDevices(response.devices);
                 }
             } else {
-                if (availability.repeatFrequency === 'none') setAvailabilities(availabilities.filter(a => a._id !== availability._id));
-                else setAvailabilities(availabilities.filter(a => a.fatherId !== availability._id && a._id !== availability._id));
+                if (deletePopUp.toShow.repeatFrequency === 'none') setAvailabilities(availabilities.filter(a => a._id !== deletePopUp.toShow._id));
+                else setAvailabilities(availabilities.filter(a => a.fatherId !== deletePopUp.toShow._id && a._id !== deletePopUp.toShow._id));
             }
         } else NewSwal.fire({ title: 'Error deleting availability', icon: 'error', text: response.message});
-        resetAvailability();
+        setDeletePopUp({ toCall: false, type: '', show: false, toShow: {} });
         resetSelected();
-        setDeletePopUp(false);
     }
+
+    const openDeletePopUp = () => {
+        setDeletePopUp({ ...deletePopUp, toShow: availability, type: 'no availability', show: true });
+        resetAvailability();
+    }
+
+    useEffect(() => {
+        if (deletePopUp.toCall && deletePopUp.type === 'no availability') {
+            deleteAvailability();
+        }
+    }, [deletePopUp.toCall]);
 
     useEffect(() => {
         if (!availability.startDate || !availability.endDate) {
@@ -299,40 +307,11 @@ const FormNoAvailability = () => {
                 <div className='d-flex align-items-center justify-content-center'>
                     <button type='button' aria-label='edit-save' className='btn-main rounded shadow-sm mt-4' disabled={!conditionsMet} onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                     {selected.edit && (
-                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp(true)}>delete</button>
+                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => openDeletePopUp()}>
+                            delete
+                        </button>
                     )}
                 </div>
-            )}
-
-            {deletePopUp && (
-                <DeletePopUpLayout handleDelete={() => deleteAvailability()} handleClose={() => setDeletePopUp(false)}>
-                    <div className='d-flex flex-column text-start'>
-                        Are you sure you want to delete this {availability.repeatFrequency !== 'none' && 'series of '}availability?
-                    </div>
-
-                    <div className='d-flex justify-content-between pe-3 pt-2'>
-
-                        <div className='d-flex flex-column'>
-                            <div className='fst-italic' style={{ color: '#244476' }}>
-                                start: {new Date(availability.startDate).toLocaleDateString('en-CA')}
-                            </div>
-                            <div className='fst-italic' style={{ color: '#244476' }}>
-                                end: {new Date(availability.endDate).toLocaleDateString('en-CA')}
-                            </div>
-                        </div>
-
-                        {availability.repeatFrequency !== 'none' && (
-                            <div className='d-flex flex-column'>
-                                <div className='fst-italic' style={{ color: '#244476' }}>
-                                    repeat: {availability.repeatFrequency}
-                                </div>
-                                <div className='fst-italic' style={{ color: '#244476' }}>
-                                    occurrences: {availability.numberOfOccurrences}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </DeletePopUpLayout>
             )}
         </div>
     )

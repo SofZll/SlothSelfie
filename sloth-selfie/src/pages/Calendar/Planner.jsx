@@ -13,6 +13,7 @@ import ScrollList from '../../components/ScrollList';
 import SettingsCalendar from '../../components/SettingsCalendar';
 import FormCalendar from './FormCalendar';
 import PlusLayout from '../../layouts/PlusLayout';
+import DeleteFromCalendar from './DeleteFromCalendar';
 
 import { TimeMachineContext } from '../../contexts/TimeMachineContext';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -39,7 +40,7 @@ const Planner = () => {
     const DnDCalendar = withDragAndDrop(BigCalendar);
 
     const { user } = useContext(AuthContext);
-    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, show, setShow } = useCalendar();
+    const { setActivity, activities, setActivities, setEvent, events, setEvents, selected, setSelected, notifications, fetchNotifications, setConditionsMet, availabilities, setAvailabilities, setAvailability, show, setShow, deletePopUp } = useCalendar();
     const { setTask, tasks, setTasks } = useTask();
     const { rooms, devices, setRooms, setDevices, selectedRooms, setSelectedRooms, selectedDevices, setSelectedDevices, toolEvents, setToolEvents, toolAvailabilities, setToolAvailabilities } = useTools();
     const { setPlannedPomodori, plannedPomodori, setSettingsPomodoro } = usePomodoro();
@@ -60,7 +61,6 @@ const Planner = () => {
         if (!Array.isArray(datas)) return [];
 
         if (type === 'no availability' || type === 'no availability tool') {
-            console.log(datas, 'aaaaaaa');
 
             return datas.map((data) => {
                 return {
@@ -356,7 +356,7 @@ const Planner = () => {
                 setListNormal([...normalizeData(toolEvents, 'event tool')]);
             }
         } else if (show === 'tools') {
-            setListNormal([...normalizeData(toolEvents, 'event tool'), ...normalizeData(toolAvailabilities, 'no availability tool')]);
+            setListNormal([...normalizeData(toolAvailabilities, 'no availability tool')]);
         } else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
         else if (show === 'no availability') {
             if (!user.isAdmin) {
@@ -386,118 +386,123 @@ const Planner = () => {
     }, [notifications]);
 
     return (
-        <PlusLayout clickCall={() => setSelected({ edit:false, add: true, popup: true, selection: '...' })} selected={selected.popup} popUp={<FormCalendar />} isCalendar={true}>
+        <>
+            <PlusLayout clickCall={() => setSelected({ edit:false, add: true, popup: true, selection: '...' })} selected={selected.popup} popUp={<FormCalendar />} isCalendar={true}>
 
-            <SettingsCalendar />
+                <SettingsCalendar />
 
-            {!isDesktop && (
-                <div className='d-flex w-100 justify-content-center flex-column'>
-                    <div className='btn-group' role='group'>
-                        <button type='button' aria-label='availability' className={`btn btn-light border-secondary-subtle m-0 px-3 fs-small ${show === 'no availability' && 'bg-secondary-subtle'}`} onClick={() => setShow('no availability')}>Availability</button>
-                        {!user.isAdmin && (
-                            <>
-                                <button type='button' aria-label='pomodoros' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 fs-small ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
-                                <button type='button' aria-label='tools' className={`btn btn-light border-secondary-subtle border-end-0 m-0 px-3 fs-small ${show === 'tools' && 'bg-secondary-subtle'}`} onClick={() => setShow('tools')}>Tools</button>
-                            </>
-                        )}
-                        <button type='button' aria-label='plans' className={`btn btn-light border-secondary-subtle m-0 px-3 fs-small ${show === 'plans' && 'bg-secondary-subtle'}`} onClick={() => setShow('plans')}>Plans</button>
-                    </div>
-
-                    {(show === 'tools' || user.isAdmin) && (
-                        <div className='d-flex w-100 justify-content-center'>
-                            <div className='col-6 mt-2'>
-                                <Select
-                                isMulti
-                                menuPlacement='auto'
-                                classNamePrefix='rooms'
-                                options={roomOptions}
-                                value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
-                                onChange={handleChange('room')}
-                                placeholder={'0 rooms'}
-                                />
-                            </div>
-                            <div className='col-6 mt-2'>
-                                <Select
-                                isMulti
-                                menuPlacement='auto'
-                                classNamePrefix='rooms'
-                                options={deviceOptions}
-                                value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
-                                onChange={handleChange('device')}
-                                placeholder={'0 devices'}
-                                />
-                            </div>
+                {!isDesktop && (
+                    <div className='d-flex w-100 justify-content-center flex-column'>
+                        <div className='btn-group' role='group'>
+                            <button type='button' aria-label='availability' className={`btn btn-light border-secondary-subtle m-0 px-3 fs-small ${show === 'no availability' && 'bg-secondary-subtle'}`} onClick={() => setShow('no availability')}>Availability</button>
+                            {!user.isAdmin && (
+                                <>
+                                    <button type='button' aria-label='pomodoros' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 fs-small ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
+                                    <button type='button' aria-label='tools' className={`btn btn-light border-secondary-subtle border-end-0 m-0 px-3 fs-small ${show === 'tools' && 'bg-secondary-subtle'}`} onClick={() => setShow('tools')}>Tools</button>
+                                </>
+                            )}
+                            <button type='button' aria-label='plans' className={`btn btn-light border-secondary-subtle m-0 px-3 fs-small ${show === 'plans' && 'bg-secondary-subtle'}`} onClick={() => setShow('plans')}>Plans</button>
                         </div>
-                    )}
-                </div>
-            )}
 
-            
-
-            <div className='d-flex justify-content-center align-items-center w-100 h-100 pt-3'>
-                <DnDCalendar
-                    localizer={localizer}
-                    events={listNormal}
-                    startAccessor='start'
-                    endAccessor='end'
-                    onSelectEvent={onItemSelect}
-                    titleAccessor='title'
-                    className='calendar-main'
-                    onEventDrop={onEventDrop}
-                    eventPropGetter={eventStyleGetter}
-                    dayPropGetter={dayPropGetter}
-                    view={calendarView}
-                    onView={(view) => setCalendarView(view)}
-                    date={date}
-                    onNavigate={(date) => setDate(date)}
-                    resizable
-                />
-            </div>
-
-            {isDesktop ? (
-                <div className='d-flex w-100 justify-content-between align-items-center p-3'>
-                    <div className='btn-group ms-4' role='group'>
-                        <button type='button' aria-label='availability' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'no availability' && 'bg-secondary-subtle'}`} onClick={() => setShow('no availability')}>Availability</button>
-                        {!user.isAdmin && (
-                            <>
-                                <button type='button' aria-label='pomodoros' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
-                                <button type='button' aria-label='tools' className={`btn btn-light border-secondary-subtle border-end-0 m-0 px-3 ${show === 'tools' && 'bg-secondary-subtle'}`} onClick={() => setShow('tools')}>Tools</button>
-                            </>
+                        {(show === 'tools' || user.isAdmin) && (
+                            <div className='d-flex w-100 justify-content-center'>
+                                <div className='col-6 mt-2'>
+                                    <Select
+                                    isMulti
+                                    menuPlacement='auto'
+                                    classNamePrefix='rooms'
+                                    options={roomOptions}
+                                    value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
+                                    onChange={handleChange('room')}
+                                    placeholder={'0 rooms'}
+                                    />
+                                </div>
+                                <div className='col-6 mt-2'>
+                                    <Select
+                                    isMulti
+                                    menuPlacement='auto'
+                                    classNamePrefix='rooms'
+                                    options={deviceOptions}
+                                    value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
+                                    onChange={handleChange('device')}
+                                    placeholder={'0 devices'}
+                                    />
+                                </div>
+                            </div>
                         )}
-                        <button type='button' aria-label='plans' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'plans' && 'bg-secondary-subtle'}`} onClick={() => setShow('plans')}>Plans</button>
                     </div>
+                )}
 
-                    {(show === 'tools' || user.isAdmin) && (
-                        <div className='d-flex justify-content-center align-items-center w-50'>
-                            <div className='col-6'>
-                                <Select
-                                isMulti
-                                menuPlacement='auto'
-                                classNamePrefix='roomsDesktop'
-                                options={roomOptions}
-                                value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
-                                onChange={handleChange('room')}
-                                placeholder={'0 rooms'}
-                                />
-                            </div>
-                            <div className='col-6'>
-                                <Select
-                                isMulti
-                                menuPlacement='auto'
-                                classNamePrefix='devicesDesktop'
-                                options={deviceOptions}
-                                value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
-                                onChange={handleChange('device')}
-                                placeholder={'0 devices'}
-                                />
-                            </div>
-                        </div>
-                    )}
+                
+
+                <div className='d-flex justify-content-center align-items-center w-100 h-100 pt-3'>
+                    <DnDCalendar
+                        localizer={localizer}
+                        events={listNormal}
+                        startAccessor='start'
+                        endAccessor='end'
+                        onSelectEvent={onItemSelect}
+                        titleAccessor='title'
+                        className='calendar-main'
+                        onEventDrop={onEventDrop}
+                        eventPropGetter={eventStyleGetter}
+                        dayPropGetter={dayPropGetter}
+                        view={calendarView}
+                        onView={(view) => setCalendarView(view)}
+                        date={date}
+                        onNavigate={(date) => setDate(date)}
+                        resizable
+                    />
                 </div>
-            ) : (
-                <ScrollList CardList={(user.isAdmin || show === 'tools') ? [...rooms, ...devices] : activities} smallView={true} activity={!(user.isAdmin || show === 'tools')} />
-            )}
-        </PlusLayout>
+
+                {isDesktop ? (
+                    <div className='d-flex w-100 justify-content-between align-items-center p-3'>
+                        <div className='btn-group ms-4' role='group'>
+                            <button type='button' aria-label='availability' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'no availability' && 'bg-secondary-subtle'}`} onClick={() => setShow('no availability')}>Availability</button>
+                            {!user.isAdmin && (
+                                <>
+                                    <button type='button' aria-label='pomodoros' className={`btn btn-light border-secondary-subtle border-start-0 border-end-0 m-0 px-3 ${show === 'pomodoro' && 'bg-secondary-subtle'}`} onClick={() => setShow('pomodoro')}>Pomodoros</button>
+                                    <button type='button' aria-label='tools' className={`btn btn-light border-secondary-subtle border-end-0 m-0 px-3 ${show === 'tools' && 'bg-secondary-subtle'}`} onClick={() => setShow('tools')}>Tools</button>
+                                </>
+                            )}
+                            <button type='button' aria-label='plans' className={`btn btn-light border-secondary-subtle m-0 px-3 ${show === 'plans' && 'bg-secondary-subtle'}`} onClick={() => setShow('plans')}>Plans</button>
+                        </div>
+
+                        {(show === 'tools' || user.isAdmin) && (
+                            <div className='d-flex justify-content-center align-items-center w-50'>
+                                <div className='col-6'>
+                                    <Select
+                                    isMulti
+                                    menuPlacement='auto'
+                                    classNamePrefix='roomsDesktop'
+                                    options={roomOptions}
+                                    value={roomOptions.filter(opt => selectedRooms.includes(opt.value))}
+                                    onChange={handleChange('room')}
+                                    placeholder={'0 rooms'}
+                                    />
+                                </div>
+                                <div className='col-6'>
+                                    <Select
+                                    isMulti
+                                    menuPlacement='auto'
+                                    classNamePrefix='devicesDesktop'
+                                    options={deviceOptions}
+                                    value={deviceOptions.filter(opt => selectedDevices.includes(opt.value))}
+                                    onChange={handleChange('device')}
+                                    placeholder={'0 devices'}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <ScrollList CardList={(user.isAdmin || show === 'tools') ? [...rooms, ...devices] : activities} smallView={true} activity={!(user.isAdmin || show === 'tools')} />
+                )}
+                
+            </PlusLayout>
+
+            <DeleteFromCalendar />
+        </>
     )
 }
 

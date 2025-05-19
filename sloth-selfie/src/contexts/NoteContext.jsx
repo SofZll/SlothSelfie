@@ -35,7 +35,6 @@ export const NoteProvider = ({ children }) => {
     }
 
     const [selected, setSelected] = useState({
-        selection: '',
         edit: false,
         add: true,
         popUp: false
@@ -43,7 +42,6 @@ export const NoteProvider = ({ children }) => {
 
     const resetSelected = () => {
         setSelected({
-            selection: '',
             edit: false,
             add: true,
             popUp: false

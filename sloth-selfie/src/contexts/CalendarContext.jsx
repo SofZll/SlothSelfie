@@ -198,6 +198,14 @@ export const CalendarProvider = ({ children }) => {
 
     const [show, setShow] = useState('plans');
 
+    const [deletePopUp, setDeletePopUp] = useState({
+        show: false,
+        toShow: null,
+        tCall: false,
+        type: '',
+
+    });
+
     return (
         <CalendarContext.Provider 
             value={{ activity, setActivity, activities, setActivities, resetActivity,
@@ -205,6 +213,7 @@ export const CalendarProvider = ({ children }) => {
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
                 selected, setSelected, select, back, resetSelected,
                 show, setShow,
+                deletePopUp, setDeletePopUp,
                 notifications, setNotifications, fetchNotifications,
                 conditionsMet, setConditionsMet}}>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { NewSwal } from '../../utils/swalUtils';
 
@@ -7,13 +7,9 @@ import { useTools } from '../../contexts/ToolsContext';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { addHoursToTime, generateTimeOptions } from '../../utils/utils';
 
-import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
-
 const FormDevice = () => {
     const { devices, setDevices, device, setDevice, resetDevice } = useTools();
-    const { selected, resetSelected, conditionsMet, setConditionsMet } = useCalendar();
-
-    const [showDeletePopUp, setShowDeletePopUp] = useState(false);
+    const { selected, resetSelected, conditionsMet, setConditionsMet, deletePopUp, setDeletePopUp } = useCalendar();
 
     const setDaysOff = (selectedValue) => {
         const isAlreadySelected = device.freeDays.includes(selectedValue);
@@ -42,7 +38,7 @@ const FormDevice = () => {
                 setDevices([...devices.filter((d) => d._id !== response.device._id), { ...updatedDevice, type: 'device' }]);
                 NewSwal.fire({ title: 'Device edited', icon: 'success', text: 'Device edited successfully'});
             } else {
-                setDevices([...devices, { ...updatedDevice, type: 'device' }]);
+                setDevices([...devices, { ...updatedDevice, type: 'device', events: [], availabilities: [] }]);
                 NewSwal.fire({ title: 'Device created', icon: 'success', text: 'Device created successfully'});
             }
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });
@@ -51,13 +47,18 @@ const FormDevice = () => {
     }
 
     const deleteDevice = async () => {
-        const response = await apiService(`/user/device/${device._id}`, 'DELETE');
+        const response = await apiService(`/user/device/${deletePopUp.toShow._id}`, 'DELETE');
         if (response.success) {
-            setDevices([...devices.filter((d) => d._id !== device._id)]);
+            setDevices([...devices.filter((d) => d._id !== deletePopUp.toShow._id)]);
             NewSwal.fire({ title: 'Device deleted', icon: 'success', text: 'Device deleted successfully'});
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });
-        resetDevice();
+        setDeletePopUp({ toCall: false, type: '', show: false, toShow: {} });
         resetSelected();
+    }
+
+    const openDeletePopUp = () => {
+        setDeletePopUp({ ...deletePopUp, toShow: device, type: 'device', show: true });
+        resetDevice();
     }
 
     useEffect(() => {
@@ -71,6 +72,12 @@ const FormDevice = () => {
             setConditionsMet(true);
         }
     }, [device.username, device.dayHours.start, device.dayHours.end]);
+
+    useEffect(() => {
+        if (deletePopUp.toCall && deletePopUp.type === 'device') {
+            deleteDevice();
+        }
+    }, [deletePopUp.toCall]);
 
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden'>
@@ -123,20 +130,8 @@ const FormDevice = () => {
                 <button type='button' aria-label='edit-save' className='btn btn-primary mx-2' onClick={handleSubmit} disabled={!conditionsMet}>
                     {selected.edit ? 'edit' : 'save'}
                 </button>
-                {selected.edit && <button type='button' aria-label='delete device' className='btn btn-danger mx-2' onClick={() => setShowDeletePopUp(true)}>Delete Device</button>}
+                {selected.edit && <button type='button' aria-label='delete device' className='btn btn-danger mx-2' onClick={() => openDeletePopUp()}>Delete Device</button>}
             </div>
-            
-            {showDeletePopUp && (
-                <DeletePopUpLayout handleDelete={deleteDevice} handleClose={() => setShowDeletePopUp(false)}>
-                    <div className='d-flex flex-column text-start'>
-                        Are you sure you want to delete this device?
-                    </div>
-                    <div className='d-flex flex-column'>
-                        <div className='fst-italic fw-bold' style={{ color: '#244476' }}>{device.username}</div>
-                        <div className='fst-italic' style={{ color: '#244476' }}>used {device.events.lenth} in event{device.events.lenth === 1 ? 's' : ''}</div>
-                    </div>
-                </DeletePopUpLayout>
-            )}
         </div>
     );
 }

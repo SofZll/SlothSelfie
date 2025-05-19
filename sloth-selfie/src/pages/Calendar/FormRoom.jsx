@@ -7,13 +7,9 @@ import { useTools } from '../../contexts/ToolsContext';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { addHoursToTime, generateTimeOptions } from '../../utils/utils';
 
-import DeletePopUpLayout from '../../layouts/DeletePopUpLayout';
-
 const FormRoom = () => {
     const { rooms, setRooms, room, setRoom, resetRoom } = useTools();
-    const { selected, resetSelected, conditionsMet, setConditionsMet } = useCalendar();
-
-    const [showDeletePopUp, setShowDeletePopUp] = useState(false);
+    const { selected, resetSelected, conditionsMet, setConditionsMet, deletePopUp, setDeletePopUp } = useCalendar();
 
     const setDaysOff = (selectedValue) => {
         const isAlreadySelected = room.freeDays.includes(selectedValue);
@@ -42,7 +38,7 @@ const FormRoom = () => {
                 setRooms([...rooms.filter((r) => r._id !== response.room._id), { ...updatedRoom, type: 'room' }]);
                 NewSwal.fire({ title: 'Room edited', icon: 'success', text: 'Room edited successfully'});
             } else {
-                setRooms([...rooms, { ...updatedRoom, type: 'room' }]);
+                setRooms([...rooms, { ...updatedRoom, type: 'room', events: [], availabilities: [] }]);
                 NewSwal.fire({ title: 'Room created', icon: 'success', text: 'Room created successfully'});
             }
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });
@@ -51,13 +47,18 @@ const FormRoom = () => {
     }
 
     const deleteRoom = async () => {
-        const response = await apiService(`/user/room/${room._id}`, 'DELETE');
+        const response = await apiService(`/user/room/${deletePopUp.toShow._id}`, 'DELETE');
         if (response.success) {
-            setRooms([...rooms.filter((r) => r._id !== room._id)]);
+            setRooms([...rooms.filter((r) => r._id !== deletePopUp.toShow._id)]);
             NewSwal.fire({ title: 'Room deleted', icon: 'success', text: 'Room deleted successfully'});
         } else NewSwal.fire({ title: 'Error', icon: 'error', text: response.message });
-        resetRoom();
+        setDeletePopUp({ toCall: false, type: '', show: false, toShow: {} });
         resetSelected();
+    }
+
+    const openDeletePopUp = () => {
+        setDeletePopUp({ ...deletePopUp, toShow: room, type: 'room', show: true });
+        resetRoom();
     }
 
     useEffect(() => {
@@ -71,9 +72,10 @@ const FormRoom = () => {
     }, [room.username, room.dayHours.start, room.dayHours.end]);
 
     useEffect(() => {
-        console.log('Room:', room);
-        console.log('Selected:', selected);
-    }, [room, selected]);
+        if (deletePopUp.toCall && deletePopUp.type === 'room') {
+            deleteRoom();
+        }
+    }, [deletePopUp.toCall]);
 
     return (
         <div className='d-flex flex-column w-100 overflow-x-hidden'>
@@ -130,23 +132,11 @@ const FormRoom = () => {
                 </button>
 
                 {selected.edit && (
-                    <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setShowDeletePopUp(true)}>
+                    <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => openDeletePopUp()}>
                         delete
                     </button>
                 )}
             </div>
-
-            {showDeletePopUp && (
-                <DeletePopUpLayout handleDelete={deleteRoom} handleClose={() => setShowDeletePopUp(false)}>
-                    <div className='d-flex flex-column text-start'>
-                        Are you sure you want to delete this room?
-                    </div>
-                    <div className='d-flex flex-column'>
-                        <div className='fst-italic fw-bold' style={{ color: '#244476' }}>{room.username}</div>
-                        <div className='fst-italic' style={{ color: '#244476' }}>{room.events.lenth} hosted event{room.events.lenth === 1 ? '' : 's'}</div>
-                    </div>
-                </DeletePopUpLayout>
-            )}
         </div>
     );
 }

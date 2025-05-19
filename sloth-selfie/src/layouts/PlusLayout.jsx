@@ -24,10 +24,13 @@ const PlusLayout = ({ children, clickCall, selected, popUp, isCalendar = false }
                     </button>
 
                     {selected && (
-                        <div className='d-flex flex-column bg-white rounded p-3 position-fixed top-50 start-50 translate-middle pop-up popup-square shadow-lg'>
-                            {popUp}
+                        <div className='d-flex fixed-top bg-dark bg-opacity-25 vh-100 vw-100'>
+                            <div className='d-flex flex-column position-absolute top-50 start-50 translate-middle pop-up popup-square bg-white p-3 rounded'>
+                                {popUp}
+                            </div>
                         </div>
                     )}
+
                 </>
             )}
 

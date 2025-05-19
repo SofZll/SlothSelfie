@@ -3,7 +3,7 @@ import React from 'react';
 const DeletePopUpLayout = ({ children, handleDelete, handleClose }) => {
 
     return (
-        <div className='fixed-top bg-dark bg-opacity-25  vh-100 vw-100 d-flex justify-content-center align-items-center' style={{ zIndex: 1000 }}>
+        <div className='fixed-top bg-dark bg-opacity-25 vh-100 vw-100 d-flex justify-content-center align-items-center' style={{ zIndex: 2000 }}>
             <div className='modal-dialog custom-modal position-absolute top-50 start-50 translate-middle bg-white'>
                 <div className='modal-content border border-secondary p-3'>
                     <div className='modal-header'>
