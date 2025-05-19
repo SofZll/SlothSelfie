@@ -346,7 +346,7 @@ const Planner = () => {
                 setListNormal([...normalizeData(toolEvents, 'event tool')]);
             }
         } else if (show === 'tools') {
-            setListNormal([...normalizeData(toolEvents, 'event tool'), ...normalizeData(toolAvailabilities, 'no availability tool')]);
+            setListNormal([...normalizeData(toolAvailabilities, 'no availability tool')]);
         } else if (show === 'pomodoro') setListNormal([...normalizeData(plannedPomodori, 'pomodoro')]);
         else if (show === 'no availability') {
             if (!user.isAdmin) {
