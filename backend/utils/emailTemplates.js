@@ -106,68 +106,46 @@ const getActivityProgrammedEmail = (activity, receiver) => ({
 const getElementInvitationEmail = (element, elementType, receiver) => ({
     subjectContent: `You're Invited: ${element.title}`,
     htmlContent: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; overflow: hidden;">
             <div style="background-color: ${elementType === 'Event' ? '#4CAF50' : '#FF9800'}; padding: 25px; text-align: center;">
                 <h1 style="color: white; margin: 0; font-size: 24px;">Invitation to ${elementType}</h1>
                 <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">You've been invited to join!</p>
             </div>
             
-            <div style="padding: 25px;">
+            <div style="padding: 20px;">
                 <h2 style="color: ${elementType === 'Event' ? '#4CAF50' : '#FF9800'}; margin-top: 0;">${element.title}</h2>
                 <p style="font-size: 16px;">Hello <strong>${receiver.username}</strong>,</p>
                 <p style="font-size: 16px;">You've been invited to this ${elementType.toLowerCase()} by <strong>${element.user.username}</strong>:</p>
                 
-                <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid ${elementType === 'Event' ? '#4CAF50' : '#FF9800'};">
-                    <h3 style="margin-top: 0;">${elementType} Details</h3>
-                    <table style="width: 100%;">
-                        <tr>
-                            <td style="width: 30%; padding: 5px 0; vertical-align: top;"><strong>Title:</strong></td>
-                            <td style="padding: 5px 0;">${element.title}</td>
-                        </tr>
-                        
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; ">
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li><strong> Title:</strong> ${element.title}</li>
                         ${elementType === 'Event' ? `
-                        <tr>
-                            <td style="padding: 5px 0; vertical-align: top;"><strong>When:</strong></td>
-                            <td style="padding: 5px 0;">
-                                ${new Date(element.startDate).toLocaleDateString()} 
-                                at ${new Date(element.startDate).toLocaleTimeString()} - 
-                                ${new Date(element.endDate).toLocaleTimeString()}
-                            </td>
-                        </tr>
-                        ${element.eventLocation === 'physical' ? `
-                        <tr>
-                            <td style="padding: 5px 0; vertical-align: top;"><strong>Location:</strong></td>
-                            <td style="padding: 5px 0;">${reverseAddress(element.eventLocationDetails)}</td>
-                        </tr>
-                        ` : ''}
-                        ${element.eventLocation === 'virtual' ? `
-                        <tr>
-                            <td style="padding: 5px 0; vertical-align: top;"><strong>Meeting Link:</strong></td>
-                            <td style="padding: 5px 0;"><a href="${element.eventLocationDetails}">Click to join</a></td>
-                        </tr>
-                        ` : ''}
+                            <li><strong>When:</strong>
+                                    ${new Date(element.startDate).toLocaleDateString()} 
+                                    at ${new Date(element.startDate).toLocaleTimeString()} - 
+                                    ${new Date(element.endDate).toLocaleDateString()}
+                                    ${new Date(element.endDate).toLocaleTimeString()}
+                            </li>
+                            ${element.eventLocation === 'physical' ? `
+                            <li><strong>Location:</strong> ${reverseAddress(element.eventLocationDetails)}</li>
+                            ` : ''}
+                            ${element.eventLocation === 'virtual' ? `
+                            <li><strong>Location:</strong> ${element.eventLocation}</li>
+                            ` : ''}
                         ` : `
-                        <tr>
-                            <td style="padding: 5px 0; vertical-align: top;"><strong>Deadline:</strong></td>
-                            <td style="padding: 5px 0;">${new Date(element.deadline).toLocaleString()}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 5px 0; vertical-align: top;"><strong>Status:</strong></td>
-                            <td style="padding: 5px 0;">
+                            <li><strong>Deadline:</strong> ${new Date(element.deadline).toLocaleString()}</li>
+                            <li><strong>Status:</strong>
                                 <span style="color: ${element.completed ? '#4CAF50' : '#F44336'}; font-weight: bold;">
                                     ${element.completed ? 'Completed ✓' : 'Pending ⚠️'}
                                 </span>
-                            </td>
-                        </tr>
+                            </li>
                         `}
                         
                         ${element.sharedWith?.length > 0 ? `
-                        <tr>
-                            <td style="padding: 5px 0; vertical-align: top;"><strong>Also invited:</strong></td>
-                            <td style="padding: 5px 0;">${element.sharedWith.map(user => user.username).join(', ')}</td>
-                        </tr>
+                        <li><strong>Also invited:</strong> ${element.sharedWith.map(user => user.username).join(', ')}</li>
                         ` : ''}
-                    </table>
+                    </ul>
                 </div>
                 
                 <div style="text-align: center; margin: 30px 0;">
@@ -194,13 +172,13 @@ const getElementInvitationEmail = (element, elementType, receiver) => ({
 const getElementModificationEmail = (element, elementType) => ({
     subjectContent: `Updated: Changes to your ${elementType} "${element.title}"`,
     htmlContent: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: overflow: hidden;">
             <div style="background-color: #2196F3; padding: 25px; text-align: center;">
                 <h1 style="color: white; margin: 0; font-size: 24px;">${elementType} Updated</h1>
                 <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Important changes you should know about</p>
             </div>
             
-            <div style="padding: 25px;">
+            <div style="padding: 20px;">
                 <div style="background-color: #E3F2FD; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="#2196F3" style="margin-right: 10px;">
                         <path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
@@ -213,50 +191,31 @@ const getElementModificationEmail = (element, elementType) => ({
 
                 <h2 style="color: #2196F3; margin-top: 0; border-bottom: 2px solid #BBDEFB; padding-bottom: 10px;">${element.title}</h2>
                 
-                <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2196F3;">
-                    <h3 style="margin-top: 0;">Updated Details</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <ul style="padding-left: 20px; margin: 0;">
                         ${elementType === 'Event' ? `
-                        <tr>
-                            <td style="width: 30%; padding: 8px 0; vertical-align: top; border-bottom: 1px solid #eee;"><strong>When:</strong></td>
-                            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                                ${new Date(element.startDate).toLocaleDateString()} 
-                                at ${new Date(element.startDate).toLocaleTimeString()} - 
-                                ${new Date(element.endDate).toLocaleTimeString()}
-                            </td>
-                        </tr>
+                        <li><strong>When:</strong>
+                            ${new Date(element.startDate).toLocaleDateString()} 
+                            at ${new Date(element.startDate).toLocaleTimeString()} - 
+                            ${new Date(element.endDate).toLocaleDateString()}
+                            ${new Date(element.endDate).toLocaleTimeString()}
+                        </li>
                         ${element.eventLocation === 'physical' ? `
-                        <tr>
-                            <td style="padding: 8px 0; vertical-align: top; border-bottom: 1px solid #eee;"><strong>Location:</strong></td>
-                            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${reverseAddress(element.eventLocationDetails)}</td>
-                        </tr>
+                        <li><strong>Location:</strong> ${reverseAddress(element.eventLocationDetails)}</li>
                         ` : ''}
                         ${element.eventLocation === 'virtual' ? `
-                        <tr>
-                            <td style="padding: 8px 0; vertical-align: top; border-bottom: 1px solid #eee;"><strong>Location:</strong></td>
-                            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><a href="${element.eventLocation}"></td>
-                        </tr>
+                        <li><strong>Location:</strong> ${element.eventLocation}</li>
                         ` : ''}
                         ` : `
-                        <tr>
-                            <td style="padding: 8px 0; vertical-align: top; border-bottom: 1px solid #eee;"><strong>Deadline:</strong></td>
-                            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${new Date(element.deadline).toLocaleString()}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 0; vertical-align: top; border-bottom: 1px solid #eee;"><strong>Status:</strong></td>
-                            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                                <span style="color: ${element.completed ? '#4CAF50' : '#F44336'}; font-weight: bold;">
-                                    ${element.completed ? 'Completed ✓' : 'Pending ⚠️'}
-                                </span>
-                            </td>
-                        </tr>
+                        <li><strong>Deadline:</strong> ${new Date(element.deadline).toLocaleString()}</li>
+                        <li><strong>Status:</strong>
+                            <span style="color: ${element.completed ? '#4CAF50' : '#F44336'}; font-weight: bold;">
+                                ${element.completed ? 'Completed ✓' : 'Pending ⚠️'}
+                            </span>
+                        </li>
                         `}
-                        
-                        <tr>
-                            <td style="padding: 8px 0; vertical-align: top;"><strong>Modified by:</strong></td>
-                            <td style="padding: 8px 0;">${element.user.username}</td>
-                        </tr>
-                    </table>
+                        <li><strong>Modified by:</strong> ${element.user.username}</li>
+                    </ul>
                 </div>
                 
                 <div style="margin: 30px 0; text-align: center;">
@@ -276,6 +235,81 @@ const getElementModificationEmail = (element, elementType) => ({
             
             <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 0.8em; color: #666; border-top: 1px solid #e0e0e0;">
                 <p style="margin: 0;">This notification was sent by Sloth Selfie. Do not reply directly to this email.</p>
+            </div>
+        </div>
+    `
+});
+
+const getUrgencyEmail = (activity, receiver) => ({
+    subjectContent: `URGENT: Action Required for Activity "${activity.title}"`,
+    htmlContent: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; overflow: hidden;">
+            <div style="background-color: #F44336; padding: 25px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px;">URGENT: Activity Deadline Approaching</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Immediate action required for pending activity</p>
+            </div>
+            
+            <div style="padding: 20px;">
+                <div style="background-color: #FFEBEE; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#F44336" style="margin-right: 10px;">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <div>
+                        <h3 style="margin: 0 0 5px 0; color: #B71C1C;">Urgent Activity Alert</h3>
+                        <p style="margin: 0; font-size: 14px;">This activity requires your immediate attention before the deadline.</p>
+                    </div>
+                </div>
+
+                <h2 style="color: #F44336; margin-top: 0; border-bottom: 2px solid #FFCDD2; padding-bottom: 10px;">${activity.title}</h2>
+                
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #F44336;">
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li><strong>Title:</strong> ${activity.title}</li>
+                        <li><strong>Deadline:</strong> ${new Date(activity.deadline).toLocaleString()}</li>
+                        ${activity.user.username !== receiver.username ? `<li><strong>Assigned by:</strong> ${activity.user.username}</li>` : ''}
+                        <li><strong>Status:</strong>
+                            <span style="color: #F44336; font-weight: bold;">
+                                Pending ⚠️
+                            </span>
+                        </li>
+                        <li><strong>Priority:</strong> <span style="color: #F44336; font-weight: bold;">${activity.priority || 'High'}</span></li>
+                        ${activity.sharedWith?.length > 0 ? `<li><strong>Shared with:</strong> ${activity.sharedWith.map(user => user.username).join(', ')}</li>` : ''}
+                    </ul>
+                </div>
+                
+                <div style="background-color: #FFF3E0; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                    <h3 style="margin-top: 0; color: #E65100;">⏰ Deadline Approaching!</h3>
+                    <p style="margin-bottom: 0;">
+                        The deadline for this activity is approaching fast! Please complete it as soon as possible.
+                    </p>
+                    <p style="margin: 10px 0 0; font-weight: bold;">
+                        Time remaining: ${getTimeRemaining(activity.deadline)}
+                    </p>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://site232453.tw.cs.unibo.it/calendar?type=Activity&element=${activity._id}" 
+                       style="display: inline-block; background-color: #F44336; color: white; 
+                              text-decoration: none; padding: 14px 30px; border-radius: 6px;
+                              font-weight: bold; font-size: 16px; margin: 0 10px;">
+                        View Activity Details
+                    </a>
+                </div>
+                
+                <div style="background-color: #E8F5E9; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                    <h3 style="margin-top: 0; color: #2E7D32;">✔️ Mark as Complete</h3>
+                    <p style="margin-bottom: 0;">
+                        Once you've completed this activity, remember to mark it as done in the system.
+                    </p>
+                </div>
+                
+                <p style="font-size: 15px; text-align: center; color: #666;">
+                    Please take action immediately to avoid missing this important deadline.
+                </p>
+            </div>
+            
+            <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 0.8em; color: #666; border-top: 1px solid #e0e0e0;">
+                <p style="margin: 0;">This urgent notification was sent by Sloth Selfie. Do not reply directly to this email.</p>
             </div>
         </div>
     `
@@ -312,5 +346,6 @@ module.exports = {
     getEventProgrammedEmail,
     getActivityProgrammedEmail,
     getElementInvitationEmail,
-    getElementModificationEmail
+    getElementModificationEmail,
+    getUrgencyEmail
 };
