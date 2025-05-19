@@ -13,7 +13,7 @@ import { X } from 'lucide-react';
 
 const FormNote = () => {
 
-    const { selected, resetSelected, note, setNote, resetNote, notes, setNotes, setDeletePopUp } = useNote();
+    const { selected, resetSelected, note, setNote, resetNote, notes, setNotes, setDeletePopUp, metConditions, setMetConditions } = useNote();
     const isDesktop = useIsDesktop();
 
     const handleSubmit = async () => {
@@ -51,6 +51,16 @@ const FormNote = () => {
             resetNote();
         }
     }, [selected]);
+
+    useEffect(() => {
+        if (!note.title || note.title.length <= 0) {
+            setMetConditions(false);
+        } else if (note.content === '' && note.tasks.length === 0) {
+            setMetConditions(false);
+        } else {
+            setMetConditions(true);
+        }
+    }, [note.title, note.content, note.tasks]);
 
     return (
         <div className='d-flex flex-column w-100 h-100 p-md-2 p-0 position-relative overflow-hidden'>
@@ -120,7 +130,7 @@ const FormNote = () => {
                 )}
 
                 <div className='d-flex align-items-center justify-content-center'>
-                    <button type='button' aria-label='save or edit' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                    <button type='button' aria-label='save or edit' className='btn-main rounded shadow-sm mt-4' diseabled={!metConditions} onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                     {selected.edit && (
                         <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => openDeletePopUp()}>delete</button>
                     )}
