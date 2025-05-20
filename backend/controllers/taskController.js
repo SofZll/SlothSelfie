@@ -16,7 +16,7 @@ const getTasks = async (req, res) => {
         const tasks = await Task.find({
             $or: [
                 { user: user._id },
-                { sharedWith: user._id }
+                { sharedWith: user._id },
             ],
             createdAt: { $lte: now }
         })
