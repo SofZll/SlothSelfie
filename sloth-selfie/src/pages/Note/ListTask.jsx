@@ -29,7 +29,9 @@ const ListTask = () => {
     }
 
     const deleteLocalTask = (t) => {
-        setNote({ ...note, addedTasks: note.addedTasks.filter(tk => tk._id !== t._id) });
+        if (selected.add) setNote({ ...note, tasks: note.tasks.filter(tk => tk._id !== t._id) });
+        else setNote({ ...note, addedTasks: note.addedTasks.filter(tk => tk._id !== t._id) });
+        
     }
 
     const completeLocalTask = (t) => {
