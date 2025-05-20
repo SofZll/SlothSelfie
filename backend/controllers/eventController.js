@@ -329,28 +329,10 @@ const editEvent = async (Id, user, title, type, priority, startDate, endDate, al
 
       if (available) {
         savedEvent.responses.push({ user: receiver._id, status: 'pending' });
-        text = `You have been invited to the event: "${savedEvent.title}" on ${savedEvent.startDate.toLocaleString()}`;
       } else {
         savedEvent.responses.push({ user: receiver._id, status: 'declined' });
         savedEvent.sharedWith = savedEvent.sharedWith.filter(u => u._id.toString() !== receiver._id.toString());
-        text = `You have been invited to the event: "${savedEvent.title}" on ${savedEvent.startDate.toLocaleString()} but you are not available.`;
       }
-
-      const notification = await Notification.create({
-        user: receiver._id,
-        element: savedEvent._id,
-        elementType: 'Event',
-        type: 'now',
-        text,
-        mode: {
-          system: true,
-          email: true,
-        },
-        createdAt: getCurrentNow(),
-        updatedAt: getCurrentNow()
-      });
-
-      await sendNotificationNow(user, notification);
     }
 
     await savedEvent.save();
