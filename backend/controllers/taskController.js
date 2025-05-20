@@ -16,7 +16,8 @@ const getTasks = async (req, res) => {
         const tasks = await Task.find({
             $or: [
                 { user: user._id },
-                { sharedWith: user._id },
+                { taskAccess: 'shared', sharedWith: user._id },
+                { taskAccess: 'public' }
             ],
             createdAt: { $lte: now }
         })
@@ -144,14 +145,15 @@ const deleteTasks = async (tasks) => {
 }
 
 //function called from note to add tasks
-const addTasks = async (tasks, user, sharedWith) => {
+const addTasks = async (tasks, user, taskAccess, sharedWith) => {
     const tasksArray = [];
 
     try {
         for (let i = 0; i < tasks.length; i++) {
             const task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id, createdAt: getCurrentNow(), updatedAt: getCurrentNow() });
             if (tasks[i].deadline) task.deadline = tasks[i].deadline;
-            if (sharedWith.length > 0) task.sharedWith = sharedWith;
+            if (taskAccess === 'shared' && sharedWith.length > 0) task.sharedWith = sharedWith;
+            task.taskAccess = taskAccess;
 
             const savedTask = await task.save();
             if (savedTask) tasksArray.push(savedTask._id);
@@ -165,7 +167,7 @@ const addTasks = async (tasks, user, sharedWith) => {
 }
 
 //function called from note to edit tasks
-const editTasks = async (tasks, users) => {
+const editTasks = async (tasks, taskAccess, users) => {
     const updatedTasks = [];
     try {
         for (let i = 0; i < tasks.length; i++) {
@@ -176,6 +178,7 @@ const editTasks = async (tasks, users) => {
             task.deadline = tasks[i].deadline;
             task.completed = tasks[i].completed;
             task.sharedWith = users;
+            task.taskAccess = taskAccess;
             task.updatedAt = getCurrentNow();
 
             const updatedTask = await task.save();
