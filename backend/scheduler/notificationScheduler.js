@@ -35,6 +35,8 @@ const startVirtualScheduler = () => {
                         if (notification.type === 'default') notification.status = 'inactive';
                         else if (notification.type === 'repeat') notification.lastSentAt = now;
 
+                        if (notification.snooze) await notification.deleteOne();
+
                         await notification.save();
                     } catch (error) {
                         console.error(`Notification ${notification._id.toString()} failed:`, error);
@@ -209,6 +211,11 @@ const shouldSendNotification = async (notification, now, user) => {
         notification.status = 'inactive';
         await notification.save();
 
+        if (now > snoozeUntil && now - snoozeUntil > INTERVAL) {
+            await notification.deleteOne();
+            return false;
+        }
+        
         return true;
     }
 
