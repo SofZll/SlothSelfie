@@ -18,10 +18,18 @@ const taskSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    taskAccess: {
+        type: String,
+        required: true,
+        default: 'public',
+        enum: ['public', 'private', 'shared']
+    },
+    
     sharedWith: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     }]
+
 }, { timestamps: true });
 
 const Task = mongoose.model('Task', taskSchema);

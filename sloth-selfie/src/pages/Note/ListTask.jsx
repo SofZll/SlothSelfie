@@ -25,7 +25,11 @@ const ListTask = () => {
     }
 
     const deleteExistingTask = (t) => {
-        setNote({ ...note, deletedTasks: [...note.deletedTasks, t], tasks: note.tasks.filter(tk => tk._id !== t._id) });
+        if (selected.add) {
+            setNote({ ...note, tasks: note.tasks.filter(tk => tk !== t) });
+        } else {
+            setNote({ ...note, deletedTasks: [...note.deletedTasks, t], tasks: note.tasks.filter(tk => tk._id !== t._id) });
+        }
     }
 
     const deleteLocalTask = (t) => {
