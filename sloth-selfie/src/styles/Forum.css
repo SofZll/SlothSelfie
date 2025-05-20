@@ -1,7 +1,7 @@
 .forum {
-    padding-top: calc(2rem + 0.5rem + calc(1.375rem + 1.5vw) + 1rem);
-    padding-bottom: calc(0.9rem + 1rem + 2rem);
-    height: 100vh !important;
+    padding-top: calc(2rem + 0.5rem + calc(1.375rem + 1.5vw) + 1rem) !important;
+    padding-bottom: calc(0.9rem + 1rem + 2rem) !important;
+    height: 100vh;
     overflow: hidden;
 }
 

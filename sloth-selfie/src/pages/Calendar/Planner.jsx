@@ -301,7 +301,7 @@ const Planner = () => {
                     apiService('/events', 'GET'),
                     apiService('/tasks', 'GET'),
                     apiService('/pomodori/todo', 'GET'),
-                    apiService('/no-availabilities', 'GET'),
+                    apiService('/no-availabilities', 'GET')
                 ]);
 
                 if (activitiesResponse.success) setActivities(activitiesResponse.activities);

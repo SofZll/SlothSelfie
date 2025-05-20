@@ -220,4 +220,27 @@ const deleteRoomDeviceImages = async () => {
         mongoose.connection.close();
     }
 }
-deleteRoomDeviceImages();
+//deleteRoomDeviceImages();
+
+const printTools = async () => {
+    try {
+        await connectDB();
+        console.log('Connected to the database.');
+
+        // Trova tutti gli utenti con isDevice o isRoom
+        const users = await User.find({ $or: [{ isDevice: true }, { isRoom: true }] });
+
+        // Stampa gli utenti
+        users.forEach(user => {
+            console.log(`User ID: ${user._id}, Username: ${user.username}, isDevice: ${user.isDevice}, isRoom: ${user.isRoom}`);
+        });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+    }
+    finally {
+        // Disconnetti dal database
+        mongoose.connection.close();
+    }
+}
+
+printTools();
