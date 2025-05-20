@@ -58,8 +58,10 @@ export const NoteProvider = ({ children }) => {
         note: null
     });
 
+    const [metConditions, setMetConditions] = useState(false);
+
     return (
-        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters, deletePopUp, setDeletePopUp }}>
+        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters, deletePopUp, setDeletePopUp, metConditions, setMetConditions }}>
             {children}
         </NoteContext.Provider>
     );
