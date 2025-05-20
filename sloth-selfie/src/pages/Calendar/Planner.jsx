@@ -274,28 +274,28 @@ const Planner = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (user.isAdmin) {
-                const response = await apiService('/users/tools', 'GET');
-                if (response.success) {
-                    const updatedRooms = response.rooms.map(room => ({
-                        ...room,
-                        dayHours: {
-                            start: addHoursToTime(room.dayHours.start, 2),
-                            end: addHoursToTime(room.dayHours.end, 2),
-                        }
-                    }));
-                    setRooms(updatedRooms);
-                    
-                    const updatedDevices = response.devices.map(device => ({
-                        ...device,
-                        dayHours: {
-                            start: addHoursToTime(device.dayHours.start, 2),
-                            end: addHoursToTime(device.dayHours.end, 2),
-                        }
-                    }));
-                    setDevices(updatedDevices);
-                }
-            } else {
+            const response = await apiService('/users/tools', 'GET');
+            if (response.success) {
+                const updatedRooms = response.rooms.map(room => ({
+                    ...room,
+                    dayHours: {
+                        start: addHoursToTime(room.dayHours.start, 2),
+                        end: addHoursToTime(room.dayHours.end, 2),
+                    }
+                }));
+                setRooms(updatedRooms);
+                
+                const updatedDevices = response.devices.map(device => ({
+                    ...device,
+                    dayHours: {
+                        start: addHoursToTime(device.dayHours.start, 2),
+                        end: addHoursToTime(device.dayHours.end, 2),
+                    }
+                }));
+                setDevices(updatedDevices);
+            }
+
+            if (!user.isAdmin) {
                 const [activitiesResponse, eventsResponse, tasksResponse, pomodorosResponse, noAvailabilityResponse] = await Promise.all([
                     apiService('/activities', 'GET'),
                     apiService('/events', 'GET'),
