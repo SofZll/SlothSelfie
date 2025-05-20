@@ -175,6 +175,9 @@ const Planner = () => {
         if (event.type === 'activity' || event.type === 'task' || event.type === 'pomodoro') return onActivityTaskPomodoroDrop({ event, start });
         else if (event.type === 'event') {
             const e = events.find(e => e._id === event._id);
+            if (e.isInProject) {
+                return;
+            }
             const response = await apiService(`/event/${e._id}`, 'PUT', { ...e, startDate: start, endDate: end });
             if (response.success) setEvents(events.map(e => e._id === event._id ? response.event : e));
         } else if (event.type === 'no availability') {
