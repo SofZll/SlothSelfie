@@ -1,18 +1,19 @@
 const NoAvailability = require('../models/noAvailabilityModel');
 const User = require('../models/userModel');
 
-const checkAvailability = async (userId, eventStartDate, eventEndDate) => {
+const checkAvailability = async (userId, eventStartDate, eventEndDate, excludeEvent = null) => {
     const user = await User.findById(userId);
     if (!user) return false;
 
-    const noAvailability = await NoAvailability.find({
+    const filter = {
         user: userId,
-        $or: [
-            { startDate: { $gt: eventStartDate, $lt: eventEndDate } },
-            { endDate: { $gt: eventStartDate, $lt: eventEndDate } },
-            { startDate: { $lt: eventStartDate }, endDate: { $gt: eventEndDate } }
-        ]
-    });
+        startDate: { $lt: eventEndDate },
+        endDate: { $gt: eventStartDate }
+    };
+
+    if (excludeEvent) filter.event = { $ne: excludeEvent };
+
+    const noAvailability = await NoAvailability.find(filter);
 
     if (noAvailability.length > 0) return false;
 

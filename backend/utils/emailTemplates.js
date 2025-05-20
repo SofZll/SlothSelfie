@@ -262,7 +262,7 @@ const getUrgencyEmail = (activity, receiver) => ({
 
                 <h2 style="color: #F44336; margin-top: 0; border-bottom: 2px solid #FFCDD2; padding-bottom: 10px;">${activity.title}</h2>
                 
-                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #F44336;">
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; ">
                     <ul style="padding-left: 20px; margin: 0;">
                         <li><strong>Title:</strong> ${activity.title}</li>
                         <li><strong>Deadline:</strong> ${new Date(activity.deadline).toLocaleString()}</li>
@@ -272,7 +272,6 @@ const getUrgencyEmail = (activity, receiver) => ({
                                 Pending ⚠️
                             </span>
                         </li>
-                        <li><strong>Priority:</strong> <span style="color: #F44336; font-weight: bold;">${activity.priority || 'High'}</span></li>
                         ${activity.sharedWith?.length > 0 ? `<li><strong>Shared with:</strong> ${activity.sharedWith.map(user => user.username).join(', ')}</li>` : ''}
                     </ul>
                 </div>

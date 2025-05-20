@@ -70,12 +70,14 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
 
     if (roomsDevices.length > 0) {
       for (const roomDevice of roomsDevices) {
+        const roomDeviceUser = await User.findById(roomDevice._id);
+        if (!roomDeviceUser) continue;
         const available = await checkAvailability(roomDevice._id, startDate, endDate);
         if (available) {
-          console.log(`Room/Device ${roomDevice.username} is available`);
+          console.log(`Room/Device ${roomDeviceUser.username} is available`);
         } else {
-          console.error(`Room/Device ${roomDevice.username} is not available`);
-          return { success: false, message: `Room/Device ${roomDevice.username} is not available` };
+          console.error(`Room/Device ${roomDeviceUser.username} is not available`);
+          return { success: false, message: `Room/Device ${roomDeviceUser.username} is not available` };
         }
       }
     }
@@ -105,6 +107,7 @@ const newEvent = async (title, user, type, priority, startDate, endDate, allDay,
         repeatFrequency: 'none',
         event: newEvent._id
       });
+      console.log("noavailability created:", noAvailability);
       await noAvailability.save();
     }
 
@@ -260,6 +263,29 @@ const editEvent = async (Id, user, title, type, priority, startDate, endDate, al
     const event = await Event.findById(Id);
     if (!event) return ({ success: false, message: 'Event not found' });
 
+    const roomsDevices = [];
+    const receivers = [];
+    for (const userId of sharedWith) {
+      const user = await User.findById(userId._id);
+      if (!user) continue;
+      if (user.isRoom || user.isDevice) roomsDevices.push(user);
+      else receivers.push(user);
+    }
+
+    if (roomsDevices.length > 0) {
+      for (const roomDevice of roomsDevices) {
+        const roomDeviceUser = await User.findById(roomDevice._id);
+        if (!roomDeviceUser) continue;
+        const available = await checkAvailability(roomDevice._id, startDate, endDate, event._id);
+        if (available) {
+          console.log(`Room/Device ${roomDeviceUser.username} is available`);
+        } else {
+          console.error(`Room/Device ${roomDeviceUser.username} is not available`);
+          return { success: false, message: `Room/Device ${roomDeviceUser.username} is not available` };
+        }
+      }
+    }
+
     event.title = title;
     event.type = type;
     event.priority = priority;
@@ -278,39 +304,21 @@ const editEvent = async (Id, user, title, type, priority, startDate, endDate, al
     if (repeatFrequency === 'none') event.fatherId = null;
     else event.fatherId = fatherId;
 
+    for (const roomDevice of roomsDevices) {
+      await NoAvailability.deleteMany({ user: roomDevice._id, event: event._id });
+      event.responses.push({ user: roomDevice._id, status: 'accepted' });
+      const noAvailability = await NoAvailability.create({
+        user: roomDevice._id,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        days: false,
+        repeatFrequency: 'none',
+        event: event._id
+      });
+      await noAvailability.save();
+    }
+
     const savedEvent = await event.save();
-
-    const roomsDevices = [];
-    const receivers = [];
-    for (const userId of sharedWith) {
-      const user = await User.findById(userId._id);
-      if (!user) continue;
-      if (user.isRoom || user.isDevice) roomsDevices.push(user);
-      else receivers.push(user);
-    }
-
-    if (roomsDevices.length > 0) {
-      for (const roomDevice of roomsDevices) {
-        const roomDeviceUser = await User.findById(roomDevice._id);
-        if (!roomDeviceUser) continue;
-        const available = await checkAvailability(roomDevice._id, savedEvent.startDate, savedEvent.endDate);
-        if (available) {
-          savedEvent.responses.push({ user: roomDevice._id, status: 'accepted' });
-          const noAvailability = await NoAvailability.create({
-            user: roomDevice._id,
-            startDate: savedEvent.startDate,
-            endDate: savedEvent.endDate,
-            days: false,
-            repeatFrequency: 'none',
-          });
-          await noAvailability.save();
-          console.log(`Room/Device ${roomDeviceUser.username} is available`);
-        } else {
-          console.error(`Room/Device ${roomDeviceUser.username} is not available`);
-          return { success: false, message: `Room/Device ${roomDeviceUser.username} is not available` };
-        }
-      }
-    }
 
     for (const receiver of receivers) {
       const receiverUser = await User.findById(receiver._id);

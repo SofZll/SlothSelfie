@@ -1,10 +1,12 @@
 .notifications-container {
     max-width: 60rem;
-    padding-top: 10vh !important;
+    padding-top: calc(2rem + 0.5rem + calc(1.375rem + 1.5vw) + 1rem) !important;
+    padding-bottom: calc(0.9rem + 1rem + 3rem) !important;
 }
 
 .notifications-container.desktop {
-    padding-top: 12vh !important;
+    padding-top: calc(2rem + 3rem + 3rem) !important;
+    padding-bottom: 1rem !important;
 }
 
 .notifications-container p {

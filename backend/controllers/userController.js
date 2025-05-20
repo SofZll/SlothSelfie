@@ -419,13 +419,25 @@ const editRoom = async (req, res) => {
         const events = await Event.find({ sharedWith: room._id });
         const eventsOk = [];
         for (const event of events) {
-            const isValid = await checkAvailability(room._id, event.startDate, event.endDate);
+            const isValid = await checkAvailability(room._id, event.startDate, event.endDate, event._id);
+
+            const responseIndex = event.responses.findIndex(response => response.user.toString() === room._id.toString());
+
             if (!isValid) {
-                event.status = 'declined';
-                await event.save();
+                if (responseIndex !== -1) {
+                    event.responses[responseIndex].status = 'declined';
+                }
+                await NoAvailability.deleteMany({ user: room._id, event: event._id });
             } else {
+                if (responseIndex !== -1) {
+                    event.responses[responseIndex].status = 'accepted';
+                } else {
+                    event.responses.push({ user: room._id, status: 'accepted' });
+                }
                 eventsOk.push(event);
             }
+
+            await event.save();
         }
 
         const availabilities = await NoAvailability.find({ user: room._id });
@@ -467,14 +479,26 @@ const editDevice = async (req, res) => {
         const events = await Event.find({ sharedWith: device._id });
         const eventsOk = [];
         for (const event of events) {
-            const isValid = await checkAvailability(device._id, event.startDate, event.endDate);
+            const isValid = await checkAvailability(device._id, event.startDate, event.endDate, event._id);
+
+            const responseIndex = event.responses.findIndex(response => response.user.toString() === device._id.toString());
+
             if (!isValid) {
-                event.status = 'declined';
-                await event.save();
+                if (responseIndex !== -1) {
+                    event.responses[responseIndex].status = 'declined';
+                }
+                await NoAvailability.deleteMany({ user: device._id, event: event._id });
             } else {
+                if (responseIndex !== -1) {
+                    event.responses[responseIndex].status = 'accepted';
+                } else {
+                    event.responses.push({ user: device._id, status: 'accepted' });
+                }
                 eventsOk.push(event);
             }
+            await event.save();
         }
+
         const availabilities = await NoAvailability.find({ user: device._id });
 
         const leanDevice = await User.findById(deviceId).lean();

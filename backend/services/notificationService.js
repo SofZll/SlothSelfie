@@ -62,8 +62,8 @@ const sendEmailNotification = async (notification, invitation, modification) => 
     }
 
     let element;
-    if (notification.elementType === 'Activity') element = await Activity.findById(notification.element).populate('user username').populate('sharedWith username');
-    else if (notification.elementType === 'Event') element = await Event.findById(notification.element).populate('user username').populate('sharedWith username');
+    if (notification.elementType === 'Activity') element = await Activity.findById(notification.element).populate('user', 'username').populate('sharedWith', 'username');
+    else if (notification.elementType === 'Event') element = await Event.findById(notification.element).populate('user', 'username').populate('sharedWith', 'username');
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
