@@ -5,7 +5,6 @@ import { NewSwal } from '../../utils/swalUtils';
 import { apiService } from '../../services/apiService';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useTask } from '../../contexts/TaskContext';
-import ShareInput from '../../components/ShareInput';
 
 const FormTask = () => {
 
@@ -81,13 +80,6 @@ const FormTask = () => {
                         checked={task.completed}
                         onChange={(e) => setTask({...task, completed: e.target.checked})} />
                     <label className='form-check-label' htmlFor='completed'>Completed</label>
-                </div>
-            </div>
-
-            <div className='row py-2'>
-                <div className='col-12 mb-3'>
-                    <label htmlFor='sharedWith' className='form-label'>Shared with</label>
-                    <ShareInput receivers={task.sharedWith} setReceivers={(receivers) => setTask({...task, sharedWith: receivers})} />
                 </div>
             </div>
             
