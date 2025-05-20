@@ -94,7 +94,7 @@ const Planner = () => {
                 };
             });
         } else {
-            return datas.filter(data => !data.completed && data.deadline).map(data => {
+            return datas.filter(data => !data.completed && data.deadline ).map(data => {
                 const deadline = new Date(data.deadline);
                 const isLate = deadline < now;
 
