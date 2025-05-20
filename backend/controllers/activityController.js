@@ -348,6 +348,12 @@ async function updateActivityStatus(req, res) {
         activity.status = status;
         activity.updatedAt = getCurrentNow();
 
+        if (status === 'Completed') {
+            activity.completed = true;
+        } else if (status === 'Reactivated') {
+            activity.completed = false;
+        }
+
         await activity.save();
 
         res.status(200).json({ success: true, message: "Activity status updated successfully", activity });
