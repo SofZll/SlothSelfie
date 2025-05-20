@@ -27,7 +27,7 @@ const createNote = async (req, res) => {
             updatedAt: getCurrentNow()
         });
         
-        if (tasks) note.tasks = await addTasks(tasks, user, sharedWithUsers);
+        if (tasks) note.tasks = await addTasks(tasks, user, noteAccess, sharedWithUsers);
 
         const savedNote = await note.save()
 
@@ -114,13 +114,13 @@ const updateNote = async (req, res) => {
         }
 
         if (addedTasks) {
-            const response = await addTasks(addedTasks, userId, sharedWithUsers);
+            const response = await addTasks(addedTasks, userId, noteAccess, sharedWithUsers);
             if (!response) return res.status(500).json({ success: false, message: 'Error adding tasks' });
             else note.tasks = response;
         }
 
         if (tasks) {
-            const response = await editTasks(tasks, sharedWithUsers);
+            const response = await editTasks(tasks, noteAccess, sharedWithUsers);
             if (!response) return res.status(500).json({ success: false, message: 'Error editing tasks' });
             else note.tasks.push(...response);
         }
