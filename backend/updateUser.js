@@ -134,7 +134,7 @@ const updateNotification = async () => {
 
 
 //updateIsAdminUndefined();
-//createAdmin();
+createAdmin();
 //updateNotification();
 
 const dropProblematicIndex = async () => {
@@ -243,4 +243,20 @@ const printTools = async () => {
     }
 }
 
-printTools();
+//printTools();
+
+const deleteEverythingfromDB = async () => {
+    try {
+        await connectDB();
+        console.log('Connected to the database.');
+
+        await mongoose.connection.db.dropDatabase();
+        console.log('Database dropped successfully!');
+    } catch (error) {
+        console.error('Error dropping database:', error);
+    } finally {
+        mongoose.connection.close();
+    }
+}
+
+//deleteEverythingfromDB();
