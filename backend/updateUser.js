@@ -51,8 +51,7 @@ const createAdmin = async () => {
         const admin = await User.findOne({ isAdmin: true });
 
         if (admin) {
-            await admin.deleteOne();
-            console.log('Admin user deleted.');
+            console.log('Admin user already exists.');
         } else {
             const newAdmin = new User({
                 username: 'SuperUser',
@@ -260,3 +259,43 @@ const deleteEverythingfromDB = async () => {
 }
 
 //deleteEverythingfromDB();
+
+
+//delete notification type: 'now' and urgency: true
+//delete notification type: 'now' che sono doppie nel senso che hanno lo stesso elemento e lo stesso utente
+const deleteNotificationNow = async () => {
+    try {
+        await connectDB();
+        console.log('Connected to the database.');
+
+        const result = await Notification.deleteMany(
+            { type: 'now', urgency: true }
+        );
+        console.log(`Deleted ${result.deletedCount} notifications.`);
+
+        const duplicates = await Notification.aggregate([
+            { $match: { type: 'now' } },
+            { $group: {
+                _id: { element: "$element", user: "$user" },
+                ids: { $push: "$_id" },
+                count: { $sum: 1 }
+            }},
+            { $match: { count: { $gt: 1 } } }
+        ]);
+
+        let deletedCount = 0;
+        for (const dup of duplicates) {
+            // Tieni solo il primo, elimina gli altri
+            const [keep, ...toDelete] = dup.ids;
+            const res = await Notification.deleteMany({ _id: { $in: toDelete } });
+            deletedCount += res.deletedCount;
+        }
+        console.log(`Deleted ${deletedCount} duplicate 'now' notifications.`);
+    } catch (error) {
+        console.error('Error deleting notifications:', error);
+    } finally {
+        mongoose.connection.close();
+    }
+}
+
+//deleteNotificationNow();
