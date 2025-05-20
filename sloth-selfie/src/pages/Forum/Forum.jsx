@@ -100,7 +100,7 @@ const Forum = () => {
     if (loading) return <LoadingPageDark />;
 
     return (
-        <div className='d-flex flex-column w-100 align-items-center forum'>
+        <div className='d-flex flex-column w-100 h-100 align-items-center forum'>
             <PostInput handleNewContent={handleNewContent} />
             <PostsList handleNewContent={handleNewContent} />
         </div>
