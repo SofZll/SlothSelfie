@@ -23,7 +23,7 @@ const FormNote = () => {
             return;
         }
 
-        if (!note.content && note.tasks.length === 0) {
+        if (!note.content && note.tasks.length === 0 && note.addedTasks.length === 0) {
             NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Content or tasks are required'});
             return;
         }
