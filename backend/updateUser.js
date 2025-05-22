@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const User = require('./models/userModel'); // Percorso del modello utente
 const Notification = require('./models/notificationModel'); // Percorso del modello notifica
 const NoAvailability = require('./models/noAvailabilityModel'); // Percorso del modello noAvailability
+const Task = require('./models/taskModel'); // Percorso del modello task
 const bcrypt = require('bcrypt');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
@@ -133,7 +134,7 @@ const updateNotification = async () => {
 
 
 //updateIsAdminUndefined();
-createAdmin();
+//createAdmin();
 //updateNotification();
 
 const dropProblematicIndex = async () => {
@@ -221,46 +222,6 @@ const deleteRoomDeviceImages = async () => {
 }
 //deleteRoomDeviceImages();
 
-const printTools = async () => {
-    try {
-        await connectDB();
-        console.log('Connected to the database.');
-
-        // Trova tutti gli utenti con isDevice o isRoom
-        const users = await User.find({ $or: [{ isDevice: true }, { isRoom: true }] });
-
-        // Stampa gli utenti
-        users.forEach(user => {
-            console.log(`User ID: ${user._id}, Username: ${user.username}, isDevice: ${user.isDevice}, isRoom: ${user.isRoom}`);
-        });
-    } catch (error) {
-        console.error('Error fetching users:', error);
-    }
-    finally {
-        // Disconnetti dal database
-        mongoose.connection.close();
-    }
-}
-
-//printTools();
-
-const deleteEverythingfromDB = async () => {
-    try {
-        await connectDB();
-        console.log('Connected to the database.');
-
-        await mongoose.connection.db.dropDatabase();
-        console.log('Database dropped successfully!');
-    } catch (error) {
-        console.error('Error dropping database:', error);
-    } finally {
-        mongoose.connection.close();
-    }
-}
-
-//deleteEverythingfromDB();
-
-
 //delete notification type: 'now' and urgency: true
 //delete notification type: 'now' che sono doppie nel senso che hanno lo stesso elemento e lo stesso utente
 const deleteNotificationNow = async () => {
@@ -299,3 +260,25 @@ const deleteNotificationNow = async () => {
 }
 
 //deleteNotificationNow();
+
+const modifytaskAccess = async () => {
+    try {
+        await connectDB();
+        console.log('Connected to the database.');
+
+        // aggiungi il campo taskAccess in Task
+        const result = await Task.updateMany(
+            { taskAccess: { $exists: false } },
+            { $set: { taskAccess: 'public' } }
+        );
+
+        console.log(`Updated ${result.modifiedCount} users.`);
+    } catch (error) {
+        console.error('Error updating users:', error);
+    } finally {
+        // Disconnetti dal database
+        mongoose.connection.close();
+    }
+}
+
+modifytaskAccess();

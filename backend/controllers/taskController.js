@@ -150,10 +150,17 @@ const addTasks = async (tasks, user, taskAccess, sharedWith) => {
 
     try {
         for (let i = 0; i < tasks.length; i++) {
-            const task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id, createdAt: getCurrentNow(), updatedAt: getCurrentNow() });
+            const task = new Task({ 
+                title: tasks[i].title, 
+                completed: tasks[i].completed, 
+                user: user._id, 
+                deadline: tasks[i].deadline,
+                taskAccess: taskAccess,
+                createdAt: getCurrentNow(), 
+                updatedAt: getCurrentNow() 
+            });
             if (tasks[i].deadline) task.deadline = tasks[i].deadline;
             if (taskAccess === 'shared' && sharedWith.length > 0) task.sharedWith = sharedWith;
-            task.taskAccess = taskAccess;
 
             const savedTask = await task.save();
             if (savedTask) tasksArray.push(savedTask._id);
