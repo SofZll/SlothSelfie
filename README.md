@@ -5,58 +5,93 @@
 - Kaori Jiang: [@Kmoon-7](https://github.com/Kmoon-7)
 - Giulia Torsani: [@giulia-t](https://github.com/giulia-t)
 
+---
+
 ## Contributo individuale:
 Giulia Torsani:
-    - progetti
-    - preview
-    - import/export con iCalendar
+- gestione dei progetti
+- preview
+- import/export tramite iCalendar
 
 Kaori Jang:
-    - notifiche
-    - hub
-    - chat
-    - autenticazione
+- sistema di notifiche
+- hub
+- chat
+- autenticazione
 
 Sofia Zanelli:
-    - calendario
-    - note
-    - pomodoro
+- calendario
+- note
+- pomodoro
 
 ## Organizzazione in file:
 Il progetto è strutturato in due cartelle principali:
 
-backend/: contiene tutta la logica server-side. Al suo interno troviamo sottocartelle come:
+### `backend/`
+Contiene tutta la logica **server-side**.
 
-    config/, controllers/, models/, routes/ per la configurazione, la gestione della logica e delle API,
+Sottocartelle principali:
+- `config/`, `controllers/`, `models/`, `routes/` – configurazione, logica applicativa e API
+- `services/`, `jobs/`, `socket/`, `scheduler/`, `uploads/`, `utils/` – notifiche, job schedulati, gestione socket, file temporanei e funzioni di utilità  
 
-    services/, jobs/, socket/, scheduler/, uploads/, utils/ per la gestione di notifiche, file temporanei, socket e funzioni di utilità,
+File principali:
+- `server.js` – avvio del server  
+- `.env` – configurazione dell’ambiente  
 
-    File principali come server.js e .env per l'avvio del server e la configurazione dell’ambiente.
+### `sloth-selfie/`
+Contiene la parte **client-side**.
 
-sloth-selfie/: contiene la parte client-side, divisa in:
+Struttura interna:
+- `public/` – gestione dei progetti tramite JavaScript puro (HTML/CSS/JS)  
+- `src/` – applicazione React, organizzata in:
+  - `components/`
+  - `pages/`
+  - `layouts/`
+  - `contexts/`
+  - `routes/`
+  - `utils/`
+  - `styles/`
+  - `assets/`
 
-    public/: gestione dei progetti tramite JavaScript puro (HTML/CSS/JS),
+Infine, nella root del progetto si trovano i file comuni:
+- `README.md`
+- `package.json`
+- `.gitignore`
 
-    src/: applicazione React, organizzata in sottocartelle components/, pages/, layouts/, contexts/, routes/, utils/, styles/, e assets/ per un’organizzazione modulare di componenti, pagine e servizi.
+## Tecnologie e scelte implementative
 
-Infine, nella root del progetto si trovano i file comuni come README.md, package.json, e .gitignore.
+### Frontend
+- **React** per home, calendario, pomodoro e note  
+- **JavaScript puro** per la gestione dei progetti  
+- **Bootstrap** per lo styling  
 
-## Tecnologie e scelte implementative:
-Frontend: realizzato principalmente con React (per home, calendario, pomodoro, note) e JavaScript puro per la gestione dei progetti. Per lo stile è stato utilizzato Bootstrap.
+### Backend
+- **Node.js**
+- Gestione dei pacchetti tramite **npm**
 
-Backend: implementato in Node.js, con gestione dei pacchetti tramite npm.
+### Database
+- **MongoDB**, ospitato sui server del dipartimento
 
-Database: tutti i dati sono memorizzati su un MongoDB ospitato sui server del dipartimento.
+### Deploy
+- Deploy effettuato tramite due container Docker
+- Container ospitati su macchine del dipartimento
 
-Deploy: effettuato su due container Docker, ospitati su macchine del dipartimento.
-
-Tutti i sorgenti si trovano nella directory sources.
+Tutti i sorgenti si trovano nella directory `sources`.
 
 ## Avvio in locale:
-Posizionarsi all'interno della cartella di riferimento (livello superiore rispetto a sloth-selfie e da backend) e lanciare con: 
-npm run dev
-(Da lanciare solo dopo aver installato le dipendenze tramite "npm install" sia dentro alla cartella backend, sia dentro alla cartella sloth-selfie).
+1. Posizionarsi nella cartella principale del progetto  
+   (livello superiore rispetto a `backend/` e `sloth-selfie/`)
 
+2. Installare le dipendenze:
+   ```bash
+   npm install
+
+   da eseguire sia nella cartella backend/ sia nella cartella sloth-selfie/
+
+3. Avviare l'applicazione:
+   ```bash
+   npm install
+   
 L’applicazione sarà quindi disponibile su:
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8000 (porta configurata nel file .env)
