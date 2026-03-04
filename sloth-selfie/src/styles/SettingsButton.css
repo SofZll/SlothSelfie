@@ -40,12 +40,20 @@
     z-index: 1000;
 }
 
-.modal-content {
+.modal-content-settings {
     background: white;
-    padding: 20px;
+    padding: 10px;
     border-radius: 10px;
     width: 300px;
     text-align: center;
     position: relative;
     z-index: 1001;
+}
+
+.modal-content-settings select[multiple] {
+    height: 20vh;
+}
+
+label, h3 {
+    color: #333;
 }

@@ -3,6 +3,10 @@
   bottom: 11vh;
 }
 
+.btn-settings {
+  bottom: calc(10vh + 4.5rem);
+}
+
 .pop-up {
   z-index: 5;
   max-height: 75vh;
@@ -13,14 +17,18 @@
 }
 
 .form-popup {
-  max-height: 63vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  max-height: 70vh !important;
 }
 
 .planner {
-  margin-top: 9vh;
-  height: 80%;
+  padding-top: calc(2rem + 0.5rem + calc(1.375rem + 1.5vw) + 1rem);
+  padding-bottom: calc(0.9rem + 1rem + 2rem);
+  max-height: 95vh;
+}
+
+.div-add {
+  padding-top: calc(2rem + 0.5rem + calc(1.375rem + 1.5vw) + 1rem);
+  padding-bottom: calc(0.9rem + 1rem + 2rem);
 }
 
 .activity-title {
@@ -36,17 +44,74 @@
   width: 95% !important;
 }
 
+.rbc-day-bg.virtual-day {
+  background-color: #eaf6ff !important;
+}
+
+.rbc-today {
+  background-color: transparent !important;
+}
+
+.rooms__control,
+.rooms__option,
+.rooms__multi-value__label,
+.rooms__menu {
+  font-size: 14px;
+  height: auto;
+}
+
+.rooms__menu.css-1nmdiq5-menu {
+  z-index: 5 !important;
+}
+
+.rooms__menu-list {
+  max-height: 250px;
+  overflow-y: auto;
+  background-color: white;
+}
+
+.roomsDesktop__menu.css-14h4o58-menu {
+  z-index: 4 !important;
+}
+
+.roomsDesktop__menu-list {
+  max-height: 250px;
+  overflow-y: auto;
+  background-color: white;
+}
+
 @media screen and (min-width: 768px) {
   .pop-up {
     max-height: none;
   }
-
   .form-popup {
     max-height: none;
   }
   .planner {
     height: 100%;
     margin: 0;
+    max-height: 90vh;
   }
   
+}
+
+@media screen and (max-width: 932px) and (orientation: landscape) and (max-height: 700px) {
+  .planner {
+    max-width: 550px;
+    padding-bottom: 0;
+    padding-top: 20px;
+  }
+
+  .pop-up,
+  .form-popup {
+    max-width: 50vw !important;
+  }
+
+  .form-popup {
+    max-height: 75vh !important;
+  }
+
+  .pop-up {
+    max-height: 85vh !important;
+  }
 }

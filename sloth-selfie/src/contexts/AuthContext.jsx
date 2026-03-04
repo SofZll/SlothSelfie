@@ -1,13 +1,16 @@
 import React, { useState, useRef, createContext, useEffect } from 'react';
 
+import socket from '../services/socket/socket';
 import { apiService } from '../services/apiService';
-import { bufferToBase64 } from '../utils/utils';
+import { bufferToBase64, urlBase64ToUint8Array } from '../utils/utils';
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [settings, setSettings] = useState(false);
+    const [calendarSettings, setCalendarSettings] = useState(false);
     const userRef = useRef(false);
 
     const fetchUserData = async () => {
@@ -21,32 +24,24 @@ const AuthProvider = ({ children }) => {
             const formattedBirthday = response.user.birthday ? new Date(response.user.birthday).toISOString().split('T')[0] : '';
             
             const newUser = {
-                _id: response.user._id || '',
-                name: response.user.name || '',
-                username: response.user.username || '',
-                email: response.user.email || '',
-                birthday: formattedBirthday,
-                phoneNumber: response.user.phoneNumber || '',
-                gender: response.user.gender || '',
+                ...response.user,
                 profile_image: base64Image,
-                workingHours: {
-                    start: response.user.workingHours.start || '',
-                    end: response.user.workingHours.end || '',
-                },
-                freeDays: response.user.freeDays || [''],
-                noAvailability: response.user.noAvailability || [],
+                birthday: formattedBirthday
             };
             
             // Only update if ID changed or user was null
             if (!userRef.current || userRef.current._id !== newUser._id) {
                 userRef.current = newUser;
                 setUser(newUser);
-            }
+            } else setUser(userRef.current);
 
+            return newUser;
         } else {
             console.error('Error fetching profile data:', response);
             userRef.current = null;
             setUser(null);
+
+            return null;
         }
     };
 
@@ -56,8 +51,9 @@ const AuthProvider = ({ children }) => {
         const checkAuth = async () => {
             try {
                 const response = await apiService('/user/check-auth');
-                if (response?.success) {
+                if (response.success) {
                     await fetchUserData();
+                    socket.connect();
                 } else {
                     console.error('Error checking auth:', response);
                     userRef.current = null;
@@ -78,8 +74,37 @@ const AuthProvider = ({ children }) => {
         };
     }, []);
 
+    useEffect(() => {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => console.log('Notification permission:', permission));
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!user?._id || Notification.permission !== 'granted') return;
+        (async () => {
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+
+                let subscription = await registration.pushManager.getSubscription();
+                if (!subscription) {
+                    const key = process.env.REACT_APP_VAPID_PUBLIC_KEY;
+                    const appKey = urlBase64ToUint8Array(key);
+                    subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: appKey
+                    });
+                    console.log('New subscription:', subscription);
+                }
+                await apiService('/subscribe', 'POST', subscription);
+            } catch (err) {
+                console.error('SW/Push error:', err);
+            }
+        })();
+    }, [user]);
+
     return (
-        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading }}>
+        <AuthContext.Provider value={{ user, setUser, fetchUserData, loading, calendarSettings, setCalendarSettings, settings, setSettings, userRef }}>
             {!loading && children}
         </AuthContext.Provider>
     );

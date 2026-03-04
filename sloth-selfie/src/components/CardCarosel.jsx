@@ -4,20 +4,20 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import 'react-calendar/dist/Calendar.css';
 
 import { CustomizationContext } from '../contexts/PreviewContext';
-import {AuthContext} from '../contexts/AuthContext';
 import { CalendarProvider } from '../contexts/CalendarContext';
 import { NoteProvider } from '../contexts/NoteContext';
 import { TaskProvider } from '../contexts/TaskContext';
+import { PomodoroProvider } from '../contexts/PomodoroContext';
 
-import PreviewPomodoro from '../previewPomodoro';
-import PreviewNote from '../previewNote';
-import PreviewCalendar from '../previewCalendar';
-import PreviewProjects from '../previewProjects';
+//import the previews from the pages folder
+import PreviewCalendar from '../pages/Calendar/previewCalendar';
+import PreviewNote from '../pages/Note/previewNote';
+import PreviewPomodoro from '../pages/Pomodoro/previewPomodoro';
+import PreviewProjects from '../pages/previewProjects';
 
 
 const CardCarosel = ({ title, settingKey }) => {
     const { customizations } = useContext(CustomizationContext);
-    const { user } = useContext(AuthContext);
     const [show, setShown] = useState(false);
 
     const props3 = useSpring({
@@ -29,19 +29,22 @@ const CardCarosel = ({ title, settingKey }) => {
 
     //Map the setting key to the personalized title
     const titleMap = {
-        showEventsList: "Today's Events List",
-        showActivitiesList: "This week's Activities List",
+        showEventsList: `Today's Events List`,
+        showActivitiesList: `This week's Activities List`,
+        showTasksList: `This week's Tasks List`,
         listOfNotes: 'Notes List',
         lastNote: 'Most recent Note',
-        quickStart: 'Quick Start',
-        listOfPomodoros: 'Pomodoros List',
+        addNote: 'Add a Note',
+        listOfPomodoros: 'Pomodoros ToDo List',
         lastPomodoro: 'Last Pomodoro',
+        stats: 'Pomodoros Stats',
         listOfProjects: 'Projects List',
-        recentProjectsDeadlines: 'Upcoming Deadlines'
+        recentProjectsDeadlines: 'Upcoming Deadlines',
+        projectGanttChart: 'Project Gantt Chart'
     };
 
     //Get the personalized title
-    const currentTitle = titleMap[customizations[settingKey]] || title;
+    const currentTitle = titleMap[customizations[settingKey]];
 
     //Function to render the content based on the setting key
     const renderContent = () => {
@@ -61,11 +64,13 @@ const CardCarosel = ({ title, settingKey }) => {
             case 'addNote':
                 return <PreviewNote viewType='add' />;
             case 'quickStart':
-                return <PreviewPomodoro viewType='quickStart' userLogged={user} />;
+                return <PreviewPomodoro viewType='quickStart' />;
             case 'listOfPomodoros':
-                return <PreviewPomodoro viewType='list' userLogged={user} />;
+                return <PreviewPomodoro viewType='list' />;
             case 'lastPomodoro':
-                return <PreviewPomodoro viewType='latest' userLogged={user} />;
+                return <PreviewPomodoro viewType='latest' />;
+            case 'stats':
+                return <PreviewPomodoro viewType='stats' />;
             case 'listOfProjects':
                 return <PreviewProjects viewType='list' />;
             case 'recentProjectsDeadlines':
@@ -103,24 +108,26 @@ const CardCarosel = ({ title, settingKey }) => {
         <CalendarProvider>
             <NoteProvider>
                 <TaskProvider>
-                    <animated.div
-                        className='card d-flex flex-column justify-content-evenly align-items-center'
-                        style={props3}
-                        onMouseEnter={() => setShown(true)}
-                        onMouseLeave={() => setShown(false)}
-                    >   
-                        <h2>{title}</h2>
-                        {customizations[settingKey] === 'showCalendar' ? (
-                                renderLegend()
-                        ) : (
-                            <>
-                                <p>{currentTitle}</p>
-                            </>
-                        )}
-                        
-                        {/* Render the content */}
-                        {renderContent()}
-                    </animated.div>
+                    <PomodoroProvider>
+                        <animated.div
+                            className='card d-flex flex-column justify-content-evenly align-items-center py-4'
+                            style={props3}
+                            onMouseEnter={() => setShown(true)}
+                            onMouseLeave={() => setShown(false)}
+                        >   
+                            <h3 className='grandstander-normal'>{title}</h3>
+                            {customizations[settingKey] === 'showCalendar' ? (
+                                    renderLegend()
+                            ) : (
+                                <>
+                                    <h6>{currentTitle}</h6>
+                                </>
+                            )}
+                            
+                            {/* Render the content */}
+                            {renderContent()}
+                        </animated.div>
+                    </PomodoroProvider>
                 </TaskProvider>
             </NoteProvider>
         </CalendarProvider>

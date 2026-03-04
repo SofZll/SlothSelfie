@@ -6,7 +6,6 @@ const defaultImagePath = path.join(__dirname, '../media/img/defaultImage.jpg');
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
     },
     username: {
         type: String,
@@ -15,8 +14,6 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
-        unique: true,
     },
     password: {
         type: String,
@@ -38,40 +35,68 @@ const userSchema = new mongoose.Schema({
         },
         contentType: {
             type: String,
-            default: 'image/jpeg',
-        },
+            default: 'image/jpeg'
+        }
     },
     isOnline: {
         type: Boolean,
+        default: false
+    },
+    disableNotifications: {
+        all: {
+            type: Boolean,
+            default: false
+        },
+        email: {
+            type: Boolean,
+            default: false
+        },
+        system: {
+            type: Boolean,
+            default: false
+        },
+        outsideWorkingHours: {
+            type: Boolean,
+            default: true
+        },
+        outsideDayHours: {
+            type: Boolean,
+            default: true
+        },
+        urgency: {
+            type: Boolean,
+            default: false
+        }
+    },
+
+    isAdmin: {
+        type: Boolean,
+        default: false,
+        required: true,
+    },
+    isRoom: {
+        type: Boolean,
         default: false,
     },
-    
-    noAvailability: [{
-        startDate: {
-            type: Date,
-            required: true,
-        },
-        endDate: {
-            type: Date,
-        },
-        repeatFrequency: { 
-            type: String, 
-            enum: ['none', 'daily', 'weekly', 'monthly', 'yearly'], 
-            default: 'none',
-            required: true,
-        },
-        numberOfOccurrences: {
-            type: Number,
-        }
-    }],
+    isDevice: {
+        type: Boolean,
+        default: false,
+    },
 
     workingHours: {
-        start: { type: String, required: true, default: '09:00' }, // HH:MM
-        end: { type: String, required: true, default: '17:00' }, // HH:MM
+        start: { type: String, required: true, default: '07:00' },
+        end: { type: String, required: true, default: '19:00' },
+    },
+
+    dayHours: {
+        start: { type: String, required: true, default: '06:00' },
+        end: { type: String, required: true, default: '21:59' },
     },
 
     freeDays: {
-        type: [String], // Array of strings declaring free days in the week
+        type: [String],
+        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        required: true,
         default: ['Saturday', 'Sunday'],
     }
 
@@ -83,7 +108,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre('save', async function (next) {
     try {
-        if (this.isNew && !this.image.data) {
+        if (this.isNew && !this.image.data && !this.isRoom && !this.isDevice) {
             // Only set default if new user and no image provided
             const defaultImgData = await fs.readFile(defaultImagePath);
             console.log("Default image data length:", defaultImgData.length);

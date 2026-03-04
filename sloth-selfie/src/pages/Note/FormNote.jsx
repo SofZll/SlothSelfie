@@ -7,45 +7,43 @@ import ShareInput from '../../components/ShareInput';
 
 import ListTask from './ListTask';
 
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { X } from 'lucide-react';
 
 const FormNote = () => {
 
-    const { selected, resetSelected, note, setNote, resetNote, notes, setNotes, setDeletePopUp } = useNote();
+    const { selected, resetSelected, note, setNote, resetNote, notes, setNotes, setDeletePopUp, metConditions, setMetConditions } = useNote();
     const isDesktop = useIsDesktop();
 
     const handleSubmit = async () => {
 
         if (!note.title) {
-            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Title is required', customClass: { confirmButton: 'button-alert' } });
+            NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Title is required'});
             return;
         }
 
-        if (!note.content && note.tasks.length === 0) {
-            Swal.fire({ title: 'Warning', icon: 'warning', text: 'Content or tasks are required', customClass: { confirmButton: 'button-alert' } });
+        if (!note.content && note.tasks.length === 0 && note.addedTasks.length === 0) {
+            NewSwal.fire({ title: 'Warning', icon: 'warning', text: 'Content or tasks are required'});
             return;
         }
 
-        if (selected.add) {
-            const response = await apiService('/note', 'POST', note);
-            if (response) {
-                Swal.fire({ title: 'Note added', icon: 'success', text: 'Note added successfully', customClass: { confirmButton: 'button-alert' } });
-                setNotes([...notes, response]);
-            } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error adding note', customClass: { confirmButton: 'button-alert' } });
-        } else {
-            console.log(note, 'noteeeeeeeee');
-            const response = await apiService(`/note/${note._id}`, 'PUT', note);
-            if (response) {
-                Swal.fire({ title: 'Note edited', icon: 'success', text: 'Note edited successfully', customClass: { confirmButton: 'button-alert' } });
-                setNotes(notes.map(n => n._id === note._id ? response : n));
-
-            } else Swal.fire({ title: 'Error', icon: 'error', text: 'Error editing note', customClass: { confirmButton: 'button-alert' } });
+        const response = await apiService(`/note${selected.add ? '' : '/'+note._id}`, selected.add ? 'POST' : 'PUT', note );
+        if (!response.success) NewSwal.fire({ title: 'Error', icon: 'error', text: 'Error saving note'});
+        else {
+            if (selected.edit) setNotes(notes.map(n => n._id === note._id ? response.note : n));
+            else setNotes([...notes, response.note]);
+            NewSwal.fire({ title: 'Success', icon: 'success', text: selected.edit ? 'Note updated successfully' : 'Note added successfully'});
         }
+        
         resetNote();
         resetSelected();
         
+    }
+
+    const openDeletePopUp = () => {
+        resetSelected();
+        setDeletePopUp({show: true, note: note});
     }
 
     useEffect(() => {
@@ -53,6 +51,16 @@ const FormNote = () => {
             resetNote();
         }
     }, [selected]);
+
+    useEffect(() => {
+        if (!note.title || note.title.length <= 0) {
+            setMetConditions(false);
+        } else if (note.content === '' && note.tasks.length === 0) {
+            setMetConditions(false);
+        } else {
+            setMetConditions(true);
+        }
+    }, [note.title, note.content, note.tasks]);
 
     return (
         <div className='d-flex flex-column w-100 h-100 p-md-2 p-0 position-relative overflow-hidden'>
@@ -64,14 +72,14 @@ const FormNote = () => {
                         <input type='text' className='form-control' id='title'
                         placeholder='Note title'
                         value={note.title}
-                        onChange={(e) => setNote({...note, ['title']: e.target.value})} />
+                        onChange={(e) => setNote({...note, title: e.target.value})} />
                     </div>
 
                     <div className='col-6'>
                         <label htmlFor='category' className='form-label'>Category</label>
                         <select className='form-select' id='category'
                         value={note.category}
-                        onChange={(e) => setNote({...note, ['category']: e.target.value})}>
+                        onChange={(e) => setNote({...note, category: e.target.value})}>
                             <option value=''>Select category</option>
                             <option value='personal'>Personal</option>
                             <option value='work'>Work</option>
@@ -87,7 +95,7 @@ const FormNote = () => {
                         <textarea className='form-control' id='textarea'
                         placeholder='Type here the note content'
                         value={note.content}
-                        onChange={(e) => setNote({...note, ['content']: e.target.value})}
+                        onChange={(e) => setNote({...note, content: e.target.value})}
                         required />
                     </div>
                 </div>
@@ -104,7 +112,7 @@ const FormNote = () => {
                         <label htmlFor='noteAccess' className='form-label'>Note access</label>
                         <select className='form-select' id='noteAccess'
                         value={note.noteAccess}
-                        onChange={(e) => setNote({...note, ['noteAccess']: e.target.value})}>
+                        onChange={(e) => setNote({...note, noteAccess: e.target.value})}>
                             <option value='private'>Private</option>
                             <option value='public'>Public</option>
                             <option value='shared'>Shared</option>
@@ -114,17 +122,17 @@ const FormNote = () => {
 
                 {note.noteAccess === 'shared' && (
                     <div className='row py-2'>
-                        <div className='col-12'>
+                        <div className='col-12 mb-3'>
                             <label htmlFor='receivers' className='form-label'>Share with</label>
-                            <ShareInput receivers={note.sharedWith} setReceivers={(receivers) => setNote({...note, ['sharedWith']: receivers})} />
+                            <ShareInput receivers={note.sharedWith} setReceivers={(receivers) => setNote({...note, sharedWith: receivers})} />
                         </div>
                     </div>
                 )}
 
                 <div className='d-flex align-items-center justify-content-center'>
-                    <button type='button' className='btn-main rounded shadow-sm mt-4' onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
+                    <button type='button' aria-label='save or edit' className='btn-main rounded shadow-sm mt-4' diseabled={!metConditions} onClick={() => handleSubmit()}>{selected.edit ? 'edit' : 'save'}</button>
                     {selected.edit && (
-                        <button type='button' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => setDeletePopUp({show: true, note: note})}>delete</button>
+                        <button type='button' aria-label='delete' className='btn-main rounded shadow-sm mt-4 ms-3' onClick={() => openDeletePopUp()}>delete</button>
                     )}
                 </div>
 
@@ -139,13 +147,13 @@ const FormNote = () => {
                 {isDesktop ? (
                     <>
                     {selected.edit && 
-                        <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                        <button type='button' aria-label='Close' title='Close' className='btn p-0' onClick={() => resetSelected()}>
                             <X size={25} color='#555B6E' strokeWidth={1.75} />
                         </button>
                     }
                     </>
                 ) : (
-                    <button className='btn p-0' onClick={() => resetSelected()} alt='exit'>
+                    <button type='button' aria-label='Close' title='Close' className='btn p-0' onClick={() => resetSelected()}>
                         <X size={25} color='#555B6E' strokeWidth={1.75} />
                     </button>
                 )}

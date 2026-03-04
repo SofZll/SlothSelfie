@@ -5,40 +5,49 @@ const activitySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+
     deadline: {
         type: Date
     },
+
     completed: {
         type: Boolean,
         default: false
     },
+
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    notify: {
-        type: Boolean,
-        default: false
-    },
-    notificationTime: {
-        type: Number,
-        default: 0
-    },
+
     sharedWith: [{ //used also for assigning activities to users in projects
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+    }],
+
+    responses: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        status: {
+            type: String,
+            enum: ['accepted', 'declined', 'pending'],
+            default: 'pending'
+        }
     }],
 
     // New fields only for Project-activities 
     project: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Project',
-        default: null }, // if this field is null, this is a normal activivty
+        default: null  // if this field is null, this is a normal activivty
+    },
     
     phaseSubphase: {
         type: mongoose.Schema.Types.ObjectId,
-         ref: 'PhaseSubphase',
+        ref: 'PhaseSubphase',
         default: null
     },
 
@@ -49,13 +58,13 @@ const activitySchema = new mongoose.Schema({
 
     dependencies: [{
         type: mongoose.Schema.Types.ObjectId,
-         ref: 'Activity' 
-        }],
+        ref: 'Activity' 
+    }],
 
     status: {
         type: String,
-        enum: ["Not_Activatable", "Activatable", "Active", "Completed", "Reactivated", "Overdue", "Abandoned"],
-        default: "Not_Activatable"
+        enum: ['Not_Activatable', 'Activatable', 'Active', 'Completed', 'Reactivated', 'Overdue', 'Abandoned'],
+        default: 'Not_Activatable'
     },
 
     description: {
@@ -77,7 +86,8 @@ const activitySchema = new mongoose.Schema({
     },
 
     milestone: {
-        type: Boolean, default: false 
+        type: Boolean,
+        default: false 
     },
 
     events: [{  // Events related to the activity startDate and deadline

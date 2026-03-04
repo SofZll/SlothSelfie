@@ -11,8 +11,8 @@ const SlothLogo = ({ color }) => {
     return (
         <svg
             fill={logoColor}
-            width="10vmin"
-            height="10vmin"
+            width="8vmin"
+            height="8vmin"
             viewBox="0 0 512 512"
             enableBackground="new 0 0 512 512"
             id="sloth"

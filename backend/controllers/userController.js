@@ -1,5 +1,10 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
+const Event = require('../models/eventModel');
+const NoAvailability = require('../models/noAvailabilityModel');
+const { getToolEvents } = require('../controllers/eventController');
+const { getNoAvailabilitiesTool } = require('../controllers/noAvailabilityController');
+const { checkAvailability } = require('../services/noAvailabilityService');
 
 // TODO: implement the possibility to change the password
 
@@ -10,13 +15,16 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({ username });
 
         if (!user) {
-            return res.status(401).json({ message: 'User not found' });
+            return res.status(401).json({ success: false, message: 'User not found' });
+        }
+
+        if (user.isRoom || user.isDevice) {
+            return res.status(401).json({ success: false, message: 'User is a room or device' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
-        console.log('isMatch:', isMatch);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Incorrect password' });
+            return res.status(401).json({ success: false, message: 'Invalid password' });
         }
 
         req.session.userId = user._id;
@@ -112,6 +120,36 @@ const editProfile = async (req, res) => {
         user.gender = gender;
         await user.save();
 
+        // birthday for the following 5 years
+        if (user.birthday) {
+            const now = new Date();
+            const birthdayDate = new Date(birthday);
+            const userBirthdayMonth = birthdayDate.getMonth();
+            const userBirthdayDay = birthdayDate.getDate();
+
+            await Event.deleteMany({ user: user._id, title: 'Birthday' });
+
+            for (let i = 0; i < 5; i++) {
+                const year = now.getFullYear() + i;
+                const eventDate = new Date(year, userBirthdayMonth, userBirthdayDay);
+
+                const newBirthdayEvent = new Event({
+                    title: 'Birthday',
+                    user: user._id,
+                    startDate: eventDate,
+                    endDate: eventDate,
+                    allDay: true,
+                    type: 'personal',
+                    priority: 5
+                });
+
+                console.log('New birthday event:', newBirthdayEvent);
+                await newBirthdayEvent.save();
+            }
+        } else {
+            await Event.deleteMany({ user: user._id, title: 'Birthday' });
+        }
+
         res.status(200).json({ success: true, message: 'Profile updated successfully' });
     } catch (error) {
         console.error('Error editing profile:', error);
@@ -121,23 +159,17 @@ const editProfile = async (req, res) => {
 
 // Get the profile info: FUNZIONA
 const getUserProfile = async (req, res) => {
+    let userId = req.params.userId;
+
     try {
-        let userId = req.params.userId;
-        
         if (!userId || userId === 'undefined') {
             userId = req.session.userId;
         }
-        console.log('Requested URL:', req.originalUrl);
-        console.log('params:', req.params);
-        console.log("Requested userId:", req.params.userId);
-        console.log("Session userId:", req.session.userId);
-        console.log("Final userId to search:", userId);
-
 
         if (!userId) {
             return res.status(400).json({ success: false, message: 'UserId not found' });
         }
-        console.log('UserId:', userId);
+
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
@@ -153,7 +185,7 @@ const getUserProfile = async (req, res) => {
 const getUsername = async (req, res) => {
     try {
         const username = req.session.username;
-        console.log('Username:', username);
+        
         if (!username) {
             return res.status(400).json({ success: false, message: 'Username not found' });
         }
@@ -168,7 +200,7 @@ const getUsername = async (req, res) => {
 const getUserId = async (req, res) => {
     try {
         const userId = req.session.userId;
-        console.log('UserId:', userId);
+        
         if (!userId) {
             return res.status(400).json({ success: false, message: 'UserId not found' });
         }
@@ -192,90 +224,21 @@ const checkAuth = async (req, res) => {
     }
 }
 
-//Fetch user's no availability time intervals
- const getNoAvailability = async (req, res) => {
-    try {
-        const userId = req.session.userId;
-        if (!userId) return res.status(400).json({ success: false, message: 'User not logged in' });
-
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-        res.status(200).json({ success: true, noAvailability: user.noAvailability });
-    } catch (error) {
-        console.error('Error fetching no availability:', error);
-        res.status(500).json({ success: false, message: 'Error fetching no availability' });
-    }
-}
-
-// Add time intervals for no availability for group events
- const addNoAvailability = async (req, res) => {
-    try {
-        const userId = req.session.userId;
-        const { startDate, endDate, startTime, duration, repeatFrequency, numberOfOccurrences } = req.body;
-
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-        const newNoAvailability = { startDate, repeatFrequency };
-
-        if ( startTime) {
-            newNoAvailability.startTime = startTime;
-            newNoAvailability.duration = duration;
-        } else newNoAvailability.endDate = endDate;
-        
-        console.log('Received data:', req.body);
-        
-        user.noAvailability.push({ startDate, endDate, repeatFrequency });
-        await user.save();
-        res.status(200).json({ success: true, noAvailability: newNoAvailability, message: 'No availability added successfully' });
-    }
-    catch (error) {
-        console.error('Error adding no availability:', error);
-        res.status(500).json({ success: false, message: 'Error adding no availability' });
-    }
-}
-
-//Remove time intervals for no availability for group events
-const removeNoAvailability = async (req, res) => {
-    try {
-        const { noAvailabilityId } = req.params;  //id of the time interval to remove
-        const userId = req.session.userId;
-        // find the user
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-        // Remove the specified no availability time interval
-        const noAvailabilityIndex = user.noAvailability.findIndex(item => item._id.toString() === noAvailabilityId);
-        if (noAvailabilityIndex === -1) {
-            return res.status(404).json({ success: false, message: 'No availability not found' });
-        }
-
-        user.noAvailability.splice(noAvailabilityIndex, 1);  //remove the no availability time interval from the array
-        await user.save();
-
-        res.status(200).json({ success: true, message: 'No availability removed successfully' });
-    } catch (error) {
-        console.error('Error removing no availability:', error);
-        res.status(500).json({ success: false, message: 'Error removing no availability' });
-    }
-};
 
 // Route to get the userId from the username
 const getUserIdFromUsername = async (req, res) => {
     const { username } = req.params;
 
-    if (!username) {
-        return res.status(400).json({ success: false, message: 'Username is required' });
-    }
+    if (!username) return res.status(400).json({ success: false, message: 'Username is required' });
 
     try {
-        // find the user
         const user = await User.findOne({ username: username });
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        if (user.isRoom) return res.status(200).json({ success: true, isTool: true, message: 'User is a room' });
+        if (user.isDevice) return res.status(200).json({ success: true, isTool: true, message: 'User is a device' });
+        
+        if (user.isAdmin) return res.status(400).json({ success: false, message: 'User is an administrator' });
 
         // Restituisci l'ID dell'utente
         res.status(200).json({ success: true, userId: user._id.toString() });
@@ -285,51 +248,335 @@ const getUserIdFromUsername = async (req, res) => {
     }
 };
 
-//route to get the no availability time intervals of a user given the userId
-const getUserNoAvailabilityWithId = async (req, res) => {
-    const { userId } = req.params;
-
-    if (!userId) {
-        return res.status(400).json({ success: false, message: 'UserId is required' });
-    }
-
-    try {
-        // find the user
-        const user = await User.findById(userId);
-
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-
-        // Return the no availability time intervals of the user
-        res.status(200).json({ success: true, noAvailability: user.noAvailability });
-    } catch (error) {
-        console.error('Error fetching no availability with userId:', error);
-        res.status(500).json({ success: false, message: 'Error fetching no availability' });
-    }
-};
 
 // Function to update the user schedule settings preferences
 const updateUserPreferences = async (req, res) => {
-    const { workingHours, freeDays, userId } = req.body;
+    const { userId } = req.session;
+    const { workingHours, daysOff, dayHour } = req.body;
 
     try {
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
 
         // Updates the preferences
         user.workingHours.start = workingHours.start || user.workingHours.start;
         user.workingHours.end = workingHours.end || user.workingHours.end;
-        user.freeDays = freeDays || user.freeDays;
+        user.freeDays = daysOff || user.freeDays;
+        user.dayHours.start = dayHour.start || user.dayHours.start;
+        user.dayHours.end = dayHour.end || user.dayHours.end;
 
         await user.save();
-        res.json({ message: 'Preferences updated successfully' });
+        res.json({ success: true, workingHours: user.workingHours, freeDays: user.freeDays, dayHours: user.dayHours });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating user preferences' });
+        res.status(500).json({ success: false, message: 'Error updating user preferences' });
     }
 };
+
+const switchNotification = async (req, res) => {
+    const { userId } = req.session;
+    const { field, value } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        // disable notifications
+        user.disableNotifications[field] = value;
+        
+        await user.save();
+        res.json({ success: true, disableNotifications: user.disableNotifications });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error updating user preferences' });
+    }
+};
+
+// Get the tools of the user
+const getUsersTools = async (req, res) => {
+    try {
+        const rooms = await User.find({ isRoom: true }).lean();
+        const devices = await User.find({ isDevice: true }).lean();
+
+        if (!rooms && !devices) {
+            return res.status(404).json({ success: false, message: 'No tools found' });
+        }
+
+        // Get the events and no availability for each room and device
+        for (const room of rooms) {
+            const events = await getToolEvents(room._id);
+            const availabilities = await getNoAvailabilitiesTool(room._id);
+            if (events.success) room.events = events.events;
+            else {
+                room.events = [];
+                console.log('Error fetching events for room:', room._id);
+            }
+
+            if (availabilities.success) room.availabilities = availabilities.noAvailability;
+            else {
+                room.availabilities = [];
+                console.log('Error fetching availabilities for room:', room._id);
+            }
+            room.type = 'room';
+        }
+
+        for (const device of devices) {
+            const events = await getToolEvents(device._id);
+            const availabilities = await getNoAvailabilitiesTool(device._id);
+            if (events.success) device.events = events.events;
+            else {
+                device.events = [];
+                console.log('Error fetching events for device:', device._id);
+            }
+
+            if (availabilities.success) device.availabilities = availabilities.noAvailability;
+            else {
+                device.availabilities = [];
+                console.log('Error fetching availabilities for device:', device._id);
+            }
+            device.type = 'device';
+        }
+
+
+        res.status(200).json({ success: true, rooms, devices });
+    } catch (error) {
+        console.error('Error fetching tools:', error);
+        res.status(500).json({ success: false, message: 'Error fetching tools' });
+    }
+}
+
+// Add a room
+const addRoom = async (req, res) => {
+    const { userId } = req.session;
+    const { username, dayHours, freeDays } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        } else if (!user.isAdmin) {
+            return res.status(400).json({ success: false, message: 'User is not an admin' });
+        }
+
+        const room = new User({ username, isRoom: true, password: user.password, dayHours, freeDays, workingHours: dayHours });
+        await room.save();
+
+        res.status(201).json({ success: true, room });
+    } catch (error) {
+        console.error('Error adding room:', error);
+        res.status(500).json({ success: false, message: 'Error adding room' });
+    }   
+}
+
+// Add a device
+const addDevice = async (req, res) => {
+    const { userId } = req.session;
+    const { username, dayHours, freeDays } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        } else if (!user.isAdmin) {
+            return res.status(400).json({ success: false, message: 'User is not an admin' });
+        }
+
+        const device = new User({ username, isDevice: true, password: user.password, dayHours, freeDays, workingHours: dayHours });
+        await device.save();
+
+        res.status(201).json({ success: true, device });
+    } catch (error) {
+        console.error('Error adding device:', error);
+        res.status(500).json({ success: false, message: 'Error adding device' });
+    }
+}
+
+// Edit a room
+const editRoom = async (req, res) => {
+    const { userId } = req.session;
+    const { roomId } = req.params;
+    const { username, dayHours, freeDays } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        } else if (!user.isAdmin) {
+            return res.status(400).json({ success: false, message: 'User is not an admin' });
+        }
+
+        const room = await User.findById(roomId);
+        if (!room) {
+            return res.status(404).json({ success: false, message: 'Room not found' });
+        }
+
+        room.username = username;
+        room.dayHours = dayHours;
+        room.freeDays = freeDays;
+        room.workingHours = dayHours;
+        await room.save();
+
+        const events = await Event.find({ sharedWith: room._id });
+        const eventsOk = [];
+        for (const event of events) {
+            const isValid = await checkAvailability(room._id, event.startDate, event.endDate, event._id);
+
+            const responseIndex = event.responses.findIndex(response => response.user.toString() === room._id.toString());
+
+            if (!isValid) {
+                if (responseIndex !== -1) {
+                    event.responses[responseIndex].status = 'declined';
+                }
+                await NoAvailability.deleteMany({ user: room._id, event: event._id });
+            } else {
+                if (responseIndex !== -1) {
+                    event.responses[responseIndex].status = 'accepted';
+                } else {
+                    event.responses.push({ user: room._id, status: 'accepted' });
+                }
+                eventsOk.push(event);
+            }
+
+            await event.save();
+        }
+
+        const availabilities = await NoAvailability.find({ user: room._id });
+
+        const leanRoom = await User.findById(roomId).lean();
+
+        res.status(200).json({ success: true, room: { ...leanRoom, events: eventsOk, availabilities: availabilities } });
+    } catch (error) {
+        console.error('Error editing room:', error);
+        res.status(500).json({ success: false, message: 'Error editing room' });
+    }
+}
+
+// Edit a device
+const editDevice = async (req, res) => {
+    const { userId } = req.session;
+    const { deviceId } = req.params;
+    const { username, dayHours, freeDays } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        } else if (!user.isAdmin) {
+            return res.status(400).json({ success: false, message: 'User is not an admin' });
+        }
+
+        const device = await User.findById(deviceId);
+        if (!device) {
+            return res.status(404).json({ success: false, message: 'Device not found' });
+        }
+
+        device.username = username;
+        device.dayHours = dayHours;
+        device.freeDays = freeDays;
+        device.workingHours = dayHours;
+        await device.save();
+
+        const events = await Event.find({ sharedWith: device._id });
+        const eventsOk = [];
+        for (const event of events) {
+            const isValid = await checkAvailability(device._id, event.startDate, event.endDate, event._id);
+
+            const responseIndex = event.responses.findIndex(response => response.user.toString() === device._id.toString());
+
+            if (!isValid) {
+                if (responseIndex !== -1) {
+                    event.responses[responseIndex].status = 'declined';
+                }
+                await NoAvailability.deleteMany({ user: device._id, event: event._id });
+            } else {
+                if (responseIndex !== -1) {
+                    event.responses[responseIndex].status = 'accepted';
+                } else {
+                    event.responses.push({ user: device._id, status: 'accepted' });
+                }
+                eventsOk.push(event);
+            }
+            await event.save();
+        }
+
+        const availabilities = await NoAvailability.find({ user: device._id });
+
+        const leanDevice = await User.findById(deviceId).lean();
+
+        res.status(200).json({ success: true, device: { ...leanDevice, events: eventsOk, availabilities: availabilities } });
+    } catch (error) {
+        console.error('Error editing device:', error);
+        res.status(500).json({ success: false, message: 'Error editing device' });
+    }
+}
+
+// Delete a room
+const deleteRoom = async (req, res) => {
+    const { roomId } = req.params;
+
+    try {
+        const room = await User.findById(roomId);
+        if (!room) {
+            return res.status(404).json({ success: false, message: 'Room not found' });
+        }
+
+        const events = await getToolEvents(room._id);
+        const availabilities = await getNoAvailabilitiesTool(room._id);
+
+        if (events.success) {
+            for (const event of events.events) {
+                await Event.findByIdAndUpdate(event._id, { $pull: { sharedWith: room._id } });
+            }
+        } else return res.status(404).json({ success: false, message: 'Events not found' });
+
+        if (availabilities.success) {
+            for (const availability of availabilities.noAvailability) {
+                await NoAvailability.findByIdAndDelete(availability._id);
+            }
+        } else return res.status(404).json({ success: false, message: 'No availabilities not found' });
+
+        await User.findByIdAndDelete(roomId);
+
+        res.status(200).json({ success: true, message: 'Room deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting room:', error);
+        res.status(500).json({ success: false, message: 'Error deleting room' });
+    }
+}
+
+// Delete a device
+const deleteDevice = async (req, res) => {
+    const { deviceId } = req.params;
+
+    try {
+        const device = await User.findById(deviceId);
+        if (!device) {
+            return res.status(404).json({ success: false, message: 'Device not found' });
+        }
+
+        const events = await getToolEvents(device._id);
+        const availabilities = await getNoAvailabilitiesTool(device._id);
+
+        if (events.success) {
+            for (const event of events.events) {
+                await Event.findByIdAndUpdate(event._id, { $pull: { sharedWith: device._id } });
+            }
+        } else return res.status(404).json({ success: false, message: 'Events not found' });
+
+        if (availabilities.success) {
+            for (const availability of availabilities.noAvailability) {
+                await NoAvailability.findByIdAndDelete(availability._id);
+            }
+        } else return res.status(404).json({ success: false, message: 'No availabilities not found' });
+
+        await User.findByIdAndDelete(deviceId);
+
+        res.status(200).json({ success: true, message: 'Device deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting device:', error);
+        res.status(500).json({ success: false, message: 'Error deleting device' });
+    }
+}
 
 
 module.exports = {
@@ -342,10 +589,14 @@ module.exports = {
     getUsername,
     getUserId,
     checkAuth,
-    getNoAvailability,
-    addNoAvailability,
-    removeNoAvailability,
     getUserIdFromUsername,
-    getUserNoAvailabilityWithId,
     updateUserPreferences,
+    switchNotification,
+    getUsersTools,
+    addRoom,
+    addDevice,
+    editRoom,
+    editDevice,
+    deleteRoom,
+    deleteDevice,
 };

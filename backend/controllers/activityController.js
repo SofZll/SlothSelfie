@@ -3,257 +3,211 @@ const User = require('../models/userModel');
 const Note = require('../models/noteModel');
 const Event = require('../models/eventModel');
 const PhaseSubphase = require("../models/phaseSubphaseModel");
-const { createNotification } = require('../controllers/notificationController');
-const { calculateDate } = require('../utils/utils');
-const {sendExportEmail} = require('../utils/utils');
+const Notification = require('../models/notificationModel');
+const { sendNotificationNow } = require('../scheduler/notificationScheduler');
+const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
+const { getCurrentNow } = require('../services/timeMachineService');
 
 // Creating an activinotenotety
 const createActivity = async (req, res) => {
     const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
-    const { title, deadline, completed, notify, notificationTime, customValue, notificationRepeat, notificationType, sharedWith} = req.body;
-    
+    const { title, deadline, completed, sharedWith} = req.body;
+
     try {
+        const user = await User.findOne({ username: userName });
+
         let sharedWithUsers = [];
         sharedWithUsers.push(user);
         if (sharedWith && Array.isArray(sharedWith)) {
-            sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
+            sharedWithUsers = await User.find({ username: { $in: sharedWith }, isDevice: { $ne: true }, isRoom: { $ne: true }, isAdmin: false }).select('_id');
         }
-        const activity = new Activity({ title, deadline, completed, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id), });
+
+        const activity = new Activity({ title, deadline, completed, user: user._id, sharedWith: sharedWithUsers.map(u => u._id), createdAt: getCurrentNow(), updatedAt: getCurrentNow() });
         const savedActivity = await activity.save();
 
-        // Populate the sharedWith field with the username of the users
-        const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
+        const receivers = savedActivity.sharedWith.map(sharedUser => sharedUser._id);
 
-        // Calculate the date of the notification
-        let dateNotif;
-        console.log(customValue);
-        if (customValue) dateNotif = new Date(customValue).toISOString();
-        else dateNotif = calculateDate(deadline, notificationTime);
-        
-        // Create a notification if the notify flag is set
-        if (notify) await createNotification({ elementId: savedActivity._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);
+        for (const receiver of receivers) {
+            const notification = await Notification.create({
+                user: receiver,
+                element: savedActivity._id,
+                elementType: 'Activity',
+                type: 'now',
+                text: `You have been invited to a new activity: ${savedActivity.title}`,
+                mode: {
+                    system: true,
+                    email: true,
+                },
+                createdAt: getCurrentNow(),
+                updatedAt: getCurrentNow()
+            });
+            await sendNotificationNow(user, notification, invitation = true);
+        }
 
-        console.log(savedActivity);
-        res.status(200).json({
-            ...populatedActivity.toObject(),
-            sharedWith: populatedActivity.sharedWith.map(user => user.username)
-        });
+        const populatedActivity = await Activity.findById(savedActivity._id).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username').lean();
+        const modifiedActivity = {
+            ...populatedActivity,
+            sharedWith: populatedActivity.sharedWith.map(sharedUser => sharedUser.username),
+        };
+
+        res.status(200).json({ success: true, activity: modifiedActivity });
     } catch (error) {
         console.error('Error creating activity:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // fetch all activities
 const getActivities = async (req, res) => {
     const userName = req.session.username;
-    const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
     
     try {
+        const user = await User.findOne({ username: userName });
+
         const activities = await Activity.find({
             $or: [
                 { user: user._id },
                 { sharedWith: user._id }
-            ]
+            ],
+            createdAt: { $lte: now }
         })
         .populate('user', 'username')
         .populate('description', 'content' )
-        .populate('sharedWith', 'username');
-        
-        res.status(200).json(activities);
+        .populate('sharedWith', 'username')
+        .lean();
+
+        const modifiedActivities = activities.map(activity => {
+            const isSharedWith = activity.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
+            
+            const response = isSharedWith ? activity.responses?.find(r => r.user?.toString() === user._id.toString())?.status || 'pending' : undefined;
+
+            return {
+                ...activity,
+                ...(isSharedWith && { response }),
+                sharedWith: activity.sharedWith.map(sharedUser => sharedUser.username)
+            };
+        });
+
+        res.status(200).json({ success: true, activities: modifiedActivities });
     } catch (error) {
         console.error('Error fetching activities:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // Fetching a single activity
 const getActivity = async (req, res) => {
+    const now = getCurrentNow();
     const {activityId} = req.params;
     try {
-        const activity = await Activity.findById(activityId).populate('sharedWith', '_id username');
+        const activity = await Activity.findById(activityId).populate('sharedWith', 'username');
         if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
+            return res.status(404).json({ success: false, message: "Activity not found" });
         }
-        res.status(200).json({
-            ...activity.toObject(),
-            sharedWith: activity.sharedWith.map(user => user.username) //we include usernames
-        });
+        if (activity.createdAt > now) {
+            return res.status(403).json({ success: false, message: "You cannot access an activity in the future" });
+        }
+
+        res.status(200).json({ success: true, activity });
     } catch (error) {
         console.error('Error fetching activity:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // Updating an activity
 const updateActivity = async (req, res) => {
-    const{activityId} = req.params;
-    const {title, deadline, completed, sharedWith} = req.body;
+    const { activityId } = req.params; 
+    const { title, deadline, completed, sharedWith, status } = req.body;
     const userName = req.session.username;
-    // Log to check the user in session
-    console.log("User in session:", userName);
-
-    console.log("Shared with:", sharedWith);
-
-    const user = await User.findOne({ username: userName });
-
-    // get the users to share the activity with
-    let sharedWithUsers = [];
-    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
-      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
-    }
-    console.log(sharedWithUsers);
 
     try {
-        const activity = await Activity.findById(activityId);
-        if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
-        }
-        //we find the current user and check if it is his activity, or if it is shared with him
-        if (activity.user.toString() !== user._id.toString() && !activity.sharedWith.includes(user._id.toString())) {
-            return res.status(403).json({ message: "You are not allowed to update this activity" });
+        const user = await User.findOne({ username: userName });
+
+        // get the users to share the activity with
+        let sharedWithUsers = [];
+        if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
+            sharedWithUsers = await User.find({ username: { $in: sharedWith }, isDevice: { $ne: true }, isRoom: { $ne: true }, isAdmin: false }).select('username');
         }
 
-        // Update the activity
+        const activity = await Activity.findById(activityId);
+        if (!activity) return res.status(404).json({ success: false, message: "Activity not found" });
+
+        const isAuthor = activity.user.toString() === user._id.toString();
+        const isSharedWith = activity.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
+
+        if (!isAuthor && !isSharedWith) return res.status(403).json({ success: false, message: "You are not authorized to update this activity" });
+
+        const updateData = {}
+        if (isAuthor) {
+            updateData.title = title;
+            updateData.deadline = deadline;
+            updateData.completed = completed;
+            updateData.sharedWith = sharedWithUsers.map(u => u._id);
+        } else if (isSharedWith && status) {
+            const responseIndex = activity.responses.findIndex(r => r.user.toString() === user._id.toString());
+
+            if (responseIndex !== -1) activity.responses[responseIndex].status = status;
+            else activity.responses.push({ user: user._id, status });
+
+            updateData.responses = activity.responses;
+
+            if (status === 'declined') updateData.sharedWith = activity.sharedWith.filter(sharedUser => sharedUser._id.toString() !== user._id.toString());
+        }
+
+        updateData.updatedAt = getCurrentNow();
+
         const updatedActivity = await Activity.findByIdAndUpdate(
             activityId,
-            { title, deadline, completed, sharedWith: sharedWithUsers.map(u => u._id) },
+            updateData,
             { new: true }
-        ).populate('user', 'username')
-        .populate('description', 'content')
-        .populate('sharedWith', 'username');
+        ).populate('user', 'username').populate('description', 'content').populate('sharedWith', 'username');
 
-        res.status(200).json({
-            ...updatedActivity.toObject(),
-            sharedWith: updatedActivity.sharedWith?.map(user => user.username) || []
-        });
+        const transformedActivity = {
+            ...updatedActivity._doc,
+            sharedWith: updatedActivity.sharedWith.map(sharedUser => sharedUser.username),
+        };
 
+        res.status(200).json({ success: true, activity: transformedActivity });
     } catch (error) {
         console.error('Error updating activity:', error);
         res.status(500).json({ message: error.message });
     }
 };
 
-// Deleting an activity, if it is a macro, we delete all the subactivities and its phaseSubphase (projects only)
-const deleteActivity = async (req, res) => {    //TODO: GESTIRE SUBATTIVITà IN CALENDARIO DA TOGLIERE LATO FRONT
+// Deleting an activity
+const deleteActivity = async (req, res) => {
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
     const {activityId} = req.params;
+
     try {
         const activity = await Activity.findById(activityId);
-        if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
-        }
+        if (!activity) return res.status(404).json({ success: false, message: "Activity not found" });
 
-        // Macroactivitycase: if the activity is a macroactivity, we need to delete all the subactivities and the phaseSubphase
-        if (activity.isMacroactivity) {
 
-            const phaseSubphase = await PhaseSubphase.findOne({ macroActivity: activity._id });
+        if (activity.user.toString() !== user._id.toString()) {
+            activity.sharedWith = activity.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+            await activity.save();
+        } else await Activity.findByIdAndDelete(activityId);
 
-            if (phaseSubphase) {
-                if (phaseSubphase.type === 'subphase') {
-                    if (phaseSubphase.activities.length > 0) {
-                        for (const subActivityId of phaseSubphase.activities) {
-                            await deleteActivityWithRelations(subActivityId);
-                        }
-                    }
-
-                    //find the phase of the subphase and delete the subphase from it
-                    const phase = await PhaseSubphase.findById(phaseSubphase.parentPhase);
-                    if (phase) {
-                        phase.subphases = phase.subphases.filter(subphaseId => subphaseId.toString() !== phaseSubphase._id.toString());
-                        await phase.save();
-                    }
-
-                    await PhaseSubphase.findByIdAndDelete(phaseSubphase._id);
-                }
-
-                else if (phaseSubphase.type === 'phase') {
-                    // delete all activities of the subphases
-                    if (phaseSubphase.subphases && phaseSubphase.subphases.length > 0) {
-                        const subphases = await PhaseSubphase.find({ _id: { $in: phaseSubphase.subphases } });
-
-                        for (const sub of subphases) {
-                            if (sub.activities && sub.activities.length > 0) {
-                                for (const subActivityId of sub.activities) {
-                                    await deleteActivityWithRelations(subActivityId);
-                                }
-                                //delete the macro also
-                                await deleteActivityWithRelations(sub.macroActivity);
-                            }
-                            await PhaseSubphase.findByIdAndDelete(sub._id);
-                            console.log(`Eliminata sottofase ${sub.title}`);
-                        }
-                    }
-                    // delete all activities of the phase
-                    if (phaseSubphase.activities && phaseSubphase.activities.length > 0) {
-                        for (const subActivityId of phaseSubphase.activities) {
-                            await deleteActivityWithRelations(subActivityId);
-                        }
-                    }
-                    // delete the macroactivity
-                    await deleteActivityWithRelations(phaseSubphase.macroActivity);
-                    // Delete the phase
-                    await PhaseSubphase.findByIdAndDelete(phaseSubphase._id);
-                }
-            } else {
-                console.warn("No phase nor subphase associeted found in the macroActivity.");
-            }
-        }
-
-        // Delete the activity itself
-        await deleteActivityWithRelations(activityId);
-
-        res.status(200).json({ message: "Activity deleted succesfully" });
+        res.status(200).json({ success: true, message: "Activity deleted successfully" });
     } catch (error) {
         console.error('Error deleting activity:', error);
-        res.status(500).json({ message: error.message });
-    }
-};
-
-const deleteActivityWithRelations = async (activityId) => {
-    try {
-        const activity = await Activity.findById(activityId);
-        if (!activity) {
-            console.warn(`Activity not found with ID: ${activityId}`);
-            return;
-        }
-
-        const { description, input, output, events } = activity;
-
-        // Delete events associated with the activity
-        if (events && events.length > 0) {
-            await Event.deleteMany({ _id: { $in: events } });
-        }
-
-        // Delete notes associated with the activity
-        if (description) {
-            await Note.findByIdAndDelete(description);
-        }
-        if (input) {
-            await Note.findByIdAndDelete(input);
-        }
-        if (output) {
-            await Note.findByIdAndDelete(output);
-        }
-
-        // Delete the activity itself
-        await Activity.findByIdAndDelete(activityId);
-
-    } catch (err) {
-        console.error(`Error while deleting activity ${activityId}:`, err);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
 //Function to export activities on iCalendar (using library: ics.js)
 async function exportActivity(req, res){
+    const { activityId } = req.params;
+    const userName = req.session.username;
+
     try {
-        const {activityId} = req.params;
-        const userName = req.session.username;
         const activity = await Activity.findById(activityId);
-        if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
-        }
+        if (!activity) return res.status(404).json({ success: false, message: 'Activity not found' });
 
         const user = await User.findOne({ username: userName });
 
@@ -269,10 +223,8 @@ async function exportActivity(req, res){
         
         if (error) {
             console.error("ICS generation error:", error);
-            return res.status(500).json({ message: 'Error while generating .ics' });
+            return res.status(500).json({ success: false, message: 'Error generating ICS file' });
         }
-
-        console.log("Generated .ics value:\n", value);
 
         // send the mail with the .ics file as attachment to the user
         const userEmail = user.email;
@@ -287,21 +239,20 @@ async function exportActivity(req, res){
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${activity.title}.ics"`);
         res.status(200).send(value);
-      } catch (err) {
+    } catch (err) {
         console.error(err);
-        res.status(500).send({ message: 'Error during the activity export' });
-      }
+        res.status(500).send({ success: false, message: 'Error exporting activity' });
+    }
 }
 
 /* Project functions */
 //Function to create a note associated to the input/output of the activity
 async function createNoteAsInputOrOutput(req, res) {
-    try {
-        const { activityId, content, userName, type } = req.body;
+    const { activityId, content, userName, type } = req.body;
 
+    try {
         //find the user from the username:
         const user = await User.findOne({ username: userName });
-        console.log(userName);
 
         //find the activity
         const activity = await Activity.findById(activityId);
@@ -320,8 +271,11 @@ async function createNoteAsInputOrOutput(req, res) {
             category: type === 'input' ? "Activity Input" : "Activity Output",
             content: content,
             user: user,
-            noteAccess: "restricted", // only for members
-            allowedUsers: allowedUsernames
+            noteAccess: "shared", // only for members
+            allowedUsers: allowedUsernames,
+            isInProject: true, // to differentiate between normal notes and project-activity notes
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
         const savedNote = await newNote.save();
 
@@ -333,13 +287,13 @@ async function createNoteAsInputOrOutput(req, res) {
         );
 
         if (!updatedActivity) {
-            return res.status(404).json({ message: "Activity not found" });
+            return res.status(404).json({ success: false, message: "Activity not found" });
         }
 
-        res.status(201).json({ message: "Note created and linked to activity", note: savedNote });
+        res.status(201).json({ success: true, message: "Note created and linked to activity", note: savedNote });
     } catch (error) {
         console.error("Error creating note:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error" });
     }
 }
 
@@ -350,7 +304,6 @@ async function updateOutputAsNote(req, res) {
 
         //find the user from the username:
         const user = await User.findOne({ username: userName });
-        console.log(userName);
 
         //find the activity
         const activity = await Activity.findById(activityId);
@@ -362,13 +315,14 @@ async function updateOutputAsNote(req, res) {
         //we update the content and the user of the note
         note.content = content;
         note.user = user;
+        note.updatedAt = getCurrentNow();
 
         const savedNote = await note.save();
 
-        res.status(201).json({ message: "Note created and linked to activity", note: savedNote });
+        res.status(201).json({ success: true, message: "Note updated successfully", note: savedNote });
     } catch (error) {
         console.error("Error updating note:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error" });
     }
 }
 
@@ -381,23 +335,31 @@ async function updateActivityStatus(req, res) {
         //find the activity
         const activity = await Activity.findById(activityId);
         if (!activity) {
-            return res.status(404).json({ message: "Activity not found" });
+            return res.status(404).json({ success: false, message: "Activity not found" });
         }
         
         // Update the status of the activity only if it is different
         if (activity.status === status) {
-            return res.status(200).json({ message: "Status already up to date", activity });
+            return res.status(200).json({ success: true, message: "Status is already set to the requested value" });
         }
 
         // Update the status of the activity
         activity.status = status;
+        activity.updatedAt = getCurrentNow();
+
+        if (status === 'Completed') {
+            activity.completed = true;
+        } else if (status === 'Reactivated') {
+            activity.completed = false;
+        }
+
         await activity.save();
 
-        res.status(200).json(activity);
+        res.status(200).json({ success: true, message: "Activity status updated successfully", activity });
     }
     catch (error) {
         console.error("Error updating activity status:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error" });
     }
 }
 
@@ -473,9 +435,9 @@ async function adjustOrContractActivitySchedule(req, res) {
                 const event = await Event.findById(eventId);
                 if (event) {
                     if (index === 0) {
-                        event.date = activity.startDate;
+                        event.startDate = activity.startDate;
                     } else if (index === 1 && action === 'delay') {
-                        event.date = activity.deadline;
+                        event.deadline = activity.deadline;
                     }
                     await event.save();
                 }
@@ -495,26 +457,39 @@ async function adjustOrContractActivitySchedule(req, res) {
                 await macro.save();
                 const macroEvent = await Event.findById(macro.events[1]);
                 if (macroEvent) {
-                    macroEvent.date = maxDeadline;
+                    macroEvent.deadline = maxDeadline;
                     await macroEvent.save();
                 } 
             }
         }
-        // Create notifications to send to the users involved in the dependent activities about the schedule change
-        const notificationPromises = activities.map(async (activity) => {
-            const dateNotif = new Date().toISOString(); //TODO: TIME MACHINE DATE ?
-            return createNotification({ elementId: activity._id, dateNotif, frequencyNotif: 'none', type: 'activity' }, res, true);
-        });
+        /* Create notifications to send to the users involved in the dependent activities about the schedule change */
+        for (const activity of activities) {
+            const usersToNotify = await User.find({ _id: { $in: activity.sharedWith } });
+            for (const user of usersToNotify) {
+                const notification = await Notification.create({
+                    user: user._id,
+                    element: activity._id,
+                    elementType: 'Activity',
+                    type: 'now',
+                    text: `The schedule of the activity ${activity.title} has been adjusted/contracted. New start date: ${activity.startDate.toISOString().split('T')[0]}, new deadline: ${activity.deadline.toISOString().split('T')[0]}`,
+                    mode: {
+                        system: true,
+                        email: true,
+                    },
+                    createdAt: getCurrentNow(),
+                    updatedAt: getCurrentNow(),
+                });
+                await sendNotificationNow(user, notification, modification = true);
+            }
+        }
 
-        await Promise.all(notificationPromises);
-
-        res.status(200).json({ message: "Schedule adjusted/contracted successfully" ,
+        res.status(200).json({ success: true, message: "Schedule adjusted/contracted successfully" ,
             updatedMacros: Array.from(macroDeadlinesMap.entries()) // [ [macroId, newDeadline], ... ]
         });
     }
     catch (error) {
         console.error("Error adjusting/contracting activity schedule:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ success: false, message: "Server error" });
     }
 }
 

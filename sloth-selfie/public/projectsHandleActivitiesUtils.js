@@ -30,15 +30,24 @@ async function updateActivitiesStatus(activities) {
             }
         }
         // Check the activity deadline and if it is Overdue or Abandoned
-        const [isLate, isAbandoned, isAbandonedNoParticipants] = checkOverdueAbandoned(activity);
+        const [isLate, isAbandoned, isAbandonedNoParticipants] = await checkOverdueAbandoned(activity);
+        console.log("isLate:", isLate);
 
-        if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
-            asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
-        }
-
-        if (isAbandoned || isAbandonedNoParticipants) {
-            if (activity.status !== "Abandoned") {
-                asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
+        if(activity.status !== "Completed" &&  activity.status !== "Reactivated") {
+            if (isLate && !isAbandoned && !isAbandonedNoParticipants) {
+                asyncOperations.push(updateActivityStatus(activity._id, "Overdue"));
+            } else if (!isLate && !isAbandoned && !isAbandonedNoParticipants) {
+                //if the activity is not overdue, we set the status as Active if it has input, otherwise we set it as Not_Activatable
+                if (activity.input && activity.status !== "Active") {
+                    asyncOperations.push(updateActivityStatus(activity._id, "Active"));
+                } else if (!activity.input && activity.status !== "Not_Activatable") {
+                    asyncOperations.push(updateActivityStatus(activity._id, "Not_Activatable"));
+                }
+            }     
+            if (isAbandoned || isAbandonedNoParticipants) {
+                if (activity.status !== "Abandoned") {
+                    asyncOperations.push(updateActivityStatus(activity._id, "Abandoned"));
+                }
             }
         }
         //if members are re-added, and the activity is not overdue since last 7 days, the activity will be Not_Activatable in case of no input, Activatable otherwise, Active if it has output also
@@ -67,7 +76,7 @@ async function renderActivities(activities, userLogged, isOwner) {
     let activityContainer = document.getElementById("activity-container");
     let closeBtn = document.getElementById("closeActivityViewBtn");
 
-    let content = `<h2>Project Activities</h2>`;
+    let content = `<h3>Project Activities</h3>`;
 
     if (activities.length === 0) {
         content += `<p>No activities assigned to you.</p>`;
@@ -149,7 +158,7 @@ function generateContent(children, activity, star, inputDisabled, inputSelectDis
             <option value="link">Link</option>
         </select>
         <input type="text" id="input-${activity._id}" value="${activity.input?.content || ''}" ${inputDisabled}>
-        <button class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'input')" ${inputInsertDisabled}>Insert Input</button>
+        <button type="button" aria-label="Insert-input" class="btn btn-outline-primary btn-sm" id="insert-input-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'input')" ${inputInsertDisabled}>Insert Input</button>
         
         <label>Output type:</label>
         <select id="output-type-${activity._id}" ${outputSelectDisabled} onchange="updateInputOutputType('${activity._id}', 'output')">
@@ -158,8 +167,8 @@ function generateContent(children, activity, star, inputDisabled, inputSelectDis
             <option value="true">Completed</option>
         </select>
         <input type="text" id="output-${activity._id}" value="${activity.output?.content || ''}" ${outputDisabled}>
-        <button class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output')" ${outputInsertDisabled}>Insert Output</button>
-        <button class="btn btn-outline-success btn-sm" id="save-output-${activity._id}" onclick="updateOutputNote('${activity._id}', 'output')" style="display: none;">Save updated output</button>
+        <button type="button" aria-label="Insert-output" class="btn btn-outline-primary btn-sm" id="insert-output-${activity._id}" onclick="insertActivityInputOutput('${activity._id}', 'output')" ${outputInsertDisabled}>Insert Output</button>
+        <button type="button" aria-label="Save-updated-output" class="btn btn-outline-success btn-sm" id="save-output-${activity._id}" onclick="updateOutputNote('${activity._id}', 'output')" style="display: none;">Save updated output</button>
         `;
 
     // shows the buttons for reject output only if the user is the owner
@@ -167,7 +176,7 @@ function generateContent(children, activity, star, inputDisabled, inputSelectDis
         // Disable the button if the activity is not Completed
         let rejectDisabled = activity.status !== "Completed" ? 'disabled' : '';
         content += `
-            <button class="btn btn-outline-danger btn-sm" id="reactivate-${activity._id}" onclick="reactivateActivity('${activity._id}', 'Reactivated')" ${rejectDisabled}>Reject output</button>
+            <button type="button" aria-label="Reject-output" class="btn btn-outline-danger btn-sm" id="reactivate-${activity._id}" onclick="reactivateActivity('${activity._id}', 'Reactivated')" ${rejectDisabled}>Reject output</button>
          `;
          
          //div for the buttons for the owner to decide if the next activities should be delayed or contracted in case of delay
@@ -180,9 +189,9 @@ function generateContent(children, activity, star, inputDisabled, inputSelectDis
     content += `
         <p id="startDate-${activity._id}">Start Date: ${new Date(activity.startDate).toLocaleDateString()}<p>
         <p id="deadline-${activity._id}">Deadline: ${new Date(activity.deadline).toLocaleDateString()}<p>
-        <button class="btn btn-success btn-sm" id="start-${activity._id}" onclick="startActivity('${activity._id}', 'Active')" ${!activity.input ? 'disabled' : ''}>Start</button>
-        <button class="btn btn-primary btn-sm" id="complete-${activity._id}" onclick="completeActivity('${activity._id}', 'Completed')" ${!activity.output ? 'disabled' : ''}>Complete</button>
-        <button class="btn btn-danger btn-sm" id="abandon-${activity._id}" onclick="abandonActivity('${activity._id}')" ${abandonDisabled}>Abandon</button>
+        <button type="button" aria-label="Start" class="btn btn-success btn-sm" id="start-${activity._id}" onclick="startActivity('${activity._id}', 'Active')" ${!activity.input ? 'disabled' : ''}>Start</button>
+        <button type="button" aria-label="Complete" class="btn btn-primary btn-sm" id="complete-${activity._id}" onclick="completeActivity('${activity._id}', 'Completed')" ${!activity.output ? 'disabled' : ''}>Complete</button>
+        <button type="button" aria-label="Abandon" class="btn btn-danger btn-sm" id="abandon-${activity._id}" onclick="abandonActivity('${activity._id}')" ${abandonDisabled}>Abandon</button>
     </li>
     `;
 }
@@ -195,8 +204,8 @@ function createAndShowDependencyButtons(activityId, dependentActivitiesIds, dela
     const container = document.getElementById(`activity-${activityId}-buttons-container`);
     if (container) {
         container.innerHTML = `
-            <button class="btn btn-outline-warning btn-sm" id="delayBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'delay', '${dependentActivitiesIds}', '${delay}', '${onlyBlocked}')">Adjust dependencies</button>
-            <button class="btn btn-outline-warning btn-sm" id="contractBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'contract', '${dependentActivitiesIds}', '${delay}', '${onlyBlocked}')" >Contract dependencies</button>
+            <button type="button" aria-label="Adjust-dependencies" class="btn btn-outline-warning btn-sm" id="delayBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'delay', '${dependentActivitiesIds}', '${delay}', '${onlyBlocked}')">Adjust dependencies</button>
+            <button type="button" aria-label="Contract-dependencies" class="btn btn-outline-warning btn-sm" id="contractBtn-${activityId}" onclick="handleOwnerDecision('${activityId}', 'contract', '${dependentActivitiesIds}', '${delay}', '${onlyBlocked}')" >Contract dependencies</button>
         `;
     } else {
         console.error('Container not found for activity buttons');
@@ -231,8 +240,12 @@ async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
     try{
 
         //get the activity
-        const response = await fetch(`http://localhost:8000/api/activity/${activityId}`);
-        const activity = await response.json();
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${activityId}`);
+        const activityData = await response.json();
+        if (!activityData.success) {
+            throw new Error('Failed to fetch activity data');
+        }
+        const activity = activityData.activity;
 
         const startBtn = `start-${activityId}`;
         const completeBtn = `complete-${activityId}`;
@@ -295,8 +308,12 @@ async function updateActivityButtons(activityId, isOwner, ownerNotMember) {
 async function adjustMacroButtons(macroId) {
     try{
         //get the macroactivity
-        const response = await fetch(`http://localhost:8000/api/activity/${macroId}`);
-        const activity = await response.json();
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${macroId}`);
+        const activityData = await response.json();
+        if (!activityData.success) {
+            throw new Error('Failed to fetch activity data');
+        }
+        const activity = activityData.activity;
         if(activity.status === "Reactivated") {
             //check if the macroactivity has children, if not, we should activate the output field and be able to edit the output note
             let children = await checkChildren(activity.phaseSubphase);
@@ -336,8 +353,12 @@ async function adjustMacroButtons(macroId) {
 async function checkChildren(phaseSubphase) {
     try{
         //get the phaseSubphase of the activity
-        const response = await fetch(`http://localhost:8000/api/phaseSubphase/${phaseSubphase}`);
-        const phaseSubphaseData = await response.json();
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/phaseSubphase/${phaseSubphase}`);
+        const phaseSubphaseres = await response.json();
+        if (!phaseSubphaseres.success) {
+            throw new Error('Failed to fetch phaseSubphase data');
+        }
+        const phaseSubphaseData = phaseSubphaseres.phaseSubphase;
         
         //get the activities of the phaseSubphase, they are the children of the macroactivity
         const children = phaseSubphaseData.activities;
@@ -347,8 +368,12 @@ async function checkChildren(phaseSubphase) {
             //we get the subphases of the phase
             for(const subphaseId of phaseSubphaseData.subphases) {
                 //get the subphase
-                const response = await fetch(`http://localhost:8000/api/phaseSubphase/${subphaseId}`);
-                const subphaseData = await response.json();
+                const response2 = await fetch(`https://site232453.tw.cs.unibo.it/api/phaseSubphase/${subphaseId}`);
+                const subphaseres = await response2.json();
+                if (!subphaseres.success) {
+                    throw new Error('Failed to fetch subphase data');
+                }
+                const subphaseData = subphaseres.phaseSubphase;
                 //get the activities of the subphase
                 children.push(...subphaseData.activities);
             }
@@ -465,18 +490,26 @@ async function handleSubphaseMacro(macroActivity, phaseSubphase, parentPhase, ty
 }
 
 // Function to check if the activity is overdue or abandoned in handleActivities
-function checkOverdueAbandoned(activity) {
-    let today = new Date();       //TODO, TIME MACHINE DATE
-                today.setHours(0, 0, 0, 0);    //we only compare the day, not the hours
-                let deadline = new Date(activity.deadline);
+async function checkOverdueAbandoned(activity) {   
+    let today = await getCurrentNow();
+    today.setHours(0, 0, 0, 0);    //we only compare the day, not the hours
+    let deadline = new Date(activity.deadline);
 
-                let isLate = today > deadline && !activity.output; // Overdue without output
-                let isAbandoned = today - deadline > 7 * 24 * 60 * 60 * 1000; // Overdue since last 7 days
-                //if the activity has no members assigned, it is abandoned
-                let isAbandonedNoParticipants = false;
-                if (activity.sharedWith.length === 0) {
-                    isAbandonedNoParticipants = true;
-                }
+    let isLate = false;
+    if (today > deadline && !activity.output) {
+        isLate = true; // Overdue without output
+    }
+
+    let isAbandoned = false;
+    if (today - deadline > 7 * 24 * 60 * 60 * 1000) {
+        isAbandoned = true; // Overdue since last 7 days
+    }
+
+    //if the activity has no members assigned, it is abandoned
+    let isAbandonedNoParticipants = false;
+    if (activity.sharedWith.length === 0) {
+        isAbandonedNoParticipants = true;
+    }
     return [ isLate, isAbandoned, isAbandonedNoParticipants ];
 }
 
@@ -490,8 +523,12 @@ async function adjustDatesOfDependentActivities(dependentActivitiesIds) {
     for (const depId of activityIdsArray) {
         try {
             // Get the activity
-            let response = await fetch(`http://localhost:8000/api/activity/${depId}`);
-            let activity = await response.json();
+            let response = await fetch(`https://site232453.tw.cs.unibo.it/api/activity/${depId}`);
+            let activityData = await response.json();
+            if (!activityData.success) {
+                throw new Error('Failed to fetch activity data');
+            }
+            let activity = activityData.activity;
             
             let newStartDate = new Date(activity.startDate);
             let newDeadline = new Date(activity.deadline);
@@ -528,7 +565,7 @@ function updateMacroDeadlinesInDOM(updatedMacros) {
 //Function to delete a note by its id (used for input/output dependency if the output is rejected)
 async function deleteNoteById(noteId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/note/${noteId}`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/note/${noteId}`, {
             method: "DELETE",
             credentials: "include",
         });

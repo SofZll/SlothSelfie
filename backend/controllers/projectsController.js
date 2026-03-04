@@ -6,38 +6,45 @@ const User = require('../models/userModel');
 const Note = require('../models/noteModel');
 const Event = require('../models/eventModel');
 
+const { getCurrentNow } = require('../services/timeMachineService');
+
 //GET all projects
 const getAllProjects = async (req, res) => {
+    const now = getCurrentNow();
+
     try {
         const userName = req.session.username;
         const user = await User.findOne({ username: userName });
 
         if(!userName) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
         
         const projects = await Project.find({
             $or: [
                 { owner: user._id },
                 { members: user._id }
-            ]
+            ],
+            createdAt: { $lte: now }
         })
         .populate('owner', 'username')
         .populate('members', 'username');
 
-        res.status(200).json(projects);
+        res.status(200).json({ success: true, projects });
     } catch (error) {
         console.error('Error fetching projects:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
 //GET project by id
 const getProjectById = async (req, res) => {
+    const now = getCurrentNow();
     const { id } = req.params;
+
     try {
         const project = await Project.findById(id)
             .populate('owner', 'username')
@@ -45,11 +52,13 @@ const getProjectById = async (req, res) => {
             .populate('description');
 
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
+        if (project.createdAt > now) return res.status(403).json({ success: false, message: 'Project not available yet' });
+
         //now we get the phases of the project (type 'phase')
-        const phases = await PhaseSubphase.find({ project: id, type: 'phase' })
+        const phases = await PhaseSubphase.find({ project: id, type: 'phase', createdAt: { $lte: now } })
         .populate({
             path: 'macroActivity',
             populate: [
@@ -63,7 +72,7 @@ const getProjectById = async (req, res) => {
 
         for (const phase of phases) {
             // we get the subphases of the phase
-            phase.subphases = await PhaseSubphase.find({ parentPhase: phase._id, type: 'subphase' })
+            phase.subphases = await PhaseSubphase.find({ parentPhase: phase._id, type: 'subphase', createdAt: { $lte: now } })
             .populate({
                 path: 'macroActivity',
                 populate: [
@@ -76,7 +85,7 @@ const getProjectById = async (req, res) => {
             .sort({ createdAt: 1 });
 
             //now we populate the activities of each phase
-            phase.activities = await Activity.find({ phaseSubphase: phase._id, isMacroactivity: false })
+            phase.activities = await Activity.find({ phaseSubphase: phase._id, isMacroactivity: false, createdAt: { $lte: now } })
                 .populate('description')
                 .populate('sharedWith', 'username')
                 .populate({ path: 'input', select: 'content' })
@@ -86,7 +95,7 @@ const getProjectById = async (req, res) => {
 
             for (const subphase of phase.subphases) {
                 // Populates activities of each subphase
-                subphase.activities = await Activity.find({ phaseSubphase: subphase._id, isMacroactivity: false })
+                subphase.activities = await Activity.find({ phaseSubphase: subphase._id, isMacroactivity: false, createdAt: { $lte: now } })
                     .populate('description')
                     .populate('sharedWith', 'username')
                     .populate({ path: 'input', select: 'content' })
@@ -98,25 +107,35 @@ const getProjectById = async (req, res) => {
 
         project.phases = phases;
 
-        res.status(200).json(project);
+        res.status(200).json({ success: true, project });
     } catch (error) {
         console.error('Error fetching project by id:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
 //get the phase/subphase by id
 const getPhaseSubphaseById = async (req, res) => {
+    const now = getCurrentNow();
     const { id } = req.params;
     try {
         const phaseSubphase = await PhaseSubphase.findById(id)
             .populate('macroActivity')
             .populate('activities');
+
+        if (!phaseSubphase) {
+            return res.status(404).json({ success: false, message: 'Phase/Subphase not found' });
+        }
+
+        if (phaseSubphase.createdAt > now) {
+            return res.status(403).json({ success: false, message: 'Phase/Subphase not available yet' });
+        }
     
-            res.status(200).json(phaseSubphase);
+        res.status(200).json({ success: true, phaseSubphase });
     }
     catch (error) {
         console.error('Error fetching phase/subphase by id:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -151,7 +170,10 @@ const createActivities = async (activities, projectId, phaseSubphaseId, ownerId,
             milestone: activity.milestone,
             dependencies: dependenciesIds,
             phaseSubphase: phaseSubphaseId,
-            events: [eventStartId, eventDeadlineId]
+            events: [eventStartId, eventDeadlineId],
+            responses: [sharedWithUserIds.map(user => ({ user, status: 'pending' }))],
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
 
         const savedActivity = await newActivity.save();
@@ -183,7 +205,10 @@ const createMacroActivity = async (macroActivity, projectId, phaseSubphaseId, ow
         user: ownerId,
         isMacroactivity: true,
         phaseSubphase: phaseSubphaseId,
-        events: [eventStartId, eventDeadlineId]
+        events: [eventStartId, eventDeadlineId],
+        responses: [sharedWithUserIds.map(user => ({ user, status: 'pending' }))],
+        createdAt: getCurrentNow(),
+        updatedAt: getCurrentNow()
     });
 
     // Save the macroactivity and return its _id
@@ -201,6 +226,8 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle
             title: phase.title,
             project: projectId,
             type: 'phase',
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
     } else if (type === 'subphase') {
         newPhaseSubphase = new PhaseSubphase({
@@ -208,6 +235,8 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle
             project: projectId,
             type: 'subphase',
             parentPhase: parentPhaseId, // Reference to the parent phase
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
     } else {
         throw new Error("Invalid type: must be 'phase' or 'subphase'");
@@ -226,6 +255,7 @@ const createPhaseSubphase = async (type, phase, projectId, ownerId, projectTitle
     // Adds the activities to the phase/subphase
     await newPhaseSubphase.updateOne({
         $push: { activities: { $each: activityIds } },
+        $set: { updatedAt: getCurrentNow() }
     });
 
     // Returns the _id of the phase/subphase
@@ -248,8 +278,11 @@ const createNoteDescription = async (description, type, owner, members, projectT
         content: description, // Content is the description provided
         user: owner, // User is the logged user
         type: type,
-        noteAccess: 'restricted', // only for members
-        allowedUsers: members.map(member => member.username) // Set the allowed users to the members
+        noteAccess: 'shared', // only for members
+        sharedWith: members.map(member => member._id), // Set the allowed users to the members
+        isInProject: true, // Set to true for project-related notes
+        createdAt: getCurrentNow(),
+        updatedAt: getCurrentNow()
     });
     await newNote.save();
     return newNote._id;
@@ -288,7 +321,9 @@ const createEvent = async (startDate, endDate, userId, sharedWith, projectTitle,
         notificationTime: 30,
         isInProject: true,
         originalId: new mongoose.Types.ObjectId(), // Unic id
-        repeatFrequency: 'none' // Default
+        repeatFrequency: 'none', // Default
+        createdAt: getCurrentNow(),
+        updatedAt: getCurrentNow()
     });
 
     const savedEvent = await newEvent.save();
@@ -305,19 +340,21 @@ const updateEvent = async (eventId, date, sharedWith, projectTitle, activityTitl
         event.time = '00:00'; //default time
         event.title = `${activityTitle} - ${type} of Project ${projectTitle}`;
         event.sharedWith = sharedWith.map(user => user._id);
+        event.updatedAt = getCurrentNow();
         await event.save();
     }
 };
 
 //POST create a project
 const createProject = async (req, res) => {
+    const now = getCurrentNow();
     try {
         const { title, owner, description, members, phases } = req.body;
 
         // finds the owner ID from the username
         const ownerUser = await User.findOne({ username: owner });
         if (!ownerUser) {
-            return res.status(404).json({ message: 'Owner not found' });
+            return res.status(404).json({ success: false, message: 'Owner not found' });
         }
 
         // finds the members IDs from the usernames
@@ -328,7 +365,7 @@ const createProject = async (req, res) => {
         const newNoteId = await createNoteDescription(description, 'project', ownerUser, memberUsers, title);
 
         // Create the project
-        const newProject = new Project({ title, owner: ownerUser._id, description: newNoteId, members: memberIds });
+        const newProject = new Project({ title, owner: ownerUser._id, description: newNoteId, members: memberIds, createdAt: now, updatedAt: now });
         await newProject.save();
 
         // Create the phases and subphases with their activities
@@ -345,17 +382,17 @@ const createProject = async (req, res) => {
             }
 
             // Update the phase with the subphases
-            await PhaseSubphase.updateOne({ _id: phaseId }, { $set: { subphases: subphaseIds } });
+            await PhaseSubphase.updateOne({ _id: phaseId }, { $set: { subphases: subphaseIds, updatedAt: now } });
         }
 
         // Update the project with the phases
-        await newProject.updateOne({ $set: { phases: phaseIds } });
+        await newProject.updateOne({ $set: { phases: phaseIds, updatedAt: now } });
 
 
-        res.status(201).json({ message: 'Project, phases, subphases, and activities saved successfully' });
+        res.status(201).json({ success: true, message: 'Project, phases, subphases, and activities saved successfully' });
     } catch (error) {
         console.error('Error saving project:', error);
-        res.status(500).json({ message: 'Server error while saving project' });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -375,6 +412,7 @@ const updateExistingMacroActivity = async (existingMacroActivity, macroActivity,
     olMacroActivity.title = macroActivity.title;
     olMacroActivity.startDate = macroActivity.startDate;
     olMacroActivity.deadline = macroActivity.deadline;
+    olMacroActivity.updatedAt = getCurrentNow();
 
     await olMacroActivity.save();
 
@@ -415,6 +453,7 @@ const updateExistingActivities = async (existingActivities, activities, projectT
                 existingActivity.deadline = activity.deadline;
                 existingActivity.milestone = activity.milestone;
                 existingActivity.dependencies = dependenciesIds;
+                existingActivity.updatedAt = getCurrentNow();
                 await existingActivity.save();
             }
         }
@@ -431,13 +470,13 @@ const updateProject = async (req, res) => {
         // Find the project
         let project = await Project.findById(id);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         // Find the owner id
         const ownerUser = await User.findOne({ username: owner });
         if (!ownerUser) {
-            return res.status(404).json({ message: 'Owner not found' });
+            return res.status(404).json({ success: false, message: 'Owner not found' });
         }
 
         // Find the members ids
@@ -447,6 +486,7 @@ const updateProject = async (req, res) => {
         // Update the project
         project.title = title;
         project.members = memberIds;
+        project.updatedAt = getCurrentNow();
 
         // Update the description note of the project
         await updateNoteDescription(project.description, description, project.title, 'project');
@@ -516,11 +556,11 @@ const updateProject = async (req, res) => {
         project.phases = updatedPhaseIds;
         await project.save();
 
-        res.status(200).json({ message: 'Project updated successfully', project });
+        res.status(200).json({ success: true, message: 'Project updated successfully', project });
 
     } catch (error) {
         console.error('Error updating project:', error);
-        res.status(500).json({ message: 'Server error while updating project' });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -560,7 +600,7 @@ const deleteProject = async (req, res) => {
         // Find the project
         const project = await Project.findById(id);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         // Find all phases and subphases of the project
@@ -592,10 +632,10 @@ const deleteProject = async (req, res) => {
         // Delete the project
         await Project.findByIdAndDelete(id);
 
-        res.status(200).send('Project and associated data deleted successfully.');
+        res.status(200).send({ success: true, message: 'Project deleted successfully' });
     } catch (error) {
         console.error('Error deleting project:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -607,13 +647,13 @@ const removePhaseFromBackend = async (req, res) => {
         // Find the project
         const project = await Project.findById(projectId);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         // Find the phase
         const phase = await PhaseSubphase.findById(phaseId);
         if (!phase || phase.type !== 'phase') {
-            return res.status(404).json({ message: 'Phase not found or invalid type' });
+            return res.status(404).json({ success: false, message: 'Phase not found or invalid type' });
         }
 
         // Remove the phase from the project's phases array
@@ -628,7 +668,8 @@ const removePhaseFromBackend = async (req, res) => {
 
         // remove the macroactivity of each subphase
         for (const subphaseId of subphaseIds) {
-            await deleteMacroActivity(subphaseId.macroActivity);
+            const subphase = await PhaseSubphase.findById(subphaseId);
+            await deleteMacroActivity(subphase.macroActivity);
         }
 
         // Get all activities belonging to the phase and its subphases
@@ -656,7 +697,7 @@ const removePhaseFromBackend = async (req, res) => {
 
     } catch (error) {
         console.error('Error deleting phase:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -668,7 +709,7 @@ const removeSubphaseFromBackend = async (req, res) => {
         // Find the project
         const project = await Project.findById(projectId);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         let subphaseDeleted = false;
@@ -677,7 +718,7 @@ const removeSubphaseFromBackend = async (req, res) => {
         if (phaseId) {
             const phase = await PhaseSubphase.findById(phaseId);
             if (!phase || phase.type !== 'phase') {
-                return res.status(404).json({ message: 'Phase not found or invalid type' });
+                return res.status(404).json({ success: false, message: 'Phase not found or invalid type' });
             }
 
             const initialLength = phase.subphases.length;
@@ -690,13 +731,19 @@ const removeSubphaseFromBackend = async (req, res) => {
         }
 
         if (!subphaseDeleted) {
-            return res.status(404).json({ message: 'Subphase not found in project or phase' });
+            return res.status(404).json({ success: false, message: 'Subphase not found in phase' });
         }
 
         // Delete the subphase
 
+        // Find the subphase
+        console.log('Finding subphase with ID:', subphaseId);
+        const subphase = await PhaseSubphase.findById(subphaseId);
+        console.log('Subphase found:', subphase);
+
         //we first delete the macroactivity of the subphase
-        await deleteMacroActivity(subphaseId.macroActivity);
+        console.log('Deleting macroactivity of subphase:', subphase.macroActivity);
+        await deleteMacroActivity(subphase.macroActivity);
 
         //and its activities
         const activities = await Activity.find({ phaseSubphase: subphaseId });
@@ -717,16 +764,18 @@ const removeSubphaseFromBackend = async (req, res) => {
 
     } catch (error) {
         console.error('Error deleting subphase:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // Delete a macroactivity from the project
 const deleteMacroActivity = async (macroActivityId) => {
     try {
+        console.log('Deleting macroactivity with ID:', macroActivityId);
         // Find the macroactivity
         const macroActivity = await Activity.findById(macroActivityId);
         if (!macroActivity) {
-            return res.status(404).json({ message: 'Macroactivity not found' });
+            throw new Error('Macroactivity not found');
         }
 
         // Delete the events linked to the macroactivity
@@ -749,7 +798,8 @@ const deleteMacroActivity = async (macroActivityId) => {
         await Activity.findByIdAndDelete(macroActivityId);
 
     } catch (error) {
-        console.error('Error deleting macroactivity:', error);
+        console.error('Error deleting macroactivity:', error.message);
+        throw error;
     }
 };
 
@@ -761,7 +811,7 @@ const removeActivityFromBackend = async (req, res) => {
         // Find the project
         const project = await Project.findById(projectId);
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            return res.status(404).json({ success: false, message: 'Project not found' });
         }
 
         let activityDeleted = false;
@@ -772,7 +822,7 @@ const removeActivityFromBackend = async (req, res) => {
         if (phaseSubphaseId) {
             const phaseSubphase = await PhaseSubphase.findById(phaseSubphaseId);
             if (!phaseSubphase) {
-                return res.status(404).json({ message: 'Phase or Subphase not found' });
+                return res.status(404).json({ success: false, message: 'Phase or subphase not found' });
             }
 
             const initialLength = phaseSubphase.activities.length;
@@ -785,13 +835,13 @@ const removeActivityFromBackend = async (req, res) => {
         }
 
         if (!activityDeleted) {
-            return res.status(404).json({ message: 'Activity not found in phase or subphase' });
+            return res.status(404).json({ success: false, message: 'Activity not found in phase or subphase' });
         }
 
         // Retrieve the activity to delete notes and events linked to it
         const activity = await Activity.findById(activityId);
         if (!activity) {
-            return res.status(404).json({ message: 'Activity not found' });
+            return res.status(404).json({ success: false, message: 'Activity not found' });
         }
 
         //get the ids of the notes and events linked to the activity
@@ -814,7 +864,7 @@ const removeActivityFromBackend = async (req, res) => {
 
     } catch (error) {
         console.error('Error deleting activity:', error);
-        return res.status(500).json({ message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 

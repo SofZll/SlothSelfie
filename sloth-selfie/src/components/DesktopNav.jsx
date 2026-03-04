@@ -1,14 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { slide as Hamburger } from 'react-burger-menu';
 import { Link } from 'react-router-dom';
-import { StyleContext } from './StyleContext';
+import { StyleContext } from '../contexts/StyleContext';
 import { AuthContext } from '../contexts/AuthContext';
 import SettingsButton from './SettingsButton';
 
 //TODO: va messo abbosto l'iconna del panino
 const DesktopNav = () => {
     const { user } = useContext(AuthContext);
-    console.log(user);
     const [isOpen, setIsOpen] = useState(false);
 
     const handleStateChange = (state) => {
@@ -32,18 +31,20 @@ const DesktopNav = () => {
 
                 <div className='fixed-bottom menu-profile d-flex flex-column align-items-center justify-content-center'>
                     <hr className='w-100' />
-                    <div className='d-flex w-100 ps-2 align-items-center gap-4'>
+                    <div className='d-flex w-100 ps-2 align-items-center gap-4 position-relative'>
                         {user.profile_image && (
                             <div className='img-wrap'>
                                 <img src={user.profile_image} alt={`Profilo di ${user.username}`} loading='lazy' />
                             </div>
                         )}
+
                         <div className='d-flex flex-column'>
                             <span className='profile-username'>{user.username}</span>
                             <Link to='/profile' onClick={closeMenu} className='profile-link'>Profile</Link>
                         </div>
-                        <div className='setting-button-small'>
-                            <SettingsButton />
+
+                        <div className='position-absolute end-0 top-0 mt-1 translate-middle-y'>
+                            <SettingsButton dark={false} />
                         </div>
                     </div>
                 </div>

@@ -8,8 +8,12 @@ const GanttChartView = ({ projectId }) => {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const projectData = await response.json();
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch project');
+        }
+        const projectData = data.project;
         console.log(projectData);
         if (!response.ok) {
             throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -138,11 +142,7 @@ const GanttChartView = ({ projectId }) => {
   if (!project) return <div>Loading...</div>;
 
   return (
-    <div>
-      <div style={{ display: "flex" }}>
-        <div id="gantt-container"></div>
-      </div>
-    </div>
+    <div id="gantt-container"></div>
   );
 };
 

@@ -1,12 +1,11 @@
 //TODO: QUANDO TRASFERISCI SUL SERVER CAMBIA I PATH DEI FETCH nei file projects.js, projectsView.js, projectsHandleActivities.js, projectsHandleActivitiesUtils.js
 
-//TODO, TIME MACHINE DATE, in projectsHandleActivities e projectsHandleActivitiesUtils.js utilizzo per due volte let today = new Date(); METTERE QUELLA DI TIMEMACHINE
-//(es di link ad un file online, es: https://example.com/files/note.txt) V
+//(es di link ad un file online, es: https://example.com/files/note.txt) V 
 
 // Function to get the logged user username
 async function getLoggedUser() {
     try {
-        const response = await fetch("http://localhost:8000/api/user/profile", {
+        const response = await fetch("https://site232453.tw.cs.unibo.it/api/user/profile", {
             method: "GET",
             credentials: "include",
         });
@@ -37,7 +36,7 @@ async function loadProjects() {
                         <p>Loading, please wait...</p>
                     </div>`;
     try {
-        const response = await fetch(`http://localhost:8000/api/projects`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/projects`, {
             method: "GET",
             credentials: "include",
             headers: {
@@ -48,7 +47,13 @@ async function loadProjects() {
             throw new Error('Error fetching projects');
         }
 
-        const projects = await response.json();
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error('Failed to fetch projects');
+        }
+
+        const projects = data.projects;
         
         const list = document.getElementById("projects-list");
         list.innerHTML = ""; // clear the list before loading the projects
@@ -60,13 +65,13 @@ async function loadProjects() {
                 <strong>${project.title}</strong> - Owner: ${project.owner.username} - Members: ${project.members.map(m => m.username).join(", ")}<br>
                  ${
                     project.owner.username === userLogged // Only the owner can edit or delete the project
-                    ? `<button class="btn btn-info btn-sm ml-2 btn-form-1" onclick="deleteProject('${project._id}')">Delete Project</button>
-                       <button class="btn btn-info btn-sm ml-2 btn-form-1" onclick="editProject('${project._id}')">Edit Project</button>` 
+                    ? `<button type="button" aria-label="Delete-project" class="btn btn-info btn-sm ml-2 btn-form-1" onclick="deleteProject('${project._id}')">Delete Project</button>
+                       <button type="button" aria-label="Edit-project" class="btn btn-info btn-sm ml-2 btn-form-1" onclick="editProject('${project._id}')">Edit Project</button>` 
                     : ''
                 }
-                <button class="btn btn-warning btn-sm ml-2 btn-form-3" onclick="handleActivities('${project._id}')">Handle Activities</button>
-                <button class="btn btn-outline-primary btn-sm btn-view view-list" onclick="viewAsList('${project._id}')">View as List</button>
-                <button class="btn btn-outline-primary btn-sm btn-view view-gantt" onclick="viewAsGantt('${project._id}')">View as Gantt</button>
+                <button type="button" aria-label="handleActivities" class="btn btn-warning btn-sm ml-2 btn-form-3" onclick="handleActivities('${project._id}')">Handle Activities</button>
+                <button type="button" aria-label="View-list" class="btn btn-outline-primary btn-sm btn-view view-list" onclick="viewAsList('${project._id}')">View as List</button>
+                <button type="button" aria-label="View-gantt" class="btn btn-outline-primary btn-sm btn-view view-gantt" onclick="viewAsGantt('${project._id}')">View as Gantt</button>
             `;
             list.appendChild(li);
         });
@@ -81,12 +86,12 @@ function extractActivityData(activityDiv) {
     const activityId = activityDiv.getAttribute("data-activity-id");
 
     // Get the members of the activity
-    const membersSelect = activityDiv.querySelector(".activity-actors");
-    const members = Array.from(membersSelect.selectedOptions).map(option => option.value);
+    const membersCheckboxes = activityDiv.querySelectorAll('input[name="activity-actors"]:checked');
+    const members = Array.from(membersCheckboxes).map(cb => cb.value);
 
     // Get the dependencies of the activity
-    const dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
-    const dependencies = Array.from(dependenciesSelect.selectedOptions).map(option => option.value);
+    const dependenciesCheckboxes = activityDiv.querySelectorAll('input[name="activity-dependencies"]:checked');
+    const dependencies = Array.from(dependenciesCheckboxes).map(cb => cb.value);
 
     // Get start and end date values
     const startDate = activityDiv.querySelector(".activity-start").value;
@@ -191,7 +196,7 @@ async function saveOrUpdateProject(event) {
         let response;
         if (projectId) {
             // Update the existing project, PUT
-            response = await fetch(`http://localhost:8000/api/project/${projectId}`, {
+            response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -201,7 +206,7 @@ async function saveOrUpdateProject(event) {
             });
         } else {
             // Save the new project, POST
-            response = await fetch(`http://localhost:8000/api/project`, {
+            response = await fetch(`https://site232453.tw.cs.unibo.it/api/project`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -264,11 +269,11 @@ function addPhase() {
         <label>Phase name:</label>
         <input type="text" class="form-control phase-name" required>
         <div class="macro-activities mt-2"></div> <!-- container macro activities of the phase -->
-        <button type="button" class="btn btn-warning mt-2 btn-form-3" onclick="addActivity(this, 'phase')">Add activity</button>
+        <button type="button" aria-label="Add-activity" class="btn btn-warning mt-2 btn-form-3" onclick="addActivity(this, 'phase')">Add activity</button>
         <div class="activities mt-2"></div> <!-- container activities of the phase -->
-        <button type="button" class="btn btn-info mt-2 btn-form-2" onclick="addSubPhase(this)">Add subphase</button>
+        <button type="button" aria-label="Add-subphase" class="btn btn-info mt-2 btn-form-2" onclick="addSubPhase(this)">Add subphase</button>
         <div class="subphases mt-2"></div> <!-- Container subphases -->
-        <button type="button" class="btn btn-danger mt-2 btn-form-1" onclick="removeElement(this)">Remove Phase</button>
+        <button type="button" aria-label="Remove-phase" class="btn btn-danger mt-2 btn-form-1" onclick="removeElement(this)">Remove Phase</button>
     `;
     document.getElementById("phasesContainer").appendChild(phaseDiv);
 
@@ -287,9 +292,9 @@ function addSubPhase(button) {
         <label>Subphase name:</label>
         <input type="text" class="form-control subphase-name" required>
         <div class="subphase-macro-activities mt-2"></div> <!-- container macro activities of the subphase -->
-        <button type="button" class="btn btn-warning mt-2 btn-form-3" onclick="addActivity(this, 'subphase')">Add activity</button>
+        <button type="button" aria-label="Add-activity" class="btn btn-warning mt-2 btn-form-3" onclick="addActivity(this, 'subphase')">Add activity</button>
         <div class="subphase-activities mt-2"></div> <!-- Container activities of the subphase -->
-        <button type="button" class="btn btn-danger mt-2 btn-form-2" onclick="removeElement(this)">Remove Subphase</button>
+        <button type="button" aria-label="Remove-subphase" class="btn btn-danger mt-2 btn-form-2" onclick="removeElement(this)">Remove Subphase</button>
     `;
     subPhaseContainer.appendChild(subPhaseDiv);
 
@@ -368,20 +373,9 @@ function addActivity(button, type) {
     let projectActorsInput = document.querySelector("#projectActors").value.trim();
     let projectActors = projectActorsInput ? projectActorsInput.split(",").map(actor => actor.trim()) : [];
 
-    // Creates the options for the select element with the members of the activity
-    let membersOptions = projectActors.map(actor => 
-        `<option value="${actor}">${actor}</option>`
-    ).join("");
-
     // Gets all project activities for selecting dependencies, we only show the ones that are already saved with an id from the backend
     const allActivities = Array.from(document.querySelectorAll(".border[data-activity-id]")) 
         .filter(activityDiv => activityDiv.getAttribute("data-activity-id"));
-
-    let dependencyOptions = allActivities.map(activity => {
-        let activityId = activity.getAttribute("data-activity-id");
-        let activityName = activity.querySelector(".activity-name").value;
-        return `<option value="${activityId}">${activityName}</option>`;
-    }).join("");
 
     const activityDiv = document.createElement("div");
     activityDiv.classList.add("border", "p-2", "mt-2");
@@ -391,9 +385,14 @@ function addActivity(button, type) {
         <label>Activity description (optional):</label>
         <textarea class="form-control activity-description"></textarea>
         <label>Members:</label>
-        <select class="form-control activity-actors" multiple>
-            ${membersOptions}
-        </select>
+        <div class="activity-actors-checkboxes">
+            ${projectActors.map(actor => `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="activity-actors" value="${actor}" checked>
+                    <label class="form-check-label">${actor}</label>
+                </div>
+            `).join("")}
+        </div>
         <label>Start date:</label>
         <input type="date" class="form-control activity-start" required min="${macroStart}" max="${macroEnd}">
         <label>Deadline:</label>
@@ -402,12 +401,21 @@ function addActivity(button, type) {
         <input type="checkbox" class="activity-milestone">
         </br>
         <label>Dependencies:</label>
-        <select class="form-control activity-dependencies" multiple>
-            ${dependencyOptions}
-        </select>
+        <div class="activity-dependencies-checkboxes">
+            ${allActivities.map(activity => {
+                const activityId = activity.getAttribute("data-activity-id");
+                const activityName = activity.querySelector(".activity-name").value;
+                return `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="activity-dependencies" value="${activityId}">
+                        <label class="form-check-label">${activityName}</label>
+                    </div>
+                `;
+            }).join("")}
+        </div>
 
         </br>
-        <button type="button" class="btn btn-danger mt-2 btn-form-3" onclick="closeActivityForm(this)">Remove Activity</button>
+        <button type="button" aria-label="Remove-activity" class="btn btn-danger mt-2 btn-form-3" onclick="closeActivityForm(this)">Remove Activity</button>
     `;
     activityContainer.appendChild(activityDiv);
 }
@@ -477,7 +485,7 @@ async function closeActivityForm(button) {
 // function to remove a phase from the backend
 async function removePhaseFromBackend(projectId, phaseId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}/remove-phase`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}/remove-phase`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId, phaseId })
@@ -485,9 +493,11 @@ async function removePhaseFromBackend(projectId, phaseId) {
 
         const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(`Error removing phase: ${data.message}`);
-        } 
+        if (data.success) {
+            console.log("Phase removed successfully:", data.message); 
+        } else {
+            Swal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
+        }
         
     } catch (error) {
         console.error('Errore:', error);
@@ -497,7 +507,7 @@ async function removePhaseFromBackend(projectId, phaseId) {
 // function to remove a subphase from the backend
 async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}/remove-subphase`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}/remove-subphase`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId, phaseId, subphaseId })
@@ -506,7 +516,7 @@ async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
         const data = await response.json();
 
         if (data.success) {
-            
+            console.log("Subphase removed successfully:", data.message);
         } else {
             Swal.fire({title: "Error", text: "Error while deleting subphase", icon: "error"});
             
@@ -519,7 +529,7 @@ async function removeSubphaseFromBackend(projectId, phaseId, subphaseId) {
 //function to remove an activity from the backend
 async function removeActivityFromBackend(projectId, phaseId, subphaseId, activityId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}/remove-activity`, {
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}/remove-activity`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectId, phaseId, subphaseId, activityId })
@@ -528,7 +538,7 @@ async function removeActivityFromBackend(projectId, phaseId, subphaseId, activit
         const data = await response.json();
 
         if (data.success) {
-            
+            console.log("Activity removed successfully:", data.message);
         } else {
             Swal.fire({title: "Error", text: "Error while deleting the activity", icon: "error"});
 
@@ -552,7 +562,7 @@ async function deleteProject(projectId) {
 
         // DELETE request to remove the project
         try {
-            const response = await fetch(`http://localhost:8000/api/project/${projectId}`, {
+            const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`, {
                 method: "DELETE",
                 credentials: 'include',
             });
@@ -612,46 +622,37 @@ function fillActivityFields(activityDiv, activity, projectActors, parentId, pare
     activityDiv.querySelector(".activity-name").value = activity.title;
     activityDiv.querySelector(".activity-description").value = activity.description.content;
 
-    //Fill the select element with the members of the project
-    let membersSelect = document.createElement("select");
-    membersSelect.classList.add("form-control", "activity-actors");
-    membersSelect.multiple = true;
+    //Fill the checkboxes with the members of the project
+    const actorUsernames = activity.sharedWith.map(a => a.username);
+    const checkboxes = activityDiv.querySelectorAll('input[name="activity-actors"]');
 
-    projectActors.forEach(actor => {
-        let option = document.createElement("option");
-        option.value = actor;
-        option.textContent = actor;
-        if (activity.sharedWith.some(a => a.username === actor)) {
-            option.selected = true;
-        }
-        membersSelect.appendChild(option);
+    checkboxes.forEach(cb => {
+        cb.checked = actorUsernames.includes(cb.value);
     });
-
-    let oldInput = activityDiv.querySelector(".activity-actors");
-    oldInput.replaceWith(membersSelect);
 
     activityDiv.querySelector(".activity-start").value = formatDateForInput(activity.startDate);
     activityDiv.querySelector(".activity-end").value = formatDateForInput(activity.deadline);
     activityDiv.querySelector(".activity-milestone").checked = activity.milestone;
 
-    // We need to select the saved dependencies in the select element
-    let dependenciesSelect = activityDiv.querySelector(".activity-dependencies");
-    let savedDependencies = activity.dependencies;
+    // We need to select the saved dependencies in the checkboxes
+    const savedDependencyIds = activity.dependencies.map(dep => dep._id);
+    const dependencyCheckboxes = activityDiv.querySelectorAll('input[name="activity-dependencies"]');
 
-    let savedDependencyIds = savedDependencies.map(dep => dep._id);
-
-    Array.from(dependenciesSelect.options).forEach(option => {
-        if (savedDependencyIds.includes(option.value)) {
-            option.selected = true;
-        }
+    dependencyCheckboxes.forEach(cb => {
+        cb.checked = savedDependencyIds.includes(cb.value);
     });
 }
 
 //function to fill the form and edit a project
 async function editProject(projectId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error('Failed to fetch project data');
+        }
+        const project = data.project;
 
         // fill the form with the project data
         
@@ -840,6 +841,22 @@ async function toggleProjectForm() {
         document.getElementById("closeProjectViewBtn").style.display = "none"; // Hides the close view button
         document.getElementById("activity-container").style.display = "none";
         document.getElementById("closeActivityViewBtn").style.display = "none"; // Hides the close view button
+    }
+}
+
+// time machine functions
+async function getCurrentNow() {
+    try {
+        const response = await fetch("https://site232453.tw.cs.unibo.it/api/time/state", {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+        console.log("Current time:", data.virtualNow);
+        return new Date(data.virtualNow);
+    } catch (error) {
+        console.error("Error fetching current time:", error);
+        return new Date();
     }
 }
 

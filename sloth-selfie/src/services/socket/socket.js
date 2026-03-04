@@ -1,6 +1,6 @@
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:8000', {
+const socket = io('https://site232453.tw.cs.unibo.it', {
     withCredentials: true,
     autoConnect: false,
 });

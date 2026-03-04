@@ -7,24 +7,38 @@ const User = require('../models/userModel');
 
 const socketHandler = (io) => {
 
-    io.on('connection', (socket) => {
+    io.on('connection', async (socket) => {
         console.log('A user connected:', socket.id);
+        const userId = socket.request.session.userId;
+        if (!userId) {
+            console.log('User ID not found in session');
+            return socket.disconnect();
+        }
 
-        socket.on('online-user', async (userId) => {
-            userSocketMap.set(userId, socket.id);
-            await User.findByIdAndUpdate(userId, { isOnline: true });
-            socket.emit('join-chatroom', userId);
+        // multi-device socket
+        if (!userSocketMap.has(userId)) userSocketMap.set(userId, new Set());
+        userSocketMap.get(userId).add(socket.id);
+
+        if (userSocketMap.get(userId).size == 1) {
+            await User.findByIdAndUpdate(userId, { isOnline: true })
             io.emit('status-change', { userId, isOnline: true });
-        });
-        
+        }
+
+        console.log('User ID:', userId);
+        socket.join(userId);
+        console.log('User joined room:', userId);
+
         socket.on('disconnect', async () => {
-            const userId = [...userSocketMap.entries()].find(([_, id]) => id === socket.id)?.[0];
-            if (userId) {
-                userSocketMap.delete(userId);
-                await User.findByIdAndUpdate(userId, { isOnline: false });
-                io.emit('status-change', { userId, isOnline: false });
-                socket.emit('leave-chatroom', userId);
-                console.log('User disconnected:', userId);
+            if (userSocketMap.get(userId)) {
+                userSocketMap.get(userId).delete(socket.id);
+                if (userSocketMap.get(userId).size == 0) {
+                    userSocketMap.delete(userId);
+                    await User.findByIdAndUpdate(userId, { isOnline: false });
+                    io.emit('status-change', { userId, isOnline: false });
+                    console.log('User disconnected:', socket.id);
+                } else {
+                    console.log('User disconnected from one device:', socket.id);
+                }
             }
         });
 

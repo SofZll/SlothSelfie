@@ -25,11 +25,16 @@ const ListTask = () => {
     }
 
     const deleteExistingTask = (t) => {
-        setNote({ ...note, deletedTasks: [...note.deletedTasks, t], tasks: note.tasks.filter(tk => tk._id !== t._id) });
+        if (selected.add) {
+            setNote({ ...note, tasks: note.tasks.filter(tk => tk !== t) });
+        } else {
+            setNote({ ...note, deletedTasks: [...note.deletedTasks, t], tasks: note.tasks.filter(tk => tk._id !== t._id) });
+        }
     }
 
     const deleteLocalTask = (t) => {
-        setNote({ ...note, addedTasks: note.addedTasks.filter(tk => tk._id !== t._id) });
+        if (selected.add) setNote({ ...note, tasks: note.tasks.filter(tk => tk._id !== t._id) });
+        else setNote({ ...note, addedTasks: note.addedTasks.filter(tk => tk._id !== t._id) });
     }
 
     const completeLocalTask = (t) => {
@@ -61,7 +66,7 @@ const ListTask = () => {
                     onChange={(e) => setDeadline(e.target.value)} />
                 </div>
                 <div className='col-2'>
-                    <button type='button' className='btn p-0' onClick={() => addTask()}>
+                    <button type='button' aria-label='Add task' title='Add task' className='btn p-0' onClick={() => addTask()}>
                         <Plus size={20} color='#555B6E' strokeWidth={1.75} />
                     </button>
                 </div>
@@ -81,7 +86,7 @@ const ListTask = () => {
                                 </div>
                             )}
                             <div>
-                                <button type='button' className='btn p-0' onClick={() => deleteLocalTask(t)}>
+                                <button type='button' aria-label='Remove task' title='Remove task' className='btn p-0' onClick={() => deleteLocalTask(t)}>
                                     <X size={20} color='#555B6E' strokeWidth={1.75} />
                                 </button>
                             </div>
@@ -104,7 +109,7 @@ const ListTask = () => {
                                 </div>
                             )}
                             <div>
-                                <button type='button' className='btn p-0' onClick={() => deleteExistingTask(t)}>
+                                <button type='button' aria-label='Remove task' title='Remove task' className='btn p-0' onClick={() => deleteExistingTask(t)}>
                                     <X size={20} color='#555B6E' strokeWidth={1.75} />
                                 </button>
                             </div>

@@ -1,62 +1,25 @@
-import React, { useMemo , useContext} from 'react';
+import React, { useMemo , useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
 
-import { apiService } from '../../services/apiService';
-import socket from '../../services/socket/socket';
 import { useChat } from '../../contexts/ChatContext';
-import { AuthContext } from '../../contexts/AuthContext';
 
 const ChatList = () => {
     const navigate = useNavigate();
-    const { chats, selectedChat, setSelectedChat, onlineUsers, searchTerm, isDesktop } = useChat();
-    const { user } = useContext(AuthContext);
+    const { chats, selectedChat, onlineUsers, searchTerm, isDesktop, fetchChat } = useChat();
 
     const filteredChats = useMemo(() => {
-        console.log('chats.otherParticipant.username: ', chats.map(chat => chat.otherParticipant.username));
-        console.log('searchTerm: ', searchTerm);
         return chats.filter(chat => 
             chat.otherParticipant.username.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [chats, searchTerm]);
 
-    const handleChatClick = async (chatId) => {
-        console.log('click rilevato');
-        const response = await apiService(`/chat/${chatId}`);
-        if (response) {
-            const existingChat = chats.find(chat => chat._id === chatId);
-            let messages = response.messages || [];
-            if (messages.length > 0) {
-                const transformedMessages = messages.map(message => {
-                    return {
-                        ...message,
-                        createdAt: message.createdAt ? new Date(message.createdAt).toLocaleDateString() : '',
-                    };
-                });
-                messages = transformedMessages;
-            }
+    const handleChatClick = async (chatId) => fetchChat(chatId);
 
-            setSelectedChat({
-                ...existingChat,
-                messages: messages,
-            });
-
-            chats.forEach(chat => {
-                if (chat._id === chatId) chat.unreadCount = 0;
-            });   
-
-            socket.emit('mark-read', {
-                chatId: chatId,
-                userId: user._id
-            });
-        } else {
-            console.error('Error fetching chat:', response);
-            Swal.fire({ icon: 'error', title: 'Errore', text: response.message });
-        }
-        if (!isDesktop && chats) {
+    useEffect(() => {
+        if (!isDesktop && selectedChat) {
             navigate(`/chat/${selectedChat.otherParticipant.username}`);
         }
-    }
+    }, [selectedChat, isDesktop, navigate]);
 
     return (
         <>
