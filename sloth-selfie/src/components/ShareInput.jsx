@@ -1,18 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import '../styles/ShareInput.css';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
 
-const ShareInput = ({ receivers, setReceivers }) => {
+import { apiService } from '../services/apiService';
+
+const ShareInput = ({ receivers, setReceivers, event }) => {
     const [receiverInput, setReceiverInput] = useState('');
     const [removingIndex, setRemovingIndex] = useState(null);
 
-    const addReceiver = () => {
+    const addReceiver = async () => {
         if (receiverInput.trim() !== '') {
             if (!receivers.includes(receiverInput.trim())) {
+                const response = await apiService(`/user/${receiverInput.trim()}`, 'GET');
+                if (!response.success) {
+                    NewSwal.fire(response.message, '', 'warning');
+                    return;
+                }
+
+                if (!event && response.isTool) {
+                    NewSwal.fire(response.message, '', 'warning');
+                    return;
+                }
+
                 setReceivers([...receivers, receiverInput.trim()]);
                 setReceiverInput('');
             } else {
-                Swal.fire('Utente già inserito', '', 'warning');
+                NewSwal.fire('User already selected', '', 'warning');
             }
         }
     };
@@ -32,11 +45,11 @@ const ShareInput = ({ receivers, setReceivers }) => {
     };
 
     return (
-        <div className='container my-2 p-0 justify-content-start'>
+        <div className='container p-0 justify-content-start'>
             <div className='d-flex flex-column align-items-center'>
-                <div className='d-flex w-100 justify-content-between align-items-center mb-3'>
+                <div className='d-flex w-100 justify-content-between align-items-center mb-2'>
                     <input type='text' className='form-control me-2 input-receiver' id='receivers' placeholder='Enter receivers username' value={receiverInput} onChange={(e) => setReceiverInput(e.target.value)} onKeyDown={enterKey} />
-                    <button type='button' className='button-clean yellow' onClick={addReceiver}>
+                    <button type='button' aria-label='addReceiver' className='button-clean yellow' onClick={addReceiver}>
                         Add
                     </button>
                 </div>
@@ -45,7 +58,7 @@ const ShareInput = ({ receivers, setReceivers }) => {
                         <div key={index} className={`badge bg-secondary d-flex align-items-center ${
                                 removingIndex === index ? 'fade-out' : 'fade-in'}`}>
                             {receiver}
-                            <button type='button' className='btn-close btn-close-white ms-2 close-small' onClick={() => removeReceiver(index)} />
+                            <button type='button' aria-label='removeReceiver' title='Remove receiver' className='btn-close btn-close-white ms-2 close-small' onClick={() => removeReceiver(index)} />
                         </div>
                     ))}
                 </div>

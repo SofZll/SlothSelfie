@@ -1,34 +1,20 @@
 const mongoose = require('mongoose');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-// Mongodb credentials
-/*
-const mongoCredentials = {
-    user: "site232453",
-    pwd: "au8Eevai",
-    site: "mongo_site232453"
-};
-*/
+const { startVirtualScheduler } = require('../scheduler/notificationScheduler');
 
-const mongoCredentials = {
-    user: "kaorijiang",
-    pwd: "dWFd3wNQCJQksWEs",
-    site: "cluster0.ynn63.mongodb.net",
-    dbname: "slothselfie"
-};
-
-const dbName = 'slothselfie';
-//const uri = `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/${dbName}?authSource=admin&writeConcern=majority`;
-const uri = `mongodb+srv://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/${dbName}?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = process.env.MONGO_URI;
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(uri, {
-        //locale:
-        //await mongoose.connect('mongodb://localhost:27017/mydb', {
-            //useNewUrlParser: true,
-            //useUnifiedTopology: true,
-        });
+        await mongoose.connect(uri);
         console.log('Connected to MongoDB');
+
+        // scheduler for notifications
+        startVirtualScheduler();
+
+        console.log('Notification scheduler initialized');
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
         process.exit(1);

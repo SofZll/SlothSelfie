@@ -6,22 +6,32 @@ import CardNote from '../../components/CardNote';
 
 import { apiService } from '../../services/apiService';
 import { useNote } from '../../contexts/NoteContext';
+import { LoadingPageDark } from '../LoadingPage';
 
 const GridNotes = () => {
 
     const { selected, setSelected, notes, setNotes, filters, setFilters } = useNote();
     const [filtedNotes, setFilteredNotes] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const fetchNotes = async () => {
-        const response = await apiService('/notes', 'GET');
-        if (response) setNotes(response);
+        try {
+            setLoading(true);
+            const response = await apiService('/notes', 'GET');
+            if (response.success) setNotes(response.notes);
+            else setNotes([]);
+        } catch (error) {
+            console.error('Error fetching notes:', error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const filterNotes = () => {
 
         let n = [];
         if (filters.date === '') n = [...notes];
-        else n = notes.filter(nt => new Date(nt.createDate).toLocaleDateString() === new Date(filters.date).toLocaleDateString());
+        else n = notes.filter(nt => new Date(nt.createdAt).toLocaleDateString() === new Date(filters.date).toLocaleDateString());
 
         switch (filters.order) {
             case 'title':
@@ -31,10 +41,10 @@ const GridNotes = () => {
                 n.sort((a, b) => a.content.length - b.content.length);
                 break;
             case 'most_recent':
-                n.sort((a, b) => new Date(b.createDate) - new Date(a.createDate));
+                n.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 break;
             case 'least_recent':
-                n.sort((a, b) => new Date(a.createDate) - new Date(b.createDate));
+                n.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
                 break;
             default:
                 break;
@@ -54,7 +64,7 @@ const GridNotes = () => {
 
 
     return (
-        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popUp: true })} selected={selected.popUp} popUp={<FormNote />}>
+        <PlusLayout clickCall={() => setSelected({ ...selected, add: true, popUp: true })} selected={selected.popUp} popUp={ <div className="formPopup"><FormNote /></div>}>
             
             <div className='row py-2 w-100 mt-md-5'>
                 <div className='col-6'>
@@ -77,7 +87,7 @@ const GridNotes = () => {
                 </div>
             </div>
 
-            <div className='row p-2 d-flex w-100 h-75 overflow-y-auto border rounded shadow m-3'>
+            <div className='row p-2 d-flex w-100 h-75 overflow-y-auto border rounded shadow-sm m-3'>
                 {filtedNotes.length > 0 ? (
                     filtedNotes.map((note, index) => (
                         <div key={index} className='col-12 col-md-6 col-lg-4 my-1'>
@@ -85,9 +95,11 @@ const GridNotes = () => {
                         </div>
                     ))
                 ) : (
-                    <div className='col-12'>
-                        <h3>No notes found</h3>
-                    </div>
+                    loading ? <LoadingPageDark /> : (
+                        <div className='col-12'>
+                            <h4>No notes found</h4>
+                        </div>
+                    )
                 )}
             </div>
         </PlusLayout>

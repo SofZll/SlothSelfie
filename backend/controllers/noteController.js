@@ -1,17 +1,20 @@
 const Note = require('../models/noteModel');
 const User = require('../models/userModel');
 
-const { addTasks, editTasks, deleteTasks } = require('./taskController');
-const { findUserId } = require('../utils/utils');
+const { addTasks, editTasks, deleteTasks, deleteUserFromShareWith } = require('./taskController');
+const { getCurrentNow } = require('../services/timeMachineService');
 
 // Create a new note
 const createNote = async (req, res) => {
     const { title, category, content, tasks, noteAccess, sharedWith } = req.body;
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
-
+    
     try {
-        const users = await findUserId(sharedWith);
+        let sharedWithUsers = [];
+        if (sharedWith && Array.isArray(sharedWith)) {
+            sharedWithUsers = await User.find({ username: { $in: sharedWith }, isDevice: { $ne: true }, isRoom: { $ne: true }, isAdmin: false }).select('_id');
+        }
 
         const note = new Note({
             title,
@@ -19,12 +22,12 @@ const createNote = async (req, res) => {
             category,
             content: content || '',
             noteAccess,
-            sharedWith: noteAccess === 'shared' ? users : [],
-            createDate: new Date(),
-            updateDate: new Date(),
+            sharedWith: noteAccess === 'shared' ? sharedWithUsers : [],
+            createdAt: getCurrentNow(),
+            updatedAt: getCurrentNow()
         });
         
-        if (tasks) note.tasks = await addTasks(tasks, user, users);
+        if (tasks) note.tasks = await addTasks(tasks, user, noteAccess, sharedWithUsers);
 
         const savedNote = await note.save()
 
@@ -33,7 +36,7 @@ const createNote = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
         
-        res.status(201).json(populatedNote);
+        res.status(201).json({ success: true, note: populatedNote });
     } catch (error) {
         console.error('Error creating note:', error);
         res.status(500).json({ success: false, message: 'Error creating note' });
@@ -44,6 +47,7 @@ const createNote = async (req, res) => {
 const getNotes = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
 
     try {
         
@@ -52,15 +56,14 @@ const getNotes = async (req, res) => {
                 { user: user._id },
                 { noteAccess: 'public' },
                 { noteAccess: 'shared', sharedWith: user._id }
-            ]
+            ],
+            createdAt: { $lte: now }
         })
         .populate('tasks')
         .populate('user', 'username')
         .populate('sharedWith', 'username');
 
-        console.log('Fetched notes:', notes);
-
-        res.status(200).json(notes);
+        res.status(200).json({ success: true, notes });
 
     } catch (error) {
         console.error('Error fetching notes:', error);
@@ -71,6 +74,7 @@ const getNotes = async (req, res) => {
 // Fetch a single note by ID
 const getNote = async (req, res) => {
     const { noteId } = req.params;
+    const now = getCurrentNow();
 
     try{
         const note = await Note.findById(noteId)
@@ -78,9 +82,10 @@ const getNote = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
 
-        res.status(200).json(note);
-    }
-    catch (error) {
+        if (note.createdAt > now) return res.status(403).json({ success: false, message: 'Note not found' }); //MI DA 403 FORBIDDEN
+
+        res.status(200).json({ success: true, note });
+    } catch (error) {
         console.error('Error fetching note:', error);
         return res.status(500).json({ success: false, message: 'Error fetching note' });
     }
@@ -90,10 +95,13 @@ const getNote = async (req, res) => {
 const updateNote = async (req, res) => {
     const { noteId } = req.params;
     const { title, user, category, content, tasks, addedTasks, deletedTasks, noteAccess, sharedWith } = req.body;
-
+    
     try {
         const note = await Note.findById(noteId);
-        const users = await findUserId(sharedWith);
+        let sharedWithUsers = [];
+        if (sharedWith && Array.isArray(sharedWith)) {
+            sharedWithUsers = await User.find({ username: { $in: sharedWith }, isDevice: { $ne: true }, isRoom: { $ne: true }, isAdmin: false }).select('_id');
+        }
         const userId = await User.findOne({ username: user});
 
         if (!note) {
@@ -106,13 +114,13 @@ const updateNote = async (req, res) => {
         }
 
         if (addedTasks) {
-            const response = await addTasks(addedTasks, userId, users);
+            const response = await addTasks(addedTasks, userId, noteAccess, sharedWithUsers);
             if (!response) return res.status(500).json({ success: false, message: 'Error adding tasks' });
             else note.tasks = response;
         }
 
         if (tasks) {
-            const response = await editTasks(tasks, users);
+            const response = await editTasks(tasks, noteAccess, sharedWithUsers);
             if (!response) return res.status(500).json({ success: false, message: 'Error editing tasks' });
             else note.tasks.push(...response);
         }
@@ -121,8 +129,8 @@ const updateNote = async (req, res) => {
         note.category = category;
         note.content = content;
         note.noteAccess = noteAccess;
-        note.updateDate = new Date();
-        note.sharedWith = noteAccess === 'shared' ? users : [];
+        note.updatedAt = getCurrentNow();
+        note.sharedWith = noteAccess === 'shared' ? sharedWithUsers : [];
 
         const updatedNote = await note.save();
 
@@ -131,8 +139,7 @@ const updateNote = async (req, res) => {
         .populate('tasks')
         .populate('sharedWith', 'username');
 
-        res.status(200).json(populatedNote);
-
+        res.status(200).json({ success: true, note: populatedNote });
     } catch (error) {
         console.error('Error updating note:', error);
         res.status(500).json({ success: false, message: 'Error updating note' });
@@ -142,6 +149,8 @@ const updateNote = async (req, res) => {
 // Delete a note
 const deleteNote = async (req, res) => {
     const { noteId } = req.params;
+    const userName = req.session.username;
+    const user = await User.findOne({ username: userName });
         
     try {
         const note = await Note.findById(noteId);
@@ -149,14 +158,27 @@ const deleteNote = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Note not found' });
         }
 
-        if (note.tasks.length > 0) {
-            const response = await deleteTasks(note.tasks);
-            if (!response) return res.status(500).json({ success: false, message: 'Error deleting tasks' });
+        if (note.user._id.toString() !== user._id.toString() && note.noteAccess === 'shared') {
+
+            note.sharedWith = note.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+
+            if (note.tasks.length > 0) {
+                const response = await deleteUserFromShareWith(user._id, note.tasks);
+                if (!response) return res.status(500).json({ success: false, message: 'Error deleting user from task share with' });
+            }
+            await note.save();
+        } else if (note.user._id.toString() !== user._id.toString() && note.noteAccess === 'public') {
+            return res.status(403).json({ success: false, message: 'You are not authorized to delete this note' });
+        } else {
+
+            if (note.tasks.length > 0) {
+                const response = await deleteTasks(note.tasks);
+                if (!response) return res.status(500).json({ success: false, message: 'Error deleting tasks' });
+            }
+
+            await Note.findByIdAndDelete(noteId);
         }
-
-        await Note.findByIdAndDelete(noteId);
         res.status(200).json({ success: true, message: 'Note deleted successfully' });
-
     } catch (error) {
         console.error('Error deleting note:', error);
         res.status(500).json({ success: false, message: 'Error deleting note' });

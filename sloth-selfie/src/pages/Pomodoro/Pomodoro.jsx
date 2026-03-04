@@ -5,6 +5,7 @@ import TimerPomodoro from './TimerPomodoro';
 
 import { PomodoroProvider } from '../../contexts/PomodoroContext';
 import { MusicProvider } from '../../contexts/MusicContext';
+import { CalendarProvider } from '../../contexts/CalendarContext';
 
 import '../../styles/Pomodoro.css';
 
@@ -13,12 +14,14 @@ const Pomodoro = () => {
     return (
         <PomodoroProvider>
             <MusicProvider>
-                <MainLayout>
-                    <div className='d-flex w-100 h-75 justify-content-center align-items-around position-relative'>
-                        <TimerPomodoro />
+                <CalendarProvider>
+                    <MainLayout>
+                        <div className='d-flex w-100 h-100 justify-content-center align-items-around position-relative overflow-auto div-pomodoro'>
+                            <TimerPomodoro />
 
-                    </div>
-                </MainLayout>
+                        </div>
+                    </MainLayout>
+                </CalendarProvider>
             </MusicProvider>
         </PomodoroProvider>
     );

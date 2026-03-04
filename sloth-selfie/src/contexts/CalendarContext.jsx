@@ -1,8 +1,17 @@
 import React, { createContext, useContext, useState }  from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { dateFromDate, timeFromDate } from '../utils/utils';
+import { apiService } from '../services/apiService';
+import { TimeMachineContext } from './TimeMachineContext';
 
 const CalendarContext = createContext();
 
 export const CalendarProvider = ({ children }) => {
+    const { getVirtualNow } = useContext(TimeMachineContext);
+    const now = new Date(getVirtualNow());
+    const location = useLocation();
+    const navigate = useNavigate();
 
     //Activity state
     const [activity, setActivity] = useState({
@@ -11,11 +20,9 @@ export const CalendarProvider = ({ children }) => {
         user: '',
         deadline: '',
         late: false,
-        date: '',
         completed: false,
         sharedWith: [],
-        notify: false,
-        notificationTime: 0,
+        response: ''
     });
 
     const [activities, setActivities] = useState([]);
@@ -27,11 +34,9 @@ export const CalendarProvider = ({ children }) => {
             user: '',
             deadline: '',
             late: false,
-            date: '',
             completed: false,
             sharedWith: [],
-            notify: false,
-            notificationTime: 0,
+            response: ''
         });
     }
 
@@ -40,8 +45,9 @@ export const CalendarProvider = ({ children }) => {
         _id: '',
         title: '',
         user: '',
-        type: 'personal',
-        date: new Date(),
+        type: '',
+        startDate: new Date(now),
+        endDate: new Date(now),
         time: '',
         isPreciseTime: false,
         duration: null,
@@ -51,16 +57,22 @@ export const CalendarProvider = ({ children }) => {
         repeatTimes: 0,
         repeatEndDate: null,
         eventLocation: '',
+        eventLocationDetails: {
+            latitude: null,
+            longitude: null,
+        },
         sharedWith: [],
-        notify: false,
-        notificationTime: 0,
+        isInProject: false,
+        fatherId: '',
+        tool: false,
+        priority: 0,
+        response: '',
     });
 
     const [events, setEvents] = useState([]);
 
     const addImportedEvents = (newEvents) => {
         setEvents(prev => [...prev, ...newEvents]);
-        //setActivities(prev => [...prev, ...newEvents]); //TEST FINCHè EVENTS NON VA, ANCHE NEL BACK
     };
 
     const resetEvent = () => {
@@ -68,8 +80,9 @@ export const CalendarProvider = ({ children }) => {
             _id: '',
             title: '',
             user: '',
-            type: 'personal',
-            date: new Date(),
+            type: '',
+            startDate: new Date(now),
+            endDate: new Date(now),
             time: '',
             isPreciseTime: false,
             duration: null,
@@ -79,34 +92,47 @@ export const CalendarProvider = ({ children }) => {
             repeatEndDate: null,
             repeatTimes: 0,
             eventLocation: '',
+            eventLocationDetails: {
+                latitude: null,
+                longitude: null,
+            },
             sharedWith: [],
-            notify: false,
-            notificationTime: 0,
+            isInProject: false,
+            fatherId: '',
+            tool: false,
+            priority: 0,
+            response: '',
         });
     }
 
     //Availability state
     const [availability, setAvailability] = useState({
-        startDate: new Date(),
-        endDate: new Date(),
+        _id: '',
+        startDate: '',
+        endDate: '',
         startTime: '',
         days: true,
-        duration: 0,
+        duration: 1,
         repeatFrequency: 'none',
         numberOfOccurrences: 0,
+        fatherId: '',
+        tool: false,
     });
 
     const [availabilities, setAvailabilities] = useState([]);
 
     const resetAvailability = () => {
         setAvailability({
-            startDate: new Date(),
-            endDate: new Date(),
+            _id: '',
+            startDate: '',
+            endDate: '',
             startTime: '',
             days: true,
-            duration: 0,
+            duration: 1,
             repeatFrequency: 'none',
             numberOfOccurrences: 0,
+            fatherId: '',
+            tool: false,
         });
     }
 
@@ -128,14 +154,17 @@ export const CalendarProvider = ({ children }) => {
     }
 
     const back = () => {
-        if (selected.edit) resetSelected();
-        else {
+        if (selected.edit) {
+            resetSelected();
+            navigate(location.pathname, { replace: true });
+        } else {
             setSelected({
                 ...selected,
                 selection: '...',
                 add: false
             });
         }
+        setNotifications([]);
     }
 
     const resetSelected = () => {
@@ -149,12 +178,44 @@ export const CalendarProvider = ({ children }) => {
 
     const [notifications, setNotifications] = useState([]);
 
+    const fetchNotifications = async ({ elementId }) => {
+        const response = await apiService(`/notifications/${elementId}`, 'GET');
+        if (response.success) {
+            if (response.notifications.length > 0) {
+                setNotifications(response.notifications.map(notification => {
+                    return {
+                        ...notification,
+                        fromDate: dateFromDate(new Date(notification.from)),
+                        fromTime: timeFromDate(new Date(notification.from)),
+                    }
+                }));
+            } else setNotifications([]);
+        } else setNotifications([]);
+    }
+
+    // disable save button if conditions are not met
+    const [conditionsMet, setConditionsMet] = useState(false);
+
+    const [show, setShow] = useState('plans');
+
+    const [deletePopUp, setDeletePopUp] = useState({
+        show: false,
+        toShow: null,
+        tCall: false,
+        type: '',
+
+    });
+
     return (
         <CalendarContext.Provider 
             value={{ activity, setActivity, activities, setActivities, resetActivity,
                 event, setEvent, events, setEvents, addImportedEvents, resetEvent,
                 availability, setAvailability, availabilities, setAvailabilities, resetAvailability,
-                selected, setSelected, select, back, resetSelected, notifications, setNotifications }}>
+                selected, setSelected, select, back, resetSelected,
+                show, setShow,
+                deletePopUp, setDeletePopUp,
+                notifications, setNotifications, fetchNotifications,
+                conditionsMet, setConditionsMet}}>
 
             {children}
             

@@ -1,12 +1,6 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-    originalId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event',
-        required: true,
-        default: this._id,
-    },
     title: {
         type: String,
         required: true,
@@ -22,6 +16,18 @@ const eventSchema = new mongoose.Schema({
         ref: 'User',
     }],
 
+    responses: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        status: {
+            type: String,
+            enum: ['accepted', 'declined', 'pending'],
+            default: 'pending'
+        }
+    }],
+
     startDate: {
         type: Date,
         required: true,
@@ -35,41 +41,62 @@ const eventSchema = new mongoose.Schema({
         required: true,
         default: false,
     },
+    type: {
+        type: String,
+        enum: ['personal', 'work', 'social', 'other'],
+        default: 'personal',
+        required: true,
+    },
+    priority: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5,
+        required: true,
+    },
 
     repeatFrequency: {
         type: String,
         default: 'none',
+        enum: ['none', 'daily', 'weekly', 'monthly', 'yearly'],
         required: true,
     },
     repeatEndDate: {
         type: Date,
         default: null,
     },
+    repeatTimes: {
+        type: Number,
+        default: 0,
+    },
+    fatherId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Event',
+        default: null
+    },
 
     eventLocation: {
         type: String,
+        enum: ['physical', 'virtual'],
         default: null,
     },
 
-    notify: {
-        type: Boolean,
-        default: false
-    },
-    notificationTime: {
-        type: Number,
-        default: 0
+    eventLocationDetails: {
+        latitude: {
+            type: Number,
+            default: null,
+        },
+        longitude: {
+            type: Number,
+            default: null,
+        },
     },
 
     isInProject: {  //used to differentiate between normal events and project-activity events
         type: Boolean,
+        required: true,
         default: false,
     },
-
-    pomodoro: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Pomodoro',
-        default: null
-    }
 }, { timestamps: true });
 
 const Event = mongoose.model('Event', eventSchema);

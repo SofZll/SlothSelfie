@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import socket from '../../services/socket/socket';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 
 import { useChat } from '../../contexts/ChatContext';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -11,7 +11,7 @@ const MessageInput = () => {
 
     const handleSendMessage = () => {
         if (!newMessage.trim()) {
-            Swal.fire({ icon: 'error', title: 'Errore', text: 'Inserisci un messaggio' });
+            NewSwal.fire({ icon: 'error', title: 'Errore', text: 'Inserisci un messaggio' });
         } else {
             const message = {
                 chat: {
@@ -36,7 +36,7 @@ const MessageInput = () => {
     return (
         <div className='d-flex gap-2 p-2 chat-input'>
             <input type='text' className='form-control p-2' placeholder='Scrivi un messaggio' value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
-            <button className='chat-input-button' onClick={handleSendMessage}>Invia</button>
+            <button type='button' aria-label='sendMessage' title='Send' className='chat-input-button' onClick={handleSendMessage}>Invia</button>
         </div>
     )
 }

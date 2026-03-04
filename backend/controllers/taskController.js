@@ -2,25 +2,37 @@
 const Task = require('../models/taskModel');
 const User = require('../models/userModel');
 const Note = require('../models/noteModel');
-const {sendExportEmail} = require('../utils/utils');
+const { sendExportEmail } = require('../utils/utils');
 const { createEvent } = require('ics'); // Import the library for iCalendar generation
+const { getCurrentNow } = require('../services/timeMachineService');
 
 // fetch all tasks
 const getTasks = async (req, res) => {
     const userName = req.session.username;
     const user = await User.findOne({ username: userName });
+    const now = getCurrentNow();
     
     try {
         const tasks = await Task.find({
             $or: [
                 { user: user._id },
-                { sharedWith: user._id }
-            ]
+                { taskAccess: 'shared', sharedWith: user._id },
+                { taskAccess: 'public' }
+            ],
+            createdAt: { $lte: now }
         })
         .populate('user', 'username')
-        .populate('sharedWith', 'username');
+        .populate('sharedWith', 'username')
+        .lean();
 
-        res.status(200).json(tasks);
+        const transformedTasks = tasks.map(task => {
+            return {
+                ...task,
+                sharedWith: task.sharedWith.map(user => user.username)
+            }
+        });
+
+        res.status(200).json({ success: true, tasks: transformedTasks });
     } catch (error) {
         console.error('Error fetching tasks:', error);
         res.status(500).json({ message: error.message });
@@ -35,15 +47,17 @@ const editTask = async (req, res) => {
     try {
         const task = await Task.findById(taskId);
         if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
+            return res.status(404).json({ success: false, message: 'Task not found' });
         }
 
         task.title = title;
         task.deadline = deadline;
         task.completed = completed;
+        task.updatedAt = getCurrentNow();
 
         const updatedTask = await task.save();
-        res.status(200).json(updatedTask);
+        updatedTask.sharedWith = updatedTask.sharedWith.map(user => user.username);
+        res.status(200).json({ success: true, task: updatedTask });
     } catch (error) {
         console.error('Error updating task:', error);
         res.status(500).json({ message: error.message });
@@ -57,15 +71,17 @@ const markTaskCompleted = async (req, res) => {
     try {
         const task = await Task.findById(taskId);
         if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
+            return res.status(404).json({ success: false, message: 'Task not found' });
         }
 
         task.completed = !task.completed;
+        task.updatedAt = getCurrentNow();
+
         const updatedTask = await task.save();
-        res.status(200).json(updatedTask);
+        res.status(200).json({ success: true, task: updatedTask });
     } catch (error) {
         console.error('Error updating task:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -75,7 +91,7 @@ const deleteTask = async (req, res) => {
     try {
         const task = await Task.findByIdAndDelete(taskId);
         if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
+            return res.status(404).json({ success: false, message: 'Task not found' });
         }
         
         const note = await Note.findOne({ tasks: taskId });
@@ -84,30 +100,30 @@ const deleteTask = async (req, res) => {
             await note.save();
         }
 
-        res.status(200).json({ message: 'Task deleted successfully' });
+        res.status(200).json({ success: true, message: 'Task deleted successfully' });
     } catch (error) {
         console.error('Error deleting task:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
-//function called from note to add tasks
-const addTasks = async (tasks, user, sharedWith) => {
-    const tasksArray = [];
-
+//function to delete user from share with
+const deleteUserFromShareWith = async (userId, tasks) => {
     try {
         for (let i = 0; i < tasks.length; i++) {
-            const task = new Task({ title: tasks[i].title, completed: tasks[i].completed, user: user._id });
-            if (tasks[i].deadline) task.deadline = tasks[i].deadline;
-            if (sharedWith.length > 0) task.sharedWith = sharedWith;
+            const task = await Task.findById(tasks[i]._id);
+            if (!task) {
+                console.error('Task not found:', tasks[i]._id, task, tasks[i]);
+                return false;
+            }
 
-            const savedTask = await task.save();
-            if (savedTask) tasksArray.push(savedTask._id);
+            task.sharedWith = task.sharedWith.filter(user => user.toString() !== userId.toString());
+            const updatedTask = await task.save();
+            if (!updatedTask) return false;
         }
-
-        return tasksArray;
+        return true;
     } catch (error) {
-        console.error('Error creating tasks:', error);
+        console.error('Error deleting user from shared tasks:', error);
         return false;
     }
 }
@@ -128,8 +144,37 @@ const deleteTasks = async (tasks) => {
     }
 }
 
+//function called from note to add tasks
+const addTasks = async (tasks, user, taskAccess, sharedWith) => {
+    const tasksArray = [];
+
+    try {
+        for (let i = 0; i < tasks.length; i++) {
+            const task = new Task({ 
+                title: tasks[i].title, 
+                completed: tasks[i].completed, 
+                user: user._id, 
+                deadline: tasks[i].deadline,
+                taskAccess: taskAccess,
+                createdAt: getCurrentNow(), 
+                updatedAt: getCurrentNow() 
+            });
+            if (tasks[i].deadline) task.deadline = tasks[i].deadline;
+            if (taskAccess === 'shared' && sharedWith.length > 0) task.sharedWith = sharedWith;
+
+            const savedTask = await task.save();
+            if (savedTask) tasksArray.push(savedTask._id);
+        }
+
+        return tasksArray;
+    } catch (error) {
+        console.error('Error creating tasks:', error);
+        return false;
+    }
+}
+
 //function called from note to edit tasks
-const editTasks = async (tasks, users) => {
+const editTasks = async (tasks, taskAccess, users) => {
     const updatedTasks = [];
     try {
         for (let i = 0; i < tasks.length; i++) {
@@ -140,6 +185,8 @@ const editTasks = async (tasks, users) => {
             task.deadline = tasks[i].deadline;
             task.completed = tasks[i].completed;
             task.sharedWith = users;
+            task.taskAccess = taskAccess;
+            task.updatedAt = getCurrentNow();
 
             const updatedTask = await task.save();
             if (!updatedTask) return false;
@@ -160,7 +207,7 @@ async function exportTask(req, res){
         const userName = req.session.username;
         const task = await Task.findById(taskId);
         if (!task) {
-            return res.status(404).json({ message: "Task not found" });
+            return res.status(404).json({ success: false, message: 'Task not found' });
         }
 
         const user = await User.findOne({ username: userName });
@@ -177,10 +224,8 @@ async function exportTask(req, res){
         
         if (error) {
             console.error("ICS generation error:", error);
-            return res.status(500).json({ message: 'Error while generating .ics' });
+            return res.status(500).json({ success: false, message: 'Error generating ICS file' });
         }
-
-        console.log("Generated .ics value:\n", value);
 
         // send the mail with the .ics file as attachment to the user
         const userEmail = user.email;
@@ -195,10 +240,10 @@ async function exportTask(req, res){
         res.setHeader('Content-Type', 'text/calendar');
         res.setHeader('Content-Disposition', `attachment; filename="${task.title}.ics"`);
         res.status(200).send(value);
-      } catch (err) {
+    } catch (err) {
         console.error(err);
-        res.status(500).send({ message: 'Error during the task export' });
-      }
+        res.status(500).send({ success: false, message: 'Error exporting task' });
+    }
 }
 
 module.exports = {
@@ -207,6 +252,7 @@ module.exports = {
     deleteTask,
     markTaskCompleted,
     deleteTasks,
+    deleteUserFromShareWith,
     addTasks,
     editTasks,
     exportTask

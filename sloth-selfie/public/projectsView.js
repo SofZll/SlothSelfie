@@ -169,8 +169,12 @@ function setupSorting(project) {
 // Function to view the project as a list
 async function viewAsList(projectId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch project');
+        }
+        const project = data.project;
 
         const projectViewContainer = renderProjectHeader(project);
 
@@ -208,8 +212,12 @@ async function viewAsList(projectId) {
 // Function to view the project as a Gantt chart with a hierarchy sidebar
 async function viewAsGantt(projectId) {
     try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
-        const project = await response.json();
+        const response = await fetch(`https://site232453.tw.cs.unibo.it/api/project/${projectId}`);
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to fetch project');
+        }
+        const project = data.project;
 
         const projectViewContainer = renderProjectHeader(project);
 
@@ -465,6 +473,9 @@ function addMacroActivityRow(tbody, macroActivity, className = "") {
     const toggleButton = document.createElement("button");
     toggleButton.textContent = "-";
     toggleButton.style.marginRight = "5px";
+    toggleButton.setAttribute("type", "button");
+    toggleButton.setAttribute("aria-label", "Expand-Contract activities");
+    toggleButton.setAttribute("title", "Expand-Contract activities");
 
     // Unique class for related activities
     const macroIdClass = `activities-of-${macroActivity._id}`;

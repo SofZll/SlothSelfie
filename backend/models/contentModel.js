@@ -12,10 +12,6 @@ const contentSchema = new mongoose.Schema({
         enum: ['post', 'comment'],
         required: true,
     },
-    date: {
-        type: Date,
-        required: true,
-    },
     text: {
         type: String,
         required: true,
@@ -55,6 +51,8 @@ const contentSchema = new mongoose.Schema({
     }
 }, {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
 const Content = mongoose.model('Content', contentSchema);

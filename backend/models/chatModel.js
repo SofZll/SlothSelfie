@@ -40,9 +40,4 @@ chatSchema.virtual('unreadCount', {
     count: true
 });
 
-chatSchema.pre('save', function(next) {
-    this.updatedAt = new Date();
-    next();
-});
-
 module.exports = mongoose.model('Chat', chatSchema);

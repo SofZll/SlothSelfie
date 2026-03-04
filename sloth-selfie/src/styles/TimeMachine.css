@@ -1,33 +1,3 @@
-/* time machine button
-
-.time-machine-container {
-    position: fixed;
-    z-index: 1000;
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-}
-
-.time-machine-button {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background-color: #F39252;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s, box-shadow 0.2s;
-    cursor: move;
-}
-
-.time-machine-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 
-}
-*/
-
 /* time machine button */
 
 .time-machine {
@@ -56,6 +26,10 @@
     cursor: move;
 }
 
+.time-machine-button:hover {
+    transform: scale(1.05);
+}
+
 .time {
     font-size: 1.2rem;
 }
@@ -76,12 +50,12 @@
 }
 
 .custom-modal {
-    max-width: 350px;
-    width: 95%;
-    margin: 0 auto;
+    max-width: 400px;
+    width: 90%;
+    margin: auto;
 }
 
-.modal-content {
+.time-machine-popup.modal-content {
     animation: zoomIn 0.3s forwards;
 }
 

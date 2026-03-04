@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { usePomodoro } from '../../contexts/PomodoroContext';
 import Button from '../../components/Button';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../../utils/swalUtils';
 import socket from '../../services/socket/socket';
 
 const EditPomodoro = () => {
@@ -35,9 +35,9 @@ const EditPomodoro = () => {
     }
 
     const editPomodoto = () => {
-        if (edit.study <= 1 || edit.break <= 1 || edit.cicles <= 1) Swal.fire({icon: 'error', title: 'Error', text: 'All fields must be greater than 1'});
+        if (edit.study < 1 || edit.break < 1 || edit.cicles < 1) NewSwal.fire({icon: 'error', title: 'Error', text: 'All fields must be greater than 0'});
         else {
-            if (socketData.inShare) socket.emit('edit pomodoro', { study: edit.study*60, break: edit.break*60, cicles: edit.cicles });
+            if (socketData.inShare) socket.emit('edit pomodoro', { study: edit.study*60, breakTime: edit.break*60, cicles: edit.cicles });
             else editSettingsPomodoro(edit.study*60, edit.break*60, edit.cicles);
             resetPopUp();
         }
@@ -91,7 +91,7 @@ const EditPomodoro = () => {
             
             <div className='row m-3 d-flex justify-content-center'>
                 <div className='col-6 m-0 ps-0'>
-                    <Button text='save' alt='save' onClick={editPomodoto} />
+                    <Button text='save' aria-label='save' onClick={editPomodoto} />
                 </div>
             </div>
         </div>

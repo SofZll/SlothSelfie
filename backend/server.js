@@ -8,11 +8,10 @@ const bodyParser = require('body-parser');
 const routes = require('./routes/index');
 const path = require('path');
 const connectDB = require('./config/db');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 const socketHandler = require('./socket/socketHandler');
 const socket = require('./socket/socket');
 const app = express();
-const agenda = require('./jobs/agenda');
 
 const http = require('http');
 const server = http.createServer(app);
@@ -20,13 +19,6 @@ const io = socket.init(server);
 
 io.use((socket, next) => {
     session(socket.request, {}, next);
-});
-
-io.on('connection', (socket) => {
-    console.log('Client connected');
-    socket.on('disconnect', () => {
-        console.log('Client disconnected');
-    });
 });
 
 //locale:
@@ -42,25 +34,23 @@ app.use(bodyParser.json());
 app.use(session);
 
 app.use((req, res, next) => {
-    //console.log('Session ID:', req.sessionID);
-    //console.log('Session:', req.session);
     req.io = io;
     next();
 });
 
 app.use(routes);
 
-//serve static files from public folder
-app.use(express.static(path.join(__dirname, 'public')));
+//serve static files from public folder in sloth-selfie
+//app.use(express.static(path.join(__dirname, '..', 'sloth-selfie', 'public')));
 
-app.get('/projects', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'projects.html'));
-});
+/*app.get('/projects', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'sloth-selfie', 'public', 'projects.html'));
+});*/
 
 // Static files from frontend
-// const frontendPath = path.join(global.rootDir, '..', 'frontend/build');
+const frontendPath = path.join(global.rootDir, '..', 'frontend/build');
 //locale:
-const frontendPath = path.join(global.rootDir, '..', 'sloth-selfie/build');
+//const frontendPath = path.join(global.rootDir, '..', 'sloth-selfie/build');
 
 app.use(express.static(frontendPath));
 
@@ -68,16 +58,11 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
+app.get('/projects', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'projects.html'));
+});
+
 socketHandler(io);
-
-agenda.on('ready', async () => {
-    console.log('Agenda started');
-    agenda.start();
-});
-
-agenda.on('error', (error) => {
-    console.error('Agenda connection error:', error);
-});
 
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {

@@ -12,8 +12,6 @@ export const NoteProvider = ({ children }) => {
         content: '',
         noteAccess: 'private',
         sharedWith: [],
-        createDate: new Date(),
-        updateDate: new Date(),
         tasks: [],
         addedTasks: [],
         deletedTasks: []
@@ -30,8 +28,6 @@ export const NoteProvider = ({ children }) => {
             content: '',
             noteAccess: 'private',
             sharedWith: [],
-            createDate: new Date(),
-            updateDate: new Date(),
             tasks: [],
             addedTasks: [],
             deletedTasks: []
@@ -39,7 +35,6 @@ export const NoteProvider = ({ children }) => {
     }
 
     const [selected, setSelected] = useState({
-        selection: '',
         edit: false,
         add: true,
         popUp: false
@@ -47,7 +42,6 @@ export const NoteProvider = ({ children }) => {
 
     const resetSelected = () => {
         setSelected({
-            selection: '',
             edit: false,
             add: true,
             popUp: false
@@ -64,8 +58,10 @@ export const NoteProvider = ({ children }) => {
         note: null
     });
 
+    const [metConditions, setMetConditions] = useState(false);
+
     return (
-        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters, deletePopUp, setDeletePopUp }}>
+        <NoteContext.Provider value={{ note, setNote, notes, setNotes, resetNote, selected, setSelected, resetSelected, filters, setFilters, deletePopUp, setDeletePopUp, metConditions, setMetConditions }}>
             {children}
         </NoteContext.Provider>
     );

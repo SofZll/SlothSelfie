@@ -20,8 +20,11 @@
     height: 65vh;
     max-height: 500px;
     border-radius: 10px;
-    width: 80vmin;
+    width: 87vmin;
     word-wrap: break-word;
+    overflow: hidden;
+    overflow-x: auto;
+    position: relative;
 }
 
 
@@ -31,9 +34,10 @@
     }
 
     .card {
-        height: 90%;
+        min-height: 200px;
         width: 30rem;
-        max-height: none;
+        max-height: 55vh;
+        overflow-y: auto;
     }
 }
 
@@ -47,5 +51,24 @@
 
     .divBtn4icon {
         display: none !important;
+    }
+
+    .divBtn {
+        margin: 2px 0 5px 0 !important;
+    }
+
+    .menu-div {
+        height: 100% !important;
+    }
+
+    .card {
+        padding: 0 !important;
+        min-height: 300px;
+        height: 80vh;
+    }
+
+    .card h3 {
+        font-size: 1.25rem;
+        margin: 10px 0 0 0;
     }
 }

@@ -1,7 +1,8 @@
 .message-container {
-    width: 95%;
+    width: 100%;
     height: 100%;
-    margin-top: 10rem;
+    padding-top: calc(2rem + 0.5rem + calc(1.375rem + 1.5vw) + 1rem);
+    padding-bottom: calc(0.9rem + 1rem + 5.5rem);
 }
 
 .message-container.desktop {
@@ -10,11 +11,16 @@
     right: 30px;
     width: 20rem;
     height: auto;
-    max-height: 20rem;
-    transition: max-height 0.4s ease-in-out;
+    max-height: 3rem;
+    transition: max-height 0.4s cubic-bezier(0.65, 0, 0.35, 1);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     z-index: 800;
     overflow: hidden;
+    padding: 0;
+}
+
+.message-container.desktop.open {
+    max-height: 20rem;
 }
 
 .message-button {
@@ -26,7 +32,6 @@
     border: none;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    transition: background 0.2s ease-in-out;
 }
 
 .message-button:hover {
@@ -36,18 +41,16 @@
 .message-box {
     display: flex;
     flex-direction: column;
-    background-color: #fff;
+    background-color: #faf9f9;
     color: #333;
     border: none;
-    max-height: 17rem;
     overflow: hidden;
     height: 100%;
 }
 
 .message-box.open {
     display: flex;
-    height: 17rem;
-    max-height: 17rem;
+    height: 100%;
 }
 
 .new-chat-button {
@@ -71,6 +74,11 @@
     height: 2.5rem;
 }
 
+.chat-content {
+    width: 100%;
+    overflow: hidden;
+}
+
 .chat-content h6,
 .chat-content p {
     margin: 0;
@@ -78,6 +86,8 @@
 
 .chat-content p {
     color: #5c5c5c;
+    max-width: 90%;
+    overflow: hidden;
 }
 
 .chat-username {
@@ -127,9 +137,15 @@
 }
 
 .chat-selected-messages {
-    background-color: #f0f0f0;
+    background-color: #fcfcfc;
     min-height: 0;
-    flex: 1;
+    height: 90%;
+    overflow-y: auto;
+}
+
+.chat-selected-messages.desktop {
+    background-color: #f0f0f0;
+    height: 15rem;
 }
 
 .chat-selected-messages::-webkit-scrollbar {
@@ -180,7 +196,7 @@
 .chat-input {
     position: sticky;
     bottom: 0;
-    background-color: #f1f1f1;
+    background-color: #f8f8f8;
     border-top: 1px solid #ddd;
     flex-shrink: 0;
 }
@@ -205,9 +221,15 @@
 @media screen and (min-width: 769px) {   
     .message-box {
         width: 20rem;
-        display: none;
-        transition: max-height 0.4s ease-in-out;
-        flex: 1;
-        overflow-y: auto;
+        height: auto;
+        max-height: 0;
+        min-height: 0;
+        transition: max-height 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+        overflow-y: scroll;
+    }
+    
+    .message-box.open {
+        max-height: 17rem;
+        min-height: 17rem;
     }
 }

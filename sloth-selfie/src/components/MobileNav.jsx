@@ -15,24 +15,24 @@ const MobileNav = () => {
     }, [location]);
 
     return (
-        <nav className='d-flex nav-mobile p-3 justify-content-between align-items-center position-fixed bottom-0 start-0 bg-white shadow z-1'>
-            <NavLink to='/home'  className={(isHomeActive ? 'active' : '')} alt='homepage'>
-                <House size={36} color="#555B6E" strokeWidth={1.75} />
+        <nav className='d-flex nav-mobile justify-content-between align-items-center position-fixed bottom-0 start-0 bg-white shadow z-1'>
+            <NavLink to='/home'  className={(isHomeActive ? 'active' : '')} aria-label='Homepage' title='Homepage'>
+                <House size={30} color="#555B6E" strokeWidth={2} />
             </NavLink>
-            <NavLink to='/calendar' activeclassname='active' alt='calendar'>
-                <Calendar1 size={36} color="#555B6E" strokeWidth={1.75} />
+            <NavLink to='/calendar' activeclassname='active' aria-label='calendar' title='calendar'>
+                <Calendar1 size={30} color="#555B6E" strokeWidth={2} />
             </NavLink>
-            <NavLink to='/notes' activeclassname='active' alt='notes'>
-                <NotebookPen size={36} color="#555B6E" strokeWidth={1.75} />
+            <NavLink to='/notes' activeclassname='active' aria-label='notes' title='notes'>
+                <NotebookPen size={28} color="#555B6E" strokeWidth={2} />
             </NavLink>
-            <NavLink to='/pomodoro' activeclassname='active' alt='pomodoro'>
-                <img src={iconTomato} alt='Pomodoro' style={{ width: '36px' }}/>
+            <NavLink to='/pomodoro' activeclassname='active' aria-label='pomodoro' title='pomodoro'>
+                <img src={iconTomato} alt='Pomodoro' style={{ width: '30px' }}/>
             </NavLink>
-            <NavLink to='/projects' activeclassname='active' alt='projects'>
-                <Presentation size={36} color="#555B6E" strokeWidth={1.75} />
+            <NavLink to='/projects' activeclassname='active' aria-label='projects' title='projects'>
+                <Presentation size={29} color="#555B6E" strokeWidth={2} />
             </NavLink>
-            <NavLink to='/profile' activeclassname='active' alt='profile'>
-                <User size={36} color="#555B6E" strokeWidth={1.75} />
+            <NavLink to='/profile' activeclassname='active' aria-label='profile' title='profile'>
+                <User size={30} color="#555B6E" strokeWidth={2} />
             </NavLink>
         </nav>
     )

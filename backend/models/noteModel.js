@@ -24,6 +24,7 @@ const noteSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: 'public',
+        enum: ['public', 'private', 'shared']
     },
     sharedWith: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -33,17 +34,12 @@ const noteSchema = new mongoose.Schema({
     fileLink: { // Optional link to a file for projects
         type: String
     },
-
-    createDate:{
-        type: Date,
-        required: true,
-        default: Date.now
-    },
-    updateDate:{
-        type: Date,
-        required: true,
-        default: Date.now
+    
+    isInProject: {  //used to differentiate between normal notes and project-activity notes
+        type: Boolean,
+        default: false,
     }
+
 }, { timestamps: true });
 
 const Note = mongoose.model('Note', noteSchema);

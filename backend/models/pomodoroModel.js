@@ -6,6 +6,12 @@ const pomodoroSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    title: {
+        type: String,
+        default: 'Pomodoro',
+        required: true
+    },
+
     studyTime: {
         type: Number,
         required: true
@@ -42,6 +48,10 @@ const pomodoroSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+
+    deadline: {
+        type: Date
     },
     finishedDate: {
         type: Date,

@@ -1,214 +1,624 @@
 // eventController.js
 const Event = require('../models/eventModel');
 const User = require('../models/userModel');
-const { createNotification } = require('../controllers/notificationController');
-const { calculateDate } = require('../utils/utils');
-const {sendExportEmail} = require('../utils/utils');
+const Notification = require('../models/notificationModel');
+const NoAvailability = require('../models/noAvailabilityModel');
 const mongoose = require('mongoose');
-const { createEvent } = require('ics'); // Import the library for iCalendar generation
+
+const { findUserId } = require('../utils/utils');
+const { sendExportEmail } = require('../utils/utils');
+const { createEvent } = require('ics'); // owImport the library for iCalendar generation
+const { getCurrentNow } = require('../services/timeMachineService');
+const { checkAvailability } = require('../services/noAvailabilityService');
+const { sendNotificationNow } = require('../scheduler/notificationScheduler');
 
 const ical = require('node-ical');
 const fs = require('fs');
-const path = require('path');
+const { RRule } = require('rrule');
 
-//const Activity = require('../models/activityModel');  //TEST
-
-// Creating an event
-const createNewEvent = async (req, res) => {
-  const userName = req.session.username;
-  const user = await User.findOne({ username: userName });
-  const { originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, notify, notificationTime, customValue, notificationRepeat, notificationType, sharedWith } = req.body;
-
-  try {
-    let event;
-
-    let sharedWithUsers = [];
-    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
-      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
-    }
-
-    if (originalId !== '') {
-      event = new Event({ originalId, title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
-    } else {
-      event = new Event({ originalId: new mongoose.Types.ObjectId(), title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, user: user._id, notify, notificationTime, sharedWith: sharedWithUsers.map(u => u._id) });
-    }
-    const savedEvent = await event.save();
-
-    //populate the sharedWith field with the username of the users
-    const populatedEvent = await Event.findById(savedEvent._id).populate('sharedWith', 'username');
-    
-    // Calculate the date of the notification
-    let dateNotif;
-    const dateTime = new Date(`${date}T${time}`).toISOString();
-    console.log(customValue);
-    if (customValue) dateNotif = new Date(customValue).toISOString();
-    else dateNotif = calculateDate(dateTime, notificationTime);
-    console.log(dateNotif);
-    console.log(notificationTime);
-    console.log(notificationRepeat);
-
-    // Create a notification if the notify flag is set
-    if (notify) await createNotification({ elementId: savedEvent._id, dateNotif, frequencyNotif: notificationRepeat, type: notificationType}, res, true);
-    
-    console.log(savedEvent);
-    res.status(200).json({
-      ...populatedEvent.toObject(),
-      sharedWith: populatedEvent.sharedWith.map(user => user.username)
-    });
-  }
-  catch (error) {
-    console.error('Error creating event:', error);
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// fetch all events
 const getEvents = async (req, res) => {
+  const now = getCurrentNow();
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
 
   try {
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
     const events = await Event.find({
       $or: [
-        { user: user._id }, // events created by the user
-        { sharedWith: user._id } // events shared with the user
-      ]
-    })
-    .populate('sharedWith', 'username'); // Populates the sharedWith field with the username of the users
-    //we only need the username on the frontend
-    const eventsWithUsernames = events.map(event => ({
-      ...event.toObject(),
-      sharedWith: event.sharedWith.map(user => user.username)
-    }));
-    res.status(200).json(eventsWithUsernames);
-  }
-  catch (error) {
+        { user: user._id },
+        { sharedWith: user._id }
+      ],
+      createdAt: { $lte: now }
+    }).populate('sharedWith', 'username')
+    .populate('user', 'username')
+    .lean();
+
+    const transformedEvents = events.map(event => {
+      const isSharedWith = event.sharedWith.some(sharedUser => sharedUser._id.toString() === user._id.toString());
+
+      const response = isSharedWith ? event.responses?.find(r => r.user?.toString() === user._id.toString())?.status || 'pending' : undefined;
+
+      return {
+        ...event,
+        ...(isSharedWith && { response }),
+        sharedWith: event.sharedWith.map(user => user.username),
+      }
+    });
+
+    res.status(200).json({ success: true, events: transformedEvents });
+  } catch (error) {
     console.error('Error fetching events:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
+const newEvent = async (title, user, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId) => {
+
+  try {
+    if (!user) return ({ success: false, message: 'User not found' });
+
+    const roomsDevices = [];
+    const receivers = [];
+    for (const userId of sharedWith) {
+      const user = await User.findById(userId._id);
+      if (!user) continue;
+      if (user.isRoom || user.isDevice) roomsDevices.push(user);
+      else receivers.push(user);
+    }
+
+    if (roomsDevices.length > 0) {
+      for (const roomDevice of roomsDevices) {
+        const roomDeviceUser = await User.findById(roomDevice._id);
+        if (!roomDeviceUser) continue;
+        const available = await checkAvailability(roomDevice._id, startDate, endDate);
+        if (available) {
+          console.log(`Room/Device ${roomDeviceUser.username} is available`);
+        } else {
+          console.error(`Room/Device ${roomDeviceUser.username} is not available`);
+          return { success: false, message: `Room/Device ${roomDeviceUser.username} is not available` };
+        }
+      }
+    }
+
+    const newEvent = new Event({
+      title,
+      user: user._id,
+      sharedWith,
+      startDate,
+      endDate,
+      allDay,
+      type,
+      priority,
+      repeatFrequency,
+      isInProject,
+      createdAt: getCurrentNow(),
+      updatedAt: getCurrentNow()
+    });
+
+    for (const roomDevice of roomsDevices) {
+      newEvent.responses.push({ user: roomDevice._id, status: 'accepted' });
+      const noAvailability = await NoAvailability.create({
+        user: roomDevice._id,
+        startDate: newEvent.startDate,
+        endDate: newEvent.endDate,
+        days: false,
+        repeatFrequency: 'none',
+        event: newEvent._id
+      });
+      console.log("noavailability created:", noAvailability);
+      await noAvailability.save();
+    }
+
+    if (eventLocation) newEvent.eventLocation = eventLocation;
+    if (eventLocationDetails) newEvent.eventLocationDetails = eventLocationDetails;
+
+    if (repeatFrequency !== 'none') {
+      if (fatherId) newEvent.fatherId = fatherId;
+
+      if (repeatEndDate) newEvent.repeatEndDate = repeatEndDate;
+      else if (repeatTimes) newEvent.repeatTimes = repeatTimes;
+      else return ({ success: false, message: 'Repeat frequency is set but no end date or number of occurrences provided' });
+    }
+
+    const savedEvent = await newEvent.save();
+
+    if (repeatFrequency !== 'none' && !fatherId) {
+      savedEvent.fatherId = savedEvent._id;
+      await savedEvent.save();
+    }
+
+    for (const receiver of receivers) {
+      const receiverUser = await User.findById(receiver._id);
+      if (!receiverUser) continue;
+
+      const available = await checkAvailability(receiver._id, savedEvent.startDate, savedEvent.endDate);
+      let text = '';
+
+      if (available) {
+        savedEvent.responses.push({ user: receiver._id, status: 'pending' });
+        text = `You have been invited to the event: "${savedEvent.title}" on ${savedEvent.startDate.toLocaleString()}`;
+      } else {
+        savedEvent.responses.push({ user: receiver._id, status: 'declined' });
+        savedEvent.sharedWith = savedEvent.sharedWith.filter(u => u._id.toString() !== receiver._id.toString());
+        text = `You have been invited to the event: "${savedEvent.title}" on ${savedEvent.startDate.toLocaleString()} but you are not available.`;
+      }
+
+      const notification = await Notification.create({
+        user: receiver._id,
+        element: savedEvent._id,
+        elementType: 'Event',
+        type: 'now',
+        text,
+        mode: {
+          system: true,
+          email: true,
+        },
+        createdAt: getCurrentNow(),
+        updatedAt: getCurrentNow()
+      });
+
+      await sendNotificationNow(user, notification, invitation = true);
+    }
+
+    await savedEvent.save();
+
+    const event = await Event.findById(savedEvent._id)
+      .populate('sharedWith', '_id username')
+      .populate('user', 'username')
+      .lean();
+
+    const transformedEvent = {
+      ...event,
+      sharedWith: event.sharedWith.map(u => u.username),
+    };
+
+    return ({ success: true, event: transformedEvent });
+  } catch (error) {
+    console.error('Error creating event:', error);
+    return ({ success: false, message: error.message });
+  }
+}
+
+const createNewEvent = async (req, res) => {
+  const userName = req.session.username;
+  const { title, type, priority, startDate, endDate, allDay, repeatFrequency, repeatEndDate, repeatTimes, eventLocation, eventLocationDetails, sharedWith, isInProject} = req.body;
+
+  try {
+    const user = await User.findOne({ username: userName });
+    const users = await findUserId(sharedWith);
+
+    if (repeatFrequency === 'none') {
+      const event = await newEvent(title, user, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency);
+      if (event.success) {
+        res.status(201).json({ success: true, event: event.event });
+      } else {
+        res.status(400).json({ success: false, message: event.message });
+      }
+    } else {
+
+      let gap = 1;
+      const events = [];
+      let fatherId = null;
+
+      if (repeatFrequency === 'weekly') gap = 7;
+      else if (repeatFrequency === 'monthly') gap = 30;
+      else if (repeatFrequency === 'yearly') gap = 365;
+      
+      if (repeatTimes) {
+        for (let i = 0; i < repeatTimes; i++) {
+          const newStartDate = new Date(startDate);
+          const newEndDate = new Date(endDate);
+          newStartDate.setDate(newStartDate.getDate() + (i * gap));
+          newEndDate.setDate(newEndDate.getDate() + (i * gap));
+
+          const event = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          if (event.success) events.push(event.event);
+          else {
+            res.status(400).json({ success: false, message: event.message });
+            return;
+          }
+
+          if (i === 0) {
+            fatherId = event.event._id;
+          }
+        }
+      } else if (repeatEndDate) {
+        let i = 0;
+        while (new Date(startDate).setDate(new Date(startDate).getDate() + (i * gap)) <= new Date(repeatEndDate)) {
+          const newStartDate = new Date(startDate);
+          const newEndDate = new Date(endDate);
+          newStartDate.setDate(newStartDate.getDate() + (i * gap));
+          newEndDate.setDate(newEndDate.getDate() + (i * gap));
+
+          const event = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+          if (event.success) events.push(event.event);
+          else {
+            res.status(400).json({ success: false, message: event.message });
+            return;
+          }
+
+          if (i === 0) {
+            fatherId = event.event._id;
+          }
+          i++;
+        }
+      } else {
+        res.status(400).json({ success: false, message: 'Repeat frequency is set but no end date or number of occurrences provided' });
+        return;
+      }
+
+      res.status(201).json({ success: true, events });
+    }
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+const editEvent = async (Id, user, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, status, repeatEndDate, repeatTimes, fatherId) => {
+
+  try {
+    const event = await Event.findById(Id);
+    if (!event) return ({ success: false, message: 'Event not found' });
+
+    const roomsDevices = [];
+    const receivers = [];
+    for (const userId of sharedWith) {
+      const user = await User.findById(userId._id);
+      if (!user) continue;
+      if (user.isRoom || user.isDevice) roomsDevices.push(user);
+      else receivers.push(user);
+    }
+
+    if (roomsDevices.length > 0) {
+      for (const roomDevice of roomsDevices) {
+        const roomDeviceUser = await User.findById(roomDevice._id);
+        if (!roomDeviceUser) continue;
+        const available = await checkAvailability(roomDevice._id, startDate, endDate, event._id);
+        if (available) {
+          console.log(`Room/Device ${roomDeviceUser.username} is available`);
+        } else {
+          console.error(`Room/Device ${roomDeviceUser.username} is not available`);
+          return { success: false, message: `Room/Device ${roomDeviceUser.username} is not available` };
+        }
+      }
+    }
+
+    event.title = title;
+    event.type = type;
+    event.priority = priority;
+    event.startDate = startDate;
+    event.endDate = endDate;
+    event.allDay = allDay;
+    event.eventLocation = eventLocation;
+    event.eventLocationDetails = eventLocationDetails;
+    event.sharedWith = sharedWith;
+    event.isInProject = isInProject;
+    event.repeatFrequency = repeatFrequency;
+    event.repeatEndDate = repeatEndDate;
+    event.repeatTimes = repeatTimes;
+    event.updatedAt = getCurrentNow();
+
+    if (repeatFrequency === 'none') event.fatherId = null;
+    else event.fatherId = fatherId;
+
+    for (const roomDevice of roomsDevices) {
+      await NoAvailability.deleteMany({ user: roomDevice._id, event: event._id });
+      event.responses.push({ user: roomDevice._id, status: 'accepted' });
+      const noAvailability = await NoAvailability.create({
+        user: roomDevice._id,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        days: false,
+        repeatFrequency: 'none',
+        event: event._id
+      });
+      await noAvailability.save();
+    }
+
+    const savedEvent = await event.save();
+
+    for (const receiver of receivers) {
+      const receiverUser = await User.findById(receiver._id);
+      if (!receiverUser) continue;
+
+      const available = await checkAvailability(receiver._id, savedEvent.startDate, savedEvent.endDate);
+      let text = '';
+
+      if (available) {
+        savedEvent.responses.push({ user: receiver._id, status: 'pending' });
+      } else {
+        savedEvent.responses.push({ user: receiver._id, status: 'declined' });
+        savedEvent.sharedWith = savedEvent.sharedWith.filter(u => u._id.toString() !== receiver._id.toString());
+      }
+    }
+
+    await savedEvent.save();
+
+    const updatedEvent = await Event.findById(Id)
+    .populate('sharedWith', 'username')
+    .populate('user', 'username')
+    .lean();
+
+    const transformedEvent = {
+      ...updatedEvent,
+      sharedWith: updatedEvent.sharedWith.map(user => user.username),
+    };
+
+    return ({ success: true, event: transformedEvent });
+  } catch (error) {
+    console.error('Error editing event:', error);
+    return ({ success: false, message: error.message });
+  }
+}
+
+const updateNoDateEvent = async (Id, title, type, priority, eventLocation, eventLocationDetails, sharedWith, isInProject) => {
+  try {
+    const event = await Event.findById(Id);
+    if (!event) return ({ success: false, message: 'Event not found' });
+
+    event.title = title;
+    event.type = type;
+    event.priority = priority;
+    event.eventLocation = eventLocation;
+    event.eventLocationDetails = eventLocationDetails;
+    event.sharedWith = sharedWith;
+    event.isInProject = isInProject;
+    event.updatedAt = getCurrentNow();
+    
+    await event.save();
+
+    const savedEvent = await Event.findById(Id)
+    .populate('sharedWith', 'username')
+    .populate('user', 'username')
+    .lean();
+
+    const transformedEvent = {
+      ...savedEvent,
+      sharedWith: savedEvent.sharedWith.map(user => user.username),
+    };
+
+    return ({ success: true, event: transformedEvent });
+  } catch (error) {
+    console.error('Error editing event:', error);
+    return ({ success: false, message: error.message });
+  }
+}
 
 // Update an event
 const updateEvent = async (req, res) => {
-  const { eventId } = req.params;
-  const { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith } = req.body;
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
+  const { eventId } = req.params;
+
+  const { title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, sharedWith, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId, status } = req.body;
+
+
   try {
-    const event = await Event.findById(eventId);
-    if (!event){
-      return res.status(404).json({ message: 'Evento non trovato' });
-    }
-    if (event.user.toString() !== user._id.toString()) {
-      return res.status(403).json({ message: 'Non sei autorizzato a modificare questo evento' });
-    }
-
-     // get the users to share the event with
-     let sharedWithUsers = [];
-     if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
-       sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('username');
-     }
-
-    //update the event
-    const updatedEvent = await Event.findByIdAndUpdate(
-      eventId,
-      { title, date, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith: sharedWithUsers.map(u => u._id) },
-      { new: true }
-    ).populate('sharedWith', 'username');
-
-    res.status(200).json({
-      ...updatedEvent.toObject(),
-      sharedWith: updatedEvent.sharedWith?.map(user => user.username) || []
-    });
-
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Update multiple events
-const updateMultipleEvent = async (req, res) => {
-  const { originalId, userId } = req.params;
-  const { title, time, isPreciseTime, duration, allDay, repeatFrequency, repeatEndDate, eventLocation, sharedWith } = req.body;
-  try {
-    const events = await Event.find({ originalId });
-    if (!events) {
-      return res.status(404).json({ message: "Events not found" });
-    }
-    let sharedWithUsers = [];
-    if (sharedWith && Array.isArray(sharedWith) && sharedWith.length > 0) {
-      sharedWithUsers = await User.find({ username: { $in: sharedWith } }).select('_id');
-    }
-
-    // update the events
-    await Event.updateMany(
-      { originalId, userId },
-      {
-        $set: {
-          title,
-          time,
-          isPreciseTime,
-          duration,
-          allDay,
-          repeatFrequency,
-          repeatEndDate,
-          eventLocation,
-          sharedWith: sharedWithUsers.map((u) => u._id),
-        },
-      }
-    );
-
-    // populate the sharedWith field with the username of the users
-    const populatedEvents = await Event.find({ originalId }).populate('sharedWith', 'username');
-
-    res.status(200).json({ message: "Events updated", updatedEvents: populatedEvents.map(event => ({
-      ...event.toObject(),
-      sharedWith: event.sharedWith?.map(user => user.username) || []
-    }))
-    });
-  }
-  catch (error) {
-    console.error('Error updating events:', error);
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Delete an event
-const deleteEvent = async (req, res) => {
-    const {eventId} = req.params;
-    try {
+    const users = await findUserId(sharedWith);
+    
+    if (repeatFrequency === 'none') {
       const event = await Event.findById(eventId);
-      if (!event) {
-        return res.status(404).json({ message: "Event not found" });
+      if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+      else {
+        if (event.repeatFrequency !== 'none') {
+          const events = await Event.find({ fatherId: event.fatherId });
+          for (let i = 1; i < events.length; i++) {
+            await Event.findByIdAndDelete(events[i]._id);
+          }
+
+          const response = await editEvent(events[0]._id, user, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, status);
+          if (response.success) {
+            res.status(200).json({ success: true, event: response.event });
+            return;
+          } else {
+            res.status(400).json({ success: false, message: response.message });
+            return;
+          }
+        }
       }
-      await Event.findByIdAndDelete(eventId);
-      res.status(200).json({ message: "Event deleted" });
+    
+      const response = await editEvent(eventId, user, title, type, priority, startDate, endDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, status);
+      if (response.success) {
+        res.status(200).json({ success: true, event: response.event });
+      } else {
+        res.status(400).json({ success: false, message: response.message });
+      }
+    } else {
+      const event = await Event.findById(eventId);
+      if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+
+      const events = [];
+
+      if (new Date(event.startDate).getTime() === new Date(startDate).getTime() && new Date(event.endDate).getTime() === new Date(endDate).getTime() && event.allDay === allDay && event.repeatFrequency === repeatFrequency && new Date(event.repeatEndDate).getTime() === new Date(repeatEndDate).getTime() && event.repeatTimes === repeatTimes && event.sharedWith.length === users.length && event.sharedWith.every(user => users.some(u => u._id.toString() === user._id.toString()))) {
+        const events2edit = await Event.find({ fatherId: fatherId });
+        if (events2edit.length > 0) {
+          for (let i = 0; i < events2edit.length; i++) {
+            const response = await updateNoDateEvent(events2edit[i]._id, title, type, priority, eventLocation, eventLocationDetails, users, isInProject);
+
+            if (!response.success) {
+              res.status(400).json({ success: false, message: response.message });
+              return;
+            } else events.push(response.event);
+          }
+          res.status(200).json({ success: true, events });
+        } else return res.status(404).json({ success: false, message: 'No events found to edit' });
+      } else {
+
+        let startDateDifference, endDateDifference, additionStartDate, additionEndDate;
+
+        if (event.startDate.getTime() < new Date(startDate).getTime()) {
+          startDateDifference = new Date(startDate).getTime() - event.startDate.getTime();
+          additionStartDate = true;
+        } else if (event.startDate.getTime() === new Date(startDate).getTime()) {
+          startDateDifference = 0;
+          additionStartDate = false;
+        } else {
+          startDateDifference = event.startDate.getTime() - new Date(startDate).getTime();
+          additionStartDate = false;
+        }
+
+        if (event.endDate.getTime() < new Date(endDate).getTime()) {
+          endDateDifference = new Date(endDate).getTime() - event.endDate.getTime();
+          additionEndDate = true;
+        } else if (event.endDate.getTime() === new Date(endDate).getTime()) {
+          endDateDifference = 0;
+          additionEndDate = false;
+        } else {
+          endDateDifference = event.endDate.getTime() - new Date(endDate).getTime();
+          additionEndDate = false;
+        }
+
+        let gap = 1;
+        if (repeatFrequency === 'weekly') gap = 7;
+        else if (repeatFrequency === 'monthly') gap = 30;
+        else if (repeatFrequency === 'yearly') gap = 365;
+
+        let fatherId = event.fatherId || eventId;
+        
+        const events2edit = await Event.find({
+          $or: [
+            { _id: eventId },
+            { fatherId: fatherId }
+          ]
+        }).sort({ startDate: 1 });
+
+        if (events2edit.length === 0) return res.status(404).json({ success: false, message: 'No events found to edit' });
+
+    
+        if (repeatTimes) {
+
+          for (let i = 0; i < repeatTimes; i++) {
+            const newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( additionStartDate ? + startDateDifference : - startDateDifference));
+            const newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (i * gap * 1000 * 60 * 60 * 24) + ( additionEndDate ? + endDateDifference : - endDateDifference));
+
+            if (i >= events2edit.length) {
+              const responseEvent = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, status, repeatEndDate, repeatTimes, fatherId);
+              if (responseEvent.success) events.push(responseEvent.event);
+              else {
+                return res.status(400).json({ success: false, message: responseEvent.message });
+              }
+            } else {
+              const response = await editEvent(events2edit[i]._id, user, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, status, repeatEndDate, repeatTimes, fatherId);
+              if (!response.success) {
+                res.status(400).json({ success: false, message: response.message });
+                return;
+              } else events.push(response.event);
+            }
+          }
+
+          if (repeatTimes < events2edit.length) {
+            for (let i = repeatTimes; i < events2edit.length; i++) {
+              await Event.findByIdAndDelete(events2edit[i]._id);
+            }
+          }
+        } else if (repeatEndDate) {
+          let count = 0;
+          let newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + ( additionStartDate ? + startDateDifference : - startDateDifference));
+          let newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + ( additionEndDate ? + endDateDifference : - startDateDifference));
+          while (newStartDate <= (new Date(repeatEndDate).setHours(23, 59, 59, 999))) {
+
+            if (count >= events2edit.length) {
+              const responseEvent = await newEvent(title, user, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId);
+              if (responseEvent.success) events.push(responseEvent.event);
+              else return res.status(400).json({ success: false, message: responseEvent.message });
+
+            } else {
+              const response = await editEvent(events2edit[count]._id, user, title, type, priority, newStartDate, newEndDate, allDay, eventLocation, eventLocationDetails, users, isInProject, repeatFrequency, repeatEndDate, repeatTimes, fatherId, status);
+              if (!response.success) {
+                res.status(400).json({ success: false, message: response.message });
+                return;
+              } else events.push(response.event);
+            }
+            count++;
+            newStartDate = new Date(new Date(events2edit[0].startDate).getTime() + (count * gap * 1000 * 60 * 60 * 24) + ( additionStartDate ? + startDateDifference : - startDateDifference));
+            newEndDate = new Date(new Date(events2edit[0].endDate).getTime() + (count * gap * 1000 * 60 * 60 * 24) + ( additionEndDate ? + endDateDifference : - endDateDifference));
+          }
+
+          if (count < events2edit.length) {
+            for (let i = count; i < events2edit.length; i++) {
+              await Event.findByIdAndDelete(events2edit[i]._id);
+            }
+          }
+        } else {
+          res.status(400).json({ success: false, message: 'Repeat frequency is set but no end date or number of occurrences provided' });
+          return;
+        }
+        res.status(200).json({ success: true, events });
+      }
     }
-    catch (error) {
-      console.error('Error deleting event:', error);
-      res.status(500).json({ message: error.message });
-    }
+  } catch (error) {
+    console.error('Error updating event:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
-// Delete multiple events
-const deleteMultipleEvent = async (req, res) => {
-  const { originalId } = req.params;
+const deleteEvent = async (req, res) => {
+  const userName = req.session.username;
+  const user = await User.findOne({ username: userName });
+  const {eventId} = req.params;
+  
   try {
-    const events = await Event.find({ originalId });
-    if (!events) {
-      return res.status(404).json({ message: "Events not found" });
+    const event = await Event.findById(eventId)
+    .populate({
+      path: 'sharedWith',
+      select: 'isRoom isDevice'
+    })
+    .lean();
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+    
+    if (event.user.toString() === user._id.toString()) {
+      if (event.repeatFrequency === 'none') {
+        await Event.findByIdAndDelete(eventId);
+        await NoAvailability.deleteMany({ event: eventId });
+      } else {
+        await Event.deleteMany({ fatherId: event.fatherId });
+        const eventsToDelete = await Event.find({ fatherId: event.fatherId }, '_id');
+        const eventIds = eventsToDelete.map(e => e._id);
+        await NoAvailability.deleteMany({ event: { $in: eventIds } });
+      }
+
+    } else if (user.isAdmin) {
+      if (event.repeatFrequency === 'none') {
+        const sharedUsers = event.sharedWith.filter(sharedUser => !sharedUser.isRoom && !sharedUser.isDevice).map(sharedUser => sharedUser._id);
+        await Event.findByIdAndUpdate(eventId, { sharedWith: sharedUsers}, { new: true });
+      } else {
+        const events = await Event.find({ fatherId: event.fatherId })
+        .populate({
+          path: 'sharedWith',
+          select: 'isRoom isDevice'
+        })
+        .lean();
+
+        for (let i = 0; i < events.length; i++) {
+          const sharedUsers = events[i].sharedWith.filter(sharedUser => !sharedUser.isRoom && !sharedUser.isDevice).map(sharedUser => sharedUser._id);
+          await Event.findByIdAndUpdate(events[i]._id, { sharedWith: sharedUsers}, { new: true });
+        }
+      }
+    
+    } else {
+      if (event.repeatFrequency === 'none') {
+        event.sharedWith = event.sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+        await event.save();
+      } else {
+        const events = await Event.find({ fatherId: event.fatherId });
+        for (let i = 0; i < events.length; i++) {
+          events[i].sharedWith = events[i].sharedWith.filter(sharedUser => sharedUser.toString() !== user._id.toString());
+          await events[i].save();
+        }
+      }
     }
-    await Event.deleteMany({ originalId });
-    res.status(200).json({ message: "Events deleted", deletedEvents: events });
-  }
-  catch (error) {
-    console.error('Error deleting events:', error);
-    res.status(500).json({ message: error.message });
+
+    res.status(200).json({ success: true, message: "Event deleted successfully" });
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 //Function to export events on iCalendar (using library: ics.js)
-//TODO: TESTARE E MODIFICARE SE NECESSARIO (quando avremo modello event definitivo)
 async function exportEvent(req, res){
   try {
       const {eventId} = req.params;
@@ -219,6 +629,11 @@ async function exportEvent(req, res){
       }
 
       const user = await User.findOne({ username: userName });
+
+      //For the allDay events, we need to add +1 day to the end date in order to have the correct date in the .ics file
+      const adjustedEnd = event.allDay
+      ? new Date(event.endDate.getTime() + 24 * 60 * 60 * 1000) // +1 giorno
+      : event.endDate;
       
       // Build the start/end array
       const start = event.allDay
@@ -237,16 +652,16 @@ async function exportEvent(req, res){
 
     const end = event.allDay
       ? [
-          event.endDate.getFullYear(),
-          event.endDate.getMonth() + 1,
-          event.endDate.getDate(),
+          adjustedEnd.getFullYear(),
+          adjustedEnd.getMonth() + 1,
+          adjustedEnd.getDate(),
         ]
       : [
-          event.endDate.getFullYear(),
-          event.endDate.getMonth() + 1,
-          event.endDate.getDate(),
-          event.endDate.getHours(),
-          event.endDate.getMinutes(),
+          adjustedEnd.getFullYear(),
+          adjustedEnd.getMonth() + 1,
+          adjustedEnd.getDate(),
+          adjustedEnd.getHours(),
+          adjustedEnd.getMinutes(),
         ];
 
     // Build the recurrence rule if needed
@@ -260,7 +675,14 @@ async function exportEvent(req, res){
       };
 
       recurrenceRule = `FREQ=${freqMap[event.repeatFrequency]};`;
-      if (event.repeatEndDate) {
+
+      if (event.repeatTimes && event.repeatTimes > 0) {
+        // Set the count of all the occurrences 
+        const occurrences = await Event.find({ fatherId: event.fatherId });
+        //compare the dates of the occurrences with the start date of the event, if it is before the start date, we remove it from the count
+        const occurrencesCount = occurrences.filter(occurrence => occurrence.startDate >= event.startDate).length;
+        recurrenceRule += `COUNT=${occurrencesCount}`;
+      } else if (event.repeatEndDate) {
         const endRecDate = event.repeatEndDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
         recurrenceRule += `UNTIL=${endRecDate}`;
       }
@@ -269,7 +691,7 @@ async function exportEvent(req, res){
     const { error, value } = createEvent({
       title: event.title,
       description: '',
-      location: event.eventLocation || '',
+      location: event.eventLocation || 'physical',
       start,
       end,
       recurrenceRule,
@@ -301,15 +723,12 @@ async function exportEvent(req, res){
     }
 }
 
-// Import events from ICS file
-//TODO: TESTARE E MODIFICARE SE NECESSARIO (quando avremo modello event definitivo) controlla gestione di eventi ripetuti
+// Import events from ICS file 
 const importEvents = async (req, res) => {
   const userName = req.session.username;
   const user = await User.findOne({ username: userName });
   try {
-    const files = req.files
-
-    console.log('Files received:', req.files);
+    const files = req.files;
 
     if (!files || files.length === 0) {
       return res.status(400).json({ message: 'No files provided' });
@@ -318,41 +737,94 @@ const importEvents = async (req, res) => {
     const importedEvents = [];
 
     for (const file of files) {
-        const filePath = file.path;  // Path to the file
-        const data = ical.parseFile(filePath);  // Parsing file .ics
+
+      //const filePath = file.path;  // Path to the file
+      //const data = ical.parseFile(filePath);  // Parsing file .ics
+
+      //Read the content of the file from the buffer as a string
+      const icsContent = file.buffer.toString('utf8');
+
+      // Parse the ICS content
+      const data = ical.parseICS(icsContent);
+
+      console.log('Parsed data:', data);  // Log the parsed data for debugging
 
       for (const key in data) {
         const icsEvent = data[key];
         if (icsEvent.type === 'VEVENT') {
-          const newEvent = new Event({
-            title: icsEvent.summary || 'Untitled Event',
-            startDate: new Date(icsEvent.start),
-            endDate: new Date(icsEvent.end),
-            allDay: !icsEvent.start.getHours(),
-            repeatFrequency: icsEvent.rrule ? icsEvent.rrule.options.freq.toLowerCase() : 'none',
-            repeatEndDate: icsEvent.rrule?.options?.until || null,
-            eventLocation: icsEvent.location || '',
-            user: user._id,
-            originalId: new mongoose.Types.ObjectId(),
-          });
-          await newEvent.save();
-          importedEvents.push(newEvent);
+          const commonOriginalId = new mongoose.Types.ObjectId();  // Create the originalId for the event one time
+          // Check if the event is all-day
+          const isAllDay = icsEvent.datetype === 'date' || 
+                 (icsEvent.start && icsEvent.start.params && icsEvent.start.params.VALUE === 'DATE');
+          
+          //Correct end date for all-day events interpreted as exclusive by other apps (e.g. Outlook)
+          const correctedEnd = isAllDay
+            ? new Date(icsEvent.end.getTime() - 24 * 60 * 60 * 1000)
+            : new Date(icsEvent.end);
 
-          //try with activity model   IT WORKS!
-          /*
-          const newActivity = new Activity({
-            title: icsEvent.summary || 'Untitled Event',
-            deadline: new Date(icsEvent.start),
-            allDay: !icsEvent.start.getHours(),
-            user: user._id,
-          });
-          await newActivity.save();
-          importedEvents.push(newActivity);*/
+          // Check if the event has a recurrence rule (rrule)
+          if (icsEvent.rrule) {
+            const rule = new RRule({
+              ...icsEvent.rrule.origOptions,
+              tzid: undefined  // Remove timezone information to avoid issues with time offsets
+            });
+            console.log('Recurrence rule:', rule);  // Log the recurrence rule for debugging
 
+            const RRuleFrequencyMap = {
+              [RRule.DAILY]: 'daily',
+              [RRule.WEEKLY]: 'weekly',
+              [RRule.MONTHLY]: 'monthly',
+              [RRule.YEARLY]: 'yearly',
+            };
+
+            // Create a new event for each occurrence of the recurring event
+            const dates = rule.between(rule.options.dtstart, rule.options.until || new Date('2100-01-01'), true); // true = inclusive
+      
+            const duration = correctedEnd - icsEvent.start;
+
+            for (const date of dates) {
+              
+              const newEvent = new Event({
+                title: icsEvent.summary || 'Untitled Event',
+                startDate: new Date(date),
+                endDate: new Date(date.getTime() + duration), //duration is the same for all occurrences
+                allDay: isAllDay,
+                repeatFrequency: RRuleFrequencyMap[rule.options.freq] || 'custom',
+                repeatEndDate: rule.options.until || null,
+                repeatTimes: rule.options.count || 0,
+                eventLocation: icsEvent.location || 'physical',
+                user: user._id,
+                fatherId: commonOriginalId,  // Use the same originalId for all occurrences
+              });
+              await newEvent.save();
+              importedEvents.push(newEvent);
+
+              console.log('Imported recurring event:', newEvent);  // Log the imported event for debugging
+            }
+      
+          } else {
+            // If it's not a recurring event, just create a single event
+            const newEvent = new Event({
+              title: icsEvent.summary || 'Untitled Event',
+              startDate: new Date(icsEvent.start),
+              endDate: correctedEnd,
+              allDay: isAllDay,
+              repeatFrequency: 'none',
+              repeatEndDate: null,
+              repeatTimes: 0,
+              eventLocation: icsEvent.location || 'physical',
+              user: user._id,
+              fatherId: commonOriginalId,
+            });
+            await newEvent.save();
+            importedEvents.push(newEvent);
+
+            console.log('Imported single event:', newEvent);  // Log the imported event for debugging
+          }
         }
       }
 
-      fs.unlinkSync(file.path); // delete the file after parsing
+      //fs.unlinkSync(file.path); // delete the file after parsing
     }
 
     res.status(200).json({ message: 'Import OK', importedEvents });
@@ -363,13 +835,36 @@ const importEvents = async (req, res) => {
   }
 };
 
+const getToolEvents = async (toolId) => {
+  try {
+    const events = await Event.find({ sharedWith: toolId })
+      .populate('user', 'username')
+      .populate('sharedWith', 'username')
+      .populate('user', 'username')
+      .lean();
+
+    if (!events) return { success: false, message: 'No events found' };
+
+    const transformedEvents = events.map(event => {
+      return {
+        ...event,
+        sharedWith: event.sharedWith.map(user => user.username),
+      }
+    });
+
+    return { success: true, events: transformedEvents };
+  } catch (error) {
+    console.error('Error fetching tool events:', error);
+    return { success: false, message: error.message };
+  }
+}
+
 module.exports = {
-    createNewEvent,
-    getEvents,
-    updateEvent,
-    updateMultipleEvent,
-    deleteEvent,
-    deleteMultipleEvent,
-    exportEvent,
-    importEvents
+  getEvents,
+  createNewEvent,
+  updateEvent,
+  deleteEvent,
+  exportEvent,
+  importEvents,
+  getToolEvents,
 };

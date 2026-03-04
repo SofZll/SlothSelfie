@@ -1,0 +1,11 @@
+.map-modal {
+    width: 80%;
+    height: 12rem;
+}
+
+.map-pin {
+    top: 3px;
+    right: 20px;
+    background-color: #fff;
+    padding: 2px 5px;
+}

@@ -1,35 +1,20 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import authSloth from '../assets/icons/authSloth.png';
-import Swal from 'sweetalert2';
+import { NewSwal } from '../utils/swalUtils';
 
 import { validateLogin, validateRegistration } from '../utils/validation.js'
 import AuthLayout from '../layouts/AuthLayout';
 import { apiService } from '../services/apiService';
 import { AuthContext } from '../contexts/AuthContext';
 
+import socket from '../services/socket/socket';
+
 // TODO: choose a library for icons react-icons or lucide-rect
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-function getCursorPosition(event) {
-    const x = (event.clientX * 100) / window.innerWidth + "%";
-    const y = (event.clientY * 100) / window.innerHeight + "%";
-  
-    const eyes1 = document.getElementById("eyes1");
-    const eyes2 = document.getElementById("eyes2");
-  
-    eyes1.style.left = x;
-    eyes1.style.top = y;
-    eyes1.style.transform = `translate(-${x}, -${y})`;
-  
-    eyes2.style.left = x;
-    eyes2.style.top = y;
-    eyes2.style.transform = `translate(-${x}, -${y})`;
-}
-
 const AuthPage = ({ formType = 'login' }) => {
-    const { user, fetchUserData } = useContext(AuthContext);
+    const { fetchUserData } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [currentFormType, setcurrentFormType] = useState(formType);
@@ -46,12 +31,15 @@ const AuthPage = ({ formType = 'login' }) => {
         if (currentFormType === 'login' && validateLogin(userInfo.username, userInfo.password)) {
             const response = await apiService('/user/login', 'POST', { username: userInfo.username, password: userInfo.password });
             if (response && response.success) {
-                console.log('User logged in');
-                await fetchUserData();
-                navigate('/home');
+                const newUser = await fetchUserData();
+                socket.connect();
+
+                if (newUser.isAdmin) navigate('/admin');
+                else navigate('/home');
+
             } else {
                 console.error('Error logging in:', response);
-                Swal.fire({ title: 'Login failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Login failed', icon: 'error', text: response.message});
             }
         } else if (currentFormType === 'register' && validateRegistration(userInfo.name, userInfo.username, userInfo.email, userInfo.password)) {
             const response = await apiService('/user/register', 'POST', userInfo);
@@ -61,22 +49,15 @@ const AuthPage = ({ formType = 'login' }) => {
                 navigate('/login');
             } else {
                 console.error('Error registering:', response);
-                Swal.fire({ title: 'Registration failed', icon: 'error', text: response.message, customClass: { confirmButton: 'button-alert' } });
+                NewSwal.fire({ title: 'Registration failed', icon: 'error', text: response.message});
             }
-        } else Swal.fire({ title: 'Invalid input', icon: 'error', text: 'Please fill in all fields', customClass: { confirmButton: 'button-alert' } });
+        } else NewSwal.fire({ title: 'Invalid input', icon: 'error', text: 'Please fill in all fields'});
     }
 
     return (
         <AuthLayout>
-            <div className='container' onMouseMove={(e) => getCursorPosition(e)}>
-                <img src={authSloth} alt='authSloth' className='auth-sloth' />
-                <div className='eye-cover1'>
-                    <div id='eyes1'></div>
-                </div>
-                <div className='eye-cover2'>
-                    <div id='eyes2'></div>
-                </div>
-                <div className={`col login-box ${currentFormType === 'register' ? 'registration-form' : 'login-form'}`}>
+            <div className='container-auth'>
+                <div className={`col login-box mx-3 ${currentFormType === 'register' ? 'registration-form' : 'login-form'}`}>
                     <h1 className='login-title'>{currentFormType === 'login' ? 'Welcome to Sloth Selfie!' : 'Register for Sloth Selfie!'}</h1>
                     <form className='row g-3' onSubmit={handleSubmit}>
                         {currentFormType === 'register' && (
@@ -103,7 +84,7 @@ const AuthPage = ({ formType = 'login' }) => {
                             <label htmlFor='password'>Password</label>
                         </div>
                         <div className='form-group-auth col-16'>
-                            <button type='submit' className='login-button'>
+                            <button type='submit' aria-label='Login' className='login-button'>
                                 {currentFormType === 'login' ? 'LOGIN' : 'REGISTER'}
                             </button>
                         </div>

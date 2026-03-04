@@ -61,16 +61,4 @@ messageSchema.index({ chat: 1, createdAt: -1 });
 messageSchema.index({ sender: 1 });
 messageSchema.index({ 'status.user': 1 });
 
-messageSchema.pre('save', function(next) {
-    if (this.isModified('status')) {
-        this.status.forEach(item => {
-            if (!item.timestamp) {
-                item.timestamp = new Date();
-            }
-        });
-    }
-    this.updatedAt = new Date();
-    next();
-});
-
 module.exports = mongoose.model('Message', messageSchema);
