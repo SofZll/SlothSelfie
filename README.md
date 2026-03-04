@@ -1,17 +1,15 @@
 # SlothSelfie
 
-Progetto di Tecnologie Web
-
 ## Partecipanti:
-- Sofia Zanelli: sofia.zanelli3@studio.unibo.it: SofZll
-- Kaori Jiang: kaori.jiang@studio.unibo.it: Kmoon-7
-- Giulia Torsani: giulia.torsani@studio.unibo.it: giulia-t
+- Sofia Zanelli: [@SofZll](https://github.com/SofZll)
+- Kaori Jiang: [@Kmoon-7](https://github.com/Kmoon-7)
+- Giulia Torsani: [@giulia-t](https://github.com/giulia-t)
 
 ## Contributo individuale:
 Giulia Torsani:
     - progetti
     - preview
-    -import/export con iCalendar
+    - import/export con iCalendar
 
 Kaori Jang:
     - notifiche
@@ -44,8 +42,6 @@ sloth-selfie/: contiene la parte client-side, divisa in:
 Infine, nella root del progetto si trovano i file comuni come README.md, package.json, e .gitignore.
 
 ## Tecnologie e scelte implementative:
-L’applicazione è stata sviluppata seguendo le specifiche del progetto SlothSelfie 23/24.
-
 Frontend: realizzato principalmente con React (per home, calendario, pomodoro, note) e JavaScript puro per la gestione dei progetti. Per lo stile è stato utilizzato Bootstrap.
 
 Backend: implementato in Node.js, con gestione dei pacchetti tramite npm.
@@ -53,8 +49,6 @@ Backend: implementato in Node.js, con gestione dei pacchetti tramite npm.
 Database: tutti i dati sono memorizzati su un MongoDB ospitato sui server del dipartimento.
 
 Deploy: effettuato su due container Docker, ospitati su macchine del dipartimento.
-
-Il sito è disponibile al link: https://site232453.tw.cs.unibo.it.
 
 Tutti i sorgenti si trovano nella directory sources.
 
@@ -64,5 +58,5 @@ npm run dev
 (Da lanciare solo dopo aver installato le dipendenze tramite "npm install" sia dentro alla cartella backend, sia dentro alla cartella sloth-selfie).
 
 L’applicazione sarà quindi disponibile su:
--Frontend: http://localhost:3000
--Backend: http://localhost:8000 (porta configurata nel file .env)
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8000 (porta configurata nel file .env)
