@@ -1,9 +1,9 @@
 # SlothSelfie
 
 ## Partecipanti:
-- Sofia Zanelli: [@SofZll](https://github.com/SofZll)
-- Kaori Jiang: [@Kmoon-7](https://github.com/Kmoon-7)
-- Giulia Torsani: [@giulia-t](https://github.com/giulia-t)
+Sofia Zanelli: [@SofZll](https://github.com/SofZll)
+Kaori Jiang: [@Kmoon-7](https://github.com/Kmoon-7)
+Giulia Torsani: [@giulia-t](https://github.com/giulia-t)
 
 ## Contributo individuale:
 Giulia Torsani:
