@@ -33,15 +33,15 @@ Sottocartelle principali:
 - `services/`, `jobs/`, `socket/`, `scheduler/`, `uploads/`, `utils/` – notifiche, job schedulati, gestione socket, file temporanei e funzioni di utilità  
 
 File principali:
-- `server.js`: avvio del server  
-- `.env`: configurazione dell’ambiente  
+- `server.js` avvio del server  
+- `.env` configurazione dell’ambiente  
 
 ### `sloth-selfie/`
 Contiene la parte **client-side**.
 
 Struttura interna:
-- `public/`: gestione dei progetti tramite JavaScript puro (HTML/CSS/JS)  
-- `src/`: applicazione React, organizzata in:
+- `public/` gestione dei progetti tramite JavaScript puro (HTML/CSS/JS)  
+- `src/` applicazione React, organizzata in:
   - `components/`
   - `pages/`
   - `layouts/`
