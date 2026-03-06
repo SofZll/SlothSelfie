@@ -5,8 +5,6 @@
 - Kaori Jiang: [@Kmoon-7](https://github.com/Kmoon-7)
 - Giulia Torsani: [@giulia-t](https://github.com/giulia-t)
 
----
-
 ## Contributo individuale:
 Giulia Torsani:
 - gestione dei progetti
@@ -35,15 +33,15 @@ Sottocartelle principali:
 - `services/`, `jobs/`, `socket/`, `scheduler/`, `uploads/`, `utils/` – notifiche, job schedulati, gestione socket, file temporanei e funzioni di utilità  
 
 File principali:
-- `server.js` – avvio del server  
-- `.env` – configurazione dell’ambiente  
+- `server.js`: avvio del server  
+- `.env`: configurazione dell’ambiente  
 
 ### `sloth-selfie/`
 Contiene la parte **client-side**.
 
 Struttura interna:
-- `public/` – gestione dei progetti tramite JavaScript puro (HTML/CSS/JS)  
-- `src/` – applicazione React, organizzata in:
+- `public/`: gestione dei progetti tramite JavaScript puro (HTML/CSS/JS)  
+- `src/`: applicazione React, organizzata in:
   - `components/`
   - `pages/`
   - `layouts/`
@@ -82,11 +80,9 @@ Tutti i sorgenti si trovano nella directory `sources`.
 1. Posizionarsi nella cartella principale del progetto  
    (livello superiore rispetto a `backend/` e `sloth-selfie/`)
 
-2. Installare le dipendenze:
+2. Installare le dipendenze (da eseguire sia nella cartella backend/ sia nella cartella sloth-selfie/):
    ```bash
    npm install
-
-   da eseguire sia nella cartella backend/ sia nella cartella sloth-selfie/
 
 3. Avviare l'applicazione:
    ```bash
